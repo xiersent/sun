@@ -1,0 +1,16 @@
+/* optimized3/styles/main.css */
+/* Главный файл стилей - импорты */
+
+/* Импортируем все стили */
+@import url('variables.css');
+@import url('base.css');
+@import url('layout.css');
+@import url('lists.css');
+@import url('components.css');
+@import url('graph.css');
+@import url('waves.css');
+@import url('corners.css');
+@import url('panels.css');
+@import url('responsive.css');
+
+/* Пустой основной файл, вся логика в импортах */

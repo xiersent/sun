@@ -1,0 +1,82 @@
+<div class="list-item list-item--wave <%= data.editing ? 'list-item--editing' : '' %>"
+    data-id="<%= data.id %>"
+    data-type="wave"
+    draggable="false"
+    data-index="<%= data.index %>">
+    
+    <div class="list-item__content">
+        <!-- Нормальный вид -->
+        <div class="list-item__normal-view">
+            <div class="list-item__row">
+                <div class="list-item__left">
+                    <div class="wave-controls-inline">
+                        <!-- Чекбокс видимости - ВСЕГДА доступен -->
+                        <input type="checkbox" class="wave-visibility-check" 
+                               <%= data.visible ? 'checked' : '' %> 
+                               data-id="<%= data.id %>" 
+                               title="Видимость">
+                        
+                        <input type="checkbox" class="wave-bold-check" 
+                               <%= data.bold ? 'checked' : '' %> 
+                               data-id="<%= data.id %>" 
+                               title="Жирность">
+                        
+                        <div class="wave-color-preview-small" 
+                             <%= data.color ? 'style="background-color: ' + data.color + ';"' : '' %> 
+                             data-id="<%= data.id %>" 
+                             title="Изменить цвет"></div>
+                    </div>
+                    <div class="list-item__title-container">
+                        <div class="list-item__title">
+                            <%= data.name %>
+                            <span class="wave-period-badge"><%= data.period %> дней</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="list-item__right">
+                    <div class="list-item__value">
+                        <%= data.description || 'Колосок' %>
+                    </div>
+                    <div class="list-item__actions">
+                        <button class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="wave">
+                            Изменить
+                        </button>
+                        <button class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="wave">Уничтожить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Форма редактирования -->
+        <div class="list-item__edit-form">
+            <div class="list-item__edit-row">
+                <label class="list-item__edit-label">Название:</label>
+                <input type="text" class="list-item__edit-input" id="editWaveName<%= data.id %>" value="<%= data.name %>">
+            </div>
+            <div class="list-item__edit-row">
+                <label class="list-item__edit-label">Период:</label>
+                <input type="number" class="list-item__edit-input" id="editWavePeriod<%= data.id %>" value="<%= data.period %>" min="0.1" step="0.1">
+            </div>
+            <div class="list-item__edit-row">
+                <label class="list-item__edit-label">Тип:</label>
+                <select class="list-item__edit-input" id="editWaveType<%= data.id %>">
+                    <option value="solid" <%= data.typeValue === 'solid' ? 'selected' : '' %>>Сплошная</option>
+                    <option value="dashed" <%= data.typeValue === 'dashed' ? 'selected' : '' %>>Пунктирная</option>
+                    <option value="dotted" <%= data.typeValue === 'dotted' ? 'selected' : '' %>>Точечная</option>
+                    <option value="zigzag" <%= data.typeValue === 'zigzag' ? 'selected' : '' %>>Зигзагообразная</option>
+                    <option value="dash-dot" <%= data.typeValue === 'dash-dot' ? 'selected' : '' %>>Штрих-линия</option>
+                    <option value="long-dash" <%= data.typeValue === 'long-dash' ? 'selected' : '' %>>Длинный штрих</option>
+                </select>
+            </div>
+            <div class="list-item__edit-row">
+                <label class="list-item__edit-label">Цвет:</label>
+                <input type="color" class="color-input" id="editWaveColor<%= data.id %>" value="<%= data.color %>">
+            </div>
+            <div class="list-item__edit-actions">
+                <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="wave">Сохранить</button>
+                <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="wave">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>

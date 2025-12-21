@@ -1,0 +1,89 @@
+<div class="list-item list-item--group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
+    data-id="<%= data.id %>"
+    data-type="group"
+    draggable="false"
+    data-index="<%= data.index %>">
+    
+    <div class="list-item__drag-handle">⋮⋮</div>
+    
+    <div class="list-item__content">
+        <!-- Нормальный вид (как у дат) -->
+        <div class="list-item__normal-view">
+            <div class="list-item__row">
+                <div class="list-item__left">
+                    <div class="list-item__title-container">
+                        <!-- Чекбокс включения/выключения группы -->
+                        <input type="checkbox" class="wave-group-toggle" 
+                               <%= data.enabled ? 'checked' : '' %> 
+                               data-group-id="<%= data.id %>" 
+                               title="Включить/выключить группу">
+                        
+                        <!-- Название группы -->
+                        <div class="list-item__title">
+                            <%= data.name %>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="list-item__right">
+                    <div class="list-item__value">
+                        <span class="group-stats">
+                            <% if (data.enabledCount > 0) { %>
+                                <span class="group-enabled-count" title="Включено колосков">
+                                    Включено: <%= data.enabledCount %>
+                                </span>
+                                <span class="group-total-count" title="Всего колосков">
+                                    Колосков: <%= data.waveCount %>
+                                </span>
+                            <% } else { %>
+                                <span class="group-total-count">
+                                    Колосков: <%= data.waveCount %>
+                                </span>
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="list-item__actions">
+                        <!-- Кнопка Свернуть/Развернуть -->
+                        <button class="ui-btn expand-collapse-btn" 
+                                data-id="<%= data.id %>" 
+                                data-type="group">
+                            <%= data.expanded ? 'Свернуть' : 'Развернуть' %>
+                        </button>
+                        <!-- Кнопка Изменить -->
+                        <button class="ui-btn edit-btn" 
+                                data-id="<%= data.id %>" 
+                                data-type="group">
+                            <%= data.editing ? 'Редактирование...' : 'Изменить' %>
+                        </button>
+                        <!-- Кнопка Уничтожить -->
+                        <button class="ui-btn delete-date-btn" 
+                                data-id="<%= data.id %>" 
+                                data-type="group">
+                            Уничтожить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Форма редактирования группы -->
+        <div class="list-item__edit-form">
+            <div class="list-item__edit-row">
+                <input type="text" placeholder="Название группы" class="list-item__edit-input" id="editGroupName<%= data.id %>" value="<%= data.name %>">
+            </div>
+            <div class="list-item__edit-actions">
+                <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="group">Сохранить</button>
+                <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="group">Отмена</button>
+            </div>
+        </div>
+        
+        <!-- Дочерние элементы (волны) -->
+        <% if (data.expanded && data.children && data.children.length > 0) { %>
+        <div class="group-children">
+            <% data.children.forEach((childData, childIndex) => { %>
+                <!-- Дочерние элементы будут добавлены отдельно -->
+            <% }) %>
+        </div>
+        <% } %>
+    </div>
+</div>

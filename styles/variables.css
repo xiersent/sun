@@ -1,0 +1,46 @@
+:root {
+    --bs: 10px;
+    --sq: 50px;
+    --gh: 500px;
+    --amp: 250px;
+    --gsx: 24;
+    --gw: 1200px;
+    --per: 1200px;
+    --ppd: 50px;
+    --cp: #666;
+    --clg: #ddd;
+    --cbg: #f5f5f5;
+    --primary-color: #666;
+    --secondary-color: #ddd;
+    --background-color: #f5f5f5;
+    --border-color: #ddd;
+    --text-color: #333;
+    --text-secondary: #666;
+    --danger-color: #ff0000;
+    --success-color: #4CAF50;
+    --warning-color: #FFC107;
+    --info-color: #2196F3;
+    
+    /* Размеры */
+    --border-radius: 3px;
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
+    
+    /* Шрифты */
+    --font-family: Tahoma, sans-serif;
+    --font-size-xs: 10px;
+    --font-size-sm: 11px;
+    --font-size-md: 13px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    
+    /* Z-index слои */
+    --z-corner: 1000;
+    --z-tooltip: 25;
+    --z-waves: 3;
+    --z-grid: 5;
+    --z-overlay: 9999;
+}

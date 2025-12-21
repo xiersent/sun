@@ -1,0 +1,55 @@
+<div class="list-item list-item--date <%= data.active ? 'active' : '' %> <%= data.editing ? 'list-item--editing' : '' %>"
+    data-id="<%= data.id %>"
+    data-type="date"
+    draggable="<%= !data.editing %>"
+    data-index="<%= data.index %>">
+    
+    <div class="list-item__drag-handle">⋮⋮</div>
+    
+    <div class="list-item__content">
+        <!-- Нормальный вид -->
+        <div class="list-item__normal-view">
+            <div class="list-item__row">
+                <div class="list-item__left">
+                    <div class="list-item__title-container">
+                        <div class="list-item__title date-name">
+                            <%= data.name %>
+                        </div>
+                        <span class="list-item__icon date-star">★</span>
+                    </div>
+                </div>
+                
+                <div class="list-item__right">
+                    <div class="list-item__value">
+                        <%= data.formattedDate %>
+                        <% if (data.yearsFromCurrent > 0) { %>
+                            [<%= data.yearsFromCurrent %>]
+                        <% } %>
+                    </div>
+                    <div class="list-item__actions">
+                        <button class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="date">
+                            Изменить
+                        </button>
+                        <button class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date">Уничтожить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Форма редактирования - ВЕРНУТЬ ИСХОДНУЮ СТРУКТУРУ -->
+        <div class="list-item__edit-form">
+            <div class="list-item__left">
+                <div class="list-item__title-container">
+                    <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
+                </div>
+            </div>
+            <div class="list-item__right">
+                <input type="date" class="date-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
+                <div class="list-item__edit-actions">
+                    <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date">Сохранить</button>
+                    <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

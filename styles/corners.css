@@ -1,0 +1,95 @@
+.corner-square {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background-color: red;
+    z-index: var(--z-corner);
+    cursor: pointer;
+}
+
+/* Углы */
+.corner-square.tl {
+    top: 0;
+    left: 0;
+}
+
+.corner-square.tr {
+    top: 0;
+    right: 0;
+}
+
+.corner-square.bl {
+    bottom: 0;
+    left: 0;
+}
+
+.corner-square.br {
+    bottom: 0;
+    right: 0;
+}
+
+/* Центральные */
+.corner-square.tc {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.corner-square.bc {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.corner-square.lc {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.corner-square.rc {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Средние */
+.corner-square.mt {
+    top: 0;
+    left: 25%;
+}
+
+.corner-square.mb {
+    bottom: 0;
+    left: 25%;
+}
+
+.corner-square.ml {
+    left: 0;
+    top: 25%;
+}
+
+.corner-square.mr {
+    right: 0;
+    top: 25%;
+}
+
+.corner-square.mt2 {
+    top: 0;
+    left: 75%;
+}
+
+.corner-square.mb2 {
+    bottom: 0;
+    left: 75%;
+}
+
+.corner-square.ml2 {
+    left: 0;
+    top: 75%;
+}
+
+.corner-square.mr2 {
+    right: 0;
+    top: 75%;
+}

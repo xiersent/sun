@@ -1,0 +1,166 @@
+/* optimized3/styles/layout.css */
+/* Секции и контейнеры */
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
+}
+
+.graph-section {
+    display: flex !important; /* Явно задаем display */
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
+    align-items: center;
+}
+
+.main-controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
+}
+
+/* ОСНОВНОЙ КОНТЕЙНЕР ПАНЕЛЕЙ - объединяем все стили здесь */
+.control-panel {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Даты 1/3, Волны 2/3 */
+    gap: var(--spacing-lg);
+    width: 100%;
+    overflow-y: auto;
+}
+
+/* Позиционирование дочерних панелей */
+#dates-panel {
+    grid-column: 1;
+}
+
+#waves-panel {
+    grid-column: 2;
+}
+
+.panel-section {
+    background: #fff;
+    padding: var(--spacing-md);
+    overflow: visible;
+    min-width: 0;
+    margin-top: var(--spacing-md);
+}
+
+/* Контейнер для списка волн с фиксированным скроллом */
+.waves-list-container {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.waves-list {
+    height: 100%;
+    background: #fff;
+    overflow-y: auto;
+}
+
+.notes-panel-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.notes-list-container {
+    flex: 1;
+    min-width: 200px;
+}
+
+.note-editor-container {
+    flex: 2;
+    min-width: 300px;
+}
+
+.warning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--cbg);
+    z-index: var(--z-overlay);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+}
+
+.warning-box {
+    background: #fff;
+    padding: var(--spacing-xl);
+    border: 1px solid var(--cp);
+    max-width: 500px;
+    text-align: center;
+}
+
+/* Табы */
+.tab-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.tab-buttons {
+    display: flex;
+    border: 1px solid #dee2e6;
+    padding: 0;
+    gap: 0;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    padding: 0 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #495057;
+    font-size: var(--font-size-sm);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    border-right: 1px solid #dee2e6;
+    height: 25px;
+}
+
+.tab-button:last-child {
+    border-right: none;
+}
+
+.tab-button.active {
+    background: var(--cp);
+    color: #fff;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Формы */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.input-row {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
