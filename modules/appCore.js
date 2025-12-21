@@ -12,7 +12,8 @@ class AppCore {
             'graphContainer', 'graphElement', 'centerDateLabel',
             'dateListForDates', 'wavesList', 'notesList', 'noteInput',
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
-            'dbImportStatus', 'intersectionResults', 'intersectionStats'
+            'dbImportStatus', 'intersectionResults', 'intersectionStats',
+            'warningBox'
         ];
         
         ids.forEach(id => {
@@ -147,20 +148,12 @@ class AppCore {
                 }
             }
             
-            // Показываем предупреждение если пользователь не отметил "Больше не спрашивать"
-            const warningAccepted = localStorage.getItem('warningAccepted');
-            const dontAskAgain = localStorage.getItem('warningDontAskAgain');
-            
-            if (!dontAskAgain) {
-                this.showWarning();
-            } else {
-                this.elements.warningOverlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
+            // ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
+            this.showWarning();
             
             // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
             
-            // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузки
+            // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
             setTimeout(() => {
                 console.log('AppCore: проверка данных волн в группах...');
                 if (window.debugGroups) {
@@ -178,101 +171,161 @@ class AppCore {
         }, 150); // Увеличена задержка для загрузки шаблонов
     }
     
-    // НОВЫЙ МЕТОД: Активация дефолтной даты при старте
-    activateDefaultDateOnStartup() {
-        console.log('AppCore: проверка активации дефолтной даты при старте...');
-        
-        // Проверяем, есть ли активная дата и корректно ли она установлена
-        const hasValidActiveDate = window.appState.activeDateId && 
-                                  window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
-        
-        if (!hasValidActiveDate || !window.appState.baseDate || isNaN(window.appState.baseDate.getTime())) {
-            console.log('AppCore: активная дата не установлена или некорректна, активируем дефолтную...');
+    // Метод для получения версии из файла
+    async getVersion() {
+        try {
+            // Проверяем кэш
+            const cachedVersion = localStorage.getItem('appVersion');
+            const cacheTimestamp = localStorage.getItem('appVersionTimestamp');
+            const now = Date.now();
             
-            // Находим дефолтную дату (s25)
-            const defaultDateId = 's25';
-            const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
-            
-            if (defaultDate) {
-                console.log('AppCore: активируем дефолтную дату:', defaultDateId);
-                
-                // Устанавливаем как активную
-                window.appState.activeDateId = defaultDateId;
-                
-                try {
-                    const date = new Date(defaultDate.date);
-                    if (isNaN(date.getTime())) {
-                        throw new Error('Некорректная дата в объекте');
-                    }
-                    
-                    window.appState.baseDate = new Date(date);
-                    console.log('AppCore: установлена базовая дата из дефолтной:', defaultDate.date);
-                    
-                    // Пересчитываем текущий день
-                    if (window.dates && window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay();
-                    }
-                    
-                    // Обновляем графики
-                    if (window.grid && window.grid.createGrid) {
-                        window.grid.createGrid();
-                    }
-                    if (window.grid && window.grid.updateCenterDate) {
-                        window.grid.updateCenterDate();
-                        window.grid.updateGridNotesHighlight();
-                    }
-                    if (window.waves && window.waves.updatePosition) {
-                        window.waves.updatePosition();
-                    }
-                    
-                    window.appState.save();
-                    
-                    console.log('AppCore: дефолтная дата успешно активирована');
-                    
-                } catch (error) {
-                    console.error('AppCore: ошибка активации дефолтной даты:', error);
-                    // Если ошибка, устанавливаем сегодняшнюю дату
-                    window.appState.baseDate = new Date();
-                    if (window.dates && window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay();
-                    }
-                    window.appState.save();
-                }
-            } else {
-                console.error('AppCore: дефолтная дата не найдена в данных');
-                
-                // Если нет дефолтной даты, берем первую из списка
-                if (window.appState.data.dates && window.appState.data.dates.length > 0) {
-                    const firstDate = window.appState.data.dates[0];
-                    console.log('AppCore: используем первую дату из списка:', firstDate.id);
-                    if (window.dates && window.dates.setActiveDate) {
-                        window.dates.setActiveDate(firstDate.id);
-                    }
-                } else {
-                    // Если вообще нет дат, устанавливаем сегодняшнюю
-                    console.log('AppCore: нет дат в списке, устанавливаем сегодняшнюю');
-                    window.appState.baseDate = new Date();
-                    if (window.dates && window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay();
-                    }
-                    window.appState.save();
-                }
+            // Если версия в кэше и не старше 24 часов, используем её
+            if (cachedVersion && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 24 * 60 * 60 * 1000) {
+                return cachedVersion;
             }
-        } else {
-            console.log('AppCore: активная дата уже корректно установлена:', window.appState.activeDateId);
+            
+            // Загружаем свежую версию
+            const response = await fetch('version.txt?t=' + now);
+            if (response.ok) {
+                const text = await response.text();
+                const trimmedText = text.trim();
+                
+                // Сохраняем в кэш
+                localStorage.setItem('appVersion', trimmedText);
+                localStorage.setItem('appVersionTimestamp', now.toString());
+                
+                return trimmedText;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки версии:', error);
         }
+        return null;
+    }
+    
+    // Метод для определения мобильного устройства
+    isMobileDevice() {
+        // Проверяем по соотношению сторон (высота > ширины - портретный режим)
+        if (window.innerHeight > window.innerWidth) {
+            return true;
+        }
+        
+        // Дополнительные проверки на мобильность
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isMobile = /mobile|android|iphone|ipad|ipod|windows phone/i.test(userAgent);
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        return isMobile || isTouchDevice;
     }
     
     showWarning() {
+        // Получаем версию из файла
+        this.getVersion().then(version => {
+            const browserInfo = this.getBrowserInfo();
+            const today = new Date();
+            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+            
+            // Проверяем, мобильный ли браузер
+            const isMobile = this.isMobileDevice();
+            
+            let warningHTML = `
+                <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
+                <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
+                <div class="warning-text">
+                    <strong>Браузер:</strong> ${browserInfo}<br>
+                    <strong>Версия от:</strong> ${version || 'неизвестно'}<br>
+                    <strong>Сегодня:</strong> ${todayFormatted}
+                </div>
+            `;
+            
+            if (isMobile) {
+                warningHTML += `
+                    <div class="warning-text" style="color: #ff0000; font-weight: bold;">
+                        ⚠️ ВНИМАНИЕ: Это приложение предназначено только для использования на компьютерах (десктоп).
+                        На мобильных устройствах интерфейс может работать некорректно.
+                    </div>
+                `;
+            } else {
+                warningHTML += `
+                    <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+                `;
+            }
+            
+            const warningBox = document.getElementById('warningBox') || this.elements.warningBox;
+            if (warningBox) {
+                warningBox.innerHTML = warningHTML;
+                
+                // Добавляем обработчик только если кнопка есть (не мобильный)
+                if (!isMobile && warningBox.querySelector('#acceptWarning')) {
+                    warningBox.querySelector('#acceptWarning').addEventListener('click', () => {
+                        const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
+                        warningOverlay.classList.add('hidden');
+                        document.body.style.overflow = 'auto';
+                    });
+                }
+            }
+            
+            // Показываем оверлей
+            const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
+            if (warningOverlay) {
+                warningOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }).catch(error => {
+            console.error('Ошибка загрузки версии:', error);
+            // Показываем оверлей без версии
+            this.showWarningFallback();
+        });
+    }
+    
+    // Фолбэк метод если не удалось загрузить версию
+    showWarningFallback() {
         const browserInfo = this.getBrowserInfo();
-        this.elements.browserInfoWarning.textContent = `Браузер: ${browserInfo}`;
+        const today = new Date();
+        const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
         
-        // Форсируем рефлоу перед показом, чтобы избежать плавления
-        this.elements.browserInfoWarning.offsetHeight; 
+        const isMobile = this.isMobileDevice();
         
-        // Только теперь показываем
-        this.elements.warningOverlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        let warningHTML = `
+            <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
+            <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
+            <div class="warning-text">
+                <strong>Браузер:</strong> ${browserInfo}<br>
+                <strong>Версия от:</strong> неизвестно<br>
+                <strong>Сегодня:</strong> ${todayFormatted}
+            </div>
+        `;
+        
+        if (isMobile) {
+            warningHTML += `
+                <div class="warning-text" style="color: #ff0000; font-weight: bold;">
+                    ⚠️ ВНИМАНИЕ: Это приложение предназначено только для использования на компьютерах (десктоп).
+                    На мобильных устройствах интерфейс может работать некорректно.
+                </div>
+            `;
+        } else {
+            warningHTML += `
+                <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+            `;
+        }
+        
+        const warningBox = document.getElementById('warningBox') || this.elements.warningBox;
+        if (warningBox) {
+            warningBox.innerHTML = warningHTML;
+            
+            if (!isMobile) {
+                warningBox.querySelector('#acceptWarning').addEventListener('click', () => {
+                    const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
+                    warningOverlay.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                });
+            }
+        }
+        
+        const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
+        if (warningOverlay) {
+            warningOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
     }
     
     getBrowserInfo() {
@@ -298,19 +351,7 @@ class AppCore {
         // Оставляем только специфичные обработчики, которые неудобно обрабатывать через делегирование
         
         // Обработчики для конкретных кнопок (предупреждение)
-        if (this.elements.acceptWarning) {
-            this.elements.acceptWarning.addEventListener('click', () => {
-                this.elements.warningOverlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-                localStorage.setItem('warningAccepted', 'true');
-                
-                // Сохраняем настройку "Больше не спрашивать"
-                const dontAskAgain = document.getElementById('dontAskAgain');
-                if (dontAskAgain && dontAskAgain.checked) {
-                    localStorage.setItem('warningDontAskAgain', 'true');
-                }
-            });
-        }
+        // УДАЛЕНО: обработчик для acceptWarning, так как теперь он добавляется динамически в showWarning()
         
         // Форма добавления волны (оставляем для гарантии работы)
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
@@ -527,6 +568,91 @@ class AppCore {
         });
         
         console.log('AppCore: обработчики событий настроены');
+    }
+    
+    // НОВЫЙ МЕТОД: Активация дефолтной даты при старте
+    activateDefaultDateOnStartup() {
+        console.log('AppCore: проверка активации дефолтной даты при старте...');
+        
+        // Проверяем, есть ли активная дата и корректно ли она установлена
+        const hasValidActiveDate = window.appState.activeDateId && 
+                                  window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
+        
+        if (!hasValidActiveDate || !window.appState.baseDate || isNaN(window.appState.baseDate.getTime())) {
+            console.log('AppCore: активная дата не установлена или некорректна, активируем дефолтную...');
+            
+            // Находим дефолтную дату (s25)
+            const defaultDateId = 's25';
+            const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
+            
+            if (defaultDate) {
+                console.log('AppCore: активируем дефолтную дату:', defaultDateId);
+                
+                // Устанавливаем как активную
+                window.appState.activeDateId = defaultDateId;
+                
+                try {
+                    const date = new Date(defaultDate.date);
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Некорректная дата в объекте');
+                    }
+                    
+                    window.appState.baseDate = new Date(date);
+                    console.log('AppCore: установлена базовая дата из дефолтной:', defaultDate.date);
+                    
+                    // Пересчитываем текущий день
+                    if (window.dates && window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    
+                    // Обновляем графики
+                    if (window.grid && window.grid.createGrid) {
+                        window.grid.createGrid();
+                    }
+                    if (window.grid && window.grid.updateCenterDate) {
+                        window.grid.updateCenterDate();
+                        window.grid.updateGridNotesHighlight();
+                    }
+                    if (window.waves && window.waves.updatePosition) {
+                        window.waves.updatePosition();
+                    }
+                    
+                    window.appState.save();
+                    
+                    console.log('AppCore: дефолтная дата успешно активирована');
+                    
+                } catch (error) {
+                    console.error('AppCore: ошибка активации дефолтной даты:', error);
+                    // Если ошибка, устанавливаем сегодняшнюю дату
+                    window.appState.baseDate = new Date();
+                    if (window.dates && window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    window.appState.save();
+                }
+            } else {
+                console.error('AppCore: дефолтная дата не найдена в данных');
+                
+                // Если нет дефолтной даты, берем первую из списка
+                if (window.appState.data.dates && window.appState.data.dates.length > 0) {
+                    const firstDate = window.appState.data.dates[0];
+                    console.log('AppCore: используем первую дату из списка:', firstDate.id);
+                    if (window.dates && window.dates.setActiveDate) {
+                        window.dates.setActiveDate(firstDate.id);
+                    }
+                } else {
+                    // Если вообще нет дат, устанавливаем сегодняшнюю
+                    console.log('AppCore: нет дат в списке, устанавливаем сегодняшнюю');
+                    window.appState.baseDate = new Date();
+                    if (window.dates && window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    window.appState.save();
+                }
+            }
+        } else {
+            console.log('AppCore: активная дата уже корректно установлена:', window.appState.activeDateId);
+        }
     }
 }
 

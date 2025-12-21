@@ -148,6 +148,23 @@ textarea {
     margin-bottom: var(--spacing-lg);
 }
 
+/* Стили для мобильного предупреждения */
+.warning-box .mobile-warning {
+    color: #ff0000;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px;
+    background: #fff3f3;
+    border: 1px solid #ff0000;
+    border-radius: 4px;
+}
+
+.warning-loading {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
+
 /* Чекбокс предупреждения */
 .warning-checkbox {
     margin: var(--spacing-md) 0;
