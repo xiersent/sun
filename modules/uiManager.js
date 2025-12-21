@@ -1,4 +1,5 @@
 // optimized3/modules/uiManager.js
+// optimized3/modules/uiManager.js
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
@@ -279,10 +280,8 @@ class UIManager {
         window.dataManager.updateNotesList();
         window.grid.updateGridNotesHighlight();
         
-        // ЯВНО УСТАНАВЛИВАЕМ АКТИВНУЮ ДАТУ И ОБНОВЛЯЕМ ГРАФИК
-        if (window.appState.activeDateId) {
-            window.dates.setActiveDate(window.appState.activeDateId);
-        }
+        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Гарантированно активируем дефолтную дату после сброса
+        this.activateDefaultDate();
         
         window.grid.updateCenterDate();
         window.waves.updatePosition();
@@ -290,6 +289,75 @@ class UIManager {
         window.appState.save();
         
         alert('Все настройки сброшены к значениям по умолчанию');
+    }
+    
+    // НОВЫЙ МЕТОД: Активация дефолтной даты
+    activateDefaultDate() {
+        console.log('UIManager: активация дефолтной даты...');
+        
+        // Находим дефолтную дату (s25)
+        const defaultDateId = 's25';
+        const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
+        
+        if (defaultDate) {
+            console.log('Найдена дефолтная дата:', defaultDateId);
+            
+            // Устанавливаем как активную
+            window.appState.activeDateId = defaultDateId;
+            
+            try {
+                const date = new Date(defaultDate.date);
+                if (isNaN(date.getTime())) {
+                    throw new Error('Некорректная дата в объекте');
+                }
+                
+                window.appState.baseDate = new Date(date);
+                console.log('Установлена базовая дата из дефолтной:', defaultDate.date);
+                
+                // Пересчитываем текущий день
+                window.dates.recalculateCurrentDay();
+                
+                // Обновляем графики
+                window.grid.createGrid();
+                window.grid.updateCenterDate();
+                window.waves.updatePosition();
+                window.grid.updateGridNotesHighlight();
+                window.appState.save();
+                
+                // Обновляем UI списка дат
+                window.dataManager.updateDateList();
+                
+                console.log('Дефолтная дата успешно активирована');
+                
+            } catch (error) {
+                console.error('Ошибка активации дефолтной даты:', error);
+                // Если ошибка, устанавливаем сегодняшнюю дату
+                window.appState.baseDate = new Date();
+                window.dates.recalculateCurrentDay();
+                window.grid.createGrid();
+                window.grid.updateCenterDate();
+                window.waves.updatePosition();
+                window.appState.save();
+            }
+        } else {
+            console.error('Дефолтная дата не найдена в данных');
+            
+            // Если нет дефолтной даты, берем первую из списка
+            if (window.appState.data.dates && window.appState.data.dates.length > 0) {
+                const firstDate = window.appState.data.dates[0];
+                console.log('Используем первую дату из списка:', firstDate.id);
+                window.dates.setActiveDate(firstDate.id);
+            } else {
+                // Если вообще нет дат, устанавливаем сегодняшнюю
+                console.log('Нет дат в списке, устанавливаем сегодняшнюю');
+                window.appState.baseDate = new Date();
+                window.dates.recalculateCurrentDay();
+                window.grid.createGrid();
+                window.grid.updateCenterDate();
+                window.waves.updatePosition();
+                window.appState.save();
+            }
+        }
     }
     
     updateUI() {

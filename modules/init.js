@@ -1,4 +1,5 @@
 // optimized3/modules/init.js
+// optimized3/modules/init.js
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {
@@ -126,6 +127,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 console.error('appCore.init не доступен');
             }
+            
+            // ВАЖНОЕ ДОПОЛНЕНИЕ: После инициализации проверяем, активирована ли дата
+            setTimeout(() => {
+                if (!window.appState.activeDateId || 
+                    !window.appState.data.dates.some(d => d.id === window.appState.activeDateId) ||
+                    !window.appState.baseDate || isNaN(window.appState.baseDate.getTime())) {
+                    
+                    console.log('init.js: дата не активирована, вызываем активацию вручную...');
+                    
+                    // Находим дефолтную дату
+                    const defaultDateId = 's25';
+                    const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
+                    
+                    if (defaultDate && window.dates && window.dates.setActiveDate) {
+                        console.log('init.js: активируем дефолтную дату', defaultDateId);
+                        window.dates.setActiveDate(defaultDateId);
+                    } else if (window.appState.data.dates && window.appState.data.dates.length > 0) {
+                        // Берем первую дату
+                        const firstDate = window.appState.data.dates[0];
+                        console.log('init.js: активируем первую дату', firstDate.id);
+                        window.dates.setActiveDate(firstDate.id);
+                    }
+                }
+            }, 500); // Даем время на полную инициализацию
             
         }, 150); // Увеличиваем задержку для загрузки всех модулей
         

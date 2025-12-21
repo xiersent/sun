@@ -1,4 +1,5 @@
 // optimized3/modules/appCore.js
+// optimized3/modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -97,6 +98,9 @@ class AppCore {
                 window.dataManager.updateNotesList();
             }
             
+            // ВАЖНОЕ ИСПРАВЛЕНИЕ: Активация дефолтной даты при первом запуске
+            this.activateDefaultDateOnStartup();
+            
             // Если есть активная дата, обновляем положение
             if (window.appState.activeDateId) {
                 setTimeout(() => {
@@ -156,7 +160,7 @@ class AppCore {
             
             // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
             
-            // ДОПОЛНИТЕЛЬНО: Проверяем данные волн в группах после загрузки
+            // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузки
             setTimeout(() => {
                 console.log('AppCore: проверка данных волн в группах...');
                 if (window.debugGroups) {
@@ -172,6 +176,91 @@ class AppCore {
                 }
             }
         }, 150); // Увеличена задержка для загрузки шаблонов
+    }
+    
+    // НОВЫЙ МЕТОД: Активация дефолтной даты при старте
+    activateDefaultDateOnStartup() {
+        console.log('AppCore: проверка активации дефолтной даты при старте...');
+        
+        // Проверяем, есть ли активная дата и корректно ли она установлена
+        const hasValidActiveDate = window.appState.activeDateId && 
+                                  window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
+        
+        if (!hasValidActiveDate || !window.appState.baseDate || isNaN(window.appState.baseDate.getTime())) {
+            console.log('AppCore: активная дата не установлена или некорректна, активируем дефолтную...');
+            
+            // Находим дефолтную дату (s25)
+            const defaultDateId = 's25';
+            const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
+            
+            if (defaultDate) {
+                console.log('AppCore: активируем дефолтную дату:', defaultDateId);
+                
+                // Устанавливаем как активную
+                window.appState.activeDateId = defaultDateId;
+                
+                try {
+                    const date = new Date(defaultDate.date);
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Некорректная дата в объекте');
+                    }
+                    
+                    window.appState.baseDate = new Date(date);
+                    console.log('AppCore: установлена базовая дата из дефолтной:', defaultDate.date);
+                    
+                    // Пересчитываем текущий день
+                    if (window.dates && window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    
+                    // Обновляем графики
+                    if (window.grid && window.grid.createGrid) {
+                        window.grid.createGrid();
+                    }
+                    if (window.grid && window.grid.updateCenterDate) {
+                        window.grid.updateCenterDate();
+                        window.grid.updateGridNotesHighlight();
+                    }
+                    if (window.waves && window.waves.updatePosition) {
+                        window.waves.updatePosition();
+                    }
+                    
+                    window.appState.save();
+                    
+                    console.log('AppCore: дефолтная дата успешно активирована');
+                    
+                } catch (error) {
+                    console.error('AppCore: ошибка активации дефолтной даты:', error);
+                    // Если ошибка, устанавливаем сегодняшнюю дату
+                    window.appState.baseDate = new Date();
+                    if (window.dates && window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    window.appState.save();
+                }
+            } else {
+                console.error('AppCore: дефолтная дата не найдена в данных');
+                
+                // Если нет дефолтной даты, берем первую из списка
+                if (window.appState.data.dates && window.appState.data.dates.length > 0) {
+                    const firstDate = window.appState.data.dates[0];
+                    console.log('AppCore: используем первую дату из списка:', firstDate.id);
+                    if (window.dates && window.dates.setActiveDate) {
+                        window.dates.setActiveDate(firstDate.id);
+                    }
+                } else {
+                    // Если вообще нет дат, устанавливаем сегодняшнюю
+                    console.log('AppCore: нет дат в списке, устанавливаем сегодняшнюю');
+                    window.appState.baseDate = new Date();
+                    if (window.dates && window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    window.appState.save();
+                }
+            }
+        } else {
+            console.log('AppCore: активная дата уже корректно установлена:', window.appState.activeDateId);
+        }
     }
     
     showWarning() {
