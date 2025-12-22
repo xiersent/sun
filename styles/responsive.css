@@ -187,4 +187,48 @@
     .wave-group-title {
         font-size: var(--font-size-sm);
     }
+    
+    /* Адаптация для очень маленьких экранов */
+    @media (max-width: 480px) {
+        .mobile-warning-overlay .warning-box {
+            max-width: 95%;
+            padding: 15px;
+        }
+        
+        .mobile-warning-box .warning-title {
+            font-size: 16px;
+        }
+        
+        .mobile-warning-box .warning-text {
+            font-size: 13px;
+        }
+        
+        .warning-info {
+            font-size: 12px;
+        }
+    }
+}
+
+/* Мобильные устройства - полный тупик */
+body.mobile-device .interface-container,
+body.mobile-device .controls-section,
+body.mobile-device .graph-section,
+body.mobile-device .panel-section,
+body.mobile-device .corner-square {
+    display: none !important;
+}
+
+body.mobile-device {
+    overflow: hidden;
+    height: 100vh;
+}
+
+body.mobile-device .warning-overlay {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
 }

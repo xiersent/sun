@@ -76,6 +76,21 @@ class AppCore {
     }
     
     initializeApp() {
+        // Проверяем мобильное устройство
+        const isMobile = this.isMobileDevice();
+        
+        if (isMobile) {
+            // Для мобильных - показываем только предупреждение
+            this.showWarning();
+            // Добавляем класс для мобильных устройств
+            document.body.classList.add('mobile-device');
+            console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
+            return; // Прерываем дальнейшую инициализацию
+        }
+        
+        // Продолжаем стандартную инициализацию для десктопов
+        console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
+        
         // Устанавливаем режим отображения звезд/имен
         if (window.appState.showStars) {
             document.body.classList.add('stars-mode');
@@ -205,26 +220,48 @@ class AppCore {
     
     // Метод для определения мобильного устройства
     isMobileDevice() {
-        // Проверяем по соотношению сторон (высота > ширины - портретный режим)
-        if (window.innerHeight > window.innerWidth) {
-            return true;
-        }
-        
-        // Дополнительные проверки на мобильность
+        // Более точная проверка на мобильное устройство
         const userAgent = navigator.userAgent.toLowerCase();
-        const isMobile = /mobile|android|iphone|ipad|ipod|windows phone/i.test(userAgent);
+        
+        // Проверка по userAgent
+        const isMobileUserAgent = /mobile|android|iphone|ipad|ipod|windows phone/i.test(userAgent);
+        
+        // Проверка по сенсорному вводу
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         
-        return isMobile || isTouchDevice;
+        // Проверка по соотношению сторон и размеру экрана
+        const hasMobileViewport = window.innerWidth <= 768 || 
+                                 (window.innerHeight > window.innerWidth && window.innerWidth < 1024);
+        
+        // Проверка на планшет (iPad и другие)
+        const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch)))/i.test(userAgent);
+        
+        // Если это планшет, считаем его мобильным для нашего приложения
+        return isMobileUserAgent || isTouchDevice || hasMobileViewport || isTablet;
     }
     
     showWarning() {
-        // Сразу показываем оверлей
         const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
-        if (warningOverlay) {
-            warningOverlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+        if (!warningOverlay) return;
+        
+        // Проверяем мобильное устройство
+        const isMobile = this.isMobileDevice();
+        
+        if (isMobile) {
+            // Для мобильных устройств - только предупреждение, без кнопки
+            this.showMobileWarning(warningOverlay);
+            return;
         }
+        
+        // Для десктопов - стандартное поведение
+        this.showDesktopWarning(warningOverlay);
+    }
+    
+    showDesktopWarning(warningOverlay) {
+        // Существующая логика для десктопов
+        warningOverlay.classList.remove('hidden');
+        warningOverlay.classList.add('desktop-warning');
+        document.body.style.overflow = 'hidden';
         
         // Загружаем информацию ОТДЕЛЬНО для каждой строки
         
@@ -232,15 +269,6 @@ class AppCore {
         const browserInfoEl = document.getElementById('browserInfo');
         if (browserInfoEl) {
             browserInfoEl.textContent = this.getBrowserInfo();
-            
-            // Проверяем мобильное устройство и добавляем предупреждение если нужно
-            const isMobile = this.isMobileDevice();
-            if (isMobile) {
-                const mobileWarning = document.createElement('div');
-                mobileWarning.className = 'mobile-warning';
-                mobileWarning.textContent = '⚠️ ВНИМАНИЕ: Это приложение предназначено только для использования на компьютерах (десктоп). На мобильных устройствах интерфейс может работать некорректно.';
-                browserInfoEl.parentNode.parentNode.appendChild(mobileWarning);
-            }
         }
         
         // 2. Информация о сегодняшней дате - СРАЗУ, синхронно
@@ -266,6 +294,82 @@ class AppCore {
                 }
             });
         }
+    }
+    
+    showMobileWarning(warningOverlay) {
+        // Скрываем весь основной контент
+        document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Настраиваем предупреждение для мобильных
+        warningOverlay.classList.remove('hidden');
+        warningOverlay.classList.add('mobile-warning-overlay');
+        
+        // Убираем кнопку "Согласиться и продолжить"
+        const acceptButton = document.getElementById('acceptWarning');
+        if (acceptButton) {
+            acceptButton.style.display = 'none';
+        }
+        
+        // Изменяем содержимое предупреждения
+        const warningBox = warningOverlay.querySelector('.warning-box');
+        if (warningBox) {
+            warningBox.classList.add('mobile-warning-box');
+            
+            // Обновляем заголовок и текст для мобильных
+            const warningTitle = warningBox.querySelector('.warning-title');
+            if (warningTitle) {
+                warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+                warningTitle.style.color = '#ff0000';
+            }
+            
+            const warningText = warningBox.querySelector('.warning-text');
+            if (warningText) {
+                warningText.innerHTML = ``;
+            }
+            
+            // Обновляем информацию о браузере
+            const browserInfoEl = document.getElementById('browserInfo');
+            if (browserInfoEl) {
+                browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+            }
+            
+            // Обновляем информацию о сегодняшней дате
+            const todayInfoEl = document.getElementById('todayInfo');
+            if (todayInfoEl) {
+                const today = new Date();
+                const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+                todayInfoEl.textContent = todayFormatted;
+            }
+            
+            // Обновляем версию
+            const versionInfoEl = document.getElementById('versionInfo');
+            if (versionInfoEl) {
+                versionInfoEl.textContent = 'Только для ПК';
+            }
+            
+            // Добавляем кнопку для повторной проверки
+            const retryButton = document.createElement('button');
+            retryButton.className = 'ui-btn mobile-retry-btn';
+            retryButton.textContent = 'Проверить снова (если вы на компьютере)';
+            retryButton.style.marginTop = '20px';
+            retryButton.style.backgroundColor = '#666';
+            retryButton.addEventListener('click', () => {
+                location.reload();
+            });
+            
+            warningBox.appendChild(retryButton);
+        }
+    }
+    
+    getMobileDeviceType() {
+        const ua = navigator.userAgent.toLowerCase();
+        if (ua.includes('iphone')) return 'iPhone';
+        if (ua.includes('ipad')) return 'iPad';
+        if (ua.includes('android')) return 'Android';
+        if (ua.includes('windows phone')) return 'Windows Phone';
+        return 'Мобильное устройство';
     }
     
     getBrowserInfo() {
