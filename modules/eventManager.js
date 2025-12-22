@@ -1,5 +1,4 @@
 // optimized3/modules/eventManager.js
-// optimized3/modules/eventManager.js
 class EventManager {
     constructor() {
         console.log('EventManager: инициализация...');
@@ -21,9 +20,6 @@ class EventManager {
     
     handleClick(e) {
         const target = e.target;
-        
-        // УБИРАЕМ обработчик кнопки "Согласиться и продолжить" отсюда
-        // он теперь в appCore.js
         
         const actionBtn = target.closest('[data-action]');
         if (actionBtn) {
@@ -129,7 +125,7 @@ class EventManager {
             e.stopPropagation();
             const id = cancelBtn.dataset.id;
             const type = cancelBtn.dataset.type || 'date';
-            console.log('EventManager: клик по кнопке отмены:', type, id);
+            console.log('EventManager: клик по кнопки отмены:', type, id);
             if (window.unifiedListManager) {
                 const containerId = this.getContainerId(target);
                 window.unifiedListManager.handleCancelClick(id, type, containerId);
@@ -153,6 +149,11 @@ class EventManager {
                     // Проверить, включена ли группа с этой волной
                     const shouldShow = target.checked && window.waves.isWaveGroupEnabled(waveId);
                     window.waves.waveContainers[waveId].style.display = shouldShow ? 'block' : 'none';
+                }
+                
+                // ВАЖНО: Обновить позиции волн после изменения видимости
+                if (window.waves && window.waves.updatePosition) {
+                    window.waves.updatePosition();
                 }
                 
                 // Обновить статистику группы
@@ -198,21 +199,37 @@ class EventManager {
                     group.enabled = target.checked;
                     window.appState.save();
                     
-                    // Обновить видимость всех волн в группе
-                    if (group.waves && Array.isArray(group.waves)) {
-                        group.waves.forEach(waveId => {
-                            const waveIdStr = String(waveId);
-                            const waveContainer = window.waves.waveContainers[waveId];
-                            if (waveContainer) {
-                                const waveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-                                const shouldShow = waveVisible && target.checked;
-                                waveContainer.style.display = shouldShow ? 'block' : 'none';
+                    // ГАРАНТИЯ: Полностью пересоздать элементы волн
+                    setTimeout(() => {
+                        // Удалить старые контейнеры
+                        document.querySelectorAll('.wave-container').forEach(c => c.remove());
+                        if (window.waves) {
+                            window.waves.waveContainers = {};
+                            window.waves.wavePaths = {};
+                        }
+                        
+                        // Создать ВСЕ видимые волны заново
+                        window.appState.data.waves.forEach(wave => {
+                            const waveIdStr = String(wave.id);
+                            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                            const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
+                            const shouldShow = isWaveVisible && isGroupEnabled;
+                            
+                            if (shouldShow) {
+                                window.waves.createWaveElement(wave);
                             }
                         });
-                    }
-                    
-                    // Обновить список волн
-                    window.unifiedListManager.updateWavesList();
+                        
+                        // Обновить позиции
+                        if (window.waves.updatePosition) {
+                            window.waves.updatePosition();
+                        }
+                        
+                        // Обновить список
+                        window.unifiedListManager.updateWavesList();
+                        
+                        console.log('Волны полностью пересозданы после переключения группы');
+                    }, 100);
                 }
             }
             return;

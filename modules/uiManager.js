@@ -1,5 +1,4 @@
 // optimized3/modules/uiManager.js
-// optimized3/modules/uiManager.js
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
@@ -270,8 +269,16 @@ class UIManager {
         window.waves.waveContainers = {};
         window.waves.wavePaths = {};
         
+        // ВАЖНО: Создаем элементы волн для активной даты
         window.appState.data.waves.forEach(wave => {
-            window.waves.createWaveElement(wave);
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
+            const shouldShow = isWaveVisible && isGroupEnabled;
+            
+            if (shouldShow) {
+                window.waves.createWaveElement(wave);
+            }
         });
         
         this.applyTransform();
@@ -316,6 +323,19 @@ class UIManager {
                 
                 // Пересчитываем текущий день
                 window.dates.recalculateCurrentDay();
+                
+                // ГАРАНТИЯ: Создаем элементы волн для дефолтной даты
+                if (window.waves) {
+                    // Очищаем старые контейнеры
+                    document.querySelectorAll('.wave-container').forEach(c => c.remove());
+                    window.waves.waveContainers = {};
+                    window.waves.wavePaths = {};
+                    
+                    // Создаем элементы волн
+                    window.waves.createVisibleWaveElements();
+                    window.waves.updatePosition();
+                    window.waves.updateCornerSquareColors();
+                }
                 
                 // Обновляем графики
                 window.grid.createGrid();
@@ -436,6 +456,22 @@ class UIManager {
             dbImportSection.scrollIntoView({
                 behavior: 'smooth'
             });
+        }
+    }
+    
+    // ДОПОЛНИТЕЛЬНЫЙ МЕТОД: Тоггл группы (если используется)
+    toggleGroup(groupId) {
+        const group = window.appState.data.groups.find(g => g.id === groupId);
+        if (group) {
+            group.enabled = !group.enabled;
+            window.appState.save();
+            
+            // Обновить видимость волн и их позиции
+            if (window.waves) {
+                window.waves.updatePosition(); // <- Добавить эту строку
+            }
+            
+            window.dataManager.updateWavesGroups();
         }
     }
 }

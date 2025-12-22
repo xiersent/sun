@@ -25,17 +25,54 @@ class WavesManager {
     }
     
     createVisibleWaveElements() {
+        console.log('WavesManager: создание видимых элементов волн...');
+        console.log('currentDay при создании волн:', window.appState.currentDay);
+        
+        // Удаляем старые контейнеры
         document.querySelectorAll('.wave-container').forEach(c => c.remove());
+        
+        // Сбрасываем кэши
+        this.waveContainers = {};
+        this.wavePaths = {};
+        
+        let createdCount = 0;
+        
+        // ВАЖНО: Проверяем, есть ли активная дата
+        const hasActiveDate = window.appState.activeDateId && 
+                             window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
+        
+        if (!hasActiveDate) {
+            console.log('WavesManager: нет активной даты, волны не будут созданы');
+            return;
+        }
+        
+        // ВАЖНО: Проверяем, что currentDay установлен
+        if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
+            console.warn('WavesManager: currentDay не установлен, пытаемся пересчитать...');
+            if (window.dates && window.dates.recalculateCurrentDay) {
+                window.dates.recalculateCurrentDay();
+            } else {
+                // Fallback: ручной расчет
+                window.appState.currentDay = this.calculateDaysBetweenDates(
+                    window.appState.baseDate,
+                    window.appState.currentDate
+                );
+                console.log('WavesManager: currentDay рассчитан вручную:', window.appState.currentDay);
+            }
+        }
         
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
             
-            // УПРОЩЕННАЯ ЛОГИКА: Показывать волну если она видима И её группа включена
             if (isWaveVisible && this.isWaveGroupEnabled(wave.id)) {
+                console.log('Создаем волну:', wave.id, wave.name);
                 this.createWaveElement(wave);
+                createdCount++;
             }
         });
+        
+        console.log('WavesManager: создано элементов волн:', createdCount);
     }
     
     createWaveElement(wave) {
@@ -161,9 +198,24 @@ class WavesManager {
     }
     
     updatePosition() {
-        // ВАЖНО: currentDay уже пересчитан в dates.recalculateCurrentDay()
-        // Он содержит разницу между baseDate и currentDate в днях
+        // ВАЖНО: Проверяем, что currentDay установлен
+        if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
+            console.warn('WavesManager: currentDay не установлен, пытаемся пересчитать...');
+            if (window.dates && window.dates.recalculateCurrentDay) {
+                window.dates.recalculateCurrentDay();
+            } else {
+                // Fallback: ручной расчет
+                window.appState.currentDay = this.calculateDaysBetweenDates(
+                    window.appState.baseDate,
+                    window.appState.currentDate
+                );
+                console.log('WavesManager: currentDay рассчитан вручную:', window.appState.currentDay);
+            }
+        }
         
+        console.log('WavesManager: updatePosition, currentDay:', window.appState.currentDay);
+        
+        // currentDay содержит разницу в днях между базовой датой и текущей датой визора
         window.appState.data.waves.forEach(wave => {
             const wavePeriodPixels = window.appState.periods[wave.id] || (wave.period * window.appState.config.squareSize);
             
@@ -188,20 +240,34 @@ class WavesManager {
                 if (this.wavePaths[wave.id]) {
                     this.wavePaths[wave.id].classList.toggle('bold', window.appState.waveBold[waveIdStr]);
                 }
-            } else if (shouldShow) {
-                this.createWaveElement(wave);
-                const wavePeriodPixelsNew = wave.period * window.appState.config.squareSize;
-                let actualPositionNew = window.appState.currentDay * window.appState.config.squareSize % wavePeriodPixelsNew;
-                if (actualPositionNew < 0) {
-                    actualPositionNew = wavePeriodPixelsNew + actualPositionNew;
-                }
-                this.waveContainers[wave.id].style.transform = `translateX(${-actualPositionNew}px)`;
             }
         });
         
-        if (document.getElementById('currentDay')) {
-            document.getElementById('currentDay').textContent = window.appState.currentDay;
+        // Обновляем DOM элемент currentDay
+        const currentDayElement = document.getElementById('currentDay');
+        if (currentDayElement) {
+            currentDayElement.textContent = window.appState.currentDay;
+            console.log('WavesManager: DOM элемент currentDay обновлен:', window.appState.currentDay);
         }
+    }
+    
+    // НОВЫЙ МЕТОД: Гарантированное создание элементов волн при активации даты
+    createVisibleWaveElementsForActiveDate() {
+        console.log('WavesManager: гарантированное создание элементов волн для активной даты');
+        
+        // Убедимся, что все видимые волны из включенных групп созданы
+        window.appState.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
+            const shouldShow = isWaveVisible && isGroupEnabled;
+            
+            // Если волна должна показываться, но её контейнер ещё не создан
+            if (shouldShow && !this.waveContainers[wave.id]) {
+                console.log('WavesManager: создаем отсутствующий элемент волны:', wave.id, wave.name);
+                this.createWaveElement(wave);
+            }
+        });
     }
     
     addCustomWave(name, period, type, color) {
@@ -423,6 +489,92 @@ class WavesManager {
         
         return waves;
     }
+    
+    // НОВЫЙ МЕТОД: Расчет дней между датами (для fallback)
+    calculateDaysBetweenDates(date1, date2) {
+        if (!date1 || !date2) return 0;
+        
+        try {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                return 0;
+            }
+            
+            const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+            const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+            return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+        } catch (error) {
+            console.error('Ошибка расчета дней между датами:', error);
+            return 0;
+        }
+    }
+}
+
+// Глобальная функция для принудительного обновления currentDay
+window.forceUpdateCurrentDay = function() {
+    console.log('=== FORCE UPDATE CURRENTDAY ===');
+    
+    if (!window.dates || !window.appState) return;
+    
+    // Принудительно устанавливаем дефолтную дату
+    const defaultDateId = 's25';
+    const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
+    
+    if (defaultDate) {
+        try {
+            const date = new Date(defaultDate.date);
+            window.appState.baseDate = new Date(date);
+            window.appState.activeDateId = defaultDateId;
+            
+            // Пересчитываем
+            window.dates.recalculateCurrentDay();
+            
+            // Обновляем все
+            if (window.waves) {
+                // Очищаем старые волны
+                document.querySelectorAll('.wave-container').forEach(c => c.remove());
+                window.waves.waveContainers = {};
+                window.waves.wavePaths = {};
+                
+                // Создаем новые
+                window.appState.data.waves.forEach(wave => {
+                    const waveIdStr = String(wave.id);
+                    const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                    const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
+                    const shouldShow = isWaveVisible && isGroupEnabled;
+                    
+                    if (shouldShow) {
+                        window.waves.createWaveElement(wave);
+                    }
+                });
+                
+                window.waves.updatePosition();
+            }
+            
+            if (window.grid && window.grid.createGrid) {
+                window.grid.createGrid();
+                window.grid.updateCenterDate();
+            }
+            
+            if (window.dataManager && window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            }
+            
+            console.log('Принудительно обновлен currentDay:', window.appState.currentDay);
+            
+        } catch (error) {
+            console.error('Ошибка принудительного обновления:', error);
+        }
+    }
+};
+
+// Автоматически вызывать при загрузке
+if (window.appState && window.appState.currentDay === 0) {
+    setTimeout(() => {
+        window.forceUpdateCurrentDay();
+    }, 1000);
 }
 
 window.waves = new WavesManager();
