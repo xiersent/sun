@@ -1,5 +1,4 @@
 // optimized3/modules/appCore.js
-// optimized3/modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -8,7 +7,7 @@ class AppCore {
     
     cacheElements() {
         const ids = [
-            'warningOverlay', 'acceptWarning', 'browserInfoWarning', 'dontAskAgain',
+            'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
             'graphContainer', 'graphElement', 'centerDateLabel',
             'dateListForDates', 'wavesList', 'notesList', 'noteInput',
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
@@ -72,103 +71,105 @@ class AppCore {
             }
         }
         
-        // Ждем немного чтобы шаблоны успели загрузиться
-        setTimeout(() => {
-            // Инициализация волн и сетки
-            if (window.waves && window.waves.init) {
-                window.waves.init();
-            }
-            
-            if (window.grid && window.grid.createGrid) {
-                window.grid.createGrid();
-            }
-            
-            // УСТАНОВИТЬ РЕЖИМ ОТОБРАЖЕНИЯ ЗВЕЗД/ИМЕН ПРИ ЗАГРУЗКЕ
-            if (window.appState.showStars) {
-                document.body.classList.add('stars-mode');
-                document.body.classList.remove('names-mode');
-            } else {
-                document.body.classList.remove('stars-mode');
-                document.body.classList.add('names-mode');
-            }
-            
-            // Обновление UI через единый менеджер списков
-            if (window.dataManager) {
-                window.dataManager.updateDateList();
-                window.dataManager.updateWavesGroups();
-                window.dataManager.updateNotesList();
-            }
-            
-            // ВАЖНОЕ ИСПРАВЛЕНИЕ: Активация дефолтной даты при первом запуске
-            this.activateDefaultDateOnStartup();
-            
-            // Если есть активная дата, обновляем положение
-            if (window.appState.activeDateId) {
-                setTimeout(() => {
-                    if (window.dates && window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay();
-                    }
-                    
-                    if (window.waves && window.waves.updatePosition) {
-                        window.waves.updatePosition();
-                    }
-                    
-                    if (window.grid && window.grid.updateCenterDate) {
-                        window.grid.updateCenterDate();
-                        window.grid.updateGridNotesHighlight();
-                    }
-                    
-                    if (window.uiManager && window.uiManager.updateUI) {
-                        window.uiManager.updateUI();
-                    }
-                    
-                    // ПРОВЕРЯЕМ И ОБНОВЛЯЕМ КНОПКУ "СЕГОДНЯ" ПРИ ЗАГРУЗКЕ
-                    if (window.dates && window.dates.updateTodayButton) {
-                        window.dates.updateTodayButton();
-                    }
-                }, 50);
-            }
-            
-            // Устанавливаем правильный фон графика
-            const graphContainer = document.getElementById('graphContainer');
-            if (graphContainer) {
-                if (window.appState.graphBgWhite) {
-                    graphContainer.style.backgroundColor = '#fff';
-                    graphContainer.classList.remove('dark-mode');
-                } else {
-                    graphContainer.style.backgroundColor = '#000';
-                    graphContainer.classList.add('dark-mode');
+        // Инициализация приложения
+        this.initializeApp();
+    }
+    
+    initializeApp() {
+        // Устанавливаем режим отображения звезд/имен
+        if (window.appState.showStars) {
+            document.body.classList.add('stars-mode');
+            document.body.classList.remove('names-mode');
+        } else {
+            document.body.classList.remove('stars-mode');
+            document.body.classList.add('names-mode');
+        }
+        
+        // Инициализация волн и сетки
+        if (window.waves && window.waves.init) {
+            window.waves.init();
+        }
+        
+        if (window.grid && window.grid.createGrid) {
+            window.grid.createGrid();
+        }
+        
+        // Обновление UI через единый менеджер списков
+        if (window.dataManager) {
+            window.dataManager.updateDateList();
+            window.dataManager.updateWavesGroups();
+            window.dataManager.updateNotesList();
+        }
+        
+        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Активация дефолтной даты при первом запуске
+        this.activateDefaultDateOnStartup();
+        
+        // Если есть активная дата, обновляем положение
+        if (window.appState.activeDateId) {
+            setTimeout(() => {
+                if (window.dates && window.dates.recalculateCurrentDay) {
+                    window.dates.recalculateCurrentDay();
                 }
                 
-                // Устанавливаем режим серости для графика
-                if (window.appState.graphGrayMode) {
-                    graphContainer.classList.add('graph-gray-mode');
-                } else {
-                    graphContainer.classList.remove('graph-gray-mode');
+                if (window.waves && window.waves.updatePosition) {
+                    window.waves.updatePosition();
                 }
+                
+                if (window.grid && window.grid.updateCenterDate) {
+                    window.grid.updateCenterDate();
+                    window.grid.updateGridNotesHighlight();
+                }
+                
+                if (window.uiManager && window.uiManager.updateUI) {
+                    window.uiManager.updateUI();
+                }
+                
+                // ПРОВЕРЯЕМ И ОБНОВЛЯЕМ КНОПКУ "СЕГОДНЯ" ПРИ ЗАГРУЗКЕ
+                if (window.dates && window.dates.updateTodayButton) {
+                    window.dates.updateTodayButton();
+                }
+            }, 50);
+        }
+        
+        // Устанавливаем правильный фон графика
+        const graphContainer = document.getElementById('graphContainer');
+        if (graphContainer) {
+            if (window.appState.graphBgWhite) {
+                graphContainer.style.backgroundColor = '#fff';
+                graphContainer.classList.remove('dark-mode');
+            } else {
+                graphContainer.style.backgroundColor = '#000';
+                graphContainer.classList.add('dark-mode');
             }
             
-            // ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
-            this.showWarning();
-            
-            // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
-            
-            // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
-            setTimeout(() => {
-                console.log('AppCore: проверка данных волн в группах...');
-                if (window.debugGroups) {
-                    window.debugGroups();
-                }
-            }, 2000);
-            
-            // Инициализируем EventManager если он ещё не создан
-            if (!window.eventManager) {
-                console.log('AppCore: инициализация EventManager...');
-                if (typeof EventManager !== 'undefined') {
-                    window.eventManager = new EventManager();
-                }
+            // Устанавливаем режим серости для графика
+            if (window.appState.graphGrayMode) {
+                graphContainer.classList.add('graph-gray-mode');
+            } else {
+                graphContainer.classList.remove('graph-gray-mode');
             }
-        }, 150); // Увеличена задержка для загрузки шаблонов
+        }
+        
+        // ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
+        this.showWarning();
+        
+        // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
+        
+        // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
+        setTimeout(() => {
+            console.log('AppCore: проверка данных волн в группах...');
+            if (window.debugGroups) {
+                window.debugGroups();
+            }
+        }, 2000);
+        
+        // Инициализируем EventManager если он ещё не создан
+        if (!window.eventManager) {
+            console.log('AppCore: инициализация EventManager...');
+            if (typeof EventManager !== 'undefined') {
+                window.eventManager = new EventManager();
+            }
+        }
     }
     
     // Метод для получения версии из файла
@@ -218,113 +219,52 @@ class AppCore {
     }
     
     showWarning() {
-        // Получаем версию из файла
-        this.getVersion().then(version => {
-            const browserInfo = this.getBrowserInfo();
-            const today = new Date();
-            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-            
-            // Проверяем, мобильный ли браузер
-            const isMobile = this.isMobileDevice();
-            
-            let warningHTML = `
-                <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
-                <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
-                <div class="warning-text">
-                    <strong>Браузер:</strong> ${browserInfo}<br>
-                    <strong>Версия от:</strong> ${version || 'неизвестно'}<br>
-                    <strong>Сегодня:</strong> ${todayFormatted}
-                </div>
-            `;
-            
-            if (isMobile) {
-                warningHTML += `
-                    <div class="warning-text" style="color: #ff0000; font-weight: bold;">
-                        ⚠️ ВНИМАНИЕ: Это приложение предназначено только для использования на компьютерах (десктоп).
-                        На мобильных устройствах интерфейс может работать некорректно.
-                    </div>
-                `;
-            } else {
-                warningHTML += `
-                    <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
-                `;
-            }
-            
-            const warningBox = document.getElementById('warningBox') || this.elements.warningBox;
-            if (warningBox) {
-                warningBox.innerHTML = warningHTML;
-                
-                // Добавляем обработчик только если кнопка есть (не мобильный)
-                if (!isMobile && warningBox.querySelector('#acceptWarning')) {
-                    warningBox.querySelector('#acceptWarning').addEventListener('click', () => {
-                        const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
-                        warningOverlay.classList.add('hidden');
-                        document.body.style.overflow = 'auto';
-                    });
-                }
-            }
-            
-            // Показываем оверлей
-            const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
-            if (warningOverlay) {
-                warningOverlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }).catch(error => {
-            console.error('Ошибка загрузки версии:', error);
-            // Показываем оверлей без версии
-            this.showWarningFallback();
-        });
-    }
-    
-    // Фолбэк метод если не удалось загрузить версию
-    showWarningFallback() {
-        const browserInfo = this.getBrowserInfo();
-        const today = new Date();
-        const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-        
-        const isMobile = this.isMobileDevice();
-        
-        let warningHTML = `
-            <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
-            <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
-            <div class="warning-text">
-                <strong>Браузер:</strong> ${browserInfo}<br>
-                <strong>Версия от:</strong> неизвестно<br>
-                <strong>Сегодня:</strong> ${todayFormatted}
-            </div>
-        `;
-        
-        if (isMobile) {
-            warningHTML += `
-                <div class="warning-text" style="color: #ff0000; font-weight: bold;">
-                    ⚠️ ВНИМАНИЕ: Это приложение предназначено только для использования на компьютерах (десктоп).
-                    На мобильных устройствах интерфейс может работать некорректно.
-                </div>
-            `;
-        } else {
-            warningHTML += `
-                <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
-            `;
-        }
-        
-        const warningBox = document.getElementById('warningBox') || this.elements.warningBox;
-        if (warningBox) {
-            warningBox.innerHTML = warningHTML;
-            
-            if (!isMobile) {
-                warningBox.querySelector('#acceptWarning').addEventListener('click', () => {
-                    const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
-                    warningOverlay.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                });
-            }
-        }
-        
+        // Сразу показываем оверлей
         const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
         if (warningOverlay) {
             warningOverlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+        }
+        
+        // Загружаем информацию ОТДЕЛЬНО для каждой строки
+        
+        // 1. Информация о браузере - СРАЗУ, синхронно
+        const browserInfoEl = document.getElementById('browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = this.getBrowserInfo();
+            
+            // Проверяем мобильное устройство и добавляем предупреждение если нужно
+            const isMobile = this.isMobileDevice();
+            if (isMobile) {
+                const mobileWarning = document.createElement('div');
+                mobileWarning.className = 'mobile-warning';
+                mobileWarning.textContent = '⚠️ ВНИМАНИЕ: Это приложение предназначено только для использования на компьютерах (десктоп). На мобильных устройствах интерфейс может работать некорректно.';
+                browserInfoEl.parentNode.parentNode.appendChild(mobileWarning);
+            }
+        }
+        
+        // 2. Информация о сегодняшней дате - СРАЗУ, синхронно
+        const todayInfoEl = document.getElementById('todayInfo');
+        if (todayInfoEl) {
+            const today = new Date();
+            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+            todayInfoEl.textContent = todayFormatted;
+        }
+        
+        // 3. Версия приложения - АСИНХРОННО
+        const versionInfoEl = document.getElementById('versionInfo');
+        if (versionInfoEl) {
+            versionInfoEl.textContent = 'Загрузка...';
+            
+            this.getVersion().then(version => {
+                if (versionInfoEl) {
+                    versionInfoEl.textContent = version || 'неизвестно';
+                }
+            }).catch(error => {
+                if (versionInfoEl) {
+                    versionInfoEl.textContent = 'неизвестно';
+                }
+            });
         }
     }
     
@@ -345,13 +285,22 @@ class AppCore {
     setupEventListeners() {
         console.log('AppCore: настройка обработчиков событий...');
         
+        // Обработчик для кнопки "Согласиться и продолжить" - ДОБАВЛЯЕМ СРАЗУ
+        const acceptWarningBtn = document.getElementById('acceptWarning');
+        if (acceptWarningBtn) {
+            acceptWarningBtn.addEventListener('click', () => {
+                const warningOverlay = document.getElementById('warningOverlay');
+                if (warningOverlay) {
+                    warningOverlay.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+        
         // ОБРАБОТЧИКИ ПЕРЕМЕЩЕНЫ В eventManager.js
         // Делегирование событий теперь обрабатывается через EventManager
         
         // Оставляем только специфичные обработчики, которые неудобно обрабатывать через делегирование
-        
-        // Обработчики для конкретных кнопок (предупреждение)
-        // УДАЛЕНО: обработчик для acceptWarning, так как теперь он добавляется динамически в showWarning()
         
         // Форма добавления волны (оставляем для гарантии работы)
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');

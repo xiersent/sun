@@ -34,8 +34,8 @@ class AppState {
                 { id: 'default-group', name: 'Основная группа', enabled: false, waves: [], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: true },
                 { id: 'classic-group', name: 'Классическая', enabled: false, waves: [24, 28, 33, 38], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false },
                 { id: 'experimental-group', name: 'Экспериментальные', enabled: false, waves: [25, 365], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false },
-                { id: '120-waves-group', name: '120 колосков', enabled: true, waves: this.waves120Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dashed', expanded: false },
-                { id: '31-waves-group', name: '31 колосок', enabled: true, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false }
+                { id: '120-waves-group', name: '120 колосков', enabled: false, waves: this.waves120Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dashed', expanded: false },
+                { id: '31-waves-group', name: '31 колосок', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false }
             ],
             uiSettings: {
                 currentDate: new Date().toISOString(),

@@ -22,6 +22,9 @@ class EventManager {
     handleClick(e) {
         const target = e.target;
         
+        // УБИРАЕМ обработчик кнопки "Согласиться и продолжить" отсюда
+        // он теперь в appCore.js
+        
         const actionBtn = target.closest('[data-action]');
         if (actionBtn) {
             e.preventDefault();
@@ -315,10 +318,9 @@ class EventManager {
                 console.log('EventManager: выбор даты из списка:', dateId);
                 
                 if (dateId && window.dates) {
+                    // Устанавливаем активную дату - это пересчитает currentDay
+                    // и перестроит графики относительно новой базовой даты
                     window.dates.setActiveDate(dateId);
-                    if (window.dataManager) {
-                        window.dataManager.updateDateList();
-                    }
                 }
                 return;
             }

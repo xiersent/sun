@@ -26,6 +26,20 @@ button:hover {
     height: 25px;
 }
 
+/* Кнопка предупреждения */
+#acceptWarning.ui-btn {
+    background-color: var(--cp);
+    color: #fff;
+    font-weight: 400;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    height: 25px;
+}
+
+#acceptWarning.ui-btn:hover {
+    filter: brightness(0.9);
+    background-color: var(--cp);
+}
+
 .small-button {
     padding: var(--spacing-xs) var(--spacing-sm);
     height: 25px;
@@ -148,41 +162,47 @@ textarea {
     margin-bottom: var(--spacing-lg);
 }
 
+/* Контейнер для информации предупреждения */
+.warning-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: var(--spacing-lg);
+	align-items: center;
+}
+
+.warning-info-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.warning-info-item strong {
+    font-weight: 600;
+    color: #333;
+}
+
+.warning-info-item span {
+    color: #666;
+    font-weight: 400;
+}
+
 /* Стили для мобильного предупреждения */
-.warning-box .mobile-warning {
+.mobile-warning {
     color: #ff0000;
     font-weight: bold;
-    margin: 15px 0;
+    margin-top: 10px;
     padding: 10px;
     background: #fff3f3;
     border: 1px solid #ff0000;
     border-radius: 4px;
+    font-size: var(--font-size-sm);
 }
 
 .warning-loading {
     padding: 20px;
     text-align: center;
     color: #666;
-}
-
-/* Чекбокс предупреждения */
-.warning-checkbox {
-    margin: var(--spacing-md) 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-}
-
-.warning-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-}
-
-.warning-checkbox label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    cursor: pointer;
 }
 
 /* Текущий день */
@@ -344,5 +364,3 @@ textarea {
     opacity: 0.5;
     cursor: not-allowed;
 }
-
-/* УДАЛЕНЫ СТИЛИ wave-disabled-hint (ненужные) */

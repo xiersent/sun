@@ -1,5 +1,4 @@
 // optimized3/modules/init.js
-// optimized3/modules/init.js
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {
@@ -24,135 +23,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.body.classList.add('names-mode');
         }
         
+        // Инициализируем основные модули
+        if (!window.appCore) window.appCore = new AppCore();
+        if (!window.dates) window.dates = new DatesManager();
+        if (!window.waves) window.waves = new WavesManager();
+        if (!window.grid) window.grid = new GridManager();
+        if (!window.uiManager) window.uiManager = new UIManager();
+        if (!window.dataManager) window.dataManager = new DataManager();
+        if (!window.unifiedListManager) window.unifiedListManager = new UnifiedListManager();
+        if (!window.importExport) window.importExport = new ImportExportManager();
+        if (!window.intersectionManager) window.intersectionManager = new IntersectionManager();
+        
+        // EventManager создаем вручную
+        if (!window.eventManager && typeof EventManager !== 'undefined') {
+            window.eventManager = new EventManager();
+        }
+        
         // Даем время на загрузку всех модулей
         setTimeout(() => {
-            // Проверяем, что все необходимые модули загружены
-            if (!window.appCore) {
-                console.error('appCore не загружен, создаем...');
-                window.appCore = new AppCore();
-            }
-            
-            if (!window.waves) {
-                console.error('waves не загружен, создаем...');
-                if (typeof WavesManager !== 'undefined') {
-                    window.waves = new WavesManager();
-                } else {
-                    console.error('WavesManager класс не определен!');
-                    return;
-                }
-            }
-            
-            if (!window.dates) {
-                console.error('dates не загружен, создаем...');
-                if (typeof DatesManager !== 'undefined') {
-                    window.dates = new DatesManager();
-                } else {
-                    console.error('DatesManager класс не определен!');
-                    return;
-                }
-            }
-            
-            if (!window.grid) {
-                console.error('grid не загружен, создаем...');
-                if (typeof GridManager !== 'undefined') {
-                    window.grid = new GridManager();
-                } else {
-                    console.error('GridManager класс не определен!');
-                    return;
-                }
-            }
-            
-            if (!window.uiManager) {
-                console.error('uiManager не загружен, создаем...');
-                if (typeof UIManager !== 'undefined') {
-                    window.uiManager = new UIManager();
-                } else {
-                    console.error('UIManager класс не определен!');
-                    return;
-                }
-            }
-            
-            if (!window.dataManager) {
-                console.error('dataManager не загружен, создаем...');
-                if (typeof DataManager !== 'undefined') {
-                    window.dataManager = new DataManager();
-                } else {
-                    console.error('DataManager класс не определен!');
-                    return;
-                }
-            }
-            
-            if (!window.unifiedListManager) {
-                console.error('unifiedListManager не загружен, создаем...');
-                if (typeof UnifiedListManager !== 'undefined') {
-                    window.unifiedListManager = new UnifiedListManager();
-                } else {
-                    console.error('UnifiedListManager класс не определен!');
-                    return;
-                }
-            }
-            
-            if (!window.importExport) {
-                console.error('importExport не загружен, создаем...');
-                if (typeof ImportExportManager !== 'undefined') {
-                    window.importExport = new ImportExportManager();
-                } else {
-                    console.error('ImportExportManager класс не определен!');
-                    return;
-                }
-            }
-            
-            // Создаем EventManager вручную если он не создан
-            if (!window.eventManager) {
-                console.log('Создаем EventManager...');
-                if (typeof EventManager !== 'undefined') {
-                    window.eventManager = new EventManager();
-                } else {
-                    console.error('EventManager класс не определен!');
-                }
-            }
-            
-            if (!window.intersectionManager) {
-                console.log('Создаем IntersectionManager...');
-                if (typeof IntersectionManager !== 'undefined') {
-                    window.intersectionManager = new IntersectionManager();
-                } else {
-                    console.error('IntersectionManager класс не определен!');
-                }
-            }
-            
-            // Инициализируем appCore
             if (window.appCore && window.appCore.init) {
                 window.appCore.init();
-            } else {
-                console.error('appCore.init не доступен');
             }
-            
-            // ВАЖНОЕ ДОПОЛНЕНИЕ: После инициализации проверяем, активирована ли дата
-            setTimeout(() => {
-                if (!window.appState.activeDateId || 
-                    !window.appState.data.dates.some(d => d.id === window.appState.activeDateId) ||
-                    !window.appState.baseDate || isNaN(window.appState.baseDate.getTime())) {
-                    
-                    console.log('init.js: дата не активирована, вызываем активацию вручную...');
-                    
-                    // Находим дефолтную дату
-                    const defaultDateId = 's25';
-                    const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
-                    
-                    if (defaultDate && window.dates && window.dates.setActiveDate) {
-                        console.log('init.js: активируем дефолтную дату', defaultDateId);
-                        window.dates.setActiveDate(defaultDateId);
-                    } else if (window.appState.data.dates && window.appState.data.dates.length > 0) {
-                        // Берем первую дату
-                        const firstDate = window.appState.data.dates[0];
-                        console.log('init.js: активируем первую дату', firstDate.id);
-                        window.dates.setActiveDate(firstDate.id);
-                    }
-                }
-            }, 500); // Даем время на полную инициализацию
-            
-        }, 150); // Увеличиваем задержку для загрузки всех модулей
+        }, 150);
         
     } catch (error) {
         console.error('ОШИБКА при инициализации:', error);

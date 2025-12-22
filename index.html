@@ -13,10 +13,11 @@
         <div class="warning-box">
             <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
             <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
-            <div class="warning-text" id="browserInfoWarning" style="min-height: 20px;">Загрузка информации о браузере...</div>
-            <div class="warning-checkbox">
-                <input type="checkbox" id="dontAskAgain">
-                <label for="dontAskAgain">Больше не спрашивать</label>
+            <!-- ОТДЕЛЬНЫЕ СТРОКИ ДЛЯ РАЗНОЙ ИНФОРМАЦИИ -->
+            <div class="warning-info">
+                <div class="warning-info-item"><strong>Браузер:</strong> <span id="browserInfo">Загрузка...</span></div>
+                <div class="warning-info-item"><strong>Версия от:</strong> <span id="versionInfo">Загрузка...</span></div>
+                <div class="warning-info-item"><strong>Сегодня:</strong> <span id="todayInfo">Загрузка...</span></div>
             </div>
             <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
         </div>
@@ -104,7 +105,7 @@
                                                 <option value="dash-dot">Штрих-линия</option>
                                                 <option value="long-dash">Длинный штрих</option>
                                             </select>
-                                            <input type="color" class="color-input" id="customWaveColor" value="#666666" title="Выберите цвет">
+                                            <input type="color" class="color-input" id="customWaveColor" value="#666666" title="Выберить цвет">
                                             <button id="btnAddCustomWave" class="ui-btn">Добавить колосок</button>
                                         </div>
                                     </div>

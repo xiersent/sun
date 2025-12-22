@@ -1,5 +1,4 @@
 // optimized3/modules/dates.js
-// optimized3/modules/dates.js
 class DatesManager {
     constructor() {
         this.elements = {};
@@ -122,48 +121,45 @@ class DatesManager {
                 throw new Error('Некорректная дата в объекте');
             }
             
-            // ВАЖНОЕ ИСПРАВЛЕНИЕ: Устанавливаем обе даты - и baseDate и currentDate
+            // ВАЖНОЕ ИСПРАВЛЕНИЕ: Устанавливаем только базовую дату для расчетов
+            // НЕ меняем текущую дату визора
             window.appState.baseDate = new Date(date);
-            window.appState.currentDate = new Date(date); // Устанавливаем currentDate такую же как baseDate
-            console.log('DatesManager: установлена базовая дата:', dateObj.date, 'и текущая дата:', date);
+            
+            console.log('DatesManager: установлена базовая дата:', dateObj.date, 
+                        'текущая дата визора осталась:', window.appState.currentDate);
+            
+            this.recalculateCurrentDay();
+            
+            // Пересоздаем grid и обновляем волны (они пересчитаются относительно новой базовой даты)
+            if (window.grid && window.grid.createGrid) {
+                window.grid.createGrid();
+            }
+            
+            if (window.grid && window.grid.updateCenterDate) {
+                window.grid.updateCenterDate();
+                window.grid.updateGridNotesHighlight();
+            }
+            
+            if (window.waves && window.waves.updatePosition) {
+                window.waves.updatePosition();
+            }
+            
+            window.appState.save();
+            
+            // Обновляем UI
+            if (window.dataManager && window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            }
+            
+            console.log('DatesManager: активная дата установлена, графики пересчитаны относительно новой базы');
+            
         } catch (error) {
             console.error('Error setting active date:', error);
             window.appState.baseDate = new Date();
             window.appState.currentDate = new Date();
+            this.recalculateCurrentDay();
+            window.appState.save();
         }
-        
-        this.recalculateCurrentDay();
-        
-        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Гарантированно обновляем ВСЕ компоненты
-        if (window.grid && window.grid.createGrid) {
-            window.grid.createGrid();
-        }
-        if (window.grid && window.grid.updateCenterDate) {
-            window.grid.updateCenterDate();
-        }
-        if (window.grid && window.grid.updateGridNotesHighlight) {
-            window.grid.updateGridNotesHighlight();
-        }
-        if (window.waves && window.waves.updatePosition) {
-            window.waves.updatePosition();
-        }
-        
-        window.appState.save();
-        
-        // Обновляем UI
-        if (window.dataManager && window.dataManager.updateDateList) {
-            window.dataManager.updateDateList();
-        }
-        
-        // ОБНОВЛЯЕМ КНОПКУ "СЕГОДНЯ"
-        this.updateTodayButton();
-        
-        // ОБНОВЛЯЕМ ПОЛЕ ВВОДА ДАТЫ
-        if (this.elements.mainDateInput) {
-            this.elements.mainDateInput.value = window.dom.formatDateForInput(window.appState.currentDate);
-        }
-        
-        console.log('DatesManager: активная дата установлена успешно, currentDay:', window.appState.currentDay);
     }
     
     recalculateCurrentDay() {

@@ -135,7 +135,7 @@ class ImportExportManager {
                                     data.groups.push({
                                         id: '120-waves-group',
                                         name: '120 колосков',
-                                        enabled: true,
+                                        enabled: false,
                                         waves: waves120Ids,
                                         styleEnabled: true,
                                         styleBold: false,
@@ -162,7 +162,7 @@ class ImportExportManager {
                                     data.groups.push({
                                         id: '31-waves-group',
                                         name: '31 колосок',
-                                        enabled: true,
+                                        enabled: false,
                                         waves: waves31Ids,
                                         styleEnabled: true,
                                         styleBold: false,
