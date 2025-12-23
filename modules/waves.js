@@ -311,37 +311,47 @@ class WavesManager {
     deleteWave(waveId) {
         if (!confirm('Уничтожить этот колосок?')) return;
         
+        // Приводим waveId к строке для сравнения
+        const waveIdStr = String(waveId);
+        
         // Перед удалением запомним группы, в которых была эта волна
         const affectedGroups = [];
         window.appState.data.groups.forEach(group => {
-            if (group.waves && group.waves.some(w => String(w) === String(waveId))) {
+            if (group.waves && group.waves.some(w => String(w) === waveIdStr)) {
                 affectedGroups.push(group.id);
             }
         });
         
-        const wave = window.appState.data.waves.find(w => w.id === waveId);
+        // Ищем волну с приведением типов
+        const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
+        
         if (wave) {
             window.appState.data.groups.forEach(group => {
-                group.waves = group.waves.filter(w => {
-                    const wStr = String(w);
-                    const waveIdStr = String(waveId);
-                    return wStr !== waveIdStr;
-                });
+                if (group.waves) {
+                    group.waves = group.waves.filter(w => {
+                        const wStr = String(w);
+                        return wStr !== waveIdStr;
+                    });
+                }
             });
         }
         
-        window.appState.data.waves = window.appState.data.waves.filter(wave => wave.id !== waveId);
-        delete window.appState.waveVisibility[waveId];
-        delete window.appState.waveBold[waveId];
-        delete window.appState.waveCornerColor[waveId];
-        delete window.appState.waveOriginalColors[waveId];
-        delete window.appState.periods[waveId];
+        // Удаляем саму волну с приведением типов
+        window.appState.data.waves = window.appState.data.waves.filter(wave => {
+            return String(wave.id) !== waveIdStr;
+        });
         
-        const waveContainer = this.waveContainers[waveId];
+        delete window.appState.waveVisibility[waveIdStr];
+        delete window.appState.waveBold[waveIdStr];
+        delete window.appState.waveCornerColor[waveIdStr];
+        delete window.appState.waveOriginalColors[waveIdStr];
+        delete window.appState.periods[waveIdStr];
+        
+        const waveContainer = this.waveContainers[waveIdStr];
         if (waveContainer) {
             waveContainer.remove();
-            delete this.waveContainers[waveId];
-            delete this.wavePaths[waveId];
+            delete this.waveContainers[waveIdStr];
+            delete this.wavePaths[waveIdStr];
         }
         
         this.updatePosition();
@@ -360,7 +370,8 @@ class WavesManager {
     updateCornerSquareColors() {
         let activeColor = 'red';
         window.appState.data.waves.forEach(wave => {
-            if (window.appState.waveCornerColor[wave.id]) {
+            const waveIdStr = String(wave.id);
+            if (window.appState.waveCornerColor[waveIdStr]) {
                 activeColor = wave.color;
             }
         });
@@ -476,10 +487,10 @@ class WavesManager {
         }
         
         group.waves.forEach(waveId => {
+            const waveIdStr = String(waveId);
             const wave = window.appState.data.waves.find(w => {
-                const wId = String(w.id);
-                const searchId = String(waveId);
-                return wId === searchId;
+                const wIdStr = String(w.id);
+                return wIdStr === waveIdStr;
             });
             
             if (wave) {

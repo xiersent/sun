@@ -1,5 +1,4 @@
 // optimized3/modules/unifiedListManager.js
-// optimized3/modules/unifiedListManager.js
 class UnifiedListManager {
     constructor() {
         this.templates = {
@@ -10,40 +9,102 @@ class UnifiedListManager {
         this.debug = false;
         this.templateCache = {};
         this.templatesLoaded = false;
-        this.initTemplates();
+        
+        // Добавляем Promise для отслеживания загрузки
+        this.templatesLoadPromise = null;
     }
     
-    async initTemplates() {
-        try {
-            const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template'];
-            
-            for (const templateId of templateIds) {
-                const templateElement = document.getElementById(templateId);
-                if (templateElement && templateElement.text) {
-                    this.templateCache[templateId] = templateElement.text;
-                    console.log(`Загружен inline шаблон: ${templateId}`);
-                } else {
-                    // Загружаем из файла
-                    const url = `templates/${templateId.replace('-template', '')}.ejs`;
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        const templateText = await response.text();
-                        this.templateCache[templateId] = templateText;
-                        console.log(`Загружен файловый шаблон: ${templateId} из ${url}`);
-                    } else {
-                        console.error(`Не удалось загрузить шаблон ${templateId} из ${url}: ${response.status}`);
-                    }
-                }
-            }
-            
-            this.templatesLoaded = true;
-            console.log('Все шаблоны загружены');
-            
-        } catch (error) {
-            console.error('Ошибка загрузки шаблонов:', error);
-            this.templatesLoaded = true;
-            // Без fallback - просто оставляем шаблоны пустыми
+    // ЗАМЕНА: initTemplates теперь возвращает Promise
+    initTemplates() {
+        // Если уже загружено, возвращаем выполненный Promise
+        if (this.templatesLoaded) {
+            return Promise.resolve();
         }
+        
+        // Если загрузка уже идет, возвращаем существующий Promise
+        if (this.templatesLoadPromise) {
+            return this.templatesLoadPromise;
+        }
+        
+        // Создаем новый Promise для загрузки
+        this.templatesLoadPromise = new Promise(async (resolve, reject) => {
+            try {
+                const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template'];
+                let loadedCount = 0;
+                
+                // Параллельная загрузка всех шаблонов
+                const loadPromises = templateIds.map(async (templateId) => {
+                    try {
+                        const templateElement = document.getElementById(templateId);
+                        if (templateElement && templateElement.text) {
+                            this.templateCache[templateId] = templateElement.text;
+                            console.log(`Загружен inline шаблон: ${templateId}`);
+                            loadedCount++;
+                            return;
+                        }
+                        
+                        // Загружаем из файла только если нет inline шаблона
+                        const url = `templates/${templateId.replace('-template', '')}.ejs`;
+                        console.log(`Попытка загрузки шаблона из файла: ${url}`);
+                        
+                        // Добавляем таймаут для предотвращения зависания
+                        const timeoutPromise = new Promise((_, timeoutReject) => {
+                            setTimeout(() => timeoutReject(new Error(`Таймаут загрузки шаблона: ${templateId}`)), 3000);
+                        });
+                        
+                        const fetchPromise = fetch(url);
+                        
+                        const response = await Promise.race([fetchPromise, timeoutPromise]);
+                        
+                        if (response.ok) {
+                            const templateText = await response.text();
+                            this.templateCache[templateId] = templateText;
+                            console.log(`Загружен файловый шаблон: ${templateId} из ${url}`);
+                            loadedCount++;
+                        } else {
+                            console.error(`Не удалось загрузить шаблон ${templateId} из ${url}: ${response.status}`);
+                            // Не прерываем всю загрузку, продолжаем с остальными
+                        }
+                    } catch (error) {
+                        console.error(`Ошибка загрузки шаблона ${templateId}:`, error);
+                        // Продолжаем загрузку других шаблонов
+                    }
+                });
+                
+                // Ждем загрузки всех шаблонов
+                await Promise.allSettled(loadPromises);
+                
+                console.log(`Загружено шаблонов: ${loadedCount} из ${templateIds.length}`);
+                
+                // Даже если не все загрузились, помечаем как загруженные
+                this.templatesLoaded = true;
+                resolve();
+                
+            } catch (error) {
+                console.error('Критическая ошибка загрузки шаблонов:', error);
+                // Даже при ошибке помечаем как загруженные, чтобы приложение не зависло
+                this.templatesLoaded = true;
+                resolve(); // Разрешаем, а не отклоняем, чтобы приложение продолжало работать
+            }
+        });
+        
+        return this.templatesLoadPromise;
+    }
+    
+    // ДОБАВЛЯЕМ: Метод для безопасного рендеринга с ожиданием загрузки
+    async renderListWithWait(containerId, items, itemType) {
+        // Если шаблоны еще не загружены, ждем
+        if (!this.templatesLoaded) {
+            console.log(`Шаблоны не загружены, ожидание загрузки для ${containerId}...`);
+            try {
+                await this.initTemplates();
+            } catch (error) {
+                console.error('Ошибка при ожидании загрузки шаблонов:', error);
+            }
+        }
+        
+        // Теперь рендерим
+        return this.renderList(containerId, items, itemType);
     }
     
     getTemplate(templateId) {
@@ -64,6 +125,9 @@ class UnifiedListManager {
     prepareDateData(dateObj, index) {
         const dateObjDate = new Date(dateObj.date);
         const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObjDate, window.appState.currentDate);
+        const activeDateIdStr = window.appState.activeDateId ? String(window.appState.activeDateId) : null;
+        const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
+        const dateObjIdStr = String(dateObj.id);
         
         return {
             id: dateObj.id,
@@ -72,14 +136,15 @@ class UnifiedListManager {
             formattedDate: window.dom.formatDate(dateObjDate),
             dateForInput: window.dom.formatDateForInput(dateObjDate),
             yearsFromCurrent: yearsFromCurrent,
-            active: dateObj.id === window.appState.activeDateId,
-            editing: window.appState.editingDateId === dateObj.id,
+            active: activeDateIdStr === dateObjIdStr,
+            editing: editingDateIdStr === dateObjIdStr,
             index: index
         };
     }
     
     prepareWaveData(wave, index) {
         const waveIdStr = String(wave.id);
+        const editingWaveIdStr = window.appState.editingWaveId ? String(window.appState.editingWaveId) : null;
         
         return {
             id: wave.id,
@@ -91,7 +156,7 @@ class UnifiedListManager {
             description: window.dom.getWaveDescription(wave.type),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
             bold: window.appState.waveBold[waveIdStr] || false,
-            editing: window.appState.editingWaveId === wave.id,
+            editing: editingWaveIdStr === waveIdStr,
             index: index
         };
     }
@@ -138,6 +203,9 @@ class UnifiedListManager {
             return this.prepareWaveData(wave, waveIndex);
         });
         
+        const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
+        const groupIdStr = String(originalGroup.id);
+        
         return {
             id: originalGroup.id,
             name: originalGroup.name,
@@ -148,7 +216,7 @@ class UnifiedListManager {
             expanded: originalGroup.expanded !== undefined ? originalGroup.expanded : false,
             children: childrenData,
             index: index,
-            editing: window.appState.editingGroupId === originalGroup.id
+            editing: editingGroupIdStr === groupIdStr
         };
     }
     
@@ -159,13 +227,16 @@ class UnifiedListManager {
             return;
         }
         
+        // Если шаблоны не загружены (должно быть невозможно после renderListWithWait)
         if (!this.templatesLoaded) {
             container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
+            console.warn(`Шаблоны не загружены для рендеринга ${containerId}, отображаем сообщение`);
             
+            // Пытаемся загрузить и перерендерить
             setTimeout(() => {
-                if (this.templatesLoaded) {
+                this.initTemplates().then(() => {
                     this.renderList(containerId, items, itemType);
-                }
+                });
             }, 100);
             return;
         }
@@ -191,6 +262,7 @@ class UnifiedListManager {
         const templateText = this.getTemplate(templateId);
         if (!templateText || templateText.includes('Шаблон не загружен')) {
             container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
+            console.error(`Шаблон ${templateId} не найден в кэше`);
             return;
         }
         
@@ -272,35 +344,46 @@ class UnifiedListManager {
         console.log('UnifiedListManager: обработка клика редактирования:', type, id);
         
         if (type === 'date') {
+            const idStr = String(id);
+            const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
+            
             window.appState.data.dates.forEach(date => {
-                if (date.id === id) {
-                    window.appState.editingDateId = window.appState.editingDateId === id ? null : id;
+                if (String(date.id) === idStr) {
+                    window.appState.editingDateId = editingDateIdStr === idStr ? null : id;
                 }
             });
             this.updateDatesList();
         } else if (type === 'wave') {
+            const idStr = String(id);
+            const editingWaveIdStr = window.appState.editingWaveId ? String(window.appState.editingWaveId) : null;
+            
             window.appState.data.waves.forEach(wave => {
-                if (wave.id === id) {
-                    window.appState.editingWaveId = window.appState.editingWaveId === id ? null : id;
+                if (String(wave.id) === idStr) {
+                    window.appState.editingWaveId = editingWaveIdStr === idStr ? null : id;
                 }
             });
             this.updateWavesList();
         } else if (type === 'group') {
-            window.appState.editingGroupId = window.appState.editingGroupId === id ? null : id;
+            const idStr = String(id);
+            const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
+            
+            window.appState.editingGroupId = editingGroupIdStr === idStr ? null : id;
             console.log('Режим редактирования группы установлен:', id, window.appState.editingGroupId);
             window.appState.save();
             this.updateWavesList();
         }
     }
     
-    handleDeleteClick(id, type) {
+    handleDeleteClick(id, type, containerId) {
         console.log('UnifiedListManager: обработка клика удаления:', type, id);
         
         if (type === 'date') {
-            window.dates.deleteDate(id);
+            // Приводим id к строке для поиска
+            window.dates.deleteDate(String(id));
             this.updateDatesList();
         } else if (type === 'wave') {
-            window.waves.deleteWave(id);
+            // Приводим id к строке
+            window.waves.deleteWave(String(id));
             this.updateWavesList();
         } else if (type === 'group') {
             window.dates.deleteGroup(id);
@@ -314,7 +397,8 @@ class UnifiedListManager {
         if (type === 'date') {
             this.saveDateChanges(id);
         } else if (type === 'wave') {
-            this.saveWaveChanges(id);
+            // Передаем id как строку
+            this.saveWaveChanges(String(id));
         } else if (type === 'group') {
             this.saveGroupChanges(id);
         }
@@ -338,7 +422,7 @@ class UnifiedListManager {
     saveDateChanges(dateId) {
         console.log('UnifiedListManager: сохранение изменений даты:', dateId);
         
-        const dateObj = window.appState.data.dates.find(d => d.id === dateId);
+        const dateObj = window.appState.data.dates.find(d => String(d.id) === String(dateId));
         if (!dateObj) {
             window.appState.editingDateId = null;
             this.updateDatesList();
@@ -376,7 +460,7 @@ class UnifiedListManager {
             dateObj.date = newDate.toISOString();
             window.appState.editingDateId = null;
             
-            if (window.appState.activeDateId === dateId) {
+            if (String(window.appState.activeDateId) === String(dateId)) {
                 window.appState.baseDate = new Date(newDate);
                 window.dates.recalculateCurrentDay();
                 window.waves.updatePosition();
@@ -395,7 +479,7 @@ class UnifiedListManager {
     saveWaveChanges(waveId) {
         console.log('UnifiedListManager: сохранение изменений волны:', waveId);
         
-        const wave = window.appState.data.waves.find(w => w.id === waveId);
+        const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
         if (!wave) {
             window.appState.editingWaveId = null;
             this.updateWavesList();
@@ -447,7 +531,7 @@ class UnifiedListManager {
     saveGroupChanges(groupId) {
         console.log('UnifiedListManager: сохранение изменений группы:', groupId);
         
-        const group = window.appState.data.groups.find(g => g.id === groupId);
+        const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
             window.appState.editingGroupId = null;
             this.updateWavesList();
@@ -534,7 +618,7 @@ class UnifiedListManager {
     updateGroupStats(groupId) {
         console.log('UnifiedListManager: обновление статистики группы:', groupId);
         
-        const group = window.appState.data.groups.find(g => g.id === groupId);
+        const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
             console.warn('Группа не найдена:', groupId);
             return;
@@ -581,6 +665,14 @@ class UnifiedListManager {
         }
         
         console.log('Статистика обновлена:', groupId, 'включено:', enabledCount, 'всего:', waveCount);
+    }
+    
+    // Добавляем метод для принудительной перезагрузки
+    async reloadTemplates() {
+        this.templatesLoaded = false;
+        this.templatesLoadPromise = null;
+        await this.initTemplates();
+        console.log('Шаблоны перезагружены');
     }
 }
 

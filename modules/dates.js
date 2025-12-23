@@ -71,16 +71,18 @@ class DatesManager {
     deleteDate(dateId) {
         if (!confirm('Уничтожить эту дату?')) return;
         
-        const dateIndex = window.appState.data.dates.findIndex(d => d.id === dateId);
+        // Приводим dateId к строке для поиска
+        const dateIdStr = String(dateId);
+        const dateIndex = window.appState.data.dates.findIndex(d => String(d.id) === dateIdStr);
         if (dateIndex === -1) return;
         
         window.appState.data.dates.splice(dateIndex, 1);
         
-        if (window.appState.editingDateId === dateId) {
+        if (String(window.appState.editingDateId) === dateIdStr) {
             window.appState.editingDateId = null;
         }
         
-        if (window.appState.activeDateId === dateId) {
+        if (String(window.appState.activeDateId) === dateIdStr) {
             if (window.appState.data.dates.length > 0) {
                 this.setActiveDate(window.appState.data.dates[0].id);
             } else {
@@ -98,7 +100,8 @@ class DatesManager {
     }
     
     updateDate(dateId, updates) {
-        const date = window.appState.data.dates.find(d => d.id === dateId);
+        const dateIdStr = String(dateId);
+        const date = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
         if (date) {
             Object.assign(date, updates);
             window.appState.save();
@@ -108,7 +111,9 @@ class DatesManager {
     setActiveDate(dateId) {
         console.log('DatesManager: установка активной даты:', dateId);
         
-        const dateObj = window.appState.data.dates.find(d => d.id === dateId);
+        // Приводим dateId к строке для поиска
+        const dateIdStr = String(dateId);
+        const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
         if (!dateObj) {
             console.error('DatesManager: дата не найдена:', dateId);
             return;
@@ -234,7 +239,8 @@ class DatesManager {
     }
     
     deleteNote(noteId) {
-        window.appState.data.notes = window.appState.data.notes.filter(n => String(n.id) !== String(noteId));
+        const noteIdStr = String(noteId);
+        window.appState.data.notes = window.appState.data.notes.filter(n => String(n.id) !== noteIdStr);
         window.appState.save();
     }
     
@@ -273,7 +279,8 @@ class DatesManager {
     deleteGroup(groupId) {
         if (!confirm(`Уничтожить группу? Колоски будут перемещены в группу по умолчанию.`)) return;
         
-        const group = window.appState.data.groups.find(g => g.id === groupId);
+        const groupIdStr = String(groupId);
+        const group = window.appState.data.groups.find(g => String(g.id) === groupIdStr);
         if (!group) return;
         
         const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
@@ -286,7 +293,7 @@ class DatesManager {
             });
         }
         
-        window.appState.data.groups = window.appState.data.groups.filter(g => g.id !== groupId);
+        window.appState.data.groups = window.appState.data.groups.filter(g => String(g.id) !== groupIdStr);
         window.appState.save();
         
         return true;

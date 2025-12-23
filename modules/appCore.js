@@ -75,7 +75,7 @@ class AppCore {
         this.initializeApp();
     }
     
-    initializeApp() {
+    async initializeApp() {
         // Проверяем мобильное устройство
         const isMobile = this.isMobileDevice();
         
@@ -100,20 +100,49 @@ class AppCore {
             document.body.classList.add('names-mode');
         }
         
-        // Инициализируем волны и сетку
-        if (window.waves && window.waves.init) {
-            window.waves.init();
+        // ВАЖНОЕ ИЗМЕНЕНИЕ: Ждем загрузки шаблонов перед рендерингом UI
+        console.log('AppCore: ожидание загрузки шаблонов...');
+        
+        if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
+            try {
+                // Начинаем загрузку шаблонов
+                const templatesPromise = window.unifiedListManager.initTemplates();
+                
+                // Пока шаблоны грузятся, инициализируем остальные компоненты
+                if (window.waves && window.waves.init) {
+                    window.waves.init();
+                }
+                
+                if (window.grid && window.grid.createGrid) {
+                    window.grid.createGrid();
+                }
+                
+                // Ждем завершения загрузки шаблонов
+                await templatesPromise;
+                console.log('AppCore: шаблоны загружены успешно');
+                
+            } catch (error) {
+                console.error('AppCore: ошибка загрузки шаблонов:', error);
+                // Продолжаем работу даже с ошибкой
+            }
         }
         
-        if (window.grid && window.grid.createGrid) {
-            window.grid.createGrid();
-        }
+        // Теперь рендерим UI с загруженными шаблонами
+        console.log('AppCore: рендеринг UI...');
         
-        // Обновление UI через единый менеджер списков
         if (window.dataManager) {
-            window.dataManager.updateDateList();
-            window.dataManager.updateWavesGroups();
-            window.dataManager.updateNotesList();
+            // Используем асинхронные вызовы
+            if (window.dataManager.updateDateList) {
+                await window.dataManager.updateDateList();
+            }
+            
+            if (window.dataManager.updateWavesGroups) {
+                await window.dataManager.updateWavesGroups();
+            }
+            
+            if (window.dataManager.updateNotesList) {
+                window.dataManager.updateNotesList();
+            }
         }
         
         // Устанавливаем правильный фон графика
@@ -127,7 +156,6 @@ class AppCore {
                 graphContainer.classList.add('dark-mode');
             }
             
-            // Устанавливаем режим серости для графика
             if (window.appState.graphGrayMode) {
                 graphContainer.classList.add('graph-gray-mode');
             } else {
@@ -160,6 +188,8 @@ class AppCore {
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
         }
+        
+        console.log('AppCore: инициализация завершена');
     }
     
     // Метод для получения версии из файла

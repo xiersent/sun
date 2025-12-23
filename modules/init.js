@@ -52,9 +52,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.dataManager = new DataManager();
         }
         
+        // 3. UnifiedListManager создаем ПОСЛЕ DataManager
         if (!window.unifiedListManager && typeof UnifiedListManager !== 'undefined') {
             console.log('Создаем UnifiedListManager...');
             window.unifiedListManager = new UnifiedListManager();
+            
+            // НАЧИНАЕМ загрузку шаблонов как можно раньше
+            console.log('Начинаем предварительную загрузку шаблонов...');
+            window.unifiedListManager.initTemplates().catch(err => {
+                console.error('Предварительная загрузка шаблонов не удалась:', err);
+            });
         }
         
         if (!window.importExport && typeof ImportExportManager !== 'undefined') {
@@ -67,13 +74,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.intersectionManager = new IntersectionManager();
         }
         
-        // 3. EventManager создаем вручную
+        // 4. EventManager создаем вручную
         if (!window.eventManager && typeof EventManager !== 'undefined') {
             console.log('Создаем EventManager...');
             window.eventManager = new EventManager();
         }
         
-        // 4. Немедленно запускаем инициализацию приложения
+        // 5. Немедленно запускаем асинхронную инициализацию приложения
         if (window.appCore && window.appCore.init) {
             console.log('Запускаем AppCore.init()...');
             window.appCore.init();
@@ -93,6 +100,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('appState.currentDay:', window.appState?.currentDay);
         console.log('appState.baseDate:', window.appState?.baseDate);
         console.log('appState.currentDate:', window.appState?.currentDate);
+        
+        // Проверяем состояние шаблонов
+        if (window.unifiedListManager) {
+            console.log('Шаблоны загружены:', window.unifiedListManager.templatesLoaded);
+            console.log('Количество загруженных шаблонов:', Object.keys(window.unifiedListManager.templateCache).length);
+        }
         
         // Если currentDay не установлен, устанавливаем вручную
         if (window.appState && (window.appState.currentDay === undefined || 
@@ -114,7 +127,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentDayElement) {
             console.log('DOM элемент currentDay найден, значение:', currentDayElement.textContent);
             
-            // Если в DOM 0, а в appState есть значение, обновляем DOM
             if (currentDayElement.textContent === '0' && 
                 window.appState && 
                 window.appState.currentDay !== 0) {

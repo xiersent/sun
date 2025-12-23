@@ -216,6 +216,9 @@ class AppState {
                 
                 this.data.waves.forEach(wave => {
                     const waveIdStr = String(wave.id);
+					if (typeof wave.id === 'number') {
+						wave.id = waveIdStr;
+					}
                     if (waveIdStr.startsWith('wave-31-')) {
                         const match = waveIdStr.match(/wave-31-(\d+)/);
                         if (match) {

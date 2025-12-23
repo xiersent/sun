@@ -22,7 +22,7 @@
                                title="Жирность">
                         
                         <div class="wave-color-preview-small" 
-                             <%= data.color ? 'style="background-color: ' + data.color + ';"' : '' %> 
+                             style="background-color: <%= data.color || '#666666' %>;" 
                              data-id="<%= data.id %>" 
                              title="Изменить цвет"></div>
                     </div>

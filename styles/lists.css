@@ -152,7 +152,6 @@
 }
 
 .list-item__edit-label {
-    width: 60px;
     font-weight: 400;
     flex-shrink: 0;
     font-size: var(--font-size-sm);
