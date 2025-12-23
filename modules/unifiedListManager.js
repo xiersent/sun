@@ -156,6 +156,7 @@ class UnifiedListManager {
             description: window.dom.getWaveDescription(wave.type),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
             bold: window.appState.waveBold[waveIdStr] || false,
+            cornerColor: window.appState.waveCornerColor[waveIdStr] || false, // ДОБАВЛЕНО
             editing: editingWaveIdStr === waveIdStr,
             index: index
         };

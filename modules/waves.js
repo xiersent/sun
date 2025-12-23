@@ -369,15 +369,64 @@ class WavesManager {
     
     updateCornerSquareColors() {
         let activeColor = 'red';
+        let hasActiveWave = false;
+        
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             if (window.appState.waveCornerColor[waveIdStr]) {
                 activeColor = wave.color;
+                hasActiveWave = true;
             }
         });
+        
         document.querySelectorAll('.corner-square').forEach(square => {
-            square.style.backgroundColor = activeColor;
+            if (hasActiveWave) {
+                square.style.backgroundColor = activeColor;
+            } else {
+                square.style.backgroundColor = 'red'; // стандартный цвет
+            }
         });
+    }
+    
+    // НОВЫЙ МЕТОД: Установка цвета углов для волны (эксклюзивная логика)
+    setWaveCornerColor(waveId, enabled) {
+        const waveIdStr = String(waveId);
+        
+        // Сначала сбросить все остальные
+        if (enabled) {
+            window.appState.data.waves.forEach(wave => {
+                const otherWaveIdStr = String(wave.id);
+                if (otherWaveIdStr !== waveIdStr) {
+                    window.appState.waveCornerColor[otherWaveIdStr] = false;
+                }
+            });
+        }
+        
+        // Установить для текущей волны
+        window.appState.waveCornerColor[waveIdStr] = enabled;
+        
+        // Обновить UI
+        this.updateCornerSquareColors();
+        
+        // Обновить чекбоксы в DOM
+        document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
+            const checkboxWaveIdStr = String(checkbox.dataset.id);
+            if (checkboxWaveIdStr === waveIdStr) {
+                checkbox.checked = enabled;
+            } else {
+                checkbox.checked = false;
+            }
+        });
+        
+        // Сохранить состояние
+        window.appState.save();
+        
+        // Обновить список волн, если нужно
+        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+            window.unifiedListManager.updateWavesList();
+        }
+        
+        console.log(`Окраска краев для волны ${waveId}: ${enabled ? 'включена' : 'выключена'}`);
     }
     
     calculateIntersections(basePeriod, baseAmplitude, precision) {

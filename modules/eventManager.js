@@ -195,6 +195,18 @@ class EventManager {
             return;
         }
         
+        // ДОБАВЛЕНО: обработчик чекбокса окраски краев
+        if (target.classList.contains('wave-corner-color-check')) {
+            e.stopPropagation();
+            const waveId = target.dataset.id;
+            console.log('EventManager: изменение окраски краев волной:', waveId, target.checked);
+            
+            if (waveId && window.waves) {
+                window.waves.setWaveCornerColor(waveId, target.checked);
+            }
+            return;
+        }
+        
         if (target.classList.contains('wave-group-toggle')) {
             e.stopPropagation();
             const groupId = target.dataset.groupId;

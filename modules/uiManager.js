@@ -116,12 +116,35 @@ class UIManager {
     }
     
     resetCorners() {
+        // Сбросить все флаги окраски углов
         window.appState.data.waves.forEach(wave => {
-            window.appState.waveCornerColor[wave.id] = false;
+            const waveIdStr = String(wave.id);
+            window.appState.waveCornerColor[waveIdStr] = false;
         });
-        window.waves.updateCornerSquareColors();
-        window.dataManager.updateWavesGroups();
+        
+        // Вернуть стандартный цвет углов
+        this.updateCornerSquareColors();
+        
+        // Обновить UI
+        if (window.dataManager && window.dataManager.updateWavesGroups) {
+            window.dataManager.updateWavesGroups();
+        }
+        
+        // Обновить чекбоксы в DOM
+        document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
         window.appState.save();
+        
+        console.log('Цвет краев сброшен к стандартному');
+    }
+    
+    // Вспомогательный метод для обновления цвета углов
+    updateCornerSquareColors() {
+        document.querySelectorAll('.corner-square').forEach(square => {
+            square.style.backgroundColor = 'red'; // стандартный цвет
+        });
     }
     
     flipHorizontal() {

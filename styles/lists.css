@@ -221,6 +221,17 @@
     margin-right: 8px;
 }
 
+/* ДОБАВЛЕНО: Стили для чекбокса окраски краев */
+.list-item--wave .wave-corner-color-check {
+    margin-left: 2px;
+    margin-right: 2px;
+    flex-shrink: 0;
+}
+
+.list-item--wave .wave-corner-color-check:checked {
+    accent-color: #ff6b6b; /* Яркий цвет для активного состояния */
+}
+
 .list-item--wave .wave-period-badge {
     background: #e0e0e0;
     padding: 2px 6px;
@@ -322,6 +333,17 @@
     border: 1px solid #ccc;
     border-radius: 2px;
     cursor: pointer;
+}
+
+/* Чекбокс окраски краев внутри группы */
+.group-children .wave-corner-color-check {
+    margin-left: 1px;
+    margin-right: 1px;
+    flex-shrink: 0;
+}
+
+.group-children .wave-corner-color-check:checked {
+    accent-color: #ff6b6b;
 }
 
 /* Заметка */
@@ -446,5 +468,15 @@
         font-size: var(--font-size-xs);
         min-width: 120px;
         text-align: right;
+    }
+    
+    /* Мобильная адаптация для элементов управления волн */
+    .wave-controls-inline {
+        gap: 2px;
+    }
+    
+    .wave-corner-color-check {
+        width: 12px;
+        height: 12px;
     }
 }

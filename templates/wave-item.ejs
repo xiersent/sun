@@ -25,6 +25,12 @@
                              style="background-color: <%= data.color || '#666666' %>;" 
                              data-id="<%= data.id %>" 
                              title="Изменить цвет"></div>
+                        
+                        <!-- Чекбокс окраски краев - ДОБАВЛЕНО -->
+                        <input type="checkbox" class="wave-corner-color-check" 
+                               <%= data.cornerColor ? 'checked' : '' %> 
+                               data-id="<%= data.id %>" 
+                               title="Окрасить края в цвет колоска">
                     </div>
                     <div class="list-item__title-container">
                         <div class="list-item__title">
