@@ -298,6 +298,8 @@ textarea {
     position: absolute;
     color: var(--text-secondary);
     z-index: 8;
+	pointer-events: none;
+	user-select: none;
 }
 
 .weekday-label {
