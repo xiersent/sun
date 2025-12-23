@@ -573,43 +573,46 @@ class EventManager {
         }
     }
     
-    updateGroupElementStats(groupElement, group) {
-        const groupId = group.id;
-        
-        // Подсчитать включенные волны
-        let enabledCount = 0;
-        if (group.waves && Array.isArray(group.waves)) {
-            group.waves.forEach(waveId => {
-                const waveIdStr = String(waveId);
-                if (window.appState.waveVisibility[waveIdStr] !== false) {
-                    enabledCount++;
-                }
-            });
-        }
-        
-        // Обновить текст счетчика в DOM
-        const statsElement = groupElement.querySelector('.list-item__value .group-stats');
-        if (statsElement) {
-            const waveCount = group.waves ? group.waves.length : 0;
-            
-            if (enabledCount > 0) {
-                statsElement.innerHTML = `
-                    <span class="group-enabled-count" title="Включено колосков">
-                        Включено: ${enabledCount}
-                    </span>
-                    <span class="group-total-count" title="Всего колосков">
-                        Колосков: ${waveCount}
-                    </span>
-                `;
-            } else {
-                statsElement.innerHTML = `
-                    <span class="group-total-count">
-                        Колосков: ${waveCount}
-                    </span>
-                `;
-            }
-        }
-    }
+
+	// В eventManager.js, метод updateGroupElementStats:
+	updateGroupElementStats(groupElement, group) {
+		const groupId = group.id;
+		
+		// Подсчитать включенные волны
+		let enabledCount = 0;
+		const waveCount = group.waves ? group.waves.length : 0; // Определяем waveCount здесь
+		
+		if (group.waves && Array.isArray(group.waves)) {
+			group.waves.forEach(waveId => {
+				const waveIdStr = String(waveId);
+				if (window.appState.waveVisibility[waveIdStr] !== false) {
+					enabledCount++;
+				}
+			});
+		}
+		
+		// Обновить текст счетчика в DOM
+		const statsElement = groupElement.querySelector('.list-item__value .group-stats');
+		if (statsElement) {
+			if (enabledCount > 0) {
+				statsElement.innerHTML = `
+					<span class="group-enabled-count" title="Включено колосков">
+						Включено: ${enabledCount}
+					</span>
+					<span class="group-total-count" title="Всего колосков">
+						Колосков: ${waveCount}
+					</span>
+				`;
+			} else {
+				statsElement.innerHTML = `
+					<span class="group-total-count">
+						Колосков: ${waveCount}
+					</span>
+				`;
+			}
+		}
+	}
+
 }
 
 window.eventManager = new EventManager();

@@ -221,114 +221,123 @@ class UnifiedListManager {
         };
     }
     
-    renderList(containerId, items, itemType) {
-        const container = document.getElementById(containerId);
-        if (!container) {
-            console.error('UnifiedListManager: контейнер не найден:', containerId);
-            return;
-        }
-        
-        // Если шаблоны не загружены (должно быть невозможно после renderListWithWait)
-        if (!this.templatesLoaded) {
-            container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
-            console.warn(`Шаблоны не загружены для рендеринга ${containerId}, отображаем сообщение`);
-            
-            // Пытаемся загрузить и перерендерить
-            setTimeout(() => {
-                this.initTemplates().then(() => {
-                    this.renderList(containerId, items, itemType);
-                });
-            }, 100);
-            return;
-        }
-        
-        container.innerHTML = '';
-        
-        if (!items || items.length === 0) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'list-empty';
-            emptyMessage.textContent = this.getEmptyMessage(itemType);
-            container.appendChild(emptyMessage);
-            return;
-        }
-        
-        let templateId;
-        switch(itemType) {
-            case 'date': templateId = 'date-item-template'; break;
-            case 'wave': templateId = 'wave-item-template'; break;
-            case 'group': templateId = 'group-item-template'; break;
-            default: templateId = 'date-item-template';
-        }
-        
-        const templateText = this.getTemplate(templateId);
-        if (!templateText || templateText.includes('Шаблон не загружен')) {
-            container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
-            console.error(`Шаблон ${templateId} не найден в кэше`);
-            return;
-        }
-        
-        if (itemType === 'group') {
-            items.forEach((groupData, index) => {
-                try {
-                    const renderedGroup = ejs.render(templateText, { data: groupData });
-                    
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = renderedGroup;
-                    const groupElement = tempDiv.firstElementChild;
-                    
-                    const childrenContainer = groupElement.querySelector('.group-children');
-                    
-                    if (childrenContainer && groupData.children && groupData.children.length > 0 && groupData.expanded) {
-                        childrenContainer.innerHTML = '';
-                        
-                        groupData.children.forEach((childData, childIndex) => {
-                            try {
-                                childData.type = 'wave';
-                                const waveTemplateText = this.getTemplate('wave-item-template');
-                                const renderedChild = ejs.render(waveTemplateText, { data: childData });
-                                
-                                const childTempDiv = document.createElement('div');
-                                childTempDiv.innerHTML = renderedChild;
-                                const childElement = childTempDiv.firstElementChild;
-                                
-                                childrenContainer.appendChild(childElement);
-                            } catch (error) {
-                                const errorDiv = document.createElement('div');
-                                errorDiv.className = 'list-error';
-                                errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
-                                childrenContainer.appendChild(errorDiv);
-                            }
-                        });
-                    }
-                    
-                    container.appendChild(groupElement);
-                    
-                } catch (error) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'list-error';
-                    errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
-                    container.appendChild(errorDiv);
-                }
-            });
-        } else {
-            const renderedItems = [];
-            items.forEach((item, index) => {
-                try {
-                    const data = this.templates[itemType] ? this.templates[itemType](item, index) : item;
-                    data.type = data.type || itemType;
-                    
-                    const rendered = ejs.render(templateText, { data });
-                    renderedItems.push(rendered);
-                } catch (error) {
-                    renderedItems.push(`<div class="list-error">Ошибка рендеринга элемента: ${error.message}</div>`);
-                }
-            });
-            
-            container.innerHTML = renderedItems.join('');
-        }
-        
-        console.log('UnifiedListManager: список отрендерен в контейнере:', containerId, 'элементов:', items.length);
-    }
+	// В unifiedListManager.js, метод renderList:
+	renderList(containerId, items, itemType) {
+		const container = document.getElementById(containerId);
+		if (!container) {
+			console.error('UnifiedListManager: контейнер не найден:', containerId);
+			return;
+		}
+		
+		// Если шаблоны не загружены (должно быть невозможно после renderListWithWait)
+		if (!this.templatesLoaded) {
+			container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
+			console.warn(`Шаблоны не загружены для рендеринга ${containerId}, отображаем сообщение`);
+			
+			// Пытаемся загрузить и перерендерить
+			setTimeout(() => {
+				this.initTemplates().then(() => {
+					this.renderList(containerId, items, itemType);
+				});
+			}, 100);
+			return;
+		}
+		
+		container.innerHTML = '';
+		
+		if (!items || items.length === 0) {
+			const emptyMessage = document.createElement('div');
+			emptyMessage.className = 'list-empty';
+			emptyMessage.textContent = this.getEmptyMessage(itemType);
+			container.appendChild(emptyMessage);
+			return;
+		}
+		
+		let templateId;
+		switch(itemType) {
+			case 'date': templateId = 'date-item-template'; break;
+			case 'wave': templateId = 'wave-item-template'; break;
+			case 'group': templateId = 'group-item-template'; break;
+			default: templateId = 'date-item-template';
+		}
+		
+		const templateText = this.getTemplate(templateId);
+		if (!templateText || templateText.includes('Шаблон не загружен')) {
+			container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
+			console.error(`Шаблон ${templateId} не найден в кэше`);
+			return;
+		}
+		
+		if (itemType === 'group') {
+			items.forEach((groupData, index) => {
+				try {
+					// ИСПРАВЛЕНО: Гарантируем наличие waveCount
+					if (groupData.waveCount === undefined) {
+						groupData.waveCount = groupData.waves ? groupData.waves.length : 0;
+					}
+					if (groupData.enabledCount === undefined) {
+						groupData.enabledCount = 0;
+					}
+					
+					const renderedGroup = ejs.render(templateText, { data: groupData });
+					
+					const tempDiv = document.createElement('div');
+					tempDiv.innerHTML = renderedGroup;
+					const groupElement = tempDiv.firstElementChild;
+					
+					const childrenContainer = groupElement.querySelector('.group-children');
+					
+					if (childrenContainer && groupData.children && groupData.children.length > 0 && groupData.expanded) {
+						childrenContainer.innerHTML = '';
+						
+						groupData.children.forEach((childData, childIndex) => {
+							try {
+								childData.type = 'wave';
+								const waveTemplateText = this.getTemplate('wave-item-template');
+								const renderedChild = ejs.render(waveTemplateText, { data: childData });
+								
+								const childTempDiv = document.createElement('div');
+								childTempDiv.innerHTML = renderedChild;
+								const childElement = childTempDiv.firstElementChild;
+								
+								childrenContainer.appendChild(childElement);
+							} catch (error) {
+								const errorDiv = document.createElement('div');
+								errorDiv.className = 'list-error';
+								errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
+								childrenContainer.appendChild(errorDiv);
+							}
+						});
+					}
+					
+					container.appendChild(groupElement);
+					
+				} catch (error) {
+					const errorDiv = document.createElement('div');
+					errorDiv.className = 'list-error';
+					errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
+					container.appendChild(errorDiv);
+				}
+			});
+		} else {
+			const renderedItems = [];
+			items.forEach((item, index) => {
+				try {
+					const data = this.templates[itemType] ? this.templates[itemType](item, index) : item;
+					data.type = data.type || itemType;
+					
+					const rendered = ejs.render(templateText, { data });
+					renderedItems.push(rendered);
+				} catch (error) {
+					renderedItems.push(`<div class="list-error">Ошибка рендеринга элемента: ${error.message}</div>`);
+				}
+			});
+			
+			container.innerHTML = renderedItems.join('');
+		}
+		
+		console.log('UnifiedListManager: список отрендерен в контейнере:', containerId, 'элементов:', items.length);
+	}
     
     getEmptyMessage(type) {
         const messages = {
@@ -614,59 +623,60 @@ class UnifiedListManager {
         this.renderList('wavesList', allGroups, 'group');
     }
     
-    // НОВЫЕ МЕТОДЫ ДЛЯ ОБНОВЛЕНИЯ СТАТИСТИКИ ГРУПП
-    
-    updateGroupStats(groupId) {
-        console.log('UnifiedListManager: обновление статистики группы:', groupId);
-        
-        const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
-        if (!group) {
-            console.warn('Группа не найдена:', groupId);
-            return;
-        }
-        
-        const groupElement = document.querySelector(`.list-item--group[data-id="${groupId}"]`);
-        if (!groupElement) {
-            console.warn('Элемент группы не найден в DOM:', groupId);
-            return;
-        }
-        
-        // Подсчитать включенные волны
-        let enabledCount = 0;
-        if (group.waves && Array.isArray(group.waves)) {
-            group.waves.forEach(waveId => {
-                const waveIdStr = String(waveId);
-                if (window.appState.waveVisibility[waveIdStr] !== false) {
-                    enabledCount++;
-                }
-            });
-        }
-        
-        // Обновить текст счетчика в DOM
-        const statsElement = groupElement.querySelector('.list-item__value .group-stats');
-        if (statsElement) {
-            const waveCount = group.waves ? group.waves.length : 0;
-            
-            if (enabledCount > 0) {
-                statsElement.innerHTML = `
-                    <span class="group-enabled-count" title="Включено колосков">
-                        Включено: ${enabledCount}
-                    </span>
-                    <span class="group-total-count" title="Всего колосков">
-                        Колосков: ${waveCount}
-                    </span>
-                `;
-            } else {
-                statsElement.innerHTML = `
-                    <span class="group-total-count">
-                        Колосков: ${waveCount}
-                    </span>
-                `;
-            }
-        }
-        
-        console.log('Статистика обновлена:', groupId, 'включено:', enabledCount, 'всего:', waveCount);
-    }
+
+	updateGroupStats(groupId) {
+		console.log('UnifiedListManager: обновление статистики группы:', groupId);
+		
+		const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
+		if (!group) {
+			console.warn('Группа не найдена:', groupId);
+			return;
+		}
+		
+		const groupElement = document.querySelector(`.list-item--group[data-id="${groupId}"]`);
+		if (!groupElement) {
+			console.warn('Элемент группы не найден в DOM:', groupId);
+			return;
+		}
+		
+		// Подсчитать включенные волны
+		let enabledCount = 0;
+		const waveCount = group.waves ? group.waves.length : 0; // Определяем waveCount здесь
+		
+		if (group.waves && Array.isArray(group.waves)) {
+			group.waves.forEach(waveId => {
+				const waveIdStr = String(waveId);
+				if (window.appState.waveVisibility[waveIdStr] !== false) {
+					enabledCount++;
+				}
+			});
+		}
+		
+		// Обновить текст счетчика в DOM
+		const statsElement = groupElement.querySelector('.list-item__value .group-stats');
+		if (statsElement) {
+			if (enabledCount > 0) {
+				statsElement.innerHTML = `
+					<span class="group-enabled-count" title="Включено колосков">
+						Включено: ${enabledCount}
+					</span>
+					<span class="group-total-count" title="Всего колосков">
+						Колосков: ${waveCount}
+					</span>
+				`;
+			} else {
+				statsElement.innerHTML = `
+					<span class="group-total-count">
+						Колосков: ${waveCount}
+					</span>
+				`;
+			}
+		}
+		
+		console.log('Статистика обновлена:', groupId, 'включено:', enabledCount, 'всего:', waveCount);
+	}
+
+
     
     // Добавляем метод для принудительной перезагрузки
     async reloadTemplates() {

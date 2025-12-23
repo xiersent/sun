@@ -11,6 +11,37 @@ class WavesManager {
         this.updatePosition();
     }
     
+    // НОВЫЙ МЕТОД: Расчет необходимого количества периодов
+	calculateRequiredPeriods(periodPx) {
+		const viewportWidth = window.appState.graphWidth;
+		
+		// Для СУПЕР малых периодов (1-5 дней) - ОЧЕНЬ много периодов
+		if (periodPx < 250) { // Меньше 5 дней
+			return 30; // 30 периодов для очень малых волн
+		}
+		
+		// Для малых периодов (5-10 дней)
+		if (periodPx < 500) { // 5-10 дней
+			return 20; // 20 периодов
+		}
+		
+		// Для средних периодов (10-20 дней)
+		if (periodPx < 1000) { // 10-20 дней
+			return 15;
+		}
+		
+		// Для больших периодов (20-30 дней)
+		if (periodPx < 1500) { // 20-30 дней
+			return 10;
+		}
+		
+		// Для очень больших периодов - стандартный расчет
+		const periodsToCoverViewport = Math.ceil(viewportWidth / periodPx);
+		const safetyMargin = 3; // Увеличиваем margin
+		
+		return Math.max(6, periodsToCoverViewport + safetyMargin);
+	}
+    
     // НОВЫЙ МЕТОД: Проверка, включена ли хоть одна группа с этой волной
     isWaveGroupEnabled(waveId) {
         const waveIdStr = String(waveId);
@@ -80,14 +111,25 @@ class WavesManager {
         container.className = 'wave-container';
         container.id = `waveContainer${wave.id}`;
         
+        // ОСНОВНОЕ ИЗМЕНЕНИЕ: Динамическое вычисление количества периодов
         const periodPx = wave.period * window.appState.config.squareSize;
-        container.style.width = `${periodPx * 3}px`;
+        
+        // НОВОЕ: Рассчитываем необходимое количество периодов
+        const totalPeriods = this.calculateRequiredPeriods(periodPx);
+        const containerWidth = periodPx * totalPeriods;
+        
+        container.style.width = `${containerWidth}px`;
         container.style.left = `-${periodPx}px`;
+        
+        // Сохраняем информацию для отладки
+        container.dataset.totalPeriods = totalPeriods;
+        container.dataset.periodPx = periodPx;
+        container.dataset.wavePeriod = wave.period;
         
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.classList.add('wave');
         svg.setAttribute('preserveAspectRatio', 'none');
-        svg.setAttribute('viewBox', `0 0 ${periodPx * 3} ${window.appState.config.graphHeight}`);
+        svg.setAttribute('viewBox', `0 0 ${containerWidth} ${window.appState.config.graphHeight}`);
         
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.classList.add('wave-path');
@@ -121,7 +163,8 @@ class WavesManager {
             path.classList.add('bold');
         }
         
-        this.generateSineWave(periodPx, path, container);
+        // НОВОЕ: Передаем totalPeriods в generateSineWave
+        this.generateSineWave(periodPx, path, container, totalPeriods);
         
         svg.appendChild(path);
         container.appendChild(svg);
@@ -157,11 +200,16 @@ class WavesManager {
                 tooltip.style.display = 'none';
             });
         }
+        
+        // Отладочная информация
+        console.log(`Создана волна: ${wave.name} (${wave.period} дней)`);
+        console.log(`  periodPx: ${periodPx}px, totalPeriods: ${totalPeriods}, containerWidth: ${containerWidth}px`);
     }
     
-    generateSineWave(periodPx, wavePath, waveContainer) {
-        const totalWidth = periodPx * 3;
-        const points = 1500;
+    // ОБНОВЛЕННЫЙ МЕТОД: Теперь принимает totalPeriods
+    generateSineWave(periodPx, wavePath, waveContainer, totalPeriods = 3) {
+        const totalWidth = periodPx * totalPeriods;
+        const points = 1500; // Можно оптимизировать позже
         const step = totalWidth / points;
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
         
@@ -187,12 +235,24 @@ class WavesManager {
     updateWaveContainer(waveId, periodPx) {
         const container = this.waveContainers[waveId];
         if (container) {
-            container.style.width = `${periodPx * 3}px`;
+            // НОВОЕ: Пересчитываем totalPeriods при изменении
+            const totalPeriods = this.calculateRequiredPeriods(periodPx);
+            const containerWidth = periodPx * totalPeriods;
+            
+            container.style.width = `${containerWidth}px`;
             container.style.left = `-${periodPx}px`;
+            container.dataset.totalPeriods = totalPeriods;
+            container.dataset.periodPx = periodPx;
             
             const waveSvg = container.querySelector('.wave');
             if (waveSvg) {
-                waveSvg.setAttribute('viewBox', `0 0 ${periodPx * 3} ${window.appState.config.graphHeight}`);
+                waveSvg.setAttribute('viewBox', `0 0 ${containerWidth} ${window.appState.config.graphHeight}`);
+            }
+            
+            // Регенерируем волну с новыми параметрами
+            const wavePath = this.wavePaths[waveId];
+            if (wavePath) {
+                this.generateSineWave(periodPx, wavePath, container, totalPeriods);
             }
         }
     }
