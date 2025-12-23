@@ -46,7 +46,7 @@ class AppState {
             uiSettings: {
                 currentDate: new Date().toISOString(),
                 baseDate: new Date().toISOString(),
-                currentDay: 0,
+                currentDay: 0, // ← Инициализируем как 0, но при загрузке перезапишется из сохраненных данных
                 transform: { scaleX: 1, scaleY: 1, rotation: 0 },
                 uiHidden: false,
                 graphHidden: false,
@@ -222,9 +222,9 @@ class AppState {
                 
                 this.data.waves.forEach(wave => {
                     const waveIdStr = String(wave.id);
-					if (typeof wave.id === 'number') {
-						wave.id = waveIdStr;
-					}
+                    if (typeof wave.id === 'number') {
+                        wave.id = waveIdStr;
+                    }
                     if (waveIdStr.startsWith('wave-31-')) {
                         const match = waveIdStr.match(/wave-31-(\d+)/);
                         if (match) {
@@ -241,9 +241,23 @@ class AppState {
                     this.data.groups.unshift(defaultGroup);
                 }
                 
+                // ВАЖНО: Загружаем currentDate и baseDate из сохраненных данных
                 this.currentDate = new Date(data.uiSettings.currentDate);
                 this.baseDate = new Date(data.uiSettings.baseDate);
-                this.currentDay = data.uiSettings.currentDay;
+                
+                // ВАЖНО: Загружаем currentDay из сохраненных данных
+                // Если в сохраненных данных currentDay есть и он валиден - используем его
+                if (data.uiSettings.currentDay !== undefined && 
+                    data.uiSettings.currentDay !== null &&
+                    typeof data.uiSettings.currentDay === 'number' &&
+                    !isNaN(data.uiSettings.currentDay)) {
+                    this.currentDay = data.uiSettings.currentDay;
+                } else {
+                    // Иначе пересчитываем
+                    console.log('currentDay в сохраненных данных некорректен, пересчитываем...');
+                    this.currentDay = 0; // Временное значение, будет пересчитано позже
+                }
+                
                 this.transform = data.uiSettings.transform;
                 this.uiHidden = data.uiSettings.uiHidden || false;
                 this.graphHidden = data.uiSettings.graphHidden || false;
@@ -265,11 +279,13 @@ class AppState {
                     this.activeDateId = null;
                 }
                 
+                // ВАЖНО: Если есть activeDateId, baseDate должен быть перезаписан датой из activeDate
                 if (this.activeDateId) {
                     const activeDate = data.dates.find(d => d.id === this.activeDateId);
                     if (activeDate) {
                         try {
                             this.baseDate = new Date(activeDate.date);
+                            console.log('baseDate обновлен из activeDate:', this.baseDate);
                         } catch (error) {
                             console.error('Error parsing active date:', error);
                             this.baseDate = new Date();
@@ -318,6 +334,12 @@ class AppState {
                         this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
                     }
                 });
+                
+                console.log('=== AppState.load() завершен ===');
+                console.log('activeDateId:', this.activeDateId);
+                console.log('baseDate:', this.baseDate);
+                console.log('currentDate:', this.currentDate);
+                console.log('currentDay:', this.currentDay);
                 
             } catch (e) {
                 console.error('Ошибка загрузки состояния:', e);

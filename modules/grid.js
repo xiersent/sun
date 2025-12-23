@@ -134,7 +134,8 @@ class GridManager {
         const element = document.getElementById('centerDateLabel');
         if (!element) return;
         
-        const date = window.appState.currentDate;
+        // Гарантируем, что используем текущую дату визора
+        const date = window.appState.currentDate || new Date();
         const dateStr = window.dom.formatDate(date);
         const weekday = window.dom.getWeekdayName(date, true);
         

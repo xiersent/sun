@@ -16,30 +16,11 @@ class WavesManager {
         
         console.log('WavesManager: инициализация...');
         console.log('currentDay при инициализации волн:', window.appState.currentDay);
+        console.log('baseDate при инициализации:', window.appState.baseDate);
+        console.log('currentDate при инициализации:', window.appState.currentDate);
         
-        // Если currentDay равен 0, возможно это начальное состояние
-        // Проверяем, есть ли активная дата
-        if (window.appState.currentDay === 0 && window.appState.activeDateId) {
-            const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
-            if (activeDate) {
-                const baseDate = new Date(activeDate.date);
-                const currentDate = new Date();
-                
-                // Рассчитываем разницу дней
-                const daysDiff = Math.floor((currentDate - baseDate) / (1000 * 60 * 60 * 24));
-                
-                if (daysDiff !== 0) {
-                    console.log('WavesManager: исправляем currentDay с 0 на:', daysDiff);
-                    window.appState.currentDay = daysDiff;
-                    window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
-                    
-                    // Обновляем DOM
-                    if (window.dates && window.dates.updateCurrentDayElement) {
-                        window.dates.updateCurrentDayElement();
-                    }
-                }
-            }
-        }
+        // УДАЛЕНО: Не исправляем currentDay здесь, это делает DatesManager
+        // DatesManager уже должен был вычислить правильный currentDay
         
         this.createVisibleWaveElements();
         this.updatePosition();
@@ -280,19 +261,23 @@ class WavesManager {
     }
     
     updatePosition() {
+        console.log('WavesManager: updatePosition вызван');
+        console.log('  currentDay:', window.appState.currentDay);
+        console.log('  baseDate:', window.appState.baseDate);
+        console.log('  currentDate:', window.appState.currentDate);
+        
         // ВАЖНО: Проверяем, что currentDay установлен
         if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
-            console.warn('WavesManager: currentDay не установлен, пытаемся пересчитать...');
+            console.warn('WavesManager: currentDay не установлен, вызываем dates.recalculateCurrentDay()');
             if (window.dates && window.dates.recalculateCurrentDay) {
                 window.dates.recalculateCurrentDay();
-            } else {
-                // Fallback: ручной расчет
-                window.appState.currentDay = this.calculateDaysBetweenDates(
-                    window.appState.baseDate,
-                    window.appState.currentDate
-                );
-                console.log('WavesManager: currentDay рассчитан вручную:', window.appState.currentDay);
             }
+        }
+        
+        // Проверяем что currentDay - число
+        if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
+            console.error('WavesManager: currentDay некорректен! Исправляем на 0');
+            window.appState.currentDay = 0;
         }
         
         console.log('WavesManager: updatePosition, currentDay:', window.appState.currentDay);
@@ -653,24 +638,5 @@ class WavesManager {
         }
     }
 }
-
-// Глобальная функция для принудительного обновления currentDay
-window.forceUpdateCurrentDay = function() {
-    console.log('=== FORCE UPDATE CURRENTDAY ===');
-    
-    if (!window.dates || !window.appState) return;
-    
-    // Пересчитываем currentDay
-    if (window.dates.recalculateCurrentDay) {
-        window.dates.recalculateCurrentDay();
-    }
-    
-    // Обновляем волны если они инициализированы
-    if (window.waves && window.waves.updatePosition) {
-        window.waves.updatePosition();
-    }
-    
-    console.log('Принудительно обновлен currentDay:', window.appState.currentDay);
-};
 
 window.waves = new WavesManager();

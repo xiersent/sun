@@ -107,12 +107,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Количество загруженных шаблонов:', Object.keys(window.unifiedListManager.templateCache).length);
         }
         
-        // Если currentDay не установлен, устанавливаем вручную
-        if (window.appState && (window.appState.currentDay === undefined || 
-            window.appState.currentDay === null || 
-            isNaN(window.appState.currentDay))) {
+        // УСИЛЕННАЯ ПРОВЕРКА currentDay
+        const currentDayValue = window.appState?.currentDay;
+        console.log('Тип currentDay:', typeof currentDayValue);
+        console.log('Значение currentDay:', currentDayValue);
+        
+        // Только если currentDay действительно некорректен
+        if (currentDayValue === undefined || 
+            currentDayValue === null || 
+            typeof currentDayValue !== 'number' ||
+            isNaN(currentDayValue)) {
             
-            console.log('WARNING: currentDay не установлен, устанавливаем вручную');
+            console.log('WARNING: currentDay некорректен, устанавливаем вручную');
             window.appState.currentDay = 0;
             
             if (window.dates && window.dates.updateCurrentDayElement) {
@@ -120,6 +126,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             window.appState.save();
+        } else {
+            console.log('currentDay корректен:', currentDayValue);
         }
         
         // Проверяем элемент currentDay в DOM
@@ -127,10 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentDayElement) {
             console.log('DOM элемент currentDay найден, значение:', currentDayElement.textContent);
             
-            if (currentDayElement.textContent === '0' && 
-                window.appState && 
-                window.appState.currentDay !== 0) {
-                
+            // Обновляем только если в DOM отличается от appState
+            if (currentDayElement.textContent !== String(window.appState.currentDay)) {
                 currentDayElement.textContent = window.appState.currentDay;
                 console.log('Обновили DOM элемент currentDay на:', window.appState.currentDay);
             }
@@ -138,10 +144,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('DOM элемент currentDay не найден!');
         }
         
-        // УДАЛЕНО: Принудительно вызывать forceUpdateCurrentDay если currentDay все еще 0
-        // Вместо этого просто логируем состояние
-        if (window.appState && window.appState.currentDay === 0) {
-            console.log('Текущий currentDay равен 0, проверьте настройки дат');
+        // ФИНАЛЬНАЯ ГАРАНТИЯ: Принудительно обновить центральную дату
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+            console.log('Финальное обновление центральной даты выполнено');
+        }
+        
+        // Также обновляем кнопку "Сегодня"
+        if (window.dates && window.dates.updateTodayButton) {
+            window.dates.updateTodayButton();
         }
     }, 500);
 });

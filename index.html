@@ -46,49 +46,33 @@
         <div class="container">
 
 			<div class="panel-section buttons-panel">
-			<div class="corner-controls">
-				<button class="ui-btn" data-action="toggleCorners">Угловые</button>
-				<button class="ui-btn" data-action="toggleAxial">Осевые</button>
-				<button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
-				<button class="ui-btn" data-action="toggleSides">Боковые</button>
-				<button class="ui-btn" data-action="toggleMiddle">Средние</button>
-				<button class="ui-btn" data-action="toggleLeft">Левые</button>
-				<button class="ui-btn" data-action="toggleRight">Правые</button>
-				<button class="ui-btn" data-action="toggleTop">Верхние</button>
-				<button class="ui-btn" data-action="toggleBottom">Нижние</button>
-				<button class="ui-btn" data-action="toggleAllSquares">Все</button>
-				<!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
-				<button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
-			</div>
-			<div class="transform-row">
-				<button class="ui-btn" data-action="toggleUI">Переключить UI</button>
-				<button class="ui-btn" data-action="toggleSquares">Квадратики</button>
-				<button class="ui-btn" data-action="toggleGrayMode">Серость</button>
-				<button class="ui-btn" data-action="toggleStars">Звездочки</button>
-				<button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
-				<button class="ui-btn" data-action="exportDates">Экспорт дат</button>
-				<button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
-				<button class="ui-btn" data-action="exportAll">Экспорт всего</button>
-				<button class="ui-btn" data-action="importAll">Импорт</button>
-				<input type="file" id="importAllFile" accept=".json" style="display:none">
-				<button class="ui-btn" data-action="resetAll">Сброс всего</button>
-			</div>
-			<div class="top-controls">
-				<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
-				<button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
-				<button class="ui-btn" data-action="toggleBg">Фон</button>
-				<button class="ui-btn" data-action="flipH">↔</button>
-				<button class="ui-btn" data-action="flipV">↕</button>
-				<button class="ui-btn" data-action="rotateL">↶</button>
-				<button class="ui-btn" data-action="rotateR">↷</button>
-				<button class="ui-btn" data-action="resetTransform">⟲</button>
-				<button id="btnPrevDay" class="ui-btn">←</button>
-				<button class="current-day ui-btn" id="currentDay">0</button>
-				<button id="btnNextDay" class="ui-btn">→</button>
-				<button id="btnToday" class="ui-btn">Сегодня</button>
-				<input type="date" class="date-input" id="mainDateInput" style="flex:0">
-				<button id="btnSetDate" class="ui-btn">Перейти</button>
-			</div>
+				<div class="corner-controls">
+					<button class="ui-btn" data-action="toggleCorners">Угловые</button>
+					<button class="ui-btn" data-action="toggleAxial">Осевые</button>
+					<button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
+					<button class="ui-btn" data-action="toggleSides">Боковые</button>
+					<button class="ui-btn" data-action="toggleMiddle">Средние</button>
+					<button class="ui-btn" data-action="toggleLeft">Левые</button>
+					<button class="ui-btn" data-action="toggleRight">Правые</button>
+					<button class="ui-btn" data-action="toggleTop">Верхние</button>
+					<button class="ui-btn" data-action="toggleBottom">Нижние</button>
+					<button class="ui-btn" data-action="toggleAllSquares">Все</button>
+					<!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
+					<button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
+				</div>
+				<div class="transform-row">
+					<button class="ui-btn" data-action="toggleUI">Переключить UI</button>
+					<button class="ui-btn" data-action="toggleSquares">Квадратики</button>
+					<button class="ui-btn" data-action="toggleGrayMode">Серость</button>
+					<button class="ui-btn" data-action="toggleStars">Звездочки</button>
+					<button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
+					<button class="ui-btn" data-action="exportDates">Экспорт дат</button>
+					<button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
+					<button class="ui-btn" data-action="exportAll">Экспорт всего</button>
+					<button class="ui-btn" data-action="importAll">Импорт</button>
+					<input type="file" id="importAllFile" accept=".json" style="display:none">
+					<button class="ui-btn" data-action="resetAll">Сброс всего</button>
+				</div>
 			</div>
 
 
@@ -98,17 +82,34 @@
 						<div class="axis x-axis"></div>
 						<div class="axis y-axis"></div>
 						<div class="center-date-label" id="centerDateLabel">
-							<div class="center-date-date">06.12.2025</div>
-							<div class="center-name-container">
-								<div class="center-date-name">Название даты</div>
-								<div class="center-date-star">★</div>
-							</div>
-							<div class="center-date-weekday">Суббота</div>
+							<!-- Контент будет заполнен JavaScript -->
 						</div>
 						<div class="zoom-overlay" id="zoomOverlay"></div>
 					</div>
 				</div>
 			</div>
+
+
+			<div class="panel-section buttons-panel">
+				<div class="top-controls">
+					<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
+					<button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
+					<button class="ui-btn" data-action="toggleBg">Фон</button>
+					<button class="ui-btn" data-action="flipH">↔</button>
+					<button class="ui-btn" data-action="flipV">↕</button>
+					<button class="ui-btn" data-action="rotateL">↶</button>
+					<button class="ui-btn" data-action="rotateR">↷</button>
+					<button class="ui-btn" data-action="resetTransform">⟲</button>
+					<button id="btnPrevDay" class="ui-btn">←</button>
+					<button class="current-day ui-btn" id="currentDay">0</button>
+					<button id="btnNextDay" class="ui-btn">→</button>
+					<button id="btnToday" class="ui-btn">Сегодня</button>
+					<input type="date" class="date-input" id="mainDateInput" style="flex:0">
+					<button id="btnSetDate" class="ui-btn">Перейти</button>
+				</div>
+			</div>
+
+
 			<div class="main-controls-panel">
 				<div class="control-panel">
 					<div class="panel-section" id="dates-panel">
@@ -208,6 +209,11 @@
 				<div id="dbImportStatus"></div>
 				<textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
 			</div>
+
+			<div class="panel-section pagel-image">
+				<img src="/images/d41d8cd98f00b204e9800998ecf8427e.webp" alt="">
+			</div>
+
         </div>
     </div>
     

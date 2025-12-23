@@ -24,6 +24,15 @@
 	gap: var(--spacing-xs);
 }
 
+.panel-section.pagel-image {
+	align-self: center;
+}
+
+.panel-section.pagel-image img{
+	display: block;
+	margin: 0 auto;
+}
+
 /* Контейнер для списка волн с фиксированным скроллом */
 .waves-list-container {
     overflow: hidden;

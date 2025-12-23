@@ -28,6 +28,11 @@ class AppCore {
         // Загрузка состояния
         window.appState.load();
         
+        // НЕМЕДЛЕННО обновляем центральную дату после загрузки состояния
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+        }
+        
         // Проверяем, что все модули созданы
         if (!window.dates) {
             console.warn('AppCore: DatesManager не создан, создаем...');

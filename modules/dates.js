@@ -189,21 +189,48 @@ class DatesManager {
     }
     
     recalculateCurrentDay() {
-        console.log('DatesManager: пересчет currentDay...');
+        console.log('=== DatesManager: пересчет currentDay... ===');
         console.log('baseDate:', window.appState.baseDate);
         console.log('currentDate:', window.appState.currentDate);
         console.log('activeDateId:', window.appState.activeDateId);
         
-        // Гарантия: оба объекта должны быть Date
-        const baseDate = window.appState.baseDate instanceof Date ? 
-            new Date(window.appState.baseDate) : new Date();
+        // ГАРАНТИЯ: Проверить и исправить baseDate если нужно
+        if (!window.appState.baseDate || !(window.appState.baseDate instanceof Date) || isNaN(window.appState.baseDate.getTime())) {
+            console.error('WARNING: baseDate некорректен! Исправляем...');
+            if (window.appState.activeDateId) {
+                const dateObj = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
+                if (dateObj) {
+                    window.appState.baseDate = new Date(dateObj.date);
+                    console.log('baseDate исправлен из activeDateId:', window.appState.baseDate);
+                } else {
+                    window.appState.baseDate = new Date();
+                    console.log('baseDate установлен на сегодня (activeDateId не найден)');
+                }
+            } else {
+                window.appState.baseDate = new Date();
+                console.log('baseDate установлен на сегодня (нет activeDateId)');
+            }
+        }
         
-        const currentDate = window.appState.currentDate instanceof Date ? 
-            new Date(window.appState.currentDate) : new Date();
+        // ГАРАНТИЯ: Проверить и исправить currentDate если нужно
+        if (!window.appState.currentDate || !(window.appState.currentDate instanceof Date) || isNaN(window.appState.currentDate.getTime())) {
+            console.error('WARNING: currentDate некорректен! Исправляем...');
+            window.appState.currentDate = new Date();
+            console.log('currentDate установлен на сегодня');
+        }
         
         // Расчет разницы в днях
-        const utc1 = Date.UTC(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
-        const utc2 = Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+        const utc1 = Date.UTC(
+            window.appState.baseDate.getFullYear(), 
+            window.appState.baseDate.getMonth(), 
+            window.appState.baseDate.getDate()
+        );
+        const utc2 = Date.UTC(
+            window.appState.currentDate.getFullYear(), 
+            window.appState.currentDate.getMonth(), 
+            window.appState.currentDate.getDate()
+        );
+        
         const daysDiff = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
         
         window.appState.currentDay = daysDiff;
@@ -211,6 +238,12 @@ class DatesManager {
         
         console.log('currentDay рассчитан:', window.appState.currentDay, 'дней');
         console.log('virtualPosition:', window.appState.virtualPosition, 'px');
+        
+        // ГАРАНТИЯ: Проверка что currentDay - валидное число
+        if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
+            console.error('ERROR: currentDay вычислен некорректно! Устанавливаем 0');
+            window.appState.currentDay = 0;
+        }
         
         // ВАЖНО: Обновляем DOM элемент currentDay сразу после расчета
         this.updateCurrentDayElement();
@@ -300,6 +333,10 @@ class DatesManager {
     }
     
     navigateDay(delta) {
+        console.log('=== navigateDay(' + delta + ') вызван ===');
+        console.log('До: currentDate:', window.appState.currentDate);
+        console.log('До: currentDay:', window.appState.currentDay);
+        
         window.appState.currentDate.setDate(window.appState.currentDate.getDate() + delta);
         this.recalculateCurrentDay();
         window.waves.updatePosition();
@@ -308,21 +345,42 @@ class DatesManager {
         window.grid.updateGridNotesHighlight();
         window.appState.save();
         
+        console.log('После: currentDate:', window.appState.currentDate);
+        console.log('После: currentDay:', window.appState.currentDay);
+        
         // ОБНОВЛЯЕМ КНОПКУ "СЕГОДНЯ"
         this.updateTodayButton();
     }
     
     goToToday() {
+        console.log('=== goToToday() вызван ===');
+        console.log('До: currentDate:', window.appState.currentDate);
+        console.log('До: baseDate:', window.appState.baseDate);
+        console.log('До: currentDay:', window.appState.currentDay);
+        console.log('До: activeDateId:', window.appState.activeDateId);
+        
         const today = new Date();
         window.appState.currentDate = new Date(today);
+        
+        console.log('После установки currentDate:', window.appState.currentDate);
+        
+        // ВАЖНО: Пересчитываем currentDay (должен быть разница между baseDate и сегодня)
         this.recalculateCurrentDay();
+        
+        console.log('После recalculateCurrentDay:');
+        console.log('  currentDay:', window.appState.currentDay);
+        console.log('  baseDate:', window.appState.baseDate);
+        console.log('  currentDate:', window.appState.currentDate);
+        
         window.grid.createGrid();
         window.grid.updateCenterDate();
         window.waves.updatePosition();
         window.appState.save();
         
-        // ОБНОВЛЯЕМ КНОПКУ "СЕГОДНЯ" (после перехода на сегодня)
+        // ОБНОВЛЯЕМ КНОПКУ "СЕГОДНЯ"
         this.updateTodayButton();
+        
+        console.log('=== goToToday() завершен ===');
     }
     
     setDateFromInput() {
