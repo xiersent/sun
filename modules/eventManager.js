@@ -133,34 +133,52 @@ class EventManager {
             return;
         }
         
-        if (target.classList.contains('wave-visibility-check')) {
-            e.stopPropagation();
-            const waveId = target.dataset.id;
-            console.log('EventManager: изменение видимости волны:', waveId, target.checked);
-            
-            if (waveId && window.appState) {
-                // УПРОЩЕННАЯ ЛОГИКА: Всегда разрешаем переключение состояния
-                const waveIdStr = String(waveId);
-                window.appState.waveVisibility[waveIdStr] = target.checked;
-                window.appState.save();
-                
-                // Обновить отображение волны
-                if (window.waves.waveContainers && window.waves.waveContainers[waveId]) {
-                    // Проверить, включена ли группа с этой волной
-                    const shouldShow = target.checked && window.waves.isWaveGroupEnabled(waveId);
-                    window.waves.waveContainers[waveId].style.display = shouldShow ? 'block' : 'none';
-                }
-                
-                // ВАЖНО: Обновить позиции волн после изменения видимости
-                if (window.waves && window.waves.updatePosition) {
-                    window.waves.updatePosition();
-                }
-                
-                // Обновить статистику группы
-                this.updateGroupStatsForWave(waveId, target.checked);
-            }
-            return;
-        }
+		if (target.classList.contains('wave-visibility-check')) {
+			e.stopPropagation();
+			const waveId = target.dataset.id;
+			console.log('EventManager: изменение видимости волны:', waveId, target.checked);
+			
+			if (waveId && window.appState) {
+				// УПРОЩЕННАЯ ЛОГИКА: Всегда разрешаем переключение состояния
+				const waveIdStr = String(waveId);
+				window.appState.waveVisibility[waveIdStr] = target.checked;
+				window.appState.save();
+				
+				// НАЙДЕМ ВОЛНУ В ДАННЫХ
+				const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
+				
+				// ПРОВЕРЯЕМ, ВКЛЮЧЕНА ЛИ ГРУППА С ЭТОЙ ВОЛНОЙ
+				const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
+				const shouldShow = target.checked && isGroupEnabled;
+				
+				// КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: СОЗДАЕМ КОНТЕЙНЕР, ЕСЛИ ЕГО НЕТ
+				if (shouldShow) {
+					// Если контейнера нет и волна существует — создаем его
+					if (!window.waves.waveContainers[waveId] && wave) {
+						console.log('EventManager: создаем отсутствующий контейнер волны:', waveId);
+						window.waves.createWaveElement(wave);
+					}
+					// Показываем контейнер
+					if (window.waves.waveContainers[waveId]) {
+						window.waves.waveContainers[waveId].style.display = 'block';
+					}
+				} else {
+					// Скрываем контейнер, если есть
+					if (window.waves.waveContainers[waveId]) {
+						window.waves.waveContainers[waveId].style.display = 'none';
+					}
+				}
+				
+				// ВАЖНО: Обновить позиции волн после изменения видимости
+				if (window.waves && window.waves.updatePosition) {
+					window.waves.updatePosition();
+				}
+				
+				// Обновить статистику группы
+				this.updateGroupStatsForWave(waveId, target.checked);
+			}
+			return;
+		}
         
         if (target.classList.contains('wave-bold-check')) {
             e.stopPropagation();
