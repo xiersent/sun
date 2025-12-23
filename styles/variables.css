@@ -21,6 +21,12 @@
     --warning-color: #FFC107;
     --info-color: #2196F3;
     
+    /* ИСПРАВЛЕНО: Добавлены переменные для цветов линий сетки */
+    --grid-line-light: #eee;
+    --grid-line-dark: #444;
+    --grid-line-hover-light: #ccc;
+    --grid-line-hover-dark: #888;
+    
     /* Размеры */
     --border-radius: 3px;
     --spacing-xs: 5px;

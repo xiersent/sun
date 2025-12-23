@@ -145,15 +145,16 @@ class AppCore {
             }
         }
         
-        // Устанавливаем правильный фон графика
+        // ИСПРАВЛЕНИЕ: Устанавливаем фон графика ТОЛЬКО через CSS-классы
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
-            if (window.appState.graphBgWhite) {
-                graphContainer.style.backgroundColor = '#fff';
-                graphContainer.classList.remove('dark-mode');
-            } else {
-                graphContainer.style.backgroundColor = '#000';
+            // УДАЛЕНО: Установка inline-стилей для фона
+            // ВМЕСТО ЭТОГО: Только управление CSS-классами
+            
+            if (!window.appState.graphBgWhite) {
                 graphContainer.classList.add('dark-mode');
+            } else {
+                graphContainer.classList.remove('dark-mode');
             }
             
             if (window.appState.graphGrayMode) {

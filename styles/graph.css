@@ -3,7 +3,7 @@
     position: relative;
     width: var(--gw);
     height: var(--gh);
-    background-color: #fff;
+    background-color: #fff; /* Светлый фон по умолчанию */
     border: 1px solid var(--clg);
     overflow: hidden;
     transition: filter 0.3s ease; /* Добавляем плавный переход */
@@ -25,6 +25,7 @@
     filter: none; /* Линии сетки и волны остаются видимыми */
 }
 
+/* ТЕМНЫЙ РЕЖИМ - ТОЛЬКО ЧЕРЕЗ CSS КЛАСС */
 .graph-container.dark-mode {
     background-color: #000;
 }
@@ -41,6 +42,8 @@
     position: absolute;
     background-color: #000;
     z-index: 5;
+	cursor: pointer;
+	pointer-events: none;
 }
 
 .graph-container.dark-mode .axis {
@@ -77,15 +80,16 @@
 .grid-line-inner {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
+
     width: 1px;
     height: 100%;
     background-color: #eee;
     z-index: 5;
 }
 
+/* ИСПРАВЛЕНО: Линии сетки в темном режиме */
 .graph-container.dark-mode .grid-line-inner {
-    background-color: #444;
+    background-color: #2b2727
 }
 
 /* Активная линия - ВЫСШИЙ ПРИОРИТЕТ */
@@ -120,8 +124,9 @@
     z-index: 1;
 }
 
+/* ИСПРАВЛЕНО: Все линии сетки в темном режиме */
 .graph-container.dark-mode .grid-line {
-    background-color: #444;
+    background-color: #2b2727
 }
 
 .grid-line.x {
@@ -140,9 +145,10 @@
     transition: width 0.2s, background-color 0.2s;
 }
 
-.graph-container.dark-mode .grid-line.y {
-    background-color: #444;
-}
+/* Это правило теперь не нужно, т.к. наследует от .graph-container.dark-mode .grid-line */
+/* .graph-container.dark-mode .grid-line.y {
+    background-color: #2b2727
+} */
 
 .grid-line.y:hover {
     background-color: #ccc;
@@ -150,7 +156,9 @@
     z-index: 7;
 }
 
-.graph-container.dark-mode .grid-line.y:hover {
+
+
+.graph-container.dark-mode .grid-wrapper:hover .grid-line-inner {
     background-color: #888;
 }
 
@@ -175,8 +183,10 @@
     width: 3px;
 }
 
+/* ИСПРАВЛЕНО: Линии с заметками в темном режиме */
 .graph-container.dark-mode .grid-line.y.has-notes:hover {
     background-color: #ff6666;
+    width: 3px;
 }
 
 /* Активная линия с заметками - приоритет над ховером */

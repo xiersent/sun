@@ -27,7 +27,7 @@ class UIManager {
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
-            toggleGraphGrayMode: () => this.toggleGraphGrayMode(), // НОВОЕ
+            toggleGraphGrayMode: () => this.toggleGraphGrayMode(),
             toggleStars: () => this.toggleStars(),
             toggleTooltips: () => this.toggleTooltips(),
             
@@ -197,20 +197,18 @@ class UIManager {
     }
     
     toggleBackground() {
-        window.appState.graphBgWhite = !window.appState.graphBgWhite;
-        
+        console.log('Переключение фона через CSS-класс');
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
-            if (window.appState.graphBgWhite) {
-                graphContainer.style.backgroundColor = '#fff';
-                graphContainer.classList.remove('dark-mode');
-            } else {
-                graphContainer.style.backgroundColor = '#000';
-                graphContainer.classList.add('dark-mode');
-            }
+            // ТОЛЬКО ПЕРЕКЛЮЧЕНИЕ CSS-КЛАССА
+            graphContainer.classList.toggle('dark-mode');
+            
+            // Сохраняем состояние: true = светлый (нет класса), false = темный (есть класс)
+            window.appState.graphBgWhite = !graphContainer.classList.contains('dark-mode');
+            window.appState.save();
+            
+            console.log('Состояние фона:', window.appState.graphBgWhite ? 'светлый' : 'темный');
         }
-        
-        window.appState.save();
     }
     
     toggleGrayMode() {

@@ -59,7 +59,8 @@ class GridManager {
             topLine.style.position = 'absolute';
             topLine.style.bottom = `calc(50% + ${i * window.appState.config.squareSize}px)`;
             topLine.style.left = '0';
-            topLine.style.backgroundColor = window.appState.graphBgWhite ? '#eee' : '#444';
+            // ИСПРАВЛЕНО: Убираем inline-стиль для background-color
+            // topLine.style.backgroundColor = window.appState.graphBgWhite ? '#eee' : '#444';
             topLine.style.zIndex = '1';
             
             const bottomLine = document.createElement('div');
@@ -69,7 +70,8 @@ class GridManager {
             bottomLine.style.position = 'absolute';
             bottomLine.style.bottom = `calc(50% - ${i * window.appState.config.squareSize}px)`;
             bottomLine.style.left = '0';
-            bottomLine.style.backgroundColor = window.appState.graphBgWhite ? '#eee' : '#444';
+            // ИСПРАВЛЕНО: Убираем inline-стиль для background-color
+            // bottomLine.style.backgroundColor = window.appState.graphBgWhite ? '#eee' : '#444';
             bottomLine.style.zIndex = '1';
             
             document.getElementById('graphElement').appendChild(topLine);
