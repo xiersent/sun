@@ -2,6 +2,7 @@
 class EventManager {
     constructor() {
         console.log('EventManager: инициализация...');
+        this.askedGroups = new Set(); // Храним ID групп, для которых уже спрашивали (не сохраняется)
         this.setupGlobalHandlers();
     }
     
@@ -125,8 +126,128 @@ class EventManager {
         if (target.classList.contains('wave-visibility-check')) {
             e.stopPropagation();
             const waveId = target.dataset.id;
-            console.log('EventManager: изменение видимости волны:', waveId, target.checked);
+            const isChecked = target.checked;
+            console.log('EventManager: изменение видимости волны:', waveId, isChecked);
             
+            // ОСНОВНАЯ НОВАЯ ЛОГИКА
+            if (isChecked && window.waves && window.appState) {
+                // 1. Проверить, включена ли группа этой волны
+                const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
+                
+                if (!isGroupEnabled) {
+                    // 2. Найти группу для этой волны
+                    const groupId = this.findGroupForWave(waveId);
+                    
+                    if (groupId && !this.askedGroups.has(groupId)) {
+                        // 3. Получить имя группы
+                        const group = window.appState.data.groups.find(g => g.id === groupId);
+                        const groupName = group ? group.name : 'Неизвестная группа';
+                        
+                        // 4. Спросить пользователя
+                        const shouldEnableGroup = confirm(`Группа "${groupName}" отключена. Включить её для отображения колоска?`);
+                        
+                        if (shouldEnableGroup) {
+                            // 5. Включить группу
+                            if (group) {
+                                group.enabled = true;
+                                console.log('EventManager: группа включена:', groupId);
+                                
+                                // Сохраняем состояние видимости волны
+                                const waveIdStr = String(waveId);
+                                window.appState.waveVisibility[waveIdStr] = true;
+                                window.appState.save();
+                                
+                                // Обновить UI группы
+                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                    setTimeout(() => {
+                                        window.unifiedListManager.updateWavesList();
+                                    }, 50);
+                                }
+                                
+                                // Пересоздать элементы волн
+                                setTimeout(() => {
+                                    // Удалить старые контейнеры
+                                    document.querySelectorAll('.wave-container').forEach(c => c.remove());
+                                    if (window.waves) {
+                                        window.waves.waveContainers = {};
+                                        window.waves.wavePaths = {};
+                                    }
+                                    
+                                    // Создать ВСЕ видимые волны заново
+                                    window.appState.data.waves.forEach(wave => {
+                                        const waveIdStr = String(wave.id);
+                                        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                                        const isGroupEnabledNow = window.waves.isWaveGroupEnabled(wave.id);
+                                        const shouldShow = isWaveVisible && isGroupEnabledNow;
+                                        
+                                        if (shouldShow) {
+                                            window.waves.createWaveElement(wave);
+                                        }
+                                    });
+                                    
+                                    // Обновить позиции
+                                    if (window.waves.updatePosition) {
+                                        window.waves.updatePosition();
+                                    }
+                                    
+                                    // Обновить статистику группы
+                                    this.updateGroupStatsForWave(waveId, true);
+                                    
+                                    // Гарантируем, что чекбокс останется отмеченным
+                                    target.checked = true;
+                                    
+                                }, 100);
+                            }
+                            return; // Прерываем обработку - всё сделано
+                        } else {
+                            // 6. Пользователь отказался - запомнить, но НЕ отменять чекбокс
+                            this.askedGroups.add(groupId);
+                            console.log('EventManager: пользователь отказался включать группу:', groupId);
+                            
+                            // ВАЖНОЕ ИСПРАВЛЕНИЕ: НЕ отменяем чекбокс, просто оставляем как есть
+                            // Но поскольку группа выключена, волна не будет отображаться
+                            // Сохраняем состояние видимости (true), но волна не покажется
+                            const waveIdStr = String(waveId);
+                            window.appState.waveVisibility[waveIdStr] = true; // Все равно сохраняем как включенную
+                            window.appState.save();
+                            
+                            // Обновляем UI, но чекбокс остается отмеченным
+                            setTimeout(() => {
+                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                    window.unifiedListManager.updateWavesList();
+                                }
+                                
+                                // Обновить статистику группы
+                                this.updateGroupStatsForWave(waveId, true);
+                            }, 50);
+                            
+                            return; // Прерываем стандартную логику
+                        }
+                    } else if (groupId && this.askedGroups.has(groupId)) {
+                        // 7. Уже спрашивали и пользователь отказался - оставляем чекбокс, но группа не включится
+                        console.log('EventManager: уже спрашивали про группу, оставляем чекбокс:', groupId);
+                        
+                        // Сохраняем состояние видимости
+                        const waveIdStr = String(waveId);
+                        window.appState.waveVisibility[waveIdStr] = true; // Все равно сохраняем
+                        window.appState.save();
+                        
+                        // Обновляем UI
+                        setTimeout(() => {
+                            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                window.unifiedListManager.updateWavesList();
+                            }
+                            
+                            // Обновить статистику группы
+                            this.updateGroupStatsForWave(waveId, true);
+                        }, 50);
+                        
+                        return; // Прерываем стандартную логику
+                    }
+                }
+            }
+            
+            // СТАНДАРТНАЯ ЛОГИКА (если группа включена или чекбокс выключается)
             if (waveId && window.appState) {
                 // УПРОЩЕННАЯ ЛОГИКА: Всегда разрешаем переключение состояния
                 const waveIdStr = String(waveId);
@@ -217,6 +338,12 @@ class EventManager {
                 if (group) {
                     group.enabled = target.checked;
                     window.appState.save();
+                    
+                    // Если группа включается - очищаем отметку о том, что спрашивали
+                    if (target.checked && this.askedGroups.has(groupId)) {
+                        this.askedGroups.delete(groupId);
+                        console.log('EventManager: группа включена вручную, очищаем отметку:', groupId);
+                    }
                     
                     // ГАРАНТИЯ: Полностью пересоздать элементы волн
                     setTimeout(() => {
@@ -545,6 +672,30 @@ class EventManager {
         return container ? container.id : null;
     }
     
+    // НОВЫЙ МЕТОД: Найти группу для волны
+    findGroupForWave(waveId) {
+        if (!window.appState || !window.appState.data || !window.appState.data.groups) {
+            return null;
+        }
+        
+        const waveIdStr = String(waveId);
+        
+        for (const group of window.appState.data.groups) {
+            if (group.waves && Array.isArray(group.waves)) {
+                const hasWave = group.waves.some(wId => {
+                    const wIdStr = String(wId);
+                    return wIdStr === waveIdStr;
+                });
+                
+                if (hasWave) {
+                    return group.id;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
     // НОВЫЕ МЕТОДЫ ДЛЯ ОБНОВЛЕНИЯ СТАТИСТИКИ ГРУПП
     
     updateGroupStatsForWave(waveId, isVisible) {
@@ -612,7 +763,6 @@ class EventManager {
 			}
 		}
 	}
-
 }
 
 window.eventManager = new EventManager();
