@@ -10,29 +10,23 @@ class UnifiedListManager {
         this.templateCache = {};
         this.templatesLoaded = false;
         
-        // Добавляем Promise для отслеживания загрузки
         this.templatesLoadPromise = null;
     }
     
-    // ЗАМЕНА: initTemplates теперь возвращает Promise
     initTemplates() {
-        // Если уже загружено, возвращаем выполненный Promise
         if (this.templatesLoaded) {
             return Promise.resolve();
         }
         
-        // Если загрузка уже идет, возвращаем существующий Promise
         if (this.templatesLoadPromise) {
             return this.templatesLoadPromise;
         }
         
-        // Создаем новый Promise для загрузки
         this.templatesLoadPromise = new Promise(async (resolve, reject) => {
             try {
                 const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template'];
                 let loadedCount = 0;
                 
-                // Параллельная загрузка всех шаблонов
                 const loadPromises = templateIds.map(async (templateId) => {
                     try {
                         const templateElement = document.getElementById(templateId);
@@ -43,11 +37,9 @@ class UnifiedListManager {
                             return;
                         }
                         
-                        // Загружаем из файла только если нет inline шаблона
                         const url = `templates/${templateId.replace('-template', '')}.ejs`;
                         console.log(`Попытка загрузки шаблона из файла: ${url}`);
                         
-                        // Добавляем таймаут для предотвращения зависания
                         const timeoutPromise = new Promise((_, timeoutReject) => {
                             setTimeout(() => timeoutReject(new Error(`Таймаут загрузки шаблона: ${templateId}`)), 3000);
                         });
@@ -63,37 +55,30 @@ class UnifiedListManager {
                             loadedCount++;
                         } else {
                             console.error(`Не удалось загрузить шаблон ${templateId} из ${url}: ${response.status}`);
-                            // Не прерываем всю загрузку, продолжаем с остальными
                         }
                     } catch (error) {
                         console.error(`Ошибка загрузки шаблона ${templateId}:`, error);
-                        // Продолжаем загрузку других шаблонов
                     }
                 });
                 
-                // Ждем загрузки всех шаблонов
                 await Promise.allSettled(loadPromises);
                 
                 console.log(`Загружено шаблонов: ${loadedCount} из ${templateIds.length}`);
                 
-                // Даже если не все загрузились, помечаем как загруженные
                 this.templatesLoaded = true;
                 resolve();
                 
             } catch (error) {
                 console.error('Критическая ошибка загрузки шаблонов:', error);
-                // Даже при ошибке помечаем как загруженные, чтобы приложение не зависло
                 this.templatesLoaded = true;
-                resolve(); // Разрешаем, а не отклоняем, чтобы приложение продолжало работать
+                resolve();
             }
         });
         
         return this.templatesLoadPromise;
     }
     
-    // ДОБАВЛЯЕМ: Метод для безопасного рендеринга с ожиданием загрузки
     async renderListWithWait(containerId, items, itemType) {
-        // Если шаблоны еще не загружены, ждем
         if (!this.templatesLoaded) {
             console.log(`Шаблоны не загружены, ожидание загрузки для ${containerId}...`);
             try {
@@ -103,7 +88,6 @@ class UnifiedListManager {
             }
         }
         
-        // Теперь рендерим
         return this.renderList(containerId, items, itemType);
     }
     
@@ -123,8 +107,15 @@ class UnifiedListManager {
     }
     
     prepareDateData(dateObj, index) {
+        // dateObj.date теперь timestamp, преобразуем в Date для форматирования
         const dateObjDate = new Date(dateObj.date);
-        const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObjDate, window.appState.currentDate);
+        
+        // Для расчета yearsFromCurrent используем timestamp
+        const currentTimestamp = window.appState.currentDate instanceof Date ? 
+            window.appState.currentDate.getTime() : 
+            window.appState.currentDate;
+        
+        const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObj.date, currentTimestamp);
         const activeDateIdStr = window.appState.activeDateId ? String(window.appState.activeDateId) : null;
         const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
         const dateObjIdStr = String(dateObj.id);
@@ -133,8 +124,8 @@ class UnifiedListManager {
             id: dateObj.id,
             name: dateObj.name,
             type: 'date',
-            formattedDate: window.dom.formatDate(dateObjDate),
-            dateForInput: window.dom.formatDateForInput(dateObjDate),
+            formattedDate: window.dom.formatDate(dateObj.date), // Передаем timestamp
+            dateForInput: window.dom.formatDateForInput(dateObj.date), // Передаем timestamp
             yearsFromCurrent: yearsFromCurrent,
             active: activeDateIdStr === dateObjIdStr,
             editing: editingDateIdStr === dateObjIdStr,
@@ -156,7 +147,7 @@ class UnifiedListManager {
             description: window.dom.getWaveDescription(wave.type),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
             bold: window.appState.waveBold[waveIdStr] || false,
-            cornerColor: window.appState.waveCornerColor[waveIdStr] || false, // ДОБАВЛЕНО
+            cornerColor: window.appState.waveCornerColor[waveIdStr] || false,
             editing: editingWaveIdStr === waveIdStr,
             index: index
         };
@@ -190,7 +181,6 @@ class UnifiedListManager {
                 
                 if (wave) {
                     existingWaves.push(wave);
-                    // Проверяем, включен ли колосок
                     const waveIdStrForCheck = String(wave.id);
                     if (window.appState.waveVisibility[waveIdStrForCheck] !== false) {
                         enabledCount++;
@@ -221,123 +211,119 @@ class UnifiedListManager {
         };
     }
     
-	// В unifiedListManager.js, метод renderList:
-	renderList(containerId, items, itemType) {
-		const container = document.getElementById(containerId);
-		if (!container) {
-			console.error('UnifiedListManager: контейнер не найден:', containerId);
-			return;
-		}
-		
-		// Если шаблоны не загружены (должно быть невозможно после renderListWithWait)
-		if (!this.templatesLoaded) {
-			container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
-			console.warn(`Шаблоны не загружены для рендеринга ${containerId}, отображаем сообщение`);
-			
-			// Пытаемся загрузить и перерендерить
-			setTimeout(() => {
-				this.initTemplates().then(() => {
-					this.renderList(containerId, items, itemType);
-				});
-			}, 100);
-			return;
-		}
-		
-		container.innerHTML = '';
-		
-		if (!items || items.length === 0) {
-			const emptyMessage = document.createElement('div');
-			emptyMessage.className = 'list-empty';
-			emptyMessage.textContent = this.getEmptyMessage(itemType);
-			container.appendChild(emptyMessage);
-			return;
-		}
-		
-		let templateId;
-		switch(itemType) {
-			case 'date': templateId = 'date-item-template'; break;
-			case 'wave': templateId = 'wave-item-template'; break;
-			case 'group': templateId = 'group-item-template'; break;
-			default: templateId = 'date-item-template';
-		}
-		
-		const templateText = this.getTemplate(templateId);
-		if (!templateText || templateText.includes('Шаблон не загружен')) {
-			container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
-			console.error(`Шаблон ${templateId} не найден в кэше`);
-			return;
-		}
-		
-		if (itemType === 'group') {
-			items.forEach((groupData, index) => {
-				try {
-					// ИСПРАВЛЕНО: Гарантируем наличие waveCount
-					if (groupData.waveCount === undefined) {
-						groupData.waveCount = groupData.waves ? groupData.waves.length : 0;
-					}
-					if (groupData.enabledCount === undefined) {
-						groupData.enabledCount = 0;
-					}
-					
-					const renderedGroup = ejs.render(templateText, { data: groupData });
-					
-					const tempDiv = document.createElement('div');
-					tempDiv.innerHTML = renderedGroup;
-					const groupElement = tempDiv.firstElementChild;
-					
-					const childrenContainer = groupElement.querySelector('.group-children');
-					
-					if (childrenContainer && groupData.children && groupData.children.length > 0 && groupData.expanded) {
-						childrenContainer.innerHTML = '';
-						
-						groupData.children.forEach((childData, childIndex) => {
-							try {
-								childData.type = 'wave';
-								const waveTemplateText = this.getTemplate('wave-item-template');
-								const renderedChild = ejs.render(waveTemplateText, { data: childData });
-								
-								const childTempDiv = document.createElement('div');
-								childTempDiv.innerHTML = renderedChild;
-								const childElement = childTempDiv.firstElementChild;
-								
-								childrenContainer.appendChild(childElement);
-							} catch (error) {
-								const errorDiv = document.createElement('div');
-								errorDiv.className = 'list-error';
-								errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
-								childrenContainer.appendChild(errorDiv);
-							}
-						});
-					}
-					
-					container.appendChild(groupElement);
-					
-				} catch (error) {
-					const errorDiv = document.createElement('div');
-					errorDiv.className = 'list-error';
-					errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
-					container.appendChild(errorDiv);
-				}
-			});
-		} else {
-			const renderedItems = [];
-			items.forEach((item, index) => {
-				try {
-					const data = this.templates[itemType] ? this.templates[itemType](item, index) : item;
-					data.type = data.type || itemType;
-					
-					const rendered = ejs.render(templateText, { data });
-					renderedItems.push(rendered);
-				} catch (error) {
-					renderedItems.push(`<div class="list-error">Ошибка рендеринга элемента: ${error.message}</div>`);
-				}
-			});
-			
-			container.innerHTML = renderedItems.join('');
-		}
-		
-		console.log('UnifiedListManager: список отрендерен в контейнере:', containerId, 'элементов:', items.length);
-	}
+    renderList(containerId, items, itemType) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error('UnifiedListManager: контейнер не найден:', containerId);
+            return;
+        }
+        
+        if (!this.templatesLoaded) {
+            container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
+            console.warn(`Шаблоны не загружены для рендеринга ${containerId}, отображаем сообщение`);
+            
+            setTimeout(() => {
+                this.initTemplates().then(() => {
+                    this.renderList(containerId, items, itemType);
+                });
+            }, 100);
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        if (!items || items.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'list-empty';
+            emptyMessage.textContent = this.getEmptyMessage(itemType);
+            container.appendChild(emptyMessage);
+            return;
+        }
+        
+        let templateId;
+        switch(itemType) {
+            case 'date': templateId = 'date-item-template'; break;
+            case 'wave': templateId = 'wave-item-template'; break;
+            case 'group': templateId = 'group-item-template'; break;
+            default: templateId = 'date-item-template';
+        }
+        
+        const templateText = this.getTemplate(templateId);
+        if (!templateText || templateText.includes('Шаблон не загружен')) {
+            container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
+            console.error(`Шаблон ${templateId} не найден в кэше`);
+            return;
+        }
+        
+        if (itemType === 'group') {
+            items.forEach((groupData, index) => {
+                try {
+                    if (groupData.waveCount === undefined) {
+                        groupData.waveCount = groupData.waves ? groupData.waves.length : 0;
+                    }
+                    if (groupData.enabledCount === undefined) {
+                        groupData.enabledCount = 0;
+                    }
+                    
+                    const renderedGroup = ejs.render(templateText, { data: groupData });
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = renderedGroup;
+                    const groupElement = tempDiv.firstElementChild;
+                    
+                    const childrenContainer = groupElement.querySelector('.group-children');
+                    
+                    if (childrenContainer && groupData.children && groupData.children.length > 0 && groupData.expanded) {
+                        childrenContainer.innerHTML = '';
+                        
+                        groupData.children.forEach((childData, childIndex) => {
+                            try {
+                                childData.type = 'wave';
+                                const waveTemplateText = this.getTemplate('wave-item-template');
+                                const renderedChild = ejs.render(waveTemplateText, { data: childData });
+                                
+                                const childTempDiv = document.createElement('div');
+                                childTempDiv.innerHTML = renderedChild;
+                                const childElement = childTempDiv.firstElementChild;
+                                
+                                childrenContainer.appendChild(childElement);
+                            } catch (error) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'list-error';
+                                errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
+                                childrenContainer.appendChild(errorDiv);
+                            }
+                        });
+                    }
+                    
+                    container.appendChild(groupElement);
+                    
+                } catch (error) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'list-error';
+                    errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
+                    container.appendChild(errorDiv);
+                }
+            });
+        } else {
+            const renderedItems = [];
+            items.forEach((item, index) => {
+                try {
+                    const data = this.templates[itemType] ? this.templates[itemType](item, index) : item;
+                    data.type = data.type || itemType;
+                    
+                    const rendered = ejs.render(templateText, { data });
+                    renderedItems.push(rendered);
+                } catch (error) {
+                    renderedItems.push(`<div class="list-error">Ошибка рендеринга элемента: ${error.message}</div>`);
+                }
+            });
+            
+            container.innerHTML = renderedItems.join('');
+        }
+        
+        console.log('UnifiedListManager: список отрендерен в контейнере:', containerId, 'элементов:', items.length);
+    }
     
     getEmptyMessage(type) {
         const messages = {
@@ -388,11 +374,9 @@ class UnifiedListManager {
         console.log('UnifiedListManager: обработка клика удаления:', type, id);
         
         if (type === 'date') {
-            // Приводим id к строке для поиска
             window.dates.deleteDate(String(id));
             this.updateDatesList();
         } else if (type === 'wave') {
-            // Приводим id к строке
             window.waves.deleteWave(String(id));
             this.updateWavesList();
         } else if (type === 'group') {
@@ -407,7 +391,6 @@ class UnifiedListManager {
         if (type === 'date') {
             this.saveDateChanges(id);
         } else if (type === 'wave') {
-            // Передаем id как строку
             this.saveWaveChanges(String(id));
         } else if (type === 'group') {
             this.saveGroupChanges(id);
@@ -467,11 +450,11 @@ class UnifiedListManager {
             }
             
             dateObj.name = newName;
-            dateObj.date = newDate.toISOString();
+            dateObj.date = newDate.getTime(); // Сохраняем как timestamp
             window.appState.editingDateId = null;
             
             if (String(window.appState.activeDateId) === String(dateId)) {
-                window.appState.baseDate = new Date(newDate);
+                window.appState.baseDate = newDate.getTime();
                 window.dates.recalculateCurrentDay();
                 window.waves.updatePosition();
                 window.grid.updateCenterDate();
@@ -579,7 +562,6 @@ class UnifiedListManager {
             
             window.waves.updateCornerSquareColors();
             
-            // ДОБАВИТЬ СОХРАНЕНИЕ
             window.appState.save();
             
             this.updateWavesList();
@@ -623,62 +605,56 @@ class UnifiedListManager {
         this.renderList('wavesList', allGroups, 'group');
     }
     
-
-	updateGroupStats(groupId) {
-		console.log('UnifiedListManager: обновление статистики группы:', groupId);
-		
-		const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
-		if (!group) {
-			console.warn('Группа не найдена:', groupId);
-			return;
-		}
-		
-		const groupElement = document.querySelector(`.list-item--group[data-id="${groupId}"]`);
-		if (!groupElement) {
-			console.warn('Элемент группы не найден в DOM:', groupId);
-			return;
-		}
-		
-		// Подсчитать включенные волны
-		let enabledCount = 0;
-		const waveCount = group.waves ? group.waves.length : 0; // Определяем waveCount здесь
-		
-		if (group.waves && Array.isArray(group.waves)) {
-			group.waves.forEach(waveId => {
-				const waveIdStr = String(waveId);
-				if (window.appState.waveVisibility[waveIdStr] !== false) {
-					enabledCount++;
-				}
-			});
-		}
-		
-		// Обновить текст счетчика в DOM
-		const statsElement = groupElement.querySelector('.list-item__value .group-stats');
-		if (statsElement) {
-			if (enabledCount > 0) {
-				statsElement.innerHTML = `
-					<span class="group-enabled-count" title="Включено колосков">
-						Включено: ${enabledCount}
-					</span>
-					<span class="group-total-count" title="Всего колосков">
-						Колосков: ${waveCount}
-					</span>
-				`;
-			} else {
-				statsElement.innerHTML = `
-					<span class="group-total-count">
-						Колосков: ${waveCount}
-					</span>
-				`;
-			}
-		}
-		
-		console.log('Статистика обновлена:', groupId, 'включено:', enabledCount, 'всего:', waveCount);
-	}
-
-
+    updateGroupStats(groupId) {
+        console.log('UnifiedListManager: обновление статистики группы:', groupId);
+        
+        const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
+        if (!group) {
+            console.warn('Группа не найдена:', groupId);
+            return;
+        }
+        
+        const groupElement = document.querySelector(`.list-item--group[data-id="${groupId}"]`);
+        if (!groupElement) {
+            console.warn('Элемент группы не найден в DOM:', groupId);
+            return;
+        }
+        
+        let enabledCount = 0;
+        const waveCount = group.waves ? group.waves.length : 0;
+        
+        if (group.waves && Array.isArray(group.waves)) {
+            group.waves.forEach(waveId => {
+                const waveIdStr = String(waveId);
+                if (window.appState.waveVisibility[waveIdStr] !== false) {
+                    enabledCount++;
+                }
+            });
+        }
+        
+        const statsElement = groupElement.querySelector('.list-item__value .group-stats');
+        if (statsElement) {
+            if (enabledCount > 0) {
+                statsElement.innerHTML = `
+                    <span class="group-enabled-count" title="Включено колосков">
+                        Включено: ${enabledCount}
+                    </span>
+                    <span class="group-total-count" title="Всего колосков">
+                        Колосков: ${waveCount}
+                    </span>
+                `;
+            } else {
+                statsElement.innerHTML = `
+                    <span class="group-total-count">
+                        Колосков: ${waveCount}
+                    </span>
+                `;
+            }
+        }
+        
+        console.log('Статистика обновлена:', groupId, 'включено:', enabledCount, 'всего:', waveCount);
+    }
     
-    // Добавляем метод для принудительной перезагрузки
     async reloadTemplates() {
         this.templatesLoaded = false;
         this.templatesLoadPromise = null;

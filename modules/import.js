@@ -13,13 +13,74 @@ class ImportExportManager {
         return this.SQL;
     }
     
+    // НОВЫЙ МЕТОД: Проверка, является ли значение timestamp
+    isTimestamp(value) {
+        return typeof value === 'number' && !isNaN(value) && value > 0;
+    }
+    
+    // НОВЫЙ МЕТОД: Конвертация импортированных дат в timestamp
+    convertImportedDatesToTimestamp(data) {
+        // Конвертировать dates
+        if (data.dates) {
+            data.dates.forEach(date => {
+                if (date.date && !this.isTimestamp(date.date)) {
+                    try {
+                        const dateObj = new Date(date.date);
+                        if (!isNaN(dateObj.getTime())) {
+                            date.date = dateObj.getTime();
+                            console.log('Конвертирована импортированная дата в timestamp:', date.date);
+                        }
+                    } catch (e) {
+                        console.warn('Ошибка конвертации импортированной даты:', date.date, e);
+                    }
+                }
+            });
+        }
+        
+        // Конвертировать notes
+        if (data.notes) {
+            data.notes.forEach(note => {
+                if (note.date && !this.isTimestamp(note.date)) {
+                    try {
+                        const dateObj = new Date(note.date);
+                        if (!isNaN(dateObj.getTime())) {
+                            note.date = dateObj.getTime();
+                            console.log('Конвертирована импортированная заметка в timestamp:', note.date);
+                        }
+                    } catch (e) {
+                        console.warn('Ошибка конвертации импортированной заметки:', note.date, e);
+                    }
+                }
+            });
+        }
+        
+        // Конвертировать uiSettings даты
+        if (data.uiSettings) {
+            ['currentDate', 'baseDate'].forEach(key => {
+                if (data.uiSettings[key] && !this.isTimestamp(data.uiSettings[key])) {
+                    try {
+                        const dateObj = new Date(data.uiSettings[key]);
+                        if (!isNaN(dateObj.getTime())) {
+                            data.uiSettings[key] = dateObj.getTime();
+                            console.log(`Конвертирован импортированный ${key} в timestamp:`, data.uiSettings[key]);
+                        }
+                    } catch (e) {
+                        console.warn(`Ошибка конвертации импортированного ${key}:`, e);
+                    }
+                }
+            });
+        }
+        
+        return data;
+    }
+    
     exportAll() {
         const dataToSave = {
             ...window.appState.data
         };
         
-        dataToSave.uiSettings.currentDate = window.appState.currentDate.toISOString();
-        dataToSave.uiSettings.baseDate = window.appState.baseDate.toISOString();
+        dataToSave.uiSettings.currentDate = window.appState.currentDate.getTime(); // timestamp
+        dataToSave.uiSettings.baseDate = window.appState.baseDate.getTime(); // timestamp
         dataToSave.uiSettings.currentDay = window.appState.currentDay;
         dataToSave.uiSettings.transform = window.appState.transform;
         dataToSave.uiSettings.uiHidden = window.appState.uiHidden;
@@ -30,7 +91,7 @@ class ImportExportManager {
         dataToSave.uiSettings.graphGrayMode = window.appState.graphGrayMode;
         dataToSave.uiSettings.showTooltips = window.appState.showTooltips;
         dataToSave.uiSettings.cornerSquaresVisible = window.appState.cornerSquaresVisible;
-        dataToSave.exportDate = new Date().toISOString();
+        dataToSave.exportDate = new Date().getTime(); // timestamp
         dataToSave.version = '1.0';
         
         const dataStr = JSON.stringify(dataToSave, null, 2);
@@ -51,7 +112,7 @@ class ImportExportManager {
         const dataToSave = {
             dates: window.appState.data.dates,
             notes: window.appState.data.notes,
-            exportDate: new Date().toISOString(),
+            exportDate: new Date().getTime(), // timestamp
             version: '1.0',
             type: 'dates-only'
         };
@@ -74,7 +135,7 @@ class ImportExportManager {
         const dataToSave = {
             waves: window.appState.data.waves,
             groups: window.appState.data.groups,
-            exportDate: new Date().toISOString(),
+            exportDate: new Date().getTime(), // timestamp
             version: '1.0',
             type: 'waves-only'
         };
@@ -100,9 +161,12 @@ class ImportExportManager {
                 try {
                     const data = JSON.parse(event.target.result);
                     
-                    const isFullExport = data.waves && data.groups && data.dates;
-                    const isDatesOnly = data.type === 'dates-only' || (data.dates && !data.waves);
-                    const isWavesOnly = data.type === 'waves-only' || (data.waves && !data.dates);
+                    // КОНВЕРТИРОВАТЬ ИМПОРТИРОВАННЫЕ ДАННЫЕ В TIMESTAMP
+                    const convertedData = window.importExport.convertImportedDatesToTimestamp(data);
+                    
+                    const isFullExport = convertedData.waves && convertedData.groups && convertedData.dates;
+                    const isDatesOnly = convertedData.type === 'dates-only' || (convertedData.dates && !convertedData.waves);
+                    const isWavesOnly = convertedData.type === 'waves-only' || (convertedData.waves && !convertedData.dates);
                     
                     if (!isFullExport && !isDatesOnly && !isWavesOnly) {
                         throw new Error('Неверный формат файла. Ожидается полный экспорт, экспорт дат или экспорт колосков.');
@@ -120,7 +184,7 @@ class ImportExportManager {
                     
                     if (confirm(message)) {
                         if (isFullExport) {
-                            const has120Waves = data.waves.some(w => {
+                            const has120Waves = convertedData.waves.some(w => {
                                 const waveIdStr = String(w.id);
                                 return waveIdStr.startsWith('wave-120-');
                             });
@@ -129,10 +193,10 @@ class ImportExportManager {
                                 const waves120 = window.appState.waves120 || [];
                                 const waves120Ids = window.appState.waves120Ids || [];
                                 
-                                data.waves = data.waves.concat(waves120);
+                                convertedData.waves = convertedData.waves.concat(waves120);
                                 
-                                if (!data.groups.some(g => g.id === '120-waves-group')) {
-                                    data.groups.push({
+                                if (!convertedData.groups.some(g => g.id === '120-waves-group')) {
+                                    convertedData.groups.push({
                                         id: '120-waves-group',
                                         name: '120 колосков',
                                         enabled: false,
@@ -147,7 +211,7 @@ class ImportExportManager {
                                 }
                             }
                             
-                            const has31Waves = data.waves.some(w => {
+                            const has31Waves = convertedData.waves.some(w => {
                                 const waveIdStr = String(w.id);
                                 return waveIdStr.startsWith('wave-31-');
                             });
@@ -156,10 +220,10 @@ class ImportExportManager {
                                 const waves31 = window.appState.waves31 || [];
                                 const waves31Ids = window.appState.waves31Ids || [];
                                 
-                                data.waves = data.waves.concat(waves31);
+                                convertedData.waves = convertedData.waves.concat(waves31);
                                 
-                                if (!data.groups.some(g => g.id === '31-waves-group')) {
-                                    data.groups.push({
+                                if (!convertedData.groups.some(g => g.id === '31-waves-group')) {
+                                    convertedData.groups.push({
                                         id: '31-waves-group',
                                         name: '31 колосок',
                                         enabled: false,
@@ -174,7 +238,7 @@ class ImportExportManager {
                                 }
                             }
                             
-                            data.waves.forEach(wave => {
+                            convertedData.waves.forEach(wave => {
                                 const waveIdStr = String(wave.id);
                                 if (waveIdStr.startsWith('wave-31-')) {
                                     const match = waveIdStr.match(/wave-31-(\d+)/);
@@ -186,31 +250,28 @@ class ImportExportManager {
                                 }
                             });
                             
-                            const defaultGroupIndex = data.groups.findIndex(g => g.id === 'default-group');
+                            const defaultGroupIndex = convertedData.groups.findIndex(g => g.id === 'default-group');
                             if (defaultGroupIndex > 0) {
-                                const defaultGroup = data.groups.splice(defaultGroupIndex, 1)[0];
-                                data.groups.unshift(defaultGroup);
+                                const defaultGroup = convertedData.groups.splice(defaultGroupIndex, 1)[0];
+                                convertedData.groups.unshift(defaultGroup);
                             }
                             
-                            window.appState.data = data;
+                            window.appState.data = convertedData;
                             
-                            // ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ ВОЛН ПРИ ИМПОРТЕ
                             window.appState.waveVisibility = {};
                             window.appState.waveBold = {};
                             window.appState.waveCornerColor = {};
                             
-                            // Восстанавливаем из импортированных данных если есть
-                            if (data.uiSettings && data.uiSettings.waveVisibility) {
-                                window.appState.waveVisibility = data.uiSettings.waveVisibility;
+                            if (convertedData.uiSettings && convertedData.uiSettings.waveVisibility) {
+                                window.appState.waveVisibility = convertedData.uiSettings.waveVisibility;
                             }
-                            if (data.uiSettings && data.uiSettings.waveBold) {
-                                window.appState.waveBold = data.uiSettings.waveBold;
+                            if (convertedData.uiSettings && convertedData.uiSettings.waveBold) {
+                                window.appState.waveBold = convertedData.uiSettings.waveBold;
                             }
-                            if (data.uiSettings && data.uiSettings.waveCornerColor) {
-                                window.appState.waveCornerColor = data.uiSettings.waveCornerColor;
+                            if (convertedData.uiSettings && convertedData.uiSettings.waveCornerColor) {
+                                window.appState.waveCornerColor = convertedData.uiSettings.waveCornerColor;
                             }
                             
-                            // Инициализируем состояния, если их нет
                             window.appState.data.waves.forEach(wave => {
                                 const waveIdStr = String(wave.id);
                                 if (window.appState.waveVisibility[waveIdStr] === undefined) {
@@ -224,18 +285,19 @@ class ImportExportManager {
                                 }
                             });
                             
-                            window.appState.currentDate = new Date(data.uiSettings.currentDate);
-                            window.appState.baseDate = new Date(data.uiSettings.baseDate);
-                            window.appState.currentDay = data.uiSettings.currentDay;
-                            window.appState.transform = data.uiSettings.transform;
-                            window.appState.uiHidden = data.uiSettings.uiHidden || false;
-                            window.appState.graphHidden = data.uiSettings.graphHidden || false;
-                            window.appState.graphBgWhite = data.uiSettings.graphBgWhite !== undefined ? data.uiSettings.graphBgWhite : true;
-                            window.appState.showStars = data.uiSettings.showStars !== undefined ? data.uiSettings.showStars : true;
-                            window.appState.grayMode = data.uiSettings.grayMode || false;
-                            window.appState.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
-                            window.appState.showTooltips = data.uiSettings.showTooltips !== undefined ? data.uiSettings.showTooltips : false;
-                            window.appState.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
+                            // Преобразуем timestamp обратно в Date объекты
+                            window.appState.currentDate = new Date(convertedData.uiSettings.currentDate);
+                            window.appState.baseDate = new Date(convertedData.uiSettings.baseDate);
+                            window.appState.currentDay = convertedData.uiSettings.currentDay;
+                            window.appState.transform = convertedData.uiSettings.transform;
+                            window.appState.uiHidden = convertedData.uiSettings.uiHidden || false;
+                            window.appState.graphHidden = convertedData.uiSettings.graphHidden || false;
+                            window.appState.graphBgWhite = convertedData.uiSettings.graphBgWhite !== undefined ? convertedData.uiSettings.graphBgWhite : true;
+                            window.appState.showStars = convertedData.uiSettings.showStars !== undefined ? convertedData.uiSettings.showStars : true;
+                            window.appState.grayMode = convertedData.uiSettings.grayMode || false;
+                            window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
+                            window.appState.showTooltips = convertedData.uiSettings.showTooltips !== undefined ? convertedData.uiSettings.showTooltips : false;
+                            window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
                             
                             if (window.appState.uiHidden) {
                                 document.body.classList.add('ui-hidden');
@@ -296,8 +358,8 @@ class ImportExportManager {
                             alert('Все данные успешно импортированы!');
                             
                         } else if (isDatesOnly) {
-                            window.appState.data.dates = data.dates || [];
-                            window.appState.data.notes = data.notes || [];
+                            window.appState.data.dates = convertedData.dates || [];
+                            window.appState.data.notes = convertedData.notes || [];
                             
                             if (window.appState.data.dates.length > 0 && !window.appState.data.dates.find(d => d.id === window.appState.activeDateId)) {
                                 window.appState.activeDateId = window.appState.data.dates[0].id;
@@ -316,8 +378,8 @@ class ImportExportManager {
                             alert('Даты и заметки успешно импортированы!');
                             
                         } else if (isWavesOnly) {
-                            window.appState.data.waves = data.waves || [];
-                            window.appState.data.groups = data.groups || [];
+                            window.appState.data.waves = convertedData.waves || [];
+                            window.appState.data.groups = convertedData.groups || [];
                             
                             const standardGroups = ['classic-group', 'experimental-group', '120-waves-group', '31-waves-group', 'default-group'];
                             standardGroups.forEach(groupId => {
@@ -347,7 +409,6 @@ class ImportExportManager {
                                 window.appState.data.groups.unshift(defaultGroup);
                             }
                             
-                            // ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ ВОЛН ПРИ ИМПОРТЕ ВОЛН
                             window.appState.waveVisibility = {};
                             window.appState.waveBold = {};
                             window.appState.waveCornerColor = {};
@@ -588,7 +649,7 @@ class ImportExportManager {
                         
                         const newNote = {
                             id: window.appState.generateId(),
-                            date: noteDate,
+                            date: noteDate.getTime(), // Сохраняем как timestamp
                             content: noteContent
                         };
                         

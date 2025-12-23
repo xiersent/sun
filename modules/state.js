@@ -33,7 +33,7 @@ class AppState {
                 { id: 365, name: 'Текущий год', description: 'Ритм текущего года', period: 365.25, color: '#FFA500', type: 'solid', category: 'experimental', visible: true, bold: false, cornerColor: false }
             ]),
             dates: [
-                { id: 's25', date: '1990-01-25T00:00:00.000Z', name: 's25' }
+                { id: 's25', date: new Date('1990-01-25T00:00:00.000Z').getTime(), name: 's25' } // ИЗМЕНЕНО: timestamp вместо строки
             ],
             notes: [],
             groups: [
@@ -44,9 +44,9 @@ class AppState {
                 { id: '31-waves-group', name: '31 колосок', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false }
             ],
             uiSettings: {
-                currentDate: new Date().toISOString(),
-                baseDate: new Date().toISOString(),
-                currentDay: 0, // ← Инициализируем как 0, но при загрузке перезапишется из сохраненных данных
+                currentDate: Date.now(), // ИЗМЕНЕНО: timestamp вместо строки
+                baseDate: Date.now(), // ИЗМЕНЕНО: timestamp вместо строки
+                currentDay: 0,
                 transform: { scaleX: 1, scaleY: 1, rotation: 0 },
                 uiHidden: false,
                 graphHidden: false,
@@ -172,6 +172,8 @@ class AppState {
                 const data = JSON.parse(saved);
                 this.data = data;
                 
+				this.convertDatesToTimestamp();
+                
                 const has120Waves = this.data.waves.some(w => {
                     const waveIdStr = String(w.id);
                     return waveIdStr.startsWith('wave-120-');
@@ -241,21 +243,19 @@ class AppState {
                     this.data.groups.unshift(defaultGroup);
                 }
                 
-                // ВАЖНО: Загружаем currentDate и baseDate из сохраненных данных
+                // ВАЖНО: Загружаем currentDate и baseDate из сохраненных данных (теперь это timestamp)
                 this.currentDate = new Date(data.uiSettings.currentDate);
                 this.baseDate = new Date(data.uiSettings.baseDate);
                 
                 // ВАЖНО: Загружаем currentDay из сохраненных данных
-                // Если в сохраненных данных currentDay есть и он валиден - используем его
                 if (data.uiSettings.currentDay !== undefined && 
                     data.uiSettings.currentDay !== null &&
                     typeof data.uiSettings.currentDay === 'number' &&
                     !isNaN(data.uiSettings.currentDay)) {
                     this.currentDay = data.uiSettings.currentDay;
                 } else {
-                    // Иначе пересчитываем
                     console.log('currentDay в сохраненных данных некорректен, пересчитываем...');
-                    this.currentDay = 0; // Временное значение, будет пересчитано позже
+                    this.currentDay = 0;
                 }
                 
                 this.transform = data.uiSettings.transform;
@@ -310,7 +310,6 @@ class AppState {
                 this.waveBold = {};
                 this.waveCornerColor = {};
                 
-                // Загружаем сохраненные состояния
                 if (data.uiSettings.waveVisibility) {
                     this.waveVisibility = data.uiSettings.waveVisibility;
                 }
@@ -321,7 +320,6 @@ class AppState {
                     this.waveCornerColor = data.uiSettings.waveCornerColor;
                 }
                 
-                // Инициализируем состояния, если их нет
                 this.data.waves.forEach(wave => {
                     const waveIdStr = String(wave.id);
                     if (this.waveVisibility[waveIdStr] === undefined) {
@@ -341,7 +339,6 @@ class AppState {
                 console.log('currentDate:', this.currentDate);
                 console.log('currentDay:', this.currentDay);
                 
-                // НОВОЕ: Автоматически запускаем forceInitialize после загрузки
                 setTimeout(() => {
                     if (window.dates && window.dates.forceInitialize) {
                         console.log('AppState: автоматический вызов forceInitialize после загрузки');
@@ -357,6 +354,57 @@ class AppState {
             this.reset();
         }
     }
+
+// Добавить новый метод для конвертации дат
+convertDatesToTimestamp() {
+    // Конвертировать даты в dates
+    this.data.dates.forEach(date => {
+        if (date.date && !this.isTimestamp(date.date)) {
+            try {
+                const dateObj = new Date(date.date);
+                if (!isNaN(dateObj.getTime())) {
+                    date.date = dateObj.getTime(); // Сохраняем как timestamp
+                }
+            } catch (e) {
+                console.warn('Ошибка конвертации даты:', date.date, e);
+            }
+        }
+    });
+    
+    // Конвертировать даты в notes
+    this.data.notes.forEach(note => {
+        if (note.date && !this.isTimestamp(note.date)) {
+            try {
+                const dateObj = new Date(note.date);
+                if (!isNaN(dateObj.getTime())) {
+                    note.date = dateObj.getTime();
+                }
+            } catch (e) {
+                console.warn('Ошибка конвертации даты заметки:', note.date, e);
+            }
+        }
+    });
+    
+    // Конвертировать uiSettings даты
+    ['currentDate', 'baseDate'].forEach(key => {
+        if (this.data.uiSettings[key] && !this.isTimestamp(this.data.uiSettings[key])) {
+            try {
+                const dateObj = new Date(this.data.uiSettings[key]);
+                if (!isNaN(dateObj.getTime())) {
+                    this.data.uiSettings[key] = dateObj.getTime();
+                }
+            } catch (e) {
+                console.warn(`Ошибка конвертации ${key}:`, e);
+            }
+        }
+    });
+}
+
+isTimestamp(value) {
+    // Проверяем, является ли значение timestamp (числом)
+    return typeof value === 'number' && !isNaN(value) && value > 0;
+}
+
     
     reset() {
         this.data = JSON.parse(JSON.stringify(this.initialData));
@@ -389,7 +437,6 @@ class AppState {
         this.waveOriginalColors = {};
         this.periods = {};
         
-        // ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЙ ВОЛН
         this.waveVisibility = {};
         this.waveBold = {};
         this.waveCornerColor = {};
@@ -401,37 +448,45 @@ class AppState {
             this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
         });
         
-        // Сохраняем начальные состояния в uiSettings
         this.data.uiSettings.waveVisibility = this.waveVisibility;
         this.data.uiSettings.waveBold = this.waveBold;
         this.data.uiSettings.waveCornerColor = this.waveCornerColor;
     }
     
-    save() {
-        this.data.uiSettings.currentDate = this.currentDate.toISOString();
-        this.data.uiSettings.baseDate = this.baseDate.toISOString();
-        this.data.uiSettings.currentDay = this.currentDay;
-        this.data.uiSettings.transform = this.transform;
-        this.data.uiSettings.uiHidden = this.uiHidden;
-        this.data.uiSettings.graphHidden = this.graphHidden;
-        this.data.uiSettings.graphBgWhite = this.graphBgWhite;
-        this.data.uiSettings.showStars = this.showStars;
-        this.data.uiSettings.grayMode = this.grayMode;
-        this.data.uiSettings.graphGrayMode = this.graphGrayMode;
-        this.data.uiSettings.showTooltips = this.showTooltips;
-        this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
-        this.data.uiSettings.activeDateId = this.activeDateId;
-        this.data.uiSettings.editingDateId = this.editingDateId;
-        this.data.uiSettings.editingWaveId = this.editingWaveId;
-        this.data.uiSettings.editingGroupId = this.editingGroupId;
-        
-        // СОХРАНЕНИЕ СОСТОЯНИЙ ВОЛН
-        this.data.uiSettings.waveVisibility = this.waveVisibility;
-        this.data.uiSettings.waveBold = this.waveBold;
-        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
-        
-        localStorage.setItem('appData', JSON.stringify(this.data));
-    }
+	save() {
+		// Сохраняем как timestamp
+		this.data.uiSettings.currentDate = this.currentDate.getTime();
+		
+		// baseDate может быть как Date объектом, так и timestamp
+		if (this.baseDate instanceof Date) {
+			this.data.uiSettings.baseDate = this.baseDate.getTime();
+		} else if (typeof this.baseDate === 'number') {
+			this.data.uiSettings.baseDate = this.baseDate;
+		} else {
+			this.data.uiSettings.baseDate = Date.now();
+		}
+		
+		this.data.uiSettings.currentDay = this.currentDay;
+		this.data.uiSettings.transform = this.transform;
+		this.data.uiSettings.uiHidden = this.uiHidden;
+		this.data.uiSettings.graphHidden = this.graphHidden;
+		this.data.uiSettings.graphBgWhite = this.graphBgWhite;
+		this.data.uiSettings.showStars = this.showStars;
+		this.data.uiSettings.grayMode = this.grayMode;
+		this.data.uiSettings.graphGrayMode = this.graphGrayMode;
+		this.data.uiSettings.showTooltips = this.showTooltips;
+		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
+		this.data.uiSettings.activeDateId = this.activeDateId;
+		this.data.uiSettings.editingDateId = this.editingDateId;
+		this.data.uiSettings.editingWaveId = this.editingWaveId;
+		this.data.uiSettings.editingGroupId = this.editingGroupId;
+		
+		this.data.uiSettings.waveVisibility = this.waveVisibility;
+		this.data.uiSettings.waveBold = this.waveBold;
+		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+		
+		localStorage.setItem('appData', JSON.stringify(this.data));
+	}
     
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);

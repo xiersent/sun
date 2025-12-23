@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
+    // Запускаем миграцию данных если нужно
+    if (window.TimestampMigrator) {
+        console.log('Проверка формата данных перед инициализацией...');
+        const migrationReport = window.TimestampMigrator.showMigrationReport();
+        console.log('Результат проверки:', migrationReport.message);
+    }
+    
     try {
         window.appState.load();
         
@@ -57,7 +64,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Создаем UnifiedListManager...');
             window.unifiedListManager = new UnifiedListManager();
             
-            // НАЧИНАЕМ загрузку шаблонов как можно раньше
             console.log('Начинаем предварительную загрузку шаблонов...');
             window.unifiedListManager.initTemplates().catch(err => {
                 console.error('Предварительная загрузка шаблонов не удалась:', err);
@@ -93,7 +99,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert(`Ошибка при инициализации приложения: ${error.message}\n\nПроверьте консоль для подробностей.`);
     }
     
-    // ГАРАНТИЯ: Финальная проверка через 500мс
     setTimeout(() => {
         console.log('=== ФИНАЛЬНАЯ ПРОВЕРКА ===');
         console.log('appState.activeDateId:', window.appState?.activeDateId);
@@ -107,12 +112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Количество загруженных шаблонов:', Object.keys(window.unifiedListManager.templateCache).length);
         }
         
-        // УСИЛЕННАЯ ПРОВЕРКА currentDay
         const currentDayValue = window.appState?.currentDay;
         console.log('Тип currentDay:', typeof currentDayValue);
         console.log('Значение currentDay:', currentDayValue);
         
-        // Только если currentDay действительно некорректен
         if (currentDayValue === undefined || 
             currentDayValue === null || 
             typeof currentDayValue !== 'number' ||
@@ -130,12 +133,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('currentDay корректен:', currentDayValue);
         }
         
-        // Проверяем элемент currentDay в DOM
         const currentDayElement = document.getElementById('currentDay');
         if (currentDayElement) {
             console.log('DOM элемент currentDay найден, значение:', currentDayElement.textContent);
             
-            // Обновляем только если в DOM отличается от appState
             if (currentDayElement.textContent !== String(window.appState.currentDay)) {
                 currentDayElement.textContent = window.appState.currentDay;
                 console.log('Обновили DOM элемент currentDay на:', window.appState.currentDay);
@@ -144,19 +145,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('DOM элемент currentDay не найден!');
         }
         
-        // ФИНАЛЬНАЯ ГАРАНТИЯ: Принудительно обновить центральную дату
         if (window.grid && window.grid.updateCenterDate) {
             window.grid.updateCenterDate();
             console.log('Финальное обновление центральной даты выполнено');
         }
         
-        // Также обновляем кнопку "Сегодня"
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
         }
     }, 500);
     
-    // НОВЫЙ КОД: ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ЧЕРЕЗ 1 СЕКУНДУ
     setTimeout(() => {
         console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ===');
         
@@ -174,7 +172,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.dates.setActiveDate(window.appState.activeDateId);
             }
         } else if (window.appState && window.appState.data.dates.length > 0) {
-            // Если нет активной даты, но есть даты в списке - выбираем первую
             console.log('Нет активной даты, выбираем первую из списка');
             const firstDateId = window.appState.data.dates[0].id;
             window.appState.activeDateId = firstDateId;
@@ -182,9 +179,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.dates.setActiveDate(firstDateId);
             }
         } else {
-            // Если вообще нет дат - создаем базовую
             console.log('Нет дат в списке, устанавливаем базовую');
-            window.appState.baseDate = new Date();
+            window.appState.baseDate = new Date().getTime();
             if (window.dates && window.dates.recalculateCurrentDay) {
                 window.dates.recalculateCurrentDay();
             }
@@ -214,10 +210,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('currentDay:', window.appState?.currentDay);
         console.log('baseDate:', window.appState?.baseDate);
         console.log('currentDate:', window.appState?.currentDate);
-    }, 1000); // Даем время всем модулям загрузиться
+    }, 1000);
 });
 
-// Глобальные функции для onclick обработчиков
 if (!window.app) {
     window.app = {
         toggleSpoiler: function(button) {
