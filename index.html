@@ -73,6 +73,39 @@
                         <button class="ui-btn" data-action="resetAll">Сброс всего</button>
                     </div>
                 </div>
+                <div class="top-controls">
+                    <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
+                    <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
+                    <button class="ui-btn" data-action="toggleBg">Фон</button>
+                    <button class="ui-btn" data-action="flipH">↔</button>
+                    <button class="ui-btn" data-action="flipV">↕</button>
+                    <button class="ui-btn" data-action="rotateL">↶</button>
+                    <button class="ui-btn" data-action="rotateR">↷</button>
+                    <button class="ui-btn" data-action="resetTransform">⟲</button>
+                    <button id="btnPrevDay" class="ui-btn">←</button>
+                    <button class="current-day ui-btn" id="currentDay">0</button>
+                    <button id="btnNextDay" class="ui-btn">→</button>
+                    <button id="btnToday" class="ui-btn">Сегодня</button>
+                    <input type="date" class="date-input" id="mainDateInput" style="flex:0">
+                    <button id="btnSetDate" class="ui-btn">Перейти</button>
+                </div>
+				<div class="graph-section">
+					<div class="graph-container" id="graphContainer">
+						<div class="graph" id="graphElement">
+							<div class="axis x-axis"></div>
+							<div class="axis y-axis"></div>
+							<div class="center-date-label" id="centerDateLabel">
+								<div class="center-date-date">06.12.2025</div>
+								<div class="center-name-container">
+									<div class="center-date-name">Название даты</div>
+									<div class="center-date-star">★</div>
+								</div>
+								<div class="center-date-weekday">Суббота</div>
+							</div>
+							<div class="zoom-overlay" id="zoomOverlay"></div>
+						</div>
+					</div>
+				</div>
                 <div class="main-controls-panel">
                     <div class="control-panel">
                         <div class="panel-section" id="dates-panel">
@@ -140,42 +173,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="top-controls">
-                    <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
-                    <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
-                    <button class="ui-btn" data-action="toggleBg">Фон</button>
-                    <button class="ui-btn" data-action="flipH">↔</button>
-                    <button class="ui-btn" data-action="flipV">↕</button>
-                    <button class="ui-btn" data-action="rotateL">↶</button>
-                    <button class="ui-btn" data-action="rotateR">↷</button>
-                    <button class="ui-btn" data-action="resetTransform">⟲</button>
-                    <button id="btnPrevDay" class="ui-btn">←</button>
-                    <button class="current-day ui-btn" id="currentDay">0</button>
-                    <button id="btnNextDay" class="ui-btn">→</button>
-                    <button id="btnToday" class="ui-btn">Сегодня</button>
-                    <input type="date" class="date-input" id="mainDateInput" style="flex:0">
-                    <button id="btnSetDate" class="ui-btn">Перейти</button>
-                </div>
             </div>
         </div>
-        
-        <div class="graph-section">
-            <div class="graph-container" id="graphContainer">
-                <div class="graph" id="graphElement">
-                    <div class="axis x-axis"></div>
-                    <div class="axis y-axis"></div>
-                    <div class="center-date-label" id="centerDateLabel">
-                        <div class="center-date-date">06.12.2025</div>
-                        <div class="center-name-container">
-                            <div class="center-date-name">Название даты</div>
-                            <div class="center-date-star">★</div>
-                        </div>
-                        <div class="center-date-weekday">Суббота</div>
-                    </div>
-                    <div class="zoom-overlay" id="zoomOverlay"></div>
-                </div>
-            </div>
-        </div>
+
         
         <div class="panel-section" id="notes-panel">
             <div class="notes-panel-layout">

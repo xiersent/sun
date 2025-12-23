@@ -91,12 +91,6 @@ class AppCore {
         // Продолжаем стандартную инициализацию для десктопов
         console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
         
-        // ВАЖНОЕ ИСПРАВЛЕНИЕ: 1. СНАЧАЛА активируем дефолтную дату и РАССЧИТЫВАЕМ currentDay
-        this.activateDefaultDateOnStartup();
-        
-        // 2. ОБНОВЛЯЕМ currentDay элемент СРАЗУ
-        this.updateCurrentDayElement();
-        
         // Устанавливаем режим отображения звезд/имен
         if (window.appState.showStars) {
             document.body.classList.add('stars-mode');
@@ -106,7 +100,7 @@ class AppCore {
             document.body.classList.add('names-mode');
         }
         
-        // 3. ПОТОМ инициализируем волны и сетку
+        // Инициализируем волны и сетку
         if (window.waves && window.waves.init) {
             window.waves.init();
         }
@@ -115,7 +109,7 @@ class AppCore {
             window.grid.createGrid();
         }
         
-        // 4. Обновление UI через единый менеджер списков
+        // Обновление UI через единый менеджер списков
         if (window.dataManager) {
             window.dataManager.updateDateList();
             window.dataManager.updateWavesGroups();
@@ -162,31 +156,10 @@ class AppCore {
             }
         }
         
-        // ГАРАНТИЯ: Выполнить финальное обновление через 100мс
-        setTimeout(() => {
-            console.log('AppCore: финальное обновление UI...');
-            console.log('Текущий currentDay:', window.appState.currentDay);
-            console.log('Текущая дата визора:', window.appState.currentDate);
-            console.log('Базовая дата:', window.appState.baseDate);
-            
-            // Еще раз обновляем currentDay
-            if (window.dates && window.dates.recalculateCurrentDay) {
-                window.dates.recalculateCurrentDay();
-            }
-            
-            // Обновляем DOM элемент
-            this.updateCurrentDayElement();
-            
-            // Обновляем позиции волн
-            if (window.waves && window.waves.updatePosition) {
-                window.waves.updatePosition();
-            }
-            
-            // Обновляем кнопку "Сегодня"
-            if (window.dates && window.dates.updateTodayButton) {
-                window.dates.updateTodayButton();
-            }
-        }, 100);
+        // Обновляем кнопку "Сегодня"
+        if (window.dates && window.dates.updateTodayButton) {
+            window.dates.updateTodayButton();
+        }
     }
     
     // Метод для получения версии из файла
@@ -623,228 +596,6 @@ class AppCore {
         });
         
         console.log('AppCore: обработчики событий настроены');
-    }
-    
-    // НОВЫЙ МЕТОД: Активация дефолтной даты при старте
-    activateDefaultDateOnStartup() {
-        console.log('AppCore: проверка активации дефолтной даты при старте...');
-        
-        const hasValidActiveDate = window.appState.activeDateId && 
-                                  window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
-        
-        if (!hasValidActiveDate || !window.appState.baseDate || isNaN(window.appState.baseDate.getTime())) {
-            console.log('AppCore: активная дата не установлена или некорректна, активируем дефолтную...');
-            
-            // Находим дефолтную дату (s25)
-            const defaultDateId = 's25';
-            const defaultDate = window.appState.data.dates.find(d => d.id === defaultDateId);
-            
-            if (defaultDate) {
-                console.log('AppCore: активируем дефолтную дату через DatesManager:', defaultDateId);
-                
-                // ГАРАНТИЯ: Проверяем, что dates инициализирован
-                if (window.dates && window.dates.setActiveDate) {
-                    window.dates.setActiveDate(defaultDateId);
-                } else {
-                    console.error('AppCore: DatesManager не инициализирован, выполняем ручную активацию');
-                    
-                    // Ручная активация с гарантией расчета currentDay
-                    window.appState.activeDateId = defaultDateId;
-                    
-                    try {
-                        const date = new Date(defaultDate.date);
-                        if (isNaN(date.getTime())) {
-                            throw new Error('Некорректная дата в объекте');
-                        }
-                        
-                        window.appState.baseDate = new Date(date);
-                        console.log('AppCore: установлена базовая дата из дефолтной:', defaultDate.date);
-                        
-                        // ВАЖНО: Пересчитываем текущий день СРАЗУ
-                        if (window.dates && window.dates.recalculateCurrentDay) {
-                            window.dates.recalculateCurrentDay();
-                        } else {
-                            // Fallback: ручной расчет
-                            window.appState.currentDay = this.getDaysBetweenDates(
-                                window.appState.baseDate, 
-                                window.appState.currentDate
-                            );
-                            console.log('AppCore: currentDay рассчитан вручную:', window.appState.currentDay);
-                        }
-                        
-                        // Гарантируем создание волн
-                        this.activateWavesForDefaultDate();
-                        
-                        // Сохраняем
-                        window.appState.save();
-                        
-                        // ВАЖНО: Обновляем DOM элемент currentDay
-                        this.updateCurrentDayElement();
-                        
-                    } catch (error) {
-                        console.error('AppCore: ошибка активации дефолтной даты:', error);
-                        // Если ошибка, устанавливаем сегодняшнюю дату
-                        this.fallbackToToday();
-                    }
-                }
-            } else {
-                console.error('AppCore: дефолтная дата не найдена в данных');
-                this.fallbackToFirstDateOrToday();
-            }
-        } else {
-            console.log('AppCore: активная дата уже корректно установлена:', window.appState.activeDateId);
-            
-            // ВАЖНО: Даже если дата уже активна, нужно АКТИВИРОВАТЬ ВОЛНЫ СРАЗУ
-            // и пересчитать currentDay
-            if (window.dates && window.dates.recalculateCurrentDay) {
-                window.dates.recalculateCurrentDay();
-                console.log('AppCore: currentDay пересчитан:', window.appState.currentDay);
-            }
-            
-            // Обновляем DOM элемент currentDay
-            this.updateCurrentDayElement();
-            
-            this.activateWavesForDefaultDate();
-        }
-    }
-
-    // НОВЫЙ МЕТОД: Активация волн для дефолтной даты
-    activateWavesForDefaultDate() {
-        console.log('AppCore: активация волн для активной даты...');
-        
-        if (!window.waves) {
-            console.error('AppCore: WavesManager не доступен');
-            return;
-        }
-        
-        // 1. Удаляем старые контейнеры волн
-        document.querySelectorAll('.wave-container').forEach(c => c.remove());
-        window.waves.waveContainers = {};
-        window.waves.wavePaths = {};
-        
-        // 2. Создаем элементы волн ЗАНОВО для активной даты
-        // Пересоздаем ВСЕ волны, но с учетом видимости и включенных групп
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            
-            // Проверяем, включена ли хоть одна группа с этой волной
-            let isGroupEnabled = false;
-            for (const group of window.appState.data.groups) {
-                if (group.waves && group.waves.some(wId => String(wId) === waveIdStr)) {
-                    if (group.enabled) {
-                        isGroupEnabled = true;
-                        break;
-                    }
-                }
-            }
-            
-            // Создаем волну, если она видима и её группа включена
-            if (isWaveVisible && isGroupEnabled) {
-                window.waves.createWaveElement(wave);
-            }
-        });
-        
-        // 3. Обновляем позицию волн относительно текущей даты
-        if (window.waves.updatePosition) {
-            window.waves.updatePosition();
-        }
-        
-        // 4. Обновляем цвета угловых квадратов
-        if (window.waves.updateCornerSquareColors) {
-            window.waves.updateCornerSquareColors();
-        }
-        
-        console.log('AppCore: волны активированы для активной даты');
-    }
-
-    // НОВЫЙ МЕТОД: Откат к сегодняшней дате
-    fallbackToToday() {
-        console.log('AppCore: fallbackToToday - устанавливаем сегодняшнюю дату');
-        
-        window.appState.baseDate = new Date();
-        window.appState.currentDate = new Date();
-        window.appState.activeDateId = null;
-        
-        // ГАРАНТИЯ: Рассчитываем currentDay
-        if (window.dates && window.dates.recalculateCurrentDay) {
-            window.dates.recalculateCurrentDay();
-        } else {
-            // Ручной расчет
-            const utc1 = Date.UTC(window.appState.baseDate.getFullYear(), 
-                                 window.appState.baseDate.getMonth(), 
-                                 window.appState.baseDate.getDate());
-            const utc2 = Date.UTC(window.appState.currentDate.getFullYear(), 
-                                 window.appState.currentDate.getMonth(), 
-                                 window.appState.currentDate.getDate());
-            window.appState.currentDay = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-            console.log('currentDay рассчитан вручную:', window.appState.currentDay);
-        }
-        
-        // Обновляем DOM элемент
-        this.updateCurrentDayElement();
-        
-        // Сохраняем
-        window.appState.save();
-        
-        console.log('Установлена сегодняшняя дата как базовая');
-        
-        this.activateWavesForDefaultDate();
-        
-        if (window.grid && window.grid.createGrid) {
-            window.grid.createGrid();
-        }
-        if (window.grid && window.grid.updateCenterDate) {
-            window.grid.updateCenterDate();
-        }
-    }
-
-    // НОВЫЙ МЕТОД: Откат к первой дате или сегодняшней
-    fallbackToFirstDateOrToday() {
-        // Если нет дефолтной даты, берем первую из списка
-        if (window.appState.data.dates && window.appState.data.dates.length > 0) {
-            const firstDate = window.appState.data.dates[0];
-            console.log('AppCore: используем первую дату из списка:', firstDate.id);
-            if (window.dates && window.dates.setActiveDate) {
-                window.dates.setActiveDate(firstDate.id);
-            }
-        } else {
-            // Если вообще нет дат, устанавливаем сегодняшнюю
-            console.log('AppCore: нет дат в списке, устанавливаем сегодняшнюю');
-            this.fallbackToToday();
-        }
-    }
-    
-    // НОВЫЙ МЕТОД: Расчет дней между датами (для fallback)
-    getDaysBetweenDates(date1, date2) {
-        if (!date1 || !date2) return 0;
-        
-        try {
-            const d1 = new Date(date1);
-            const d2 = new Date(date2);
-            
-            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
-                return 0;
-            }
-            
-            const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-            const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-            return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-        } catch (error) {
-            console.error('Ошибка расчета дней между датами:', error);
-            return 0;
-        }
-    }
-    
-    // НОВЫЙ МЕТОД: Обновление DOM элемента currentDay
-    updateCurrentDayElement() {
-        const currentDayElement = document.getElementById('currentDay');
-        if (currentDayElement) {
-            currentDayElement.textContent = window.appState.currentDay || 0;
-            console.log('AppCore: DOM элемент currentDay обновлен:', window.appState.currentDay);
-        } else {
-            console.warn('AppCore: элемент currentDay не найден в DOM');
-        }
     }
 }
 

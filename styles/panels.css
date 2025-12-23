@@ -353,7 +353,6 @@
     gap: var(--spacing-sm);
     flex-wrap: wrap;
     width: 100%;
-    margin-bottom: var(--spacing-md);
 }
 
 .top-controls > * {
