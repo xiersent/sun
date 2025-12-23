@@ -203,6 +203,29 @@ class AppCore {
 		
 		// Замените старый код на вызов нового метода:
 		await this.initializeAppComponents();
+        
+        // ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ - добавляем этот блок
+        console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ В AppCore ===');
+        
+        // Даем время всем модулям загрузиться
+        setTimeout(() => {
+            if (window.dates) {
+                // Вызываем force initialize
+                if (window.dates.forceInitialize) {
+                    window.dates.forceInitialize();
+                } else {
+                    // Fallback: базовая инициализация
+                    if (window.dates.recalculateCurrentDay) {
+                        window.dates.recalculateCurrentDay();
+                    }
+                    if (window.appState.activeDateId && window.dates.setActiveDate) {
+                        window.dates.setActiveDate(window.appState.activeDateId);
+                    }
+                }
+            }
+        }, 500);
+		
+		console.log('AppCore: инициализация завершена');
 	}
 
     

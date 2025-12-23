@@ -155,6 +155,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.dates.updateTodayButton();
         }
     }, 500);
+    
+    // НОВЫЙ КОД: ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ЧЕРЕЗ 1 СЕКУНДУ
+    setTimeout(() => {
+        console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ===');
+        
+        // 1. Всегда пересчитываем currentDay
+        if (window.dates && window.dates.recalculateCurrentDay) {
+            console.log('Принудительный пересчет currentDay...');
+            const result = window.dates.recalculateCurrentDay();
+            console.log('Результат recalculateCurrentDay():', result);
+        }
+        
+        // 2. Всегда устанавливаем активную дату (даже если она уже активна)
+        if (window.appState && window.appState.activeDateId) {
+            console.log('Устанавливаем активную дату:', window.appState.activeDateId);
+            if (window.dates && window.dates.setActiveDate) {
+                window.dates.setActiveDate(window.appState.activeDateId);
+            }
+        } else if (window.appState && window.appState.data.dates.length > 0) {
+            // Если нет активной даты, но есть даты в списке - выбираем первую
+            console.log('Нет активной даты, выбираем первую из списка');
+            const firstDateId = window.appState.data.dates[0].id;
+            window.appState.activeDateId = firstDateId;
+            if (window.dates && window.dates.setActiveDate) {
+                window.dates.setActiveDate(firstDateId);
+            }
+        } else {
+            // Если вообще нет дат - создаем базовую
+            console.log('Нет дат в списке, устанавливаем базовую');
+            window.appState.baseDate = new Date();
+            if (window.dates && window.dates.recalculateCurrentDay) {
+                window.dates.recalculateCurrentDay();
+            }
+        }
+        
+        // 3. Гарантированное обновление UI
+        if (window.dataManager) {
+            if (window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            }
+            if (window.dataManager.updateWavesGroups) {
+                window.dataManager.updateWavesGroups();
+            }
+        }
+        
+        // 4. Финишное обновление
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+        }
+        
+        if (window.dates && window.dates.updateTodayButton) {
+            window.dates.updateTodayButton();
+        }
+        
+        console.log('=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
+        console.log('activeDateId:', window.appState?.activeDateId);
+        console.log('currentDay:', window.appState?.currentDay);
+        console.log('baseDate:', window.appState?.baseDate);
+        console.log('currentDate:', window.appState?.currentDate);
+    }, 1000); // Даем время всем модулям загрузиться
 });
 
 // Глобальные функции для onclick обработчиков

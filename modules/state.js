@@ -341,6 +341,14 @@ class AppState {
                 console.log('currentDate:', this.currentDate);
                 console.log('currentDay:', this.currentDay);
                 
+                // НОВОЕ: Автоматически запускаем forceInitialize после загрузки
+                setTimeout(() => {
+                    if (window.dates && window.dates.forceInitialize) {
+                        console.log('AppState: автоматический вызов forceInitialize после загрузки');
+                        window.dates.forceInitialize();
+                    }
+                }, 100);
+                
             } catch (e) {
                 console.error('Ошибка загрузки состояния:', e);
                 this.reset();
