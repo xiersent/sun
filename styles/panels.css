@@ -18,6 +18,12 @@
 	border: 1px solid var(--clg);
 }
 
+.panel-section.buttons-panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-xs);
+}
+
 /* Контейнер для списка волн с фиксированным скроллом */
 .waves-list-container {
     overflow: hidden;
