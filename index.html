@@ -44,36 +44,35 @@
     
     <div class="interface-container">
         <div class="container">
-            <div class="controls-section">
-                <div class="transform-controls">
-                    <div class="corner-controls">
-                        <button class="ui-btn" data-action="toggleCorners">Угловые</button>
-                        <button class="ui-btn" data-action="toggleAxial">Осевые</button>
-                        <button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
-                        <button class="ui-btn" data-action="toggleSides">Боковые</button>
-                        <button class="ui-btn" data-action="toggleMiddle">Средние</button>
-                        <button class="ui-btn" data-action="toggleLeft">Левые</button>
-                        <button class="ui-btn" data-action="toggleRight">Правые</button>
-                        <button class="ui-btn" data-action="toggleTop">Верхние</button>
-                        <button class="ui-btn" data-action="toggleBottom">Нижние</button>
-                        <button class="ui-btn" data-action="toggleAllSquares">Все</button>
-                        <!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
-                        <button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
-                    </div>
-                    <div class="transform-row">
-                        <button class="ui-btn" data-action="toggleUI">Переключить UI</button>
-                        <button class="ui-btn" data-action="toggleSquares">Квадратики</button>
-                        <button class="ui-btn" data-action="toggleGrayMode">Серость</button>
-                        <button class="ui-btn" data-action="toggleStars">Звездочки</button>
-                        <button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
-                        <button class="ui-btn" data-action="exportDates">Экспорт дат</button>
-                        <button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
-                        <button class="ui-btn" data-action="exportAll">Экспорт всего</button>
-                        <button class="ui-btn" data-action="importAll">Импорт</button>
-                        <input type="file" id="importAllFile" accept=".json" style="display:none">
-                        <button class="ui-btn" data-action="resetAll">Сброс всего</button>
-                    </div>
-                </div>
+
+			<div class="corner-controls">
+				<button class="ui-btn" data-action="toggleCorners">Угловые</button>
+				<button class="ui-btn" data-action="toggleAxial">Осевые</button>
+				<button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
+				<button class="ui-btn" data-action="toggleSides">Боковые</button>
+				<button class="ui-btn" data-action="toggleMiddle">Средние</button>
+				<button class="ui-btn" data-action="toggleLeft">Левые</button>
+				<button class="ui-btn" data-action="toggleRight">Правые</button>
+				<button class="ui-btn" data-action="toggleTop">Верхние</button>
+				<button class="ui-btn" data-action="toggleBottom">Нижние</button>
+				<button class="ui-btn" data-action="toggleAllSquares">Все</button>
+				<!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
+				<button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
+			</div>
+			<div class="transform-row">
+				<button class="ui-btn" data-action="toggleUI">Переключить UI</button>
+				<button class="ui-btn" data-action="toggleSquares">Квадратики</button>
+				<button class="ui-btn" data-action="toggleGrayMode">Серость</button>
+				<button class="ui-btn" data-action="toggleStars">Звездочки</button>
+				<button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
+				<button class="ui-btn" data-action="exportDates">Экспорт дат</button>
+				<button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
+				<button class="ui-btn" data-action="exportAll">Экспорт всего</button>
+				<button class="ui-btn" data-action="importAll">Импорт</button>
+				<input type="file" id="importAllFile" accept=".json" style="display:none">
+				<button class="ui-btn" data-action="resetAll">Сброс всего</button>
+			</div>
+
                 <div class="top-controls">
                     <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
                     <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
@@ -154,14 +153,16 @@
                                             <label class="intersection-form-label">Эталонный период:</label>
                                             <input type="number" class="intersection-form-input" id="intersectionBasePeriod" placeholder="Период в днях" min="0.1" step="0.1" value="24">
                                         </div>
-                                        <div class="intersection-form-row">
-                                            <label class="intersection-form-label">Амплитуда эталона:</label>
-                                            <input type="number" class="intersection-form-input" id="intersectionBaseAmplitude" placeholder="Амплитуда" min="0.1" step="0.1" value="1">
-                                        </div>
-                                        <div class="intersection-form-row">
-                                            <label class="intersection-form-label">Порог совпадения:</label>
-                                            <input type="number" class="intersection-form-input" id="intersectionPrecision" placeholder="Точность (0-1)" min="0" max="1" step="0.01" value="0.95">
-                                        </div>
+										<div>
+											<div class="intersection-form-row">
+												<label class="intersection-form-label">Амплитуда эталона:</label>
+												<input type="number" class="intersection-form-input" id="intersectionBaseAmplitude" placeholder="Амплитуда" min="0.1" step="0.1" value="1">
+											</div>
+											<div class="intersection-form-row">
+												<label class="intersection-form-label">Порог совпадения:</label>
+												<input type="number" class="intersection-form-input" id="intersectionPrecision" placeholder="Точность (0-1)" min="0" max="1" step="0.01" value="0.95">
+											</div>
+										</div>
                                         <div class="intersection-form-actions">
                                             <button id="btnCalculateIntersections" class="ui-btn">Найти совпадения</button>
                                             <button id="btnClearIntersections" class="ui-btn">Очистить</button>
@@ -174,38 +175,36 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        
-        <div class="panel-section" id="notes-panel">
-            <div class="notes-panel-layout">
-                <div class="notes-list-container">
-                    <div class="list-container" id="notesList"></div>
-                </div>
-                <div class="note-editor-container">
-                    <div class="notes-section">
-                        <textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
-                        <button id="btnAddNote" class="ui-btn">Добавить запись</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="panel-section db-import-section">
-            <h3>Импорт базы данных</h3>
-            <div class="db-import-controls">
-                <button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
-                <input type="file" id="importDBFile" accept=".db" style="display:none">
-                <button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
-                <button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
-                <button class="ui-btn" id="btnClearImportResults">Очистить</button>
-            </div>
-            <div class="db-import-progress" id="dbImportProgress" style="display:none">
-                <div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
-            </div>
-            <div id="dbImportStatus"></div>
-            <textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
+			<div class="panel-section" id="notes-panel">
+				<div class="notes-panel-layout">
+					<div class="notes-list-container">
+						<div class="list-container" id="notesList"></div>
+					</div>
+					<div class="note-editor-container">
+						<div class="notes-section">
+							<textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
+							<button id="btnAddNote" class="ui-btn">Добавить запись</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="panel-section db-import-section">
+				<h3>Импорт базы данных</h3>
+				<div class="db-import-controls">
+					<button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
+					<input type="file" id="importDBFile" accept=".db" style="display:none">
+					<button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
+					<button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
+					<button class="ui-btn" id="btnClearImportResults">Очистить</button>
+				</div>
+				<div class="db-import-progress" id="dbImportProgress" style="display:none">
+					<div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
+				</div>
+				<div id="dbImportStatus"></div>
+				<textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
+			</div>
         </div>
     </div>
     

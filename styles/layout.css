@@ -45,7 +45,6 @@
     padding: var(--spacing-md);
     overflow: visible;
     min-width: 0;
-    margin-top: var(--spacing-md);
 }
 
 /* Контейнер для списка волн с фиксированным скроллом */
@@ -97,7 +96,7 @@
 .warning-box {
     background: #fff;
     padding: var(--spacing-xl);
-    border: 1px solid var(--cp);
+    border: 1px solid var(--clg);
     max-width: 500px;
     text-align: center;
 }

@@ -138,14 +138,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('DOM элемент currentDay не найден!');
         }
         
-        // Принудительно вызываем forceUpdateCurrentDay если currentDay все еще 0
+        // УДАЛЕНО: Принудительно вызывать forceUpdateCurrentDay если currentDay все еще 0
+        // Вместо этого просто логируем состояние
         if (window.appState && window.appState.currentDay === 0) {
-            console.log('currentDay все еще 0, вызываем forceUpdateCurrentDay...');
-            if (window.forceUpdateCurrentDay) {
-                setTimeout(() => {
-                    window.forceUpdateCurrentDay();
-                }, 200);
-            }
+            console.log('Текущий currentDay равен 0, проверьте настройки дат');
         }
     }, 500);
 });

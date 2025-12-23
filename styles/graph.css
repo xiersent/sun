@@ -40,7 +40,7 @@
 /* Оси */
 .axis {
     position: absolute;
-    background-color: #000;
+    background-color: #c9c9c9;
     z-index: 5;
 	cursor: pointer;
 	pointer-events: none;

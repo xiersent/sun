@@ -75,154 +75,146 @@ class AppCore {
         this.initializeApp();
     }
     
-    async initializeApp() {
-        // Проверяем мобильное устройство
-        const isMobile = this.isMobileDevice();
-        
-        if (isMobile) {
-            // Для мобильных - показываем только предупреждение
-            this.showWarning();
-            // Добавляем класс для мобильных устройств
-            document.body.classList.add('mobile-device');
-            console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
-            return; // Прерываем дальнейшую инициализацию
-        }
-        
-        // Продолжаем стандартную инициализацию для десктопов
-        console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
-        
-        // Устанавливаем режим отображения звезд/имен
-        if (window.appState.showStars) {
-            document.body.classList.add('stars-mode');
-            document.body.classList.remove('names-mode');
-        } else {
-            document.body.classList.remove('stars-mode');
-            document.body.classList.add('names-mode');
-        }
-        
-        // ВАЖНОЕ ИЗМЕНЕНИЕ: Ждем загрузки шаблонов перед рендерингом UI
-        console.log('AppCore: ожидание загрузки шаблонов...');
-        
-        if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
-            try {
-                // Начинаем загрузку шаблонов
-                const templatesPromise = window.unifiedListManager.initTemplates();
-                
-                // Пока шаблоны грузятся, инициализируем остальные компоненты
-                if (window.waves && window.waves.init) {
-                    window.waves.init();
-                }
-                
-                if (window.grid && window.grid.createGrid) {
-                    window.grid.createGrid();
-                }
-                
-                // Ждем завершения загрузки шаблонов
-                await templatesPromise;
-                console.log('AppCore: шаблоны загружены успешно');
-                
-            } catch (error) {
-                console.error('AppCore: ошибка загрузки шаблонов:', error);
-                // Продолжаем работу даже с ошибкой
-            }
-        }
-        
-        // Теперь рендерим UI с загруженными шаблонами
-        console.log('AppCore: рендеринг UI...');
-        
-        if (window.dataManager) {
-            // Используем асинхронные вызовы
-            if (window.dataManager.updateDateList) {
-                await window.dataManager.updateDateList();
-            }
-            
-            if (window.dataManager.updateWavesGroups) {
-                await window.dataManager.updateWavesGroups();
-            }
-            
-            if (window.dataManager.updateNotesList) {
-                window.dataManager.updateNotesList();
-            }
-        }
-        
-        // ИСПРАВЛЕНИЕ: Устанавливаем фон графика ТОЛЬКО через CSS-классы
-        const graphContainer = document.getElementById('graphContainer');
-        if (graphContainer) {
-            // УДАЛЕНО: Установка inline-стилей для фона
-            // ВМЕСТО ЭТОГО: Только управление CSS-классами
-            
-            if (!window.appState.graphBgWhite) {
-                graphContainer.classList.add('dark-mode');
-            } else {
-                graphContainer.classList.remove('dark-mode');
-            }
-            
-            if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('graph-gray-mode');
-            } else {
-                graphContainer.classList.remove('graph-gray-mode');
-            }
-        }
-        
-        // ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
-        this.showWarning();
-        
-        // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
-        
-        // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
-        setTimeout(() => {
-            console.log('AppCore: проверка данных волн в группах...');
-            if (window.debugGroups) {
-                window.debugGroups();
-            }
-        }, 2000);
-        
-        // Инициализируем EventManager если он ещё не создан
-        if (!window.eventManager) {
-            console.log('AppCore: инициализация EventManager...');
-            if (typeof EventManager !== 'undefined') {
-                window.eventManager = new EventManager();
-            }
-        }
-        
-        // Обновляем кнопку "Сегодня"
-        if (window.dates && window.dates.updateTodayButton) {
-            window.dates.updateTodayButton();
-        }
-        
-        console.log('AppCore: инициализация завершена');
-    }
+
+	async initializeAppComponents() {
+		// ВАЖНОЕ ИЗМЕНЕНИЕ: Ждем загрузки шаблонов перед рендерингом UI
+		console.log('AppCore: ожидание загрузки шаблонов...');
+		
+		if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
+			try {
+				// Начинаем загрузку шаблонов
+				const templatesPromise = window.unifiedListManager.initTemplates();
+				
+				// ВАЖНО: Инициализируем волны с правильным currentDay
+				if (window.waves && window.waves.init) {
+					console.log('AppCore: инициализация WavesManager...');
+					await window.waves.init(); // Ждем инициализации волн
+				}
+				
+				if (window.grid && window.grid.createGrid) {
+					window.grid.createGrid();
+				}
+				
+				// Ждем завершения загрузки шаблонов
+				await templatesPromise;
+				console.log('AppCore: шаблоны загружены успешно');
+				
+			} catch (error) {
+				console.error('AppCore: ошибка загрузки шаблонов:', error);
+			}
+		}
+		
+		// Теперь рендерим UI с загруженными шаблонами
+		console.log('AppCore: рендеринг UI...');
+		
+		if (window.dataManager) {
+			// Используем асинхронные вызовы
+			if (window.dataManager.updateDateList) {
+				await window.dataManager.updateDateList();
+			}
+			
+			if (window.dataManager.updateWavesGroups) {
+				await window.dataManager.updateWavesGroups();
+			}
+			
+			if (window.dataManager.updateNotesList) {
+				window.dataManager.updateNotesList();
+			}
+		}
+		
+		// ИСПРАВЛЕНИЕ: Устанавливаем фон графика ТОЛЬКО через CSS-классы
+		const graphContainer = document.getElementById('graphContainer');
+		if (graphContainer) {
+			// УДАЛЕНО: Установка inline-стилей для фона
+			// ВМЕСТО ЭТОГО: Только управление CSS-классами
+			
+			if (!window.appState.graphBgWhite) {
+				graphContainer.classList.add('dark-mode');
+			} else {
+				graphContainer.classList.remove('dark-mode');
+			}
+			
+			if (window.appState.graphGrayMode) {
+				graphContainer.classList.add('graph-gray-mode');
+			} else {
+				graphContainer.classList.remove('graph-gray-mode');
+			}
+		}
+		
+		// ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
+		this.showWarning();
+		
+		// НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
+		
+		// ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
+		setTimeout(() => {
+			console.log('AppCore: проверка данных волн в группах...');
+			if (window.debugGroups) {
+				window.debugGroups();
+			}
+		}, 2000);
+		
+		// Инициализируем EventManager если он ещё не создан
+		if (!window.eventManager) {
+			console.log('AppCore: инициализация EventManager...');
+			if (typeof EventManager !== 'undefined') {
+				window.eventManager = new EventManager();
+			}
+		}
+		
+		// Обновляем кнопку "Сегодня"
+		if (window.dates && window.dates.updateTodayButton) {
+			window.dates.updateTodayButton();
+		}
+		
+		console.log('AppCore: инициализация завершена');
+	}
+
+	// И измените вызов в методе initializeApp():
+	async initializeApp() {
+		// Проверяем мобильное устройство
+		const isMobile = this.isMobileDevice();
+		
+		if (isMobile) {
+			// Для мобильных - показываем только предупреждение
+			this.showWarning();
+			// Добавляем класс для мобильных устройств
+			document.body.classList.add('mobile-device');
+			console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
+			return; // Прерываем дальнейшую инициализацию
+		}
+		
+		// Продолжаем стандартную инициализацию для десктопов
+		console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
+		
+		// Устанавливаем режим отображения звезд/имен
+		if (window.appState.showStars) {
+			document.body.classList.add('stars-mode');
+			document.body.classList.remove('names-mode');
+		} else {
+			document.body.classList.remove('stars-mode');
+			document.body.classList.add('names-mode');
+		}
+		
+		// Замените старый код на вызов нового метода:
+		await this.initializeAppComponents();
+	}
+
     
     // Метод для получения версии из файла
-    async getVersion() {
-        try {
-            // Проверяем кэш
-            const cachedVersion = localStorage.getItem('appVersion');
-            const cacheTimestamp = localStorage.getItem('appVersionTimestamp');
-            const now = Date.now();
-            
-            // Если версия в кэше и не старше 24 часов, используем её
-            if (cachedVersion && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 24 * 60 * 60 * 1000) {
-                return cachedVersion;
-            }
-            
-            // Загружаем свежую версию
-            const response = await fetch('version.txt?t=' + now);
-            if (response.ok) {
-                const text = await response.text();
-                const trimmedText = text.trim();
-                
-                // Сохраняем в кэш
-                localStorage.setItem('appVersion', trimmedText);
-                localStorage.setItem('appVersionTimestamp', now.toString());
-                
-                return trimmedText;
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки версии:', error);
-        }
-        return null;
-    }
+	async getVersion() {
+		try {
+			// Пробуем загрузить версию
+			const response = await fetch('version.txt');
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл не найден)';
+		} catch (error) {
+			console.error('Ошибка загрузки версии:', error);
+			return '(ошибка загрузки)';
+		}
+	}
     
     // Метод для определения мобильного устройства
     isMobileDevice() {
