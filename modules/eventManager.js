@@ -454,6 +454,14 @@ class EventManager {
             return;
         }
         
+        // НОВЫЙ ОБРАБОТЧИК: Кнопка "Сейчас"
+        if (target.id === 'btnNow' || target.closest('#btnNow')) {
+            e.preventDefault();
+            console.log('EventManager: сейчас');
+            if (window.dates) window.dates.goToNow();
+            return;
+        }
+        
         if (target.id === 'btnSetDate' || target.closest('#btnSetDate')) {
             e.preventDefault();
             console.log('EventManager: установка даты из инпута');

@@ -59,8 +59,6 @@ class GridManager {
             topLine.style.position = 'absolute';
             topLine.style.bottom = `calc(50% + ${i * window.appState.config.squareSize}px)`;
             topLine.style.left = '0';
-            // ИСПРАВЛЕНО: Убираем inline-стиль для background-color
-            // topLine.style.backgroundColor = window.appState.graphBgWhite ? '#eee' : '#444';
             topLine.style.zIndex = '1';
             
             const bottomLine = document.createElement('div');
@@ -70,8 +68,6 @@ class GridManager {
             bottomLine.style.position = 'absolute';
             bottomLine.style.bottom = `calc(50% - ${i * window.appState.config.squareSize}px)`;
             bottomLine.style.left = '0';
-            // ИСПРАВЛЕНО: Убираем inline-стиль для background-color
-            // bottomLine.style.backgroundColor = window.appState.graphBgWhite ? '#eee' : '#444';
             bottomLine.style.zIndex = '1';
             
             document.getElementById('graphElement').appendChild(topLine);
@@ -137,13 +133,23 @@ class GridManager {
         // Гарантируем, что используем текущую дату визора
         const date = window.appState.currentDate || new Date();
         const dateStr = window.dom.formatDate(date);
+        
+        // НОВОЕ: Форматируем время с точностью до секунд
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        const timeStr = `${hours}:${minutes}:${seconds}`;
+        
         const weekday = window.dom.getWeekdayName(date, true);
         
         const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
         const name = activeDate?.name || 'Новая дата';
         
+        // НОВОЕ: Отображаем дату и время
         element.innerHTML = `
-            <div class="center-date-date">${dateStr}</div>
+			<div style="display: flex; gap: 5px; align-items: center;">
+            <div class="center-date-date">${dateStr}</div><div class="center-date-time">${timeStr}</div>
+			</div>
             <div class="center-name-container">
                 <div class="center-date-name">${name}</div>
                 <div class="center-date-star">★</div>

@@ -257,17 +257,14 @@
     color: #fff;
 }
 
-.center-date-main {
-    font-size: var(--font-size-md);
-    margin-bottom: 2px;
-}
-
-.center-date-secondary {
+/* НОВОЕ: Стили для времени в центральной метке */
+.center-date-time {
     font-size: var(--font-size-md);
     color: var(--text-secondary);
+    margin: 2px 0;
 }
 
-.graph-container.dark-mode .center-date-secondary {
+.graph-container.dark-mode .center-date-time {
     color: #ccc;
 }
 

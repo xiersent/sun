@@ -260,63 +260,72 @@ class WavesManager {
         }
     }
     
-    updatePosition() {
-        console.log('WavesManager: updatePosition вызван');
-        console.log('  currentDay:', window.appState.currentDay);
-        console.log('  baseDate:', window.appState.baseDate);
-        console.log('  currentDate:', window.appState.currentDate);
-        
-        // ВАЖНО: Проверяем, что currentDay установлен
-        if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
-            console.warn('WavesManager: currentDay не установлен, вызываем dates.recalculateCurrentDay()');
-            if (window.dates && window.dates.recalculateCurrentDay) {
-                window.dates.recalculateCurrentDay();
-            }
-        }
-        
-        // Проверяем что currentDay - число
-        if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
-            console.error('WavesManager: currentDay некорректен! Исправляем на 0');
-            window.appState.currentDay = 0;
-        }
-        
-        console.log('WavesManager: updatePosition, currentDay:', window.appState.currentDay);
-        
-        // currentDay содержит разницу в днях между базовой датой и текущей датой визора
-        window.appState.data.waves.forEach(wave => {
-            const wavePeriodPixels = window.appState.periods[wave.id] || (wave.period * window.appState.config.squareSize);
-            
-            // currentDay содержит разницу в днях между базовой датой и текущей датой визора
-            let actualPosition = window.appState.currentDay * window.appState.config.squareSize % wavePeriodPixels;
-            
-            if (actualPosition < 0) {
-                actualPosition = wavePeriodPixels + actualPosition;
-            }
-            
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            
-            // УПРОЩЕННАЯ ЛОГИКА: Показывать волну если она видима И её группа включена
-            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
-            
-            if (this.waveContainers[wave.id]) {
-                this.waveContainers[wave.id].style.transition = 'none';
-                this.waveContainers[wave.id].style.transform = `translateX(${-actualPosition}px)`;
-                this.waveContainers[wave.id].style.display = shouldShow ? 'block' : 'none';
-                
-                if (this.wavePaths[wave.id]) {
-                    this.wavePaths[wave.id].classList.toggle('bold', window.appState.waveBold[waveIdStr]);
-                }
-            }
-        });
-        
-        // Обновляем DOM элемент currentDay
-        const currentDayElement = document.getElementById('currentDay');
-        if (currentDayElement) {
-            currentDayElement.textContent = window.appState.currentDay;
-            console.log('WavesManager: DOM элемент currentDay обновлен:', window.appState.currentDay);
-        }
-    }
+
+
+	updatePosition() {
+		console.log('WavesManager: updatePosition вызван');
+		console.log('  currentDay:', window.appState.currentDay);
+		console.log('  baseDate:', window.appState.baseDate);
+		console.log('  currentDate:', window.appState.currentDate);
+		
+		// ВАЖНО: Проверяем, что currentDay установлен
+		if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
+			console.warn('WavesManager: currentDay не установлен, вызываем dates.recalculateCurrentDay()');
+			if (window.dates && window.dates.recalculateCurrentDay) {
+				window.dates.recalculateCurrentDay(false); // По умолчанию целые числа
+			}
+		}
+		
+		// Проверяем что currentDay - число
+		if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
+			console.error('WavesManager: currentDay некорректен! Исправляем на 0');
+			window.appState.currentDay = 0;
+		}
+		
+		console.log('WavesManager: updatePosition, currentDay:', window.appState.currentDay);
+		
+		// Обновляем DOM элемент currentDay (только в waves.js тоже для гарантии)
+		const currentDayElement = document.getElementById('currentDay');
+		if (currentDayElement) {
+			const currentDayValue = window.appState.currentDay || 0;
+			// Синхронизируем форматирование с dates.js
+			if (Math.floor(currentDayValue) === currentDayValue) {
+				currentDayElement.textContent = currentDayValue;
+			} else {
+				currentDayElement.textContent = currentDayValue.toFixed(3);
+			}
+			console.log('WavesManager: DOM элемент currentDay обновлен:', currentDayElement.textContent);
+		}
+		
+		// Остальная логика updatePosition остается без изменений...
+		// currentDay содержит разницу в днях между базовой датой и текущей датой визора
+		window.appState.data.waves.forEach(wave => {
+			const wavePeriodPixels = window.appState.periods[wave.id] || (wave.period * window.appState.config.squareSize);
+			
+			// currentDay содержит разницу в днях между базовой датой и текущей датой визора
+			let actualPosition = window.appState.currentDay * window.appState.config.squareSize % wavePeriodPixels;
+			
+			if (actualPosition < 0) {
+				actualPosition = wavePeriodPixels + actualPosition;
+			}
+			
+			const waveIdStr = String(wave.id);
+			const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+			
+			// УПРОЩЕННАЯ ЛОГИКА: Показывать волну если она видима И её группа включена
+			const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+			
+			if (this.waveContainers[wave.id]) {
+				this.waveContainers[wave.id].style.transition = 'none';
+				this.waveContainers[wave.id].style.transform = `translateX(${-actualPosition}px)`;
+				this.waveContainers[wave.id].style.display = shouldShow ? 'block' : 'none';
+				
+				if (this.wavePaths[wave.id]) {
+					this.wavePaths[wave.id].classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+				}
+			}
+		});
+	}
     
     // НОВЫЙ МЕТОД: Гарантированное создание элементов волн при активации даты
     createVisibleWaveElementsForActiveDate() {
