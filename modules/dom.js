@@ -1,3 +1,4 @@
+// modules/dom.js
 class DOM {
     constructor() {
         this.elements = {};
@@ -43,6 +44,70 @@ class DOM {
             console.error('Format date error:', e);
             return 'Ошибка даты';
         }
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Полное форматирование даты и времени в одну строку
+    formatDateTimeFull(timestamp) {
+        if (!timestamp) return 'Неизвестно';
+        try {
+            let date;
+            if (typeof timestamp === 'number') {
+                date = new Date(timestamp);
+            } else {
+                date = new Date(timestamp);
+            }
+            
+            if (isNaN(date.getTime())) {
+                return 'Некорректная дата';
+            }
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+        } catch (e) {
+            console.error('Format datetime error:', e);
+            return 'Ошибка даты';
+        }
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Форматирование currentDay для отображения секунд (5 знаков после запятой)
+    formatCurrentDayWithSeconds(currentDay) {
+        if (currentDay === undefined || currentDay === null || isNaN(currentDay)) {
+            return '0.00000';
+        }
+        
+        // Форматируем с 5 знаками после запятой для отображения секунд
+        // 1 день = 86400 секунд, 1 секунда ≈ 0.000011574 дней
+        // 5 знаков после запятой ≈ точность до 0.0864 секунды
+        return currentDay.toFixed(5);
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Форматирование даты для input[type="datetime-local"]
+    formatDateForDateTimeInput(timestamp) {
+        if (!timestamp) return '';
+        
+        let date;
+        if (typeof timestamp === 'number') {
+            date = new Date(timestamp);
+        } else {
+            date = new Date(timestamp);
+        }
+        
+        if (isNaN(date.getTime())) {
+            return '';
+        }
+        
+        // Формат для datetime-local: YYYY-MM-DDTHH:mm
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
     
     formatDateForInput(timestamp) {
@@ -153,7 +218,27 @@ class DOM {
         return new Date();
     }
     
-    // НОВЫЙ МЕТОД: Преобразование строки даты в timestamp
+    // НОВАЯ ФУНКЦИЯ: Преобразование строки из datetime-local в timestamp
+    stringFromDateTimeLocalToTimestamp(dateTimeString) {
+        try {
+            if (!dateTimeString) return Date.now();
+            
+            // datetime-local формат: YYYY-MM-DDTHH:mm
+            const [datePart, timePart] = dateTimeString.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hours, minutes] = timePart ? timePart.split(':').map(Number) : [0, 0];
+            
+            const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
+            if (isNaN(date.getTime())) {
+                throw new Error('Некорректная дата-время');
+            }
+            return date.getTime();
+        } catch (error) {
+            console.error('Ошибка преобразования datetime-local в timestamp:', error);
+            return Date.now();
+        }
+    }
+    
     stringToTimestamp(dateString) {
         try {
             const date = new Date(dateString);
@@ -167,7 +252,6 @@ class DOM {
         }
     }
     
-    // НОВЫЙ МЕТОД: Проверка, является ли значение timestamp
     isTimestamp(value) {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }

@@ -146,6 +146,13 @@ class AppCore {
 			}
 		}
 		
+		// НОВОЕ: Устанавливаем начальное значение в mainDateInput
+		const mainDateInput = document.getElementById('mainDateInput');
+		if (mainDateInput && window.dom) {
+			mainDateInput.value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+			console.log('AppCore: установлено начальное значение в mainDateInput:', mainDateInput.value);
+		}
+		
 		// ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
 		this.showWarning();
 		

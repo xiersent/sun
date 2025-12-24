@@ -10,6 +10,7 @@ button {
     cursor: pointer;
     font-weight: 400;
     height: 25px;
+	font-family: var(--font-family);
 }
 
 button:hover {
@@ -287,6 +288,7 @@ textarea {
     height: 100%;
     cursor: pointer;
     border: none;
+	font-family: Monospace;
 }
 
 .current-day:hover {

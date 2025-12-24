@@ -274,22 +274,23 @@ class UIManager {
         // ВСЁ! Никакой дополнительной логики не нужно
     }
     
-    updateUI() {
-        window.dataManager.updateDateList();
-        window.dataManager.updateWavesGroups();
-        window.dataManager.updateNotesList();
-        
-        if (document.getElementById('mainDateInput')) {
-            document.getElementById('mainDateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
-        }
-        if (document.getElementById('dateInput')) {
-            document.getElementById('dateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
-        }
-        
-        window.waves.updatePosition();
-        window.grid.updateCenterDate();
-        window.grid.updateGridNotesHighlight();
-    }
+	updateUI() {
+		window.dataManager.updateDateList();
+		window.dataManager.updateWavesGroups();
+		window.dataManager.updateNotesList();
+		
+		// ИЗМЕНЕНО: Используем новый метод форматирования для datetime-local
+		if (document.getElementById('mainDateInput') && window.dom) {
+			document.getElementById('mainDateInput').value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+		}
+		if (document.getElementById('dateInput')) {
+			document.getElementById('dateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
+		}
+		
+		window.waves.updatePosition();
+		window.grid.updateCenterDate();
+		window.grid.updateGridNotesHighlight();
+	}
     
     clearWaveForm() {
         document.getElementById('customWaveName').value = '';

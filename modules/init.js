@@ -1,4 +1,4 @@
-// optimized3/modules/init.js
+// modules/init.js - обновленная часть инициализации
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {
@@ -137,12 +137,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentDayElement) {
             console.log('DOM элемент currentDay найден, значение:', currentDayElement.textContent);
             
-            if (currentDayElement.textContent !== String(window.appState.currentDay)) {
-                currentDayElement.textContent = window.appState.currentDay;
-                console.log('Обновили DOM элемент currentDay на:', window.appState.currentDay);
-            }
+            // Обновляем значение в DOM
+            currentDayElement.textContent = window.dom.formatCurrentDayWithSeconds(window.appState.currentDay);
+            console.log('Обновили DOM элемент currentDay на:', currentDayElement.textContent);
         } else {
             console.error('DOM элемент currentDay не найден!');
+        }
+        
+        // НОВОЕ: Устанавливаем значение в mainDateInput при загрузке
+        const mainDateInput = document.getElementById('mainDateInput');
+        if (mainDateInput && window.dom) {
+            mainDateInput.value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+            console.log('Установлено значение в mainDateInput:', mainDateInput.value);
         }
         
         if (window.grid && window.grid.updateCenterDate) {

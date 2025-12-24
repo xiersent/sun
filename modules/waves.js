@@ -260,8 +260,6 @@ class WavesManager {
         }
     }
     
-
-
 	updatePosition() {
 		console.log('WavesManager: updatePosition вызван');
 		console.log('  currentDay:', window.appState.currentDay);
@@ -272,7 +270,7 @@ class WavesManager {
 		if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
 			console.warn('WavesManager: currentDay не установлен, вызываем dates.recalculateCurrentDay()');
 			if (window.dates && window.dates.recalculateCurrentDay) {
-				window.dates.recalculateCurrentDay(false); // По умолчанию целые числа
+				window.dates.recalculateCurrentDay(false);
 			}
 		}
 		
@@ -284,25 +282,14 @@ class WavesManager {
 		
 		console.log('WavesManager: updatePosition, currentDay:', window.appState.currentDay);
 		
-		// Обновляем DOM элемент currentDay (только в waves.js тоже для гарантии)
-		const currentDayElement = document.getElementById('currentDay');
-		if (currentDayElement) {
-			const currentDayValue = window.appState.currentDay || 0;
-			// Синхронизируем форматирование с dates.js
-			if (Math.floor(currentDayValue) === currentDayValue) {
-				currentDayElement.textContent = currentDayValue;
-			} else {
-				currentDayElement.textContent = currentDayValue.toFixed(3);
-			}
-			console.log('WavesManager: DOM элемент currentDay обновлен:', currentDayElement.textContent);
-		}
+		// УДАЛЕНО: Убираем обновление DOM элемента currentDay здесь
+		// Этот код дублирует логику из dates.js и использует другое форматирование
+		// currentDay обновляется в dates.updateCurrentDayElement()
 		
-		// Остальная логика updatePosition остается без изменений...
-		// currentDay содержит разницу в днях между базовой датой и текущей датой визора
+		// Остальная логика updatePosition...
 		window.appState.data.waves.forEach(wave => {
 			const wavePeriodPixels = window.appState.periods[wave.id] || (wave.period * window.appState.config.squareSize);
 			
-			// currentDay содержит разницу в днях между базовой датой и текущей датой визора
 			let actualPosition = window.appState.currentDay * window.appState.config.squareSize % wavePeriodPixels;
 			
 			if (actualPosition < 0) {
@@ -312,7 +299,6 @@ class WavesManager {
 			const waveIdStr = String(wave.id);
 			const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
 			
-			// УПРОЩЕННАЯ ЛОГИКА: Показывать волну если она видима И её группа включена
 			const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
 			
 			if (this.waveContainers[wave.id]) {
