@@ -22,7 +22,14 @@ class GridManager {
     createGridLine(offset) {
         const wrapper = document.createElement('div');
         wrapper.className = 'grid-wrapper';
-        wrapper.style.left = `calc(50% + ${offset * window.appState.config.squareSize - window.appState.config.squareSize / 2}px)`;
+        
+        // НОВОЕ: Учитываем дробную часть currentDay для правильного позиционирования
+        const currentDayFractional = window.appState.currentDay || 0;
+        const fractionalOffset = currentDayFractional - Math.floor(currentDayFractional);
+        
+        // Смещаем линии относительно центра с учетом дробной части дня
+        const actualOffset = offset - fractionalOffset;
+        wrapper.style.left = `calc(50% + ${actualOffset * window.appState.config.squareSize - window.appState.config.squareSize / 2}px)`;
         wrapper.style.width = `${window.appState.config.squareSize}px`;
         wrapper.setAttribute('data-day-offset', offset);
         
@@ -81,12 +88,18 @@ class GridManager {
         
         const label = document.createElement('div');
         label.className = 'labels date-labels';
-        label.style.left = `calc(50% + ${offset * window.appState.config.squareSize}px)`;
+        
+        // НОВОЕ: Учитываем дробное смещение для меток дат
+        const currentDayFractional = window.appState.currentDay || 0;
+        const fractionalOffset = currentDayFractional - Math.floor(currentDayFractional);
+        const actualOffset = offset - fractionalOffset;
+        
+        label.style.left = `calc(50% + ${actualOffset * window.appState.config.squareSize}px)`;
         label.textContent = date.getDate();
         
         const weekday = document.createElement('div');
         weekday.className = 'labels x-labels weekday-label';
-        weekday.style.left = `calc(50% + ${offset * window.appState.config.squareSize}px)`;
+        weekday.style.left = `calc(50% + ${actualOffset * window.appState.config.squareSize}px)`;
         weekday.textContent = window.dom.getWeekdayName(date);
         
         const graph = document.getElementById('graphElement');
@@ -140,16 +153,20 @@ class GridManager {
         const seconds = date.getSeconds().toString().padStart(2, '0');
         const timeStr = `${hours}:${minutes}:${seconds}`;
         
+        // НОВОЕ: Показываем дробную часть дня
+        const currentDayValue = window.appState.currentDay || 0;
+        const fractionalDay = (currentDayValue - Math.floor(currentDayValue)).toFixed(3);
+        
         const weekday = window.dom.getWeekdayName(date, true);
         
         const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
         const name = activeDate?.name || 'Новая дата';
         
-        // НОВОЕ: Отображаем дату и время
+        // НОВОЕ: Отображаем дату, время и дробную часть дня
         element.innerHTML = `
-			<div style="display: flex; gap: 5px; align-items: center;">
-            <div class="center-date-date">${dateStr}</div><div class="center-date-time">${timeStr}</div>
-			</div>
+            <div class="center-date-date">${dateStr}</div>
+            <div class="center-date-time">${timeStr}</div>
+            <div class="center-date-fractional">${fractionalDay} дня</div>
             <div class="center-name-container">
                 <div class="center-date-name">${name}</div>
                 <div class="center-date-star">★</div>

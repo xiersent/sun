@@ -369,37 +369,42 @@ class DatesManager {
         this.updateTodayButton();
     }
     
-    goToToday() {
-        console.log('=== goToToday() вызван ===');
-        console.log('До: currentDate:', window.appState.currentDate);
-        console.log('До: baseDate:', window.appState.baseDate);
-        console.log('До: currentDay:', window.appState.currentDay);
-        console.log('До: activeDateId:', window.appState.activeDateId);
-        
-        const today = new Date();
-        // Устанавливаем на начало дня (00:00:00)
-        today.setHours(0, 0, 0, 0);
-        window.appState.currentDate = new Date(today);
-        
-        console.log('После установки currentDate (начало дня):', window.appState.currentDate);
-        
-        // Пересчитываем с целыми числами (без учета времени)
-        this.recalculateCurrentDay(false);
-        
-        console.log('После recalculateCurrentDay:');
-        console.log('  currentDay (целое число):', window.appState.currentDay);
-        console.log('  baseDate:', window.appState.baseDate);
-        console.log('  currentDate:', window.appState.currentDate);
-        
-        window.grid.createGrid();
-        window.grid.updateCenterDate();
-        window.waves.updatePosition();
-        window.appState.save();
-        
-        this.updateTodayButton();
-        
-        console.log('=== goToToday() завершен ===');
-    }
+
+	goToToday() {
+		console.log('=== goToToday() вызван ===');
+		console.log('До: currentDate:', window.appState.currentDate);
+		console.log('До: baseDate:', window.appState.baseDate);
+		console.log('До: currentDay:', window.appState.currentDay);
+		console.log('До: activeDateId:', window.appState.activeDateId);
+		
+		const today = new Date();
+		// Устанавливаем на начало дня (00:00:00)
+		today.setHours(0, 0, 0, 0);
+		window.appState.currentDate = new Date(today);
+		
+		console.log('После установки currentDate (начало дня):', window.appState.currentDate);
+		
+		// Пересчитываем с целыми числами (без учета времени)
+		this.recalculateCurrentDay(false);
+		
+		console.log('После recalculateCurrentDay:');
+		console.log('  currentDay (целое число):', window.appState.currentDay);
+		console.log('  baseDate:', window.appState.baseDate);
+		console.log('  currentDate:', window.appState.currentDate);
+		
+		// ВАЖНО: Полностью пересоздаем сетку, чтобы линии стали на целые позиции
+		if (window.grid && window.grid.createGrid) {
+			window.grid.createGrid();
+		}
+		
+		window.grid.updateCenterDate();
+		window.waves.updatePosition();
+		window.appState.save();
+		
+		this.updateTodayButton();
+		
+		console.log('=== goToToday() завершен ===');
+	}
     
     // НОВЫЙ МЕТОД: Установить текущее точное время
     goToNow() {
