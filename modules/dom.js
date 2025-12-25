@@ -85,8 +85,8 @@ class DOM {
         return currentDay.toFixed(5);
     }
     
-    // НОВАЯ ФУНКЦИЯ: Форматирование даты для input[type="datetime-local"]
-    formatDateForDateTimeInput(timestamp) {
+    // НОВАЯ ФУНКЦИЯ: Форматирование даты для input с поддержкой секунд
+    formatDateForDateTimeInputWithSeconds(timestamp) {
         if (!timestamp) return '';
         
         let date;
@@ -100,14 +100,66 @@ class DOM {
             return '';
         }
         
-        // Формат для datetime-local: YYYY-MM-DDTHH:mm
+        // Формат: YYYY-MM-DD HH:mm:ss
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
         
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+    
+    // НОВАЯ ФУНКЦИЯ: Преобразование строки с секундами в timestamp
+    stringFromDateTimeStringToTimestamp(dateTimeString) {
+        try {
+            if (!dateTimeString) return Date.now();
+            
+            // Поддерживаем несколько форматов:
+            // 1. YYYY-MM-DD HH:mm:ss
+            // 2. YYYY-MM-DD HH:mm
+            // 3. YYYY-MM-DD
+            // 4. datetime-local формат (YYYY-MM-DDTHH:mm)
+            
+            let normalizedString = dateTimeString.trim();
+            
+            // Если есть T (datetime-local формат), заменяем пробелом
+            if (normalizedString.includes('T')) {
+                normalizedString = normalizedString.replace('T', ' ');
+            }
+            
+            // Разбиваем на дату и время
+            const parts = normalizedString.split(' ');
+            const datePart = parts[0];
+            
+            let timePart = '00:00:00'; // По умолчанию
+            if (parts.length > 1) {
+                timePart = parts[1];
+                // Добавляем секунды если их нет
+                if (timePart.split(':').length === 2) {
+                    timePart += ':00';
+                }
+            }
+            
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hours, minutes, seconds] = timePart.split(':').map(Number);
+            
+            const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
+            
+            if (isNaN(date.getTime())) {
+                throw new Error('Некорректная дата-время');
+            }
+            return date.getTime();
+        } catch (error) {
+            console.error('Ошибка преобразования строки в timestamp:', error);
+            return Date.now();
+        }
+    }
+    
+    // Старый метод для обратной совместимости
+    formatDateForDateTimeInput(timestamp) {
+        return this.formatDateForDateTimeInputWithSeconds(timestamp);
     }
     
     formatDateForInput(timestamp) {
@@ -218,25 +270,9 @@ class DOM {
         return new Date();
     }
     
-    // НОВАЯ ФУНКЦИЯ: Преобразование строки из datetime-local в timestamp
+    // Старый метод для обратной совместимости
     stringFromDateTimeLocalToTimestamp(dateTimeString) {
-        try {
-            if (!dateTimeString) return Date.now();
-            
-            // datetime-local формат: YYYY-MM-DDTHH:mm
-            const [datePart, timePart] = dateTimeString.split('T');
-            const [year, month, day] = datePart.split('-').map(Number);
-            const [hours, minutes] = timePart ? timePart.split(':').map(Number) : [0, 0];
-            
-            const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
-            if (isNaN(date.getTime())) {
-                throw new Error('Некорректная дата-время');
-            }
-            return date.getTime();
-        } catch (error) {
-            console.error('Ошибка преобразования datetime-local в timestamp:', error);
-            return Date.now();
-        }
+        return this.stringFromDateTimeStringToTimestamp(dateTimeString);
     }
     
     stringToTimestamp(dateString) {

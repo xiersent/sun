@@ -106,8 +106,11 @@
 					<button id="btnToday" class="ui-btn">Сегодня</button>
 					<!-- НОВАЯ КНОПКА: СЕЙЧАС -->
 					<button id="btnNow" class="ui-btn">Сейчас</button>
-					<!-- ИЗМЕНЕНО: тип input на datetime-local -->
-					<input type="datetime-local" class="date-input" id="mainDateInput" style="flex:0">
+					<!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
+					<input type="text" class="date-input" id="mainDateInput" 
+                           placeholder="YYYY-MM-DD HH:MM:SS" 
+                           pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
+                           title="Формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС" style="flex:1">
 					<button id="btnSetDate" class="ui-btn">Перейти</button>
 				</div>
 			</div>

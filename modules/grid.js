@@ -4,6 +4,20 @@ class GridManager {
         this.gridElements = [];
     }
     
+    // НОВЫЙ МЕТОД: единая функция расчета позиции
+    calculateGridPosition(offset) {
+        const currentDayFractional = window.appState.currentDay || 0;
+        const fractionalOffset = currentDayFractional - Math.floor(currentDayFractional);
+        
+        // НОВАЯ ФОРМУЛА: корректное смещение для дробных дней
+        const actualOffset = offset - fractionalOffset;
+        
+        return {
+            actualOffset,
+            pixelPosition: actualOffset * window.appState.config.squareSize
+        };
+    }
+    
     createGrid() {
         this.clearGrid();
         
@@ -20,52 +34,48 @@ class GridManager {
         this.updateGridNotesHighlight();
     }
     
-	createGridLine(offset) {
-		const wrapper = document.createElement('div');
-		wrapper.className = 'grid-wrapper';
-		
-		// ИСПРАВЛЕННЫЙ РАСЧЕТ:
-		const currentDayFractional = window.appState.currentDay || 0;
-		const fractionalOffset = currentDayFractional - Math.floor(currentDayFractional);
-		
-		// НОВАЯ ФОРМУЛА: корректное смещение для дробных дней
-		// Мы хотим, чтобы центральная линия (offset=0) всегда была в центре визора
-		// независимо от времени суток
-		const actualOffset = offset - fractionalOffset;
-		
-		// Центр визора: 50% от ширины графика
-		// Линии позиционируются относительно центра с учетом их ширины
-		const centerPosition = window.appState.graphWidth / 2;
-		const lineCenterPosition = centerPosition + actualOffset * window.appState.config.squareSize;
-		const lineLeftPosition = lineCenterPosition - window.appState.config.squareSize / 2;
-		
-		wrapper.style.left = `${lineLeftPosition}px`;
-		wrapper.style.width = `${window.appState.config.squareSize}px`;
-		wrapper.setAttribute('data-day-offset', offset);
-		
-		const line = document.createElement('div');
-		line.className = 'grid-line-inner';
-		if (offset === 0) line.classList.add('active');
-		
-		wrapper.appendChild(line);
-		document.getElementById('graphElement').appendChild(wrapper);
-		
-		this.gridElements.push(wrapper);
-		
-		// Обработчик клика
-		wrapper.addEventListener('click', (e) => {
-			if (window.appState.isProgrammaticDateChange) return;
-			
-			const gridLines = document.querySelectorAll('.grid-line-inner');
-			gridLines.forEach(line => {
-				line.classList.remove('active');
-			});
-			
-			if (parseInt(wrapper.getAttribute('data-day-offset')) !== 0) {
-				line.classList.add('active');
-			}
-		});
-	}
+    createGridLine(offset) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'grid-wrapper';
+        
+        // ИСПРАВЛЕННЫЙ РАСЧЕТ: используем единую функцию
+        const positionData = this.calculateGridPosition(offset);
+        
+        // ВАЖНО: Все линии позиционируются одинаково
+        // Центральная линия будет на calc(50% + 0px)
+        wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+        wrapper.style.width = `${window.appState.config.squareSize}px`;
+        wrapper.setAttribute('data-day-offset', offset);
+        
+        // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Вместо transform используем margin для центрирования
+        wrapper.style.marginLeft = `-${window.appState.config.squareSize / 2}px`;
+        
+        const line = document.createElement('div');
+        line.className = 'grid-line-inner';
+        if (offset === 0) line.classList.add('active');
+        
+        wrapper.appendChild(line);
+        document.getElementById('graphElement').appendChild(wrapper);
+        
+        this.gridElements.push(wrapper);
+        
+        // Обработчик клика
+        wrapper.addEventListener('click', (e) => {
+            if (window.appState.isProgrammaticDateChange) return;
+            
+            e.stopPropagation(); // Важно: останавливаем всплытие
+            
+            const gridLines = document.querySelectorAll('.grid-line-inner');
+            gridLines.forEach(line => {
+                line.classList.remove('active');
+            });
+            
+            // ВАЖНО: Клик на центральную линию тоже должен работать
+            // Если нажали на центральную линию, она уже активна
+            // Если нажали на другую - активируем ее
+            line.classList.add('active');
+        });
+    }
     
     createHorizontalGridLines() {
         for (let i = 1; i <= 5; i++) {
@@ -92,28 +102,33 @@ class GridManager {
         }
     }
     
-	createDateLabel(offset) {
-		const date = new Date(window.appState.currentDate);
-		date.setDate(date.getDate() + offset);
-		
-		const label = document.createElement('div');
-		label.className = 'labels date-labels';
-		
-		// ТАКОЕ ЖЕ ИСПРАВЛЕНИЕ КАК ДЛЯ ЛИНИЙ
-		const actualOffset = offset;
-		
-		label.style.left = `calc(50% + ${actualOffset * window.appState.config.squareSize}px)`;
-		label.textContent = date.getDate();
-		
-		const weekday = document.createElement('div');
-		weekday.className = 'labels x-labels weekday-label';
-		weekday.style.left = `calc(50% + ${actualOffset * window.appState.config.squareSize}px)`;
-		weekday.textContent = window.dom.getWeekdayName(date);
-		
-		const graph = document.getElementById('graphElement');
-		graph.appendChild(label);
-		graph.appendChild(weekday);
-	}
+    createDateLabel(offset) {
+        const date = new Date(window.appState.currentDate);
+        date.setDate(date.getDate() + offset);
+        
+        const label = document.createElement('div');
+        label.className = 'labels date-labels';
+        
+        // ТАКОЕ ЖЕ ИСПРАВЛЕНИЕ КАК ДЛЯ ЛИНИЙ: используем единую функцию
+        const positionData = this.calculateGridPosition(offset);
+        
+        // ВАЖНО: Такое же позиционирование как у линий
+        label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+        label.style.transform = 'translateX(-50%)';
+        label.style.bottom = '30px';
+        label.textContent = date.getDate();
+        
+        const weekday = document.createElement('div');
+        weekday.className = 'labels x-labels weekday-label';
+        weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+        weekday.style.transform = 'translateX(-50%)';
+        weekday.style.bottom = '10px';
+        weekday.textContent = window.dom.getWeekdayName(date);
+        
+        const graph = document.getElementById('graphElement');
+        graph.appendChild(label);
+        graph.appendChild(weekday);
+    }
     
     createYAxisLabels() {
         for (let i = 0; i <= 5; i++) {
@@ -121,11 +136,13 @@ class GridManager {
                 const labelTop = document.createElement('div');
                 labelTop.className = 'labels y-labels';
                 labelTop.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
+                labelTop.style.transform = 'translateY(-50%)';
                 labelTop.textContent = i;
                 
                 const labelBottom = document.createElement('div');
                 labelBottom.className = 'labels y-labels';
                 labelBottom.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
+                labelBottom.style.transform = 'translateY(-50%)';
                 labelBottom.textContent = -i;
                 
                 document.getElementById('graphElement').appendChild(labelTop);
@@ -136,6 +153,7 @@ class GridManager {
         const zeroLabel = document.createElement('div');
         zeroLabel.className = 'labels y-labels';
         zeroLabel.style.top = '50%';
+        zeroLabel.style.transform = 'translateY(-50%)';
         zeroLabel.textContent = '0';
         document.getElementById('graphElement').appendChild(zeroLabel);
     }
@@ -144,6 +162,7 @@ class GridManager {
         this.gridElements.forEach(el => el.remove());
         this.gridElements = [];
         
+        // Удаляем ВСЕ метки, включая даты
         document.querySelectorAll('.labels:not(.center-date-label), .grid-line, .grid-line-inner, .grid-wrapper').forEach(el => el.remove());
     }
     
@@ -154,16 +173,21 @@ class GridManager {
         // Гарантируем, что используем текущую дату визора
         const date = window.appState.currentDate || new Date();
         
-        // НОВОЕ: Форматируем дату и время в одну строку
-        const dateTimeStr = window.dom.formatDateTimeFull(date);
+        // ОБНОВЛЕНО: Форматируем с секундами
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
         
+        const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
         const weekday = window.dom.getWeekdayName(date, true);
         
         const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
         const name = activeDate?.name || 'Новая дата';
         
-        // НОВОЕ: Обновленный HTML с датой и временем в одной строке
-        // Убрали center-date-fractional и объединили дату и время
+        // ОБНОВЛЕННЫЙ HTML с секундами
         element.innerHTML = `
             <div class="center-date-main">
                 <div class="center-date-datetime">${dateTimeStr}</div>

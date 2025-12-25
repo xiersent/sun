@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (!window.uiManager && typeof UIManager !== 'undefined') {
             console.log('Создаем UIManager...');
-            window.uiManager = new UIManager();
+            window.uiManager = new UIManager(); // Автоматически настраивает инпут
         }
         
         if (!window.dataManager && typeof DataManager !== 'undefined') {
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // НОВОЕ: Устанавливаем значение в mainDateInput при загрузке
         const mainDateInput = document.getElementById('mainDateInput');
         if (mainDateInput && window.dom) {
-            mainDateInput.value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+            mainDateInput.value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
             console.log('Установлено значение в mainDateInput:', mainDateInput.value);
         }
         

@@ -2,6 +2,55 @@
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
+        this.setupDateTimeInput();
+    }
+    
+    setupDateTimeInput() {
+        const dateInput = document.getElementById('mainDateInput');
+        if (!dateInput) return;
+        
+        // Автодополнение даты
+        dateInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^\d\s\-:]/g, '');
+            
+            // Автоматическое добавление разделителей
+            if (value.length === 4 && !value.includes('-')) {
+                value = value + '-';
+            } else if (value.length === 7 && value.split('-').length < 3) {
+                value = value + '-';
+            } else if (value.length === 10 && !value.includes(' ')) {
+                value = value + ' ';
+            } else if (value.length === 13 && value.split(':').length < 2) {
+                value = value + ':';
+            } else if (value.length === 16 && value.split(':').length < 3) {
+                value = value + ':';
+            }
+            
+            e.target.value = value;
+        });
+        
+        // Подсказка при фокусе
+        dateInput.addEventListener('focus', () => {
+            if (!dateInput.value) {
+                const now = new Date();
+                const example = window.dom.formatDateForDateTimeInputWithSeconds(now);
+                dateInput.placeholder = example;
+            }
+        });
+        
+        // Возвращаем стандартный placeholder при потере фокуса
+        dateInput.addEventListener('blur', () => {
+            dateInput.placeholder = "YYYY-MM-DD HH:MM:SS";
+        });
+        
+        // Обработка клавиши Enter
+        dateInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (window.dates && window.dates.setDateFromInput) {
+                    window.dates.setDateFromInput();
+                }
+            }
+        });
     }
     
     handleAction(action, element) {
@@ -279,9 +328,9 @@ class UIManager {
 		window.dataManager.updateWavesGroups();
 		window.dataManager.updateNotesList();
 		
-		// ИЗМЕНЕНО: Используем новый метод форматирования для datetime-local
+		// ИЗМЕНЕНО: Используем новый метод форматирования с секундами
 		if (document.getElementById('mainDateInput') && window.dom) {
-			document.getElementById('mainDateInput').value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+			document.getElementById('mainDateInput').value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
 		}
 		if (document.getElementById('dateInput')) {
 			document.getElementById('dateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
