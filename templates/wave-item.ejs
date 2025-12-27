@@ -57,15 +57,12 @@
         <!-- Форма редактирования -->
         <div class="list-item__edit-form">
             <div class="list-item__edit-row">
-                <label class="list-item__edit-label">Название:</label>
                 <input type="text" class="list-item__edit-input" id="editWaveName<%= data.id %>" value="<%= data.name %>">
             </div>
             <div class="list-item__edit-row">
-                <label class="list-item__edit-label">Период:</label>
                 <input type="number" class="list-item__edit-input" id="editWavePeriod<%= data.id %>" value="<%= data.period %>" min="0.1" step="0.1">
             </div>
             <div class="list-item__edit-row">
-                <label class="list-item__edit-label">Тип:</label>
                 <select class="list-item__edit-input" id="editWaveType<%= data.id %>">
                     <option value="solid" <%= data.typeValue === 'solid' ? 'selected' : '' %>>Сплошная</option>
                     <option value="dashed" <%= data.typeValue === 'dashed' ? 'selected' : '' %>>Пунктирная</option>
