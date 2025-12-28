@@ -34,69 +34,75 @@ class GridManager {
         this.updateGridNotesHighlight();
     }
     
-    createGridLine(offset) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'grid-wrapper';
-        
-        // ИСПРАВЛЕННЫЙ РАСЧЕТ: используем единую функцию
-        const positionData = this.calculateGridPosition(offset);
-        
-        // ВАЖНО: Все линии позиционируются одинаково
-        // Центральная линия будет на calc(50% + 0px)
-        wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        wrapper.style.width = `${window.appState.config.squareSize}px`;
-        wrapper.setAttribute('data-day-offset', offset);
-        
-        // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Вместо transform используем margin для центрирования
-        wrapper.style.marginLeft = `-${window.appState.config.squareSize / 2}px`;
-        
-        const line = document.createElement('div');
-        line.className = 'grid-line-inner';
-        if (offset === 0) line.classList.add('active');
-        
-        wrapper.appendChild(line);
-        document.getElementById('graphElement').appendChild(wrapper);
-        
-        this.gridElements.push(wrapper);
-        
-        // Обработчик клика
-        wrapper.addEventListener('click', (e) => {
-            if (window.appState.isProgrammaticDateChange) return;
-            
-            e.stopPropagation(); // Важно: останавливаем всплытие
-            
-            const gridLines = document.querySelectorAll('.grid-line-inner');
-            gridLines.forEach(line => {
-                line.classList.remove('active');
-            });
-            
-            // ВАЖНО: Клик на центральную линию тоже должен работать
-            // Если нажали на центральную линию, она уже активна
-            // Если нажали на другую - активируем ее
-            line.classList.add('active');
-            
-            // Рассчитываем новую дату на основе смещения
-            const newDate = new Date(window.appState.currentDate);
-            newDate.setDate(newDate.getDate() + offset);
-            window.appState.currentDate = newDate;
-            window.dates.recalculateCurrentDay(false);
-            
-            // Обновляем UI
-            window.waves.updatePosition();
-            window.grid.createGrid();
-            window.grid.updateCenterDate();
-            window.grid.updateGridNotesHighlight();
-            
-            // ОБНОВЛЯЕМ СВОДНУЮ ИНФОРМАЦИЮ
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                setTimeout(() => {
-                    window.summaryManager.updateSummary();
-                }, 50);
-            }
-            
-            window.appState.save();
-        });
-    }
+	createGridLine(offset) {
+		const wrapper = document.createElement('div');
+		wrapper.className = 'grid-wrapper';
+		
+		// ИСПРАВЛЕННЫЙ РАСЧЕТ: используем единую функцию
+		const positionData = this.calculateGridPosition(offset);
+		
+		// ВАЖНО: Все линии позиционируются одинаково
+		// Центральная линия будет на calc(50% + 0px)
+		wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+		wrapper.style.width = `${window.appState.config.squareSize}px`;
+		wrapper.setAttribute('data-day-offset', offset);
+		
+		// КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Вместо transform используем margin для центрирования
+		wrapper.style.marginLeft = `-${window.appState.config.squareSize / 2}px`;
+		
+		const line = document.createElement('div');
+		line.className = 'grid-line-inner';
+		if (offset === 0) line.classList.add('active');
+		
+		wrapper.appendChild(line);
+		document.getElementById('graphElement').appendChild(wrapper);
+		
+		this.gridElements.push(wrapper);
+		
+		// ОБРАТИТЕ ВНИМАНИЕ: 
+		// Клик по линии сетки НЕ ДОЛЖЕН менять дату визора!
+		// Линии сетки служат только для визуальной ориентации и подсветки.
+		// Изменение даты визора происходит только через:
+		// 1. Кнопки навигации (←, →, Сегодня, Сейчас)
+		// 2. Выбор даты из списка дат
+		// 3. Установку даты через текстовое поле
+		// 4. Клик по заметке в списке заметок
+		
+		wrapper.addEventListener('click', (e) => {
+			if (window.appState.isProgrammaticDateChange) return;
+			
+			e.stopPropagation(); // Важно: останавливаем всплытие
+			
+			const gridLines = document.querySelectorAll('.grid-line-inner');
+			gridLines.forEach(line => {
+				line.classList.remove('active');
+			});
+			
+			// ВАЖНО: ТОЛЬКО визуальная подсветка выбранной линии!
+			// НЕ изменяем текущую дату визора!
+			line.classList.add('active');
+			
+			// НЕ делаем ничего из этого:
+			// ❌ НЕ меняем window.appState.currentDate
+			// ❌ НЕ вызываем window.dates.recalculateCurrentDay()
+			// ❌ НЕ вызываем window.waves.updatePosition()
+			// ❌ НЕ вызываем window.grid.createGrid()
+			// ❌ НЕ вызываем window.grid.updateCenterDate()
+			// ❌ НЕ вызываем window.grid.updateGridNotesHighlight()
+			
+			// Остается только сохранение состояния для подсветки линий
+			// window.appState.save(); // Опционально, если хотим сохранять активную линию
+			
+			// При клике на линии сетки обновляем сводную информацию,
+			// так как пользователь может смотреть на конкретную дату
+			// (хотя сама дата визора не меняется)
+			if (window.summaryManager && window.summaryManager.updateSummary) {
+				setTimeout(() => {
+					window.summaryManager.updateSummary();
+				}, 50);
+			}
+		});
+	}
     
     createHorizontalGridLines() {
         for (let i = 1; i <= 5; i++) {
