@@ -74,6 +74,27 @@ class GridManager {
             // Если нажали на центральную линию, она уже активна
             // Если нажали на другую - активируем ее
             line.classList.add('active');
+            
+            // Рассчитываем новую дату на основе смещения
+            const newDate = new Date(window.appState.currentDate);
+            newDate.setDate(newDate.getDate() + offset);
+            window.appState.currentDate = newDate;
+            window.dates.recalculateCurrentDay(false);
+            
+            // Обновляем UI
+            window.waves.updatePosition();
+            window.grid.createGrid();
+            window.grid.updateCenterDate();
+            window.grid.updateGridNotesHighlight();
+            
+            // ОБНОВЛЯЕМ СВОДНУЮ ИНФОРМАЦИЮ
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                setTimeout(() => {
+                    window.summaryManager.updateSummary();
+                }, 50);
+            }
+            
+            window.appState.save();
         });
     }
     

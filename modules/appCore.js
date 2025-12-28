@@ -1,4 +1,4 @@
-// optimized3/modules/appCore.js
+// modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -12,7 +12,8 @@ class AppCore {
             'dateListForDates', 'wavesList', 'notesList', 'noteInput',
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
-            'warningBox', 'currentDay'
+            'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
+            'summaryStateSelect', 'summaryStats', 'summaryResults'
         ];
         
         ids.forEach(id => {
@@ -76,6 +77,13 @@ class AppCore {
             }
         }
         
+        if (!window.summaryManager) {
+            console.warn('AppCore: SummaryManager не создан, создаем...');
+            if (typeof SummaryManager !== 'undefined') {
+                window.summaryManager = new SummaryManager();
+            }
+        }
+        
         // Инициализация приложения
         this.initializeApp();
     }
@@ -98,6 +106,12 @@ class AppCore {
 				
 				if (window.grid && window.grid.createGrid) {
 					window.grid.createGrid();
+				}
+				
+				// Инициализируем сводную информацию
+				if (window.summaryManager && window.summaryManager.init) {
+					console.log('AppCore: инициализация SummaryManager...');
+					window.summaryManager.init();
 				}
 				
 				// Ждем завершения загрузки шаблонов
@@ -460,6 +474,11 @@ class AppCore {
                     if (window.uiManager && window.uiManager.clearWaveForm) {
                         window.uiManager.clearWaveForm();
                     }
+                    
+                    // Обновляем сводную информацию при добавлении новой волны
+                    if (window.summaryManager && window.summaryManager.refresh) {
+                        window.summaryManager.refresh();
+                    }
                 }
             });
         }
@@ -513,6 +532,11 @@ class AppCore {
                         window.importExport.importAll(file).then(() => {
                             if (window.uiManager && window.uiManager.updateUI) {
                                 window.uiManager.updateUI();
+                            }
+                            
+                            // Обновляем сводную информацию после импорта
+                            if (window.summaryManager && window.summaryManager.refresh) {
+                                window.summaryManager.refresh();
                             }
                         }).catch(err => {
                             alert('Ошибка импорта: ' + err.message);

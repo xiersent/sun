@@ -41,6 +41,11 @@ class DataManager {
         });
         
         await window.unifiedListManager.renderListWithWait('wavesList', allGroups, 'group');
+
+        // ДОБАВЛЕНО: Обновление сводной информации после обновления групп
+        if (window.summaryManager && window.summaryManager.refresh) {
+            window.summaryManager.refresh();
+        }
     }
     
     updateNotesList() {

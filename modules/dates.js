@@ -120,82 +120,84 @@ class DatesManager {
         }
     }
     
-	setActiveDate(dateId) {
-		console.log('=== setActiveDate(' + dateId + ') ===');
-		
-		const oldActiveId = window.appState.activeDateId;
-		window.appState.activeDateId = dateId;
-		
-		const dateIdStr = String(dateId);
-		const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
-		
-		if (!dateObj) {
-			console.warn('DatesManager: дата не найдена, устанавливаем базовую дату на сегодня');
-			window.appState.baseDate = Date.now(); // timestamp
-		} else {
-			try {
-				// dateObj.date уже timestamp
-				if (typeof dateObj.date !== 'number' || isNaN(dateObj.date)) {
-					throw new Error('Некорректный timestamp в объекте даты');
-				}
-				window.appState.baseDate = dateObj.date; // Устанавливаем timestamp
-				console.log('DatesManager: установлена базовая дата (timestamp):', dateObj.date);
-			} catch (error) {
-				console.error('Error setting active date:', error);
-				window.appState.baseDate = Date.now();
-			}
-		}
-		
-		this.recalculateCurrentDay();
-		console.log('currentDay после recalculate:', window.appState.currentDay);
-		
-		this.updateCurrentDayElement();
-		
-		// ВАЖНОЕ ИСПРАВЛЕНИЕ: Обновляем список дат ДО пересоздания элементов
-		if (window.dataManager && window.dataManager.updateDateList) {
-			window.dataManager.updateDateList();
-		}
-		
-		if (oldActiveId !== dateId) {
-			console.log('Активная дата изменилась, пересоздаем элементы...');
-			
-			document.querySelectorAll('.wave-container').forEach(c => c.remove());
-			if (window.waves) {
-				window.waves.waveContainers = {};
-				window.waves.wavePaths = {};
-			}
-			
-			if (window.waves && window.waves.createVisibleWaveElements) {
-				window.waves.createVisibleWaveElements();
-			}
-		}
-		
-		if (window.waves) {
-			window.waves.updatePosition();
-			window.waves.updateCornerSquareColors();
-		}
-		
-		if (window.grid) {
-			if (window.grid.createGrid) {
-				window.grid.createGrid();
-			}
-			if (window.grid.updateCenterDate) {
-				window.grid.updateCenterDate();
-				window.grid.updateGridNotesHighlight();
-			}
-		}
-		
-		window.appState.save();
-		
-		// ВАЖНО: Уже обновили выше, не нужно делать снова
-		// if (window.dataManager && window.dataManager.updateDateList) {
-		//     window.dataManager.updateDateList();
-		// }
-		
-		this.updateTodayButton();
-		
-		console.log('=== setActiveDate() завершен ===');
-	}
+    setActiveDate(dateId) {
+        console.log('=== setActiveDate(' + dateId + ') ===');
+        
+        const oldActiveId = window.appState.activeDateId;
+        window.appState.activeDateId = dateId;
+        
+        const dateIdStr = String(dateId);
+        const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
+        
+        if (!dateObj) {
+            console.warn('DatesManager: дата не найдена, устанавливаем базовую дату на сегодня');
+            window.appState.baseDate = Date.now(); // timestamp
+        } else {
+            try {
+                // dateObj.date уже timestamp
+                if (typeof dateObj.date !== 'number' || isNaN(dateObj.date)) {
+                    throw new Error('Некорректный timestamp в объекте даты');
+                }
+                window.appState.baseDate = dateObj.date; // Устанавливаем timestamp
+                console.log('DatesManager: установлена базовая дата (timestamp):', dateObj.date);
+            } catch (error) {
+                console.error('Error setting active date:', error);
+                window.appState.baseDate = Date.now();
+            }
+        }
+        
+        this.recalculateCurrentDay();
+        console.log('currentDay после recalculate:', window.appState.currentDay);
+        
+        this.updateCurrentDayElement();
+        
+        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Обновляем список дат ДО пересоздания элементов
+        if (window.dataManager && window.dataManager.updateDateList) {
+            window.dataManager.updateDateList();
+        }
+        
+        if (oldActiveId !== dateId) {
+            console.log('Активная дата изменилась, пересоздаем элементы...');
+            
+            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            if (window.waves) {
+                window.waves.waveContainers = {};
+                window.waves.wavePaths = {};
+            }
+            
+            if (window.waves && window.waves.createVisibleWaveElements) {
+                window.waves.createVisibleWaveElements();
+            }
+        }
+        
+        if (window.waves) {
+            window.waves.updatePosition();
+            window.waves.updateCornerSquareColors();
+        }
+        
+        if (window.grid) {
+            if (window.grid.createGrid) {
+                window.grid.createGrid();
+            }
+            if (window.grid.updateCenterDate) {
+                window.grid.updateCenterDate();
+                window.grid.updateGridNotesHighlight();
+            }
+        }
+        
+        window.appState.save();
+        
+        this.updateTodayButton();
+        
+        // Обновляем сводную информацию
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        console.log('=== setActiveDate() завершен ===');
+    }
     
     recalculateCurrentDay(useExactTime = false) {
         console.log('=== ПЕРЕСЧЕТ CURRENTDAY (гарантированный) ===');
@@ -368,6 +370,15 @@ class DatesManager {
         console.log('После: currentDay:', window.appState.currentDay);
         
         this.updateTodayButton();
+        
+        // Обновляем сводную информацию
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        console.log('=== navigateDay() завершен ===');
     }
     
     goToToday() {
@@ -403,6 +414,13 @@ class DatesManager {
         
         this.updateTodayButton();
         
+        // Обновляем сводную информацию
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
         console.log('=== goToToday() завершен ===');
     }
     
@@ -435,6 +453,13 @@ class DatesManager {
         window.appState.save();
         
         this.updateTodayButton();
+        
+        // Обновляем сводную информацию
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
         
         console.log('=== goToNow() завершен ===');
     }
@@ -473,6 +498,13 @@ class DatesManager {
             
             this.updateTodayButton();
             
+            // Обновляем сводную информацию
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                setTimeout(() => {
+                    window.summaryManager.updateSummary();
+                }, 50);
+            }
+            
             console.log('Текущий день после установки:', window.appState.currentDay);
             console.log('Форматированный:', window.dom.formatCurrentDayWithSeconds(window.appState.currentDay));
         }
@@ -497,6 +529,13 @@ class DatesManager {
         window.appState.save();
         
         this.updateTodayButton();
+        
+        // Обновляем сводную информацию
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
         
         setTimeout(() => {
             window.appState.isProgrammaticDateChange = false;

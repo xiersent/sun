@@ -89,7 +89,6 @@
 				</div>
 			</div>
 
-
 			<div class="panel-section buttons-panel">
 				<div class="top-controls">
 					<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
@@ -186,6 +185,54 @@
 				</div>
 			</div>
 
+            <!-- НОВАЯ ПАНЕЛЬ: Сводная информация -->
+            <div class="panel-section summary-panel" id="summaryPanel">
+                <div class="summary-header">
+                    <h3>Сводная информация о колосках</h3>
+                </div>
+                
+                <div class="summary-controls">
+                    <div class="summary-select-row">
+                        <div class="summary-select-group">
+                            <label class="summary-label">Группа:</label>
+                            <select class="summary-select" id="summaryGroupSelect">
+                                <option value="all">Все доступные группы с колосками</option>
+                                <!-- Опции будут добавлены через JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="summary-select-group">
+                            <label class="summary-label">Состояние:</label>
+                            <select class="summary-select" id="summaryStateSelect">
+                                <option value="-5" selected>-5</option>
+                                <option value="-4">-4</option>
+                                <option value="-3">-3</option>
+                                <option value="-2">-2</option>
+                                <option value="-1">-1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-stats-row">
+                        <div class="summary-stats" id="summaryStats">
+                            <!-- Статистика будет заполнена через JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-results-container">
+                    <div class="summary-results" id="summaryResults">
+                        <!-- Результаты будут заполнены через JavaScript -->
+                    </div>
+                </div>
+            </div>
+
 			<div class="panel-section" id="notes-panel">
 				<div class="notes-panel-layout">
 					<div class="notes-list-container">
@@ -240,6 +287,8 @@
     <script src="modules/eventManager.js"></script>
 	<script src="modules/migrateToTimestamp.js"></script>
 	<script src="modules/fixTimestamp.js"></script>
+    <!-- НОВЫЙ МОДУЛЬ: Сводная информация -->
+    <script src="modules/summaryManager.js"></script>
     <script src="modules/init.js"></script>
     
 </body>

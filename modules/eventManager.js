@@ -4,6 +4,7 @@ class EventManager {
         console.log('EventManager: инициализация...');
         this.askedGroups = new Set(); // Храним ID групп, для которых уже спрашивали (не сохраняется)
         this.setupGlobalHandlers();
+        this.setupDateChangeObservers();
     }
     
     setupGlobalHandlers() {
@@ -19,8 +20,81 @@ class EventManager {
         document.addEventListener('dragend', (e) => this.handleDragEnd(e));
     }
     
+    setupDateChangeObservers() {
+        // Добавляем обновление сводки при клике на элементы дат
+        document.addEventListener('click', (e) => {
+            const dateListItem = e.target.closest('.list-item--date[data-type="date"]');
+            if (dateListItem && !dateListItem.classList.contains('list-item--editing')) {
+                if (!e.target.closest('button') && 
+                    !e.target.closest('input') && 
+                    !e.target.closest('textarea') && 
+                    !e.target.closest('select') &&
+                    !e.target.classList.contains('list-item__drag-handle') &&
+                    !e.target.classList.contains('delete-date-btn') &&
+                    !e.target.classList.contains('edit-btn') &&
+                    e.target.tagName !== 'BUTTON' &&
+                    e.target.tagName !== 'INPUT' &&
+                    e.target.tagName !== 'TEXTAREA' &&
+                    e.target.tagName !== 'SELECT') {
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const dateId = dateListItem.dataset.id;
+                    console.log('EventManager: выбор даты из списка:', dateId);
+                    
+                    if (dateId && window.dates) {
+                        // Устанавливаем активную дату - это пересчитает currentDay
+                        // и перестроит графики относительно новой базовой даты
+                        window.dates.setActiveDate(dateId);
+                        
+                        // После установки даты обновляем сводку
+                        setTimeout(() => {
+                            if (window.summaryManager && window.summaryManager.updateSummary) {
+                                window.summaryManager.updateSummary();
+                            }
+                        }, 100);
+                    }
+                    return;
+                }
+            }
+            
+            const noteItem = e.target.closest('.list-item--note');
+            if (noteItem && !e.target.closest('.delete-btn')) {
+                const noteDate = noteItem.dataset.date;
+                console.log('EventManager: клик по заметке, дата:', noteDate);
+                if (noteDate && window.dates) {
+                    const newDate = new Date(noteDate);
+                    window.dates.setDate(newDate);
+                    
+                    // После установки даты обновляем сводку
+                    setTimeout(() => {
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
+                            window.summaryManager.updateSummary();
+                        }
+                    }, 100);
+                }
+                return;
+            }
+        });
+    }
+    
     handleClick(e) {
         const target = e.target;
+
+        // ДОБАВЛЕНО: Обновление сводной информации при навигации
+        if (target.id === 'btnPrevDay' || target.closest('#btnPrevDay') ||
+            target.id === 'btnNextDay' || target.closest('#btnNextDay') ||
+            target.id === 'btnToday' || target.closest('#btnToday') ||
+            target.id === 'btnNow' || target.closest('#btnNow') ||
+            target.id === 'btnSetDate' || target.closest('#btnSetDate')) {
+            
+            // После навигации обновляем сводную информацию
+            setTimeout(() => {
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    window.summaryManager.updateSummary();
+                }
+            }, 100);
+        }
         
         const actionBtn = target.closest('[data-action]');
         if (actionBtn) {
@@ -193,6 +267,11 @@ class EventManager {
                                     // Обновить статистику группы
                                     this.updateGroupStatsForWave(waveId, true);
                                     
+                                    // Обновить сводную информацию
+                                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                                        window.summaryManager.updateSummary();
+                                    }
+                                    
                                     // Гарантируем, что чекбокс останется отмеченным
                                     target.checked = true;
                                     
@@ -219,6 +298,11 @@ class EventManager {
                                 
                                 // Обновить статистику группы
                                 this.updateGroupStatsForWave(waveId, true);
+                                
+                                // Обновить сводную информацию
+                                if (window.summaryManager && window.summaryManager.updateSummary) {
+                                    window.summaryManager.updateSummary();
+                                }
                             }, 50);
                             
                             return; // Прерываем стандартную логику
@@ -240,6 +324,11 @@ class EventManager {
                             
                             // Обновить статистику группы
                             this.updateGroupStatsForWave(waveId, true);
+                            
+                            // Обновить сводную информацию
+                            if (window.summaryManager && window.summaryManager.updateSummary) {
+                                window.summaryManager.updateSummary();
+                            }
                         }, 50);
                         
                         return; // Прерываем стандартную логику
@@ -286,6 +375,13 @@ class EventManager {
                 
                 // Обновить статистику группы
                 this.updateGroupStatsForWave(waveId, target.checked);
+                
+                // Обновить сводную информацию
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    setTimeout(() => {
+                        window.summaryManager.updateSummary();
+                    }, 50);
+                }
             }
             return;
         }
@@ -299,6 +395,13 @@ class EventManager {
                 window.appState.waveBold[waveId] = target.checked;
                 window.appState.save();
                 if (window.waves) window.waves.updatePosition();
+                
+                // Обновить сводную информацию
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    setTimeout(() => {
+                        window.summaryManager.updateSummary();
+                    }, 50);
+                }
             }
             return;
         }
@@ -311,6 +414,13 @@ class EventManager {
                 const wave = window.appState.data.waves.find(w => w.id === waveId);
                 if (wave) {
                     window.unifiedListManager.changeWaveColor(wave);
+                    
+                    // Обновить сводную информацию
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        setTimeout(() => {
+                            window.summaryManager.updateSummary();
+                        }, 50);
+                    }
                 }
             }
             return;
@@ -324,6 +434,13 @@ class EventManager {
             
             if (waveId && window.waves) {
                 window.waves.setWaveCornerColor(waveId, target.checked);
+                
+                // Обновить сводную информацию
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    setTimeout(() => {
+                        window.summaryManager.updateSummary();
+                    }, 50);
+                }
             }
             return;
         }
@@ -374,6 +491,11 @@ class EventManager {
                         // Обновить список
                         window.unifiedListManager.updateWavesList();
                         
+                        // Обновить сводную информацию
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
+                            window.summaryManager.updateSummary();
+                        }
+                        
                         console.log('Волны полностью пересозданы после переключения группы');
                     }, 100);
                 }
@@ -400,6 +522,13 @@ class EventManager {
                 window.dates.addNote(content);
                 if (window.dataManager) window.dataManager.updateNotesList();
                 document.getElementById('noteInput').value = '';
+                
+                // Обновить сводную информацию
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    setTimeout(() => {
+                        window.summaryManager.updateSummary();
+                    }, 50);
+                }
             }
             return;
         }
@@ -427,6 +556,13 @@ class EventManager {
                     const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
                     if (defaultGroup && window.unifiedListManager.updateGroupStats) {
                         window.unifiedListManager.updateGroupStats('default-group');
+                    }
+                    
+                    // Обновить сводную информацию
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        setTimeout(() => {
+                            window.summaryManager.updateSummary();
+                        }, 50);
                     }
                 }
             }
@@ -466,45 +602,6 @@ class EventManager {
             e.preventDefault();
             console.log('EventManager: установка даты из инпута');
             if (window.dates) window.dates.setDateFromInput();
-            return;
-        }
-        
-        const dateListItem = target.closest('.list-item--date[data-type="date"]');
-        if (dateListItem && !dateListItem.classList.contains('list-item--editing')) {
-            if (!target.closest('button') && 
-                !target.closest('input') && 
-                !target.closest('textarea') && 
-                !target.closest('select') &&
-                !target.classList.contains('list-item__drag-handle') &&
-                !target.classList.contains('delete-date-btn') &&
-                !target.classList.contains('edit-btn') &&
-                target.tagName !== 'BUTTON' &&
-                target.tagName !== 'INPUT' &&
-                target.tagName !== 'TEXTAREA' &&
-                target.tagName !== 'SELECT') {
-                
-                e.preventDefault();
-                e.stopPropagation();
-                const dateId = dateListItem.dataset.id;
-                console.log('EventManager: выбор даты из списка:', dateId);
-                
-                if (dateId && window.dates) {
-                    // Устанавливаем активную дату - это пересчитает currentDay
-                    // и перестроит графики относительно новой базовой даты
-                    window.dates.setActiveDate(dateId);
-                }
-                return;
-            }
-        }
-        
-        const noteItem = target.closest('.list-item--note');
-        if (noteItem && !target.closest('.delete-btn')) {
-            const noteDate = noteItem.dataset.date;
-            console.log('EventManager: клик по заметке, дата:', noteDate);
-            if (noteDate && window.dates) {
-                const newDate = new Date(noteDate);
-                window.dates.setDate(newDate);
-            }
             return;
         }
         
@@ -571,6 +668,13 @@ class EventManager {
                 window.dates.addGroup(groupName);
                 if (window.dataManager) window.dataManager.updateWavesGroups();
                 document.getElementById('newGroupName').value = '';
+                
+                // Обновить сводную информацию
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    setTimeout(() => {
+                        window.summaryManager.updateSummary();
+                    }, 50);
+                }
             }
             return;
         }
@@ -611,6 +715,13 @@ class EventManager {
                 console.log('EventManager: добавление волны пересечения:', period, amplitude);
                 if (window.intersectionManager && window.intersectionManager.addIntersectionWave) {
                     window.intersectionManager.addIntersectionWave(period, amplitude);
+                    
+                    // Обновить сводную информацию
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        setTimeout(() => {
+                            window.summaryManager.updateSummary();
+                        }, 50);
+                    }
                 }
             }
             return;
@@ -661,6 +772,13 @@ class EventManager {
                     window.appState.data.dates.splice(targetIndex, 0, movedItem);
                     window.appState.save();
                     if (window.dataManager) window.dataManager.updateDateList();
+                    
+                    // Обновить сводную информацию
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        setTimeout(() => {
+                            window.summaryManager.updateSummary();
+                        }, 50);
+                    }
                 }
             }
         } catch (error) {
@@ -726,6 +844,13 @@ class EventManager {
                         if (window.unifiedListManager && window.unifiedListManager.updateGroupStats) {
                             window.unifiedListManager.updateGroupStats(group.id);
                         }
+                        
+                        // Обновить сводную информацию
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
+                            setTimeout(() => {
+                                window.summaryManager.updateSummary();
+                            }, 50);
+                        }
                     }
                 }
             });
@@ -733,44 +858,44 @@ class EventManager {
     }
     
 
-	// В eventManager.js, метод updateGroupElementStats:
-	updateGroupElementStats(groupElement, group) {
-		const groupId = group.id;
-		
-		// Подсчитать включенные волны
-		let enabledCount = 0;
-		const waveCount = group.waves ? group.waves.length : 0; // Определяем waveCount здесь
-		
-		if (group.waves && Array.isArray(group.waves)) {
-			group.waves.forEach(waveId => {
-				const waveIdStr = String(waveId);
-				if (window.appState.waveVisibility[waveIdStr] !== false) {
-					enabledCount++;
-				}
-			});
-		}
-		
-		// Обновить текст счетчика в DOM
-		const statsElement = groupElement.querySelector('.list-item__value .group-stats');
-		if (statsElement) {
-			if (enabledCount > 0) {
-				statsElement.innerHTML = `
-					<span class="group-enabled-count" title="Включено колосков">
-						Включено: ${enabledCount}
-					</span>
-					<span class="group-total-count" title="Всего колосков">
-						Колосков: ${waveCount}
-					</span>
-				`;
-			} else {
-				statsElement.innerHTML = `
-					<span class="group-total-count">
-						Колосков: ${waveCount}
-					</span>
-				`;
-			}
-		}
-	}
+    // В eventManager.js, метод updateGroupElementStats:
+    updateGroupElementStats(groupElement, group) {
+        const groupId = group.id;
+        
+        // Подсчитать включенные волны
+        let enabledCount = 0;
+        const waveCount = group.waves ? group.waves.length : 0; // Определяем waveCount здесь
+        
+        if (group.waves && Array.isArray(group.waves)) {
+            group.waves.forEach(waveId => {
+                const waveIdStr = String(waveId);
+                if (window.appState.waveVisibility[waveIdStr] !== false) {
+                    enabledCount++;
+                }
+            });
+        }
+        
+        // Обновить текст счетчика в DOM
+        const statsElement = groupElement.querySelector('.list-item__value .group-stats');
+        if (statsElement) {
+            if (enabledCount > 0) {
+                statsElement.innerHTML = `
+                    <span class="group-enabled-count" title="Включено колосков">
+                        Включено: ${enabledCount}
+                    </span>
+                    <span class="group-total-count" title="Всего колосков">
+                        Колосков: ${waveCount}
+                    </span>
+                `;
+            } else {
+                statsElement.innerHTML = `
+                    <span class="group-total-count">
+                        Колосков: ${waveCount}
+                    </span>
+                `;
+            }
+        }
+    }
 }
 
 window.eventManager = new EventManager();

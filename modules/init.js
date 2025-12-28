@@ -80,6 +80,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.intersectionManager = new IntersectionManager();
         }
         
+        if (!window.summaryManager && typeof SummaryManager !== 'undefined') {
+            console.log('Создаем SummaryManager...');
+            window.summaryManager = new SummaryManager();
+        }
+        
         // 4. EventManager создаем вручную
         if (!window.eventManager && typeof EventManager !== 'undefined') {
             console.log('Создаем EventManager...');
@@ -159,6 +164,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
         }
+        
+        // НОВОЕ: Обновляем сводную информацию
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            window.summaryManager.updateSummary();
+            console.log('Сводная информация обновлена');
+        }
     }, 500);
     
     setTimeout(() => {
@@ -202,7 +213,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         
-        // 4. Финишное обновление
+        // 4. Обновление сводной информации
+        if (window.summaryManager) {
+            if (window.summaryManager.populateGroupSelect) {
+                window.summaryManager.populateGroupSelect();
+            }
+            if (window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+        }
+        
+        // 5. Финишное обновление
         if (window.grid && window.grid.updateCenterDate) {
             window.grid.updateCenterDate();
         }
