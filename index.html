@@ -76,18 +76,21 @@
                 </div>
             </div>
 
-            <div class="graph-section">
-                <div class="graph-container" id="graphContainer">
-                    <div class="graph" id="graphElement">
-                        <div class="axis x-axis"></div>
-                        <div class="axis y-axis"></div>
-                        <div class="center-date-label" id="centerDateLabel">
-                            <!-- Контент будет заполнен JavaScript -->
-                        </div>
-                        <div class="zoom-overlay" id="zoomOverlay"></div>
-                    </div>
-                </div>
-            </div>
+			<div class="graph-section">
+				<div class="graph-container" id="graphContainer">
+					<div class="graph" id="graphElement">
+						<div class="axis x-axis"></div>
+						<div class="axis y-axis"></div>
+						<div class="center-date-label" id="centerDateLabel"></div>
+						<div class="zoom-overlay" id="zoomOverlay"></div>
+					</div>
+				</div>
+				<!-- КОНТЕЙНЕР ДЛЯ ВЫНОСОК ПЕРЕМЕЩАЕМ СЮДА (внутри graph-container, но вне graph) -->
+				<div class="wave-labels-container" id="waveLabelsContainer">
+					<div class="wave-labels-side wave-labels-left"></div>
+					<div class="wave-labels-side wave-labels-right"></div>
+				</div>
+			</div>
 
             <div class="panel-section buttons-panel">
                 <div class="top-controls">

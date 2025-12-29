@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
-    // Запускаем миграцию данных если нужно
     if (window.TimestampMigrator) {
         console.log('Проверка формата данных перед инициализацией...');
         const migrationReport = window.TimestampMigrator.showMigrationReport();
@@ -24,8 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         console.log('AppState загружен, инициализация модулей...');
         
-        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Инициализируем модули в правильном порядке
-        // 1. Сначала DatesManager (он нужен для расчета currentDay)
         if (!window.dates && typeof DatesManager !== 'undefined') {
             console.log('Создаем DatesManager...');
             window.dates = new DatesManager();
@@ -33,7 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('DatesManager не определен!');
         }
         
-        // 2. Потом другие модули
         if (!window.appCore && typeof AppCore !== 'undefined') {
             console.log('Создаем AppCore...');
             window.appCore = new AppCore();
@@ -51,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (!window.uiManager && typeof UIManager !== 'undefined') {
             console.log('Создаем UIManager...');
-            window.uiManager = new UIManager(); // Автоматически настраивает инпут
+            window.uiManager = new UIManager();
         }
         
         if (!window.dataManager && typeof DataManager !== 'undefined') {
@@ -59,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.dataManager = new DataManager();
         }
         
-        // 3. UnifiedListManager создаем ПОСЛЕ DataManager
         if (!window.unifiedListManager && typeof UnifiedListManager !== 'undefined') {
             console.log('Создаем UnifiedListManager...');
             window.unifiedListManager = new UnifiedListManager();
@@ -85,19 +80,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.summaryManager = new SummaryManager();
         }
         
-        // 4. EventManager создаем вручную
         if (!window.eventManager && typeof EventManager !== 'undefined') {
             console.log('Создаем EventManager...');
             window.eventManager = new EventManager();
         }
         
-        // 5. TemplateReminder - напоминание про шаблоны
         if (!window.templateReminder && typeof TemplateReminder !== 'undefined') {
             console.log('Создаем TemplateReminder...');
             window.templateReminder = new TemplateReminder();
         }
         
-        // 6. Немедленно запускаем асинхронную инициализацию приложения
         if (window.appCore && window.appCore.init) {
             console.log('Запускаем AppCore.init()...');
             window.appCore.init();
@@ -117,12 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('appState.baseDate:', window.appState?.baseDate);
         console.log('appState.currentDate:', window.appState?.currentDate);
         
-        // Проверяем состояние шаблонов
         if (window.unifiedListManager) {
             console.log('Шаблоны загружены:', window.unifiedListManager.templatesLoaded);
             console.log('Количество загруженных шаблонов:', Object.keys(window.unifiedListManager.templateCache).length);
             
-            // Проверяем каждый необходимый шаблон
             const requiredTemplates = ['date-item-template', 'wave-item-template', 'group-item-template'];
             requiredTemplates.forEach(templateId => {
                 if (window.unifiedListManager.templateCache[templateId]) {
@@ -159,18 +149,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentDayElement) {
             console.log('DOM элемент currentDay найден, значение:', currentDayElement.textContent);
             
-            // Обновляем значение в DOM
             currentDayElement.textContent = window.dom.formatCurrentDayWithSeconds(window.appState.currentDay);
             console.log('Обновили DOM элемент currentDay на:', currentDayElement.textContent);
         } else {
             console.error('DOM элемент currentDay не найден!');
         }
         
-        // НОВОЕ: Устанавливаем значение в mainDateInput при загрузке
         const mainDateInput = document.getElementById('mainDateInput');
         if (mainDateInput && window.dom) {
             mainDateInput.value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
             console.log('Установлено значение в mainDateInput:', mainDateInput.value);
+        }
+        
+        // Проверяем наличие контейнера для выносок
+        const labelsContainer = document.querySelector('.wave-labels-container');
+        if (!labelsContainer) {
+            console.warn('Контейнер для выносок не найден, создаем вручную');
+            const container = document.createElement('div');
+            container.className = 'wave-labels-container';
+            container.id = 'waveLabelsContainer';
+            container.innerHTML = `
+                <div class="wave-labels-side wave-labels-left"></div>
+                <div class="wave-labels-side wave-labels-right"></div>
+            `;
+            
+            const graphElement = document.getElementById('graphElement');
+            if (graphElement) {
+                graphElement.appendChild(container);
+                console.log('Контейнер для выносок создан');
+            }
         }
         
         if (window.grid && window.grid.updateCenterDate) {
@@ -182,13 +189,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.dates.updateTodayButton();
         }
         
-        // НОВОЕ: Обновляем сводную информацию
         if (window.summaryManager && window.summaryManager.updateSummary) {
             window.summaryManager.updateSummary();
             console.log('Сводная информация обновлена');
         }
         
-        // НОВОЕ: Проверка на инлайн шаблоны
         console.log('🔍 Проверка на наличие инлайн шаблонов...');
         console.log('⚠️  НАПОМИНАНИЕ: Все шаблоны должны быть в папке templates/');
         console.log('⚠️  НАПОМИНАНИЕ: Никогда не создавайте инлайн шаблоны в коде!');
@@ -198,14 +203,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
         console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ===');
         
-        // 1. Всегда пересчитываем currentDay
         if (window.dates && window.dates.recalculateCurrentDay) {
             console.log('Принудительный пересчет currentDay...');
             const result = window.dates.recalculateCurrentDay();
             console.log('Результат recalculateCurrentDay():', result);
         }
         
-        // 2. Всегда устанавливаем активную дату (даже если она уже активна)
         if (window.appState && window.appState.activeDateId) {
             console.log('Устанавливаем активную дату:', window.appState.activeDateId);
             if (window.dates && window.dates.setActiveDate) {
@@ -226,7 +229,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         
-        // 3. Гарантированное обновление UI
         if (window.dataManager) {
             if (window.dataManager.updateDateList) {
                 window.dataManager.updateDateList();
@@ -236,7 +238,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         
-        // 4. Обновление сводной информации
         if (window.summaryManager) {
             if (window.summaryManager.populateGroupSelect) {
                 window.summaryManager.populateGroupSelect();
@@ -246,7 +247,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         
-        // 5. Финишное обновление
         if (window.grid && window.grid.updateCenterDate) {
             window.grid.updateCenterDate();
         }
@@ -261,7 +261,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('baseDate:', window.appState?.baseDate);
         console.log('currentDate:', window.appState?.currentDate);
         
-        // НОВОЕ: Итоговая проверка шаблонов
         console.log('=== ПРОВЕРКА ШАБЛОНОВ ===');
         console.log('⚠️  ЗАПРЕЩЕНО создавать инлайн шаблоны в коде JavaScript!');
         console.log('✅ Все шаблоны должны быть в папке templates/');

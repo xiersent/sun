@@ -3,29 +3,26 @@
     position: relative;
     width: var(--gw);
     height: var(--gh);
-    background-color: #fff; /* Светлый фон по умолчанию */
+    background-color: #fff;
     border: 1px solid var(--clg);
     overflow: hidden;
-    transition: filter 0.3s ease; /* Добавляем плавный переход */
+    transition: filter 0.3s ease;
 }
 
-/* Серость только для графика */
 .graph-container.graph-gray-mode {
     filter: grayscale(1);
 }
 
-/* Возвращаем нормальные цвета для элементов внутри графика при серости */
 .graph-container.graph-gray-mode .axis {
-    filter: none; /* Оси остаются видимыми */
+    filter: none;
 }
 
 .graph-container.graph-gray-mode .grid-line,
 .graph-container.graph-gray-mode .grid-line-inner,
 .graph-container.graph-gray-mode .wave-path {
-    filter: none; /* Линии сетки и волны остаются видимыми */
+    filter: none;
 }
 
-/* ТЕМНЫЙ РЕЖИМ - ТОЛЬКО ЧЕРЕЗ CSS КЛАСС */
 .graph-container.dark-mode {
     background-color: #000;
 }
@@ -37,13 +34,12 @@
     transform: scaleX(1) scaleY(1);
 }
 
-/* Оси */
 .axis {
     position: absolute;
     background-color: #c9c9c9;
     z-index: 5;
-	cursor: pointer;
-	pointer-events: none;
+    cursor: pointer;
+    pointer-events: none;
 }
 
 .graph-container.dark-mode .axis {
@@ -64,7 +60,6 @@
     top: 0;
 }
 
-/* Сетка */
 .grid-wrapper {
     position: absolute;
     width: var(--sq);
@@ -80,19 +75,16 @@
 .grid-line-inner {
     position: absolute;
     left: 50%;
-
     width: 1px;
     height: 100%;
     background-color: #eee;
     z-index: 5;
 }
 
-/* ИСПРАВЛЕНО: Линии сетки в темном режиме */
 .graph-container.dark-mode .grid-line-inner {
     background-color: #2b2727
 }
 
-/* Активная линия - ВЫСШИЙ ПРИОРИТЕТ */
 .grid-line-inner.active {
     background-color: var(--cp) !important;
     z-index: 6 !important;
@@ -106,13 +98,11 @@
     background-color: #ff4444;
 }
 
-/* Убираем ховер для активной линии */
 .grid-line-inner.active:hover,
 .grid-wrapper:hover .grid-line-inner.active {
     background-color: var(--cp) !important;
 }
 
-/* Убираем ховер для линий с заметками если они активны */
 .grid-line-inner.active.has-notes,
 .grid-wrapper:hover .grid-line-inner.active.has-notes {
     background-color: var(--danger-color) !important;
@@ -124,7 +114,6 @@
     z-index: 1;
 }
 
-/* ИСПРАВЛЕНО: Все линии сетки в темном режиме */
 .graph-container.dark-mode .grid-line {
     background-color: #2b2727
 }
@@ -145,24 +134,10 @@
     transition: width 0.2s, background-color 0.2s;
 }
 
-/* Это правило теперь не нужно, т.к. наследует от .graph-container.dark-mode .grid-line */
-/* .graph-container.dark-mode .grid-line.y {
-    background-color: #2b2727
-} */
-
-.grid-line.y:hover {
-    background-color: #ccc;
-    width: 3px;
-    z-index: 7;
-}
-
-
-
-.graph-container.dark-mode .grid-wrapper:hover .grid-line-inner {
+.graph-container.dark-mode .grid-line.y:hover {
     background-color: #888;
 }
 
-/* Активная линия - приоритет над ховером */
 .grid-line.y.active {
     background-color: var(--cp);
     width: 1px;
@@ -183,13 +158,11 @@
     width: 3px;
 }
 
-/* ИСПРАВЛЕНО: Линии с заметками в темном режиме */
 .graph-container.dark-mode .grid-line.y.has-notes:hover {
     background-color: #ff6666;
     width: 3px;
 }
 
-/* Активная линия с заметками - приоритет над ховером */
 .grid-line.y.active.has-notes {
     background-color: var(--danger-color);
 }
@@ -199,7 +172,6 @@
     width: 1px;
 }
 
-/* Метки осей */
 .x-labels {
     bottom: 10px;
     transform: translateX(-50%);
@@ -230,7 +202,6 @@
     color: #ccc;
 }
 
-/* Центральная дата */
 .center-date-label {
     position: absolute;
     top: 50%;
@@ -257,7 +228,6 @@
     color: #fff;
 }
 
-/* НОВОЕ: Стили для времени в центральной метке */
 .center-date-time {
     font-size: var(--font-size-md);
     color: var(--text-secondary);
@@ -268,7 +238,6 @@
     color: #ccc;
 }
 
-/* НОВОЕ: Стили для дробной части дня */
 .center-date-fractional {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
@@ -289,7 +258,6 @@
 .graph-container.dark-mode .center-date-name {
     color: #fff;
 }
-
 
 .center-date-main {
     display: flex;
@@ -341,4 +309,115 @@
 
 .graph-container.dark-mode .center-date-weekday {
     color: #ccc;
+}
+
+/* КОНТЕЙНЕР ДЛЯ ВЫНОСОК КОЛОСКОВ - ВНЕ ОБЛАСТИ OVERFLOW */
+.wave-labels-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: visible; /* ВАЖНО: разрешаем выходить за пределы */
+}
+
+/* Стороны для выносок */
+.wave-labels-side {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 200px;
+}
+
+.wave-labels-left {
+    left: -200px;
+    text-align: right;
+}
+
+.wave-labels-right {
+    right: -200px;
+    text-align: left;
+}
+
+/* Индивидуальная выноска */
+.wave-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    height: 20px;
+    margin-top: -10px;
+    opacity: 0.9;
+    transition: top 0.1s linear;
+    pointer-events: auto;
+    cursor: default;
+}
+
+.wave-label:hover {
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Левая сторона: текст → стрелка */
+.wave-labels-left .wave-label {
+    flex-direction: row-reverse;
+    right: 0;
+}
+
+.wave-labels-left .wave-label-text {
+    margin-left: 8px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Для темного режима графика */
+.graph-container.dark-mode .wave-labels-left .wave-label-text {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.wave-labels-left .wave-label-arrow {
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid;
+    border-right: 2px solid;
+    transform: rotate(45deg);
+    margin-left: 8px;
+}
+
+/* Правая сторона: стрелка → текст */
+.wave-labels-right .wave-label {
+    flex-direction: row;
+    left: 0;
+}
+
+.wave-labels-right .wave-label-text {
+    margin-right: 8px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Для темного режима графика */
+.graph-container.dark-mode .wave-labels-right .wave-label-text {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.wave-labels-right .wave-label-arrow {
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid;
+    border-right: 2px solid;
+    transform: rotate(-135deg);
+    margin-right: 8px;
 }

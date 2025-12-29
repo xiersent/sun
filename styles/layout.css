@@ -13,6 +13,7 @@
     gap: var(--spacing-lg);
     width: 100%;
     align-items: center;
+	position: relative;
 }
 
 .main-controls-panel {
