@@ -356,66 +356,83 @@ class WavesManager {
         return y;
     }
     
-    createWaveLabel(wave, y, side, container) {
-        const labelId = `${wave.id}-${side}`;
-        
-        const waveColor = wave.color || '#666666';
-        
-        const labelElement = document.createElement('div');
-        labelElement.className = 'wave-label';
-        labelElement.id = `waveLabel${labelId}`;
-        labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.side = side;
-        
-        labelElement.style.top = `${y}px`;
-        labelElement.style.backgroundColor = waveColor;
-        labelElement.style.color = '#fff';
-        
-        // Создаем стрелку как отдельный элемент
-        const arrow = document.createElement('div');
-        arrow.className = 'wave-label-arrow';
-        arrow.style.position = 'absolute';
-        arrow.style.top = '50%';
-        arrow.style.transform = 'translateY(-50%)';
-        arrow.style.width = '0';
-        arrow.style.height = '0';
-        arrow.style.borderStyle = 'solid';
-        arrow.style.zIndex = '1';
-        
-        if (side === 'left') {
-            arrow.style.right = '-6px';
-            arrow.style.borderWidth = '4px 0 4px 6px';
-            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-            labelElement.style.flexDirection = 'row-reverse';
-            labelElement.style.marginRight = '10px';
-        } else {
-            arrow.style.left = '-6px';
-            arrow.style.borderWidth = '4px 6px 4px 0';
-            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-            labelElement.style.flexDirection = 'row';
-            labelElement.style.marginLeft = '10px';
-        }
-        
-        const text = document.createElement('div');
-        text.className = 'wave-label-text';
-        text.textContent = wave.name;
-        text.title = `${wave.name} (${wave.period} дней)`;
-        text.style.position = 'relative';
-        text.style.zIndex = '2';
-        
-        labelElement.appendChild(text);
-        labelElement.appendChild(arrow);
-        container.appendChild(labelElement);
-        
-        this.waveLabelElements[labelId] = labelElement;
-        
-        labelElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.onWaveLabelClick(wave.id);
-        });
-        
-        return labelElement;
-    }
+	createWaveLabel(wave, y, side, container) {
+		const labelId = `${wave.id}-${side}`;
+		
+		const waveColor = wave.color || '#666666';
+		
+		const labelElement = document.createElement('div');
+		labelElement.className = 'wave-label';
+		labelElement.id = `waveLabel${labelId}`;
+		labelElement.dataset.waveId = wave.id;
+		labelElement.dataset.side = side;
+		
+		labelElement.style.top = `${y}px`;
+		labelElement.style.backgroundColor = waveColor;
+		labelElement.style.color = '#fff';
+		labelElement.style.opacity = '0.5'; // По умолчанию
+		labelElement.style.zIndex = '1'; // По умолчанию
+		
+		// Создаем стрелку как отдельный элемент
+		const arrow = document.createElement('div');
+		arrow.className = 'wave-label-arrow';
+		arrow.style.position = 'absolute';
+		arrow.style.top = '50%';
+		arrow.style.transform = 'translateY(-50%)';
+		arrow.style.width = '0';
+		arrow.style.height = '0';
+		arrow.style.borderStyle = 'solid';
+		arrow.style.zIndex = '1';
+		
+		if (side === 'left') {
+			// Для левых выносок: стрелка справа
+			arrow.style.right = '-6px';
+			arrow.style.borderWidth = '4px 0 4px 6px';
+			arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
+			labelElement.style.flexDirection = 'row-reverse';
+			labelElement.style.right = '0'; // Прижимаем к правому краю родителя
+			labelElement.style.marginRight = '10px'; // Отступ от правого края
+		} else {
+			// Для правых выносок: стрелка слева
+			arrow.style.left = '-6px';
+			arrow.style.borderWidth = '4px 6px 4px 0';
+			arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
+			labelElement.style.flexDirection = 'row';
+			labelElement.style.left = '0'; // Прижимаем к левому краю родителя
+			labelElement.style.marginLeft = '10px'; // Отступ от левого края
+		}
+		
+		const text = document.createElement('div');
+		text.className = 'wave-label-text';
+		text.textContent = wave.name;
+		text.title = `${wave.name} (${wave.period} дней)`;
+		text.style.position = 'relative';
+		text.style.zIndex = '2';
+		
+		labelElement.appendChild(text);
+		labelElement.appendChild(arrow);
+		container.appendChild(labelElement);
+		
+		this.waveLabelElements[labelId] = labelElement;
+		
+		// Обработчики для hover
+		labelElement.addEventListener('mouseenter', () => {
+			labelElement.style.opacity = '1';
+			labelElement.style.zIndex = '10';
+		});
+		
+		labelElement.addEventListener('mouseleave', () => {
+			labelElement.style.opacity = '0.5';
+			labelElement.style.zIndex = '1';
+		});
+		
+		labelElement.addEventListener('click', (e) => {
+			e.stopPropagation();
+			this.onWaveLabelClick(wave.id);
+		});
+		
+		return labelElement;
+	}
     
     onWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);

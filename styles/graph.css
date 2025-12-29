@@ -349,22 +349,38 @@
     white-space: nowrap;
     font-size: var(--font-size-sm);
     font-weight: 400;
-    opacity: 0.9;
     transition: top 0.1s linear;
     pointer-events: auto;
     cursor: default;
     transform: translateY(-50%);
     padding: 0 8px;
     height: 23px;
-    color: #fff; /* Текст всегда белый */
+    color: #fff;
     border-radius: 3px;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: opacity 0.2s, filter 0.2s;
+    opacity: 0.5; /* По умолчанию */
+    z-index: 1; /* По умолчанию */
+    transition: opacity 0.2s, z-index 0.2s, filter 0.2s;
 }
 
 .wave-label:hover {
-    opacity: 1;
-    filter: brightness(1.2); /* Немного светлее при наведении */
+    opacity: 1; /* При hover полная видимость */
+    z-index: 10; /* При hover выше других */
+    filter: brightness(1.2);
+}
+
+/* Левая сторона: текст → стрелка - ИСПРАВЛЕНО */
+.wave-labels-left .wave-label {
+    flex-direction: row-reverse;
+    right: 0; /* Прижимаем к ПРАВОМУ краю родителя */
+    margin-right: 10px; /* Отступ от правого края */
+}
+
+/* Правая сторона: стрелка → текст - ИСПРАВЛЕНО */
+.wave-labels-right .wave-label {
+    flex-direction: row;
+    left: 0; /* Прижимаем к ЛЕВОМУ краю родителя */
+    margin-left: 10px; /* Отступ от левого края */
 }
 
 /* Текст выноски */
