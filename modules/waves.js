@@ -359,6 +359,8 @@ class WavesManager {
     createWaveLabel(wave, y, side, container) {
         const labelId = `${wave.id}-${side}`;
         
+        const waveColor = wave.color || '#666666';
+        
         const labelElement = document.createElement('div');
         labelElement.className = 'wave-label';
         labelElement.id = `waveLabel${labelId}`;
@@ -366,25 +368,43 @@ class WavesManager {
         labelElement.dataset.side = side;
         
         labelElement.style.top = `${y}px`;
-        labelElement.style.color = wave.color || '#666666';
+        labelElement.style.backgroundColor = waveColor;
+        labelElement.style.color = '#fff';
         
+        // Создаем стрелку как отдельный элемент
         const arrow = document.createElement('div');
         arrow.className = 'wave-label-arrow';
-        arrow.style.borderColor = wave.color || '#666666';
+        arrow.style.position = 'absolute';
+        arrow.style.top = '50%';
+        arrow.style.transform = 'translateY(-50%)';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        
+        if (side === 'left') {
+            arrow.style.right = '-6px';
+            arrow.style.borderWidth = '4px 0 4px 6px';
+            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
+            labelElement.style.flexDirection = 'row-reverse';
+            labelElement.style.marginRight = '10px';
+        } else {
+            arrow.style.left = '-6px';
+            arrow.style.borderWidth = '4px 6px 4px 0';
+            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
+            labelElement.style.flexDirection = 'row';
+            labelElement.style.marginLeft = '10px';
+        }
         
         const text = document.createElement('div');
         text.className = 'wave-label-text';
         text.textContent = wave.name;
         text.title = `${wave.name} (${wave.period} дней)`;
+        text.style.position = 'relative';
+        text.style.zIndex = '2';
         
-        if (side === 'left') {
-            labelElement.appendChild(arrow);
-            labelElement.appendChild(text);
-        } else {
-            labelElement.appendChild(arrow);
-            labelElement.appendChild(text);
-        }
-        
+        labelElement.appendChild(text);
+        labelElement.appendChild(arrow);
         container.appendChild(labelElement);
         
         this.waveLabelElements[labelId] = labelElement;

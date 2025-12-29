@@ -349,75 +349,31 @@
     white-space: nowrap;
     font-size: var(--font-size-sm);
     font-weight: 400;
-    height: 20px;
-    margin-top: -10px;
     opacity: 0.9;
     transition: top 0.1s linear;
     pointer-events: auto;
     cursor: default;
+    transform: translateY(-50%);
+    padding: 0 8px;
+    height: 23px;
+    color: #fff; /* Текст всегда белый */
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: opacity 0.2s, filter 0.2s;
 }
 
 .wave-label:hover {
     opacity: 1;
-    font-weight: 600;
+    filter: brightness(1.2); /* Немного светлее при наведении */
 }
 
-/* Левая сторона: текст → стрелка */
-.wave-labels-left .wave-label {
-    flex-direction: row-reverse;
-    right: 0;
+/* Текст выноски */
+.wave-label-text {
+    white-space: nowrap;
+    font-weight: 400;
 }
 
-.wave-labels-left .wave-label-text {
-    margin-left: 8px;
-    padding: 2px 6px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 3px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Для темного режима графика */
-.graph-container.dark-mode .wave-labels-left .wave-label-text {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-}
-
-.wave-labels-left .wave-label-arrow {
-    width: 10px;
-    height: 10px;
-    border-top: 2px solid;
-    border-right: 2px solid;
-    transform: rotate(45deg);
-    margin-left: 8px;
-}
-
-/* Правая сторона: стрелка → текст */
-.wave-labels-right .wave-label {
-    flex-direction: row;
-    left: 0;
-}
-
-.wave-labels-right .wave-label-text {
-    margin-right: 8px;
-    padding: 2px 6px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 3px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Для темного режима графика */
-.graph-container.dark-mode .wave-labels-right .wave-label-text {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-}
-
-.wave-labels-right .wave-label-arrow {
-    width: 10px;
-    height: 10px;
-    border-top: 2px solid;
-    border-right: 2px solid;
-    transform: rotate(-135deg);
-    margin-right: 8px;
+/* Темный режим графика */
+.graph-container.dark-mode .wave-label {
+    border-color: rgba(255, 255, 255, 0.3); /* Более видимая обводка в темном режиме */
 }
