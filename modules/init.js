@@ -91,7 +91,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.eventManager = new EventManager();
         }
         
-        // 5. Немедленно запускаем асинхронную инициализацию приложения
+        // 5. TemplateReminder - напоминание про шаблоны
+        if (!window.templateReminder && typeof TemplateReminder !== 'undefined') {
+            console.log('Создаем TemplateReminder...');
+            window.templateReminder = new TemplateReminder();
+        }
+        
+        // 6. Немедленно запускаем асинхронную инициализацию приложения
         if (window.appCore && window.appCore.init) {
             console.log('Запускаем AppCore.init()...');
             window.appCore.init();
@@ -115,6 +121,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.unifiedListManager) {
             console.log('Шаблоны загружены:', window.unifiedListManager.templatesLoaded);
             console.log('Количество загруженных шаблонов:', Object.keys(window.unifiedListManager.templateCache).length);
+            
+            // Проверяем каждый необходимый шаблон
+            const requiredTemplates = ['date-item-template', 'wave-item-template', 'group-item-template'];
+            requiredTemplates.forEach(templateId => {
+                if (window.unifiedListManager.templateCache[templateId]) {
+                    console.log(`✓ Шаблон ${templateId} загружен`);
+                } else {
+                    console.error(`✗ Шаблон ${templateId} НЕ ЗАГРУЖЕН!`);
+                    console.error(`Убедитесь, что файл существует: templates/${templateId.replace('-template', '')}.ejs`);
+                }
+            });
         }
         
         const currentDayValue = window.appState?.currentDay;
@@ -170,6 +187,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.summaryManager.updateSummary();
             console.log('Сводная информация обновлена');
         }
+        
+        // НОВОЕ: Проверка на инлайн шаблоны
+        console.log('🔍 Проверка на наличие инлайн шаблонов...');
+        console.log('⚠️  НАПОМИНАНИЕ: Все шаблоны должны быть в папке templates/');
+        console.log('⚠️  НАПОМИНАНИЕ: Никогда не создавайте инлайн шаблоны в коде!');
+        
     }, 500);
     
     setTimeout(() => {
@@ -237,6 +260,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('currentDay:', window.appState?.currentDay);
         console.log('baseDate:', window.appState?.baseDate);
         console.log('currentDate:', window.appState?.currentDate);
+        
+        // НОВОЕ: Итоговая проверка шаблонов
+        console.log('=== ПРОВЕРКА ШАБЛОНОВ ===');
+        console.log('⚠️  ЗАПРЕЩЕНО создавать инлайн шаблоны в коде JavaScript!');
+        console.log('✅ Все шаблоны должны быть в папке templates/');
     }, 1000);
 });
 

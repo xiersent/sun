@@ -5,22 +5,22 @@ class AppCore {
         this.cacheElements();
     }
     
-    cacheElements() {
-        const ids = [
-            'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
-            'graphContainer', 'graphElement', 'centerDateLabel',
-            'dateListForDates', 'wavesList', 'notesList', 'noteInput',
-            'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
-            'dbImportStatus', 'intersectionResults', 'intersectionStats',
-            'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
-            'summaryStateSelect', 'summaryStats', 'summaryResults'
-        ];
-        
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) this.elements[id] = el;
-        });
-    }
+	cacheElements() {
+		const ids = [
+			'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
+			'graphContainer', 'graphElement', 'centerDateLabel',
+			'dateListForDates', 'wavesList', 'notesList', 'noteInput',
+			'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
+			'dbImportStatus', 'intersectionResults', 'intersectionStats',
+			'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
+			'summaryStateSelect', 'summaryResults'  // УДАЛЕНО: summaryStats
+		];
+		
+		ids.forEach(id => {
+			const el = document.getElementById(id);
+			if (el) this.elements[id] = el;
+		});
+	}
     
     init() {
         this.setupEventListeners();

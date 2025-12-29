@@ -45,145 +45,143 @@
     <div class="interface-container">
         <div class="container">
 
-			<div class="panel-section buttons-panel">
-				<div class="corner-controls">
-					<button class="ui-btn" data-action="toggleCorners">Угловые</button>
-					<button class="ui-btn" data-action="toggleAxial">Осевые</button>
-					<button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
-					<button class="ui-btn" data-action="toggleSides">Боковые</button>
-					<button class="ui-btn" data-action="toggleMiddle">Средние</button>
-					<button class="ui-btn" data-action="toggleLeft">Левые</button>
-					<button class="ui-btn" data-action="toggleRight">Правые</button>
-					<button class="ui-btn" data-action="toggleTop">Верхние</button>
-					<button class="ui-btn" data-action="toggleBottom">Нижние</button>
-					<button class="ui-btn" data-action="toggleAllSquares">Все</button>
-					<!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
-					<button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
-				</div>
-				<div class="transform-row">
-					<button class="ui-btn" data-action="toggleUI">Переключить UI</button>
-					<button class="ui-btn" data-action="toggleSquares">Квадратики</button>
-					<button class="ui-btn" data-action="toggleGrayMode">Серость</button>
-					<button class="ui-btn" data-action="toggleStars">Звездочки</button>
-					<button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
-					<button class="ui-btn" data-action="exportDates">Экспорт дат</button>
-					<button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
-					<button class="ui-btn" data-action="exportAll">Экспорт всего</button>
-					<button class="ui-btn" data-action="importAll">Импорт</button>
-					<input type="file" id="importAllFile" accept=".json" style="display:none">
-					<button class="ui-btn" data-action="resetAll">Сброс всего</button>
-				</div>
-			</div>
+            <div class="panel-section buttons-panel">
+                <div class="corner-controls">
+                    <button class="ui-btn" data-action="toggleCorners">Угловые</button>
+                    <button class="ui-btn" data-action="toggleAxial">Осевые</button>
+                    <button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
+                    <button class="ui-btn" data-action="toggleSides">Боковые</button>
+                    <button class="ui-btn" data-action="toggleMiddle">Средние</button>
+                    <button class="ui-btn" data-action="toggleLeft">Левые</button>
+                    <button class="ui-btn" data-action="toggleRight">Правые</button>
+                    <button class="ui-btn" data-action="toggleTop">Верхние</button>
+                    <button class="ui-btn" data-action="toggleBottom">Нижние</button>
+                    <button class="ui-btn" data-action="toggleAllSquares">Все</button>
+                    <!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
+                    <button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
+                </div>
+                <div class="transform-row">
+                    <button class="ui-btn" data-action="toggleUI">Переключить UI</button>
+                    <button class="ui-btn" data-action="toggleSquares">Квадратики</button>
+                    <button class="ui-btn" data-action="toggleGrayMode">Серость</button>
+                    <button class="ui-btn" data-action="toggleStars">Звездочки</button>
+                    <button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
+                    <button class="ui-btn" data-action="exportDates">Экспорт дат</button>
+                    <button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
+                    <button class="ui-btn" data-action="exportAll">Экспорт всего</button>
+                    <button class="ui-btn" data-action="importAll">Импорт</button>
+                    <input type="file" id="importAllFile" accept=".json" style="display:none">
+                    <button class="ui-btn" data-action="resetAll">Сброс всего</button>
+                </div>
+            </div>
 
+            <div class="graph-section">
+                <div class="graph-container" id="graphContainer">
+                    <div class="graph" id="graphElement">
+                        <div class="axis x-axis"></div>
+                        <div class="axis y-axis"></div>
+                        <div class="center-date-label" id="centerDateLabel">
+                            <!-- Контент будет заполнен JavaScript -->
+                        </div>
+                        <div class="zoom-overlay" id="zoomOverlay"></div>
+                    </div>
+                </div>
+            </div>
 
-			<div class="graph-section">
-				<div class="graph-container" id="graphContainer">
-					<div class="graph" id="graphElement">
-						<div class="axis x-axis"></div>
-						<div class="axis y-axis"></div>
-						<div class="center-date-label" id="centerDateLabel">
-							<!-- Контент будет заполнен JavaScript -->
-						</div>
-						<div class="zoom-overlay" id="zoomOverlay"></div>
-					</div>
-				</div>
-			</div>
-
-			<div class="panel-section buttons-panel">
-				<div class="top-controls">
-					<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
-					<button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
-					<button class="ui-btn" data-action="toggleBg">Фон</button>
-					<button class="ui-btn" data-action="flipH">↔</button>
-					<button class="ui-btn" data-action="flipV">↕</button>
-					<button class="ui-btn" data-action="rotateL">↶</button>
-					<button class="ui-btn" data-action="rotateR">↷</button>
-					<button class="ui-btn" data-action="resetTransform">⟲</button>
-					<button id="btnPrevDay" class="ui-btn">←</button>
-					<button class="current-day ui-btn" id="currentDay">0.00000</button>
-					<button id="btnNextDay" class="ui-btn">→</button>
-					<button id="btnToday" class="ui-btn">Сегодня</button>
-					<!-- НОВАЯ КНОПКА: СЕЙЧАС -->
-					<button id="btnNow" class="ui-btn">Сейчас</button>
-					<!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
-					<input type="text" class="date-input" id="mainDateInput" 
+            <div class="panel-section buttons-panel">
+                <div class="top-controls">
+                    <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
+                    <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
+                    <button class="ui-btn" data-action="toggleBg">Фон</button>
+                    <button class="ui-btn" data-action="flipH">↔</button>
+                    <button class="ui-btn" data-action="flipV">↕</button>
+                    <button class="ui-btn" data-action="rotateL">↶</button>
+                    <button class="ui-btn" data-action="rotateR">↷</button>
+                    <button class="ui-btn" data-action="resetTransform">⟲</button>
+                    <button id="btnPrevDay" class="ui-btn">←</button>
+                    <button class="current-day ui-btn" id="currentDay">0.00000</button>
+                    <button id="btnNextDay" class="ui-btn">→</button>
+                    <button id="btnToday" class="ui-btn">Сегодня</button>
+                    <!-- НОВАЯ КНОПКА: СЕЙЧАС -->
+                    <button id="btnNow" class="ui-btn">Сейчас</button>
+                    <!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
+                    <input type="text" class="date-input" id="mainDateInput" 
                            placeholder="YYYY-MM-DD HH:MM:SS" 
                            pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
                            title="Формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС" style="flex:1">
-					<button id="btnSetDate" class="ui-btn">Перейти</button>
-				</div>
-			</div>
+                    <button id="btnSetDate" class="ui-btn">Перейти</button>
+                </div>
+            </div>
 
-
-			<div class="main-controls-panel">
-				<div class="control-panel">
-					<div class="panel-section" id="dates-panel">
-						<div class="date-controls-buttons">
-							<input type="date" class="date-input" id="dateInput">
-							<input type="text" class="date-input" id="dateNameInput" placeholder="Название" style="flex:1">
-							<button id="btnAddDate" class="ui-btn">Добавить дату</button>
-						</div>
-						<div class="list-container" id="dateListForDates"></div>
-					</div>
-					<div class="panel-section" id="waves-panel">
-						<div class="tab-container">
-							<div class="tab-buttons">
-								<button class="tab-button active" data-tab="custom-waves">Колоски</button>
-								<button class="tab-button" data-tab="intersection-waves">Анализ совпадений</button>
-							</div>
-							<div class="tab-content active" id="custom-waves-tab">
-								<div class="add-custom-wave-form compact">
-									<div class="add-group-form">
-										<input type="text" class="add-group-input" id="newGroupName" placeholder="Название новой группы" style="flex: 1">
-										<button class="add-group-btn ui-btn" id="btnAddGroup">Добавить группу</button>
-									</div>
-									<div class="wave-inputs-row">
-										<input type="text" class="form-input" id="customWaveName" placeholder="Название колоска" style="flex:2">
-										<input type="number" class="form-input" id="customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
-										<select class="form-input" id="customWaveType">
-											<option value="solid">Сплошная</option>
-											<option value="dashed">Пунктирная</option>
-											<option value="dotted">Точечная</option>
-											<option value="zigzag">Зигзагообразная</option>
-											<option value="dash-dot">Штрих-линия</option>
-											<option value="long-dash">Длинный штрих</option>
-										</select>
-										<input type="color" class="color-input" id="customWaveColor" value="#666666" title="Выберить цвет">
-										<button id="btnAddCustomWave" class="ui-btn">Добавить колосок</button>
-									</div>
-								</div>
-								<div class="waves-list-container">
-									<div class="list-container" id="wavesList"></div>
-								</div>
-							</div>
-							<div class="tab-content" id="intersection-waves-tab">
-								<div class="intersection-form">
-									<div class="intersection-form-row">
-										<label class="intersection-form-label">Эталонный период:</label>
-										<input type="number" class="intersection-form-input" id="intersectionBasePeriod" placeholder="Период в днях" min="0.1" step="0.1" value="24">
-									</div>
-									<div>
-										<div class="intersection-form-row">
-											<label class="intersection-form-label">Амплитуда эталона:</label>
-											<input type="number" class="intersection-form-input" id="intersectionBaseAmplitude" placeholder="Амплитуда" min="0.1" step="0.1" value="1">
-										</div>
-										<div class="intersection-form-row">
-											<label class="intersection-form-label">Порог совпадения:</label>
-											<input type="number" class="intersection-form-input" id="intersectionPrecision" placeholder="Точность (0-1)" min="0" max="1" step="0.01" value="0.95">
-										</div>
-									</div>
-									<div class="intersection-form-actions">
-										<button id="btnCalculateIntersections" class="ui-btn">Найти совпадения</button>
-										<button id="btnClearIntersections" class="ui-btn">Очистить</button>
-									</div>
-								</div>
-								<div class="intersection-stats" id="intersectionStats" style="display:none"></div>
-								<div class="intersection-results" id="intersectionResults"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+            <div class="main-controls-panel">
+                <div class="control-panel">
+                    <div class="panel-section" id="dates-panel">
+                        <div class="date-controls-buttons">
+                            <input type="date" class="date-input" id="dateInput">
+                            <input type="text" class="date-input" id="dateNameInput" placeholder="Название" style="flex:1">
+                            <button id="btnAddDate" class="ui-btn">Добавить дату</button>
+                        </div>
+                        <div class="list-container" id="dateListForDates"></div>
+                    </div>
+                    <div class="panel-section" id="waves-panel">
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" data-tab="custom-waves">Колоски</button>
+                                <button class="tab-button" data-tab="intersection-waves">Анализ совпадений</button>
+                            </div>
+                            <div class="tab-content active" id="custom-waves-tab">
+                                <div class="add-custom-wave-form compact">
+                                    <div class="add-group-form">
+                                        <input type="text" class="add-group-input" id="newGroupName" placeholder="Название новой группы" style="flex: 1">
+                                        <button class="add-group-btn ui-btn" id="btnAddGroup">Добавить группу</button>
+                                    </div>
+                                    <div class="wave-inputs-row">
+                                        <input type="text" class="form-input" id="customWaveName" placeholder="Название колоска" style="flex:2">
+                                        <input type="number" class="form-input" id="customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
+                                        <select class="form-input" id="customWaveType">
+                                            <option value="solid">Сплошная</option>
+                                            <option value="dashed">Пунктирная</option>
+                                            <option value="dotted">Точечная</option>
+                                            <option value="zigzag">Зигзагообразная</option>
+                                            <option value="dash-dot">Штрих-линия</option>
+                                            <option value="long-dash">Длинный штрих</option>
+                                        </select>
+                                        <input type="color" class="color-input" id="customWaveColor" value="#666666" title="Выберить цвет">
+                                        <button id="btnAddCustomWave" class="ui-btn">Добавить колосок</button>
+                                    </div>
+                                </div>
+                                <div class="waves-list-container">
+                                    <div class="list-container" id="wavesList"></div>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="intersection-waves-tab">
+                                <div class="intersection-form">
+                                    <div class="intersection-form-row">
+                                        <label class="intersection-form-label">Эталонный период:</label>
+                                        <input type="number" class="intersection-form-input" id="intersectionBasePeriod" placeholder="Период в днях" min="0.1" step="0.1" value="24">
+                                    </div>
+                                    <div>
+                                        <div class="intersection-form-row">
+                                            <label class="intersection-form-label">Амплитуда эталона:</label>
+                                            <input type="number" class="intersection-form-input" id="intersectionBaseAmplitude" placeholder="Амплитуда" min="0.1" step="0.1" value="1">
+                                        </div>
+                                        <div class="intersection-form-row">
+                                            <label class="intersection-form-label">Порог совпадения:</label>
+                                            <input type="number" class="intersection-form-input" id="intersectionPrecision" placeholder="Точность (0-1)" min="0" max="1" step="0.01" value="0.95">
+                                        </div>
+                                    </div>
+                                    <div class="intersection-form-actions">
+                                        <button id="btnCalculateIntersections" class="ui-btn">Найти совпадения</button>
+                                        <button id="btnClearIntersections" class="ui-btn">Очистить</button>
+                                    </div>
+                                </div>
+                                <div class="intersection-stats" id="intersectionStats" style="display:none"></div>
+                                <div class="intersection-results" id="intersectionResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- НОВАЯ ПАНЕЛЬ: Сводная информация -->
             <div class="panel-section summary-panel" id="summaryPanel">
@@ -204,26 +202,11 @@
                         <div class="summary-select-group">
                             <label class="summary-label">Состояние:</label>
                             <select class="summary-select" id="summaryStateSelect">
-                                <option value="-5" selected>-5</option>
-                                <option value="-4">-4</option>
-                                <option value="-3">-3</option>
-                                <option value="-2">-2</option>
-                                <option value="-1">-1</option>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
+                                <!-- Опции будут добавлены динамически -->
                             </select>
                         </div>
                     </div>
                     
-                    <div class="summary-stats-row">
-                        <div class="summary-stats" id="summaryStats">
-                            <!-- Статистика будет заполнена через JavaScript -->
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="summary-results-container">
@@ -233,39 +216,39 @@
                 </div>
             </div>
 
-			<div class="panel-section" id="notes-panel">
-				<div class="notes-panel-layout">
-					<div class="notes-list-container">
-						<div class="list-container" id="notesList"></div>
-					</div>
-					<div class="note-editor-container">
-						<div class="notes-section">
-							<textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
-							<button id="btnAddNote" class="ui-btn">Добавить запись</button>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="panel-section db-import-section">
-				<h3>Импорт базы данных</h3>
-				<div class="db-import-controls">
-					<button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
-					<input type="file" id="importDBFile" accept=".db" style="display:none">
-					<button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
-					<button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
-					<button class="ui-btn" id="btnClearImportResults">Очистить</button>
-				</div>
-				<div class="db-import-progress" id="dbImportProgress" style="display:none">
-					<div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
-				</div>
-				<div id="dbImportStatus"></div>
-				<textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
-			</div>
+            <div class="panel-section" id="notes-panel">
+                <div class="notes-panel-layout">
+                    <div class="notes-list-container">
+                        <div class="list-container" id="notesList"></div>
+                    </div>
+                    <div class="note-editor-container">
+                        <div class="notes-section">
+                            <textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
+                            <button id="btnAddNote" class="ui-btn">Добавить запись</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section db-import-section">
+                <h3>Импорт базы данных</h3>
+                <div class="db-import-controls">
+                    <button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
+                    <input type="file" id="importDBFile" accept=".db" style="display:none">
+                    <button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
+                    <button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
+                    <button class="ui-btn" id="btnClearImportResults">Очистить</button>
+                </div>
+                <div class="db-import-progress" id="dbImportProgress" style="display:none">
+                    <div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
+                </div>
+                <div id="dbImportStatus"></div>
+                <textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
+            </div>
 
-			<div class="panel-section pagel-image" style="display: none;">
-				<img src="images/d41d8cd98f00b204e9800998ecf8427e.webp" alt="">
-			</div>
+            <div class="panel-section pagel-image" style="display: none;">
+                <img src="images/d41d8cd98f00b204e9800998ecf8427e.webp" alt="">
+            </div>
 
         </div>
     </div>
@@ -285,8 +268,10 @@
     <script src="modules/import.js"></script>
     <script src="modules/unifiedListManager.js"></script>
     <script src="modules/eventManager.js"></script>
-	<script src="modules/migrateToTimestamp.js"></script>
-	<script src="modules/fixTimestamp.js"></script>
+    <script src="modules/migrateToTimestamp.js"></script>
+    <script src="modules/fixTimestamp.js"></script>
+    <!-- НОВЫЙ МОДУЛЬ: Напоминание про шаблоны -->
+    <script src="modules/template-reminder.js"></script>
     <!-- НОВЫЙ МОДУЛЬ: Сводная информация -->
     <script src="modules/summaryManager.js"></script>
     <script src="modules/init.js"></script>

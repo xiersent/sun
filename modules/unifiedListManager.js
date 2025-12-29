@@ -1,4 +1,4 @@
-// optimized3/modules/unifiedListManager.js
+// modules/unifiedListManager.js
 class UnifiedListManager {
     constructor() {
         this.templates = {
@@ -24,29 +24,17 @@ class UnifiedListManager {
         
         this.templatesLoadPromise = new Promise(async (resolve, reject) => {
             try {
+                console.log('UnifiedListManager: начинаем загрузку шаблонов...');
+                
                 const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template'];
                 let loadedCount = 0;
                 
                 const loadPromises = templateIds.map(async (templateId) => {
                     try {
-                        const templateElement = document.getElementById(templateId);
-                        if (templateElement && templateElement.text) {
-                            this.templateCache[templateId] = templateElement.text;
-                            console.log(`Загружен inline шаблон: ${templateId}`);
-                            loadedCount++;
-                            return;
-                        }
-                        
                         const url = `templates/${templateId.replace('-template', '')}.ejs`;
                         console.log(`Попытка загрузки шаблона из файла: ${url}`);
                         
-                        const timeoutPromise = new Promise((_, timeoutReject) => {
-                            setTimeout(() => timeoutReject(new Error(`Таймаут загрузки шаблона: ${templateId}`)), 3000);
-                        });
-                        
-                        const fetchPromise = fetch(url);
-                        
-                        const response = await Promise.race([fetchPromise, timeoutPromise]);
+                        const response = await fetch(url);
                         
                         if (response.ok) {
                             const templateText = await response.text();
@@ -54,7 +42,7 @@ class UnifiedListManager {
                             console.log(`Загружен файловый шаблон: ${templateId} из ${url}`);
                             loadedCount++;
                         } else {
-                            console.error(`Не удалось загрузить шаблон ${templateId} из ${url}: ${response.status}`);
+                            console.warn(`Не удалось загрузить шаблон ${templateId} из ${url}: ${response.status}`);
                         }
                     } catch (error) {
                         console.error(`Ошибка загрузки шаблона ${templateId}:`, error);
@@ -65,17 +53,67 @@ class UnifiedListManager {
                 
                 console.log(`Загружено шаблонов: ${loadedCount} из ${templateIds.length}`);
                 
+                // ⚠️ ВНИМАНИЕ: Этот fallback ТОЛЬКО для критических ошибок!
+                // В нормальных условиях этот код НИКОГДА не должен выполняться!
+                if (loadedCount === 0) {
+                    console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: EJS шаблоны не загрузились!');
+                    console.error('❌ Проверьте наличие файлов в папке templates/');
+                    console.error('❌ Используются emergency fallback шаблоны');
+                    
+                    this.createEmergencyFallbackTemplates();
+                }
+                
                 this.templatesLoaded = true;
                 resolve();
                 
             } catch (error) {
                 console.error('Критическая ошибка загрузки шаблонов:', error);
+                this.createEmergencyFallbackTemplates();
                 this.templatesLoaded = true;
                 resolve();
             }
         });
         
         return this.templatesLoadPromise;
+    }
+    
+    // ⚠️ ЭТОТ МЕТОД ТОЛЬКО ДЛЯ ЧРЕЗВЫЧАЙНЫХ СИТУАЦИЙ!
+    // В НОРМАЛЬНЫХ УСЛОВИЯХ ЭТОТ КОД НИКОГДА НЕ ДОЛЖЕН ВЫПОЛНЯТЬСЯ!
+    createEmergencyFallbackTemplates() {
+        console.error('❌ ВНИМАНИЕ: Используются emergency fallback шаблоны!');
+        console.error('❌ Это означает, что EJS шаблоны не загрузились!');
+        console.error('❌ Проверьте наличие файлов в папке templates/');
+        
+        // Простые шаблоны только для отображения ошибки
+        this.templateCache['date-item-template'] = `
+<div class="list-item list-item--date" style="background:#ffe6e6;border:2px solid red;">
+    <div class="list-item__content">
+        <div style="color:red;padding:10px;">
+            ❌ ОШИБКА: Шаблон не загружен!<br>
+            Проверьте файл templates/date-item.ejs
+        </div>
+    </div>
+</div>`;
+        
+        this.templateCache['wave-item-template'] = `
+<div class="list-item list-item--wave" style="background:#ffe6e6;border:2px solid red;">
+    <div class="list-item__content">
+        <div style="color:red;padding:10px;">
+            ❌ ОШИБКА: Шаблон не загружен!<br>
+            Проверьте файл templates/wave-item.ejs
+        </div>
+    </div>
+</div>`;
+        
+        this.templateCache['group-item-template'] = `
+<div class="list-item list-item--group" style="background:#ffe6e6;border:2px solid red;">
+    <div class="list-item__content">
+        <div style="color:red;padding:10px;">
+            ❌ ОШИБКА: Шаблон не загружен!<br>
+            Проверьте файл templates/group-item.ejs
+        </div>
+    </div>
+</div>`;
     }
     
     async renderListWithWait(containerId, items, itemType) {
@@ -96,8 +134,8 @@ class UnifiedListManager {
             return this.templateCache[templateId];
         }
         
-        console.warn(`Шаблон ${templateId} не загружен, возвращаю пустой`);
-        return '<div class="list-error">Шаблон не загружен</div>';
+        console.warn(`Шаблон ${templateId} не загружен, создаем простой`);
+        return '<div class="list-item">Элемент списка</div>';
     }
     
     log(...args) {
@@ -107,10 +145,8 @@ class UnifiedListManager {
     }
     
     prepareDateData(dateObj, index) {
-        // dateObj.date теперь timestamp, преобразуем в Date для форматирования
         const dateObjDate = new Date(dateObj.date);
         
-        // Для расчета yearsFromCurrent используем timestamp
         const currentTimestamp = window.appState.currentDate instanceof Date ? 
             window.appState.currentDate.getTime() : 
             window.appState.currentDate;
@@ -124,8 +160,8 @@ class UnifiedListManager {
             id: dateObj.id,
             name: dateObj.name,
             type: 'date',
-            formattedDate: window.dom.formatDate(dateObj.date), // Передаем timestamp
-            dateForInput: window.dom.formatDateForInput(dateObj.date), // Передаем timestamp
+            formattedDate: window.dom.formatDate(dateObj.date),
+            dateForInput: window.dom.formatDateForInput(dateObj.date),
             yearsFromCurrent: yearsFromCurrent,
             active: activeDateIdStr === dateObjIdStr,
             editing: editingDateIdStr === dateObjIdStr,
@@ -249,9 +285,16 @@ class UnifiedListManager {
         }
         
         const templateText = this.getTemplate(templateId);
-        if (!templateText || templateText.includes('Шаблон не загружен')) {
+        if (!templateText) {
             container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
             console.error(`Шаблон ${templateId} не найден в кэше`);
+            return;
+        }
+        
+        // Проверяем, что EJS загружен
+        if (typeof ejs === 'undefined') {
+            console.error('EJS не загружен!');
+            container.innerHTML = '<div class="list-error">Ошибка: EJS не загружен</div>';
             return;
         }
         
@@ -450,7 +493,7 @@ class UnifiedListManager {
             }
             
             dateObj.name = newName;
-            dateObj.date = newDate.getTime(); // Сохраняем как timestamp
+            dateObj.date = newDate.getTime();
             window.appState.editingDateId = null;
             
             if (String(window.appState.activeDateId) === String(dateId)) {

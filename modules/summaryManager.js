@@ -5,12 +5,11 @@ class SummaryManager {
         this.cacheElements();
         this.currentGroup = 'all';
         this.currentState = -5;
-        this.tolerance = 0.5; // Допустимая погрешность для "близкого" состояния
+        this.tolerance = 0.5;
         
-        // Устанавливаем флаг для отслеживания изменений
         this.isUpdating = false;
         this.lastUpdateTime = 0;
-        this.updateDebounceDelay = 100; // Задержка для дебаунса
+        this.updateDebounceDelay = 100;
         this.updateTimeout = null;
         
         this.init();
@@ -21,7 +20,6 @@ class SummaryManager {
             'summaryPanel',
             'summaryGroupSelect',
             'summaryStateSelect',
-            'summaryStats',
             'summaryResults'
         ];
         
@@ -34,6 +32,8 @@ class SummaryManager {
     init() {
         this.setupEventListeners();
         this.populateGroupSelect();
+        this.setupStateSelect();
+        this.restoreSelections();
         this.updateSummary();
         this.setupStateObservers();
     }
@@ -45,6 +45,7 @@ class SummaryManager {
         if (groupSelect) {
             groupSelect.addEventListener('change', (e) => {
                 this.currentGroup = e.target.value;
+                this.saveSelections();
                 this.updateSummary();
             });
         }
@@ -52,9 +53,56 @@ class SummaryManager {
         if (stateSelect) {
             stateSelect.addEventListener('change', (e) => {
                 this.currentState = parseFloat(e.target.value);
+                this.saveSelections();
                 this.updateSummary();
             });
         }
+    }
+    
+    setupStateSelect() {
+        const stateSelect = this.elements.summaryStateSelect;
+        if (!stateSelect) return;
+        
+        // Очищаем текущие опции
+        stateSelect.innerHTML = '';
+        
+        // Создаем опции от 5 до -5, но -5 по умолчанию
+        for (let i = 5; i >= -5; i--) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            if (i === -5) {
+                option.selected = true;
+            }
+            stateSelect.appendChild(option);
+        }
+    }
+    
+    restoreSelections() {
+        // Восстанавливаем выбранные значения из localStorage
+        const savedGroup = localStorage.getItem('summarySelectedGroup');
+        const savedState = localStorage.getItem('summarySelectedState');
+        
+        if (savedGroup) {
+            this.currentGroup = savedGroup;
+            const groupSelect = this.elements.summaryGroupSelect;
+            if (groupSelect) {
+                groupSelect.value = savedGroup;
+            }
+        }
+        
+        if (savedState) {
+            this.currentState = parseFloat(savedState);
+            const stateSelect = this.elements.summaryStateSelect;
+            if (stateSelect) {
+                stateSelect.value = savedState;
+            }
+        }
+    }
+    
+    saveSelections() {
+        localStorage.setItem('summarySelectedGroup', this.currentGroup);
+        localStorage.setItem('summarySelectedState', this.currentState.toString());
     }
     
     setupStateObservers() {
@@ -158,7 +206,6 @@ class SummaryManager {
             const waves = this.getWavesForSelectedGroup();
             const stateWaves = this.filterWavesByState(waves);
             
-            this.updateStats(stateWaves, waves.length);
             this.updateResults(stateWaves);
             
         } catch (error) {
@@ -208,7 +255,6 @@ class SummaryManager {
             const phase = (currentDay % wave.period);
             
             // Нормализуем фазу к диапазону [-П, П] или другому удобному
-            // Для синусоиды состояние = sin(2π * фаза/период)
             const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
             
             // Переводим в состояние от -5 до 5
@@ -235,22 +281,11 @@ class SummaryManager {
     }
     
     getClosenessLevel(difference) {
+        if (difference < 0.001) return 'точно';
         if (difference < 0.1) return 'очень близко';
         if (difference < 0.3) return 'близко';
         if (difference < 0.5) return 'довольно близко';
         return 'рядом';
-    }
-    
-    updateStats(stateWaves, totalWaves) {
-        const statsElement = this.elements.summaryStats;
-        if (!statsElement) return;
-        
-        statsElement.innerHTML = `
-            <strong>Статистика:</strong><br>
-            Всего колосков в группе: ${totalWaves}<br>
-            Найдено в состоянии ${this.currentState} (±${this.tolerance}): ${stateWaves.length}<br>
-            Процент соответствия: ${totalWaves > 0 ? ((stateWaves.length / totalWaves) * 100).toFixed(1) : 0}%
-        `;
     }
     
     updateResults(stateWaves) {
@@ -288,13 +323,13 @@ class SummaryManager {
     }
     
     getClosenessClass(difference) {
+        if (difference < 0.001) return 'summary-item-exact';
         if (difference < 0.1) return 'summary-item-very-close';
         if (difference < 0.3) return 'summary-item-close';
         if (difference < 0.5) return 'summary-item-fairly-close';
         return 'summary-item-nearby';
     }
     
-    // Метод для обновления при изменении данных
     refresh() {
         this.populateGroupSelect();
         this.updateSummary();
