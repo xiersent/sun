@@ -1,4 +1,4 @@
-// optimized3/modules/eventManager.js
+// modules/eventManager.js
 class EventManager {
     constructor() {
         console.log('EventManager: инициализация...');
@@ -106,6 +106,17 @@ class EventManager {
                 window.uiManager.handleAction(action, actionBtn);
                 return;
             }
+        }
+        
+        // ТАБЫ В НОВОЙ ПАНЕЛИ АНАЛИЗА
+        if (target.classList.contains('tab-button')) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('EventManager: клик по табу:', target.dataset.tab);
+            if (window.uiManager) {
+                window.uiManager.handleTabClick(target);
+            }
+            return;
         }
         
         const expandCollapseBtn = target.closest('.expand-collapse-btn');
@@ -499,16 +510,6 @@ class EventManager {
                         console.log('Волны полностью пересозданы после переключения группы');
                     }, 100);
                 }
-            }
-            return;
-        }
-        
-        if (target.classList.contains('tab-button')) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('EventManager: клик по табу:', target.dataset.tab);
-            if (window.uiManager) {
-                window.uiManager.handleTabClick(target);
             }
             return;
         }

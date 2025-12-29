@@ -15,22 +15,40 @@
     padding: var(--spacing-md);
     overflow: visible;
     min-width: 0;
-	border: 1px solid var(--clg);
+    border: 1px solid var(--clg);
+}
+
+/* НОВАЯ ПАНЕЛЬ АНАЛИЗА */
+#analysis-panel {
+    width: var(--gw);
+    margin-top: 0;
+}
+
+/* Стили для пустого состояния анализа */
+.analysis-empty {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    font-size: var(--font-size-sm);
+    background: #f9f9f9;
+    border: 1px dashed var(--clg);
+    border-radius: var(--border-radius);
 }
 
 .panel-section.buttons-panel {
-	display: flex;
-	flex-direction: column;
-	gap: var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
 }
 
 .panel-section.pagel-image {
-	align-self: center;
+    align-self: center;
 }
 
 .panel-section.pagel-image img{
-	display: block;
-	margin: 0 auto;
+    display: block;
+    margin: 0 auto;
 }
 
 /* Контейнер для списка волн с фиксированным скроллом */
@@ -312,10 +330,6 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: var(--spacing-sm);
-    border: 1px solid var(--clg);
-    padding: var(--spacing-md);
-    background: #f9f9f9;
 }
 
 .intersection-form-row {

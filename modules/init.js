@@ -1,4 +1,4 @@
-// modules/init.js - обновленная часть инициализации
+// modules/init.js
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {

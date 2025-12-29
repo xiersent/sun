@@ -1,4 +1,4 @@
-// optimized3/modules/uiManager.js
+// modules/uiManager.js
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
@@ -323,23 +323,23 @@ class UIManager {
         // ВСЁ! Никакой дополнительной логики не нужно
     }
     
-	updateUI() {
-		window.dataManager.updateDateList();
-		window.dataManager.updateWavesGroups();
-		window.dataManager.updateNotesList();
-		
-		// ИЗМЕНЕНО: Используем новый метод форматирования с секундами
-		if (document.getElementById('mainDateInput') && window.dom) {
-			document.getElementById('mainDateInput').value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
-		}
-		if (document.getElementById('dateInput')) {
-			document.getElementById('dateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
-		}
-		
-		window.waves.updatePosition();
-		window.grid.updateCenterDate();
-		window.grid.updateGridNotesHighlight();
-	}
+    updateUI() {
+        window.dataManager.updateDateList();
+        window.dataManager.updateWavesGroups();
+        window.dataManager.updateNotesList();
+        
+        // ИЗМЕНЕНО: Используем новый метод форматирования с секундами
+        if (document.getElementById('mainDateInput') && window.dom) {
+            document.getElementById('mainDateInput').value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
+        }
+        if (document.getElementById('dateInput')) {
+            document.getElementById('dateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
+        }
+        
+        window.waves.updatePosition();
+        window.grid.updateCenterDate();
+        window.grid.updateGridNotesHighlight();
+    }
     
     clearWaveForm() {
         document.getElementById('customWaveName').value = '';
