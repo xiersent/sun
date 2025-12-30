@@ -73,12 +73,12 @@ class UIManager {
             // Переключение UI
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
+            toggleWaveLabels: () => this.toggleWaveLabels(), // НОВЫЙ МЕТОД
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
             toggleGraphGrayMode: () => this.toggleGraphGrayMode(),
             toggleStars: () => this.toggleStars(),
-            toggleTooltips: () => this.toggleTooltips(),
             
             // Управление углами
             toggleCorners: () => this.toggleCornerSquares('corners'),
@@ -120,6 +120,21 @@ class UIManager {
             console.log('UI показан');
         }
         window.appState.save();
+    }
+    
+    // НОВЫЙ МЕТОД: Переключение видимости выносок
+    toggleWaveLabels() {
+        console.log('Переключение видимости выносок');
+        const labelsContainer = document.querySelector('.wave-labels-container');
+        if (labelsContainer) {
+            if (labelsContainer.classList.contains('hidden')) {
+                labelsContainer.classList.remove('hidden');
+                console.log('Выноски показаны');
+            } else {
+                labelsContainer.classList.add('hidden');
+                console.log('Выноски скрыты');
+            }
+        }
     }
     
     toggleCornerSquares(type) {
@@ -297,11 +312,6 @@ class UIManager {
         }
         window.grid.updateCenterDate();
         window.dataManager.updateDateList();
-        window.appState.save();
-    }
-    
-    toggleTooltips() {
-        window.appState.showTooltips = !window.appState.showTooltips;
         window.appState.save();
     }
     

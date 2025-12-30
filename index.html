@@ -66,7 +66,6 @@
                     <button class="ui-btn" data-action="toggleSquares">Квадратики</button>
                     <button class="ui-btn" data-action="toggleGrayMode">Серость</button>
                     <button class="ui-btn" data-action="toggleStars">Звездочки</button>
-                    <button class="ui-btn" data-action="toggleTooltips">Тултипы</button>
                     <button class="ui-btn" data-action="exportDates">Экспорт дат</button>
                     <button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
                     <button class="ui-btn" data-action="exportAll">Экспорт всего</button>
@@ -92,30 +91,32 @@
 				</div>
 			</div>
 
-            <div class="panel-section buttons-panel">
-                <div class="top-controls">
-                    <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
-                    <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
-                    <button class="ui-btn" data-action="toggleBg">Фон</button>
-                    <button class="ui-btn" data-action="flipH">↔</button>
-                    <button class="ui-btn" data-action="flipV">↕</button>
-                    <button class="ui-btn" data-action="rotateL">↶</button>
-                    <button class="ui-btn" data-action="rotateR">↷</button>
-                    <button class="ui-btn" data-action="resetTransform">⟲</button>
-                    <button id="btnPrevDay" class="ui-btn">←</button>
-                    <button class="current-day ui-btn" id="currentDay">0.00000</button>
-                    <button id="btnNextDay" class="ui-btn">→</button>
-                    <button id="btnToday" class="ui-btn">Сегодня</button>
-                    <!-- НОВАЯ КНОПКА: СЕЙЧАС -->
-                    <button id="btnNow" class="ui-btn">Сейчас</button>
-                    <!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
-                    <input type="text" class="date-input" id="mainDateInput" 
-                           placeholder="YYYY-MM-DD HH:MM:SS" 
-                           pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
-                           title="Формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС" style="flex:1">
-                    <button id="btnSetDate" class="ui-btn">Перейти</button>
-                </div>
-            </div>
+			<div class="panel-section buttons-panel">
+				<div class="top-controls">
+					<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
+					<!-- НОВАЯ КНОПКА: Выноски -->
+					<button class="ui-btn" data-action="toggleWaveLabels">Переключить выноски</button>
+					<button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
+					<button class="ui-btn" data-action="toggleBg">Фон</button>
+					<button class="ui-btn" data-action="flipH">↔</button>
+					<button class="ui-btn" data-action="flipV">↕</button>
+					<button class="ui-btn" data-action="rotateL">↶</button>
+					<button class="ui-btn" data-action="rotateR">↷</button>
+					<button class="ui-btn" data-action="resetTransform">⟲</button>
+					<button id="btnPrevDay" class="ui-btn">←</button>
+					<button class="current-day ui-btn" id="currentDay">0.00000</button>
+					<button id="btnNextDay" class="ui-btn">→</button>
+					<button id="btnToday" class="ui-btn">Сегодня</button>
+					<!-- НОВАЯ КНОПКА: СЕЙЧАС -->
+					<button id="btnNow" class="ui-btn">Сейчас</button>
+					<!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
+					<input type="text" class="date-input" id="mainDateInput" 
+						placeholder="YYYY-MM-DD HH:MM:SS" 
+						pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
+						title="Формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС" style="flex:1">
+					<button id="btnSetDate" class="ui-btn">Перейти</button>
+				</div>
+			</div>
 
             <div class="main-controls-panel">
                 <div class="control-panel">

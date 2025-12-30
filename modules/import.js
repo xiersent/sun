@@ -89,7 +89,6 @@ class ImportExportManager {
         dataToSave.uiSettings.showStars = window.appState.showStars;
         dataToSave.uiSettings.grayMode = window.appState.grayMode;
         dataToSave.uiSettings.graphGrayMode = window.appState.graphGrayMode;
-        dataToSave.uiSettings.showTooltips = window.appState.showTooltips;
         dataToSave.uiSettings.cornerSquaresVisible = window.appState.cornerSquaresVisible;
         dataToSave.exportDate = new Date().getTime(); // timestamp
         dataToSave.version = '1.0';
@@ -296,7 +295,6 @@ class ImportExportManager {
                             window.appState.showStars = convertedData.uiSettings.showStars !== undefined ? convertedData.uiSettings.showStars : true;
                             window.appState.grayMode = convertedData.uiSettings.grayMode || false;
                             window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
-                            window.appState.showTooltips = convertedData.uiSettings.showTooltips !== undefined ? convertedData.uiSettings.showTooltips : false;
                             window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
                             
                             if (window.appState.uiHidden) {

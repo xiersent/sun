@@ -168,34 +168,6 @@ class WavesManager {
         
         window.appState.periods[wave.id] = periodPx;
         
-        const waveIdStrForTooltip = String(wave.id);
-        if (!waveIdStrForTooltip.startsWith('wave-120-') && !waveIdStrForTooltip.startsWith('wave-31-')) {
-            const tooltip = document.createElement('div');
-            tooltip.className = 'wave-tooltip';
-            tooltip.textContent = wave.name;
-            container.appendChild(tooltip);
-            
-            container.addEventListener('mouseenter', (e) => {
-                if (!window.appState.showTooltips) return;
-                const rect = container.getBoundingClientRect();
-                tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
-                tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
-                tooltip.style.zIndex = window.appState.tooltipZIndex++;
-                tooltip.style.display = 'block';
-            });
-            
-            container.addEventListener('mousemove', (e) => {
-                if (!window.appState.showTooltips) return;
-                const rect = container.getBoundingClientRect();
-                tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
-                tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
-            });
-            
-            container.addEventListener('mouseleave', () => {
-                tooltip.style.display = 'none';
-            });
-        }
-        
         console.log(`Создана волна: ${wave.name} (${wave.period} дней)`);
         console.log(`  periodPx: ${periodPx}px, totalPeriods: ${totalPeriods}, containerWidth: ${containerWidth}px`);
     }

@@ -233,11 +233,6 @@ class GridManager {
             const line = wrapper.querySelector('.grid-line-inner');
             line.classList.remove('has-notes');
             
-            const tooltip = wrapper.querySelector('.grid-line-tooltip');
-            if (tooltip) {
-                tooltip.remove();
-            }
-            
             const targetDate = new Date(window.appState.currentDate);
             targetDate.setDate(targetDate.getDate() + offset);
             
@@ -248,11 +243,6 @@ class GridManager {
             
             if (notesForDate.length > 0) {
                 line.classList.add('has-notes');
-                
-                const tooltip = document.createElement('div');
-                tooltip.className = 'grid-line-tooltip';
-                tooltip.textContent = `${notesForDate.length} запис${notesForDate.length === 1 ? 'ь' : 'ей'}`;
-                wrapper.appendChild(tooltip);
             }
         });
     }

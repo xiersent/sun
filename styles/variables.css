@@ -45,7 +45,6 @@
     
     /* Z-index слои */
     --z-corner: 1000;
-    --z-tooltip: 25;
     --z-waves: 3;
     --z-grid: 5;
     --z-overlay: 9999;

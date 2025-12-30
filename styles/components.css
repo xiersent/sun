@@ -343,36 +343,6 @@ textarea {
     display: block;
 }
 
-/* Tooltip */
-.wave-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: var(--spacing-xs) 8px;
-    font-size: var(--font-size-sm);
-    z-index: var(--z-tooltip);
-    pointer-events: none;
-    white-space: nowrap;
-    display: none;
-}
-
-.grid-line-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: var(--spacing-xs) 8px;
-    font-size: var(--font-size-sm);
-    z-index: var(--z-tooltip);
-    pointer-events: none;
-    white-space: nowrap;
-    transform: translateX(-50%);
-    top: -30px;
-    display: none;
-}
-
-.grid-line.y.has-notes:hover .grid-line-tooltip {
-    display: block;
-}
 
 /* Состояния импорта */
 .db-import-status {

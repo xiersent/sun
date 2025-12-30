@@ -393,3 +393,13 @@
 .graph-container.dark-mode .wave-label {
     border-color: rgba(255, 255, 255, 0.3); /* Более видимая обводка в темном режиме */
 }
+
+/* СЕРЫЕ ВЫНОСКИ В РЕЖИМЕ СЕРОСТИ ГРАФИКА */
+.graph-container.graph-gray-mode+.wave-labels-container {
+    filter: grayscale(1);
+}
+
+/* СКРЫТЫЕ ВЫНОСКИ */
+.wave-labels-container.hidden {
+    display: none !important;
+}

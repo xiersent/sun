@@ -70,7 +70,6 @@ class DebugState {
         const requiredSettings = [
             'graphHeight6Squares',
             'graphGrayMode',
-            'showTooltips',
             'cornerSquaresVisible'
         ];
         

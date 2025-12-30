@@ -54,7 +54,6 @@ class AppState {
                 showStars: true,
                 grayMode: false,
                 graphGrayMode: false,
-                showTooltips: false,
                 cornerSquaresVisible: true,
                 activeDateId: 's25',
                 editingDateId: null,
@@ -265,7 +264,6 @@ class AppState {
                 this.showStars = data.uiSettings.showStars !== undefined ? data.uiSettings.showStars : true;
                 this.grayMode = data.uiSettings.grayMode || false;
                 this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
-                this.showTooltips = data.uiSettings.showTooltips !== undefined ? data.uiSettings.showTooltips : false;
                 this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
                 this.editingDateId = data.uiSettings.editingDateId || null;
                 this.editingWaveId = data.uiSettings.editingWaveId || null;
@@ -301,7 +299,6 @@ class AppState {
                 this.dbImportData = null;
                 this.intersectionWaves = [];
                 this.intersectionResults = [];
-                this.tooltipZIndex = 100;
                 this.waveOriginalColors = {};
                 this.periods = {};
                 
@@ -421,7 +418,6 @@ isTimestamp(value) {
         this.showStars = true;
         this.grayMode = false;
         this.graphGrayMode = false;
-        this.showTooltips = false;
         this.cornerSquaresVisible = true;
         this.activeDateId = 's25';
         this.editingDateId = null;
@@ -433,7 +429,6 @@ isTimestamp(value) {
         this.dbImportData = null;
         this.intersectionWaves = [];
         this.intersectionResults = [];
-        this.tooltipZIndex = 100;
         this.waveOriginalColors = {};
         this.periods = {};
         
@@ -474,7 +469,6 @@ isTimestamp(value) {
 		this.data.uiSettings.showStars = this.showStars;
 		this.data.uiSettings.grayMode = this.grayMode;
 		this.data.uiSettings.graphGrayMode = this.graphGrayMode;
-		this.data.uiSettings.showTooltips = this.showTooltips;
 		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
 		this.data.uiSettings.activeDateId = this.activeDateId;
 		this.data.uiSettings.editingDateId = this.editingDateId;
