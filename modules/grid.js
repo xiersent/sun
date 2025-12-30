@@ -220,7 +220,7 @@ class GridManager {
                 <div class="center-date-datetime">${dateTimeStr}</div>
                 <div class="center-name-container">
                     <div class="center-date-name">${name}</div>
-                    <div class="center-date-star">★</div>
+                    <div class="center-date-star">☼</div>
                 </div>
             </div>
             <div class="center-date-weekday">${weekday}</div>

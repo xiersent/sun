@@ -296,8 +296,7 @@
 }
 
 .center-date-star {
-    color: var(--warning-color);
-    font-size: var(--font-size-lg);
+    font-size: 22px;
 }
 
 .center-date-weekday {
