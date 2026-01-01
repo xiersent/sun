@@ -5,22 +5,23 @@ class AppCore {
         this.cacheElements();
     }
     
-	cacheElements() {
-		const ids = [
-			'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
-			'graphContainer', 'graphElement', 'centerDateLabel',
-			'dateListForDates', 'wavesList', 'notesList', 'noteInput',
-			'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
-			'dbImportStatus', 'intersectionResults', 'intersectionStats',
-			'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
-			'summaryStateSelect', 'summaryResults'  // УДАЛЕНО: summaryStats
-		];
-		
-		ids.forEach(id => {
-			const el = document.getElementById(id);
-			if (el) this.elements[id] = el;
-		});
-	}
+    cacheElements() {
+        const ids = [
+            'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
+            'graphContainer', 'graphElement', 'centerDateLabel',
+            'dateListForDates', 'wavesList', 'notesList', 'noteInput',
+            'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
+            'dbImportStatus', 'intersectionResults', 'intersectionStats',
+            'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
+            'summaryStateSelect', 'summaryResults',  // УДАЛЕНО: summaryStats
+            'readParableBtn', 'parableModal', 'parableContent', 'closeParableBtn'  // НОВОЕ: элементы притчи
+        ];
+        
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) this.elements[id] = el;
+        });
+    }
     
     init() {
         this.setupEventListeners();
@@ -89,141 +90,144 @@ class AppCore {
     }
     
 
-	async initializeAppComponents() {
-		// ВАЖНОЕ ИЗМЕНЕНИЕ: Ждем загрузки шаблонов перед рендерингом UI
-		console.log('AppCore: ожидание загрузки шаблонов...');
-		
-		if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
-			try {
-				// Начинаем загрузку шаблонов
-				const templatesPromise = window.unifiedListManager.initTemplates();
-				
-				// ВАЖНО: Инициализируем волны с правильным currentDay
-				if (window.waves && window.waves.init) {
-					console.log('AppCore: инициализация WavesManager...');
-					await window.waves.init(); // Ждем инициализации волн
-				}
-				
-				if (window.grid && window.grid.createGrid) {
-					window.grid.createGrid();
-				}
-				
-				// Инициализируем сводную информацию
-				if (window.summaryManager && window.summaryManager.init) {
-					console.log('AppCore: инициализация SummaryManager...');
-					window.summaryManager.init();
-				}
-				
-				// Ждем завершения загрузки шаблонов
-				await templatesPromise;
-				console.log('AppCore: шаблоны загружены успешно');
-				
-			} catch (error) {
-				console.error('AppCore: ошибка загрузки шаблонов:', error);
-			}
-		}
-		
-		// Теперь рендерим UI с загруженными шаблонами
-		console.log('AppCore: рендеринг UI...');
-		
-		if (window.dataManager) {
-			// Используем асинхронные вызовы
-			if (window.dataManager.updateDateList) {
-				await window.dataManager.updateDateList();
-			}
-			
-			if (window.dataManager.updateWavesGroups) {
-				await window.dataManager.updateWavesGroups();
-			}
-			
-			if (window.dataManager.updateNotesList) {
-				window.dataManager.updateNotesList();
-			}
-		}
-		
-		// ИСПРАВЛЕНИЕ: Устанавливаем фон графика ТОЛЬКО через CSS-классы
-		const graphContainer = document.getElementById('graphContainer');
-		if (graphContainer) {
-			// УДАЛЕНО: Установка inline-стилей для фона
-			// ВМЕСТО ЭТОГО: Только управление CSS-классами
-			
-			if (!window.appState.graphBgWhite) {
-				graphContainer.classList.add('dark-mode');
-			} else {
-				graphContainer.classList.remove('dark-mode');
-			}
-			
-			if (window.appState.graphGrayMode) {
-				graphContainer.classList.add('graph-gray-mode');
-			} else {
-				graphContainer.classList.remove('graph-gray-mode');
-			}
-		}
-		
-		// НОВОЕ: Устанавливаем начальное значение в mainDateInput
-		const mainDateInput = document.getElementById('mainDateInput');
-		if (mainDateInput && window.dom) {
-			mainDateInput.value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
-			console.log('AppCore: установлено начальное значение в mainDateInput:', mainDateInput.value);
-		}
-		
-		// ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
-		this.showWarning();
-		
-		// НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
-		
-		// ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
-		setTimeout(() => {
-			console.log('AppCore: проверка данных волн в группах...');
-			if (window.debugGroups) {
-				window.debugGroups();
-			}
-		}, 2000);
-		
-		// Инициализируем EventManager если он ещё не создан
-		if (!window.eventManager) {
-			console.log('AppCore: инициализация EventManager...');
-			if (typeof EventManager !== 'undefined') {
-				window.eventManager = new EventManager();
-			}
-		}
-		
-		// Обновляем кнопку "Сегодня"
-		if (window.dates && window.dates.updateTodayButton) {
-			window.dates.updateTodayButton();
-		}
-		
-		console.log('AppCore: инициализация завершена');
-	}
+    async initializeAppComponents() {
+        // ВАЖНОЕ ИЗМЕНЕНИЕ: Ждем загрузки шаблонов перед рендерингом UI
+        console.log('AppCore: ожидание загрузки шаблонов...');
+        
+        if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
+            try {
+                // Начинаем загрузку шаблонов
+                const templatesPromise = window.unifiedListManager.initTemplates();
+                
+                // ВАЖНО: Инициализируем волны с правильным currentDay
+                if (window.waves && window.waves.init) {
+                    console.log('AppCore: инициализация WavesManager...');
+                    await window.waves.init(); // Ждем инициализации волн
+                }
+                
+                if (window.grid && window.grid.createGrid) {
+                    window.grid.createGrid();
+                }
+                
+                // Инициализируем сводную информацию
+                if (window.summaryManager && window.summaryManager.init) {
+                    console.log('AppCore: инициализация SummaryManager...');
+                    window.summaryManager.init();
+                }
+                
+                // Ждем завершения загрузки шаблонов
+                await templatesPromise;
+                console.log('AppCore: шаблоны загружены успешно');
+                
+            } catch (error) {
+                console.error('AppCore: ошибка загрузки шаблонов:', error);
+            }
+        }
+        
+        // Теперь рендерим UI с загруженными шаблонами
+        console.log('AppCore: рендеринг UI...');
+        
+        if (window.dataManager) {
+            // Используем асинхронные вызовы
+            if (window.dataManager.updateDateList) {
+                await window.dataManager.updateDateList();
+            }
+            
+            if (window.dataManager.updateWavesGroups) {
+                await window.dataManager.updateWavesGroups();
+            }
+            
+            if (window.dataManager.updateNotesList) {
+                window.dataManager.updateNotesList();
+            }
+        }
+        
+        // ИСПРАВЛЕНИЕ: Устанавливаем фон графика ТОЛЬКО через CSS-классы
+        const graphContainer = document.getElementById('graphContainer');
+        if (graphContainer) {
+            // УДАЛЕНО: Установка inline-стилей для фона
+            // ВМЕСТО ЭТОГО: Только управление CSS-классами
+            
+            if (!window.appState.graphBgWhite) {
+                graphContainer.classList.add('dark-mode');
+            } else {
+                graphContainer.classList.remove('dark-mode');
+            }
+            
+            if (window.appState.graphGrayMode) {
+                graphContainer.classList.add('graph-gray-mode');
+            } else {
+                graphContainer.classList.remove('graph-gray-mode');
+            }
+        }
+        
+        // НОВОЕ: Устанавливаем начальное значение в mainDateInput
+        const mainDateInput = document.getElementById('mainDateInput');
+        if (mainDateInput && window.dom) {
+            mainDateInput.value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+            console.log('AppCore: установлено начальное значение в mainDateInput:', mainDateInput.value);
+        }
+        
+        // НОВОЕ: Загружаем текст притчи в модальное окно
+        this.loadParableText();
+        
+        // ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
+        this.showWarning();
+        
+        // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
+        
+        // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
+        setTimeout(() => {
+            console.log('AppCore: проверка данных волн в группах...');
+            if (window.debugGroups) {
+                window.debugGroups();
+            }
+        }, 2000);
+        
+        // Инициализируем EventManager если он ещё не создан
+        if (!window.eventManager) {
+            console.log('AppCore: инициализация EventManager...');
+            if (typeof EventManager !== 'undefined') {
+                window.eventManager = new EventManager();
+            }
+        }
+        
+        // Обновляем кнопку "Сегодня"
+        if (window.dates && window.dates.updateTodayButton) {
+            window.dates.updateTodayButton();
+        }
+        
+        console.log('AppCore: инициализация завершена');
+    }
 
-	// И измените вызов в методе initializeApp():
-	async initializeApp() {
-		// Проверяем мобильное устройство
-		const isMobile = this.isMobileDevice();
-		
-		if (isMobile) {
-			// Для мобильных - показываем только предупреждение
-			this.showWarning();
-			// Добавляем класс для мобильных устройств
-			document.body.classList.add('mobile-device');
-			console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
-			return; // Прерываем дальнейшую инициализацию
-		}
-		
-		// Продолжаем стандартную инициализацию для десктопов
-		console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
-		
-		// Устанавливаем режим отображения звезд/имен
-		if (window.appState.showStars) {
-			document.body.classList.add('stars-mode');
-			document.body.classList.remove('names-mode');
-		} else {
-			document.body.classList.remove('stars-mode');
-			document.body.classList.add('names-mode');
-		}
-		
-		// Замените старый код на вызов нового метода:
-		await this.initializeAppComponents();
+    // И измените вызов в методе initializeApp():
+    async initializeApp() {
+        // Проверяем мобильное устройство
+        const isMobile = this.isMobileDevice();
+        
+        if (isMobile) {
+            // Для мобильных - показываем только предупреждение
+            this.showWarning();
+            // Добавляем класс для мобильных устройств
+            document.body.classList.add('mobile-device');
+            console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
+            return; // Прерываем дальнейшую инициализацию
+        }
+        
+        // Продолжаем стандартную инициализацию для десктопов
+        console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
+        
+        // Устанавливаем режим отображения звезд/имен
+        if (window.appState.showStars) {
+            document.body.classList.add('stars-mode');
+            document.body.classList.remove('names-mode');
+        } else {
+            document.body.classList.remove('stars-mode');
+            document.body.classList.add('names-mode');
+        }
+        
+        // Замените старый код на вызов нового метода:
+        await this.initializeAppComponents();
         
         // ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ - добавляем этот блок
         console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ В AppCore ===');
@@ -245,25 +249,25 @@ class AppCore {
                 }
             }
         }, 500);
-		
-		console.log('AppCore: инициализация завершена');
-	}
+        
+        console.log('AppCore: инициализация завершена');
+    }
 
     
     // Метод для получения версии из файла
-	async getVersion() {
-		try {
-			// Пробуем загрузить версию
-			const response = await fetch('version.txt');
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл не найден)';
-		} catch (error) {
-			console.error('Ошибка загрузки версии:', error);
-			return '(ошибка загрузки)';
-		}
-	}
+    async getVersion() {
+        try {
+            // Пробуем загрузить версию
+            const response = await fetch('version.txt');
+            if (response.ok) {
+                return (await response.text()).trim();
+            }
+            return '(файл не найден)';
+        } catch (error) {
+            console.error('Ошибка загрузки версии:', error);
+            return '(ошибка загрузки)';
+        }
+    }
     
     // Метод для определения мобильного устройства
     isMobileDevice() {
@@ -359,6 +363,12 @@ class AppCore {
             acceptButton.style.display = 'none';
         }
         
+        // Убираем кнопку "прочесть притчу"
+        const parableButton = document.getElementById('readParableBtn');
+        if (parableButton) {
+            parableButton.style.display = 'none';
+        }
+        
         // Изменяем содержимое предупреждения
         const warningBox = warningOverlay.querySelector('.warning-box');
         if (warningBox) {
@@ -435,6 +445,22 @@ class AppCore {
     
     setupEventListeners() {
         console.log('AppCore: настройка обработчиков событий...');
+        
+        // НОВОЕ: Обработчик для кнопки "прочесть притчу"
+        const readParableBtn = document.getElementById('readParableBtn');
+        if (readParableBtn) {
+            readParableBtn.addEventListener('click', () => {
+                this.showParableModal();
+            });
+        }
+        
+        // НОВОЕ: Обработчик для кнопки закрытия притчи
+        const closeParableBtn = document.getElementById('closeParableBtn');
+        if (closeParableBtn) {
+            closeParableBtn.addEventListener('click', () => {
+                this.hideParableModal();
+            });
+        }
         
         // Обработчик для кнопки "Согласиться и продолжить" - ДОБАВЛЯЕМ СРАЗУ
         const acceptWarningBtn = document.getElementById('acceptWarning');
@@ -674,10 +700,60 @@ class AppCore {
                         window.dates.navigateDay(1); 
                     }
                     break;
+                case 'Escape':
+                    // Закрыть модальное окно притчи при нажатии ESC
+                    if (this.elements.parableModal && !this.elements.parableModal.classList.contains('hidden')) {
+                        this.hideParableModal();
+                    }
+                    break;
             }
         });
         
         console.log('AppCore: обработчики событий настроены');
+    }
+    
+    // НОВЫЕ МЕТОДЫ ДЛЯ РАБОТЫ С ПРИТЧЕЙ
+    
+    loadParableText() {
+        const parableContent = this.elements.parableContent;
+        if (!parableContent) return;
+        
+        // Берем текст притчи из начала страницы (блок .aaa-blockquote)
+        const parableBlock = document.querySelector('.aaa-blockquote');
+        if (parableBlock) {
+            parableContent.innerHTML = parableBlock.innerHTML;
+        } else {
+            // Если блок не найден, используем запасной текст
+            parableContent.innerHTML = `
+                <p>Говорят, когда-то одну девушку обвинили в ведовстве. В качестве наказания её отвезли на островок на озере – клочок каменистой почвы, где не было ни еды, ни укрытий. Её приговорили к мучительной медленной смерти от холода и голода.</p>
+                <p>Вот только не знали в городе, что один юноша, увидев её глаза, прекрасные и сверкающие, подобно луне в летнюю ночь, поклялся ей в вечной любви. Когда ей вынесли приговор – по его мнению, несправедливый – он дал обет уберечь её от гибели. Выжидая удобного дня для совместного побега, он каждую ночь втайне переплывал озеро на лодке с едой и тёплой одеждой. А она каждую ночь вставала у воды и зажигала свечу, чтобы указать ему путь.</p>
+                <p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
+                <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу любимому.</p>
+            `;
+        }
+    }
+    
+    showParableModal() {
+        const parableModal = this.elements.parableModal;
+        if (parableModal) {
+            parableModal.classList.remove('hidden');
+            // Блокируем прокрутку основного содержимого
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    hideParableModal() {
+        const parableModal = this.elements.parableModal;
+        if (parableModal) {
+            parableModal.classList.add('hidden');
+            // Восстанавливаем прокрутку основного содержимого
+            // (но оставляем скрытой, если warningOverlay еще виден)
+            if (this.elements.warningOverlay.classList.contains('hidden')) {
+                document.body.style.overflow = 'auto';
+            } else {
+                document.body.style.overflow = 'hidden';
+            }
+        }
     }
 }
 

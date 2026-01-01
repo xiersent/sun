@@ -16,12 +16,26 @@
             <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
             <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
             <!-- ОТДЕЛЬНЫЕ СТРОКИ ДЛЯ РАЗНОЙ ИНФОРМАЦИИ -->
+			<div style="margin-bottom: 20px;"><button id="readParableBtn" class="ui-btn parable-btn">Притча</button></div>
             <div class="warning-info">
                 <div class="warning-info-item"><strong>Браузер:</strong> <span id="browserInfo">Загрузка...</span></div>
                 <div class="warning-info-item"><strong>Версия от:</strong> <span id="versionInfo">Загрузка...</span></div>
                 <div class="warning-info-item"><strong>Сегодня:</strong> <span id="todayInfo">Загрузка...</span></div>
             </div>
-            <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+            <div class="warning-actions">
+                <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+            </div>
+        </div>
+        
+        <!-- Модальное окно притчи (изначально скрыто) -->
+        <div class="parable-modal hidden" id="parableModal">
+            <div class="parable-modal-header">
+                <h2 class="parable-modal-title">Притча о Светоносной деве</h2>
+                <button class="ui-btn parable-modal-close" id="closeParableBtn">× Закрыть</button>
+            </div>
+            <div class="parable-modal-content" id="parableContent">
+                <!-- Содержимое будет вставлено из JavaScript -->
+            </div>
         </div>
     </div>
     
@@ -75,48 +89,48 @@
                 </div>
             </div>
 
-			<div class="graph-section">
-				<div class="graph-container" id="graphContainer">
-					<div class="graph" id="graphElement">
-						<div class="axis x-axis"></div>
-						<div class="axis y-axis"></div>
-						<div class="center-date-label" id="centerDateLabel"></div>
-						<div class="zoom-overlay" id="zoomOverlay"></div>
-					</div>
-				</div>
-				<!-- КОНТЕЙНЕР ДЛЯ ВЫНОСОК ПЕРЕМЕЩАЕМ СЮДА (внутри graph-container, но вне graph) -->
-				<div class="wave-labels-container" id="waveLabelsContainer">
-					<div class="wave-labels-side wave-labels-left"></div>
-					<div class="wave-labels-side wave-labels-right"></div>
-				</div>
-			</div>
+            <div class="graph-section">
+                <div class="graph-container" id="graphContainer">
+                    <div class="graph" id="graphElement">
+                        <div class="axis x-axis"></div>
+                        <div class="axis y-axis"></div>
+                        <div class="center-date-label" id="centerDateLabel"></div>
+                        <div class="zoom-overlay" id="zoomOverlay"></div>
+                    </div>
+                </div>
+                <!-- КОНТЕЙНЕР ДЛЯ ВЫНОСОК ПЕРЕМЕЩАЕМ СЮДА (внутри graph-container, но вне graph) -->
+                <div class="wave-labels-container" id="waveLabelsContainer">
+                    <div class="wave-labels-side wave-labels-left"></div>
+                    <div class="wave-labels-side wave-labels-right"></div>
+                </div>
+            </div>
 
-			<div class="panel-section buttons-panel">
-				<div class="top-controls">
-					<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
-					<!-- НОВАЯ КНОПКА: Выноски -->
-					<button class="ui-btn" data-action="toggleWaveLabels">Переключить выноски</button>
-					<button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
-					<button class="ui-btn" data-action="toggleBg">Фон</button>
-					<button class="ui-btn" data-action="flipH">↔</button>
-					<button class="ui-btn" data-action="flipV">↕</button>
-					<button class="ui-btn" data-action="rotateL">↶</button>
-					<button class="ui-btn" data-action="rotateR">↷</button>
-					<button class="ui-btn" data-action="resetTransform">⟲</button>
-					<button id="btnPrevDay" class="ui-btn">←</button>
-					<button class="current-day ui-btn" id="currentDay">0.00000</button>
-					<button id="btnNextDay" class="ui-btn">→</button>
-					<button id="btnToday" class="ui-btn">Сегодня</button>
-					<!-- НОВАЯ КНОПКА: СЕЙЧАС -->
-					<button id="btnNow" class="ui-btn">Сейчас</button>
-					<!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
-					<input type="text" class="date-input" id="mainDateInput" 
-						placeholder="YYYY-MM-DD HH:MM:SS" 
-						pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
-						title="Формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС" style="flex:1">
-					<button id="btnSetDate" class="ui-btn">Перейти</button>
-				</div>
-			</div>
+            <div class="panel-section buttons-panel">
+                <div class="top-controls">
+                    <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
+                    <!-- НОВАЯ КНОПКА: Выноски -->
+                    <button class="ui-btn" data-action="toggleWaveLabels">Переключить выноски</button>
+                    <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
+                    <button class="ui-btn" data-action="toggleBg">Фон</button>
+                    <button class="ui-btn" data-action="flipH">↔</button>
+                    <button class="ui-btn" data-action="flipV">↕</button>
+                    <button class="ui-btn" data-action="rotateL">↶</button>
+                    <button class="ui-btn" data-action="rotateR">↷</button>
+                    <button class="ui-btn" data-action="resetTransform">⟲</button>
+                    <button id="btnPrevDay" class="ui-btn">←</button>
+                    <button class="current-day ui-btn" id="currentDay">0.00000</button>
+                    <button id="btnNextDay" class="ui-btn">→</button>
+                    <button id="btnToday" class="ui-btn">Сегодня</button>
+                    <!-- НОВАЯ КНОПКА: СЕЙЧАС -->
+                    <button id="btnNow" class="ui-btn">Сейчас</button>
+                    <!-- ИЗМЕНЕНО: text input с поддержкой секунд -->
+                    <input type="text" class="date-input" id="mainDateInput" 
+                        placeholder="YYYY-MM-DD HH:MM:SS" 
+                        pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
+                        title="Формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС" style="flex:1">
+                    <button id="btnSetDate" class="ui-btn">Перейти</button>
+                </div>
+            </div>
 
             <div class="main-controls-panel">
                 <div class="control-panel">
@@ -192,35 +206,35 @@
 
             <!-- ПАНЕЛЬ АНАЛИЗА СОВПАДЕНИЙ (перенесена под сводную информацию) -->
             <div class="panel-section" id="analysis-panel">
-				<div class="summary-header">
+                <div class="summary-header">
                     <h3>Поиск совпадений</h3>
                 </div>
-				<div class="intersection-form">
-					<div class="intersection-form-row">
-						<label class="intersection-form-label">Эталонный период:</label>
-						<input type="number" class="intersection-form-input" id="intersectionBasePeriod" placeholder="Период в днях" min="0.1" step="0.1" value="24">
-					</div>
-					<div>
-						<div class="intersection-form-row">
-							<label class="intersection-form-label">Амплитуда эталона:</label>
-							<input type="number" class="intersection-form-input" id="intersectionBaseAmplitude" placeholder="Амплитуда" min="0.1" step="0.1" value="1">
-						</div>
-						<div class="intersection-form-row">
-							<label class="intersection-form-label">Порог совпадения:</label>
-							<input type="number" class="intersection-form-input" id="intersectionPrecision" placeholder="Точность (0-1)" min="0" max="1" step="0.01" value="0.95">
-						</div>
-					</div>
-					<div class="intersection-form-actions">
-						<button id="btnCalculateIntersections" class="ui-btn">Найти совпадения</button>
-						<button id="btnClearIntersections" class="ui-btn">Очистить</button>
-					</div>
-				</div>
-				<div class="intersection-stats" id="intersectionStats" style="display:none"></div>
-				<div class="intersection-results" id="intersectionResults"></div>
+                <div class="intersection-form">
+                    <div class="intersection-form-row">
+                        <label class="intersection-form-label">Эталонный период:</label>
+                        <input type="number" class="intersection-form-input" id="intersectionBasePeriod" placeholder="Период в днях" min="0.1" step="0.1" value="24">
+                    </div>
+                    <div>
+                        <div class="intersection-form-row">
+                            <label class="intersection-form-label">Амплитуда эталона:</label>
+                            <input type="number" class="intersection-form-input" id="intersectionBaseAmplitude" placeholder="Амплитуда" min="0.1" step="0.1" value="1">
+                        </div>
+                        <div class="intersection-form-row">
+                            <label class="intersection-form-label">Порог совпадения:</label>
+                            <input type="number" class="intersection-form-input" id="intersectionPrecision" placeholder="Точность (0-1)" min="0" max="1" step="0.01" value="0.95">
+                        </div>
+                    </div>
+                    <div class="intersection-form-actions">
+                        <button id="btnCalculateIntersections" class="ui-btn">Найти совпадения</button>
+                        <button id="btnClearIntersections" class="ui-btn">Очистить</button>
+                    </div>
+                </div>
+                <div class="intersection-stats" id="intersectionStats" style="display:none"></div>
+                <div class="intersection-results" id="intersectionResults"></div>
             </div>
 
             <div class="panel-section" id="notes-panel">
-				<div class="summary-header">
+                <div class="summary-header">
                     <h3>Записи</h3>
                 </div>
                 <div class="notes-panel-layout">
@@ -283,6 +297,6 @@
     <!-- НОВЫЙ МОДУЛЬ: Сводная информация -->
     <script src="modules/summaryManager.js"></script>
     <script src="modules/init.js"></script>
-    
+
 </body>
 </html>

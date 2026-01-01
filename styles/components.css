@@ -10,7 +10,7 @@ button {
     cursor: pointer;
     font-weight: 400;
     height: 25px;
-	font-family: var(--font-family);
+    font-family: var(--font-family);
 }
 
 button:hover {
@@ -39,6 +39,21 @@ button:hover {
 #acceptWarning.ui-btn:hover {
     filter: brightness(0.9);
     background-color: var(--cp);
+}
+
+/* Кнопка притчи */
+.parable-btn {
+    background-color: #4a6fa5;
+    color: #fff;
+    font-weight: 400;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    height: 25px;
+    margin-right: var(--spacing-xs);
+}
+
+.parable-btn:hover {
+    filter: brightness(0.9);
+    background-color: #3a5a8a;
 }
 
 .small-button {
@@ -99,6 +114,82 @@ button:hover {
     filter: brightness(1.1);
 }
 
+/* Контейнер для кнопок предупреждения */
+.warning-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    margin-top: var(--spacing-md);
+}
+
+/* Модальное окно притчи */
+.parable-modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 700px;
+	background: #fff;
+	z-index: var(--z-overlay) + 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.parable-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+	padding-bottom: 0;
+}
+
+.parable-modal-title {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.parable-modal-close {
+    background: #fff;
+    color: var(--cp);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+.parable-modal-close:hover {
+    background: #f0f0f0;
+}
+
+.parable-modal-content {
+    overflow-y: auto;
+    flex: 1;
+    font-size: 19px;
+    line-height: 1.6;
+	font-family: serif;
+	padding: 30px;
+}
+
+.parable-modal-content p {
+	margin: 0;
+}
+
+.parable-modal-content p+p {
+    margin-top: 10px;
+}
+
+.parable-modal-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Темная тема для модального окна при темном фоне */
+body.gray-mode .parable-modal {
+    background: #f5f5f5;
+}
+
 /* Стили для мобильного предупреждения */
 .mobile-warning-overlay {
     background: #f0f0f0;
@@ -124,7 +215,7 @@ button:hover {
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 20px;
-	display: none;
+    display: none;
 }
 
 .mobile-warning-box .warning-text ul {
@@ -142,7 +233,7 @@ button:hover {
     padding: 15px;
     border-radius: 5px;
     margin: 15px 0;
-	display: none;
+    display: none;
 }
 
 .mobile-warning-box .warning-info-item {
@@ -163,7 +254,7 @@ button:hover {
     border-radius: 4px;
     cursor: pointer;
     margin-top: 20px;
-	display: none;
+    display: none;
 }
 
 .mobile-retry-btn:hover {
@@ -240,7 +331,7 @@ textarea {
     flex-direction: column;
     gap: 8px;
     margin-bottom: var(--spacing-lg);
-	align-items: center;
+    align-items: center;
 }
 
 .warning-info-item {
@@ -288,7 +379,7 @@ textarea {
     height: 100%;
     cursor: pointer;
     border: none;
-	font-family: Monospace;
+    font-family: Monospace;
 }
 
 .current-day:hover {
@@ -300,8 +391,8 @@ textarea {
     position: absolute;
     color: var(--text-secondary);
     z-index: 8;
-	pointer-events: none;
-	user-select: none;
+    pointer-events: none;
+    user-select: none;
 }
 
 .weekday-label {
@@ -342,7 +433,6 @@ textarea {
 .spoiler-content.show {
     display: block;
 }
-
 
 /* Состояния импорта */
 .db-import-status {
