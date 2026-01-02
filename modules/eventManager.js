@@ -5,7 +5,7 @@ class EventManager {
         this.askedGroups = new Set(); // Храним ID групп, для которых уже спрашивали (не сохраняется)
         this.setupGlobalHandlers();
         this.setupDateChangeObservers();
-		this.setupIntersectionHandlers();
+        this.setupIntersectionHandlers();
     }
     
     setupGlobalHandlers() {
@@ -114,7 +114,7 @@ class EventManager {
             }
         }
         
-        // ТАБЫ В НОВОЙ ПАНЕЛИ АНАЛИЗА
+        // ТАБЫ - ИСПРАВЛЕНА ЛОГИКА (делегируем UIManager)
         if (target.classList.contains('tab-button')) {
             e.preventDefault();
             e.stopPropagation();
@@ -343,7 +343,7 @@ class EventManager {
                             this.updateGroupStatsForWave(waveId, true);
                             
                             // Обновить сводную информацию
-                            if (window.summaryManager && window.summaryManager.updateSummary) {
+                                if (window.summaryManager && window.summaryManager.updateSummary) {
                                 window.summaryManager.updateSummary();
                             }
                         }, 50);
@@ -899,141 +899,140 @@ class EventManager {
         }
     }
 
-	setupIntersectionHandlers() {
-		console.log('EventManager: настройка обработчиков пересечений...');
-		
-		// Обработчики для кнопок панели пересечений
-		document.addEventListener('click', (e) => {
-			this.handleIntersectionClick(e);
-		});
-	}
+    setupIntersectionHandlers() {
+        console.log('EventManager: настройка обработчиков пересечений...');
+        
+        // Обработчики для кнопок панели пересечений
+        document.addEventListener('click', (e) => {
+            this.handleIntersectionClick(e);
+        });
+    }
 
-	handleIntersectionClick(e) {
-		const target = e.target;
-		
-		// Кнопка "Рассчитать за день"
-		if (target.id === 'btnCalculateIntersections' || 
-			target.closest('#btnCalculateIntersections')) {
-			e.preventDefault();
-			e.stopPropagation();
-			console.log('EventManager: расчет пересечений за день');
-			
-			this.calculateIntersectionsForSelectedDay();
-			return;
-		}
-		
-		// Кнопка "Для текущей даты"
-		if (target.id === 'btnUpdateForCurrentDate' || 
-			target.closest('#btnUpdateForCurrentDate')) {
-			e.preventDefault();
-			e.stopPropagation();
-			console.log('EventManager: обновление для текущей даты');
-			
-			if (window.intersectionManager) {
-				window.intersectionManager.updateForCurrentDate();
-			}
-			return;
-		}
-		
-		// Кнопка "Очистить"
-		if (target.id === 'btnClearIntersections' || 
-			target.closest('#btnClearIntersections')) {
-			e.preventDefault();
-			e.stopPropagation();
-			console.log('EventManager: очистка результатов пересечений');
-			
-			this.clearIntersectionResults();
-			return;
-		}
-		
-		// Клик по чекбоксу "Только активные колоски"
-		if (target.id === 'onlyActiveWaves' || 
-			target.closest('#onlyActiveWaves')) {
-			e.stopPropagation();
-			const isChecked = target.checked || (target.closest('label')?.querySelector('input')?.checked);
-			console.log('EventManager: переключение режима колосков:', isChecked ? 'только активные' : 'все');
-			
-			if (window.intersectionManager) {
-				window.intersectionManager.toggleOnlyActive(isChecked);
-			}
-			return;
-		}
-		
-		// Клик по элементу пересечения в списке
-		const intersectionItem = target.closest('.intersection-item');
-		if (intersectionItem && 
-			!target.closest('button') && 
-			!target.classList.contains('wave-name')) {
-			
-			e.preventDefault();
-			e.stopPropagation();
-			
-			const timestamp = intersectionItem.dataset.timestamp;
-			const index = intersectionItem.dataset.index;
-			
-			console.log('EventManager: клик по пересечению', index, timestamp);
-			
-			// Установить время визора на момент пересечения
-			if (timestamp && window.dates) {
-				const intersectionDate = new Date(parseInt(timestamp));
-				window.dates.setDate(intersectionDate);
-			}
-			return;
-		}
-	}
+    handleIntersectionClick(e) {
+        const target = e.target;
+        
+        // Кнопка "Рассчитать за день"
+        if (target.id === 'btnCalculateIntersections' || 
+            target.closest('#btnCalculateIntersections')) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('EventManager: расчет пересечений за день');
+            
+            this.calculateIntersectionsForSelectedDay();
+            return;
+        }
+        
+        // Кнопка "Для текущей даты"
+        if (target.id === 'btnUpdateForCurrentDate' || 
+            target.closest('#btnUpdateForCurrentDate')) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('EventManager: обновление для текущей даты');
+            
+            if (window.intersectionManager) {
+                window.intersectionManager.updateForCurrentDate();
+            }
+            return;
+        }
+        
+        // Кнопка "Очистить"
+        if (target.id === 'btnClearIntersections' || 
+            target.closest('#btnClearIntersections')) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('EventManager: очистка результатов пересечений');
+            
+            this.clearIntersectionResults();
+            return;
+        }
+        
+        // Клик по чекбоксу "Только активные колоски"
+        if (target.id === 'onlyActiveWaves' || 
+            target.closest('#onlyActiveWaves')) {
+            e.stopPropagation();
+            const isChecked = target.checked || (target.closest('label')?.querySelector('input')?.checked);
+            console.log('EventManager: переключение режима колосков:', isChecked ? 'только активные' : 'все');
+            
+            if (window.intersectionManager) {
+                window.intersectionManager.toggleOnlyActive(isChecked);
+            }
+            return;
+        }
+        
+        // Клик по элементу пересечения в списке
+        const intersectionItem = target.closest('.intersection-item');
+        if (intersectionItem && 
+            !target.closest('button') && 
+            !target.classList.contains('wave-name')) {
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const timestamp = intersectionItem.dataset.timestamp;
+            const index = intersectionItem.dataset.index;
+            
+            console.log('EventManager: клик по пересечению', index, timestamp);
+            
+            // Установить время визора на момент пересечения
+            if (timestamp && window.dates) {
+                const intersectionDate = new Date(parseInt(timestamp));
+                window.dates.setDate(intersectionDate);
+            }
+            return;
+        }
+    }
 
-	calculateIntersectionsForSelectedDay() {
-		try {
-			const dateInput = document.getElementById('intersectionDate');
-			const onlyActiveCheckbox = document.getElementById('onlyActiveWaves');
-			
-			if (!dateInput || !onlyActiveCheckbox) {
-				console.error('EventManager: элементы управления не найдены');
-				return;
-			}
-			
-			// Получить выбранную дату
-			const selectedDate = dateInput.value ? new Date(dateInput.value) : new Date();
-			selectedDate.setHours(12, 0, 0, 0);
-			
-			// Получить настройки
-			const onlyActive = onlyActiveCheckbox.checked;
-			
-			console.log('Расчет пересечений для:', selectedDate.toDateString(), 
-					onlyActive ? '(только активные)' : '(все колоски)');
-			
-			// Выполнить расчет
-			if (window.intersectionManager) {
-				window.intersectionManager.onlyActive = onlyActive;
-				const intersections = window.intersectionManager.calculateDailyIntersections(selectedDate);
-				window.intersectionManager.displayResults(intersections, selectedDate);
-			}
-			
-		} catch (error) {
-			console.error('EventManager: ошибка расчета:', error);
-			alert('Ошибка расчета пересечений: ' + error.message);
-		}
-	}
+    calculateIntersectionsForSelectedDay() {
+        try {
+            const dateInput = document.getElementById('intersectionDate');
+            const onlyActiveCheckbox = document.getElementById('onlyActiveWaves');
+            
+            if (!dateInput || !onlyActiveCheckbox) {
+                console.error('EventManager: элементы управления не найдены');
+                return;
+            }
+            
+            // Получить выбранную дату
+            const selectedDate = dateInput.value ? new Date(dateInput.value) : new Date();
+            selectedDate.setHours(12, 0, 0, 0);
+            
+            // Получить настройки
+            const onlyActive = onlyActiveCheckbox.checked;
+            
+            console.log('Расчет пересечений для:', selectedDate.toDateString(), 
+                    onlyActive ? '(только активные)' : '(все колоски)');
+            
+            // Выполнить расчет
+            if (window.intersectionManager) {
+                window.intersectionManager.onlyActive = onlyActive;
+                const intersections = window.intersectionManager.calculateDailyIntersections(selectedDate);
+                window.intersectionManager.displayResults(intersections, selectedDate);
+            }
+            
+        } catch (error) {
+            console.error('EventManager: ошибка расчета:', error);
+            alert('Ошибка расчета пересечений: ' + error.message);
+        }
+    }
 
-	clearIntersectionResults() {
-		const container = document.getElementById('intersectionResults');
-		const stats = document.getElementById('intersectionStats');
-		
-		if (container) {
-			container.innerHTML = '<div class="list-empty">Нет рассчитанных пересечений</div>';
-		}
-		
-		if (stats) {
-			stats.style.display = 'none';
-			stats.innerHTML = '';
-		}
-		
-		// Очистить кэш
-		if (window.intersectionManager) {
-			window.intersectionManager.clearCache();
-		}
-	}
-	
+    clearIntersectionResults() {
+        const container = document.getElementById('intersectionResults');
+        const stats = document.getElementById('intersectionStats');
+        
+        if (container) {
+            container.innerHTML = '<div class="list-empty">Нет рассчитанных пересечений</div>';
+        }
+        
+        if (stats) {
+            stats.style.display = 'none';
+            stats.innerHTML = '';
+        }
+        
+        // Очистить кэш
+        if (window.intersectionManager) {
+            window.intersectionManager.clearCache();
+        }
+    }
 }
 
 window.eventManager = new EventManager();

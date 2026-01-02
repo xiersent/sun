@@ -3,6 +3,7 @@ class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
         this.setupDateTimeInput();
+        this.activeTab = null; // текущий активный таб
     }
     
     setupDateTimeInput() {
@@ -73,7 +74,7 @@ class UIManager {
             // Переключение UI
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
-            toggleWaveLabels: () => this.toggleWaveLabels(), // НОВЫЙ МЕТОД
+            toggleWaveLabels: () => this.toggleWaveLabels(),
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
@@ -122,7 +123,6 @@ class UIManager {
         window.appState.save();
     }
     
-    // НОВЫЙ МЕТОД: Переключение видимости выносок
     toggleWaveLabels() {
         console.log('Переключение видимости выносок');
         const labelsContainer = document.querySelector('.wave-labels-container');
@@ -204,7 +204,6 @@ class UIManager {
         console.log('Цвет краев сброшен к стандартному');
     }
     
-    // Вспомогательный метод для обновления цвета углов
     updateCornerSquareColors() {
         document.querySelectorAll('.corner-square').forEach(square => {
             square.style.backgroundColor = 'red'; // стандартный цвет
@@ -329,8 +328,6 @@ class UIManager {
         
         // Перезагрузка страницы
         window.location.reload();
-        
-        // ВСЁ! Никакой дополнительной логики не нужно
     }
     
     updateUI() {
@@ -358,23 +355,80 @@ class UIManager {
         document.getElementById('customWaveColor').value = '#666666';
     }
     
+    // НОВАЯ ЛОГИКА ТАБОВ
     handleTabClick(tabButton) {
-        const tabId = tabButton.getAttribute('data-tab');
-        const container = tabButton.closest('.tab-container');
+        const tabId = tabButton.dataset.tab;
         
-        container.querySelectorAll('.tab-button').forEach(btn => {
+        // Если кликаем по уже активному табу - выключаем его
+        if (this.activeTab === tabId) {
+            this.deactivateTab(tabButton);
+            this.activeTab = null;
+        } else {
+            // Выключаем предыдущий активный таб, если есть
+            if (this.activeTab) {
+                const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
+                if (prevTabButton) {
+                    this.deactivateTab(prevTabButton);
+                }
+            }
+            
+            // Включаем новый таб
+            this.activateTab(tabButton);
+            this.activeTab = tabId;
+        }
+        
+        // Сохраняем состояние
+        localStorage.setItem('activeTab', this.activeTab);
+    }
+    
+    // Метод активации таба
+    activateTab(tabButton) {
+        const tabId = tabButton.dataset.tab;
+        
+        // Убираем active со всех кнопок
+        document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
         
-        container.querySelectorAll('.tab-content').forEach(content => {
+        // Убираем active со всех контентов
+        document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         
+        // Активируем выбранный
         tabButton.classList.add('active');
         
-        const tabContent = container.querySelector(`#${tabId}-tab`);
+        const tabContent = document.querySelector(`#${tabId}-tab`);
         if (tabContent) {
             tabContent.classList.add('active');
+        }
+        
+        // Обновляем пересечения если нужно
+        if (tabId === 'intersections' && window.intersectionManager) {
+            window.intersectionManager.updateForCurrentDate();
+        }
+    }
+    
+    // Метод деактивации таба
+    deactivateTab(tabButton) {
+        const tabId = tabButton.dataset.tab;
+        
+        tabButton.classList.remove('active');
+        const tabContent = document.querySelector(`#${tabId}-tab`);
+        if (tabContent) {
+            tabContent.classList.remove('active');
+        }
+    }
+    
+    // Восстановление состояния при загрузке
+    restoreTabState() {
+        const savedTab = localStorage.getItem('activeTab');
+        if (savedTab) {
+            const tabButton = document.querySelector(`[data-tab="${savedTab}"]`);
+            if (tabButton) {
+                this.activateTab(tabButton);
+                this.activeTab = savedTab;
+            }
         }
     }
     
@@ -428,44 +482,6 @@ class UIManager {
             window.dataManager.updateWavesGroups();
         }
     }
-
-	// modules/uiManager.js - добавить метод
-	handleTabClick(tabButton) {
-		const tabId = tabButton.dataset.tab;
-		const container = tabButton.closest('.tab-container');
-		
-		// Убрать active со всех кнопок и контента
-		container.querySelectorAll('.tab-button').forEach(btn => {
-			btn.classList.remove('active');
-		});
-		
-		container.querySelectorAll('.tab-content').forEach(content => {
-			content.classList.remove('active');
-		});
-		
-		// Активировать выбранную вкладку
-		tabButton.classList.add('active');
-		
-		const tabContent = container.querySelector(`#${tabId}-tab`);
-		if (tabContent) {
-			tabContent.classList.add('active');
-		}
-		
-		// Если активирована вкладка с пересечениями, обновить данные
-		if (tabId === 'intersections' && window.intersectionManager) {
-			window.intersectionManager.updateForCurrentDate();
-		}
-	}
-
-	// modules/eventManager.js - добавить обработчик
-	setupTabHandlers() {
-		document.addEventListener('click', (e) => {
-			const tabButton = e.target.closest('.tab-button');
-			if (tabButton && window.uiManager) {
-				window.uiManager.handleTabClick(tabButton);
-			}
-		});
-	}
 }
 
 window.uiManager = new UIManager();

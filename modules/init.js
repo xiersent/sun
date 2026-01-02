@@ -85,10 +85,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.eventManager = new EventManager();
         }
 
-		if (!window.intersectionManager && typeof WaveIntersectionManager !== 'undefined') {
-			console.log('Создаем WaveIntersectionManager...');
-			window.intersectionManager = new WaveIntersectionManager();
-		}
+        if (!window.intersectionManager && typeof WaveIntersectionManager !== 'undefined') {
+            console.log('Создаем WaveIntersectionManager...');
+            window.intersectionManager = new WaveIntersectionManager();
+        }
         
         if (!window.templateReminder && typeof TemplateReminder !== 'undefined') {
             console.log('Создаем TemplateReminder...');
@@ -262,6 +262,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
+        }
+        
+        // ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ ТАБОВ - ВАЖНО!
+        if (window.uiManager && window.uiManager.restoreTabState) {
+            window.uiManager.restoreTabState();
+            console.log('Состояние табов восстановлено');
         }
         
         console.log('=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
