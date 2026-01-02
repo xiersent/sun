@@ -43,8 +43,14 @@ class EventManager {
                     console.log('EventManager: выбор даты из списка:', dateId);
                     
                     if (dateId && window.dates) {
-                        // ИЗМЕНЕНО: устанавливаем активную дату с ТОЧНЫМ временем (true)
+                        // ПРОСТОЕ РЕШЕНИЕ: устанавливаем активную дату и переключаем на "сейчас"
+                        // 1. Устанавливаем активную дату
                         window.dates.setActiveDate(dateId, true);
+                        
+                        // 2. ИМЕДЛЕННО переключаем на "сейчас"
+                        window.dates.goToNow();
+                        
+                        console.log('Переключение на дату и переход к текущему времени:', dateId);
                         
                         // После установки даты обновляем сводку
                         setTimeout(() => {
