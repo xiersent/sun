@@ -4,19 +4,27 @@ class GridManager {
         this.gridElements = [];
     }
     
-    // НОВЫЙ МЕТОД: единая функция расчета позиции
-    calculateGridPosition(offset) {
-        const currentDayFractional = window.appState.currentDay || 0;
-        const fractionalOffset = currentDayFractional - Math.floor(currentDayFractional);
-        
-        // НОВАЯ ФОРМУЛА: корректное смещение для дробных дней
-        const actualOffset = offset - fractionalOffset;
-        
-        return {
-            actualOffset,
-            pixelPosition: actualOffset * window.appState.config.squareSize
-        };
-    }
+calculateGridPosition(offset) {
+    const currentDayFractional = window.appState.currentDay || 0;
+    const fractionalOffset = currentDayFractional - Math.floor(currentDayFractional);
+    
+    // ПРАВИЛЬНАЯ ФОРМУЛА:
+    // offset - это количество полных дней от ТЕКУЩЕГО МОМЕНТА
+    // Линия "сегодня" (offset = 0) должна быть на текущем времени
+    // Линии смещаются на целые дни от текущего времени
+    
+    // Для времени 12:00 (0.5 дня):
+    // offset = 0: actualOffset = -0.5 (смещаем на 0.5 влево)
+    // offset = 1: actualOffset = 0.5 (смещаем на 0.5 вправо - это завтра 12:00)
+    // offset = -1: actualOffset = -1.5 (смещаем на 1.5 влево - это вчера 12:00)
+    
+    const actualOffset = offset - fractionalOffset;
+    
+    return {
+        actualOffset,
+        pixelPosition: actualOffset * window.appState.config.squareSize
+    };
+}
     
     createGrid() {
         this.clearGrid();
@@ -34,6 +42,7 @@ class GridManager {
         this.updateGridNotesHighlight();
     }
     
+	// modules/grid.js
 	createGridLine(offset) {
 		const wrapper = document.createElement('div');
 		wrapper.className = 'grid-wrapper';
@@ -41,8 +50,8 @@ class GridManager {
 		// ИСПРАВЛЕННЫЙ РАСЧЕТ: используем единую функцию
 		const positionData = this.calculateGridPosition(offset);
 		
-		// ВАЖНО: Все линии позиционируются одинаково
-		// Центральная линия будет на calc(50% + 0px)
+		// ВАЖНО: Правильное позиционирование с учетом дробной части времени
+		// Если fractionalOffset = 0.564 (13:33), линия смещается вправо на 0.564 дня
 		wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
 		wrapper.style.width = `${window.appState.config.squareSize}px`;
 		wrapper.setAttribute('data-day-offset', offset);
@@ -59,15 +68,7 @@ class GridManager {
 		
 		this.gridElements.push(wrapper);
 		
-		// ОБРАТИТЕ ВНИМАНИЕ: 
 		// Клик по линии сетки НЕ ДОЛЖЕН менять дату визора!
-		// Линии сетки служат только для визуальной ориентации и подсветки.
-		// Изменение даты визора происходит только через:
-		// 1. Кнопки навигации (←, →, Сегодня, Сейчас)
-		// 2. Выбор даты из списка дат
-		// 3. Установку даты через текстовое поле
-		// 4. Клик по заметке в списке заметок
-		
 		wrapper.addEventListener('click', (e) => {
 			if (window.appState.isProgrammaticDateChange) return;
 			
@@ -82,20 +83,8 @@ class GridManager {
 			// НЕ изменяем текущую дату визора!
 			line.classList.add('active');
 			
-			// НЕ делаем ничего из этого:
-			// ❌ НЕ меняем window.appState.currentDate
-			// ❌ НЕ вызываем window.dates.recalculateCurrentDay()
-			// ❌ НЕ вызываем window.waves.updatePosition()
-			// ❌ НЕ вызываем window.grid.createGrid()
-			// ❌ НЕ вызываем window.grid.updateCenterDate()
-			// ❌ НЕ вызываем window.grid.updateGridNotesHighlight()
-			
-			// Остается только сохранение состояния для подсветки линий
-			// window.appState.save(); // Опционально, если хотим сохранять активную линию
-			
 			// При клике на линии сетки обновляем сводную информацию,
 			// так как пользователь может смотреть на конкретную дату
-			// (хотя сама дата визора не меняется)
 			if (window.summaryManager && window.summaryManager.updateSummary) {
 				setTimeout(() => {
 					window.summaryManager.updateSummary();
@@ -129,33 +118,39 @@ class GridManager {
         }
     }
     
-    createDateLabel(offset) {
-        const date = new Date(window.appState.currentDate);
-        date.setDate(date.getDate() + offset);
-        
-        const label = document.createElement('div');
-        label.className = 'labels date-labels';
-        
-        // ТАКОЕ ЖЕ ИСПРАВЛЕНИЕ КАК ДЛЯ ЛИНИЙ: используем единую функцию
-        const positionData = this.calculateGridPosition(offset);
-        
-        // ВАЖНО: Такое же позиционирование как у линий
-        label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        label.style.transform = 'translateX(-50%)';
-        label.style.bottom = '30px';
-        label.textContent = date.getDate();
-        
-        const weekday = document.createElement('div');
-        weekday.className = 'labels x-labels weekday-label';
-        weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        weekday.style.transform = 'translateX(-50%)';
-        weekday.style.bottom = '10px';
-        weekday.textContent = window.dom.getWeekdayName(date);
-        
-        const graph = document.getElementById('graphElement');
-        graph.appendChild(label);
-        graph.appendChild(weekday);
-    }
+createDateLabel(offset) {
+    // offset - это смещение в днях от текущего момента
+    // Чтобы показать правильную дату на линии, нужно прибавить смещение
+    // к целой части currentDay
+    
+    const currentDay = window.appState.currentDay || 0;
+    const dayOffset = Math.floor(currentDay) + offset;
+    
+    // Создаем дату от базовой даты
+    const date = new Date(window.appState.baseDate);
+    date.setDate(date.getDate() + dayOffset);
+    
+    const label = document.createElement('div');
+    label.className = 'labels date-labels';
+    
+    const positionData = this.calculateGridPosition(offset);
+    
+    label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+    label.style.transform = 'translateX(-50%)';
+    label.style.bottom = '30px';
+    label.textContent = date.getDate();
+    
+    const weekday = document.createElement('div');
+    weekday.className = 'labels x-labels weekday-label';
+    weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+    weekday.style.transform = 'translateX(-50%)';
+    weekday.style.bottom = '10px';
+    weekday.textContent = window.dom.getWeekdayName(date);
+    
+    const graph = document.getElementById('graphElement');
+    graph.appendChild(label);
+    graph.appendChild(weekday);
+}
     
     createYAxisLabels() {
         for (let i = 0; i <= 5; i++) {
