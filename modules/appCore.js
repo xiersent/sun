@@ -164,7 +164,7 @@ class AppCore {
         // НОВОЕ: Устанавливаем начальное значение в mainDateInput
         const mainDateInput = document.getElementById('mainDateInput');
         if (mainDateInput && window.dom) {
-            mainDateInput.value = window.dom.formatDateForDateTimeInput(window.appState.currentDate);
+            mainDateInput.value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
             console.log('AppCore: установлено начальное значение в mainDateInput:', mainDateInput.value);
         }
         
@@ -226,6 +226,15 @@ class AppCore {
             document.body.classList.add('names-mode');
         }
         
+        // ИЗМЕНЕНО: Устанавливаем начальное время на ТОЧНОЕ время (сейчас)
+        const now = new Date();
+        window.appState.currentDate = new Date(now);
+        
+        // Пересчитываем с учетом времени
+        if (window.dates && window.dates.recalculateCurrentDay) {
+            window.dates.recalculateCurrentDay(true);
+        }
+        
         // Замените старый код на вызов нового метода:
         await this.initializeAppComponents();
         
@@ -241,10 +250,10 @@ class AppCore {
                 } else {
                     // Fallback: базовая инициализация
                     if (window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay();
+                        window.dates.recalculateCurrentDay(true); // ИСПРАВЛЕНО: true для точного времени
                     }
                     if (window.appState.activeDateId && window.dates.setActiveDate) {
-                        window.dates.setActiveDate(window.appState.activeDateId);
+                        window.dates.setActiveDate(window.appState.activeDateId, true); // ИСПРАВЛЕНО: true для точного времени
                     }
                 }
             }

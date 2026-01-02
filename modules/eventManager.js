@@ -43,9 +43,8 @@ class EventManager {
                     console.log('EventManager: выбор даты из списка:', dateId);
                     
                     if (dateId && window.dates) {
-                        // Устанавливаем активную дату - это пересчитает currentDay
-                        // и перестроит графики относительно новой базовой даты
-                        window.dates.setActiveDate(dateId);
+                        // ИЗМЕНЕНО: устанавливаем активную дату с ТОЧНЫМ временем (true)
+                        window.dates.setActiveDate(dateId, true);
                         
                         // После установки даты обновляем сводку
                         setTimeout(() => {

@@ -203,29 +203,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
         console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ===');
         
+        // ИЗМЕНЕНО: Устанавливаем текущее точное время при инициализации
+        const now = new Date();
+        window.appState.currentDate = new Date(now);
+        
         if (window.dates && window.dates.recalculateCurrentDay) {
-            console.log('Принудительный пересчет currentDay...');
-            const result = window.dates.recalculateCurrentDay();
-            console.log('Результат recalculateCurrentDay():', result);
+            console.log('Принудительный пересчет currentDay с учетом времени...');
+            const result = window.dates.recalculateCurrentDay(true); // ИСПРАВЛЕНО: true для точного времени
+            console.log('Результат recalculateCurrentDay(true):', result);
         }
         
         if (window.appState && window.appState.activeDateId) {
-            console.log('Устанавливаем активную дату:', window.appState.activeDateId);
+            console.log('Устанавливаем активную дату с точным временем:', window.appState.activeDateId);
             if (window.dates && window.dates.setActiveDate) {
-                window.dates.setActiveDate(window.appState.activeDateId);
+                window.dates.setActiveDate(window.appState.activeDateId, true); // ИСПРАВЛЕНО: true для точного времени
             }
         } else if (window.appState && window.appState.data.dates.length > 0) {
-            console.log('Нет активной даты, выбираем первую из списка');
+            console.log('Нет активной даты, выбираем первую из списка с точным временем');
             const firstDateId = window.appState.data.dates[0].id;
             window.appState.activeDateId = firstDateId;
             if (window.dates && window.dates.setActiveDate) {
-                window.dates.setActiveDate(firstDateId);
+                window.dates.setActiveDate(firstDateId, true); // ИСПРАВЛЕНО: true для точного времени
             }
         } else {
-            console.log('Нет дат в списке, устанавливаем базовую');
+            console.log('Нет дат в списке, устанавливаем базовую дату с точным временем');
             window.appState.baseDate = new Date().getTime();
             if (window.dates && window.dates.recalculateCurrentDay) {
-                window.dates.recalculateCurrentDay();
+                window.dates.recalculateCurrentDay(true); // ИСПРАВЛЕНО: true для точного времени
             }
         }
         
@@ -260,6 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('currentDay:', window.appState?.currentDay);
         console.log('baseDate:', window.appState?.baseDate);
         console.log('currentDate:', window.appState?.currentDate);
+        console.log('Текущее точное время установлено:', now.toLocaleTimeString());
         
         console.log('=== ПРОВЕРКА ШАБЛОНОВ ===');
         console.log('⚠️  ЗАПРЕЩЕНО создавать инлайн шаблоны в коде JavaScript!');
