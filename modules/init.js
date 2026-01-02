@@ -84,6 +84,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('Создаем EventManager...');
             window.eventManager = new EventManager();
         }
+
+		if (!window.intersectionManager && typeof WaveIntersectionManager !== 'undefined') {
+			console.log('Создаем WaveIntersectionManager...');
+			window.intersectionManager = new WaveIntersectionManager();
+		}
         
         if (!window.templateReminder && typeof TemplateReminder !== 'undefined') {
             console.log('Создаем TemplateReminder...');

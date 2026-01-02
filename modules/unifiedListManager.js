@@ -26,7 +26,7 @@ class UnifiedListManager {
             try {
                 console.log('UnifiedListManager: начинаем загрузку шаблонов...');
                 
-                const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template'];
+                const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template', 'intersection-item-template'];
                 let loadedCount = 0;
                 
                 const loadPromises = templateIds.map(async (templateId) => {
@@ -112,6 +112,13 @@ class UnifiedListManager {
             ❌ ОШИБКА: Шаблон не загружен!<br>
             Проверьте файл templates/group-item.ejs
         </div>
+    </div>
+</div>`;
+        
+        this.templateCache['intersection-item-template'] = `
+<div class="intersection-item" style="background:#ffe6e6;border:2px solid red;">
+    <div style="color:red;padding:10px;">
+        ❌ ОШИБКА: Шаблон пересечений не загружен!
     </div>
 </div>`;
     }
@@ -247,6 +254,34 @@ class UnifiedListManager {
         };
     }
     
+    prepareIntersectionData(intersectionData, index) {
+        return {
+            ...intersectionData,
+            type: 'intersection',
+            index: index,
+            timeStr: intersectionData.timeStr || this.formatIntersectionTime(intersectionData.timestamp),
+            wave1Name: intersectionData.wave1?.name || 'Неизвестно',
+            wave2Name: intersectionData.wave2?.name || 'Неизвестно',
+            wave1Period: intersectionData.wave1?.period || 0,
+            wave2Period: intersectionData.wave2?.period || 0,
+            wave1Color: intersectionData.wave1?.color || '#666666',
+            wave2Color: intersectionData.wave2?.color || '#666666'
+        };
+    }
+    
+    formatIntersectionTime(timestamp) {
+        if (!timestamp) return '00:00:00';
+        try {
+            const date = new Date(timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        } catch (error) {
+            return '00:00:00';
+        }
+    }
+    
     renderList(containerId, items, itemType) {
         const container = document.getElementById(containerId);
         if (!container) {
@@ -281,6 +316,7 @@ class UnifiedListManager {
             case 'date': templateId = 'date-item-template'; break;
             case 'wave': templateId = 'wave-item-template'; break;
             case 'group': templateId = 'group-item-template'; break;
+            case 'intersection': templateId = 'intersection-item-template'; break;
             default: templateId = 'date-item-template';
         }
         
@@ -348,6 +384,20 @@ class UnifiedListManager {
                     container.appendChild(errorDiv);
                 }
             });
+        } else if (itemType === 'intersection') {
+            const renderedItems = [];
+            items.forEach((item, index) => {
+                try {
+                    const data = this.prepareIntersectionData(item, index);
+                    const rendered = ejs.render(templateText, { data });
+                    renderedItems.push(rendered);
+                } catch (error) {
+                    console.error('Ошибка рендеринга элемента пересечения:', error);
+                    renderedItems.push(`<div class="list-error">Ошибка рендеринга пересечения</div>`);
+                }
+            });
+            
+            container.innerHTML = renderedItems.join('');
         } else {
             const renderedItems = [];
             items.forEach((item, index) => {
@@ -646,6 +696,11 @@ class UnifiedListManager {
         });
         
         this.renderList('wavesList', allGroups, 'group');
+    }
+    
+    updateIntersectionResults(intersections) {
+        console.log('UnifiedListManager: обновление результатов пересечений...');
+        this.renderList('intersectionResults', intersections, 'intersection');
     }
     
     updateGroupStats(groupId) {

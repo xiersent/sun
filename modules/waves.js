@@ -219,6 +219,44 @@ class WavesManager {
             }
         }
     }
+
+getActiveWaves() {
+    return window.appState.data.waves.filter(wave => {
+        const waveIdStr = String(wave.id);
+        const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
+        const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
+        return isVisible && isGroupEnabled;
+    });
+}
+
+getPhaseAtTime(wave, date) {
+    // Возвращает фазу 0-1 в момент времени
+    const daysFromBase = this.calculateDaysBetweenDates(
+        window.appState.baseDate, 
+        date
+    );
+    return (daysFromBase % wave.period) / wave.period;
+}
+
+calculateDaysBetweenDates(date1, date2) {
+    if (!date1 || !date2) return 0;
+    
+    try {
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+        
+        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+            return 0;
+        }
+        
+        const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+        const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+        return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+    } catch (error) {
+        console.error('Ошибка расчета дней между датами:', error);
+        return 0;
+    }
+}
     
     updatePosition() {
         console.log('WavesManager: updatePosition вызван');

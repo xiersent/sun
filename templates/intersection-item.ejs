@@ -1,0 +1,24 @@
+<!-- templates/intersection-item.ejs -->
+<div class="intersection-item" 
+     data-timestamp="<%= data.timestamp %>"
+     data-index="<%= data.index || 0 %>">
+    
+    <div class="intersection-header">
+        <span class="intersection-time"><%= data.timeStr %></span>
+        <span class="intersection-index"><%= data.index + 1 %></span>
+    </div>
+    
+    <div class="intersection-pair">
+        <span class="wave-name" style="color: <%= data.wave1Color || '#666' %>">
+            <%= data.wave1Name %>
+        </span>
+        <span class="intersection-symbol">×</span>
+        <span class="wave-name" style="color: <%= data.wave2Color || '#666' %>">
+            <%= data.wave2Name %>
+        </span>
+    </div>
+    
+    <div class="intersection-details">
+        Периоды: <%= data.wave1Period %>д × <%= data.wave2Period %>д
+    </div>
+</div>

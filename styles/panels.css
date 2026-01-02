@@ -64,7 +64,6 @@
 .tab-container {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
 }
 
 .tab-buttons {
@@ -421,4 +420,254 @@
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+}
+
+
+/* ============================================
+   СТИЛИ ДЛЯ ПАНЕЛИ ПЕРЕСЕЧЕНИЙ КОЛОСКОВ
+   ============================================ */
+
+/* Контейнер управления */
+.intersection-controls {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: #f9f9f9;
+    border: 1px solid var(--clg);
+    border-radius: var(--border-radius);
+}
+
+.intersection-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.intersection-form-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.intersection-form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.intersection-form-label input[type="checkbox"] {
+    margin: 0;
+    width: 14px;
+    height: 14px;
+}
+
+.intersection-date-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.intersection-form-input {
+    padding: 4px 8px;
+    border: 1px solid var(--clg);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    height: 25px;
+    min-width: 140px;
+    background: #fff;
+}
+
+.intersection-form-input:focus {
+    outline: none;
+    border-color: var(--cp);
+}
+
+.intersection-form-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+/* Статистика */
+.intersection-stats {
+    margin: var(--spacing-sm) 0;
+    padding: var(--spacing-md);
+    background: #e9f7ef;
+    border: 1px solid #c3e6cb;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    color: #155724;
+}
+
+.intersection-stats strong {
+    font-weight: 600;
+    color: #0c4121;
+}
+
+/* Контейнер результатов */
+.intersection-results-container {
+    border: 1px solid var(--clg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    max-height: 400px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.intersection-results {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Элемент пересечения */
+.intersection-item {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    position: relative;
+}
+
+.intersection-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+}
+
+.intersection-item:active {
+    background-color: #e9ecef;
+    transform: translateX(0);
+}
+
+.intersection-item:last-child {
+    border-bottom: none;
+}
+
+.intersection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.intersection-time {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    color: var(--text-color);
+    letter-spacing: 0.5px;
+}
+
+.intersection-index {
+    font-size: var(--font-size-xs);
+    color: #999;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* Пара колосков */
+.intersection-pair {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.wave-name {
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    background: rgba(0, 0, 0, 0.05);
+    font-size: var(--font-size-sm);
+    transition: background-color 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.intersection-item:hover .wave-name {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.intersection-symbol {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin: 0 2px;
+}
+
+/* Детали пересечения */
+.intersection-details {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.intersection-period {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.intersection-period::before {
+    content: "🕐";
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* Состояния */
+.intersection-item--highlight {
+    background-color: #fff3cd;
+    border-left: 3px solid #ffc107;
+}
+
+.intersection-item--exact {
+    background-color: #d4edda;
+    border-left: 3px solid #28a745;
+}
+
+/* Пустое состояние */
+.intersection-empty {
+    padding: var(--spacing-xl) var(--spacing-md);
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: var(--font-size-sm);
+}
+
+.intersection-empty::before {
+    content: "📊";
+    display: block;
+    font-size: 32px;
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.5;
+}
+
+/* Прогресс-бар для длительных расчетов */
+.intersection-progress {
+    padding: var(--spacing-md);
+    text-align: center;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--clg);
+}
+
+.intersection-progress-bar {
+    height: 4px;
+    background: var(--cp);
+    border-radius: 2px;
+    transition: width 0.3s;
+    margin-top: var(--spacing-xs);
+}
+
+.intersection-progress-text {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
 }

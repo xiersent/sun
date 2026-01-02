@@ -428,6 +428,44 @@ class UIManager {
             window.dataManager.updateWavesGroups();
         }
     }
+
+	// modules/uiManager.js - добавить метод
+	handleTabClick(tabButton) {
+		const tabId = tabButton.dataset.tab;
+		const container = tabButton.closest('.tab-container');
+		
+		// Убрать active со всех кнопок и контента
+		container.querySelectorAll('.tab-button').forEach(btn => {
+			btn.classList.remove('active');
+		});
+		
+		container.querySelectorAll('.tab-content').forEach(content => {
+			content.classList.remove('active');
+		});
+		
+		// Активировать выбранную вкладку
+		tabButton.classList.add('active');
+		
+		const tabContent = container.querySelector(`#${tabId}-tab`);
+		if (tabContent) {
+			tabContent.classList.add('active');
+		}
+		
+		// Если активирована вкладка с пересечениями, обновить данные
+		if (tabId === 'intersections' && window.intersectionManager) {
+			window.intersectionManager.updateForCurrentDate();
+		}
+	}
+
+	// modules/eventManager.js - добавить обработчик
+	setupTabHandlers() {
+		document.addEventListener('click', (e) => {
+			const tabButton = e.target.closest('.tab-button');
+			if (tabButton && window.uiManager) {
+				window.uiManager.handleTabClick(tabButton);
+			}
+		});
+	}
 }
 
 window.uiManager = new UIManager();
