@@ -239,17 +239,14 @@ recalculateCurrentDay(useExactTime = false) {
         currentDateObj = window.appState.currentDate;
     }
     
-    // ДЕБАГ: Выводим даты для проверки
     console.log('ДЕБАГ recalculateCurrentDay:');
     console.log('  baseDateObj (локальное):', baseDateObj.toString());
-    console.log('  baseDateObj (UTC):', baseDateObj.toUTCString());
     console.log('  currentDateObj (локальное):', currentDateObj.toString());
-    console.log('  currentDateObj (UTC):', currentDateObj.toUTCString());
     
     let daysDiff;
     
     if (useExactTime) {
-        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Нормализуем baseDate к локальному началу дня
+        // ТОЧНЫЙ расчет разницы в днях (с дробной частью для учета времени)
         const baseLocalStartOfDay = new Date(
             baseDateObj.getFullYear(),
             baseDateObj.getMonth(),
@@ -257,51 +254,26 @@ recalculateCurrentDay(useExactTime = false) {
             0, 0, 0, 0
         );
         
-        // ТОЧНЫЙ расчет разницы от локального начала дня базовой даты
         const timeDiffMs = currentDateObj.getTime() - baseLocalStartOfDay.getTime();
         daysDiff = timeDiffMs / (1000 * 60 * 60 * 24); // Дробное значение
         
         console.log('Расчет с точным временем (дробный):', daysDiff);
-        console.log('  baseLocalStartOfDay:', baseLocalStartOfDay.toString());
-        console.log('  baseLocalStartOfDay UTC:', baseLocalStartOfDay.toUTCString());
-        console.log('  Разница в миллисекундах:', timeDiffMs);
     } else {
         // ЦЕЛЫЙ расчет разницы в днях (только даты, без времени)
-        // Приводим обе даты к локальному началу дня
-        const baseLocalStartOfDay = new Date(
-            baseDateObj.getFullYear(),
-            baseDateObj.getMonth(),
-            baseDateObj.getDate(),
-            0, 0, 0, 0
-        );
+        // ВАЖНО: Используем специальную функцию для расчета целых дней
         
-        const currentLocalStartOfDay = new Date(
-            currentDateObj.getFullYear(),
-            currentDateObj.getMonth(),
-            currentDateObj.getDate(),
-            0, 0, 0, 0
-        );
-        
-        const timeDiffMs = currentLocalStartOfDay.getTime() - baseLocalStartOfDay.getTime();
-        daysDiff = timeDiffMs / (1000 * 60 * 60 * 24); // Целое число
-        
+        daysDiff = this.calculateWholeDaysBetween(baseDateObj, currentDateObj);
         console.log('Расчет без времени (целый):', daysDiff);
-        console.log('  baseLocalStartOfDay:', baseLocalStartOfDay.toString());
-        console.log('  currentLocalStartOfDay:', currentLocalStartOfDay.toString());
     }
     
     window.appState.currentDay = daysDiff;
     window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
     
     console.log('Результат:');
-    console.log('  baseDate (timestamp):', window.appState.baseDate);
-    console.log('  baseDate (объект):', baseDateObj.toISOString());
-    console.log('  currentDate:', currentDateObj.toISOString());
     console.log('  currentDay:', window.appState.currentDay);
-    console.log('  virtualPosition:', window.appState.virtualPosition);
     
     if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
-        console.error('ERROR: currentDay вычислен некорректно! Устанавливаем 0');
+        console.error('ERROR: currentDay вычислен некоррекктно! Устанавливаем 0');
         window.appState.currentDay = 0;
     }
     
@@ -309,6 +281,36 @@ recalculateCurrentDay(useExactTime = false) {
     window.appState.save();
     
     return window.appState.currentDay;
+}
+
+// НОВЫЙ МЕТОД: Расчет целых дней между двумя датами
+calculateWholeDaysBetween(date1, date2) {
+    // Приводим обе даты к локальному началу дня
+    const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
+    const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+    
+    // Вычисляем разницу в миллисекундах
+    const timeDiff = d2.getTime() - d1.getTime();
+    
+    // Конвертируем в дни и округляем
+    const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // Дополнительная проверка: используем математику с датами
+    // Это более надежный способ для целых дней
+    const yearDiff = d2.getFullYear() - d1.getFullYear();
+    const monthDiff = d2.getMonth() - d1.getMonth();
+    const dateDiff = d2.getDate() - d1.getDate();
+    
+    const calculatedDays = yearDiff * 365 + monthDiff * 30 + dateDiff;
+    
+    console.log('calculateWholeDaysBetween:');
+    console.log('  d1:', d1.toString());
+    console.log('  d2:', d2.toString());
+    console.log('  timeDiff способ:', daysDiff);
+    console.log('  математический способ:', calculatedDays);
+    
+    // Возвращаем результат через timeDiff, так как он более точен
+    return daysDiff;
 }
     
     addNote(content) {
