@@ -438,6 +438,49 @@ class TimeUtils {
         console.warn('TimeUtils: не удалось конвертировать в timestamp:', value);
         return Date.now();
     }
+
+	/**
+	 * Улучшенный парсинг из datetime-local input
+	 * Пользователь видит UTC время, мы его и парсим
+	 */
+	parseFromDateTimeInputUTC(inputString) {
+		if (!inputString) return this.nowTimestamp();
+		
+		try {
+			// Убираем (UTC) если есть
+			const cleanString = inputString.replace(' (UTC)', '').trim();
+			
+			// Формат: "YYYY-MM-DD HH:MM:SS"
+			const [datePart, timePart] = cleanString.split(' ');
+			
+			if (!datePart) {
+				throw new Error('Отсутствует дата');
+			}
+			
+			// Создаем строку для парсинга в UTC
+			const [year, month, day] = datePart.split('-').map(Number);
+			const [hours = 0, minutes = 0, seconds = 0] = (timePart || '00:00:00').split(':').map(Number);
+			
+			// Создаем Date в UTC
+			const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+			
+			if (isNaN(utcDate.getTime())) {
+				throw new Error('Некорректная дата-время');
+			}
+			
+			console.log('TimeUtils: парсинг input (UTC):', {
+				input: inputString,
+				utcDate: utcDate.toISOString(),
+				timestamp: utcDate.getTime()
+			});
+			
+			return utcDate.getTime();
+			
+		} catch (error) {
+			console.error('TimeUtils: ошибка парсинга UTC инпута:', inputString, error);
+			return this.nowTimestamp();
+		}
+	}
     
     /**
      * Получает строковое представление для отладки

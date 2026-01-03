@@ -23,34 +23,187 @@ class DOM {
         return document.querySelectorAll(selector);
     }
     
-    formatDate(timestamp) {
-        // ЗАМЕНА: Используем timeUtils вместо локальных методов
-        if (window.timeUtils && window.timeUtils.formatDateUTC) {
-            return window.timeUtils.formatDateUTC(timestamp);
+formatDate(timestamp) {
+    // ИСПОЛЬЗУЕМ UTC ВМЕСТО ЛОКАЛЬНОГО ВРЕМЕНИ
+    if (!timestamp) return 'Неизвестно';
+    try {
+        let date;
+        if (typeof timestamp === 'number') {
+            date = new Date(timestamp);
+        } else {
+            date = new Date(timestamp);
         }
         
-        // Fallback для обратной совместимости
-        if (!timestamp) return 'Неизвестно';
-        try {
-            let date;
-            if (typeof timestamp === 'number') {
-                date = new Date(timestamp);
-            } else {
-                date = new Date(timestamp);
-            }
-            
-            if (isNaN(date.getTime())) {
-                return 'Некорректная дата';
-            }
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        } catch (e) {
-            console.error('Format date error:', e);
-            return 'Ошибка даты';
+        if (isNaN(date.getTime())) {
+            return 'Некорректная дата';
         }
+        
+        // UTC компоненты вместо локальных
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const year = date.getUTCFullYear();
+        return `${day}.${month}.${year} (UTC)`;
+    } catch (e) {
+        console.error('Format date error:', e);
+        return 'Ошибка даты';
     }
+}
+
+formatDateTimeFull(timestamp) {
+    // ИСПОЛЬЗУЕМ UTC ВМЕСТО ЛОКАЛЬНОГО ВРЕМЕНИ
+    if (!timestamp) return 'Неизвестно';
+    try {
+        let date;
+        if (typeof timestamp === 'number') {
+            date = new Date(timestamp);
+        } else {
+            date = new Date(timestamp);
+        }
+        
+        if (isNaN(date.getTime())) {
+            return 'Некорректная дата';
+        }
+        
+        // UTC компоненты вместо локальных
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const year = date.getUTCFullYear();
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        return `${day}.${month}.${year} ${hours}:${minutes}:${seconds} (UTC)`;
+    } catch (e) {
+        console.error('Format datetime error:', e);
+        return 'Ошибка даты';
+    }
+}
+
+formatCurrentDayWithSeconds(currentDay, currentDate = null) {
+    // ДОБАВЛЯЕМ УКАЗАНИЕ UTC
+    if (currentDay === undefined || currentDay === null || isNaN(currentDay)) {
+        return '0.00000 (UTC)';
+    }
+    return `${currentDay.toFixed(5)} (UTC)`;
+}
+
+formatDateForDateTimeInputWithSeconds(timestamp) {
+    // ВАЖНО: Используем UTC время для инпута
+    if (!timestamp) return '';
+    
+    let date;
+    if (typeof timestamp === 'number') {
+        date = new Date(timestamp);
+    } else {
+        date = new Date(timestamp);
+    }
+    
+    if (isNaN(date.getTime())) {
+        return '';
+    }
+    
+    // ВСЕГДА UTC компоненты
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    
+    console.log('DOM: Форматирование даты для инпута (UTC):', {
+        timestamp,
+        utcTime: date.toUTCString(),
+        result: `${year}-${month}-${day} ${hours}:${minutes}:${seconds} (UTC)`
+    });
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} (UTC)`;
+}
+
+formatDateForInput(timestamp) {
+    // UTC для date input
+    if (!timestamp) return '';
+    
+    let date;
+    if (typeof timestamp === 'number') {
+        date = new Date(timestamp);
+    } else {
+        date = new Date(timestamp);
+    }
+    
+    if (isNaN(date.getTime())) {
+        return '';
+    }
+    
+    // UTC компоненты
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
+getWeekday(date) {
+    // UTC день недели
+    let dateObj;
+    if (typeof date === 'number') {
+        dateObj = new Date(date);
+    } else if (date instanceof Date) {
+        dateObj = date;
+    } else {
+        dateObj = new Date(date);
+    }
+    return dateObj.getUTCDay(); // UTC вместо локального
+}
+
+getDaysBetweenDates(date1, date2) {
+    // UTC разница в днях
+    let d1, d2;
+    
+    if (typeof date1 === 'number') {
+        d1 = new Date(date1);
+    } else if (date1 instanceof Date) {
+        d1 = date1;
+    } else {
+        d1 = new Date(date1);
+    }
+    
+    if (typeof date2 === 'number') {
+        d2 = new Date(date2);
+    } else if (date2 instanceof Date) {
+        d2 = date2;
+    } else {
+        d2 = new Date(date2);
+    }
+    
+    // ВСЕГДА UTC для сравнения
+    const utc1 = Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate());
+    const utc2 = Date.UTC(d2.getUTCFullYear(), d2.getUTCMonth(), d2.getUTCDate());
+    return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+}
+
+getDaysBetweenExact(date1, date2) {
+    // Точная разница в днях (дробная) в UTC
+    let d1, d2;
+    
+    if (typeof date1 === 'number') {
+        d1 = new Date(date1);
+    } else if (date1 instanceof Date) {
+        d1 = date1;
+    } else {
+        d1 = new Date(date1);
+    }
+    
+    if (typeof date2 === 'number') {
+        d2 = new Date(date2);
+    } else if (date2 instanceof Date) {
+        d2 = date2;
+    } else {
+        d2 = new Date(date2);
+    }
+    
+    // Разница в миллисекундах (уже UTC)
+    const timeDiff = d2.getTime() - d1.getTime();
+    return timeDiff / (1000 * 60 * 60 * 24);
+}
     
     // НОВАЯ ФУНКЦИЯ: Полное форматирование даты и времени в одну строку - ОБНОВЛЕНА
     formatDateTimeFull(timestamp) {

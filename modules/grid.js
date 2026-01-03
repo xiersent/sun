@@ -268,40 +268,40 @@ class GridManager {
         });
     }
     
-    updateCenterDate() {
-        const element = document.getElementById('centerDateLabel');
-        if (!element) return;
-        
-        // Гарантируем, что используем текущую дату визора
-        const date = window.appState.currentDate || new Date();
-        
-        // Форматируем с секундами в UTC
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const year = date.getUTCFullYear();
-        const hours = String(date.getUTCHours()).padStart(2, '0');
-        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-        
-        const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
-        const weekday = window.dom.getWeekdayName(date, true);
-        
-        // Находим активную дату
-        const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
-        const name = activeDate?.name || 'Новая дата';
-        
-        // HTML с секундами
-        element.innerHTML = `
-            <div class="center-date-main">
-                <div class="center-date-datetime">${dateTimeStr}</div>
-                <div class="center-name-container">
-                    <div class="center-date-name">${name}</div>
-                    <div class="center-date-star">☼</div>
-                </div>
-            </div>
-            <div class="center-date-weekday">${weekday}</div>
-        `;
-    }
+	updateCenterDate() {
+		const element = document.getElementById('centerDateLabel');
+		if (!element) return;
+		
+		// Гарантируем, что используем текущую дату визора
+		const date = window.appState.currentDate || new Date();
+		
+		// Форматируем с секундами в UTC
+		const day = String(date.getUTCDate()).padStart(2, '0');
+		const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+		const year = date.getUTCFullYear();
+		const hours = String(date.getUTCHours()).padStart(2, '0');
+		const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+		const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+		
+		const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds} (UTC)`;
+		const weekday = window.dom.getWeekdayName(date, true);
+		
+		// Находим активную дату
+		const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
+		const name = activeDate?.name || 'Новая дата';
+		
+		// HTML с секундами и UTC
+		element.innerHTML = `
+			<div class="center-date-main">
+				<div class="center-date-datetime">${dateTimeStr}</div>
+				<div class="center-name-container">
+					<div class="center-date-name">${name}</div>
+					<div class="center-date-star">☼</div>
+				</div>
+			</div>
+			<div class="center-date-weekday">${weekday}</div>
+		`;
+	}
     
     updateGridNotesHighlight() {
         if (!this.gridContainer) return;

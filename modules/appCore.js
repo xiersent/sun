@@ -209,36 +209,36 @@ class AppCore {
         console.log('Компоненты приложения инициализированы');
     }
     
-    initializeUTCDate() {
-        console.log('AppCore: установка начальной даты в UTC...');
-        
-        if (!window.appState || !window.timeUtils) {
-            console.error('Не удалось установить UTC дату: отсутствуют зависимости');
-            return;
-        }
-        
-        // Устанавливаем ТОЧНОЕ текущее время в UTC
-        window.appState.currentDate = window.timeUtils.nowUTC();
-        
-        console.log('Начальная дата установлена (UTC):', {
-            iso: window.appState.currentDate.toISOString(),
-            utcString: window.appState.currentDate.toUTCString(),
-            hours: window.appState.currentDate.getUTCHours(),
-            minutes: window.appState.currentDate.getUTCMinutes(),
-            seconds: window.appState.currentDate.getUTCSeconds()
-        });
-        
-        // Устанавливаем начальное значение в mainDateInput через timeUtils
-        const mainDateInput = document.getElementById('mainDateInput');
-        if (mainDateInput && window.timeUtils) {
-            const formatted = window.timeUtils.formatForDateTimeInputUTC(
-                window.appState.currentDate.getTime()
-            );
-            mainDateInput.value = formatted;
-            mainDateInput.placeholder = formatted;
-            console.log('mainDateInput установлен на:', formatted);
-        }
-    }
+	initializeUTCDate() {
+		console.log('AppCore: установка начальной даты в UTC...');
+		
+		if (!window.appState || !window.timeUtils) {
+			console.error('Не удалось установить UTC дату: отсутствуют зависимости');
+			return;
+		}
+		
+		// Устанавливаем ТОЧНОЕ текущее время в UTC
+		window.appState.currentDate = window.timeUtils.nowUTC();
+		
+		console.log('Начальная дата установлена (UTC):', {
+			iso: window.appState.currentDate.toISOString(),
+			utcString: window.appState.currentDate.toUTCString(),
+			hours: window.appState.currentDate.getUTCHours(),
+			minutes: window.appState.currentDate.getUTCMinutes(),
+			seconds: window.appState.currentDate.getUTCSeconds()
+		});
+		
+		// Устанавливаем начальное значение в mainDateInput через timeUtils
+		const mainDateInput = document.getElementById('mainDateInput');
+		if (mainDateInput && window.timeUtils) {
+			const formatted = window.timeUtils.formatForDateTimeInputUTC(
+				window.appState.currentDate.getTime()
+			);
+			mainDateInput.value = formatted;
+			mainDateInput.placeholder = formatted + ' (UTC)';
+			console.log('mainDateInput установлен на:', formatted);
+		}
+	}
     
     setupInitialUIState() {
         console.log('AppCore: настройка начального состояния UI...');

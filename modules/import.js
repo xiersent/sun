@@ -1,27 +1,35 @@
 // optimized3/modules/import.js
 class ImportExportManager {
     constructor() {
+        console.log('ImportExportManager: constructor called');
         this.SQL = null;
         this.currentDB = null;
         this.dbImportData = null;
     }
     
     async initSQL() {
+        console.log('ImportExportManager: initSQL called');
         if (!this.SQL && window.SQL) {
             this.SQL = window.SQL;
+            console.log('ImportExportManager: SQL.js loaded');
         }
         return this.SQL;
     }
     
     // НОВЫЙ МЕТОД: Проверка, является ли значение timestamp
     isTimestamp(value) {
-        return typeof value === 'number' && !isNaN(value) && value > 0;
+        const result = typeof value === 'number' && !isNaN(value) && value > 0;
+        console.log(`ImportExportManager: isTimestamp(${value}) = ${result}`);
+        return result;
     }
     
     // НОВЫЙ МЕТОД: Конвертация импортированных дат в timestamp
     convertImportedDatesToTimestamp(data) {
+        console.log('ImportExportManager: convertImportedDatesToTimestamp called', data ? 'data exists' : 'no data');
+        
         // Конвертировать dates
         if (data.dates) {
+            console.log(`ImportExportManager: Converting ${data.dates.length} dates`);
             data.dates.forEach(date => {
                 if (date.date && !this.isTimestamp(date.date)) {
                     try {
@@ -39,6 +47,7 @@ class ImportExportManager {
         
         // Конвертировать notes
         if (data.notes) {
+            console.log(`ImportExportManager: Converting ${data.notes.length} notes`);
             data.notes.forEach(note => {
                 if (note.date && !this.isTimestamp(note.date)) {
                     try {
@@ -56,6 +65,7 @@ class ImportExportManager {
         
         // Конвертировать uiSettings даты
         if (data.uiSettings) {
+            console.log('ImportExportManager: Converting uiSettings dates');
             ['currentDate', 'baseDate'].forEach(key => {
                 if (data.uiSettings[key] && !this.isTimestamp(data.uiSettings[key])) {
                     try {
@@ -75,6 +85,7 @@ class ImportExportManager {
     }
     
     exportAll() {
+        console.log('ImportExportManager: exportAll called');
         const dataToSave = {
             ...window.appState.data
         };
@@ -93,6 +104,8 @@ class ImportExportManager {
         dataToSave.exportDate = new Date().getTime(); // timestamp
         dataToSave.version = '1.0';
         
+        console.log('ImportExportManager: Data prepared for export', dataToSave);
+        
         const dataStr = JSON.stringify(dataToSave, null, 2);
         const dataBlob = new Blob([dataStr], {
             type: 'application/json'
@@ -105,9 +118,11 @@ class ImportExportManager {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        console.log('ImportExportManager: exportAll completed');
     }
     
     exportDates() {
+        console.log('ImportExportManager: exportDates called');
         const dataToSave = {
             dates: window.appState.data.dates,
             notes: window.appState.data.notes,
@@ -128,9 +143,11 @@ class ImportExportManager {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        console.log('ImportExportManager: exportDates completed');
     }
     
     exportWaves() {
+        console.log('ImportExportManager: exportWaves called');
         const dataToSave = {
             waves: window.appState.data.waves,
             groups: window.appState.data.groups,
@@ -151,23 +168,41 @@ class ImportExportManager {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        console.log('ImportExportManager: exportWaves completed');
     }
     
     importAll(file) {
+        console.log('ImportExportManager: importAll called', file ? `file: ${file.name}, size: ${file.size}` : 'no file');
+        
         return new Promise((resolve, reject) => {
+            console.log('ImportExportManager: Starting Promise for import');
             const reader = new FileReader();
+            
             reader.onload = function(event) {
+                console.log('ImportExportManager: FileReader onload triggered');
                 try {
+                    console.log('ImportExportManager: Parsing JSON');
                     const data = JSON.parse(event.target.result);
+                    console.log('ImportExportManager: JSON parsed successfully', data);
                     
                     // КОНВЕРТИРОВАТЬ ИМПОРТИРОВАННЫЕ ДАННЫЕ В TIMESTAMP
                     const convertedData = window.importExport.convertImportedDatesToTimestamp(data);
+                    console.log('ImportExportManager: Data converted to timestamp', convertedData);
                     
                     const isFullExport = convertedData.waves && convertedData.groups && convertedData.dates;
                     const isDatesOnly = convertedData.type === 'dates-only' || (convertedData.dates && !convertedData.waves);
                     const isWavesOnly = convertedData.type === 'waves-only' || (convertedData.waves && !convertedData.dates);
                     
+                    console.log('ImportExportManager: Export type detection:', {
+                        isFullExport, isDatesOnly, isWavesOnly,
+                        hasWaves: !!convertedData.waves,
+                        hasGroups: !!convertedData.groups,
+                        hasDates: !!convertedData.dates,
+                        type: convertedData.type
+                    });
+                    
                     if (!isFullExport && !isDatesOnly && !isWavesOnly) {
+                        console.error('ImportExportManager: Invalid file format');
                         throw new Error('Неверный формат файла. Ожидается полный экспорт, экспорт дат или экспорт колосков.');
                     }
                     
@@ -181,14 +216,20 @@ class ImportExportManager {
                         message = 'Импортировать колоски и группы? Существующие колоски и группы будут заменены.';
                     }
                     
+                    console.log('ImportExportManager: Confirmation message:', message);
+                    
                     if (confirm(message)) {
+                        console.log('ImportExportManager: User confirmed import');
+                        
                         if (isFullExport) {
+                            console.log('ImportExportManager: Processing full export import');
                             const has120Waves = convertedData.waves.some(w => {
                                 const waveIdStr = String(w.id);
                                 return waveIdStr.startsWith('wave-120-');
                             });
                             
                             if (!has120Waves) {
+                                console.log('ImportExportManager: Adding 120 waves');
                                 const waves120 = window.appState.waves120 || [];
                                 const waves120Ids = window.appState.waves120Ids || [];
                                 
@@ -216,6 +257,7 @@ class ImportExportManager {
                             });
                             
                             if (!has31Waves) {
+                                console.log('ImportExportManager: Adding 31 waves');
                                 const waves31 = window.appState.waves31 || [];
                                 const waves31Ids = window.appState.waves31Ids || [];
                                 
@@ -285,6 +327,7 @@ class ImportExportManager {
                             });
                             
                             // Преобразуем timestamp обратно в Date объекты
+                            console.log('ImportExportManager: Converting timestamps back to Date objects');
                             window.appState.currentDate = new Date(convertedData.uiSettings.currentDate);
                             window.appState.baseDate = new Date(convertedData.uiSettings.baseDate);
                             window.appState.currentDay = convertedData.uiSettings.currentDay;
@@ -296,6 +339,12 @@ class ImportExportManager {
                             window.appState.grayMode = convertedData.uiSettings.grayMode || false;
                             window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
                             window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
+                            
+                            console.log('ImportExportManager: UI state updated', {
+                                currentDate: window.appState.currentDate,
+                                baseDate: window.appState.baseDate,
+                                uiHidden: window.appState.uiHidden
+                            });
                             
                             if (window.appState.uiHidden) {
                                 document.body.classList.add('ui-hidden');
@@ -354,8 +403,10 @@ class ImportExportManager {
                             window.appState.save();
                             
                             alert('Все данные успешно импортированы!');
+                            console.log('ImportExportManager: Full import completed successfully');
                             
                         } else if (isDatesOnly) {
+                            console.log('ImportExportManager: Processing dates-only import');
                             window.appState.data.dates = convertedData.dates || [];
                             window.appState.data.notes = convertedData.notes || [];
                             
@@ -374,8 +425,10 @@ class ImportExportManager {
                             window.appState.save();
                             
                             alert('Даты и заметки успешно импортированы!');
+                            console.log('ImportExportManager: Dates-only import completed successfully');
                             
                         } else if (isWavesOnly) {
+                            console.log('ImportExportManager: Processing waves-only import');
                             window.appState.data.waves = convertedData.waves || [];
                             window.appState.data.groups = convertedData.groups || [];
                             
@@ -434,20 +487,41 @@ class ImportExportManager {
                             window.appState.save();
                             
                             alert('Колоски и группы успешно импортированы!');
+                            console.log('ImportExportManager: Waves-only import completed successfully');
                         }
                         
                         resolve();
+                    } else {
+                        console.log('ImportExportManager: User cancelled import');
+                        resolve(); // Пользователь отменил, но промис должен завершиться
                     }
                 } catch (error) {
+                    console.error('ImportExportManager: Import error:', error);
                     alert('Ошибка импорта: ' + error.message);
                     reject(error);
                 }
             };
+            
+            reader.onerror = function(error) {
+                console.error('ImportExportManager: FileReader error:', error);
+                reject(new Error('Ошибка чтения файла'));
+            };
+            
+            reader.onloadstart = function() {
+                console.log('ImportExportManager: Starting to read file');
+            };
+            
+            reader.onloadend = function() {
+                console.log('ImportExportManager: File reading completed');
+            };
+            
+            console.log('ImportExportManager: Starting FileReader.readAsText');
             reader.readAsText(file);
         });
     }
     
     async importDB(file) {
+        console.log('ImportExportManager: importDB called', file ? `file: ${file.name}, size: ${file.size}` : 'no file');
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = async (e) => {
@@ -507,6 +581,7 @@ class ImportExportManager {
     }
     
     async analyzeDB() {
+        console.log('ImportExportManager: analyzeDB called');
         if (!this.currentDB) {
             throw new Error('Сначала загрузите DB файл через кнопку "Импорт заметок Metaslip"');
         }
@@ -603,6 +678,7 @@ class ImportExportManager {
     }
     
     migrateDBToNotes() {
+        console.log('ImportExportManager: migrateDBToNotes called');
         if (!this.currentDB) {
             throw new Error('Сначала загрузите и проанализируйте DB файл');
         }
@@ -678,6 +754,7 @@ class ImportExportManager {
     }
     
     createNoteFromCard(card) {
+        console.log('ImportExportManager: createNoteFromCard called', card);
         let timeString = '';
         if (card.created_at) {
             const date = new Date(card.created_at * 1000);
@@ -712,6 +789,7 @@ class ImportExportManager {
     }
     
     clearImportResults() {
+        console.log('ImportExportManager: clearImportResults called');
         document.getElementById('dbImportTextarea').value = '';
         document.getElementById('dbImportProgress').style.display = 'none';
         document.getElementById('dbImportProgressBar').style.width = '0%';
@@ -719,6 +797,7 @@ class ImportExportManager {
     }
     
     updateDBImportProgress(percent, message = '') {
+        console.log(`ImportExportManager: updateDBImportProgress ${percent}%, message: ${message}`);
         const progressBar = document.getElementById('dbImportProgressBar');
         const status = document.getElementById('dbImportStatus');
         
@@ -732,6 +811,7 @@ class ImportExportManager {
     }
     
     showDBImportStatus(message, type = 'info') {
+        console.log(`ImportExportManager: showDBImportStatus ${type}: ${message}`);
         const status = document.getElementById('dbImportStatus');
         if (status) {
             status.innerHTML = `<div class="db-import-status ${type}">${message}</div>`;
@@ -739,4 +819,17 @@ class ImportExportManager {
     }
 }
 
+console.log('ImportExportManager: Creating instance');
 window.importExport = new ImportExportManager();
+console.log('ImportExportManager: Instance created and assigned to window.importExport', window.importExport);
+
+// Тестовый код для отладки - удалить после проверки
+setTimeout(() => {
+    console.log('ImportExportManager test: Checking if initialized');
+    if (window.importExport) {
+        console.log('ImportExportManager: ✓ Successfully initialized', window.importExport);
+        console.log('ImportExportManager: Methods available:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.importExport)));
+    } else {
+        console.error('ImportExportManager: ✗ Not initialized!');
+    }
+}, 1000);
