@@ -142,49 +142,7 @@ class GridManager {
         });
     }
     
-    /**
-     * Создает метку даты под линией сетки
-     * @param {number} offset - Смещение в днях от текущего момента
-     */
-    createDateLabel(offset) {
-        if (!this.gridContainer) return;
-        
-        // offset - это смещение в целых днях от СЕЙЧАС
-        // Чтобы получить дату на линии, нужно:
-        // 1. Взять БАЗОВУЮ дату
-        // 2. Добавить offset
-        
-        const currentDay = window.appState.currentDay || 0;
-        const integerDays = Math.floor(currentDay); // Целая часть currentDay
-        
-        // Дата на линии = базовое время + integerDays + offset
-        const date = new Date(window.appState.baseDate);
-        date.setDate(date.getDate() + integerDays + offset);
-        
-        // Позиция метки (совпадает с линией)
-        const positionData = this.calculateGridPosition(offset);
-        
-        // Метка числа
-        const label = document.createElement('div');
-        label.className = 'labels date-labels';
-        label.style.position = 'absolute';
-        label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        label.style.transform = 'translateX(-50%)';
-        label.style.bottom = '30px';
-        label.textContent = date.getDate();
-        
-        // Метка дня недели
-        const weekday = document.createElement('div');
-        weekday.className = 'labels x-labels weekday-label';
-        weekday.style.position = 'absolute';
-        weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        weekday.style.transform = 'translateX(-50%)';
-        weekday.style.bottom = '10px';
-        weekday.textContent = window.dom.getWeekdayName(date);
-        
-        this.gridContainer.appendChild(label);
-        this.gridContainer.appendChild(weekday);
-    }
+
     
     createHorizontalGridLines() {
         if (!this.gridContainer) return;
@@ -268,40 +226,80 @@ class GridManager {
         });
     }
     
-    updateCenterDate() {
-        const element = document.getElementById('centerDateLabel');
-        if (!element) return;
-        
-        // Гарантируем, что используем текущую дату визора
-        const date = window.appState.currentDate || new Date();
-        
-        // Форматируем с секундами в UTC
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const year = date.getUTCFullYear();
-        const hours = String(date.getUTCHours()).padStart(2, '0');
-        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-        
-        const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
-        const weekday = window.dom.getWeekdayName(date, true);
-        
-        // Находим активную дату
-        const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
-        const name = activeDate?.name || 'Новая дата';
-        
-        // HTML с секундами
-        element.innerHTML = `
-            <div class="center-date-main">
-                <div class="center-date-datetime">${dateTimeStr}</div>
-                <div class="center-name-container">
-                    <div class="center-date-name">${name}</div>
-                    <div class="center-date-star">☼</div>
-                </div>
+
+// В grid.js обновить отображение дат:
+
+createDateLabel(offset) {
+    if (!this.gridContainer) return;
+    
+    // offset - смещение в целых днях от СЕЙЧАС
+    const currentDay = window.appState.currentDay || 0;
+    const integerDays = Math.floor(currentDay);
+    
+    // Дата на линии = базовое время + integerDays + offset
+    const date = new Date(window.appState.baseDate);
+    date.setDate(date.getDate() + integerDays + offset);
+    
+    // Позиция метки
+    const positionData = this.calculateGridPosition(offset);
+    
+    // Метка числа
+    const label = document.createElement('div');
+    label.className = 'labels date-labels';
+    label.style.position = 'absolute';
+    label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+    label.style.transform = 'translateX(-50%)';
+    label.style.bottom = '30px';
+    label.textContent = date.getDate();
+    
+    // Метка дня недели
+    const weekday = document.createElement('div');
+    weekday.className = 'labels x-labels weekday-label';
+    weekday.style.position = 'absolute';
+    weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+    weekday.style.transform = 'translateX(-50%)';
+    weekday.style.bottom = '10px';
+    weekday.textContent = window.dom.getWeekdayName(date);
+    
+    this.gridContainer.appendChild(label);
+    this.gridContainer.appendChild(weekday);
+}
+
+updateCenterDate() {
+    const element = document.getElementById('centerDateLabel');
+    if (!element) return;
+    
+    // Используем локальную дату визора
+    const date = window.appState.currentDate || new Date();
+    
+    // Форматируем с секундами в ЛОКАЛЬНОМ времени
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+    const weekday = window.dom.getWeekdayName(date, true);
+    
+    // Находим активную дату
+    const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
+    const name = activeDate?.name || 'Новая дата';
+    
+    // HTML с секундами
+    element.innerHTML = `
+        <div class="center-date-main">
+            <div class="center-date-datetime">${dateTimeStr}</div>
+            <div class="center-name-container">
+                <div class="center-date-name">${name}</div>
+                <div class="center-date-star">☼</div>
             </div>
-            <div class="center-date-weekday">${weekday}</div>
-        `;
-    }
+        </div>
+        <div class="center-date-weekday">${weekday}</div>
+    `;
+}
+
     
     updateGridNotesHighlight() {
         if (!this.gridContainer) return;

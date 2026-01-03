@@ -1,8 +1,40 @@
-// modules/dom.js - ОБНОВЛЕННЫЙ с использованием timeUtils
+// modules/dom.js - ИСПРАВЛЕННЫЙ
 class DOM {
     constructor() {
         this.elements = {};
         this.cacheElements();
+    }
+
+    formatDate(timestamp) {
+        return window.timeUtils.formatDate(timestamp);
+    }
+    
+    formatDateTimeFull(timestamp) {
+        return window.timeUtils.formatDateTime(timestamp);
+    }
+    
+    formatCurrentDayWithSeconds(currentDay, currentDate = null) {
+        return window.timeUtils.formatCurrentDayWithSeconds(currentDay, currentDate);
+    }
+    
+    formatDateForDateTimeInputWithSeconds(timestamp) {
+        return window.timeUtils.formatForDateTimeInput(timestamp);
+    }
+    
+    getWeekday(date) {
+        return window.timeUtils.getWeekday(date);
+    }
+    
+    getWeekdayName(date, full = false) {
+        return window.timeUtils.getWeekdayName(date, full);
+    }
+    
+    getDaysBetweenDates(date1, date2) {
+        return window.timeUtils.getDaysBetween(date1, date2);
+    }
+    
+    getDaysBetweenExact(date1, date2) {
+        return window.timeUtils.getDaysBetweenExact(date1, date2);
     }
     
     cacheElements() {
@@ -22,138 +54,24 @@ class DOM {
     $$(selector) {
         return document.querySelectorAll(selector);
     }
+
     
-    formatDate(timestamp) {
-        // ЗАМЕНА: Используем timeUtils вместо локальных методов
-        if (window.timeUtils && window.timeUtils.formatDateUTC) {
-            return window.timeUtils.formatDateUTC(timestamp);
-        }
-        
-        // Fallback для обратной совместимости
-        if (!timestamp) return 'Неизвестно';
-        try {
-            let date;
-            if (typeof timestamp === 'number') {
-                date = new Date(timestamp);
-            } else {
-                date = new Date(timestamp);
-            }
-            
-            if (isNaN(date.getTime())) {
-                return 'Некорректная дата';
-            }
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        } catch (e) {
-            console.error('Format date error:', e);
-            return 'Ошибка даты';
-        }
-    }
     
-    // НОВАЯ ФУНКЦИЯ: Полное форматирование даты и времени в одну строку - ОБНОВЛЕНА
-    formatDateTimeFull(timestamp) {
-        // ЗАМЕНА: Используем timeUtils
-        if (window.timeUtils && window.timeUtils.formatDateTimeUTC) {
-            return window.timeUtils.formatDateTimeUTC(timestamp);
-        }
-        
-        // Fallback
-        if (!timestamp) return 'Неизвестно';
-        try {
-            let date;
-            if (typeof timestamp === 'number') {
-                date = new Date(timestamp);
-            } else {
-                date = new Date(timestamp);
-            }
-            
-            if (isNaN(date.getTime())) {
-                return 'Некорректная дата';
-            }
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
-        } catch (e) {
-            console.error('Format datetime error:', e);
-            return 'Ошибка даты';
-        }
-    }
-    
-    // НОВАЯ ФУНКЦИЯ: Форматирование currentDay для отображения секунд (5 знаков после запятой)
-    formatCurrentDayWithSeconds(currentDay, currentDate = null) {
-        // ЗАМЕНА: Используем timeUtils
-        if (window.timeUtils && window.timeUtils.formatCurrentDayWithSecondsUTC) {
-            return window.timeUtils.formatCurrentDayWithSecondsUTC(currentDay, currentDate);
-        }
-        
-        // Fallback
-        if (currentDay === undefined || currentDay === null || isNaN(currentDay)) {
-            return '0.00000';
-        }
-        return currentDay.toFixed(5);
-    }
-    
-    // ОБНОВЛЕНА: Используем timeUtils
-    formatDateForDateTimeInputWithSeconds(timestamp) {
-        if (window.timeUtils && window.timeUtils.formatForDateTimeInputUTC) {
-            return window.timeUtils.formatForDateTimeInputUTC(timestamp);
-        }
-        
-        // Fallback
-        if (!timestamp) return '';
-        
-        let date;
-        if (typeof timestamp === 'number') {
-            date = new Date(timestamp);
-        } else {
-            date = new Date(timestamp);
-        }
-        
-        if (isNaN(date.getTime())) {
-            return '';
-        }
-        
-        // ВАЖНО: Используем локальное время (fallback)
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        
-        console.log('DOM: Форматирование даты для инпута (fallback):', {
-            timestamp,
-            localTime: date.toString(),
-            result: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-        });
-        
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-    
-    // ОБНОВЛЕНА: Используем timeUtils
     stringFromDateTimeStringToTimestamp(dateTimeString) {
-        if (window.timeUtils && window.timeUtils.parseStringToUTC) {
-            const utcDate = window.timeUtils.parseStringToUTC(dateTimeString);
-            return utcDate.getTime();
+        if (window.timeUtils && window.timeUtils.getTimestamp) {
+            return window.timeUtils.getTimestamp(dateTimeString);
         }
         
         // Fallback
         try {
             if (!dateTimeString) return Date.now();
             
-            let normalizedString = dateTimeString.trim();
-            
-            if (normalizedString.includes('T')) {
-                normalizedString = normalizedString.replace('T', ' ');
+            let normalized = dateTimeString.trim();
+            if (normalized.includes('T')) {
+                normalized = normalized.replace('T', ' ');
             }
             
-            const parts = normalizedString.split(' ');
+            const parts = normalized.split(' ');
             const datePart = parts[0];
             
             let timePart = '00:00:00';
@@ -167,14 +85,7 @@ class DOM {
             const [year, month, day] = datePart.split('-').map(Number);
             const [hours, minutes, seconds] = timePart.split(':').map(Number);
             
-            // Создаем Date в локальном часовом поясе (fallback)
             const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
-            
-            console.log('DOM: Конвертация строки в дату (fallback):', {
-                input: dateTimeString,
-                localDate: date.toString(),
-                timestamp: date.getTime()
-            });
             
             if (isNaN(date.getTime())) {
                 throw new Error('Некорректная дата-время');
@@ -186,66 +97,42 @@ class DOM {
         }
     }
     
-    // Старый метод для обратной совместимости
-    formatDateForDateTimeInput(timestamp) {
-        return this.formatDateForDateTimeInputWithSeconds(timestamp);
-    }
-    
-    // ОБНОВЛЕНА: Используем timeUtils
     formatDateForInput(timestamp) {
-        if (window.timeUtils && window.timeUtils.formatForDateInputUTC) {
-            return window.timeUtils.formatForDateInputUTC(timestamp);
+        if (window.timeUtils && window.timeUtils.formatForDateInput) {
+            return window.timeUtils.formatForDateInput(timestamp);
         }
         
         // Fallback
         if (!timestamp) return '';
-        
-        let date;
-        if (typeof timestamp === 'number') {
-            date = new Date(timestamp);
-        } else {
-            date = new Date(timestamp);
-        }
-        
-        if (isNaN(date.getTime())) {
-            return '';
-        }
-        
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) return '';
         return date.toISOString().split('T')[0];
     }
     
-    // ОБНОВЛЕНА: Используем timeUtils
     getYearsBetweenDates(timestamp1, timestamp2) {
-        if (window.timeUtils && window.timeUtils.getYearsBetweenUTC) {
-            return window.timeUtils.getYearsBetweenUTC(timestamp1, timestamp2);
+        if (window.timeUtils && window.timeUtils.getYearsBetween) {
+            return window.timeUtils.getYearsBetween(timestamp1, timestamp2);
         }
         
         // Fallback
         if (!timestamp1 || !timestamp2) return 0;
-        
-        let date1, date2;
-        
         try {
-            date1 = typeof timestamp1 === 'number' ? new Date(timestamp1) : new Date(timestamp1);
-            date2 = typeof timestamp2 === 'number' ? new Date(timestamp2) : new Date(timestamp2);
+            const date1 = new Date(timestamp1);
+            const date2 = new Date(timestamp2);
             
-            if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
-                return 0;
-            }
+            if (isNaN(date1.getTime()) || isNaN(date2.getTime())) return 0;
             const diffMs = Math.abs(date2.getTime() - date1.getTime());
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
             const diffYears = Math.floor(diffDays / 365.25);
             return diffYears;
         } catch (e) {
-            console.error('Error parsing dates:', e);
             return 0;
         }
     }
     
-    // ОБНОВЛЕНА: Используем timeUtils
     getWeekday(date) {
-        if (window.timeUtils && window.timeUtils.getWeekdayUTC) {
-            return window.timeUtils.getWeekdayUTC(date);
+        if (window.timeUtils && window.timeUtils.getWeekday) {
+            return window.timeUtils.getWeekday(date);
         }
         
         // Fallback
@@ -260,10 +147,9 @@ class DOM {
         return dateObj.getDay();
     }
     
-    // ОБНОВЛЕНА: Используем timeUtils
     getWeekdayName(date, full = false) {
-        if (window.timeUtils && window.timeUtils.getWeekdayNameUTC) {
-            return window.timeUtils.getWeekdayNameUTC(date, full);
+        if (window.timeUtils && window.timeUtils.getWeekdayName) {
+            return window.timeUtils.getWeekdayName(date, full);
         }
         
         // Fallback
@@ -295,96 +181,9 @@ class DOM {
         return descriptions[type] || 'неизвестный тип';
     }
     
-    // ОБНОВЛЕНА: Используем timeUtils
     getDaysBetweenDates(date1, date2) {
-        if (window.timeUtils && window.timeUtils.getDaysBetweenUTC) {
-            return window.timeUtils.getDaysBetweenUTC(date1, date2);
-        }
-        
-        // Fallback
-        let d1, d2;
-        
-        if (typeof date1 === 'number') {
-            d1 = new Date(date1);
-        } else if (date1 instanceof Date) {
-            d1 = date1;
-        } else {
-            d1 = new Date(date1);
-        }
-        
-        if (typeof date2 === 'number') {
-            d2 = new Date(date2);
-        } else if (date2 instanceof Date) {
-            d2 = date2;
-        } else {
-            d2 = new Date(date2);
-        }
-        
-        const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-        const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-        return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-    }
-    
-    getCurrentDate() {
-        // ЗАМЕНА: Используем timeUtils для получения UTC
-        if (window.timeUtils && window.timeUtils.nowUTC) {
-            return window.timeUtils.nowUTC();
-        }
-        
-        // Fallback
-        return new Date();
-    }
-    
-    // Старый метод для обратной совместимости
-    stringFromDateTimeLocalToTimestamp(dateTimeString) {
-        return this.stringFromDateTimeStringToTimestamp(dateTimeString);
-    }
-    
-    stringToTimestamp(dateString) {
-        // ЗАМЕНА: Используем timeUtils
-        if (window.timeUtils && window.timeUtils.parseStringToUTC) {
-            const utcDate = window.timeUtils.parseStringToUTC(dateString);
-            return utcDate.getTime();
-        }
-        
-        // Fallback
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                throw new Error('Некорректная дата');
-            }
-            return date.getTime();
-        } catch (error) {
-            console.error('Ошибка преобразования строки в timestamp:', error);
-            return Date.now();
-        }
-    }
-    
-    isTimestamp(value) {
-        return window.timeUtils ? window.timeUtils.isTimestamp(value) : 
-            (typeof value === 'number' && !isNaN(value) && value > 0);
-    }
-    
-    // НОВЫЙ МЕТОД: Получить начало дня в UTC
-    getStartOfDayUTC(timestamp) {
-        if (window.timeUtils && window.timeUtils.getStartOfDayUTC) {
-            return window.timeUtils.getStartOfDayUTC(timestamp);
-        }
-        
-        // Fallback
-        const date = new Date(timestamp);
-        return new Date(Date.UTC(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            date.getUTCDate(),
-            0, 0, 0, 0
-        ));
-    }
-    
-    // НОВЫЙ МЕТОД: Получить разницу в днях с дробной частью (UTC)
-    getDaysBetweenExact(date1, date2) {
-        if (window.timeUtils && window.timeUtils.getDaysBetweenExactUTC) {
-            return window.timeUtils.getDaysBetweenExactUTC(date1, date2);
+        if (window.timeUtils && window.timeUtils.getDaysBetween) {
+            return window.timeUtils.getDaysBetween(date1, date2);
         }
         
         // Fallback
@@ -409,6 +208,50 @@ class DOM {
         const timeDiff = d2.getTime() - d1.getTime();
         return timeDiff / (1000 * 60 * 60 * 24);
     }
+    
+    getCurrentDate() {
+        return new Date(); // Локальное время
+    }
+    
+    // Старый метод для обратной совместимости
+    stringFromDateTimeLocalToTimestamp(dateTimeString) {
+        return this.stringFromDateTimeStringToTimestamp(dateTimeString);
+    }
+    
+    stringToTimestamp(dateString) {
+        if (window.timeUtils && window.timeUtils.getTimestamp) {
+            return window.timeUtils.getTimestamp(dateString);
+        }
+        
+        // Fallback
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                throw new Error('Некорректная дата');
+            }
+            return date.getTime();
+        } catch (error) {
+            console.error('Ошибка преобразования строки в timestamp:', error);
+            return Date.now();
+        }
+    }
+    
+    isTimestamp(value) {
+        return window.timeUtils ? window.timeUtils.isTimestamp(value) : 
+            (typeof value === 'number' && !isNaN(value) && value > 0);
+    }
+    
+    getStartOfDayUTC(timestamp) {
+        if (window.timeUtils && window.timeUtils.getStartOfDay) {
+            return window.timeUtils.getStartOfDay(timestamp);
+        }
+        
+        // Fallback
+        const date = new Date(timestamp);
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+    }
+    
+
 }
 
 window.dom = new DOM();

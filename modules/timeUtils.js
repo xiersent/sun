@@ -1,85 +1,98 @@
-// modules/timeUtils.js - ПОЛНОСТЬЮ ИСПРАВЛЕННЫЙ И УПРОЩЕННЫЙ
+// modules/timeUtils.js - ПОЛНОСТЬЮ В ЛОКАЛЬНОМ ВРЕМЕНИ
 /**
- * Утилиты для работы со временем ТОЛЬКО в UTC
- * ВСЕ методы возвращают UTC timestamp или UTC Date
- * НЕТ часовых поясов, НЕТ локального времени
+ * Утилиты для работы со временем в ЛОКАЛЬНОМ часовом поясе пользователя
+ * Все методы работают с локальным временем пользователя
+ * НЕТ UTC преобразований, НЕТ часовых поясов
  */
 class TimeUtils {
     constructor() {
-        console.log('TimeUtils: режим UTC - все даты в UTC, все вычисления в UTC');
-        this.DAY_MS = 24 * 60 * 60 * 1000; // Миллисекунд в дне
+        console.log('TimeUtils: режим ЛОКАЛЬНОЕ время пользователя');
+        this.DAY_MS = 24 * 60 * 60 * 1000;
     }
     
     // ================ БАЗОВЫЕ МЕТОДЫ ================
     
     /**
-     * Текущее время в UTC
-     * @returns {Date} Date объект в UTC
+     * Текущее время в локальном часовом поясе
+     * @returns {Date} Date объект в локальном времени
      */
-    nowUTC() {
-        return new Date(Date.now());
+    now() {
+        return new Date();
     }
     
     /**
-     * Текущее время как UTC timestamp
-     * @returns {number} UTC timestamp
+     * Текущее время как timestamp
+     * @returns {number} timestamp (всегда локальное время)
      */
     nowTimestamp() {
         return Date.now();
     }
     
     /**
-     * Приводит ЛЮБОЕ значение к UTC Date
-     * @param {Date|number|string} date - Дата в любом формате
-     * @returns {Date} UTC Date
+     * Приводит любое значение к Date в локальном времени
+     * @param {Date|number|string} value - Значение времени
+     * @returns {Date} Date в локальном времени
      */
-    toUTC(date) {
-        if (!date) return this.nowUTC();
+    toLocalDate(value) {
+        if (!value) return this.now();
         
-        if (date instanceof Date) {
-            return new Date(date.getTime());
+        if (value instanceof Date) {
+            return new Date(value.getTime());
         }
         
-        if (typeof date === 'number') {
-            return new Date(date);
+        if (typeof value === 'number') {
+            return new Date(value);
         }
         
-        if (typeof date === 'string') {
-            return this.parseStringToUTC(date);
+        if (typeof value === 'string') {
+            return this.parseStringToLocal(value);
         }
         
-        return this.nowUTC();
+        return this.now();
     }
     
     // ================ ПАРСИНГ И ФОРМАТИРОВАНИЕ ================
     
     /**
-     * Парсит строку в UTC Date
-     * Форматы: 
-     * - "2024-01-15 14:30:00" (локальное время пользователя)
-     * - "2024-01-15T14:30:00Z" (уже UTC)
-     * - "2024-01-15" (без времени = 00:00:00)
+     * Парсит строку в локальное время
+     * Форматы:
+     * - "2024-01-15 14:30:00" (как локальное время)
+     * - "2024-01-15" (00:00:00 локальное)
+     * - "2024-01-15T14:30:00" (ISO, но интерпретируется как локальное)
      * 
-     * @param {string} dateTimeString - Строка с датой и временем
-     * @returns {Date} UTC Date
+     * @param {string} dateTimeString - Строка с датой
+     * @returns {Date} Date в локальном времени
      */
-    parseStringToUTC(dateTimeString) {
-        if (!dateTimeString) return this.nowUTC();
+    parseStringToLocal(dateTimeString) {
+        if (!dateTimeString) return this.now();
         
         try {
-            // Нормализуем строку
             let normalized = dateTimeString.trim();
             
-            // Если есть пробел, заменяем на 'T'
+            // Если строка уже в формате "YYYY-MM-DD HH:MM:SS"
             if (normalized.includes(' ') && !normalized.includes('T')) {
-                normalized = normalized.replace(' ', 'T');
+                const [datePart, timePart] = normalized.split(' ');
+                const [year, month, day] = datePart.split('-').map(Number);
+                
+                let hours = 0, minutes = 0, seconds = 0;
+                if (timePart) {
+                    const timeParts = timePart.split(':').map(Number);
+                    hours = timeParts[0] || 0;
+                    minutes = timeParts[1] || 0;
+                    seconds = timeParts[2] || 0;
+                }
+                
+                // Создаем Date в ЛОКАЛЬНОМ времени
+                const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
+                
+                if (isNaN(date.getTime())) {
+                    throw new Error(`Некорректная дата: "${dateTimeString}"`);
+                }
+                
+                return date;
             }
             
-            // Если нет часового пояса, добавляем 'Z' (UTC)
-            if (!normalized.endsWith('Z') && !normalized.includes('+')) {
-                normalized += 'Z';
-            }
-            
+            // Для других форматов (ISO и т.д.)
             const date = new Date(normalized);
             
             if (isNaN(date.getTime())) {
@@ -89,25 +102,22 @@ class TimeUtils {
             return date;
             
         } catch (error) {
-            console.error('Ошибка парсинга даты:', dateTimeString, error);
-            return this.nowUTC();
+            console.error('TimeUtils: ошибка парсинга даты:', error.message);
+            return this.now();
         }
     }
     
     /**
      * Парсит строку из input[type="datetime-local"]
-     * Пользователь вводит в ЛОКАЛЬНОМ времени
-     * Мы конвертируем в UTC
+     * Формат: "YYYY-MM-DD HH:MM:SS" (локальное время)
      * 
-     * @param {string} inputString - "YYYY-MM-DD HH:MM:SS"
-     * @returns {number} UTC timestamp
+     * @param {string} inputString - Строка из инпута
+     * @returns {number} timestamp
      */
     parseFromDateTimeInput(inputString) {
         if (!inputString) return this.nowTimestamp();
         
         try {
-            // Пользователь вводит в локальном времени
-            // Пример: "2024-01-15 14:30:00"
             const [datePart, timePart] = inputString.split(' ');
             
             if (!datePart) {
@@ -117,7 +127,6 @@ class TimeUtils {
             const [year, month, day] = datePart.split('-').map(Number);
             
             let hours = 0, minutes = 0, seconds = 0;
-            
             if (timePart) {
                 const [h, m, s] = timePart.split(':').map(Number);
                 hours = h || 0;
@@ -125,29 +134,38 @@ class TimeUtils {
                 seconds = s || 0;
             }
             
-            // ВАЖНО: Создаем Date в UTC из локальных значений
-            // Date.UTC() автоматически конвертирует в UTC
-            return Date.UTC(year, month - 1, day, hours, minutes, seconds);
+            // Создаем Date в ЛОКАЛЬНОМ времени
+            const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
+            
+            if (isNaN(date.getTime())) {
+                throw new Error('Некорректная дата-время');
+            }
+            
+            return date.getTime();
             
         } catch (error) {
-            console.error('Ошибка парсинга input:', inputString, error);
+            console.error('TimeUtils: ошибка парсинга input:', error);
             return this.nowTimestamp();
         }
     }
     
     /**
      * Форматирует timestamp для input[type="datetime-local"]
-     * Показываем пользователю в ЛОКАЛЬНОМ времени
+     * Формат: "YYYY-MM-DD HH:MM:SS" (локальное время)
      * 
-     * @param {number} timestamp - UTC timestamp
-     * @returns {string} "YYYY-MM-DD HH:MM:SS" (локальное время)
+     * @param {number} timestamp - timestamp
+     * @returns {string} "YYYY-MM-DD HH:MM:SS"
      */
-    formatForDateTimeInputUTC(timestamp) {
+    formatForDateTimeInput(timestamp) {
         if (!timestamp) return '';
         
         const date = new Date(timestamp);
         
-        // Используем локальные геттеры для отображения
+        if (isNaN(date.getTime())) {
+            return '';
+        }
+        
+        // Локальное время
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -161,73 +179,68 @@ class TimeUtils {
     /**
      * Форматирует дату для отображения
      * @param {Date|number} date - Дата
-     * @returns {string} "DD.MM.YYYY" (UTC день)
+     * @returns {string} "DD.MM.YYYY" (локальная дата)
      */
-    formatDateUTC(date) {
-        const d = this.toUTC(date);
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const year = d.getUTCFullYear();
+    formatDate(date) {
+        const d = this.toLocalDate(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
         return `${day}.${month}.${year}`;
     }
     
     /**
      * Форматирует дату и время
      * @param {Date|number} date - Дата
-     * @returns {string} "DD.MM.YYYY HH:MM:SS" (UTC время)
+     * @returns {string} "DD.MM.YYYY HH:MM:SS" (локальное время)
      */
-    formatDateTimeUTC(date) {
-        const d = this.toUTC(date);
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const year = d.getUTCFullYear();
-        const hours = String(d.getUTCHours()).padStart(2, '0');
-        const minutes = String(d.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(d.getUTCSeconds()).padStart(2, '0');
+    formatDateTime(date) {
+        const d = this.toLocalDate(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
         return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
     }
     
     /**
      * Форматирует дату для input[type="date"]
      * @param {Date|number} date - Дата
-     * @returns {string} "YYYY-MM-DD" (UTC день)
+     * @returns {string} "YYYY-MM-DD" (локальная дата)
      */
-    formatForDateInputUTC(date) {
-        const d = this.toUTC(date);
-        const year = d.getUTCFullYear();
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
+    formatForDateInput(date) {
+        const d = this.toLocalDate(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
     
     // ================ ВЫЧИСЛЕНИЯ ================
     
     /**
-     * Начало дня (00:00:00.000) в UTC
+     * Начало дня (00:00:00.000) в локальном времени
      * @param {Date|number} date - Дата
-     * @returns {Date} Начало дня в UTC
+     * @returns {Date} Начало дня в локальном времени
      */
-    getStartOfDayUTC(date) {
-        const d = this.toUTC(date);
-        return new Date(Date.UTC(
-            d.getUTCFullYear(),
-            d.getUTCMonth(),
-            d.getUTCDate(),
-            0, 0, 0, 0
-        ));
+    getStartOfDay(date) {
+        const d = this.toLocalDate(date);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
     }
     
     /**
      * Разница в днях между двумя датами (целые дни)
-     * Использует начало дня в UTC
+     * Использует начало дня в локальном времени
      * 
      * @param {Date|number} date1 - Первая дата
      * @param {Date|number} date2 - Вторая дата
      * @returns {number} Целое количество дней
      */
-    getDaysBetweenUTC(date1, date2) {
-        const d1 = this.getStartOfDayUTC(date1);
-        const d2 = this.getStartOfDayUTC(date2);
+    getDaysBetween(date1, date2) {
+        const d1 = this.getStartOfDay(date1);
+        const d2 = this.getStartOfDay(date2);
         
         const diffMs = d2.getTime() - d1.getTime();
         return Math.floor(diffMs / this.DAY_MS);
@@ -235,15 +248,15 @@ class TimeUtils {
     
     /**
      * ТОЧНАЯ разница в днях между двумя датами (дробная)
-     * Использует точное время
+     * Использует точное локальное время
      * 
      * @param {Date|number} date1 - Первая дата
      * @param {Date|number} date2 - Вторая дата
      * @returns {number} Дробное количество дней
      */
-    getDaysBetweenExactUTC(date1, date2) {
-        const d1 = this.toUTC(date1);
-        const d2 = this.toUTC(date2);
+    getDaysBetweenExact(date1, date2) {
+        const d1 = this.toLocalDate(date1);
+        const d2 = this.toLocalDate(date2);
         
         const diffMs = d2.getTime() - d1.getTime();
         return diffMs / this.DAY_MS;
@@ -257,20 +270,20 @@ class TimeUtils {
      * @param {Date} [currentDate] - Текущая дата для верификации
      * @returns {string} "ДД.ДДДДД"
      */
-    formatCurrentDayWithSecondsUTC(currentDay, currentDate = null) {
+    formatCurrentDayWithSeconds(currentDay, currentDate = null) {
         if (currentDay === undefined || currentDay === null || isNaN(currentDay)) {
             return '0.00000';
         }
         
-        // Проверяем согласованность с currentDate
-        if (currentDate) {
-            const calculatedDay = this.getDaysBetweenExactUTC(
+        // Проверяем согласованность
+        if (currentDate && window.appState && window.appState.baseDate) {
+            const calculatedDay = this.getDaysBetweenExact(
                 window.appState.baseDate,
                 currentDate
             );
             
             const diff = Math.abs(calculatedDay - currentDay);
-            if (diff > 0.00001) { // Расхождение более 0.86 секунды
+            if (diff > 0.00001) {
                 console.warn('TimeUtils: расхождение currentDay!', {
                     currentDay: currentDay,
                     calculated: calculatedDay,
@@ -279,20 +292,19 @@ class TimeUtils {
             }
         }
         
-        // Форматируем с 5 знаками после запятой
         return currentDay.toFixed(5);
     }
     
     // ================ ДНИ НЕДЕЛИ ================
     
     /**
-     * День недели в UTC (0-воскресенье, 6-суббота)
+     * День недели в локальном времени (0-воскресенье, 6-суббота)
      * @param {Date|number} date - Дата
      * @returns {number} 0-6
      */
-    getWeekdayUTC(date) {
-        const d = this.toUTC(date);
-        return d.getUTCDay();
+    getWeekday(date) {
+        const d = this.toLocalDate(date);
+        return d.getDay();
     }
     
     /**
@@ -301,8 +313,8 @@ class TimeUtils {
      * @param {boolean} full - Полное название?
      * @returns {string} Название дня
      */
-    getWeekdayNameUTC(date, full = false) {
-        const weekday = this.getWeekdayUTC(date);
+    getWeekdayName(date, full = false) {
+        const weekday = this.getWeekday(date);
         const weekdays = full ? 
             ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] :
             ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
@@ -317,11 +329,11 @@ class TimeUtils {
      * @param {Date|number} date2 - Вторая дата
      * @returns {number} Целое количество лет
      */
-    getYearsBetweenUTC(date1, date2) {
-        const d1 = this.toUTC(date1);
-        const d2 = this.toUTC(date2);
+    getYearsBetween(date1, date2) {
+        const d1 = this.toLocalDate(date1);
+        const d2 = this.toLocalDate(date2);
         
-        const diffDays = Math.abs(this.getDaysBetweenExactUTC(d1, d2));
+        const diffDays = Math.abs(this.getDaysBetweenExact(d1, d2));
         return Math.floor(diffDays / 365.25);
     }
     
@@ -340,48 +352,9 @@ class TimeUtils {
     }
     
     /**
-     * Проверяет согласованность дат в приложении
-     * Логирует предупреждения при несоответствиях
-     */
-    validateDateConsistency() {
-        if (!window.appState) return;
-        
-        const { currentDate, baseDate, currentDay } = window.appState;
-        
-        // Проверяем currentDay
-        const calculatedCurrentDay = this.getDaysBetweenExactUTC(baseDate, currentDate);
-        const diff = Math.abs(calculatedCurrentDay - (currentDay || 0));
-        
-        if (diff > 0.00001) { // Более 0.86 секунды
-            console.error('TimeUtils: НЕСОГЛАСОВАННОСТЬ ДАТ!', {
-                baseDate: new Date(baseDate).toUTCString(),
-                currentDate: currentDate.toUTCString(),
-                storedCurrentDay: currentDay,
-                calculatedCurrentDay: calculatedCurrentDay,
-                diffDays: diff,
-                diffSeconds: Math.round(diff * 86400)
-            });
-            
-            return false;
-        }
-        
-        console.log('TimeUtils: даты согласованы', {
-            currentDay: currentDay,
-            calculated: calculatedCurrentDay.toFixed(5),
-            diff: diff.toFixed(8)
-        });
-        
-        return true;
-    }
-    
-    // ================ УТИЛИТЫ ДЛЯ ПРИЛОЖЕНИЯ ================
-    
-    /**
-     * Получает время из строки или timestamp
-     * Универсальный метод для использования в приложении
-     * 
-     * @param {string|number|Date} value - Значение времени
-     * @returns {number} UTC timestamp
+     * Получает timestamp из любого значения
+     * @param {any} value - Значение
+     * @returns {number} timestamp
      */
     getTimestamp(value) {
         if (!value) return this.nowTimestamp();
@@ -391,7 +364,7 @@ class TimeUtils {
         }
         
         if (typeof value === 'string') {
-            return this.parseStringToUTC(value).getTime();
+            return this.parseStringToLocal(value).getTime();
         }
         
         if (value instanceof Date) {
@@ -402,92 +375,37 @@ class TimeUtils {
     }
     
     /**
-     * Получает Date объект из любого значения
-     * @param {any} value - Значение
-     * @returns {Date} UTC Date
+     * Проверяет согласованность дат в приложении
      */
-    getDate(value) {
-        return this.toUTC(value);
+    validateDateConsistency() {
+        if (!window.appState) return;
+        
+        const { currentDate, baseDate, currentDay } = window.appState;
+        
+        if (!currentDate || !baseDate) return;
+        
+        const calculatedCurrentDay = this.getDaysBetweenExact(baseDate, currentDate);
+        const diff = Math.abs(calculatedCurrentDay - (currentDay || 0));
+        
+        if (diff > 0.00001) {
+            console.error('TimeUtils: НЕСОГЛАСОВАННОСТЬ ДАТ!', {
+                baseDate: new Date(baseDate).toLocaleString(),
+                currentDate: currentDate.toLocaleString(),
+                storedCurrentDay: currentDay,
+                calculatedCurrentDay: calculatedCurrentDay,
+                diffDays: diff,
+                diffSeconds: Math.round(diff * 86400)
+            });
+            return false;
+        }
+        
+        console.log('TimeUtils: даты согласованы', {
+            currentDay: currentDay,
+            calculated: calculatedCurrentDay.toFixed(5),
+            diff: diff.toFixed(8)
+        });
+        return true;
     }
 }
 
 window.timeUtils = new TimeUtils();
-
-// ДЕМОНСТРАЦИЯ И ТЕСТЫ
-window.testTimeUtils = function() {
-    console.log('=== ТЕСТ TimeUtils ===');
-    
-    const tests = [
-        {
-            name: 'Текущее время',
-            test: () => {
-                const now = window.timeUtils.nowUTC();
-                console.log('nowUTC():', now.toUTCString());
-                console.log('nowTimestamp():', window.timeUtils.nowTimestamp());
-                return true;
-            }
-        },
-        {
-            name: 'Парсинг строки',
-            test: () => {
-                const testString = '2024-01-15 14:30:00';
-                const utcDate = window.timeUtils.parseStringToUTC(testString);
-                console.log(`Парсинг "${testString}":`, utcDate.toUTCString());
-                
-                // Проверяем, что это действительно UTC
-                const localDate = new Date(testString);
-                console.log('Локальное время:', localDate.toString());
-                console.log('Разница (часов):', (localDate.getTime() - utcDate.getTime()) / (1000 * 60 * 60));
-                return true;
-            }
-        },
-        {
-            name: 'Форматирование для input',
-            test: () => {
-                const timestamp = Date.UTC(2024, 0, 15, 14, 30, 0); // 15.01.2024 14:30:00 UTC
-                const formatted = window.timeUtils.formatForDateTimeInputUTC(timestamp);
-                console.log('Форматирование timestamp:', {
-                    timestamp: timestamp,
-                    formatted: formatted,
-                    ожидание: '2024-01-15 14:30:00 (локальное время)'
-                });
-                return true;
-            }
-        },
-        {
-            name: 'Разница в днях',
-            test: () => {
-                const date1 = new Date(Date.UTC(2024, 0, 1, 0, 0, 0));
-                const date2 = new Date(Date.UTC(2024, 0, 15, 14, 30, 0));
-                
-                const daysExact = window.timeUtils.getDaysBetweenExactUTC(date1, date2);
-                const daysWhole = window.timeUtils.getDaysBetweenUTC(date1, date2);
-                
-                console.log('Разница в днях:', {
-                    date1: date1.toUTCString(),
-                    date2: date2.toUTCString(),
-                    exact: daysExact,
-                    whole: daysWhole,
-                    часов: Math.round((daysExact - daysWhole) * 24)
-                });
-                return true;
-            }
-        }
-    ];
-    
-    let allPassed = true;
-    tests.forEach(testCase => {
-        try {
-            console.log(`\n--- ${testCase.name} ---`);
-            if (!testCase.test()) {
-                allPassed = false;
-            }
-        } catch (error) {
-            console.error(`Ошибка в тесте ${testCase.name}:`, error);
-            allPassed = false;
-        }
-    });
-    
-    console.log(`\n=== ТЕСТ ЗАВЕРШЕН: ${allPassed ? 'ВСЁ ОК' : 'ЕСТЬ ОШИБКИ'} ===`);
-    return allPassed;
-};

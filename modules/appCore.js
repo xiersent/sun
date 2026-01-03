@@ -200,67 +200,39 @@ class AppCore {
         console.log('AppCore: инициализация завершена');
     }
 
-    // И измените вызов в методе initializeApp():
-    async initializeApp() {
-        // Проверяем мобильное устройство
-        const isMobile = this.isMobileDevice();
-        
-        if (isMobile) {
-            // Для мобильных - показываем только предупреждение
-            this.showWarning();
-            // Добавляем класс для мобильных устройств
-            document.body.classList.add('mobile-device');
-            console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
-            return; // Прерываем дальнейшую инициализацию
-        }
-        
-        // Продолжаем стандартную инициализацию для десктопов
-        console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
-        
-        // Устанавливаем режим отображения звезд/имен
-        if (window.appState.showStars) {
-            document.body.classList.add('stars-mode');
-            document.body.classList.remove('names-mode');
-        } else {
-            document.body.classList.remove('stars-mode');
-            document.body.classList.add('names-mode');
-        }
-        
-        // ИЗМЕНЕНО: Устанавливаем начальное время на ТОЧНОЕ время (сейчас)
-        const now = new Date();
-        window.appState.currentDate = new Date(now);
-        
-        // Пересчитываем с учетом времени
-        if (window.dates && window.dates.recalculateCurrentDay) {
-            window.dates.recalculateCurrentDay(true);
-        }
-        
-        // Замените старый код на вызов нового метода:
-        await this.initializeAppComponents();
-        
-        // ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ - добавляем этот блок
-        console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ В AppCore ===');
-        
-        // Даем время всем модулям загрузиться
-        setTimeout(() => {
-            if (window.dates) {
-                // Вызываем force initialize
-                if (window.dates.forceInitialize) {
-                    window.dates.forceInitialize();
-                } else {
-                    // Fallback: базовая инициализация
-                    if (window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay(true); // ИСПРАВЛЕНО: true для точного времени
-                    }
-                    if (window.appState.activeDateId && window.dates.setActiveDate) {
-                        window.dates.setActiveDate(window.appState.activeDateId, true); // ИСПРАВЛЕНО: true для точного времени
-                    }
-                }
-            }
-        }, 500);
-        
-        console.log('AppCore: инициализация завершена');
-    }
+
+	async initializeApp() {
+		// Проверяем мобильное устройство
+		const isMobile = this.isMobileDevice();
+		
+		if (isMobile) {
+			this.showWarning();
+			document.body.classList.add('mobile-device');
+			console.log('AppCore: Мобильное устройство обнаружено');
+			return;
+		}
+		
+		// Для десктопов - стандартная инициализация
+		console.log('AppCore: Десктоп, продолжаем инициализацию с ЛОКАЛЬНЫМ временем');
+		
+		// Устанавливаем режим отображения звезд/имен
+		if (window.appState.showStars) {
+			document.body.classList.add('stars-mode');
+			document.body.classList.remove('names-mode');
+		} else {
+			document.body.classList.remove('stars-mode');
+			document.body.classList.add('names-mode');
+		}
+		
+		// ИЗМЕНЕНО: Используем ЛОКАЛЬНОЕ время
+		const now = new Date(); // Локальное время пользователя
+		window.appState.currentDate = new Date(now);
+		
+		// Инициализируем компоненты
+		await this.initializeAppComponents();
+		
+		console.log('AppCore: инициализация с локальным временем завершена');
+	}
 
     
     // Метод для получения версии из файла
