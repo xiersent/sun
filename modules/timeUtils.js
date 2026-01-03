@@ -53,59 +53,60 @@ class TimeUtils {
     
     // ================ ПАРСИНГ И ФОРМАТИРОВАНИЕ ================
     
-    /**
-     * Парсит строку в локальное время
-     * Форматы:
-     * - "2024-01-15 14:30:00" (как локальное время)
-     * - "2024-01-15" (00:00:00 локальное)
-     * - "2024-01-15T14:30:00" (ISO, но интерпретируется как локальное)
-     * 
-     * @param {string} dateTimeString - Строка с датой
-     * @returns {Date} Date в локальном времени
-     */
-    parseStringToLocal(dateTimeString) {
-        if (!dateTimeString) return this.now();
-        
-        try {
-            let normalized = dateTimeString.trim();
-            
-            // Если строка уже в формате "YYYY-MM-DD HH:MM:SS"
-            if (normalized.includes(' ') && !normalized.includes('T')) {
-                const [datePart, timePart] = normalized.split(' ');
-                const [year, month, day] = datePart.split('-').map(Number);
-                
-                let hours = 0, minutes = 0, seconds = 0;
-                if (timePart) {
-                    const timeParts = timePart.split(':').map(Number);
-                    hours = timeParts[0] || 0;
-                    minutes = timeParts[1] || 0;
-                    seconds = timeParts[2] || 0;
-                }
-                
-                // Создаем Date в ЛОКАЛЬНОМ времени
-                const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
-                
-                if (isNaN(date.getTime())) {
-                    throw new Error(`Некорректная дата: "${dateTimeString}"`);
-                }
-                
-                return date;
-            }
-            
-            // Для других форматов (ISO и т.д.)
-            const date = new Date(normalized);
-            
-            if (isNaN(date.getTime())) {
-                throw new Error(`Некорректная дата: "${dateTimeString}"`);
-            }
-            
-            return date;
-            
-        } catch (error) {
-            console.error('TimeUtils: ошибка парсинга даты:', error.message);
-            return this.now();
-        }
-    }
+	// modules/timeUtils.js - ПОЛНЫЙ МЕТОД parseStringToLocal
+	/**
+	 * Парсит строку в локальное время
+	 * Форматы:
+	 * - "2024-01-15 14:30:00" (как локальное время)
+	 * - "2024-01-15" (00:00:00 локальное)
+	 * - "2024-01-15T14:30:00" (ISO, но интерпретируется как локальное)
+	 * 
+	 * @param {string} dateTimeString - Строка с датой
+	 * @returns {Date} Date в локальном времени
+	 */
+	parseStringToLocal(dateTimeString) {
+		if (!dateTimeString) return this.now();
+		
+		try {
+			let normalized = dateTimeString.trim();
+			
+			// Если строка уже в формате "YYYY-MM-DD HH:MM:SS"
+			if (normalized.includes(' ') && !normalized.includes('T')) {
+				const [datePart, timePart] = normalized.split(' ');
+				const [year, month, day] = datePart.split('-').map(Number);
+				
+				let hours = 0, minutes = 0, seconds = 0;
+				if (timePart) {
+					const timeParts = timePart.split(':').map(Number);
+					hours = timeParts[0] || 0;
+					minutes = timeParts[1] || 0;
+					seconds = timeParts[2] || 0;
+				}
+				
+				// Создаем Date в ЛОКАЛЬНОМ времени
+				const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
+				
+				if (isNaN(date.getTime())) {
+					throw new Error(`Некорректная дата: "${dateTimeString}"`);
+				}
+				
+				return date;
+			}
+			
+			// Для других форматов (ISO и т.д.)
+			const date = new Date(normalized);
+			
+			if (isNaN(date.getTime())) {
+				throw new Error(`Некорректная дата: "${dateTimeString}"`);
+			}
+			
+			return date;
+			
+		} catch (error) {
+			console.error('TimeUtils: ошибка парсинга даты:', error.message);
+			return this.now();
+		}
+	}
     
     /**
      * Парсит строку из input[type="datetime-local"]
@@ -217,195 +218,61 @@ class TimeUtils {
         const day = String(d.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-    
-    // ================ ВЫЧИСЛЕНИЯ ================
-    
+
+	/**
+	 * Форматирует текущий день с секундами
+	 * @param {number} currentDay - Текущий день (дробное число)
+	 * @param {Date} [currentDate] - Текущая дата
+	 * @returns {string} Отформатированная строка
+	 */
+	formatCurrentDayWithSeconds(currentDay, currentDate = null) {
+		try {
+			if (!currentDate) {
+				currentDate = this.now();
+			}
+			
+			// Целая часть - дни
+			const days = Math.floor(currentDay);
+			
+			// Дробная часть - время суток
+			const fractional = currentDay - days;
+			
+			// Время в секундах
+			const totalSeconds = fractional * 24 * 60 * 60;
+			const hours = Math.floor(totalSeconds / 3600);
+			const minutes = Math.floor((totalSeconds % 3600) / 60);
+			const seconds = Math.floor(totalSeconds % 60);
+			
+			// Форматирование
+			let result = `${currentDay.toFixed(5)}`;
+			
+			// Добавляем время суток если есть
+			if (hours > 0 || minutes > 0 || seconds > 0) {
+				result += ` (${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
+			}
+			
+			return result;
+			
+		} catch (error) {
+			console.error('TimeUtils: ошибка форматирования дня с секундами:', error);
+			return currentDay.toFixed(5);
+		}
+	}
+
     /**
-     * Начало дня (00:00:00.000) в локальном времени
-     * @param {Date|number} date - Дата
+     * Получает начало дня (00:00:00) для указанной даты в ЛОКАЛЬНОМ времени
+     * @param {Date|number|string} date - Дата
      * @returns {Date} Начало дня в локальном времени
      */
     getStartOfDay(date) {
         const d = this.toLocalDate(date);
-        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+        return new Date(
+            d.getFullYear(),
+            d.getMonth(),
+            d.getDate(),
+            0, 0, 0, 0
+        );
     }
     
-    /**
-     * Разница в днях между двумя датами (целые дни)
-     * Использует начало дня в локальном времени
-     * 
-     * @param {Date|number} date1 - Первая дата
-     * @param {Date|number} date2 - Вторая дата
-     * @returns {number} Целое количество дней
-     */
-    getDaysBetween(date1, date2) {
-        const d1 = this.getStartOfDay(date1);
-        const d2 = this.getStartOfDay(date2);
-        
-        const diffMs = d2.getTime() - d1.getTime();
-        return Math.floor(diffMs / this.DAY_MS);
-    }
-    
-    /**
-     * ТОЧНАЯ разница в днях между двумя датами (дробная)
-     * Использует точное локальное время
-     * 
-     * @param {Date|number} date1 - Первая дата
-     * @param {Date|number} date2 - Вторая дата
-     * @returns {number} Дробное количество дней
-     */
-    getDaysBetweenExact(date1, date2) {
-        const d1 = this.toLocalDate(date1);
-        const d2 = this.toLocalDate(date2);
-        
-        const diffMs = d2.getTime() - d1.getTime();
-        return diffMs / this.DAY_MS;
-    }
-    
-    /**
-     * Форматирует текущий день с дробной частью
-     * Показывает 5 знаков после запятой (точность до секунды)
-     * 
-     * @param {number} currentDay - Текущий день (дробный)
-     * @param {Date} [currentDate] - Текущая дата для верификации
-     * @returns {string} "ДД.ДДДДД"
-     */
-    formatCurrentDayWithSeconds(currentDay, currentDate = null) {
-        if (currentDay === undefined || currentDay === null || isNaN(currentDay)) {
-            return '0.00000';
-        }
-        
-        // Проверяем согласованность
-        if (currentDate && window.appState && window.appState.baseDate) {
-            const calculatedDay = this.getDaysBetweenExact(
-                window.appState.baseDate,
-                currentDate
-            );
-            
-            const diff = Math.abs(calculatedDay - currentDay);
-            if (diff > 0.00001) {
-                console.warn('TimeUtils: расхождение currentDay!', {
-                    currentDay: currentDay,
-                    calculated: calculatedDay,
-                    diff: diff
-                });
-            }
-        }
-        
-        return currentDay.toFixed(5);
-    }
-    
-    // ================ ДНИ НЕДЕЛИ ================
-    
-    /**
-     * День недели в локальном времени (0-воскресенье, 6-суббота)
-     * @param {Date|number} date - Дата
-     * @returns {number} 0-6
-     */
-    getWeekday(date) {
-        const d = this.toLocalDate(date);
-        return d.getDay();
-    }
-    
-    /**
-     * Название дня недели
-     * @param {Date|number} date - Дата
-     * @param {boolean} full - Полное название?
-     * @returns {string} Название дня
-     */
-    getWeekdayName(date, full = false) {
-        const weekday = this.getWeekday(date);
-        const weekdays = full ? 
-            ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] :
-            ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-        return weekdays[weekday];
-    }
-    
-    // ================ РАЗНИЦА В ГОДАХ ================
-    
-    /**
-     * Разница в годах между датами
-     * @param {Date|number} date1 - Первая дата
-     * @param {Date|number} date2 - Вторая дата
-     * @returns {number} Целое количество лет
-     */
-    getYearsBetween(date1, date2) {
-        const d1 = this.toLocalDate(date1);
-        const d2 = this.toLocalDate(date2);
-        
-        const diffDays = Math.abs(this.getDaysBetweenExact(d1, d2));
-        return Math.floor(diffDays / 365.25);
-    }
-    
-    // ================ ВАЛИДАЦИЯ ================
-    
-    /**
-     * Проверяет, является ли значение timestamp
-     * @param {any} value - Значение для проверки
-     * @returns {boolean} true если это корректный timestamp
-     */
-    isTimestamp(value) {
-        return typeof value === 'number' && 
-               !isNaN(value) && 
-               value > 0 && 
-               value < Number.MAX_SAFE_INTEGER;
-    }
-    
-    /**
-     * Получает timestamp из любого значения
-     * @param {any} value - Значение
-     * @returns {number} timestamp
-     */
-    getTimestamp(value) {
-        if (!value) return this.nowTimestamp();
-        
-        if (this.isTimestamp(value)) {
-            return value;
-        }
-        
-        if (typeof value === 'string') {
-            return this.parseStringToLocal(value).getTime();
-        }
-        
-        if (value instanceof Date) {
-            return value.getTime();
-        }
-        
-        return this.nowTimestamp();
-    }
-    
-    /**
-     * Проверяет согласованность дат в приложении
-     */
-    validateDateConsistency() {
-        if (!window.appState) return;
-        
-        const { currentDate, baseDate, currentDay } = window.appState;
-        
-        if (!currentDate || !baseDate) return;
-        
-        const calculatedCurrentDay = this.getDaysBetweenExact(baseDate, currentDate);
-        const diff = Math.abs(calculatedCurrentDay - (currentDay || 0));
-        
-        if (diff > 0.00001) {
-            console.error('TimeUtils: НЕСОГЛАСОВАННОСТЬ ДАТ!', {
-                baseDate: new Date(baseDate).toLocaleString(),
-                currentDate: currentDate.toLocaleString(),
-                storedCurrentDay: currentDay,
-                calculatedCurrentDay: calculatedCurrentDay,
-                diffDays: diff,
-                diffSeconds: Math.round(diff * 86400)
-            });
-            return false;
-        }
-        
-        console.log('TimeUtils: даты согласованы', {
-            currentDay: currentDay,
-            calculated: calculatedCurrentDay.toFixed(5),
-            diff: diff.toFixed(8)
-        });
-        return true;
-    }
 }
-
 window.timeUtils = new TimeUtils();
