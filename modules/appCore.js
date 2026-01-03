@@ -226,7 +226,8 @@ class AppCore {
 		
 		// ИЗМЕНЕНО: Используем ЛОКАЛЬНОЕ время
 		const now = new Date(); // Локальное время пользователя
-		window.appState.currentDate = new Date(now);
+		const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+		window.appState.currentDate = startOfDay; // Начало дня
 		
 		// Инициализируем компоненты
 		await this.initializeAppComponents();

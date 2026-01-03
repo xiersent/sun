@@ -210,13 +210,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // ИЗМЕНЕНО: Устанавливаем текущее точное время при инициализации
         const now = new Date();
-        window.appState.currentDate = new Date(now);
+		const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+		window.appState.currentDate = startOfDay; // Начало дня
         
-        if (window.dates && window.dates.recalculateCurrentDay) {
-            console.log('Принудительный пересчет currentDay с учетом времени...');
-            const result = window.dates.recalculateCurrentDay(true); // ИСПРАВЛЕНО: true для точного времени
-            console.log('Результат recalculateCurrentDay(true):', result);
-        }
+		if (window.dates && window.dates.recalculateCurrentDay) {
+			console.log('Принудительный пересчет currentDay (начало дня)...');
+			const result = window.dates.recalculateCurrentDay(false); // ИСПРАВЛЕНО: false для целых дней
+			console.log('Результат recalculateCurrentDay(false):', result);
+		}
         
         if (window.appState && window.appState.activeDateId) {
             console.log('Устанавливаем активную дату с точным временем:', window.appState.activeDateId);

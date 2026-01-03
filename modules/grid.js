@@ -5,186 +5,203 @@ class GridManager {
         this.gridContainer = null;
     }
     
-    /**
-     * ПРАВИЛЬНЫЙ расчет позиции элемента сетки
-     * @param {number} offset - Смещение в целых днях от текущего момента
-     * @returns {number} Позиция в пикселях относительно центра
-     */
-    calculateGridPosition(offset) {
-        // ПРОСТАЯ ФОРМУЛА:
-        // offset - количество целых дней от текущего момента
-        // Каждый день = squareSize пикселей
-        
-        const pixelPosition = offset * window.appState.config.squareSize;
-        
-        console.log(`Grid: позиция для offset=${offset}: ${pixelPosition}px`);
-        
-        return {
-            actualOffset: offset,
-            pixelPosition: pixelPosition
-        };
+/**
+ * ПРАВИЛЬНЫЙ расчет позиции элемента сетки
+ * @param {number} offset - Смещение в целых днях от текущего момента
+ * @returns {number} Позиция в пикселях относительно центра
+ */
+calculateGridPosition(offset) {
+    // ПРОСТАЯ ФОРМУЛА:
+    // offset - количество целых дней от текущего момента
+    // Каждый день = squareSize пикселей
+    
+    const pixelPosition = offset * window.appState.config.squareSize;
+    
+    console.log(`Grid: позиция для offset=${offset}: ${pixelPosition}px`);
+    
+    return {
+        actualOffset: offset,
+        pixelPosition: pixelPosition
+    };
+}
+    
+createGrid() {
+    console.log('=== СОЗДАНИЕ СЕТКИ ===');
+    console.log('currentDay:', window.appState.currentDay);
+    console.log('currentDate (UTC):', window.appState.currentDate.toUTCString());
+    console.log('baseDate (UTC):', new Date(window.appState.baseDate).toUTCString());
+    
+    this.clearGrid();
+    
+    const centerX = window.appState.graphWidth / 2;
+    const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
+    
+    // 1. ВЫЧИСЛЯЕМ СМЕЩЕНИЕ ОТ ДРОБНОЙ ЧАСТИ ВРЕМЕНИ
+    const currentDay = window.appState.currentDay || 0;
+    const fractionalOffset = currentDay - Math.floor(currentDay);
+    const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
+    
+    console.log(`Смещение от дробной части времени:`);
+    console.log(`  currentDay: ${currentDay}`);
+    console.log(`  fractionalOffset: ${fractionalOffset.toFixed(5)}`);
+    console.log(`  timeOffsetPx: ${timeOffsetPx.toFixed(2)}px`);
+    
+    // 2. СОЗДАЕМ КОНТЕЙНЕР ДЛЯ ВСЕЙ СЕТКИ
+    this.gridContainer = document.createElement('div');
+    this.gridContainer.className = 'grid-absolute-container';
+    this.gridContainer.style.position = 'absolute';
+    this.gridContainer.style.width = '100%';
+    this.gridContainer.style.height = '100%';
+    this.gridContainer.style.top = '0';
+    this.gridContainer.style.left = '0';
+    
+    // 3. ПРИМЕНЯЕМ СМЕЩЕНИЕ КО ВСЕЙ СЕТКЕ
+    this.gridContainer.style.transform = `translateX(${timeOffsetPx}px)`;
+    this.gridContainer.style.transition = 'none';
+    
+    // 4. СОЗДАЕМ ЛИНИИ СЕТКИ И МЕТКИ (БЕЗ УЧЕТА ДРОБНОГО СМЕЩЕНИЯ)
+    for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
+        this.createGridLine(i);
+        this.createDateLabel(i);
     }
     
-    createGrid() {
-        console.log('=== СОЗДАНИЕ СЕТКИ ===');
-        console.log('currentDay:', window.appState.currentDay);
-        console.log('currentDate (UTC):', window.appState.currentDate.toUTCString());
-        console.log('baseDate (UTC):', new Date(window.appState.baseDate).toUTCString());
-        
-        this.clearGrid();
-        
-        const centerX = window.appState.graphWidth / 2;
-        const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
-        
-        // 1. ВЫЧИСЛЯЕМ СМЕЩЕНИЕ ОТ ДРОБНОЙ ЧАСТИ ВРЕМЕНИ
-        const currentDay = window.appState.currentDay || 0;
-        const fractionalOffset = currentDay - Math.floor(currentDay);
-        const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
-        
-        console.log(`Смещение от дробной части времени:`);
-        console.log(`  currentDay: ${currentDay}`);
-        console.log(`  fractionalOffset: ${fractionalOffset.toFixed(5)}`);
-        console.log(`  timeOffsetPx: ${timeOffsetPx.toFixed(2)}px`);
-        
-        // 2. СОЗДАЕМ КОНТЕЙНЕР ДЛЯ ВСЕЙ СЕТКИ
-        this.gridContainer = document.createElement('div');
-        this.gridContainer.className = 'grid-absolute-container';
-        this.gridContainer.style.position = 'absolute';
-        this.gridContainer.style.width = '100%';
-        this.gridContainer.style.height = '100%';
-        this.gridContainer.style.top = '0';
-        this.gridContainer.style.left = '0';
-        
-        // 3. ПРИМЕНЯЕМ СМЕЩЕНИЕ КО ВСЕЙ СЕТКЕ
-        this.gridContainer.style.transform = `translateX(${timeOffsetPx}px)`;
-        this.gridContainer.style.transition = 'none';
-        
-        // 4. СОЗДАЕМ ЛИНИИ СЕТКИ И МЕТКИ
-        for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
-            this.createGridLine(i);
-            this.createDateLabel(i);
-        }
-        
-        // 5. ДОБАВЛЯЕМ КОНТЕЙНЕР В ГРАФИК
-        const graphElement = document.getElementById('graphElement');
-        if (graphElement) {
-            graphElement.appendChild(this.gridContainer);
-        }
-        
-        // 6. СОЗДАЕМ ГОРИЗОНТАЛЬНЫЕ ЛИНИИ И ОСИ Y
-        this.createHorizontalGridLines();
-        this.createYAxisLabels();
-        
-        // 7. ПОДСВЕТКА ЗАМЕТОК
-        this.updateGridNotesHighlight();
-        
-        console.log('=== СЕТКА СОЗДАНА ===');
+    // 5. ДОБАВЛЯЕМ КОНТЕЙНЕР В ГРАФИК
+    const graphElement = document.getElementById('graphElement');
+    if (graphElement) {
+        graphElement.appendChild(this.gridContainer);
     }
     
-    /**
-     * Создает вертикальную линию сетки
-     * @param {number} offset - Смещение в днях от текущего момента
-     */
-    createGridLine(offset) {
-        if (!this.gridContainer) return;
+    // 6. СОЗДАЕМ ГОРИЗОНТАЛЬНЫЕ ЛИНИИ И ОСИ Y
+    this.createHorizontalGridLines();
+    this.createYAxisLabels();
+    
+    // 7. ПОДСВЕТКА ЗАМЕТОК
+    this.updateGridNotesHighlight();
+    
+    console.log('=== СЕТКА СОЗДАНА ===');
+}
+		
+/**
+ * Создает вертикальную линию сетки
+ * @param {number} offset - Смещение в днях от текущего момента
+ */
+createGridLine(offset) {
+    if (!this.gridContainer) return;
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'grid-wrapper';
+    
+    // Позиция относительно центра (БЕЗ учета дробного смещения)
+    const positionData = this.calculateGridPosition(offset);
+    
+    // Важно: left считается от ЛЕВОГО КРАЯ КОНТЕЙНЕРА СЕТКИ
+    // Контейнер уже смещен на timeOffsetPx через transform
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`; // БЕЗ timeOffsetPx
+    wrapper.style.width = `${window.appState.config.squareSize}px`;
+    wrapper.style.height = '100%';
+    wrapper.style.marginLeft = `-${window.appState.config.squareSize / 2}px`;
+    wrapper.setAttribute('data-day-offset', offset);
+    
+    const line = document.createElement('div');
+    line.className = 'grid-line-inner';
+    
+    // Линия "сегодня" (offset = 0)
+    if (offset === 0) {
+        line.classList.add('active');
+        line.style.backgroundColor = '#666'; // Основной цвет
+    }
+    
+    wrapper.appendChild(line);
+    this.gridContainer.appendChild(wrapper);
+    
+    this.gridElements.push(wrapper);
+    
+    // ОБРАБОТЧИК КЛИКА ПО ЛИНИИ
+    wrapper.addEventListener('click', (e) => {
+        if (window.appState.isProgrammaticDateChange) return;
         
-        const wrapper = document.createElement('div');
-        wrapper.className = 'grid-wrapper';
+        e.stopPropagation();
         
-        // Позиция относительно центра (без учета дробного смещения)
-        const positionData = this.calculateGridPosition(offset);
-        
-        // Важно: left считается от ЛЕВОГО КРАЯ КОНТЕЙНЕРА СЕТКИ
-        // Контейнер уже смещен на timeOffsetPx
-        wrapper.style.position = 'absolute';
-        wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        wrapper.style.width = `${window.appState.config.squareSize}px`;
-        wrapper.style.height = '100%';
-        wrapper.style.marginLeft = `-${window.appState.config.squareSize / 2}px`;
-        wrapper.setAttribute('data-day-offset', offset);
-        
-        const line = document.createElement('div');
-        line.className = 'grid-line-inner';
-        
-        // Линия "сегодня" (offset = 0)
-        if (offset === 0) {
-            line.classList.add('active');
-            line.style.backgroundColor = '#666'; // Основной цвет
-        }
-        
-        wrapper.appendChild(line);
-        this.gridContainer.appendChild(wrapper);
-        
-        this.gridElements.push(wrapper);
-        
-        // ОБРАБОТЧИК КЛИКА ПО ЛИНИИ
-        wrapper.addEventListener('click', (e) => {
-            if (window.appState.isProgrammaticDateChange) return;
-            
-            e.stopPropagation();
-            
-            // Убираем активность со всех линий
-            document.querySelectorAll('.grid-line-inner').forEach(line => {
-                line.classList.remove('active');
-            });
-            
-            // Подсвечиваем выбранную линию (только визуально)
-            line.classList.add('active');
-            
-            // ОБНОВЛЯЕМ СВОДНУЮ ИНФОРМАЦИЮ
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                setTimeout(() => {
-                    window.summaryManager.updateSummary();
-                }, 50);
-            }
-            
-            console.log(`Клик по линии сетки: offset=${offset}`);
+        // Убираем активность со всех линий
+        document.querySelectorAll('.grid-line-inner').forEach(line => {
+            line.classList.remove('active');
         });
-    }
+        
+        // Подсвечиваем выбранную линию (только визуально)
+        line.classList.add('active');
+        
+        // ОБНОВЛЯЕМ СВОДНУЮ ИНФОРМАЦИЮ
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        console.log(`Клик по линии сетки: offset=${offset}`);
+    });
+}
+		
+/**
+ * Создает метку даты под линией сетки
+ * @param {number} offset - Смещение в днях от текущего момента
+ */
+createDateLabel(offset) {
+    if (!this.gridContainer) return;
     
-    /**
-     * Создает метку даты под линией сетки
-     * @param {number} offset - Смещение в днях от текущего момента
-     */
-    createDateLabel(offset) {
-        if (!this.gridContainer) return;
-        
-        // offset - это смещение в целых днях от СЕЙЧАС
-        // Чтобы получить дату на линии, нужно:
-        // 1. Взять БАЗОВУЮ дату
-        // 2. Добавить offset
-        
-        const currentDay = window.appState.currentDay || 0;
-        const integerDays = Math.floor(currentDay); // Целая часть currentDay
-        
-        // Дата на линии = базовое время + integerDays + offset
-        const date = new Date(window.appState.baseDate);
-        date.setDate(date.getDate() + integerDays + offset);
-        
-        // Позиция метки (совпадает с линией)
-        const positionData = this.calculateGridPosition(offset);
-        
-        // Метка числа
-        const label = document.createElement('div');
-        label.className = 'labels date-labels';
-        label.style.position = 'absolute';
-        label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        label.style.transform = 'translateX(-50%)';
-        label.style.bottom = '30px';
-        label.textContent = date.getDate();
-        
-        // Метка дня недели
-        const weekday = document.createElement('div');
-        weekday.className = 'labels x-labels weekday-label';
-        weekday.style.position = 'absolute';
-        weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        weekday.style.transform = 'translateX(-50%)';
-        weekday.style.bottom = '10px';
-        weekday.textContent = window.dom.getWeekdayName(date);
-        
-        this.gridContainer.appendChild(label);
-        this.gridContainer.appendChild(weekday);
-    }
+    // offset - это смещение в целых днях от СЕЙЧАС
+    const currentDay = window.appState.currentDay || 0;
+    const integerDays = Math.floor(currentDay); // Целая часть currentDay
+    
+    // Дата на линии = базовое время + integerDays + offset
+    const date = new Date(window.appState.baseDate);
+    date.setDate(date.getDate() + integerDays + offset);
+    
+    // Позиция метки (совпадает с линией, БЕЗ учета дробного смещения)
+    const positionData = this.calculateGridPosition(offset);
+    
+    // Метка числа
+    const label = document.createElement('div');
+    label.className = 'labels date-labels';
+    label.style.position = 'absolute';
+    label.style.left = `calc(50% + ${positionData.pixelPosition}px)`; // БЕЗ timeOffsetPx
+    label.style.transform = 'translateX(-50%)';
+    label.style.bottom = '30px';
+    label.textContent = date.getDate();
+    
+    // Метка дня недели
+    const weekday = document.createElement('div');
+    weekday.className = 'labels x-labels weekday-label';
+    weekday.style.position = 'absolute';
+    weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`; // БЕЗ timeOffsetPx
+    weekday.style.transform = 'translateX(-50%)';
+    weekday.style.bottom = '10px';
+    weekday.textContent = window.dom.getWeekdayName(date);
+    
+    this.gridContainer.appendChild(label);
+    this.gridContainer.appendChild(weekday);
+}
+
+/**
+ * Обновляет смещение сетки при изменении времени
+ * Вызывается при каждом изменении currentDay
+ */
+updateGridOffset() {
+    if (!this.gridContainer) return;
+    
+    const currentDay = window.appState.currentDay || 0;
+    const fractionalOffset = currentDay - Math.floor(currentDay);
+    const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
+    
+    // Плавное смещение сетки
+    this.gridContainer.style.transition = 'transform 0.3s ease';
+    this.gridContainer.style.transform = `translateX(${timeOffsetPx}px)`;
+    
+    // Обновляем метки дат
+    this.updateDateLabels();
+    
+    console.log(`Grid: обновлено смещение: ${timeOffsetPx.toFixed(2)}px`);
+}
     
     createHorizontalGridLines() {
         if (!this.gridContainer) return;
@@ -354,21 +371,21 @@ class GridManager {
         console.log(`Grid: обновлено смещение: ${timeOffsetPx.toFixed(2)}px`);
     }
     
-    /**
-     * Обновляет метки дат при изменении текущей даты
-     */
-    updateDateLabels() {
-        if (!this.gridContainer) return;
-        
-        // Удаляем старые метки
-        this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach(el => el.remove());
-        
-        // Создаем новые метки
-        const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
-        for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
-            this.createDateLabel(i);
-        }
+/**
+ * Обновляет метки дат при изменении текущей даты
+ */
+updateDateLabels() {
+    if (!this.gridContainer) return;
+    
+    // Удаляем старые метки
+    this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach(el => el.remove());
+    
+    // Создаем новые метки
+    const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
+    for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
+        this.createDateLabel(i);
     }
+}
 }
 
 window.grid = new GridManager();

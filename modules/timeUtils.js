@@ -227,32 +227,9 @@ class TimeUtils {
 	 */
 	formatCurrentDayWithSeconds(currentDay, currentDate = null) {
 		try {
-			if (!currentDate) {
-				currentDate = this.now();
-			}
-			
-			// Целая часть - дни
-			const days = Math.floor(currentDay);
-			
-			// Дробная часть - время суток
-			const fractional = currentDay - days;
-			
-			// Время в секундах
-			const totalSeconds = fractional * 24 * 60 * 60;
-			const hours = Math.floor(totalSeconds / 3600);
-			const minutes = Math.floor((totalSeconds % 3600) / 60);
-			const seconds = Math.floor(totalSeconds % 60);
-			
-			// Форматирование
-			let result = `${currentDay.toFixed(5)}`;
-			
-			// Добавляем время суток если есть
-			if (hours > 0 || minutes > 0 || seconds > 0) {
-				result += ` (${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
-			}
-			
-			return result;
-			
+			// Просто возвращаем число с 5 знаками после запятой
+			// УБРАЛИ добавление времени в скобках
+			return currentDay.toFixed(5);
 		} catch (error) {
 			console.error('TimeUtils: ошибка форматирования дня с секундами:', error);
 			return currentDay.toFixed(5);

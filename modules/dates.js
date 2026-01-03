@@ -629,23 +629,24 @@ setDateFromInput() {
 forceInitialize() {
     console.log('=== FORCE INITIALIZE (ЛОКАЛЬНОЕ ВРЕМЯ) ===');
     
-    // Устанавливаем ТОЧНОЕ локальное время
-    window.appState.currentDate = window.timeUtils.now();
+    // Устанавливаем НАЧАЛО текущего дня в локальном времени
+    const todayStart = window.timeUtils.getStartOfDay(new Date());
+    window.appState.currentDate = new Date(todayStart);
     
-    this.recalculateCurrentDay(true); // При инициализации используем ДРОБНЫЕ числа
+    this.recalculateCurrentDay(false); // Используем ЦЕЛЫЕ числа при инициализации
     
     if (window.appState.activeDateId) {
-        console.log('Принудительная установка активной даты (локальное время):', window.appState.activeDateId);
-        this.setActiveDate(window.appState.activeDateId, true);
+        console.log('Принудительная установка активной даты (целые дни):', window.appState.activeDateId);
+        this.setActiveDate(window.appState.activeDateId, false); // ИСПРАВЛЕНО: false для целых дней
     } else if (window.appState.data.dates.length > 0) {
-        console.log('Нет активной даты, выбираем первую из списка (локальное время)');
+        console.log('Нет активной даты, выбираем первую из списка (целые дни)');
         const firstDateId = window.appState.data.dates[0].id;
         window.appState.activeDateId = firstDateId;
-        this.setActiveDate(firstDateId, true);
+        this.setActiveDate(firstDateId, false); // ИСПРАВЛЕНО: false для целых дней
     } else {
-        console.log('Нет дат в списке, устанавливаем базовую дату (локальное время)');
-        window.appState.baseDate = window.timeUtils.nowTimestamp();
-        this.recalculateCurrentDay(true);
+        console.log('Нет дат в списке, устанавливаем базовую дату (целые дни)');
+        window.appState.baseDate = window.timeUtils.getStartOfDay(new Date()).getTime();
+        this.recalculateCurrentDay(false);
     }
     
     if (window.waves && window.waves.updatePosition) {
@@ -669,10 +670,10 @@ forceInitialize() {
     
     this.updateTodayButton();
     
-    console.log('=== FORCE INITIALIZE завершен (локальное время) ===');
+    console.log('=== FORCE INITIALIZE завершен (целые дни) ===');
     console.log('activeDateId:', window.appState?.activeDateId);
     console.log('currentDay:', window.appState?.currentDay);
-    console.log('currentDate (локальное):', window.appState?.currentDate?.toLocaleString());
+    console.log('currentDate (локальное начало дня):', window.appState?.currentDate?.toLocaleString());
 }
     
 
