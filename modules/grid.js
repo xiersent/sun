@@ -149,59 +149,40 @@ createGridLine(offset) {
 createDateLabel(offset) {
     if (!this.gridContainer) return;
     
-    // offset - это смещение в целых днях от СЕЙЧАС
+    // Инвертируем знак offset для правильного направления оси времени
+    // offset > 0 должно быть вправо (будущее), offset < 0 влево (прошлое)
+    const adjustedOffset = -offset;
+    
     const currentDay = window.appState.currentDay || 0;
-    const integerDays = Math.floor(currentDay); // Целая часть currentDay
-    
-    // Дата на линии = базовое время + integerDays + offset
     const date = new Date(window.appState.baseDate);
-    date.setDate(date.getDate() + integerDays + offset);
+    date.setDate(date.getDate() + Math.floor(currentDay) + adjustedOffset);
     
-    // Позиция метки (совпадает с линией, БЕЗ учета дробного смещения)
-    const positionData = this.calculateGridPosition(offset);
+    // Позиция метки с инвертированным знаком
+    const positionData = this.calculateGridPosition(adjustedOffset);
     
-    // Метка числа
     const label = document.createElement('div');
     label.className = 'labels date-labels';
     label.style.position = 'absolute';
-    label.style.left = `calc(50% + ${positionData.pixelPosition}px)`; // БЕЗ timeOffsetPx
+    label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
     label.style.transform = 'translateX(-50%)';
     label.style.bottom = '30px';
     label.textContent = date.getDate();
     
-    // Метка дня недели
     const weekday = document.createElement('div');
     weekday.className = 'labels x-labels weekday-label';
     weekday.style.position = 'absolute';
-    weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`; // БЕЗ timeOffsetPx
+    weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
     weekday.style.transform = 'translateX(-50%)';
     weekday.style.bottom = '10px';
     weekday.textContent = window.dom.getWeekdayName(date);
+    
+    console.log(`Метка offset=${offset} -> adjustedOffset=${adjustedOffset}: дата ${date.getDate()}, позиция ${positionData.pixelPosition}px`);
     
     this.gridContainer.appendChild(label);
     this.gridContainer.appendChild(weekday);
 }
 
-/**
- * Обновляет смещение сетки при изменении времени
- * Вызывается при каждом изменении currentDay
- */
-updateGridOffset() {
-    if (!this.gridContainer) return;
-    
-    const currentDay = window.appState.currentDay || 0;
-    const fractionalOffset = currentDay - Math.floor(currentDay);
-    const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
-    
-    // Плавное смещение сетки
-    this.gridContainer.style.transition = 'transform 0.3s ease';
-    this.gridContainer.style.transform = `translateX(${timeOffsetPx}px)`;
-    
-    // Обновляем метки дат
-    this.updateDateLabels();
-    
-    console.log(`Grid: обновлено смещение: ${timeOffsetPx.toFixed(2)}px`);
-}
+
     
     createHorizontalGridLines() {
         if (!this.gridContainer) return;
@@ -350,26 +331,25 @@ updateGridOffset() {
         });
     }
     
-    /**
-     * Обновляет смещение сетки при изменении времени
-     * Вызывается при каждом изменении currentDay
-     */
-    updateGridOffset() {
-        if (!this.gridContainer) return;
-        
-        const currentDay = window.appState.currentDay || 0;
-        const fractionalOffset = currentDay - Math.floor(currentDay);
-        const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
-        
-        // Плавное смещение сетки
-        this.gridContainer.style.transition = 'transform 0.3s ease';
-        this.gridContainer.style.transform = `translateX(${timeOffsetPx}px)`;
-        
-        // Обновляем метки дат
-        this.updateDateLabels();
-        
-        console.log(`Grid: обновлено смещение: ${timeOffsetPx.toFixed(2)}px`);
-    }
+updateGridOffset() {
+    if (!this.gridContainer) return;
+    
+    const currentDay = window.appState.currentDay || 0;
+    const fractionalOffset = currentDay - Math.floor(currentDay);
+    const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
+    
+    // ИНВЕРТИРУЕМ дробное смещение!
+    // 12:00 (0.5) должно смещать сетку ВПРАВО, а не влево
+    const invertedTimeOffsetPx = -timeOffsetPx;
+    
+    this.gridContainer.style.transition = 'transform 0.3s ease';
+    this.gridContainer.style.transform = `translateX(${invertedTimeOffsetPx}px)`;
+    
+    console.log(`Grid: fractionalOffset=${fractionalOffset}, timeOffsetPx=${timeOffsetPx}, inverted=${invertedTimeOffsetPx}`);
+    
+    // Обновляем метки дат
+    this.updateDateLabels();
+}
     
 /**
  * Обновляет метки дат при изменении текущей даты
