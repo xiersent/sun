@@ -1,8 +1,28 @@
-// modules/appCore.js
+// modules/appCore.js - ПОЛНОСТЬЮ ПЕРЕРАБОТАННЫЙ С UTC
 class AppCore {
     constructor() {
         this.elements = {};
+        this.isInitialized = false;
+        this.initializationPromise = null;
+        this.initializationAttempts = 0;
+        this.maxInitializationAttempts = 3;
+        
         this.cacheElements();
+        this.setupGlobalErrorHandlers();
+    }
+    
+    setupGlobalErrorHandlers() {
+        // Обработчик необработанных ошибок Promise
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Необработанная ошибка Promise:', event.reason);
+            console.error('В стеке:', event.reason?.stack);
+        });
+        
+        // Обработчик глобальных ошибок
+        window.addEventListener('error', (event) => {
+            console.error('Глобальная ошибка:', event.error);
+            console.error('В файле:', event.filename, 'строка:', event.lineno);
+        });
     }
     
     cacheElements() {
@@ -13,8 +33,10 @@ class AppCore {
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
             'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
-            'summaryStateSelect', 'summaryResults',  // УДАЛЕНО: summaryStats
-            'readParableBtn', 'parableModal', 'parableContent', 'closeParableBtn'  // НОВОЕ: элементы притчи
+            'summaryStateSelect', 'summaryResults',
+            'readParableBtn', 'parableModal', 'parableContent', 'closeParableBtn',
+            'mainDateInput', 'dateInput', 'dateNameInput', 'btnAddDate',
+            'btnPrevDay', 'btnNextDay', 'btnToday', 'btnNow', 'btnSetDate'
         ];
         
         ids.forEach(id => {
@@ -23,112 +45,274 @@ class AppCore {
         });
     }
     
-    init() {
-        this.setupEventListeners();
-        this.updateCSSVariables();
-        
-        // Загрузка состояния
-        window.appState.load();
-        
-        // НЕМЕДЛЕННО обновляем центральную дату после загрузки состояния
-        if (window.grid && window.grid.updateCenterDate) {
-            window.grid.updateCenterDate();
+    async init() {
+        if (this.isInitialized) {
+            console.log('AppCore уже инициализирован');
+            return;
         }
         
-        // Проверяем, что все модули созданы
-        if (!window.dates) {
-            console.warn('AppCore: DatesManager не создан, создаем...');
-            if (typeof DatesManager !== 'undefined') {
-                window.dates = new DatesManager();
-            }
+        if (this.initializationPromise) {
+            return this.initializationPromise;
         }
         
-        if (!window.waves) {
-            console.warn('AppCore: WavesManager не создан, создаем...');
-            if (typeof WavesManager !== 'undefined') {
-                window.waves = new WavesManager();
-            }
-        }
+        this.initializationPromise = this._initializeApp()
+            .then(() => {
+                this.isInitialized = true;
+                console.log('AppCore: инициализация успешно завершена');
+            })
+            .catch((error) => {
+                console.error('AppCore: критическая ошибка инициализации:', error);
+                this.showInitializationError(error);
+                throw error;
+            });
         
-        if (!window.grid) {
-            console.warn('AppCore: GridManager не создан, создаем...');
-            if (typeof GridManager !== 'undefined') {
-                window.grid = new GridManager();
-            }
-        }
-        
-        if (!window.importExport) {
-            console.warn('AppCore: ImportExportManager не создан, создаем...');
-            if (typeof ImportExportManager !== 'undefined') {
-                window.importExport = new ImportExportManager();
-            }
-        }
-        
-        if (!window.dataManager) {
-            console.warn('AppCore: DataManager не создан, создаем...');
-            if (typeof DataManager !== 'undefined') {
-                window.dataManager = new DataManager();
-            }
-        }
-        
-        if (!window.uiManager) {
-            console.warn('AppCore: UIManager не создан, создаем...');
-            if (typeof UIManager !== 'undefined') {
-                window.uiManager = new UIManager();
-            }
-        }
-        
-        if (!window.summaryManager) {
-            console.warn('AppCore: SummaryManager не создан, создаем...');
-            if (typeof SummaryManager !== 'undefined') {
-                window.summaryManager = new SummaryManager();
-            }
-        }
-        
-        // Инициализация приложения
-        this.initializeApp();
+        return this.initializationPromise;
     }
     
-
-    async initializeAppComponents() {
-        // ВАЖНОЕ ИЗМЕНЕНИЕ: Ждем загрузки шаблонов перед рендерингом UI
-        console.log('AppCore: ожидание загрузки шаблонов...');
+    async _initializeApp() {
+        console.log('=== AppCore: начата инициализация (UTC режим) ===');
         
-        if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
-            try {
-                // Начинаем загрузку шаблонов
-                const templatesPromise = window.unifiedListManager.initTemplates();
-                
-                // ВАЖНО: Инициализируем волны с правильным currentDay
-                if (window.waves && window.waves.init) {
-                    console.log('AppCore: инициализация WavesManager...');
-                    await window.waves.init(); // Ждем инициализации волн
-                }
-                
-                if (window.grid && window.grid.createGrid) {
-                    window.grid.createGrid();
-                }
-                
-                // Инициализируем сводную информацию
-                if (window.summaryManager && window.summaryManager.init) {
-                    console.log('AppCore: инициализация SummaryManager...');
-                    window.summaryManager.init();
-                }
-                
-                // Ждем завершения загрузки шаблонов
-                await templatesPromise;
-                console.log('AppCore: шаблоны загружены успешно');
-                
-            } catch (error) {
-                console.error('AppCore: ошибка загрузки шаблонов:', error);
-            }
+        // Проверка критических зависимостей
+        this.checkCriticalDependencies();
+        
+        // Обновляем CSS переменные
+        this.updateCSSVariables();
+        
+        // Загружаем состояние приложения
+        if (window.appState && window.appState.load) {
+            console.log('AppCore: загрузка состояния приложения...');
+            window.appState.load();
+        } else {
+            console.error('AppCore: appState не найден!');
+            throw new Error('Критическая зависимость: appState не загружен');
         }
         
-        // Теперь рендерим UI с загруженными шаблонами
-        console.log('AppCore: рендеринг UI...');
+        // Инициализируем основные модули
+        await this.initializeCoreModules();
         
-        if (window.dataManager) {
-            // Используем асинхронные вызовы
+        // Настройка обработчиков событий
+        this.setupEventListeners();
+        
+        // Загрузка компонентов приложения
+        await this.initializeAppComponents();
+        
+        // Проверяем мобильное устройство и показываем предупреждение
+        this.checkDeviceAndShowWarning();
+        
+        // Загружаем текст притчи
+        this.loadParableText();
+        
+        // Проверяем согласованность дат
+        if (window.timeUtils && window.timeUtils.validateDateConsistency) {
+            setTimeout(() => {
+                window.timeUtils.validateDateConsistency();
+            }, 1000);
+        }
+        
+        console.log('=== AppCore: инициализация завершена ===');
+    }
+    
+    checkCriticalDependencies() {
+        const required = ['appState', 'timeUtils', 'dom'];
+        const missing = [];
+        
+        required.forEach(dep => {
+            if (!window[dep]) {
+                missing.push(dep);
+                console.error(`Критическая зависимость отсутствует: ${dep}`);
+            }
+        });
+        
+        if (missing.length > 0) {
+            throw new Error(`Отсутствуют критические зависимости: ${missing.join(', ')}`);
+        }
+        
+        console.log('Все критические зависимости загружены');
+    }
+    
+    async initializeCoreModules() {
+        console.log('AppCore: инициализация основных модулей...');
+        
+        // Создаем модули, если они еще не созданы
+        const modules = [
+            { name: 'dates', constructor: DatesManager },
+            { name: 'waves', constructor: WavesManager },
+            { name: 'grid', constructor: GridManager },
+            { name: 'uiManager', constructor: UIManager },
+            { name: 'dataManager', constructor: DataManager },
+            { name: 'unifiedListManager', constructor: UnifiedListManager },
+            { name: 'importExport', constructor: ImportExportManager },
+            { name: 'summaryManager', constructor: SummaryManager },
+            { name: 'eventManager', constructor: EventManager },
+            { name: 'intersectionManager', constructor: WaveIntersectionManager }
+        ];
+        
+        modules.forEach(({ name, constructor }) => {
+            if (!window[name] && typeof constructor !== 'undefined') {
+                console.log(`Создаем ${name}...`);
+                window[name] = new constructor();
+            } else if (!window[name]) {
+                console.warn(`Конструктор для ${name} не найден`);
+            }
+        });
+        
+        // Специальная обработка для unifiedListManager (требует загрузки шаблонов)
+        if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
+            console.log('Начинаем предварительную загрузку шаблонов...');
+            try {
+                await window.unifiedListManager.initTemplates();
+                console.log('Шаблоны успешно загружены');
+            } catch (error) {
+                console.error('Ошибка загрузки шаблонов:', error);
+            }
+        }
+    }
+    
+    async initializeAppComponents() {
+        console.log('AppCore: инициализация компонентов приложения...');
+        
+        // Устанавливаем начальную дату в UTC
+        this.initializeUTCDate();
+        
+        // Инициализируем волны
+        if (window.waves && window.waves.init) {
+            console.log('Инициализация WavesManager...');
+            await window.waves.init();
+        }
+        
+        // Создаем сетку
+        if (window.grid && window.grid.createGrid) {
+            console.log('Создание сетки...');
+            window.grid.createGrid();
+        }
+        
+        // Инициализируем сводную информацию
+        if (window.summaryManager && window.summaryManager.init) {
+            console.log('Инициализация SummaryManager...');
+            window.summaryManager.init();
+        }
+        
+        // Настраиваем UI
+        this.setupInitialUIState();
+        
+        // Рендерим UI с загруженными шаблонами
+        await this.renderUIComponents();
+        
+        // Гарантированная инициализация дат
+        this.guaranteedDatesInitialization();
+        
+        // Обновляем кнопку "Сегодня"
+        if (window.dates && window.dates.updateTodayButton) {
+            window.dates.updateTodayButton();
+        }
+        
+        console.log('Компоненты приложения инициализированы');
+    }
+    
+    initializeUTCDate() {
+        console.log('AppCore: установка начальной даты в UTC...');
+        
+        if (!window.appState || !window.timeUtils) {
+            console.error('Не удалось установить UTC дату: отсутствуют зависимости');
+            return;
+        }
+        
+        // Устанавливаем ТОЧНОЕ текущее время в UTC
+        window.appState.currentDate = window.timeUtils.nowUTC();
+        
+        console.log('Начальная дата установлена (UTC):', {
+            iso: window.appState.currentDate.toISOString(),
+            utcString: window.appState.currentDate.toUTCString(),
+            hours: window.appState.currentDate.getUTCHours(),
+            minutes: window.appState.currentDate.getUTCMinutes(),
+            seconds: window.appState.currentDate.getUTCSeconds()
+        });
+        
+        // Устанавливаем начальное значение в mainDateInput через timeUtils
+        const mainDateInput = document.getElementById('mainDateInput');
+        if (mainDateInput && window.timeUtils) {
+            const formatted = window.timeUtils.formatForDateTimeInputUTC(
+                window.appState.currentDate.getTime()
+            );
+            mainDateInput.value = formatted;
+            mainDateInput.placeholder = formatted;
+            console.log('mainDateInput установлен на:', formatted);
+        }
+    }
+    
+    setupInitialUIState() {
+        console.log('AppCore: настройка начального состояния UI...');
+        
+        // Устанавливаем режим отображения звезд/имен
+        if (window.appState.showStars) {
+            document.body.classList.add('stars-mode');
+            document.body.classList.remove('names-mode');
+        } else {
+            document.body.classList.remove('stars-mode');
+            document.body.classList.add('names-mode');
+        }
+        
+        // Настраиваем график через CSS-классы
+        const graphContainer = document.getElementById('graphContainer');
+        if (graphContainer) {
+            // Темный режим графика
+            if (!window.appState.graphBgWhite) {
+                graphContainer.classList.add('dark-mode');
+            } else {
+                graphContainer.classList.remove('dark-mode');
+            }
+            
+            // Серый режим графика
+            if (window.appState.graphGrayMode) {
+                graphContainer.classList.add('graph-gray-mode');
+            } else {
+                graphContainer.classList.remove('graph-gray-mode');
+            }
+            
+            console.log('График настроен:', {
+                darkMode: graphContainer.classList.contains('dark-mode'),
+                grayMode: graphContainer.classList.contains('graph-gray-mode')
+            });
+        }
+        
+        // Серый режим всего приложения
+        if (window.appState.grayMode) {
+            document.body.classList.add('gray-mode');
+        } else {
+            document.body.classList.remove('gray-mode');
+        }
+        
+        // Угловые квадраты
+        const allSquares = document.querySelectorAll('.corner-square');
+        allSquares.forEach(square => {
+            square.style.display = window.appState.cornerSquaresVisible ? 'block' : 'none';
+        });
+        
+        // Скрытие UI
+        if (window.appState.uiHidden) {
+            document.body.classList.add('ui-hidden');
+        } else {
+            document.body.classList.remove('ui-hidden');
+        }
+        
+        // Скрытие графика
+        if (window.appState.graphHidden) {
+            document.body.classList.add('graph-hidden');
+        } else {
+            document.body.classList.remove('graph-hidden');
+        }
+    }
+    
+    async renderUIComponents() {
+        console.log('AppCore: рендеринг UI компонентов...');
+        
+        if (!window.dataManager) {
+            console.warn('DataManager не доступен, пропускаем рендеринг UI');
+            return;
+        }
+        
+        try {
+            // Рендерим списки с ожиданием загрузки шаблонов
             if (window.dataManager.updateDateList) {
                 await window.dataManager.updateDateList();
             }
@@ -140,147 +324,71 @@ class AppCore {
             if (window.dataManager.updateNotesList) {
                 window.dataManager.updateNotesList();
             }
-        }
-        
-        // ИСПРАВЛЕНИЕ: Устанавливаем фон графика ТОЛЬКО через CSS-классы
-        const graphContainer = document.getElementById('graphContainer');
-        if (graphContainer) {
-            // УДАЛЕНО: Установка inline-стилей для фона
-            // ВМЕСТО ЭТОГО: Только управление CSS-классами
             
-            if (!window.appState.graphBgWhite) {
-                graphContainer.classList.add('dark-mode');
-            } else {
-                graphContainer.classList.remove('dark-mode');
-            }
-            
-            if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('graph-gray-mode');
-            } else {
-                graphContainer.classList.remove('graph-gray-mode');
-            }
+            console.log('UI компоненты отрендерены');
+        } catch (error) {
+            console.error('Ошибка рендеринга UI:', error);
         }
-        
-        // НОВОЕ: Устанавливаем начальное значение в mainDateInput
-        const mainDateInput = document.getElementById('mainDateInput');
-        if (mainDateInput && window.dom) {
-            mainDateInput.value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
-            console.log('AppCore: установлено начальное значение в mainDateInput:', mainDateInput.value);
-        }
-        
-        // НОВОЕ: Загружаем текст притчи в модальное окно
-        this.loadParableText();
-        
-        // ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ВСЕГДА
-        this.showWarning();
-        
-        // НЕ рандомизируем порядок панелей, сохраняем пропорции 1/3 и 2/3
-        
-        // ДОПОЛНИТЕЛЬНО: Проверка данных волн в группах после загрузка
-        setTimeout(() => {
-            console.log('AppCore: проверка данных волн в группах...');
-            if (window.debugGroups) {
-                window.debugGroups();
-            }
-        }, 2000);
-        
-        // Инициализируем EventManager если он ещё не создан
-        if (!window.eventManager) {
-            console.log('AppCore: инициализация EventManager...');
-            if (typeof EventManager !== 'undefined') {
-                window.eventManager = new EventManager();
-            }
-        }
-        
-        // Обновляем кнопку "Сегодня"
-        if (window.dates && window.dates.updateTodayButton) {
-            window.dates.updateTodayButton();
-        }
-        
-        console.log('AppCore: инициализация завершена');
     }
-
-    // И измените вызов в методе initializeApp():
-    async initializeApp() {
-        // Проверяем мобильное устройство
+    
+    guaranteedDatesInitialization() {
+        console.log('AppCore: гарантированная инициализация дат...');
+        
+        if (!window.dates || !window.appState) {
+            console.error('Не удалось инициализировать даты: отсутствуют зависимости');
+            return;
+        }
+        
+        // Проверяем currentDay
+        if (window.appState.currentDay === undefined || 
+            window.appState.currentDay === null ||
+            typeof window.appState.currentDay !== 'number' ||
+            isNaN(window.appState.currentDay)) {
+            
+            console.warn('currentDay некорректен, исправляем на 0');
+            window.appState.currentDay = 0;
+            window.appState.save();
+        }
+        
+        // Принудительная инициализация дат
+        setTimeout(() => {
+            if (window.dates.forceInitialize) {
+                console.log('Выполняем forceInitialize...');
+                window.dates.forceInitialize();
+            } else if (window.dates.recalculateCurrentDay) {
+                console.log('Выполняем recalculateCurrentDay...');
+                window.dates.recalculateCurrentDay(true);
+            }
+            
+            // Проверяем и обновляем currentDay в DOM
+            const currentDayElement = document.getElementById('currentDay');
+            if (currentDayElement && window.dom) {
+                const formatted = window.dom.formatCurrentDayWithSeconds(window.appState.currentDay);
+                currentDayElement.textContent = formatted;
+                console.log('DOM элемент currentDay обновлен:', formatted);
+            }
+        }, 100);
+    }
+    
+    checkDeviceAndShowWarning() {
+        console.log('AppCore: проверка устройства...');
+        
         const isMobile = this.isMobileDevice();
         
         if (isMobile) {
-            // Для мобильных - показываем только предупреждение
-            this.showWarning();
-            // Добавляем класс для мобильных устройств
+            // Для мобильных - показываем специальное предупреждение
+            this.showMobileWarning();
             document.body.classList.add('mobile-device');
-            console.log('AppCore: Мобильное устройство обнаружено, показываем только предупреждение');
-            return; // Прерываем дальнейшую инициализацию
-        }
-        
-        // Продолжаем стандартную инициализацию для десктопов
-        console.log('AppCore: Десктоп устройство, продолжаем стандартную инициализацию');
-        
-        // Устанавливаем режим отображения звезд/имен
-        if (window.appState.showStars) {
-            document.body.classList.add('stars-mode');
-            document.body.classList.remove('names-mode');
+            console.log('Обнаружено мобильное устройство');
         } else {
-            document.body.classList.remove('stars-mode');
-            document.body.classList.add('names-mode');
-        }
-        
-        // ИЗМЕНЕНО: Устанавливаем начальное время на ТОЧНОЕ время (сейчас)
-        const now = new Date();
-        window.appState.currentDate = new Date(now);
-        
-        // Пересчитываем с учетом времени
-        if (window.dates && window.dates.recalculateCurrentDay) {
-            window.dates.recalculateCurrentDay(true);
-        }
-        
-        // Замените старый код на вызов нового метода:
-        await this.initializeAppComponents();
-        
-        // ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ - добавляем этот блок
-        console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ В AppCore ===');
-        
-        // Даем время всем модулям загрузиться
-        setTimeout(() => {
-            if (window.dates) {
-                // Вызываем force initialize
-                if (window.dates.forceInitialize) {
-                    window.dates.forceInitialize();
-                } else {
-                    // Fallback: базовая инициализация
-                    if (window.dates.recalculateCurrentDay) {
-                        window.dates.recalculateCurrentDay(true); // ИСПРАВЛЕНО: true для точного времени
-                    }
-                    if (window.appState.activeDateId && window.dates.setActiveDate) {
-                        window.dates.setActiveDate(window.appState.activeDateId, true); // ИСПРАВЛЕНО: true для точного времени
-                    }
-                }
-            }
-        }, 500);
-        
-        console.log('AppCore: инициализация завершена');
-    }
-
-    
-    // Метод для получения версии из файла
-    async getVersion() {
-        try {
-            // Пробуем загрузить версию
-            const response = await fetch('version.txt');
-            if (response.ok) {
-                return (await response.text()).trim();
-            }
-            return '(файл не найден)';
-        } catch (error) {
-            console.error('Ошибка загрузки версии:', error);
-            return '(ошибка загрузки)';
+            // Для десктопов - стандартное предупреждение
+            this.showDesktopWarning();
+            console.log('Обнаружено десктоп устройство');
         }
     }
     
-    // Метод для определения мобильного устройства
     isMobileDevice() {
-        // Более точная проверка на мобильное устройство
+        // Комплексная проверка на мобильное устройство
         const userAgent = navigator.userAgent.toLowerCase();
         
         // Проверка по userAgent
@@ -289,74 +397,21 @@ class AppCore {
         // Проверка по сенсорному вводу
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         
-        // Проверка по соотношению сторон и размеру экрана
+        // Проверка по размеру экрана
         const hasMobileViewport = window.innerWidth <= 768 || 
                                  (window.innerHeight > window.innerWidth && window.innerWidth < 1024);
         
-        // Проверка на планшет (iPad и другие)
+        // Проверка на планшет
         const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch)))/i.test(userAgent);
         
         // Если это планшет, считаем его мобильным для нашего приложения
-        return isMobileUserAgent || isTouchDevice || hasMobileViewport || isTablet;
+        return isMobileUserAgent || (isTouchDevice && hasMobileViewport) || isTablet;
     }
     
-    showWarning() {
-        const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
+    showMobileWarning() {
+        const warningOverlay = document.getElementById('warningOverlay');
         if (!warningOverlay) return;
         
-        // Проверяем мобильное устройство
-        const isMobile = this.isMobileDevice();
-        
-        if (isMobile) {
-            // Для мобильных устройств - только предупреждение, без кнопки
-            this.showMobileWarning(warningOverlay);
-            return;
-        }
-        
-        // Для десктопов - стандартное поведение
-        this.showDesktopWarning(warningOverlay);
-    }
-    
-    showDesktopWarning(warningOverlay) {
-        // Существующая логика для десктопов
-        warningOverlay.classList.remove('hidden');
-        warningOverlay.classList.add('desktop-warning');
-        document.body.style.overflow = 'hidden';
-        
-        // Загружаем информацию ОТДЕЛЬНО для каждой строки
-        
-        // 1. Информация о браузере - СРАЗУ, синхронно
-        const browserInfoEl = document.getElementById('browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = this.getBrowserInfo();
-        }
-        
-        // 2. Информация о сегодняшней дате - СРАЗУ, синхронно
-        const todayInfoEl = document.getElementById('todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-            todayInfoEl.textContent = todayFormatted;
-        }
-        
-        // 3. Версия приложения - АСИНХРОННО
-        const versionInfoEl = document.getElementById('versionInfo');
-        if (versionInfoEl) {
-            versionInfoEl.textContent = 'Загрузка...';
-            
-            this.getVersion().then(version => {
-                if (versionInfoEl) {
-                    versionInfoEl.textContent = version || 'неизвестно';
-                }
-            }).catch(error => {
-                if (versionInfoEl) {
-                    versionInfoEl.textContent = 'неизвестно';
-                }
-            });
-        }
-    }
-    
-    showMobileWarning(warningOverlay) {
         // Скрываем весь основной контент
         document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
             el.style.display = 'none';
@@ -378,7 +433,7 @@ class AppCore {
             parableButton.style.display = 'none';
         }
         
-        // Изменяем содержимое предупреждения
+        // Обновляем содержимое предупреждения
         const warningBox = warningOverlay.querySelector('.warning-box');
         if (warningBox) {
             warningBox.classList.add('mobile-warning-box');
@@ -388,44 +443,52 @@ class AppCore {
             if (warningTitle) {
                 warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
                 warningTitle.style.color = '#ff0000';
+                warningTitle.style.fontSize = '18px';
             }
             
             const warningText = warningBox.querySelector('.warning-text');
             if (warningText) {
-                warningText.innerHTML = ``;
+                warningText.innerHTML = `
+                    <p>Это приложение предназначено только для использования на компьютерах.</p>
+                    <p>Для работы требуется:</p>
+                    <ul>
+                        <li>Клавиатура для навигации</li>
+                        <li>Мышь для точного взаимодействия</li>
+                        <li>Экран с разрешением не менее 1024x768</li>
+                    </ul>
+                    <p>Пожалуйста, откройте эту страницу на компьютере.</p>
+                `;
+                warningText.style.textAlign = 'left';
+                warningText.style.fontSize = '14px';
             }
             
-            // Обновляем информацию о браузере
-            const browserInfoEl = document.getElementById('browserInfo');
-            if (browserInfoEl) {
-                browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-            }
-            
-            // Обновляем информацию о сегодняшней дате
-            const todayInfoEl = document.getElementById('todayInfo');
-            if (todayInfoEl) {
-                const today = new Date();
-                const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-                todayInfoEl.textContent = todayFormatted;
-            }
-            
-            // Обновляем версию
-            const versionInfoEl = document.getElementById('versionInfo');
-            if (versionInfoEl) {
-                versionInfoEl.textContent = 'Только для ПК';
-            }
+            // Обновляем информацию
+            this.updateWarningInfoForMobile(warningBox);
             
             // Добавляем кнопку для повторной проверки
-            const retryButton = document.createElement('button');
-            retryButton.className = 'ui-btn mobile-retry-btn';
-            retryButton.textContent = 'Проверить снова (если вы на компьютере)';
-            retryButton.style.marginTop = '20px';
-            retryButton.style.backgroundColor = '#666';
-            retryButton.addEventListener('click', () => {
-                location.reload();
-            });
-            
-            warningBox.appendChild(retryButton);
+            this.addMobileRetryButton(warningBox);
+        }
+    }
+    
+    updateWarningInfoForMobile(warningBox) {
+        // Информация о браузере
+        const browserInfoEl = document.getElementById('browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+        }
+        
+        // Информация о сегодняшней дате
+        const todayInfoEl = document.getElementById('todayInfo');
+        if (todayInfoEl && window.timeUtils) {
+            const today = window.timeUtils.nowUTC();
+            const todayFormatted = window.timeUtils.formatDateUTC(today);
+            todayInfoEl.textContent = todayFormatted;
+        }
+        
+        // Информация о версии
+        const versionInfoEl = document.getElementById('versionInfo');
+        if (versionInfoEl) {
+            versionInfoEl.textContent = 'Только для ПК';
         }
     }
     
@@ -438,24 +501,102 @@ class AppCore {
         return 'Мобильное устройство';
     }
     
+    addMobileRetryButton(warningBox) {
+        const retryButton = document.createElement('button');
+        retryButton.className = 'ui-btn mobile-retry-btn';
+        retryButton.textContent = 'Проверить снова (если вы на компьютере)';
+        retryButton.style.marginTop = '20px';
+        retryButton.style.backgroundColor = '#666';
+        retryButton.style.width = '100%';
+        retryButton.style.padding = '12px';
+        
+        retryButton.addEventListener('click', () => {
+            console.log('Пользователь запросил повторную проверку устройства');
+            location.reload();
+        });
+        
+        warningBox.appendChild(retryButton);
+    }
+    
+    showDesktopWarning() {
+        const warningOverlay = document.getElementById('warningOverlay');
+        if (!warningOverlay) return;
+        
+        warningOverlay.classList.remove('hidden');
+        warningOverlay.classList.add('desktop-warning');
+        document.body.style.overflow = 'hidden';
+        
+        // Загружаем информацию для десктопов
+        this.updateWarningInfoForDesktop();
+    }
+    
+    updateWarningInfoForDesktop() {
+        // 1. Информация о браузере - сразу
+        const browserInfoEl = document.getElementById('browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = this.getBrowserInfo();
+        }
+        
+        // 2. Информация о сегодняшней дате - сразу
+        const todayInfoEl = document.getElementById('todayInfo');
+        if (todayInfoEl && window.timeUtils) {
+            const today = window.timeUtils.nowUTC();
+            const todayFormatted = window.timeUtils.formatDateUTC(today);
+            todayInfoEl.textContent = todayFormatted;
+        }
+        
+        // 3. Версия приложения - асинхронно
+        const versionInfoEl = document.getElementById('versionInfo');
+        if (versionInfoEl) {
+            versionInfoEl.textContent = 'Загрузка...';
+            
+            this.getVersion()
+                .then(version => {
+                    versionInfoEl.textContent = version || 'неизвестно';
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки версии:', error);
+                    versionInfoEl.textContent = 'неизвестно';
+                });
+        }
+    }
+    
+    async getVersion() {
+        try {
+            const response = await fetch('version.txt');
+            if (response.ok) {
+                const text = await response.text();
+                return text.trim();
+            }
+            return '(файл не найден)';
+        } catch (error) {
+            console.error('Ошибка загрузки версии:', error);
+            return '(ошибка загрузки)';
+        }
+    }
+    
     getBrowserInfo() {
         const ua = navigator.userAgent;
         if (ua.includes("Chrome") && !ua.includes("Edg")) return "Google Chrome";
         if (ua.includes("Firefox")) return "Mozilla Firefox";
         if (ua.includes("Safari") && !ua.includes("Chrome")) return "Apple Safari";
         if (ua.includes("Edg")) return "Microsoft Edge";
+        if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
         return "Неизвестный браузер";
     }
     
     updateCSSVariables() {
-        document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
-        document.documentElement.style.setProperty('--gw', window.appState.graphWidth + 'px');
+        if (window.appState && window.appState.config) {
+            document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
+            document.documentElement.style.setProperty('--gw', window.appState.graphWidth + 'px');
+            console.log('CSS переменные обновлены');
+        }
     }
     
     setupEventListeners() {
         console.log('AppCore: настройка обработчиков событий...');
         
-        // НОВОЕ: Обработчик для кнопки "прочесть притчу"
+        // Обработчик для кнопки "прочесть притчу"
         const readParableBtn = document.getElementById('readParableBtn');
         if (readParableBtn) {
             readParableBtn.addEventListener('click', () => {
@@ -463,7 +604,7 @@ class AppCore {
             });
         }
         
-        // НОВОЕ: Обработчик для кнопки закрытия притчи
+        // Обработчик для кнопки закрытия притчи
         const closeParableBtn = document.getElementById('closeParableBtn');
         if (closeParableBtn) {
             closeParableBtn.addEventListener('click', () => {
@@ -471,7 +612,7 @@ class AppCore {
             });
         }
         
-        // Обработчик для кнопки "Согласиться и продолжить" - ДОБАВЛЯЕМ СРАЗУ
+        // Обработчик для кнопки "Согласиться и продолжить"
         const acceptWarningBtn = document.getElementById('acceptWarning');
         if (acceptWarningBtn) {
             acceptWarningBtn.addEventListener('click', () => {
@@ -479,249 +620,71 @@ class AppCore {
                 if (warningOverlay) {
                     warningOverlay.classList.add('hidden');
                     document.body.style.overflow = 'auto';
+                    console.log('Пользователь принял предупреждение');
                 }
             });
         }
         
-        // ОБРАБОТЧИКИ ПЕРЕМЕЩЕНЫ В eventManager.js
-        // Делегирование событий теперь обрабатывается через EventManager
-        
-        // Оставляем только специфичные обработчики, которые неудобно обрабатывать через делегирование
-        
-        // Форма добавления волны (оставляем для гарантии работы)
-        const btnAddCustomWave = document.getElementById('btnAddCustomWave');
-        if (btnAddCustomWave) {
-            btnAddCustomWave.addEventListener('click', () => {
-                const name = document.getElementById('customWaveName').value;
-                const period = document.getElementById('customWavePeriod').value;
-                const type = document.getElementById('customWaveType').value;
-                const color = document.getElementById('customWaveColor').value;
-                
-                if (name && period) {
-                    if (window.waves && window.waves.addCustomWave) {
-                        window.waves.addCustomWave(name, period, type, color);
-                    }
-                    
-                    if (window.dataManager && window.dataManager.updateWavesGroups) {
-                        window.dataManager.updateWavesGroups();
-                    }
-                    
-                    if (window.uiManager && window.uiManager.clearWaveForm) {
-                        window.uiManager.clearWaveForm();
-                    }
-                    
-                    // Обновляем сводную информацию при добавлении новой волны
-                    if (window.summaryManager && window.summaryManager.refresh) {
-                        window.summaryManager.refresh();
-                    }
-                }
-            });
-        }
-        
-        // Форма добавления даты (оставляем для гарантии работы)
-        const btnAddDate = document.getElementById('btnAddDate');
-        if (btnAddDate) {
-            btnAddDate.addEventListener('click', () => {
-                const dateValue = document.getElementById('dateInput').value;
-                const name = document.getElementById('dateNameInput').value || 'Новая дата';
-                
-                if (dateValue) {
-                    if (window.dates && window.dates.addDate) {
-                        window.dates.addDate(dateValue, name);
-                    }
-                    
-                    if (window.dataManager && window.dataManager.updateDateList) {
-                        window.dataManager.updateDateList();
-                    }
-                }
-            });
-        }
-        
-        // Форма добавления заметки (оставляем для гарантии работы)
-        const btnAddNote = document.getElementById('btnAddNote');
-        if (btnAddNote) {
-            btnAddNote.addEventListener('click', () => {
-                const content = document.getElementById('noteInput').value;
-                if (content) {
-                    if (window.dates && window.dates.addNote) {
-                        window.dates.addNote(content);
-                    }
-                    
-                    if (window.dataManager && window.dataManager.updateNotesList) {
-                        window.dataManager.updateNotesList();
-                        document.getElementById('noteInput').value = '';
-                    }
-                }
-            });
-        }
-        
-        // Импорт файлов (оставляем для гарантии работы)
-        const importAllFile = document.getElementById('importAllFile');
-        const importDBFile = document.getElementById('importDBFile');
-        
-        if (importAllFile) {
-            importAllFile.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    if (window.importExport && window.importExport.importAll) {
-                        window.importExport.importAll(file).then(() => {
-                            if (window.uiManager && window.uiManager.updateUI) {
-                                window.uiManager.updateUI();
-                            }
-                            
-                            // Обновляем сводную информацию после импорта
-                            if (window.summaryManager && window.summaryManager.refresh) {
-                                window.summaryManager.refresh();
-                            }
-                        }).catch(err => {
-                            alert('Ошибка импорта: ' + err.message);
-                        });
-                    }
-                }
-            });
-        }
-        
-        if (importDBFile) {
-            importDBFile.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    try {
-                        document.getElementById('dbImportProgress').style.display = 'block';
-                        
-                        if (window.importExport && window.importExport.updateDBImportProgress) {
-                            window.importExport.updateDBImportProgress(30, 'Загрузка базы данных...');
-                        }
-                        
-                        if (window.importExport && window.importExport.importDB) {
-                            const result = await window.importExport.importDB(file);
-                            document.getElementById('dbImportTextarea').value = result;
-                            
-                            if (window.importExport && window.importExport.updateDBImportProgress) {
-                                window.importExport.updateDBImportProgress(100, 'База данных загружена!');
-                            }
-                            
-                            if (window.importExport && window.importExport.showDBImportStatus) {
-                                window.importExport.showDBImportStatus('База данных успешно загружена!', 'success');
-                            }
-                        }
-                    } catch (error) {
-                        if (window.importExport && window.importExport.showDBImportStatus) {
-                            window.importExport.showDBImportStatus(`Ошибка загрузки базы: ${error.message}`, 'error');
-                        }
-                        document.getElementById('dbImportTextarea').value = `❌ ОШИБКА ЗАГРРУЗКИ БАЗЫ ДАННЫХ\n\nФайл: ${file.name}\nОшибка: ${error.message}`;
-                    }
-                }
-            });
-        }
-        
-        // Анализ DB (оставляем для гарантии работы)
-        const btnAnalyzeDB = document.getElementById('btnAnalyzeDB');
-        if (btnAnalyzeDB) {
-            btnAnalyzeDB.addEventListener('click', async () => {
-                try {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus('Анализ структуры базы данных...', 'info');
-                    }
-                    
-                    document.getElementById('dbImportProgress').style.display = 'block';
-                    
-                    if (window.importExport && window.importExport.updateDBImportProgress) {
-                        window.importExport.updateDBImportProgress(10);
-                    }
-                    
-                    if (window.importExport && window.importExport.analyzeDB) {
-                        const result = await window.importExport.analyzeDB();
-                        document.getElementById('dbImportTextarea').value = result;
-                        
-                        if (window.importExport && window.importExport.updateDBImportProgress) {
-                            window.importExport.updateDBImportProgress(100, 'Анализ завершен!');
-                        }
-                        
-                        if (window.importExport && window.importExport.showDBImportStatus) {
-                            window.importExport.showDBImportStatus('Анализ базы данных завершен успешно!', 'success');
-                        }
-                    }
-                } catch (error) {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus(`Ошибка анализа: ${error.message}`, 'error');
-                    }
-                    document.getElementById('dbImportTextarea').value = `ОШИБКА АНАЛИЗА:\n\n${error.message}`;
-                }
-            });
-        }
-        
-        // Миграция DB в заметки (оставляем для гарантии работы)
-        const btnMigrateToNotes = document.getElementById('btnMigrateToNotes');
-        if (btnMigrateToNotes) {
-            btnMigrateToNotes.addEventListener('click', () => {
-                try {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus('Начало миграции данных...', 'info');
-                    }
-                    
-                    document.getElementById('dbImportProgress').style.display = 'block';
-                    
-                    if (window.importExport && window.importExport.updateDBImportProgress) {
-                        window.importExport.updateDBImportProgress(10);
-                    }
-                    
-                    if (window.importExport && window.importExport.migrateDBToNotes) {
-                        const result = window.importExport.migrateDBToNotes();
-                        document.getElementById('dbImportTextarea').value = result;
-                        
-                        if (window.importExport && window.importExport.updateDBImportProgress) {
-                            window.importExport.updateDBImportProgress(100, 'Миграция завершена!');
-                        }
-                        
-                        if (window.importExport && window.importExport.showDBImportStatus) {
-                            window.importExport.showDBImportStatus('Миграция завершена успешно!', 'success');
-                        }
-                        
-                        if (window.dataManager && window.dataManager.updateNotesList) {
-                            window.dataManager.updateNotesList();
-                        }
-                        
-                        if (window.grid && window.grid.updateGridNotesHighlight) {
-                            window.grid.updateGridNotesHighlight();
-                        }
-                    }
-                } catch (error) {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus(`Ошибка миграции: ${error.message}`, 'error');
-                    }
-                    document.getElementById('dbImportTextarea').value = `ОШИБКА МИГРАЦИИ:\n\n${error.message}`;
-                }
-            });
-        }
-        
-        // Клавиатура - ОСТАВЛЯЕМ ТОЛЬКО СТРЕЛОЧКИ ДЛЯ ВИЗОРА
+        // Глобальный обработчик клавиатуры
         document.addEventListener('keydown', (e) => {
-            if (!window.dates) return;
-            
-            switch(e.key) {
-                case 'ArrowLeft': 
-                    if (window.dates.navigateDay) {
-                        window.dates.navigateDay(-1); 
-                    }
-                    break;
-                case 'ArrowRight': 
-                    if (window.dates.navigateDay) {
-                        window.dates.navigateDay(1); 
-                    }
-                    break;
-                case 'Escape':
-                    // Закрыть модальное окно притчи при нажатии ESC
-                    if (this.elements.parableModal && !this.elements.parableModal.classList.contains('hidden')) {
-                        this.hideParableModal();
-                    }
-                    break;
+            this.handleGlobalKeydown(e);
+        });
+        
+        // Обработчик закрытия притчи по клику вне модального окна
+        document.addEventListener('click', (e) => {
+            const parableModal = document.getElementById('parableModal');
+            if (parableModal && 
+                !parableModal.classList.contains('hidden') && 
+                e.target === parableModal) {
+                this.hideParableModal();
             }
         });
         
-        console.log('AppCore: обработчики событий настроены');
+        console.log('Обработчики событий настроены');
     }
     
-    // НОВЫЕ МЕТОДЫ ДЛЯ РАБОТЫ С ПРИТЧЕЙ
+    handleGlobalKeydown(e) {
+        // Закрыть модальное окно притчи при нажатии ESC
+        if (e.key === 'Escape') {
+            const parableModal = document.getElementById('parableModal');
+            if (parableModal && !parableModal.classList.contains('hidden')) {
+                this.hideParableModal();
+                e.preventDefault();
+            }
+        }
+        
+        // Навигация по дням стрелками (только если нет открытых модальных окон)
+        if (!document.getElementById('parableModal')?.classList.contains('hidden')) {
+            return; // Не обрабатываем навигацию, если открыта притча
+        }
+        
+        if (!document.getElementById('warningOverlay')?.classList.contains('hidden')) {
+            return; // Не обрабатываем навигацию, если открыто предупреждение
+        }
+        
+        if (window.dates) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    window.dates.navigateDay(-1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    window.dates.navigateDay(1);
+                    e.preventDefault();
+                    break;
+                case 'Home':
+                    window.dates.goToToday();
+                    e.preventDefault();
+                    break;
+                case 'End':
+                    window.dates.goToNow();
+                    e.preventDefault();
+                    break;
+            }
+        }
+    }
+    
+    // ================ МЕТОДЫ ДЛЯ РАБОТЫ С ПРИТЧЕЙ ================
     
     loadParableText() {
         const parableContent = this.elements.parableContent;
@@ -731,6 +694,7 @@ class AppCore {
         const parableBlock = document.querySelector('.aaa-blockquote');
         if (parableBlock) {
             parableContent.innerHTML = parableBlock.innerHTML;
+            console.log('Текст притчи загружен из .aaa-blockquote');
         } else {
             // Если блок не найден, используем запасной текст
             parableContent.innerHTML = `
@@ -739,6 +703,7 @@ class AppCore {
                 <p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
                 <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу любимому.</p>
             `;
+            console.log('Текст притчи загружен из резервного источника');
         }
     }
     
@@ -748,6 +713,7 @@ class AppCore {
             parableModal.classList.remove('hidden');
             // Блокируем прокрутку основного содержимого
             document.body.style.overflow = 'hidden';
+            console.log('Модальное окно притчи открыто');
         }
     }
     
@@ -755,15 +721,191 @@ class AppCore {
         const parableModal = this.elements.parableModal;
         if (parableModal) {
             parableModal.classList.add('hidden');
-            // Восстанавливаем прокрутку основного содержимого
-            // (но оставляем скрытой, если warningOverlay еще виден)
-            if (this.elements.warningOverlay.classList.contains('hidden')) {
+            // Восстанавливаем прокрутку
+            const warningOverlay = document.getElementById('warningOverlay');
+            if (!warningOverlay || warningOverlay.classList.contains('hidden')) {
                 document.body.style.overflow = 'auto';
-            } else {
-                document.body.style.overflow = 'hidden';
             }
+            console.log('Модальное окно притчи закрыто');
+        }
+    }
+    
+    // ================ МЕТОДЫ ДЛЯ ОТЛАДКИ ================
+    
+    showInitializationError(error) {
+        console.error('Критическая ошибка инициализации:', error);
+        
+        // Показываем сообщение об ошибке пользователю
+        const errorMessage = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                padding: 20px;
+                text-align: center;
+                font-family: sans-serif;
+            ">
+                <h1 style="color: #ff4444; margin-bottom: 20px;">Ошибка загрузки приложения</h1>
+                <p style="margin-bottom: 20px; max-width: 600px;">
+                    Не удалось загрузить приложение. Возможно, некоторые файлы повреждены или отсутствуют.
+                </p>
+                <p style="margin-bottom: 30px; font-family: monospace; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+                    ${error.message || 'Неизвестная ошибка'}
+                </p>
+                <button onclick="location.reload()" style="
+                    padding: 10px 20px;
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">
+                    Перезагрузить страницу
+                </button>
+                <p style="margin-top: 30px; font-size: 12px; opacity: 0.7;">
+                    Если ошибка повторяется, попробуйте очистить кэш браузера (Ctrl+Shift+Del)
+                </p>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', errorMessage);
+    }
+    
+    // ================ УТИЛИТЫ ================
+    
+    /**
+     * Пересоздает все визуальные элементы
+     * Используется при серьезных изменениях состояния
+     */
+    recreateVisualElements() {
+        console.log('AppCore: пересоздание визуальных элементов...');
+        
+        if (window.grid && window.grid.createGrid) {
+            window.grid.createGrid();
+        }
+        
+        if (window.waves) {
+            // Удаляем старые элементы волн
+            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            if (window.waves.waveContainers) {
+                window.waves.waveContainers = {};
+            }
+            if (window.waves.wavePaths) {
+                window.waves.wavePaths = {};
+            }
+            
+            // Создаем заново
+            if (window.waves.createVisibleWaveElements) {
+                window.waves.createVisibleWaveElements();
+            }
+            
+            if (window.waves.updatePosition) {
+                window.waves.updatePosition();
+            }
+        }
+        
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+        }
+        
+        console.log('Визуальные элементы пересозданы');
+    }
+    
+    /**
+     * Принудительное сохранение состояния
+     */
+    forceSave() {
+        if (window.appState && window.appState.save) {
+            window.appState.save();
+            console.log('Состояние принудительно сохранено');
+        }
+    }
+    
+    /**
+     * Сброс приложения к начальному состоянию
+     * Используется для отладки
+     */
+    debugReset() {
+        if (!confirm('ВНИМАНИЕ: Это сбросит все настройки к начальным значениям. Продолжить?')) {
+            return;
+        }
+        
+        if (window.appState && window.appState.reset) {
+            window.appState.reset();
+            console.log('Приложение сброшено к начальному состоянию');
+            
+            // Перезагружаем страницу
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
     }
 }
 
+// Глобальные дебаг функции
+window.debugAppCore = function() {
+    console.log('=== ДЕБАГ AppCore ===');
+    console.log('Состояние инициализации:', window.appCore?.isInitialized);
+    console.log('Текущая дата (UTC):', window.appState?.currentDate?.toISOString());
+    console.log('Текущий день:', window.appState?.currentDay);
+    console.log('Base date (UTC):', new Date(window.appState?.baseDate || 0).toISOString());
+    console.log('Активная дата ID:', window.appState?.activeDateId);
+    
+    // Проверка модулей
+    const modules = ['dates', 'waves', 'grid', 'uiManager', 'dataManager', 'unifiedListManager'];
+    modules.forEach(module => {
+        console.log(`${module}:`, window[module] ? '✓ Загружен' : '✗ Отсутствует');
+    });
+    
+    // Проверка контейнеров
+    const containers = ['graphElement', 'dateListForDates', 'wavesList', 'notesList'];
+    containers.forEach(id => {
+        const el = document.getElementById(id);
+        console.log(`${id}:`, el ? '✓ Найден' : '✗ Не найден');
+    });
+    
+    console.log('=== КОНЕЦ ДЕБАГА ===');
+};
+
+window.reinitializeApp = function() {
+    console.log('Принудительная реинициализация приложения...');
+    
+    if (window.appCore && window.appCore.recreateVisualElements) {
+        window.appCore.recreateVisualElements();
+    } else {
+        console.warn('AppCore не доступен для реинициализации');
+    }
+};
+
+// Создаем экземпляр AppCore
 window.appCore = new AppCore();
+
+// Автоматический запуск инициализации при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM загружен, запускаем инициализацию AppCore...');
+    
+    // Небольшая задержка для гарантии загрузки всех зависимостей
+    setTimeout(() => {
+        if (window.appCore && window.appCore.init) {
+            window.appCore.init()
+                .then(() => {
+                    console.log('AppCore успешно инициализирован');
+                })
+                .catch((error) => {
+                    console.error('Не удалось инициализировать AppCore:', error);
+                });
+        } else {
+            console.error('AppCore не найден или не имеет метода init');
+        }
+    }, 100);
+});
