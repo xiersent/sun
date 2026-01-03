@@ -17,8 +17,6 @@ calculateGridPosition(offset) {
     
     const pixelPosition = offset * window.appState.config.squareSize;
     
-    console.log(`Grid: позиция для offset=${offset}: ${pixelPosition}px`);
-    
     return {
         actualOffset: offset,
         pixelPosition: pixelPosition

@@ -363,9 +363,9 @@ recalculateCurrentDay(useExactTime = false) {
     const currentDate = window.appState.currentDate;
     console.log('1. currentDate:');
     console.log('   Локальное:', currentDate.toLocaleString());
-    console.log('   UTC:', currentDate.toUTCString());
-    console.log('   getTime():', currentDate.getTime());
     console.log('   Часы (локально):', currentDate.getHours());
+    console.log('   Минуты (локально):', currentDate.getMinutes());
+    console.log('   Секунды (локально):', currentDate.getSeconds());
     
     // 2. Получаем baseDate
     let baseDate;
@@ -377,12 +377,9 @@ recalculateCurrentDay(useExactTime = false) {
     
     console.log('2. baseDate:');
     console.log('   Локальное:', baseDate.toLocaleString());
-    console.log('   UTC:', baseDate.toUTCString());
-    console.log('   getTime():', baseDate.getTime());
     console.log('   Часы (локально):', baseDate.getHours());
-    console.log('   Часы (UTC):', baseDate.getUTCHours());
     
-    // 3. Создаем начала дней
+    // 3. Создаем начала дней в ЛОКАЛЬНОМ времени
     const currentStart = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
@@ -397,44 +394,49 @@ recalculateCurrentDay(useExactTime = false) {
         0, 0, 0, 0
     );
     
-    console.log('3. Начала дней:');
-    console.log('   currentStart (локальное):', currentStart.toLocaleString());
-    console.log('   currentStart (UTC):', currentStart.toUTCString());
-    console.log('   currentStart.getTime():', currentStart.getTime());
+    console.log('3. Начала дней (локальные):');
+    console.log('   currentStart:', currentStart.toLocaleString());
+    console.log('   baseStart:', baseStart.toLocaleString());
     
-    console.log('   baseStart (локальное):', baseStart.toLocaleString());
-    console.log('   baseStart (UTC):', baseStart.toUTCString());
-    console.log('   baseStart.getTime():', baseStart.getTime());
-    
-    // 4. Разница в миллисекундах
-    const diffMsExact = currentDate.getTime() - baseDate.getTime();
+    // 4. Разница в миллисекундах по началам дней
     const diffMsStart = currentStart.getTime() - baseStart.getTime();
-    
-    console.log('4. Разница в мс:');
-    console.log('   Точная (с временем):', diffMsExact, 'мс');
-    console.log('   По началам дней:', diffMsStart, 'мс');
-    
-    // 5. Преобразуем в дни
-    const daysExact = diffMsExact / (1000 * 60 * 60 * 24);
     const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
     
-    console.log('5. Разница в днях:');
-    console.log('   Точная:', daysExact);
-    console.log('   По началам дней:', daysStart);
+    console.log('4. Разница по началам дней:');
+    console.log('   мс:', diffMsStart);
+    console.log('   дней:', daysStart);
+    console.log('   целых дней:', Math.floor(daysStart));
     
-    // 6. Дробная часть
-    console.log('6. Дробные части:');
-    console.log('   Точная:', daysExact - Math.floor(daysExact));
-    console.log('   По началам дней:', daysStart - Math.floor(daysStart));
+    // 5. Вычисляем дробную часть от времени суток (только локальное время)
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const seconds = currentDate.getSeconds();
+    const milliseconds = currentDate.getMilliseconds();
     
-    // Вычисляем окончательный результат
+    const timeOfDayFraction = (
+        (hours * 60 * 60 * 1000) +
+        (minutes * 60 * 1000) +
+        (seconds * 1000) +
+        milliseconds
+    ) / (24 * 60 * 60 * 1000);
+    
+    console.log('5. Время суток (локальное):');
+    console.log('   Часы:', hours, 'Минуты:', minutes, 'Секунды:', seconds);
+    console.log('   Дробная часть дня:', timeOfDayFraction.toFixed(8));
+    
+    // 6. Вычисляем окончательный результат
     let daysDiff;
     if (useExactTime) {
-        daysDiff = daysExact;
-        console.log('Используем точную разницу:', daysDiff);
+        // Для "Сейчас": целые дни от начала дней + дробная часть времени суток
+        daysDiff = Math.floor(daysStart) + timeOfDayFraction;
+        console.log('Используем РЕАЛЬНОЕ время (без смещения часовых поясов):', daysDiff);
+        console.log('  Целые дни:', Math.floor(daysStart));
+        console.log('  Время суток:', timeOfDayFraction.toFixed(8));
+        console.log('  Общее:', daysDiff.toFixed(8));
     } else {
-        daysDiff = Math.round(daysStart); // Принудительно округляем
-        console.log('Используем округленную разницу по началам дней:', daysDiff);
+        // Для "Сегодня": только целые дни (начало дня)
+        daysDiff = Math.round(daysStart);
+        console.log('Используем начало дня (целые числа):', daysDiff);
     }
     
     window.appState.currentDay = daysDiff;
