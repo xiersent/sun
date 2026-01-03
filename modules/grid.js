@@ -91,13 +91,10 @@ createGridLine(offset) {
     const wrapper = document.createElement('div');
     wrapper.className = 'grid-wrapper';
     
-    // Позиция относительно центра (БЕЗ учета дробного смещения)
     const positionData = this.calculateGridPosition(offset);
     
-    // Важно: left считается от ЛЕВОГО КРАЯ КОНТЕЙНЕРА СЕТКИ
-    // Контейнер уже смещен на timeOffsetPx через transform
     wrapper.style.position = 'absolute';
-    wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`; // БЕЗ timeOffsetPx
+    wrapper.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
     wrapper.style.width = `${window.appState.config.squareSize}px`;
     wrapper.style.height = '100%';
     wrapper.style.marginLeft = `-${window.appState.config.squareSize / 2}px`;
@@ -106,8 +103,18 @@ createGridLine(offset) {
     const line = document.createElement('div');
     line.className = 'grid-line-inner';
     
-    // Линия "сегодня" (offset = 0)
-    if (offset === 0) {
+    // ИСПРАВЛЕНИЕ: Линия активна только если мы находимся точно на целом дне
+    // И offset равен целой части текущего дня
+    const currentDay = window.appState.currentDay || 0;
+    const integerPart = Math.floor(currentDay);
+    const fractionalPart = currentDay - integerPart;
+    
+    // Активна только если:
+    // 1. Нет дробной части (мы на целом дне) с небольшой погрешностью
+    // 2. offset точно соответствует целой части дня
+    const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
+    
+    if (isExactlyOnLine) {
         line.classList.add('active');
         line.style.backgroundColor = '#666'; // Основной цвет
     }
