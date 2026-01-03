@@ -181,8 +181,6 @@ createDateLabel(offset) {
     weekday.style.bottom = '10px';
     weekday.textContent = window.dom.getWeekdayName(date);
     
-    console.log(`Метка offset=${offset} -> adjustedOffset=${adjustedOffset}: дата ${date.getDate()}, позиция ${positionData.pixelPosition}px`);
-    
     this.gridContainer.appendChild(label);
     this.gridContainer.appendChild(weekday);
 }
