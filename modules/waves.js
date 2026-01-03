@@ -1,4 +1,4 @@
-// modules/waves.js
+// modules/waves.js - ПОЛНОСТЬЮ ОБНОВЛЕННЫЙ СИНХРОННО
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -220,43 +220,49 @@ class WavesManager {
         }
     }
 
-getActiveWaves() {
-    return window.appState.data.waves.filter(wave => {
-        const waveIdStr = String(wave.id);
-        const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
-        const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
-        return isVisible && isGroupEnabled;
-    });
-}
+    getActiveWaves() {
+        return window.appState.data.waves.filter(wave => {
+            const waveIdStr = String(wave.id);
+            const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
+            return isVisible && isGroupEnabled;
+        });
+    }
 
-getPhaseAtTime(wave, date) {
-    // Возвращает фазу 0-1 в момент времени
-    const daysFromBase = this.calculateDaysBetweenDates(
-        window.appState.baseDate, 
-        date
-    );
-    return (daysFromBase % wave.period) / wave.period;
-}
-
-calculateDaysBetweenDates(date1, date2) {
-    if (!date1 || !date2) return 0;
+    getPhaseAtTime(wave, date) {
+        // Возвращает фазу 0-1 в момент времени
+        const daysFromBase = this.calculateDaysBetweenDatesUTC(
+            window.appState.baseDate, 
+            date
+        );
+        return (daysFromBase % wave.period) / wave.period;
+    }
     
-    try {
-        const d1 = new Date(date1);
-        const d2 = new Date(date2);
+    // НОВЫЙ МЕТОД: Расчет дней между датами с использованием timeUtils
+    calculateDaysBetweenDatesUTC(date1, date2) {
+        if (!date1 || !date2) return 0;
         
-        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
-            return 0;
+        // Используем timeUtils если доступен
+        if (window.timeUtils && window.timeUtils.getDaysBetweenExactUTC) {
+            return window.timeUtils.getDaysBetweenExactUTC(date1, date2);
         }
         
-        const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-        const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-        return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-    } catch (error) {
-        console.error('Ошибка расчета дней между датами:', error);
-        return 0;
+        // Fallback для обратной совместимости
+        try {
+            const d1 = date1 instanceof Date ? date1 : new Date(date1);
+            const d2 = date2 instanceof Date ? date2 : new Date(date2);
+            
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                return 0;
+            }
+            
+            const timeDiff = d2.getTime() - d1.getTime();
+            return timeDiff / (1000 * 60 * 60 * 24);
+        } catch (error) {
+            console.error('Ошибка расчета дней между датами:', error);
+            return 0;
+        }
     }
-}
     
     updatePosition() {
         console.log('WavesManager: updatePosition вызван');
@@ -366,83 +372,83 @@ calculateDaysBetweenDates(date1, date2) {
         return y;
     }
     
-	createWaveLabel(wave, y, side, container) {
-		const labelId = `${wave.id}-${side}`;
-		
-		const waveColor = wave.color || '#666666';
-		
-		const labelElement = document.createElement('div');
-		labelElement.className = 'wave-label';
-		labelElement.id = `waveLabel${labelId}`;
-		labelElement.dataset.waveId = wave.id;
-		labelElement.dataset.side = side;
-		
-		labelElement.style.top = `${y}px`;
-		labelElement.style.backgroundColor = waveColor;
-		labelElement.style.color = '#fff';
-		labelElement.style.opacity = '0.5'; // По умолчанию
-		labelElement.style.zIndex = '1'; // По умолчанию
-		
-		// Создаем стрелку как отдельный элемент
-		const arrow = document.createElement('div');
-		arrow.className = 'wave-label-arrow';
-		arrow.style.position = 'absolute';
-		arrow.style.top = '50%';
-		arrow.style.transform = 'translateY(-50%)';
-		arrow.style.width = '0';
-		arrow.style.height = '0';
-		arrow.style.borderStyle = 'solid';
-		arrow.style.zIndex = '1';
-		
-		if (side === 'left') {
-			// Для левых выносок: стрелка справа
-			arrow.style.right = '-6px';
-			arrow.style.borderWidth = '4px 0 4px 6px';
-			arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-			labelElement.style.flexDirection = 'row-reverse';
-			labelElement.style.right = '0'; // Прижимаем к правому краю родителя
-			labelElement.style.marginRight = '10px'; // Отступ от правого края
-		} else {
-			// Для правых выносок: стрелка слева
-			arrow.style.left = '-6px';
-			arrow.style.borderWidth = '4px 6px 4px 0';
-			arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-			labelElement.style.flexDirection = 'row';
-			labelElement.style.left = '0'; // Прижимаем к левому краю родителя
-			labelElement.style.marginLeft = '10px'; // Отступ от левого края
-		}
-		
-		const text = document.createElement('div');
-		text.className = 'wave-label-text';
-		text.textContent = wave.name;
-		text.title = `${wave.name} (${wave.period} дней)`;
-		text.style.position = 'relative';
-		text.style.zIndex = '2';
-		
-		labelElement.appendChild(text);
-		labelElement.appendChild(arrow);
-		container.appendChild(labelElement);
-		
-		this.waveLabelElements[labelId] = labelElement;
-		
-		// Обработчики для hover
-		labelElement.addEventListener('mouseenter', () => {
-			labelElement.style.opacity = '1';
-			labelElement.style.zIndex = '10';
-		});
-		
-		labelElement.addEventListener('mouseleave', () => {
-			labelElement.style.opacity = '0.5';
-			labelElement.style.zIndex = '1';
-		});
-		
-		labelElement.addEventListener('click', (e) => {
-			e.stopPropagation();
-			this.onWaveLabelClick(wave.id);
-		});
-		
-		return labelElement;
-	}
+    createWaveLabel(wave, y, side, container) {
+        const labelId = `${wave.id}-${side}`;
+        
+        const waveColor = wave.color || '#666666';
+        
+        const labelElement = document.createElement('div');
+        labelElement.className = 'wave-label';
+        labelElement.id = `waveLabel${labelId}`;
+        labelElement.dataset.waveId = wave.id;
+        labelElement.dataset.side = side;
+        
+        labelElement.style.top = `${y}px`;
+        labelElement.style.backgroundColor = waveColor;
+        labelElement.style.color = '#fff';
+        labelElement.style.opacity = '0.5'; // По умолчанию
+        labelElement.style.zIndex = '1'; // По умолчанию
+        
+        // Создаем стрелку как отдельный элемент
+        const arrow = document.createElement('div');
+        arrow.className = 'wave-label-arrow';
+        arrow.style.position = 'absolute';
+        arrow.style.top = '50%';
+        arrow.style.transform = 'translateY(-50%)';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        
+        if (side === 'left') {
+            // Для левых выносок: стрелка справа
+            arrow.style.right = '-6px';
+            arrow.style.borderWidth = '4px 0 4px 6px';
+            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
+            labelElement.style.flexDirection = 'row-reverse';
+            labelElement.style.right = '0'; // Прижимаем к правому краю родителя
+            labelElement.style.marginRight = '10px'; // Отступ от правого края
+        } else {
+            // Для правых выносок: стрелка слева
+            arrow.style.left = '-6px';
+            arrow.style.borderWidth = '4px 6px 4px 0';
+            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
+            labelElement.style.flexDirection = 'row';
+            labelElement.style.left = '0'; // Прижимаем к левому краю родителя
+            labelElement.style.marginLeft = '10px'; // Отступ от левого края
+        }
+        
+        const text = document.createElement('div');
+        text.className = 'wave-label-text';
+        text.textContent = wave.name;
+        text.title = `${wave.name} (${wave.period} дней)`;
+        text.style.position = 'relative';
+        text.style.zIndex = '2';
+        
+        labelElement.appendChild(text);
+        labelElement.appendChild(arrow);
+        container.appendChild(labelElement);
+        
+        this.waveLabelElements[labelId] = labelElement;
+        
+        // Обработчики для hover
+        labelElement.addEventListener('mouseenter', () => {
+            labelElement.style.opacity = '1';
+            labelElement.style.zIndex = '10';
+        });
+        
+        labelElement.addEventListener('mouseleave', () => {
+            labelElement.style.opacity = '0.5';
+            labelElement.style.zIndex = '1';
+        });
+        
+        labelElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onWaveLabelClick(wave.id);
+        });
+        
+        return labelElement;
+    }
     
     onWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);
@@ -632,7 +638,13 @@ calculateDaysBetweenDates(date1, date2) {
     }
     
     calculateIntersections(basePeriod, baseAmplitude, precision) {
-        const daysFromBase = window.dom ? window.dom.getDaysBetweenDates(window.appState.baseDate, window.appState.currentDate) : 0;
+        // Используем timeUtils для расчета дней
+        const daysFromBase = window.timeUtils ? 
+            window.timeUtils.getDaysBetweenExactUTC(
+                window.appState.baseDate, 
+                window.appState.currentDate
+            ) : 0;
+        
         const basePhase = (daysFromBase / basePeriod) * 2 * Math.PI;
         const baseValue = Math.sin(basePhase) * baseAmplitude;
         
@@ -751,24 +763,9 @@ calculateDaysBetweenDates(date1, date2) {
         return waves;
     }
     
+    // КОМПАТИБИЛЬНОСТЬ: Старый метод для обратной совместимости
     calculateDaysBetweenDates(date1, date2) {
-        if (!date1 || !date2) return 0;
-        
-        try {
-            const d1 = new Date(date1);
-            const d2 = new Date(date2);
-            
-            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
-                return 0;
-            }
-            
-            const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-            const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-            return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
-        } catch (error) {
-            console.error('Ошибка расчета дней между датами:', error);
-            return 0;
-        }
+        return this.calculateDaysBetweenDatesUTC(date1, date2);
     }
 }
 

@@ -1,4 +1,4 @@
-// modules/dates.js
+// modules/dates.js - ПОЛНОСТЬЮ ОБНОВЛЕННЫЙ с использованием TimeUtils
 class DatesManager {
     constructor() {
         this.elements = {};
@@ -11,9 +11,7 @@ class DatesManager {
             'mainDateInput', 'btnSetDate', 'currentDay', 'btnPrevDay',
             'btnNextDay', 'btnToday', 'btnNow', 'noteInput', 'btnAddNote',
             'notesList', 'customWaveName', 'customWavePeriod', 'customWaveType',
-            'customWaveColor', 'btnAddCustomWave', 'newGroupName', 'btnAddGroup',
-            'dateList', 'intersectionBasePeriod', 'intersectionBaseAmplitude',
-            'intersectionPrecision', 'intersectionResults', 'intersectionStats'
+            'customWaveColor', 'btnAddCustomWave', 'newGroupName', 'btnAddGroup'
         ];
         
         ids.forEach(id => {
@@ -23,10 +21,14 @@ class DatesManager {
     }
     
     isCurrentDateOnVizor() {
-        const today = new Date();
+        const today = window.timeUtils.nowUTC();
         const vizorDate = window.appState.currentDate;
         
-        return today.toDateString() === vizorDate.toDateString();
+        // Сравниваем даты в UTC (только год, месяц, день)
+        const todayStart = window.timeUtils.getStartOfDayUTC(today);
+        const vizorStart = window.timeUtils.getStartOfDayUTC(vizorDate);
+        
+        return todayStart.getTime() === vizorStart.getTime();
     }
     
     updateTodayButton() {
@@ -38,9 +40,11 @@ class DatesManager {
         if (isCurrent) {
             btnToday.classList.remove('today-inactive');
             btnToday.classList.add('today-active');
+            btnToday.title = 'Текущая дата уже на визоре';
         } else {
             btnToday.classList.remove('today-active');
             btnToday.classList.add('today-inactive');
+            btnToday.title = 'Перейти к сегодняшней дате';
         }
     }
     
@@ -48,12 +52,13 @@ class DatesManager {
         let timestamp;
         
         if (typeof dateValue === 'string') {
-            const date = new Date(dateValue);
-            timestamp = date.getTime();
+            // Используем TimeUtils для парсинга в UTC
+            const utcDate = window.timeUtils.parseStringToUTC(dateValue);
+            timestamp = utcDate.getTime();
         } else if (typeof dateValue === 'number') {
             timestamp = dateValue;
         } else {
-            timestamp = Date.now();
+            timestamp = window.timeUtils.nowTimestamp();
         }
         
         const newDate = {
@@ -92,7 +97,7 @@ class DatesManager {
                 this.setActiveDate(window.appState.data.dates[0].id);
             } else {
                 window.appState.activeDateId = null;
-                window.appState.baseDate = new Date();
+                window.appState.baseDate = window.timeUtils.nowTimestamp();
                 this.recalculateCurrentDay();
                 this.updateCurrentDayElement();
                 window.grid.updateCenterDate();
@@ -108,19 +113,16 @@ class DatesManager {
         const dateIdStr = String(dateId);
         const date = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
         if (date) {
-            // Если обновляем дату, преобразуем в timestamp
+            // Если обновляем дату, преобразуем в timestamp с использованием TimeUtils
             if (updates.date && typeof updates.date !== 'number') {
-                const dateObj = new Date(updates.date);
-                if (!isNaN(dateObj.getTime())) {
-                    updates.date = dateObj.getTime();
-                }
+                const utcDate = window.timeUtils.parseStringToUTC(updates.date);
+                updates.date = utcDate.getTime();
             }
             Object.assign(date, updates);
             window.appState.save();
         }
     }
     
-    // ОБНОВЛЕННЫЙ МЕТОД: Добавлен параметр useExactTime (по умолчанию true)
     setActiveDate(dateId, useExactTime = true) {
         console.log('=== setActiveDate(' + dateId + ', useExactTime=' + useExactTime + ') ===');
         
@@ -131,43 +133,39 @@ class DatesManager {
         const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
         
         if (!dateObj) {
-            console.warn('DatesManager: дата не найдена, устанавливаем базовую дату на сегодня');
-            window.appState.baseDate = Date.now(); // timestamp
+            console.warn('DatesManager: дата не найдена, устанавливаем базовую дату на сейчас (UTC)');
+            window.appState.baseDate = window.timeUtils.nowTimestamp();
         } else {
             try {
-                // dateObj.date уже timestamp
+                // dateObj.date уже должен быть UTC timestamp
                 if (typeof dateObj.date !== 'number' || isNaN(dateObj.date)) {
                     throw new Error('Некорректный timestamp в объекте даты');
                 }
                 
-                // Устанавливаем базовую дату как есть
+                // Устанавливаем базовую дату как есть (уже UTC timestamp)
                 window.appState.baseDate = dateObj.date;
                 
-                // ДЕБАГ: выводим для проверки
-                const dateFromTimestamp = new Date(dateObj.date);
-                console.log('DatesManager: установка базовой даты:', {
+                console.log('DatesManager: установка базовой даты (UTC):', {
                     timestamp: dateObj.date,
-                    localDate: dateFromTimestamp.toString(),
-                    utcDate: dateFromTimestamp.toUTCString(),
-                    hours: dateFromTimestamp.getHours(),
-                    minutes: dateFromTimestamp.getMinutes()
+                    utcDate: new Date(dateObj.date).toUTCString(),
+                    utcHours: new Date(dateObj.date).getUTCHours(),
+                    utcMinutes: new Date(dateObj.date).getUTCMinutes(),
+                    utcSeconds: new Date(dateObj.date).getUTCSeconds()
                 });
                 
                 console.log('DatesManager: установлена базовая дата (timestamp):', dateObj.date);
             } catch (error) {
                 console.error('Error setting active date:', error);
-                window.appState.baseDate = Date.now();
+                window.appState.baseDate = window.timeUtils.nowTimestamp();
             }
         }
         
-        // ИЗМЕНЕНО: Используем переданный параметр useExactTime
         this.recalculateCurrentDay(useExactTime);
         
         console.log('currentDay после recalculate:', window.appState.currentDay);
         
         this.updateCurrentDayElement();
         
-        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Обновляем список дат ДО пересоздания элементов
         if (window.dataManager && window.dataManager.updateDateList) {
             window.dataManager.updateDateList();
         }
@@ -205,7 +203,6 @@ class DatesManager {
         
         this.updateTodayButton();
         
-        // Обновляем сводную информацию
         if (window.summaryManager && window.summaryManager.updateSummary) {
             setTimeout(() => {
                 window.summaryManager.updateSummary();
@@ -216,66 +213,53 @@ class DatesManager {
     }
     
     recalculateCurrentDay(useExactTime = false) {
-        console.log('=== ПЕРЕСЧЕТ CURRENTDAY (гарантированный) ===');
+        console.log('=== ПЕРЕСЧЕТ CURRENTDAY (UTC) ===');
         console.log('useExactTime:', useExactTime);
         
-        // Проверяем baseDate - если это timestamp, преобразуем в Date
-        let baseDateObj;
+        // Получаем текущую дату визора в UTC
+        const currentDateUTC = window.timeUtils.toUTC(window.appState.currentDate);
+        
+        // Получаем базовую дату в UTC
+        let baseDateUTC;
         if (typeof window.appState.baseDate === 'number') {
-            baseDateObj = new Date(window.appState.baseDate);
+            baseDateUTC = new Date(window.appState.baseDate);
         } else if (window.appState.baseDate instanceof Date) {
-            baseDateObj = window.appState.baseDate;
+            baseDateUTC = window.appState.baseDate;
         } else {
-            console.warn('baseDate некорректен! Устанавливаем на сегодня');
-            window.appState.baseDate = new Date().getTime();
-            baseDateObj = new Date();
+            console.warn('baseDate некорректен! Устанавливаем на сейчас (UTC)');
+            window.appState.baseDate = window.timeUtils.nowTimestamp();
+            baseDateUTC = window.timeUtils.nowUTC();
         }
         
-        // Проверяем currentDate
-        let currentDateObj;
-        if (window.appState.currentDate instanceof Date) {
-            currentDateObj = window.appState.currentDate;
-        } else {
-            console.warn('currentDate некорректен! Устанавливаем на сегодня');
-            window.appState.currentDate = new Date();
-            currentDateObj = window.appState.currentDate;
-        }
-        
-        console.log('ДЕБАГ recalculateCurrentDay:');
-        console.log('  baseDateObj (локальное):', baseDateObj.toString());
-        console.log('  currentDateObj (локальное):', currentDateObj.toString());
+        console.log('ДЕБАГ recalculateCurrentDay (UTC):');
+        console.log('  baseDateUTC:', baseDateUTC.toUTCString());
+        console.log('  currentDateUTC:', currentDateUTC.toUTCString());
+        console.log('  baseDate (timestamp):', window.appState.baseDate);
+        console.log('  currentDate (timestamp):', currentDateUTC.getTime());
         
         let daysDiff;
         
         if (useExactTime) {
-            // ТОЧНЫЙ расчет разницы в днях (с дробной частью для учета времени)
-            const baseLocalStartOfDay = new Date(
-                baseDateObj.getFullYear(),
-                baseDateObj.getMonth(),
-                baseDateObj.getDate(),
-                0, 0, 0, 0
-            );
-            
-            const timeDiffMs = currentDateObj.getTime() - baseLocalStartOfDay.getTime();
+            // ТОЧНЫЙ расчет разницы в днях в UTC (с дробной частью)
+            const baseStartOfDayUTC = window.timeUtils.getStartOfDayUTC(baseDateUTC);
+            const timeDiffMs = currentDateUTC.getTime() - baseStartOfDayUTC.getTime();
             daysDiff = timeDiffMs / (1000 * 60 * 60 * 24); // Дробное значение
             
-            console.log('Расчет с точным временем (дробный):', daysDiff);
+            console.log('Расчет с точным временем (UTC дробный):', daysDiff);
         } else {
-            // ЦЕЛЫЙ расчет разницы в днях (только даты, без времени)
-            // ВАЖНО: Используем специальную функцию для расчета целых дней
-            
-            daysDiff = this.calculateWholeDaysBetween(baseDateObj, currentDateObj);
-            console.log('Расчет без времени (целый):', daysDiff);
+            // ЦЕЛЫЙ расчет разницы в днях в UTC (только даты)
+            daysDiff = window.timeUtils.getDaysBetweenUTC(baseDateUTC, currentDateUTC);
+            console.log('Расчет без времени (UTC целый):', daysDiff);
         }
         
         window.appState.currentDay = daysDiff;
         window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
         
-        console.log('Результат:');
+        console.log('Результат (UTC):');
         console.log('  currentDay:', window.appState.currentDay);
         
         if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
-            console.error('ERROR: currentDay вычислен некоррекктно! Устанавливаем 0');
+            console.error('ERROR: currentDay вычислен некорректно! Устанавливаем 0');
             window.appState.currentDay = 0;
         }
         
@@ -283,36 +267,6 @@ class DatesManager {
         window.appState.save();
         
         return window.appState.currentDay;
-    }
-
-    // НОВЫЙ МЕТОД: Расчет целых дней между двумя датами
-    calculateWholeDaysBetween(date1, date2) {
-        // Приводим обе даты к локальному началу дня
-        const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
-        const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
-        
-        // Вычисляем разницу в миллисекундах
-        const timeDiff = d2.getTime() - d1.getTime();
-        
-        // Конвертируем в дни и округляем
-        const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
-        
-        // Дополнительная проверка: используем математику с датами
-        // Это более надежный способ для целых дней
-        const yearDiff = d2.getFullYear() - d1.getFullYear();
-        const monthDiff = d2.getMonth() - d1.getMonth();
-        const dateDiff = d2.getDate() - d1.getDate();
-        
-        const calculatedDays = yearDiff * 365 + monthDiff * 30 + dateDiff;
-        
-        console.log('calculateWholeDaysBetween:');
-        console.log('  d1:', d1.toString());
-        console.log('  d2:', d2.toString());
-        console.log('  timeDiff способ:', daysDiff);
-        console.log('  математический способ:', calculatedDays);
-        
-        // Возвращаем результат через timeDiff, так как он более точен
-        return daysDiff;
     }
     
     addNote(content) {
@@ -323,7 +277,7 @@ class DatesManager {
         
         const note = {
             id: window.appState.generateId(),
-            date: window.appState.currentDate.getTime(), // Сохраняем как timestamp
+            date: window.appState.currentDate.getTime(), // Сохраняем как UTC timestamp
             content: content.trim()
         };
         
@@ -346,13 +300,16 @@ class DatesManager {
         } else if (typeof date === 'number') {
             targetTimestamp = date;
         } else {
-            targetTimestamp = new Date(date).getTime();
+            targetTimestamp = window.timeUtils.parseStringToUTC(date).getTime();
         }
         
+        // Используем TimeUtils для сравнения дат в UTC
+        const targetStart = window.timeUtils.getStartOfDayUTC(targetTimestamp);
+        const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000);
+        
         return window.appState.data.notes.filter(note => {
-            const noteDate = new Date(note.date);
-            const targetDate = new Date(targetTimestamp);
-            return noteDate.toDateString() === targetDate.toDateString();
+            const noteTime = note.date;
+            return noteTime >= targetStart.getTime() && noteTime < targetEnd.getTime();
         });
     }
     
@@ -404,11 +361,16 @@ class DatesManager {
     }
     
     navigateDay(delta) {
-        console.log('=== navigateDay(' + delta + ') вызван ===');
-        console.log('До: currentDate:', window.appState.currentDate);
+        console.log('=== navigateDay(' + delta + ') вызван (UTC) ===');
+        console.log('До: currentDate:', window.appState.currentDate.toUTCString());
         console.log('До: currentDay:', window.appState.currentDay);
         
-        window.appState.currentDate.setDate(window.appState.currentDate.getDate() + delta);
+        // Создаем новую дату (не мутируем существующую)
+        const newDate = new Date(window.appState.currentDate);
+        newDate.setUTCDate(newDate.getUTCDate() + delta);
+        
+        window.appState.currentDate = window.timeUtils.toUTC(newDate);
+        
         this.recalculateCurrentDay(false); // Навигация по дням использует целые числа
         window.waves.updatePosition();
         window.grid.createGrid();
@@ -416,12 +378,11 @@ class DatesManager {
         window.grid.updateGridNotesHighlight();
         window.appState.save();
         
-        console.log('После: currentDate:', window.appState.currentDate);
+        console.log('После: currentDate:', window.appState.currentDate.toUTCString());
         console.log('После: currentDay:', window.appState.currentDay);
         
         this.updateTodayButton();
         
-        // Обновляем сводную информацию
         if (window.summaryManager && window.summaryManager.updateSummary) {
             setTimeout(() => {
                 window.summaryManager.updateSummary();
@@ -432,28 +393,25 @@ class DatesManager {
     }
     
     goToToday() {
-        console.log('=== goToToday() вызван ===');
-        console.log('До: currentDate:', window.appState.currentDate);
+        console.log('=== goToToday() вызван (UTC) ===');
+        console.log('До: currentDate:', window.appState.currentDate.toUTCString());
         console.log('До: baseDate:', window.appState.baseDate);
         console.log('До: currentDay:', window.appState.currentDay);
-        console.log('До: activeDateId:', window.appState.activeDateId);
         
-        const today = new Date();
-        // Устанавливаем на начало дня (00:00:00)
-        today.setHours(0, 0, 0, 0);
-        window.appState.currentDate = new Date(today);
+        // Получаем начало текущего дня в UTC
+        const todayStartUTC = window.timeUtils.getStartOfDayUTC(window.timeUtils.nowUTC());
         
-        console.log('После установки currentDate (начало дня):', window.appState.currentDate);
+        window.appState.currentDate = new Date(todayStartUTC);
+        
+        console.log('После установки currentDate (UTC начало дня):', window.appState.currentDate.toUTCString());
         
         // Пересчитываем с целыми числами (без учета времени)
         this.recalculateCurrentDay(false);
         
-        console.log('После recalculateCurrentDay:');
+        console.log('После recalculateCurrentDay (UTC):');
         console.log('  currentDay (целое число):', window.appState.currentDay);
-        console.log('  baseDate:', window.appState.baseDate);
-        console.log('  currentDate:', window.appState.currentDate);
+        console.log('  currentDate (UTC):', window.appState.currentDate.toUTCString());
         
-        // ВАЖНО: Полностью пересоздаем сетку, чтобы линии стали на целые позиции
         if (window.grid && window.grid.createGrid) {
             window.grid.createGrid();
         }
@@ -464,7 +422,6 @@ class DatesManager {
         
         this.updateTodayButton();
         
-        // Обновляем сводную информацию
         if (window.summaryManager && window.summaryManager.updateSummary) {
             setTimeout(() => {
                 window.summaryManager.updateSummary();
@@ -474,28 +431,26 @@ class DatesManager {
         console.log('=== goToToday() завершен ===');
     }
     
-    // НОВЫЙ МЕТОД: Установить текущее точное время
     goToNow() {
-        console.log('=== goToNow() вызван ===');
-        console.log('До: currentDate:', window.appState.currentDate);
+        console.log('=== goToNow() вызван (UTC) ===');
+        console.log('До: currentDate:', window.appState.currentDate.toUTCString());
         console.log('До: baseDate:', window.appState.baseDate);
         console.log('До: currentDay:', window.appState.currentDay);
-        console.log('До: activeDateId:', window.appState.activeDateId);
         
-        // Устанавливаем точное текущее время (с секундами и миллисекундами)
-        const now = new Date();
-        window.appState.currentDate = new Date(now);
+        // Получаем текущее точное время в UTC
+        window.appState.currentDate = window.timeUtils.nowUTC();
         
-        console.log('После установки currentDate (точное время):', window.appState.currentDate);
-        console.log('Часы:', now.getHours(), 'Минуты:', now.getMinutes(), 'Секунды:', now.getSeconds(), 'Милисекунды:', now.getMilliseconds());
+        console.log('После установки currentDate (UTC точное время):', window.appState.currentDate.toUTCString());
+        console.log('UTC Часы:', window.appState.currentDate.getUTCHours(), 
+                   'Минуты:', window.appState.currentDate.getUTCMinutes(), 
+                   'Секунды:', window.appState.currentDate.getUTCSeconds());
         
         // Пересчитываем с дробными числами (с учетом времени)
         this.recalculateCurrentDay(true);
         
-        console.log('После recalculateCurrentDay:');
+        console.log('После recalculateCurrentDay (UTC):');
         console.log('  currentDay (с точностью до секунд):', window.appState.currentDay);
-        console.log('  baseDate:', window.appState.baseDate);
-        console.log('  currentDate:', window.appState.currentDate);
+        console.log('  currentDate (UTC):', window.appState.currentDate.toUTCString());
         
         window.grid.createGrid();
         window.grid.updateCenterDate();
@@ -504,7 +459,6 @@ class DatesManager {
         
         this.updateTodayButton();
         
-        // Обновляем сводную информацию
         if (window.summaryManager && window.summaryManager.updateSummary) {
             setTimeout(() => {
                 window.summaryManager.updateSummary();
@@ -514,29 +468,24 @@ class DatesManager {
         console.log('=== goToNow() завершен ===');
     }
     
-    // ОБНОВЛЕННЫЙ МЕТОД: Установка даты из инпута с поддержкой секунд и автоматическим определением режима
     setDateFromInput() {
         const dateValue = this.elements.mainDateInput.value;
         if (dateValue) {
-            // Используем новую функцию для преобразования строки с секундами в timestamp
-            const newTimestamp = window.dom.stringFromDateTimeStringToTimestamp(dateValue);
-            const newDate = new Date(newTimestamp);
+            // Используем TimeUtils для парсинга в UTC
+            const timestamp = window.timeUtils.parseFromDateTimeInput(dateValue);
+            window.appState.currentDate = new Date(timestamp);
             
-            // Сохраняем полное время с секундами
-            window.appState.currentDate = new Date(newDate);
+            // Проверяем, является ли время началом дня в UTC
+            const hours = window.appState.currentDate.getUTCHours();
+            const minutes = window.appState.currentDate.getUTCMinutes();
+            const seconds = window.appState.currentDate.getUTCSeconds();
+            const milliseconds = window.appState.currentDate.getUTCMilliseconds();
             
-            // АВТОМАТИЧЕСКОЕ ОПРЕДЕЛЕНИЕ: если время 00:00:00 - целые, иначе дробные
-            const hours = newDate.getHours();
-            const minutes = newDate.getMinutes();
-            const seconds = newDate.getSeconds();
-            const milliseconds = newDate.getMilliseconds();
-            
-            // Проверяем, является ли время началом дня (включая секунды)
             const isStartOfDay = hours === 0 && minutes === 0 && seconds === 0 && milliseconds === 0;
             
-            console.log('Время в инпуте:', 
+            console.log('Время в инпуте (UTC):', 
                 `Часы: ${hours}, Минуты: ${minutes}, Секунды: ${seconds}, Мс: ${milliseconds}`);
-            console.log('Начало дня?:', isStartOfDay);
+            console.log('Начало дня в UTC?:', isStartOfDay);
             
             // Пересчитываем с учетом времени
             this.recalculateCurrentDay(!isStartOfDay);
@@ -548,7 +497,6 @@ class DatesManager {
             
             this.updateTodayButton();
             
-            // Обновляем сводную информацию
             if (window.summaryManager && window.summaryManager.updateSummary) {
                 setTimeout(() => {
                     window.summaryManager.updateSummary();
@@ -556,7 +504,10 @@ class DatesManager {
             }
             
             console.log('Текущий день после установки:', window.appState.currentDay);
-            console.log('Форматированный:', window.dom.formatCurrentDayWithSeconds(window.appState.currentDay));
+            console.log('Форматированный:', window.dom.formatCurrentDayWithSeconds(
+                window.appState.currentDay, 
+                window.appState.currentDate
+            ));
         }
     }
     
@@ -564,11 +515,11 @@ class DatesManager {
         window.appState.isProgrammaticDateChange = true;
         
         if (newDate instanceof Date) {
-            window.appState.currentDate = new Date(newDate);
+            window.appState.currentDate = window.timeUtils.toUTC(newDate);
         } else if (typeof newDate === 'number') {
             window.appState.currentDate = new Date(newDate);
         } else {
-            window.appState.currentDate = new Date(newDate);
+            window.appState.currentDate = window.timeUtils.parseStringToUTC(newDate);
         }
         
         // По умолчанию используем целые числа при установке даты
@@ -580,7 +531,6 @@ class DatesManager {
         
         this.updateTodayButton();
         
-        // Обновляем сводную информацию
         if (window.summaryManager && window.summaryManager.updateSummary) {
             setTimeout(() => {
                 window.summaryManager.updateSummary();
@@ -593,32 +543,18 @@ class DatesManager {
     }
     
     getCurrentDate() {
-        return new Date();
+        // Возвращаем в UTC
+        return window.timeUtils.nowUTC();
     }
     
     getWeekday(date) {
-        let dateObj;
-        if (typeof date === 'number') {
-            dateObj = new Date(date);
-        } else if (date instanceof Date) {
-            dateObj = date;
-        } else {
-            dateObj = new Date(date);
-        }
-        return dateObj.getDay();
+        // Используем TimeUtils
+        return window.timeUtils.getWeekdayUTC(date);
     }
     
     getWeekdayName(date, full = false) {
-        let dateObj;
-        if (typeof date === 'number') {
-            dateObj = new Date(date);
-        } else if (date instanceof Date) {
-            dateObj = date;
-        } else {
-            dateObj = new Date(date);
-        }
-        const weekday = this.getWeekday(dateObj);
-        return full ? window.appState.config.weekdaysFull[weekday] : window.appState.config.weekdays[weekday];
+        // Используем TimeUtils
+        return window.timeUtils.getWeekdayNameUTC(date, full);
     }
     
     cleanupEditingHandlers() {
@@ -630,13 +566,15 @@ class DatesManager {
         });
     }
     
-    // ОБНОВЛЕННЫЙ МЕТОД: Всегда отображаем с 5 знаками после запятой
     updateCurrentDayElement() {
         const currentDayElement = document.getElementById('currentDay');
         if (currentDayElement) {
             const currentDayValue = window.appState.currentDay || 0;
-            // ВСЕГДА отображаем с 5 знаками после запятой (для секунд)
-            currentDayElement.textContent = window.dom.formatCurrentDayWithSeconds(currentDayValue);
+            // Используем TimeUtils для форматирования
+            currentDayElement.textContent = window.timeUtils.formatCurrentDayWithSecondsUTC(
+                currentDayValue, 
+                window.appState.currentDate
+            );
             console.log('DatesManager: DOM элемент currentDay обновлен:', currentDayElement.textContent);
         } else {
             console.warn('DatesManager: элемент currentDay не найден в DOM');
@@ -644,26 +582,25 @@ class DatesManager {
     }
     
     forceInitialize() {
-        console.log('=== FORCE INITIALIZE ===');
+        console.log('=== FORCE INITIALIZE (UTC) ===');
         
-        // ИЗМЕНЕНО: При инициализации устанавливаем ТОЧНОЕ время (сейчас), а не начало дня
-        const now = new Date();
-        window.appState.currentDate = new Date(now);
+        // Устанавливаем ТОЧНОЕ время в UTC
+        window.appState.currentDate = window.timeUtils.nowUTC();
         
         this.recalculateCurrentDay(true); // При инициализации используем ДРОБНЫЕ числа (учитываем время)
         
         if (window.appState.activeDateId) {
-            console.log('Принудительная установка активной даты:', window.appState.activeDateId);
-            this.setActiveDate(window.appState.activeDateId, true); // Используем точное время
+            console.log('Принудительная установка активной даты (UTC):', window.appState.activeDateId);
+            this.setActiveDate(window.appState.activeDateId, true);
         } else if (window.appState.data.dates.length > 0) {
-            console.log('Нет активной даты, выбираем первую из списка');
+            console.log('Нет активной даты, выбираем первую из списка (UTC)');
             const firstDateId = window.appState.data.dates[0].id;
             window.appState.activeDateId = firstDateId;
-            this.setActiveDate(firstDateId, true); // Используем точное время
+            this.setActiveDate(firstDateId, true);
         } else {
-            console.log('Нет дат в списке, устанавливаем базовую дату');
-            window.appState.baseDate = new Date().getTime();
-            this.recalculateCurrentDay(true); // Используем точное время
+            console.log('Нет дат в списке, устанавливаем базовую дату (UTC)');
+            window.appState.baseDate = window.timeUtils.nowTimestamp();
+            this.recalculateCurrentDay(true);
         }
         
         if (window.waves && window.waves.updatePosition) {
@@ -687,9 +624,10 @@ class DatesManager {
         
         this.updateTodayButton();
         
-        console.log('=== FORCE INITIALIZE завершен ===');
+        console.log('=== FORCE INITIALIZE завершен (UTC) ===');
         console.log('activeDateId:', window.appState?.activeDateId);
         console.log('currentDay:', window.appState?.currentDay);
+        console.log('currentDate (UTC):', window.appState?.currentDate?.toUTCString());
     }
 }
 
