@@ -185,7 +185,7 @@
 .date-labels {
     bottom: 30px;
     transform: translateX(-50%);
-    color: var(--text-color);
+    color: var(--text-secondary);
 }
 
 .graph-container.dark-mode .date-labels {
