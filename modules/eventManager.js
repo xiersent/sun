@@ -45,7 +45,7 @@ class EventManager {
                     
                     if (dateId && window.dates) {
                         // 1. Устанавливаем активную дату
-                        window.dates.setActiveDate(dateId, false);
+                        window.dates.setActiveDate(dateId, true);
                         
                         // После установки даты обновляем сводку
                         setTimeout(() => {

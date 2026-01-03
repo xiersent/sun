@@ -54,7 +54,7 @@ createGrid() {
     this.gridContainer.style.left = '0';
     
     // 3. ПРИМЕНЯЕМ СМЕЩЕНИЕ КО ВСЕЙ СЕТКЕ
-    this.gridContainer.style.transform = `translateX(${timeOffsetPx}px)`;
+    this.gridContainer.style.transform = `translateX(${-timeOffsetPx}px)`;
     this.gridContainer.style.transition = 'none';
     
     // 4. СОЗДАЕМ ЛИНИИ СЕТКИ И МЕТКИ (БЕЗ УЧЕТА ДРОБНОГО СМЕЩЕНИЯ)
