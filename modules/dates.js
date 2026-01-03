@@ -356,64 +356,91 @@ setActiveDate(dateId, useExactTime = false) {
     }
     
 
-// modules/dates.js - исправленный recalculateCurrentDay
 recalculateCurrentDay(useExactTime = false) {
-    console.log('=== ПЕРЕСЧЕТ CURRENTDAY (ПОЛНОСТЬЮ ЛОКАЛЬНОЕ ВРЕМЯ) ===');
-    console.log('useExactTime:', useExactTime);
+    console.log('=== ДЕТАЛЬНЫЙ ДЕБАГ ДРОБНОЙ ЧАСТИ ===');
     
+    // 1. Получаем currentDate
     const currentDate = window.appState.currentDate;
+    console.log('1. currentDate:');
+    console.log('   Локальное:', currentDate.toLocaleString());
+    console.log('   UTC:', currentDate.toUTCString());
+    console.log('   getTime():', currentDate.getTime());
+    console.log('   Часы (локально):', currentDate.getHours());
     
-    // ВАЖНО: baseDate должен быть объектом Date в ЛОКАЛЬНОМ времени
-	let baseDate;
-	if (typeof window.appState.baseDate === 'number') {
-		// timestamp -> локальное время
-		baseDate = new Date(window.appState.baseDate);
-	} else if (window.appState.baseDate instanceof Date) {
-		baseDate = new Date(window.appState.baseDate.getTime()); // Создаем копию
-	} else {
-		window.appState.baseDate = Date.now();
-		baseDate = new Date();
-	}
-    
-    console.log('ДЕБАГ recalculateCurrentDay (полностью локальное):');
-    console.log('  baseDate (локальное):', baseDate.toLocaleString());
-    console.log('  baseDate (getTime):', baseDate.getTime());
-    console.log('  baseDate (часы/минуты):', baseDate.getHours() + ':' + baseDate.getMinutes());
-    console.log('  currentDate (локальное):', currentDate.toLocaleString());
-    console.log('  currentDate (getTime):', currentDate.getTime());
-    console.log('  currentDate (часы/минуты):', currentDate.getHours() + ':' + currentDate.getMinutes());
-    
-    let daysDiff;
-    
-    if (useExactTime) {
-        // ТОЧНЫЙ расчет: разница в миллисекундах / день в миллисекундах
-        const diffMs = currentDate.getTime() - baseDate.getTime();
-        daysDiff = diffMs / (1000 * 60 * 60 * 24);
-        console.log('Точный расчет (локальное время ms):', diffMs, 'дней:', daysDiff);
+    // 2. Получаем baseDate
+    let baseDate;
+    if (typeof window.appState.baseDate === 'number') {
+        baseDate = new Date(window.appState.baseDate);
     } else {
-        // Расчет по ЛОКАЛЬНЫМ датам (без времени)
-        const baseStart = new Date(
-            baseDate.getFullYear(),
-            baseDate.getMonth(),
-            baseDate.getDate(),
-            0, 0, 0, 0
-        );
-        const currentStart = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            currentDate.getDate(),
-            0, 0, 0, 0
-        );
-        
-        const diffMs = currentStart.getTime() - baseStart.getTime();
-        daysDiff = diffMs / (1000 * 60 * 60 * 24);
-        console.log('Целый расчет (локальные даты):', diffMs, 'дней:', daysDiff);
+        baseDate = new Date(window.appState.baseDate);
+    }
+    
+    console.log('2. baseDate:');
+    console.log('   Локальное:', baseDate.toLocaleString());
+    console.log('   UTC:', baseDate.toUTCString());
+    console.log('   getTime():', baseDate.getTime());
+    console.log('   Часы (локально):', baseDate.getHours());
+    console.log('   Часы (UTC):', baseDate.getUTCHours());
+    
+    // 3. Создаем начала дней
+    const currentStart = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate(),
+        0, 0, 0, 0
+    );
+    
+    const baseStart = new Date(
+        baseDate.getFullYear(),
+        baseDate.getMonth(),
+        baseDate.getDate(),
+        0, 0, 0, 0
+    );
+    
+    console.log('3. Начала дней:');
+    console.log('   currentStart (локальное):', currentStart.toLocaleString());
+    console.log('   currentStart (UTC):', currentStart.toUTCString());
+    console.log('   currentStart.getTime():', currentStart.getTime());
+    
+    console.log('   baseStart (локальное):', baseStart.toLocaleString());
+    console.log('   baseStart (UTC):', baseStart.toUTCString());
+    console.log('   baseStart.getTime():', baseStart.getTime());
+    
+    // 4. Разница в миллисекундах
+    const diffMsExact = currentDate.getTime() - baseDate.getTime();
+    const diffMsStart = currentStart.getTime() - baseStart.getTime();
+    
+    console.log('4. Разница в мс:');
+    console.log('   Точная (с временем):', diffMsExact, 'мс');
+    console.log('   По началам дней:', diffMsStart, 'мс');
+    
+    // 5. Преобразуем в дни
+    const daysExact = diffMsExact / (1000 * 60 * 60 * 24);
+    const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
+    
+    console.log('5. Разница в днях:');
+    console.log('   Точная:', daysExact);
+    console.log('   По началам дней:', daysStart);
+    
+    // 6. Дробная часть
+    console.log('6. Дробные части:');
+    console.log('   Точная:', daysExact - Math.floor(daysExact));
+    console.log('   По началам дней:', daysStart - Math.floor(daysStart));
+    
+    // Вычисляем окончательный результат
+    let daysDiff;
+    if (useExactTime) {
+        daysDiff = daysExact;
+        console.log('Используем точную разницу:', daysDiff);
+    } else {
+        daysDiff = Math.round(daysStart); // Принудительно округляем
+        console.log('Используем округленную разницу по началам дней:', daysDiff);
     }
     
     window.appState.currentDay = daysDiff;
     window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
     
-    console.log('Результат: currentDay =', window.appState.currentDay);
+    console.log('Финальный currentDay:', window.appState.currentDay);
     
     this.updateCurrentDayElement();
     window.appState.save();
@@ -629,24 +656,23 @@ setDateFromInput() {
 forceInitialize() {
     console.log('=== FORCE INITIALIZE (ЛОКАЛЬНОЕ ВРЕМЯ) ===');
     
-    // Устанавливаем НАЧАЛО текущего дня в локальном времени
-    const todayStart = window.timeUtils.getStartOfDay(new Date());
-    window.appState.currentDate = new Date(todayStart);
+    // Устанавливаем ТОЧНОЕ локальное время
+    window.appState.currentDate = window.timeUtils.now();
     
-    this.recalculateCurrentDay(false); // Используем ЦЕЛЫЕ числа при инициализации
+    this.recalculateCurrentDay(true); // При инициализации используем ДРОБНЫЕ числа
     
     if (window.appState.activeDateId) {
-        console.log('Принудительная установка активной даты (целые дни):', window.appState.activeDateId);
-        this.setActiveDate(window.appState.activeDateId, false); // ИСПРАВЛЕНО: false для целых дней
+        console.log('Принудительная установка активной даты (локальное время):', window.appState.activeDateId);
+        this.setActiveDate(window.appState.activeDateId, true);
     } else if (window.appState.data.dates.length > 0) {
-        console.log('Нет активной даты, выбираем первую из списка (целые дни)');
+        console.log('Нет активной даты, выбираем первую из списка (локальное время)');
         const firstDateId = window.appState.data.dates[0].id;
         window.appState.activeDateId = firstDateId;
-        this.setActiveDate(firstDateId, false); // ИСПРАВЛЕНО: false для целых дней
+        this.setActiveDate(firstDateId, true);
     } else {
-        console.log('Нет дат в списке, устанавливаем базовую дату (целые дни)');
-        window.appState.baseDate = window.timeUtils.getStartOfDay(new Date()).getTime();
-        this.recalculateCurrentDay(false);
+        console.log('Нет дат в списке, устанавливаем базовую дату (локальное время)');
+        window.appState.baseDate = window.timeUtils.nowTimestamp();
+        this.recalculateCurrentDay(true);
     }
     
     if (window.waves && window.waves.updatePosition) {
@@ -670,10 +696,10 @@ forceInitialize() {
     
     this.updateTodayButton();
     
-    console.log('=== FORCE INITIALIZE завершен (целые дни) ===');
+    console.log('=== FORCE INITIALIZE завершен (локальное время) ===');
     console.log('activeDateId:', window.appState?.activeDateId);
     console.log('currentDay:', window.appState?.currentDay);
-    console.log('currentDate (локальное начало дня):', window.appState?.currentDate?.toLocaleString());
+    console.log('currentDate (локальное):', window.appState?.currentDate?.toLocaleString());
 }
     
 
