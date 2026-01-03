@@ -20,16 +20,24 @@ class DatesManager {
         });
     }
     
-    isCurrentDateOnVizor() {
-        const today = window.timeUtils.nowUTC();
-        const vizorDate = window.appState.currentDate;
-        
-        // Сравниваем даты в UTC (только год, месяц, день)
-        const todayStart = window.timeUtils.getStartOfDayUTC(today);
-        const vizorStart = window.timeUtils.getStartOfDayUTC(vizorDate);
-        
-        return todayStart.getTime() === vizorStart.getTime();
-    }
+	isCurrentDateOnVizor() {
+		const today = window.timeUtils.nowUTC();
+		const vizorDate = window.appState.currentDate;
+		
+		// Сравниваем даты в UTC (только год, месяц, день)
+		const todayStart = new Date(Date.UTC(
+			today.getUTCFullYear(),
+			today.getUTCMonth(),
+			today.getUTCDate()
+		));
+		const vizorStart = new Date(Date.UTC(
+			vizorDate.getUTCFullYear(),
+			vizorDate.getUTCMonth(),
+			vizorDate.getUTCDate()
+		));
+		
+		return todayStart.getTime() === vizorStart.getTime();
+	}
     
     updateTodayButton() {
         const btnToday = document.getElementById('btnToday');
