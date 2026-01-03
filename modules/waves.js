@@ -1,4 +1,4 @@
-// modules/waves.js - ПОЛНОСТЬЮ ОБНОВЛЕННЫЙ СИНХРОННО
+// modules/waves.js - ИСПРАВЛЕННЫЙ С УЧЕТОМ UTC И ДРОБНЫХ ЧАСТЕЙ
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -13,25 +13,31 @@ class WavesManager {
     
     init() {
         if (this.initialized) {
-            console.log('WavesManager: уже инициализирован, пропускаем');
+            console.log('WavesManager: уже инициализирован');
             return;
         }
         
-        console.log('WavesManager: инициализация...');
-        console.log('currentDay при инициализации волн:', window.appState.currentDay);
-        console.log('baseDate при инициализации:', window.appState.baseDate);
-        console.log('currentDate при инициализации:', window.appState.currentDate);
+        console.log('=== WavesManager: инициализация (UTC) ===');
+        console.log('currentDay при инициализации:', window.appState.currentDay);
+        console.log('baseDate (UTC):', new Date(window.appState.baseDate).toUTCString());
+        console.log('currentDate (UTC):', window.appState.currentDate.toUTCString());
         
         this.createVisibleWaveElements();
         this.updatePosition();
         this.initialized = true;
         
-        console.log('WavesManager: инициализация завершена, currentDay:', window.appState.currentDay);
+        console.log('WavesManager: инициализация завершена');
     }
     
+    /**
+     * Рассчитывает необходимое количество периодов для бесконечного эффекта
+     * @param {number} periodPx - Период в пикселях
+     * @returns {number} Количество периодов для рендеринга
+     */
     calculateRequiredPeriods(periodPx) {
         const viewportWidth = window.appState.graphWidth;
         
+        // Для маленьких периодов рендерим больше периодов
         if (periodPx < 250) {
             return 30;
         }
@@ -48,14 +54,21 @@ class WavesManager {
             return 10;
         }
         
+        // Для больших периодов рендерим минимум 3 периода
         const periodsToCoverViewport = Math.ceil(viewportWidth / periodPx);
         const safetyMargin = 3;
         
-        return Math.max(6, periodsToCoverViewport + safetyMargin);
+        return Math.max(3, periodsToCoverViewport + safetyMargin);
     }
     
+    /**
+     * Проверяет, включена ли группа, содержащая волну
+     * @param {string|number} waveId - ID волны
+     * @returns {boolean} true если группа включена
+     */
     isWaveGroupEnabled(waveId) {
         const waveIdStr = String(waveId);
+        
         for (const group of window.appState.data.groups) {
             if (group.waves && group.waves.some(wId => String(wId) === waveIdStr)) {
                 if (group.enabled) {
@@ -63,13 +76,17 @@ class WavesManager {
                 }
             }
         }
+        
         return false;
     }
     
+    /**
+     * Создает элементы всех видимых волн
+     */
     createVisibleWaveElements() {
         console.log('WavesManager: создание видимых элементов волн...');
-        console.log('currentDay при создании волн:', window.appState.currentDay);
         
+        // Очищаем старые элементы
         document.querySelectorAll('.wave-container').forEach(c => c.remove());
         document.querySelectorAll('.wave-label').forEach(l => l.remove());
         
@@ -79,6 +96,7 @@ class WavesManager {
         
         let createdCount = 0;
         
+        // Проверяем, есть ли активная дата
         const hasActiveDate = window.appState.activeDateId && 
                              window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
         
@@ -87,49 +105,68 @@ class WavesManager {
             return;
         }
         
+        // Создаем элементы для всех видимых волн с включенными группами
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
             
             if (isWaveVisible && this.isWaveGroupEnabled(wave.id)) {
-                console.log('Создаем волну:', wave.id, wave.name);
+                console.log(`Создаем волну: ${wave.id} "${wave.name}"`);
                 this.createWaveElement(wave);
                 createdCount++;
             }
         });
         
-        console.log('WavesManager: создано элементов волн:', createdCount);
-        
-        this.updateWaveLabels();
+        console.log(`WavesManager: создано ${createdCount} элементов волн`);
     }
     
+    /**
+     * Создает элемент волны
+     * @param {Object} wave - Объект волны
+     */
     createWaveElement(wave) {
         const container = document.createElement('div');
         container.className = 'wave-container';
         container.id = `waveContainer${wave.id}`;
         
+        // Период в пикселях
         const periodPx = wave.period * window.appState.config.squareSize;
         
+        // Сколько периодов рендерить для бесконечного эффекта
         const totalPeriods = this.calculateRequiredPeriods(periodPx);
         const containerWidth = periodPx * totalPeriods;
         
+        // Настройка контейнера
         container.style.width = `${containerWidth}px`;
-        container.style.left = `-${periodPx}px`;
+        container.style.height = '100%';
+        container.style.position = 'absolute';
+        container.style.top = '0';
+        container.style.left = '0';
         
+        // Сохраняем данные для расчетов
         container.dataset.totalPeriods = totalPeriods;
         container.dataset.periodPx = periodPx;
         container.dataset.wavePeriod = wave.period;
+        container.dataset.waveId = wave.id;
         
+        // Создаем SVG для волны
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.classList.add('wave');
         svg.setAttribute('preserveAspectRatio', 'none');
         svg.setAttribute('viewBox', `0 0 ${containerWidth} ${window.appState.config.graphHeight}`);
+        svg.style.width = '100%';
+        svg.style.height = '100%';
         
+        // Создаем путь волны
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.classList.add('wave-path');
+        path.id = `wavePath${wave.id}`;
+        path.style.stroke = wave.color;
         
+        // Определяем стиль линии (из группы или из волны)
         let waveType = wave.type;
         
+        // Проверяем, есть ли у волны стиль от группы
         for (const group of window.appState.data.groups) {
             if (group.waves && Array.isArray(group.waves)) {
                 const waveInGroup = group.waves.some(waveId => {
@@ -145,48 +182,72 @@ class WavesManager {
             }
         }
         
+        // Применяем стиль линии
         if (waveType && waveType !== 'solid') {
             path.classList.add(window.dom.getWaveStyle(waveType));
         }
         
-        path.id = `wavePath${wave.id}`;
-        path.style.stroke = wave.color;
-        
+        // Применяем жирность
         const waveIdStr = String(wave.id);
         if (window.appState.waveBold[waveIdStr]) {
             path.classList.add('bold');
         }
         
+        // Генерируем форму волны
         this.generateSineWave(periodPx, path, container, totalPeriods);
         
+        // Добавляем элементы
         svg.appendChild(path);
         container.appendChild(svg);
-        document.getElementById('graphElement').appendChild(container);
         
+        // Добавляем в DOM
+        const graphElement = document.getElementById('graphElement');
+        if (graphElement) {
+            graphElement.appendChild(container);
+        }
+        
+        // Сохраняем ссылки
         this.waveContainers[wave.id] = container;
         this.wavePaths[wave.id] = path;
-        
         window.appState.periods[wave.id] = periodPx;
         
-        console.log(`Создана волна: ${wave.name} (${wave.period} дней)`);
+        console.log(`Создана волна: "${wave.name}" (${wave.period} дней)`);
         console.log(`  periodPx: ${periodPx}px, totalPeriods: ${totalPeriods}, containerWidth: ${containerWidth}px`);
     }
     
+    /**
+     * Генерирует синусоидальный путь волны
+     * @param {number} periodPx - Период в пикселях
+     * @param {SVGPathElement} wavePath - SVG path элемент
+     * @param {HTMLElement} waveContainer - Контейнер волны
+     * @param {number} totalPeriods - Количество периодов для рендеринга
+     */
     generateSineWave(periodPx, wavePath, waveContainer, totalPeriods = 3) {
         const totalWidth = periodPx * totalPeriods;
-        const points = 1500;
+        const points = 1500; // Количество точек для сглаживания
         const step = totalWidth / points;
+        
+        // Фазовая поправка (для смещения графика)
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
         
+        // Обновляем viewBox SVG
         const waveSvg = waveContainer.querySelector('.wave');
         if (waveSvg) {
             waveSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${window.appState.config.graphHeight}`);
         }
         
+        // Генерируем путь волны
         let pathData = `M0,${window.appState.config.graphHeight / 2} `;
+        
         for (let i = 1; i <= points; i++) {
             const x = i * step;
-            const y = window.appState.config.graphHeight / 2 - window.appState.config.amplitude * Math.sin(2 * Math.PI * (x + phaseOffsetPixels) / periodPx);
+            
+            // Синусоидальная функция
+            // y = centerY - amplitude * sin(2π * (x + phaseOffset) / period)
+            const y = window.appState.config.graphHeight / 2 - 
+                     window.appState.config.amplitude * 
+                     Math.sin(2 * Math.PI * (x + phaseOffsetPixels) / periodPx);
+            
             pathData += `L${x},${y} `;
         }
         
@@ -194,9 +255,18 @@ class WavesManager {
             wavePath.setAttribute('d', pathData);
         }
         
-        window.appState.periods[waveContainer.id.replace('waveContainer', '')] = periodPx;
+        // Сохраняем период для быстрого доступа
+        const waveId = waveContainer.dataset.waveId;
+        if (waveId) {
+            window.appState.periods[waveId] = periodPx;
+        }
     }
     
+    /**
+     * Обновляет контейнер волны (при изменении периода)
+     * @param {string} waveId - ID волны
+     * @param {number} periodPx - Период в пикселях
+     */
     updateWaveContainer(waveId, periodPx) {
         const container = this.waveContainers[waveId];
         if (container) {
@@ -204,7 +274,6 @@ class WavesManager {
             const containerWidth = periodPx * totalPeriods;
             
             container.style.width = `${containerWidth}px`;
-            container.style.left = `-${periodPx}px`;
             container.dataset.totalPeriods = totalPeriods;
             container.dataset.periodPx = periodPx;
             
@@ -219,7 +288,11 @@ class WavesManager {
             }
         }
     }
-
+    
+    /**
+     * Получает активные волны (видимые и с включенной группой)
+     * @returns {Array} Массив активных волн
+     */
     getActiveWaves() {
         return window.appState.data.waves.filter(wave => {
             const waveIdStr = String(wave.id);
@@ -228,106 +301,100 @@ class WavesManager {
             return isVisible && isGroupEnabled;
         });
     }
-
-    getPhaseAtTime(wave, date) {
-        // Возвращает фазу 0-1 в момент времени
-        const daysFromBase = this.calculateDaysBetweenDatesUTC(
-            window.appState.baseDate, 
-            date
-        );
-        return (daysFromBase % wave.period) / wave.period;
-    }
     
-    // НОВЫЙ МЕТОД: Расчет дней между датами с использованием timeUtils
-    calculateDaysBetweenDatesUTC(date1, date2) {
-        if (!date1 || !date2) return 0;
-        
-        // Используем timeUtils если доступен
-        if (window.timeUtils && window.timeUtils.getDaysBetweenExactUTC) {
-            return window.timeUtils.getDaysBetweenExactUTC(date1, date2);
-        }
-        
-        // Fallback для обратной совместимости
-        try {
-            const d1 = date1 instanceof Date ? date1 : new Date(date1);
-            const d2 = date2 instanceof Date ? date2 : new Date(date2);
-            
-            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
-                return 0;
-            }
-            
-            const timeDiff = d2.getTime() - d1.getTime();
-            return timeDiff / (1000 * 60 * 60 * 24);
-        } catch (error) {
-            console.error('Ошибка расчета дней между датами:', error);
-            return 0;
-        }
-    }
-    
+    /**
+     * Позиционирует ВСЕ волны на графике
+     * ВЫЗЫВАЕТСЯ при каждом изменении currentDay
+     */
     updatePosition() {
         console.log('WavesManager: updatePosition вызван');
         console.log('  currentDay:', window.appState.currentDay);
+        console.log('  fractional часть:', (window.appState.currentDay || 0) - Math.floor(window.appState.currentDay || 0));
         
-        if (window.appState.currentDay === undefined || window.appState.currentDay === null) {
-            console.warn('WavesManager: currentDay не установлен, вызываем dates.recalculateCurrentDay()');
-            if (window.dates && window.dates.recalculateCurrentDay) {
-                window.dates.recalculateCurrentDay(false);
-            }
-        }
-        
-        if (typeof window.appState.currentDay !== 'number' || isNaN(window.appState.currentDay)) {
-            console.error('WavesManager: currentDay некорректен! Исправляем на 0');
+        // Проверяем currentDay
+        if (window.appState.currentDay === undefined || 
+            window.appState.currentDay === null ||
+            isNaN(window.appState.currentDay)) {
+            
+            console.warn('WavesManager: currentDay некорректен, исправляем на 0');
             window.appState.currentDay = 0;
         }
         
-        console.log('WavesManager: updatePosition, currentDay:', window.appState.currentDay);
+        const currentDay = window.appState.currentDay || 0;
         
+        // Позиционируем каждую волну
         window.appState.data.waves.forEach(wave => {
-            const wavePeriodPixels = window.appState.periods[wave.id] || (wave.period * window.appState.config.squareSize);
+            const wavePeriodPixels = window.appState.periods[wave.id] || 
+                                   (wave.period * window.appState.config.squareSize);
             
-            let actualPosition = window.appState.currentDay * window.appState.config.squareSize % wavePeriodPixels;
+            // Если период нулевой или отрицательный - пропускаем
+            if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+                return;
+            }
             
-            if (actualPosition < 0) {
-                actualPosition = wavePeriodPixels + actualPosition;
+            // ВАЖНО: используем currentDay целиком (с дробной частью)
+            // Это дает точное позиционирование с учетом времени суток
+            
+            // Текущая позиция в пикселях от начала периода
+            let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+            
+            // Корректируем для отрицательных значений
+            if (currentPositionPx < 0) {
+                currentPositionPx = wavePeriodPixels + currentPositionPx;
             }
             
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            
             const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
             
-            if (this.waveContainers[wave.id]) {
-                this.waveContainers[wave.id].style.transition = 'none';
-                this.waveContainers[wave.id].style.transform = `translateX(${-actualPosition}px)`;
-                this.waveContainers[wave.id].style.display = shouldShow ? 'block' : 'none';
+            const container = this.waveContainers[wave.id];
+            if (container) {
+                // Применяем позиционирование
+                container.style.transition = 'none';
+                container.style.transform = `translateX(${-currentPositionPx}px)`;
+                container.style.display = shouldShow ? 'block' : 'none';
                 
-                if (this.wavePaths[wave.id]) {
-                    this.wavePaths[wave.id].classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+                // Обновляем жирность
+                const path = this.wavePaths[wave.id];
+                if (path) {
+                    path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
                 }
             }
         });
         
+        // Обновляем выноски
         this.updateWaveLabels();
+        
+        console.log('WavesManager: позиционирование завершено');
     }
     
+    /**
+     * Обновляет выноски волн по краям графика
+     */
     updateWaveLabels() {
         const now = Date.now();
         
+        // Защита от слишком частых обновлений
         if (now - this.lastUpdateTime < this.updateInterval) {
             return;
         }
+        
         this.lastUpdateTime = now;
         
         const leftContainer = document.querySelector('.wave-labels-left');
         const rightContainer = document.querySelector('.wave-labels-right');
         
-        if (!leftContainer || !rightContainer) return;
+        if (!leftContainer || !rightContainer) {
+            console.warn('WavesManager: контейнеры выносок не найдены');
+            return;
+        }
         
+        // Очищаем старые выноски
         leftContainer.innerHTML = '';
         rightContainer.innerHTML = '';
-        
         this.waveLabelElements = {};
         
+        // Создаем выноски для активных волн
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
@@ -335,9 +402,11 @@ class WavesManager {
             
             if (!shouldShow) return;
             
-            const leftY = this.calculateWaveYAtX(wave, 0);
-            const rightY = this.calculateWaveYAtX(wave, window.appState.graphWidth);
+            // Рассчитываем Y-координаты на левом и правом краях
+            const leftY = this.calculateWaveYAtX(wave, 0); // X = 0 (левый край)
+            const rightY = this.calculateWaveYAtX(wave, window.appState.graphWidth); // X = ширина (правый край)
             
+            // Создаем выноски, если волна пересекает край
             if (leftY >= 0 && leftY <= window.appState.config.graphHeight) {
                 this.createWaveLabel(wave, leftY, 'left', leftContainer);
             }
@@ -348,23 +417,39 @@ class WavesManager {
         });
     }
     
+    /**
+     * Рассчитывает Y-координату волны в заданной точке X
+     * @param {Object} wave - Объект волны
+     * @param {number} x - X-координата на графике (0..ширина)
+     * @returns {number} Y-координата
+     */
     calculateWaveYAtX(wave, x) {
-        const wavePeriodPixels = window.appState.periods[wave.id] || (wave.period * window.appState.config.squareSize);
+        const wavePeriodPixels = window.appState.periods[wave.id] || 
+                               (wave.period * window.appState.config.squareSize);
         
         if (!wavePeriodPixels || wavePeriodPixels <= 0) {
             return window.appState.config.graphHeight / 2;
         }
         
-        let translateX = window.appState.currentDay * window.appState.config.squareSize % wavePeriodPixels;
-        if (translateX < 0) {
-            translateX = wavePeriodPixels + translateX;
+        const currentDay = window.appState.currentDay || 0;
+        
+        // Текущее смещение волны (с учетом дробной части времени)
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        
+        // Корректируем для отрицательных значений
+        if (currentOffsetPx < 0) {
+            currentOffsetPx = wavePeriodPixels + currentOffsetPx;
         }
         
-        const relativeX = x + translateX;
+        // Относительная X-координата внутри периода волны
+        const relativeX = x + currentOffsetPx;
+        
+        // Фазовая поправка
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
         const centerY = window.appState.config.graphHeight / 2;
         const amplitude = window.appState.config.amplitude;
         
+        // Синусоидальная функция
         const y = centerY - amplitude * Math.sin(
             2 * Math.PI * (relativeX + phaseOffsetPixels) / wavePeriodPixels
         );
@@ -372,6 +457,14 @@ class WavesManager {
         return y;
     }
     
+    /**
+     * Создает выноску для волны
+     * @param {Object} wave - Объект волны
+     * @param {number} y - Y-координата
+     * @param {string} side - 'left' или 'right'
+     * @param {HTMLElement} container - Контейнер для выноски
+     * @returns {HTMLElement} Созданная выноска
+     */
     createWaveLabel(wave, y, side, container) {
         const labelId = `${wave.id}-${side}`;
         
@@ -383,13 +476,19 @@ class WavesManager {
         labelElement.dataset.waveId = wave.id;
         labelElement.dataset.side = side;
         
+        labelElement.style.position = 'absolute';
         labelElement.style.top = `${y}px`;
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = '#fff';
-        labelElement.style.opacity = '0.5'; // По умолчанию
-        labelElement.style.zIndex = '1'; // По умолчанию
+        labelElement.style.opacity = '0.5';
+        labelElement.style.zIndex = '1';
+        labelElement.style.padding = '2px 6px';
+        labelElement.style.borderRadius = '3px';
+        labelElement.style.fontSize = '11px';
+        labelElement.style.transform = 'translateY(-50%)';
+        labelElement.style.cursor = 'pointer';
         
-        // Создаем стрелку как отдельный элемент
+        // Стрелка
         const arrow = document.createElement('div');
         arrow.className = 'wave-label-arrow';
         arrow.style.position = 'absolute';
@@ -405,19 +504,18 @@ class WavesManager {
             arrow.style.right = '-6px';
             arrow.style.borderWidth = '4px 0 4px 6px';
             arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-            labelElement.style.flexDirection = 'row-reverse';
-            labelElement.style.right = '0'; // Прижимаем к правому краю родителя
-            labelElement.style.marginRight = '10px'; // Отступ от правого края
+            labelElement.style.right = '0';
+            labelElement.style.marginRight = '10px';
         } else {
             // Для правых выносок: стрелка слева
             arrow.style.left = '-6px';
             arrow.style.borderWidth = '4px 6px 4px 0';
             arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-            labelElement.style.flexDirection = 'row';
-            labelElement.style.left = '0'; // Прижимаем к левому краю родителя
-            labelElement.style.marginLeft = '10px'; // Отступ от левого края
+            labelElement.style.left = '0';
+            labelElement.style.marginLeft = '10px';
         }
         
+        // Текст
         const text = document.createElement('div');
         text.className = 'wave-label-text';
         text.textContent = wave.name;
@@ -431,7 +529,7 @@ class WavesManager {
         
         this.waveLabelElements[labelId] = labelElement;
         
-        // Обработчики для hover
+        // Обработчики событий
         labelElement.addEventListener('mouseenter', () => {
             labelElement.style.opacity = '1';
             labelElement.style.zIndex = '10';
@@ -450,24 +548,34 @@ class WavesManager {
         return labelElement;
     }
     
+    /**
+     * Обработчик клика по выноске
+     * @param {string|number} waveId - ID волны
+     */
     onWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);
         const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
         
+        // Переключаем видимость
         window.appState.waveVisibility[waveIdStr] = !isCurrentlyVisible;
         window.appState.save();
         
+        // Обновляем UI
         if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
             window.unifiedListManager.updateWavesList();
         }
         
+        // Пересоздаем элементы волн
         this.updatePosition();
         
         console.log(`Видимость волны ${waveId} изменена: ${!isCurrentlyVisible ? 'включена' : 'выключена'}`);
     }
     
+    /**
+     * Гарантированное создание элементов волн для активной даты
+     */
     createVisibleWaveElementsForActiveDate() {
-        console.log('WavesManager: гарантированное создание элементов волн для активной даты');
+        console.log('WavesManager: гарантированное создание элементов волн');
         
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
@@ -476,11 +584,13 @@ class WavesManager {
             const shouldShow = isWaveVisible && isGroupEnabled;
             
             if (shouldShow && !this.waveContainers[wave.id]) {
-                console.log('WavesManager: создаем отсутствующий элемент волны:', wave.id, wave.name);
+                console.log('Создаем отсутствующий элемент волны:', wave.id, wave.name);
                 this.createWaveElement(wave);
             }
         });
     }
+    
+    // ================ МЕТОДЫ ДЛЯ РАБОТЫ С ВОЛНАМИ ================
     
     addCustomWave(name, period, type, color) {
         if (!name || !period) {
@@ -499,20 +609,24 @@ class WavesManager {
             cornerColor: false
         };
         
+        // Добавляем волну
         window.appState.data.waves.push(newWave);
         window.appState.waveVisibility[newWave.id] = true;
         window.appState.waveBold[newWave.id] = false;
         window.appState.waveCornerColor[newWave.id] = false;
         
+        // Добавляем в группу по умолчанию
         const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
         if (defaultGroup) {
             defaultGroup.waves.unshift(newWave.id);
             defaultGroup.expanded = true;
         }
         
+        // Создаем элемент, если группа включена
         if (this.isWaveGroupEnabled(newWave.id)) {
             this.createWaveElement(newWave);
         }
+        
         this.updatePosition();
         window.appState.save();
         
@@ -524,36 +638,29 @@ class WavesManager {
         
         const waveIdStr = String(waveId);
         
-        const affectedGroups = [];
+        // Удаляем из групп
         window.appState.data.groups.forEach(group => {
-            if (group.waves && group.waves.some(w => String(w) === waveIdStr)) {
-                affectedGroups.push(group.id);
+            if (group.waves) {
+                group.waves = group.waves.filter(w => {
+                    const wStr = String(w);
+                    return wStr !== waveIdStr;
+                });
             }
         });
         
-        const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
-        
-        if (wave) {
-            window.appState.data.groups.forEach(group => {
-                if (group.waves) {
-                    group.waves = group.waves.filter(w => {
-                        const wStr = String(w);
-                        return wStr !== waveIdStr;
-                    });
-                }
-            });
-        }
-        
+        // Удаляем из массива волн
         window.appState.data.waves = window.appState.data.waves.filter(wave => {
             return String(wave.id) !== waveIdStr;
         });
         
+        // Удаляем из состояний
         delete window.appState.waveVisibility[waveIdStr];
         delete window.appState.waveBold[waveIdStr];
         delete window.appState.waveCornerColor[waveIdStr];
         delete window.appState.waveOriginalColors[waveIdStr];
         delete window.appState.periods[waveIdStr];
         
+        // Удаляем DOM элементы
         const waveContainer = this.waveContainers[waveIdStr];
         if (waveContainer) {
             waveContainer.remove();
@@ -561,6 +668,7 @@ class WavesManager {
             delete this.wavePaths[waveIdStr];
         }
         
+        // Удаляем выноски
         const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
         const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
         
@@ -574,18 +682,13 @@ class WavesManager {
         window.grid.updateGridNotesHighlight();
         this.updateCornerSquareColors();
         window.appState.save();
-        
-        affectedGroups.forEach(groupId => {
-            if (window.unifiedListManager && window.unifiedListManager.updateGroupStats) {
-                window.unifiedListManager.updateGroupStats(groupId);
-            }
-        });
     }
     
     updateCornerSquareColors() {
         let activeColor = 'red';
         let hasActiveWave = false;
         
+        // Ищем волну, окрашивающую края
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             if (window.appState.waveCornerColor[waveIdStr]) {
@@ -594,6 +697,7 @@ class WavesManager {
             }
         });
         
+        // Обновляем цвет краев
         document.querySelectorAll('.corner-square').forEach(square => {
             if (hasActiveWave) {
                 square.style.backgroundColor = activeColor;
@@ -606,6 +710,7 @@ class WavesManager {
     setWaveCornerColor(waveId, enabled) {
         const waveIdStr = String(waveId);
         
+        // Если включаем окраску для одной волны, выключаем у других
         if (enabled) {
             window.appState.data.waves.forEach(wave => {
                 const otherWaveIdStr = String(wave.id);
@@ -619,6 +724,7 @@ class WavesManager {
         
         this.updateCornerSquareColors();
         
+        // Обновляем чекбоксы в DOM
         document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
             const checkboxWaveIdStr = String(checkbox.dataset.id);
             if (checkboxWaveIdStr === waveIdStr) {
@@ -630,6 +736,7 @@ class WavesManager {
         
         window.appState.save();
         
+        // Обновляем UI
         if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
             window.unifiedListManager.updateWavesList();
         }
@@ -637,110 +744,11 @@ class WavesManager {
         console.log(`Окраска краев для волны ${waveId}: ${enabled ? 'включена' : 'выключена'}`);
     }
     
-    calculateIntersections(basePeriod, baseAmplitude, precision) {
-        // Используем timeUtils для расчета дней
-        const daysFromBase = window.timeUtils ? 
-            window.timeUtils.getDaysBetweenExactUTC(
-                window.appState.baseDate, 
-                window.appState.currentDate
-            ) : 0;
-        
-        const basePhase = (daysFromBase / basePeriod) * 2 * Math.PI;
-        const baseValue = Math.sin(basePhase) * baseAmplitude;
-        
-        window.appState.intersectionResults = [];
-        
-        const allWaves = this.generateIntersectionWaves();
-        let exactMatches = 0;
-        let closeMatches = 0;
-        
-        allWaves.forEach(wave => {
-            const wavePhase = (daysFromBase / wave.period) * 2 * Math.PI;
-            const waveValue = Math.sin(wavePhase) * wave.amplitude;
-            const difference = Math.abs(baseValue - waveValue);
-            const matchQuality = 1 - (difference / (baseAmplitude + wave.amplitude));
-            
-            if (matchQuality >= precision) {
-                const isExact = matchQuality >= 0.99;
-                if (isExact) exactMatches++;
-                else closeMatches++;
-                
-                window.appState.intersectionResults.push({
-                    period: wave.period,
-                    amplitude: wave.amplitude,
-                    value: waveValue,
-                    matchQuality: matchQuality,
-                    isExact: isExact,
-                    difference: difference
-                });
-            }
-        });
-        
-        window.appState.intersectionResults.sort((a, b) => b.matchQuality - a.matchQuality);
-        return {
-            results: window.appState.intersectionResults,
-            exactMatches,
-            closeMatches,
-            totalWaves: allWaves.length
-        };
-    }
-    
-    generateIntersectionWaves() {
-        const waves = [];
-        
-        for (let i = 1; i <= 1000; i++) {
-            const period = 0.1 + (i * 0.1);
-            const amplitude = 0.5 + (Math.sin(i * 0.1) * 0.5);
-            waves.push({ period, amplitude });
-        }
-        
-        for (let i = 1; i <= 500; i++) {
-            const period = 10 + (i * 0.5);
-            const amplitude = 0.8 + (Math.cos(i * 0.05) * 0.2);
-            waves.push({ period, amplitude });
-        }
-        
-        for (let i = 1; i <= 200; i++) {
-            const period = 100 + (i * 2);
-            const amplitude = 1.0 + (Math.sin(i * 0.02) * 0.3);
-            waves.push({ period, amplitude });
-        }
-        
-        return waves;
-    }
-    
-    addIntersectionWave(period, amplitude) {
-        const newWave = {
-            id: window.appState.generateId(),
-            name: `Совпадение ${period.toFixed(1)}д`,
-            period: period,
-            color: '#FF6B6B',
-            type: 'dashed',
-            visible: true,
-            bold: false,
-            cornerColor: false
-        };
-        
-        window.appState.data.waves.push(newWave);
-        window.appState.waveVisibility[newWave.id] = true;
-        window.appState.waveBold[newWave.id] = false;
-        window.appState.waveCornerColor[newWave.id] = false;
-        
-        const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
-        if (defaultGroup) {
-            defaultGroup.waves.unshift(newWave.id);
-            defaultGroup.expanded = true;
-        }
-        
-        if (this.isWaveGroupEnabled(newWave.id)) {
-            this.createWaveElement(newWave);
-        }
-        this.updatePosition();
-        window.appState.save();
-        
-        return newWave;
-    }
-    
+    /**
+     * Получает все волны в группе
+     * @param {Object} group - Объект группы
+     * @returns {Array} Массив волн
+     */
     getAllWavesInGroup(group) {
         const waves = [];
         
@@ -763,10 +771,68 @@ class WavesManager {
         return waves;
     }
     
-    // КОМПАТИБИЛЬНОСТЬ: Старый метод для обратной совместимости
+    /**
+     * Для обратной совместимости
+     */
     calculateDaysBetweenDates(date1, date2) {
-        return this.calculateDaysBetweenDatesUTC(date1, date2);
+        if (!window.timeUtils || !window.timeUtils.getDaysBetweenExactUTC) {
+            // Fallback
+            const d1 = date1 instanceof Date ? date1 : new Date(date1);
+            const d2 = date2 instanceof Date ? date2 : new Date(date2);
+            
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                return 0;
+            }
+            
+            const timeDiff = d2.getTime() - d1.getTime();
+            return timeDiff / (1000 * 60 * 60 * 24);
+        }
+        
+        return window.timeUtils.getDaysBetweenExactUTC(date1, date2);
     }
 }
 
 window.waves = new WavesManager();
+
+// Дебаг функция для проверки позиционирования
+window.debugWavePositioning = function(waveId) {
+    if (!window.waves || !window.appState) {
+        console.error('WavesManager не инициализирован');
+        return;
+    }
+    
+    const wave = window.appState.data.waves.find(w => w.id == waveId);
+    if (!wave) {
+        console.error(`Волна с ID ${waveId} не найдена`);
+        return;
+    }
+    
+    console.log(`=== ДЕБАГ ПОЗИЦИОНИРОВАНИЯ ВОЛНЫ "${wave.name}" ===`);
+    console.log('Параметры волны:');
+    console.log(`  ID: ${wave.id}`);
+    console.log(`  Период: ${wave.period} дней`);
+    console.log(`  periodPx: ${window.appState.periods[wave.id]}px`);
+    
+    console.log('\nСостояние приложения:');
+    console.log(`  currentDay: ${window.appState.currentDay}`);
+    console.log(`  currentDate (UTC): ${window.appState.currentDate.toUTCString()}`);
+    console.log(`  baseDate (UTC): ${new Date(window.appState.baseDate).toUTCString()}`);
+    
+    console.log('\nРасчеты:');
+    const wavePeriodPixels = window.appState.periods[wave.id];
+    const currentDay = window.appState.currentDay || 0;
+    
+    console.log(`  wavePeriodPixels: ${wavePeriodPixels}px`);
+    console.log(`  currentDay: ${currentDay}`);
+    console.log(`  currentPositionPx (расчет): ${(currentDay * window.appState.config.squareSize) % wavePeriodPixels}px`);
+    
+    const container = window.waves.waveContainers[wave.id];
+    if (container) {
+        console.log('\nDOM элемент:');
+        console.log(`  transform: ${container.style.transform}`);
+        console.log(`  display: ${container.style.display}`);
+        console.log(`  width: ${container.style.width}`);
+    }
+    
+    console.log('=== КОНЕЦ ДЕБАГА ===');
+};
