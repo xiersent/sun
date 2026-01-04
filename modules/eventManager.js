@@ -1,92 +1,92 @@
-// modules/eventManager.js
+// modules/eventManager.js - ВЕРСИЯ С JQUERY
 class EventManager {
     constructor() {
-        console.log('EventManager: инициализация...');
-        this.askedGroups = new Set(); // Храним ID групп, для которых уже спрашивали (не сохраняется)
+        console.log('EventManager: инициализация с jQuery...');
+        this.askedGroups = new Set();
+        this.$ = window.jQuery; // Сохраняем ссылку на jQuery
         this.setupGlobalHandlers();
         this.setupDateChangeObservers();
         this.setupIntersectionHandlers();
     }
     
     setupGlobalHandlers() {
-        console.log('EventManager: настройка глобальных обработчиков...');
+        console.log('EventManager: настройка глобальных обработчиков с jQuery...');
         
-        document.addEventListener('click', (e) => {
+        // Используем делегирование событий через jQuery
+        $(document).on('click', (e) => {
             this.handleClick(e);
         });
         
-        document.addEventListener('dragstart', (e) => this.handleDragStart(e));
-        document.addEventListener('dragover', (e) => this.handleDragOver(e));
-        document.addEventListener('drop', (e) => this.handleDrop(e));
-        document.addEventListener('dragend', (e) => this.handleDragEnd(e));
+        // Drag & Drop с jQuery
+        $(document)
+            .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing)', this.handleDragStart.bind(this))
+            .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
+            .on('drop', '.list-item--date[data-type="date"]', this.handleDrop.bind(this))
+            .on('dragend', '.list-item--date[data-type="date"]', this.handleDragEnd.bind(this));
     }
     
     setupDateChangeObservers() {
-        // Добавляем обновление сводки при клике на элементы дат
-        document.addEventListener('click', (e) => {
-            const dateListItem = e.target.closest('.list-item--date[data-type="date"]');
-            if (dateListItem && !dateListItem.classList.contains('list-item--editing')) {
-                if (!e.target.closest('button') && 
-                    !e.target.closest('input') && 
-                    !e.target.closest('textarea') && 
-                    !e.target.closest('select') &&
-                    !e.target.classList.contains('list-item__drag-handle') &&
-                    !e.target.classList.contains('delete-date-btn') &&
-                    !e.target.classList.contains('edit-btn') &&
-                    e.target.tagName !== 'BUTTON' &&
-                    e.target.tagName !== 'INPUT' &&
-                    e.target.tagName !== 'TEXTAREA' &&
-                    e.target.tagName !== 'SELECT') {
-                    
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const dateId = dateListItem.dataset.id;
-                    console.log('EventManager: выбор даты из списка:', dateId);
-                    
-                    if (dateId && window.dates) {
-                        // 1. Устанавливаем активную дату
-                        window.dates.setActiveDate(dateId, true);
-                        
-                        // После установки даты обновляем сводку
-                        setTimeout(() => {
-                            if (window.summaryManager && window.summaryManager.updateSummary) {
-                                window.summaryManager.updateSummary();
-                            }
-                        }, 100);
-                    }
-                    return;
-                }
+        // Обработка кликов по датам и заметкам через делегирование jQuery
+        $(document).on('click', '.list-item--date[data-type="date"]', (e) => {
+            const $target = $(e.target);
+            const $item = $target.closest('.list-item--date');
+            
+            // Проверяем, что клик не по кнопкам или полям ввода
+            if ($target.is('button, input, textarea, select, .list-item__drag-handle, .delete-date-btn, .edit-btn')) {
+                return;
             }
             
-            const noteItem = e.target.closest('.list-item--note');
-            if (noteItem && !e.target.closest('.delete-btn')) {
-                const noteDate = noteItem.dataset.date;
-                console.log('EventManager: клик по заметке, дата:', noteDate);
-                if (noteDate && window.dates) {
-                    const newDate = new Date(noteDate);
-                    window.dates.setDate(newDate);
+            if ($item.length && !$item.hasClass('list-item--editing')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const dateId = $item.data('id');
+                console.log('EventManager: выбор даты из списка:', dateId);
+                
+                if (dateId && window.dates) {
+                    window.dates.setActiveDate(dateId, true);
                     
-                    // После установки даты обновляем сводку
+                    // Обновляем сводку через setTimeout
                     setTimeout(() => {
                         if (window.summaryManager && window.summaryManager.updateSummary) {
                             window.summaryManager.updateSummary();
                         }
                     }, 100);
                 }
+            }
+        });
+        
+        // Обработка кликов по заметкам
+        $(document).on('click', '.list-item--note', (e) => {
+            const $target = $(e.target);
+            if ($target.hasClass('delete-btn') || $target.closest('.delete-btn').length) {
                 return;
+            }
+            
+            const $item = $(e.currentTarget);
+            const noteDate = $item.data('date');
+            console.log('EventManager: клик по заметке, дата:', noteDate);
+            
+            if (noteDate && window.dates) {
+                const newDate = new Date(noteDate);
+                window.dates.setDate(newDate);
+                
+                setTimeout(() => {
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
+                }, 100);
             }
         });
     }
     
     handleClick(e) {
-        const target = e.target;
-
-        // ДОБАВЛЕНО: Обновление сводной информации при навигации
-        if (target.id === 'btnPrevDay' || target.closest('#btnPrevDay') ||
-            target.id === 'btnNextDay' || target.closest('#btnNextDay') ||
-            target.id === 'btnToday' || target.closest('#btnToday') ||
-            target.id === 'btnNow' || target.closest('#btnNow') ||
-            target.id === 'btnSetDate' || target.closest('#btnSetDate')) {
+        const $target = $(e.target);
+        
+        // Обработка кнопок навигации с обновлением сводки
+        if ($target.is('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate') || 
+            $target.closest('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate').length) {
+            e.preventDefault();
             
             // После навигации обновляем сводную информацию
             setTimeout(() => {
@@ -96,34 +96,36 @@ class EventManager {
             }, 100);
         }
         
-        const actionBtn = target.closest('[data-action]');
-        if (actionBtn) {
+        // Обработка action-кнопок
+        const $actionBtn = $target.closest('[data-action]');
+        if ($actionBtn.length) {
             e.preventDefault();
             e.stopPropagation();
-            const action = actionBtn.dataset.action;
+            const action = $actionBtn.data('action');
             console.log('EventManager: клик по action-кнопке:', action);
             if (window.uiManager && action) {
-                window.uiManager.handleAction(action, actionBtn);
+                window.uiManager.handleAction(action, $actionBtn[0]);
                 return;
             }
         }
         
-        // ТАБЫ - ИСПРАВЛЕНА ЛОГИКА (делегируем UIManager)
-        if (target.classList.contains('tab-button')) {
+        // Обработка табов
+        if ($target.hasClass('tab-button')) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('EventManager: клик по табу:', target.dataset.tab);
+            console.log('EventManager: клик по табу:', $target.data('tab'));
             if (window.uiManager) {
-                window.uiManager.handleTabClick(target);
+                window.uiManager.handleTabClick($target[0]);
             }
             return;
         }
         
-        const expandCollapseBtn = target.closest('.expand-collapse-btn');
-        if (expandCollapseBtn) {
+        // Кнопка развернуть/свернуть группу
+        const $expandBtn = $target.closest('.expand-collapse-btn');
+        if ($expandBtn.length) {
             e.preventDefault();
             e.stopPropagation();
-            const id = expandCollapseBtn.dataset.id;
+            const id = $expandBtn.data('id');
             console.log('EventManager: развернуть/свернуть группу:', id);
             
             if (id && window.unifiedListManager) {
@@ -137,11 +139,12 @@ class EventManager {
             return;
         }
         
-        const groupDeleteBtn = target.closest('.delete-date-btn[data-type="group"]');
-        if (groupDeleteBtn) {
+        // Удаление группы
+        const $groupDeleteBtn = $target.closest('.delete-date-btn[data-type="group"]');
+        if ($groupDeleteBtn.length) {
             e.preventDefault();
             e.stopPropagation();
-            const id = groupDeleteBtn.dataset.id;
+            const id = $groupDeleteBtn.data('id');
             console.log('EventManager: удаление группы:', id);
             
             if (id && window.unifiedListManager) {
@@ -150,29 +153,32 @@ class EventManager {
             return;
         }
         
-        // ИСПРАВЛЕНО: проверяем ВСЕ edit-btn без фильтрации по data-type
-        const editBtn = target.closest('.edit-btn');
-        if (editBtn) {
+        // Кнопки редактирования (все типы)
+        const $editBtn = $target.closest('.edit-btn');
+        if ($editBtn.length) {
             e.preventDefault();
             e.stopPropagation();
-            const id = editBtn.dataset.id;
-            const type = editBtn.dataset.type || 'date';
+            const id = $editBtn.data('id');
+            const type = $editBtn.data('type') || 'date';
             
             console.log('EventManager: клик по кнопке редактирования:', type, id);
             
             if (window.unifiedListManager) {
-                const containerId = this.getContainerId(target);
+                const containerId = this.getContainerId($target[0]);
                 window.unifiedListManager.handleEditClick(id, type, containerId);
             }
             return;
         }
         
-        const deleteBtn = target.closest('.delete-date-btn, .delete-btn');
-        if (deleteBtn && !deleteBtn.closest('.list-item--note') && deleteBtn.dataset.type !== 'group') {
+        // Кнопки удаления (кроме заметок и групп)
+        const $deleteBtn = $target.closest('.delete-date-btn, .delete-btn');
+        if ($deleteBtn.length && 
+            !$target.closest('.list-item--note').length && 
+            $deleteBtn.data('type') !== 'group') {
             e.preventDefault();
             e.stopPropagation();
-            const id = deleteBtn.dataset.id;
-            const type = deleteBtn.dataset.type || 'date';
+            const id = $deleteBtn.data('id');
+            const type = $deleteBtn.data('type') || 'date';
             console.log('EventManager: клик по кнопке удаления:', type, id);
             if (window.unifiedListManager) {
                 window.unifiedListManager.handleDeleteClick(id, type);
@@ -180,445 +186,407 @@ class EventManager {
             return;
         }
         
-        const saveBtn = target.closest('.save-btn');
-        if (saveBtn) {
+        // Кнопки сохранения
+        const $saveBtn = $target.closest('.save-btn');
+        if ($saveBtn.length) {
             e.preventDefault();
             e.stopPropagation();
-            const id = saveBtn.dataset.id;
-            const type = saveBtn.dataset.type || 'date';
+            const id = $saveBtn.data('id');
+            const type = $saveBtn.data('type') || 'date';
             console.log('EventManager: клик по кнопке сохранения:', type, id);
             if (window.unifiedListManager) {
-                const containerId = this.getContainerId(target);
+                const containerId = this.getContainerId($target[0]);
                 window.unifiedListManager.handleSaveClick(id, type, containerId);
             }
             return;
         }
         
-        const cancelBtn = target.closest('.cancel-btn');
-        if (cancelBtn) {
+        // Кнопки отмены
+        const $cancelBtn = $target.closest('.cancel-btn');
+        if ($cancelBtn.length) {
             e.preventDefault();
             e.stopPropagation();
-            const id = cancelBtn.dataset.id;
-            const type = cancelBtn.dataset.type || 'date';
+            const id = $cancelBtn.data('id');
+            const type = $cancelBtn.data('type') || 'date';
             console.log('EventManager: клик по кнопки отмены:', type, id);
             if (window.unifiedListManager) {
-                const containerId = this.getContainerId(target);
+                const containerId = this.getContainerId($target[0]);
                 window.unifiedListManager.handleCancelClick(id, type, containerId);
             }
             return;
         }
         
-        if (target.classList.contains('wave-visibility-check')) {
+        // Чекбокс видимости волны
+        if ($target.hasClass('wave-visibility-check')) {
             e.stopPropagation();
-            const waveId = target.dataset.id;
-            const isChecked = target.checked;
+            const waveId = $target.data('id');
+            const isChecked = $target.prop('checked');
             console.log('EventManager: изменение видимости волны:', waveId, isChecked);
             
-            // ОСНОВНАЯ НОВАЯ ЛОГИКА
-            if (isChecked && window.waves && window.appState) {
-                // 1. Проверить, включена ли группа этой волны
-                const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
-                
-                if (!isGroupEnabled) {
-                    // 2. Найти группу для этой волны
-                    const groupId = this.findGroupForWave(waveId);
-                    
-                    if (groupId && !this.askedGroups.has(groupId)) {
-                        // 3. Получить имя группы
-                        const group = window.appState.data.groups.find(g => g.id === groupId);
-                        const groupName = group ? group.name : 'Неизвестная группа';
-                        
-                        // 4. Спросить пользователя
-                        const shouldEnableGroup = confirm(`Группа "${groupName}" отключена. Включить её для отображения колоска?`);
-                        
-                        if (shouldEnableGroup) {
-                            // 5. Включить группу
-                            if (group) {
-                                group.enabled = true;
-                                console.log('EventManager: группа включена:', groupId);
-                                
-                                // Сохраняем состояние видимости волны
-                                const waveIdStr = String(waveId);
-                                window.appState.waveVisibility[waveIdStr] = true;
-                                window.appState.save();
-                                
-                                // Обновить UI группы
-                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                                    setTimeout(() => {
-                                        window.unifiedListManager.updateWavesList();
-                                    }, 50);
-                                }
-                                
-                                // Пересоздать элементы волн
-                                setTimeout(() => {
-                                    // Удалить старые контейнеры
-                                    document.querySelectorAll('.wave-container').forEach(c => c.remove());
-                                    if (window.waves) {
-                                        window.waves.waveContainers = {};
-                                        window.waves.wavePaths = {};
-                                    }
-                                    
-                                    // Создать ВСЕ видимые волны заново
-                                    window.appState.data.waves.forEach(wave => {
-                                        const waveIdStr = String(wave.id);
-                                        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-                                        const isGroupEnabledNow = window.waves.isWaveGroupEnabled(wave.id);
-                                        const shouldShow = isWaveVisible && isGroupEnabledNow;
-                                        
-                                        if (shouldShow) {
-                                            window.waves.createWaveElement(wave);
-                                        }
-                                    });
-                                    
-                                    // Обновить позиции
-                                    if (window.waves.updatePosition) {
-                                        window.waves.updatePosition();
-                                    }
-                                    
-                                    // Обновить статистику группы
-                                    this.updateGroupStatsForWave(waveId, true);
-                                    
-                                    // Обновить сводную информацию
-                                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                                        window.summaryManager.updateSummary();
-                                    }
-                                    
-                                    // Гарантируем, что чекбокс останется отмеченным
-                                    target.checked = true;
-                                    
-                                }, 100);
-                            }
-                            return; // Прерываем обработку - всё сделано
-                        } else {
-                            // 6. Пользователь отказался - запомнить, но НЕ отменять чекбокс
-                            this.askedGroups.add(groupId);
-                            console.log('EventManager: пользователь отказался включать группу:', groupId);
-                            
-                            // ВАЖНОЕ ИСПРАВЛЕНИЕ: НЕ отменяем чекбокс, просто оставляем как есть
-                            // Но поскольку группа выключена, волна не будет отображаться
-                            // Сохраняем состояние видимости (true), но волна не покажется
-                            const waveIdStr = String(waveId);
-                            window.appState.waveVisibility[waveIdStr] = true; // Все равно сохраняем как включенную
-                            window.appState.save();
-                            
-                            // Обновляем UI, но чекбокс остается отмеченным
-                            setTimeout(() => {
-                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                                    window.unifiedListManager.updateWavesList();
-                                }
-                                
-                                // Обновить статистику группы
-                                this.updateGroupStatsForWave(waveId, true);
-                                
-                                // Обновить сводную информацию
-                                if (window.summaryManager && window.summaryManager.updateSummary) {
-                                    window.summaryManager.updateSummary();
-                                }
-                            }, 50);
-                            
-                            return; // Прерываем стандартную логику
-                        }
-                    } else if (groupId && this.askedGroups.has(groupId)) {
-                        // 7. Уже спрашивали и пользователь отказался - оставляем чекбокс, но группа не включится
-                        console.log('EventManager: уже спрашивали про группу, оставляем чекбокс:', groupId);
-                        
-                        // Сохраняем состояние видимости
-                        const waveIdStr = String(waveId);
-                        window.appState.waveVisibility[waveIdStr] = true; // Все равно сохраняем
-                        window.appState.save();
-                        
-                        // Обновляем UI
-                        setTimeout(() => {
-                            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                                window.unifiedListManager.updateWavesList();
-                            }
-                            
-                            // Обновить статистику группы
-                            this.updateGroupStatsForWave(waveId, true);
-                            
-                            // Обновить сводную информацию
-                                if (window.summaryManager && window.summaryManager.updateSummary) {
-                                window.summaryManager.updateSummary();
-                            }
-                        }, 50);
-                        
-                        return; // Прерываем стандартную логику
-                    }
-                }
-            }
-            
-            // СТАНДАРТНАЯ ЛОГИКА (если группа включена или чекбокс выключается)
-            if (waveId && window.appState) {
-                // УПРОЩЕННАЯ ЛОГИКА: Всегда разрешаем переключение состояния
-                const waveIdStr = String(waveId);
-                window.appState.waveVisibility[waveIdStr] = target.checked;
-                window.appState.save();
-                
-                // НАЙДЕМ ВОЛНУ В ДАННЫХ
-                const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
-                
-                // ПРОВЕРЯЕМ, ВКЛЮЧЕНА ЛИ ГРУППА С ЭТОЙ ВОЛНОЙ
-                const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
-                const shouldShow = target.checked && isGroupEnabled;
-                
-                // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: СОЗДАЕМ КОНТЕЙНЕР, ЕСЛИ ЕГО НЕТ
-                if (shouldShow) {
-                    // Если контейнера нет и волна существует — создаем его
-                    if (!window.waves.waveContainers[waveId] && wave) {
-                        console.log('EventManager: создаем отсутствующий контейнер волны:', waveId);
-                        window.waves.createWaveElement(wave);
-                    }
-                    // Показываем контейнер
-                    if (window.waves.waveContainers[waveId]) {
-                        window.waves.waveContainers[waveId].style.display = 'block';
-                    }
-                } else {
-                    // Скрываем контейнер, если есть
-                    if (window.waves.waveContainers[waveId]) {
-                        window.waves.waveContainers[waveId].style.display = 'none';
-                    }
-                }
-                
-                // ВАЖНО: Обновить позиции волн после изменения видимости
-                if (window.waves && window.waves.updatePosition) {
-                    window.waves.updatePosition();
-                }
-                
-                // Обновить статистику группы
-                this.updateGroupStatsForWave(waveId, target.checked);
-                
-                // Обновить сводную информацию
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    setTimeout(() => {
-                        window.summaryManager.updateSummary();
-                    }, 50);
-                }
-            }
+            this.handleWaveVisibilityChange(waveId, isChecked, $target);
             return;
         }
         
-        if (target.classList.contains('wave-bold-check')) {
+        // Чекбокс жирности волны
+        if ($target.hasClass('wave-bold-check')) {
             e.stopPropagation();
-            const waveId = target.dataset.id;
-            console.log('EventManager: изменение жирности волны:', waveId, target.checked);
+            const waveId = $target.data('id');
+            console.log('EventManager: изменение жирности волны:', waveId, $target.prop('checked'));
             
             if (waveId && window.appState) {
-                window.appState.waveBold[waveId] = target.checked;
+                window.appState.waveBold[waveId] = $target.prop('checked');
                 window.appState.save();
                 if (window.waves) window.waves.updatePosition();
                 
-                // Обновить сводную информацию
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    setTimeout(() => {
+                setTimeout(() => {
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
-                    }, 50);
-                }
+                    }
+                }, 50);
             }
             return;
         }
         
-        if (target.classList.contains('wave-color-preview-small')) {
+        // Превью цвета волны
+        if ($target.hasClass('wave-color-preview-small')) {
             e.stopPropagation();
-            const waveId = target.dataset.id;
+            const waveId = $target.data('id');
             console.log('EventManager: клик по превью цвета волны:', waveId);
             if (waveId && window.unifiedListManager) {
                 const wave = window.appState.data.waves.find(w => w.id === waveId);
                 if (wave) {
                     window.unifiedListManager.changeWaveColor(wave);
                     
-                    // Обновить сводную информацию
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        setTimeout(() => {
-                            window.summaryManager.updateSummary();
-                        }, 50);
-                    }
-                }
-            }
-            return;
-        }
-        
-        // ДОБАВЛЕНО: обработчик чекбокса окраски краев
-        if (target.classList.contains('wave-corner-color-check')) {
-            e.stopPropagation();
-            const waveId = target.dataset.id;
-            console.log('EventManager: изменение окраски краев волной:', waveId, target.checked);
-            
-            if (waveId && window.waves) {
-                window.waves.setWaveCornerColor(waveId, target.checked);
-                
-                // Обновить сводную информацию
-                if (window.summaryManager && window.summaryManager.updateSummary) {
                     setTimeout(() => {
-                        window.summaryManager.updateSummary();
-                    }, 50);
-                }
-            }
-            return;
-        }
-        
-        if (target.classList.contains('wave-group-toggle')) {
-            e.stopPropagation();
-            const groupId = target.dataset.groupId;
-            console.log('EventManager: переключение группы:', groupId, target.checked);
-            
-            if (groupId && window.appState) {
-                const group = window.appState.data.groups.find(g => g.id === groupId);
-                if (group) {
-                    group.enabled = target.checked;
-                    window.appState.save();
-                    
-                    // Если группа включается - очищаем отметку о том, что спрашивали
-                    if (target.checked && this.askedGroups.has(groupId)) {
-                        this.askedGroups.delete(groupId);
-                        console.log('EventManager: группа включена вручную, очищаем отметку:', groupId);
-                    }
-                    
-                    // ГАРАНТИЯ: Полностью пересоздать элементы волн
-                    setTimeout(() => {
-                        // Удалить старые контейнеры
-                        document.querySelectorAll('.wave-container').forEach(c => c.remove());
-                        if (window.waves) {
-                            window.waves.waveContainers = {};
-                            window.waves.wavePaths = {};
-                        }
-                        
-                        // Создать ВСЕ видимые волны заново
-                        window.appState.data.waves.forEach(wave => {
-                            const waveIdStr = String(wave.id);
-                            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-                            const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
-                            const shouldShow = isWaveVisible && isGroupEnabled;
-                            
-                            if (shouldShow) {
-                                window.waves.createWaveElement(wave);
-                            }
-                        });
-                        
-                        // Обновить позиции
-                        if (window.waves.updatePosition) {
-                            window.waves.updatePosition();
-                        }
-                        
-                        // Обновить список
-                        window.unifiedListManager.updateWavesList();
-                        
-                        // Обновить сводную информацию
                         if (window.summaryManager && window.summaryManager.updateSummary) {
                             window.summaryManager.updateSummary();
                         }
-                        
-                        console.log('Волны полностью пересозданы после переключения группы');
-                    }, 100);
-                }
-            }
-            return;
-        }
-        
-        if ((target.id === 'btnAddNote' || target.closest('#btnAddNote')) && !e.defaultPrevented) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('EventManager: клик по кнопке добавления заметки');
-            const content = document.getElementById('noteInput')?.value;
-            if (content && window.dates) {
-                window.dates.addNote(content);
-                if (window.dataManager) window.dataManager.updateNotesList();
-                document.getElementById('noteInput').value = '';
-                
-                // Обновить сводную информацию
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    setTimeout(() => {
-                        window.summaryManager.updateSummary();
                     }, 50);
                 }
             }
             return;
         }
         
-        if (target.id === 'btnAddCustomWave' || target.closest('#btnAddCustomWave')) {
+        // Чекбокс окраски краев
+        if ($target.hasClass('wave-corner-color-check')) {
+            e.stopPropagation();
+            const waveId = $target.data('id');
+            console.log('EventManager: изменение окраски краев волной:', waveId, $target.prop('checked'));
+            
+            if (waveId && window.waves) {
+                window.waves.setWaveCornerColor(waveId, $target.prop('checked'));
+                
+                setTimeout(() => {
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
+                }, 50);
+            }
+            return;
+        }
+        
+        // Переключение группы
+        if ($target.hasClass('wave-group-toggle')) {
+            e.stopPropagation();
+            const groupId = $target.data('groupId');
+            const isChecked = $target.prop('checked');
+            console.log('EventManager: переключение группы:', groupId, isChecked);
+            
+            this.handleGroupToggle(groupId, isChecked);
+            return;
+        }
+        
+        // Обработка остальных кнопок по ID
+        this.handleButtonClicks($target, e);
+    }
+    
+    handleWaveVisibilityChange(waveId, isChecked, $checkbox) {
+        if (isChecked && window.waves && window.appState) {
+            // Проверяем, включена ли группа этой волны
+            const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
+            
+            if (!isGroupEnabled) {
+                // Найти группу для этой волны
+                const groupId = this.findGroupForWave(waveId);
+                
+                if (groupId && !this.askedGroups.has(groupId)) {
+                    const group = window.appState.data.groups.find(g => g.id === groupId);
+                    const groupName = group ? group.name : 'Неизвестная группа';
+                    
+                    const shouldEnableGroup = confirm(`Группа "${groupName}" отключена. Включить её для отображения колоска?`);
+                    
+                    if (shouldEnableGroup) {
+                        // Включаем группу
+                        if (group) {
+                            group.enabled = true;
+                            console.log('EventManager: группа включена:', groupId);
+                            
+                            const waveIdStr = String(waveId);
+                            window.appState.waveVisibility[waveIdStr] = true;
+                            window.appState.save();
+                            
+                            // Обновляем UI
+                            setTimeout(() => {
+                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                    window.unifiedListManager.updateWavesList();
+                                }
+                                
+                                // Пересоздаем элементы волн
+                                this.recreateAllWaveElements();
+                                
+                                // Обновляем статистику группы
+                                this.updateGroupStatsForWave(waveId, true);
+                                
+                                // Обновляем сводную информацию
+                                if (window.summaryManager && window.summaryManager.updateSummary) {
+                                    window.summaryManager.updateSummary();
+                                }
+                                
+                                // Гарантируем, что чекбокс останется отмеченным
+                                $checkbox.prop('checked', true);
+                            }, 100);
+                        }
+                        return;
+                    } else {
+                        // Пользователь отказался
+                        this.askedGroups.add(groupId);
+                        console.log('EventManager: пользователь отказался включать группу:', groupId);
+                        
+                        const waveIdStr = String(waveId);
+                        window.appState.waveVisibility[waveIdStr] = true;
+                        window.appState.save();
+                        
+                        setTimeout(() => {
+                            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                window.unifiedListManager.updateWavesList();
+                            }
+                            
+                            this.updateGroupStatsForWave(waveId, true);
+                            
+                            if (window.summaryManager && window.summaryManager.updateSummary) {
+                                window.summaryManager.updateSummary();
+                            }
+                        }, 50);
+                        
+                        return;
+                    }
+                } else if (groupId && this.askedGroups.has(groupId)) {
+                    // Уже спрашивали
+                    console.log('EventManager: уже спрашивали про группу, оставляем чекбокс:', groupId);
+                    
+                    const waveIdStr = String(waveId);
+                    window.appState.waveVisibility[waveIdStr] = true;
+                    window.appState.save();
+                    
+                    setTimeout(() => {
+                        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                            window.unifiedListManager.updateWavesList();
+                        }
+                        
+                        this.updateGroupStatsForWave(waveId, true);
+                        
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
+                            window.summaryManager.updateSummary();
+                        }
+                    }, 50);
+                    
+                    return;
+                }
+            }
+        }
+        
+        // Стандартная логика
+        if (waveId && window.appState) {
+            const waveIdStr = String(waveId);
+            window.appState.waveVisibility[waveIdStr] = isChecked;
+            window.appState.save();
+            
+            const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
+            const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
+            const shouldShow = isChecked && isGroupEnabled;
+            
+            if (shouldShow) {
+                if (!window.waves.waveContainers[waveId] && wave) {
+                    console.log('EventManager: создаем отсутствующий контейнер волны:', waveId);
+                    window.waves.createWaveElement(wave);
+                }
+                if (window.waves.waveContainers[waveId]) {
+                    $(window.waves.waveContainers[waveId]).show();
+                }
+            } else {
+                if (window.waves.waveContainers[waveId]) {
+                    $(window.waves.waveContainers[waveId]).hide();
+                }
+            }
+            
+            if (window.waves && window.waves.updatePosition) {
+                window.waves.updatePosition();
+            }
+            
+            this.updateGroupStatsForWave(waveId, isChecked);
+            
+            setTimeout(() => {
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    window.summaryManager.updateSummary();
+                }
+            }, 50);
+        }
+    }
+    
+    handleGroupToggle(groupId, isChecked) {
+        if (groupId && window.appState) {
+            const group = window.appState.data.groups.find(g => g.id === groupId);
+            if (group) {
+                group.enabled = isChecked;
+                window.appState.save();
+                
+                if (isChecked && this.askedGroups.has(groupId)) {
+                    this.askedGroups.delete(groupId);
+                    console.log('EventManager: группа включена вручную, очищаем отметку:', groupId);
+                }
+                
+                setTimeout(() => {
+                    // Удаляем старые контейнеры через jQuery
+                    $('.wave-container').remove();
+                    if (window.waves) {
+                        window.waves.waveContainers = {};
+                        window.waves.wavePaths = {};
+                    }
+                    
+                    // Создаем ВСЕ видимые волны заново
+                    window.appState.data.waves.forEach(wave => {
+                        const waveIdStr = String(wave.id);
+                        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                        const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
+                        const shouldShow = isWaveVisible && isGroupEnabled;
+                        
+                        if (shouldShow) {
+                            window.waves.createWaveElement(wave);
+                        }
+                    });
+                    
+                    if (window.waves.updatePosition) {
+                        window.waves.updatePosition();
+                    }
+                    
+                    window.unifiedListManager.updateWavesList();
+                    
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
+                    
+                    console.log('Волны полностью пересозданы после переключения группы');
+                }, 100);
+            }
+        }
+    }
+    
+    handleButtonClicks($target, e) {
+        // Добавление заметки
+        if ($target.is('#btnAddNote') || $target.closest('#btnAddNote').length) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('EventManager: клик по кнопке добавления заметки');
+            const content = $('#noteInput').val();
+            if (content && window.dates) {
+                window.dates.addNote(content);
+                if (window.dataManager) window.dataManager.updateNotesList();
+                $('#noteInput').val('');
+                
+                setTimeout(() => {
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
+                }, 50);
+            }
+            return;
+        }
+        
+        // Добавление волны
+        if ($target.is('#btnAddCustomWave') || $target.closest('#btnAddCustomWave').length) {
             e.preventDefault();
             e.stopPropagation();
             console.log('EventManager: добавление волны');
             
-            const name = document.getElementById('customWaveName')?.value;
-            const period = document.getElementById('customWavePeriod')?.value;
-            const type = document.getElementById('customWaveType')?.value;
-            const color = document.getElementById('customWaveColor')?.value;
+            const name = $('#customWaveName').val();
+            const period = $('#customWavePeriod').val();
+            const type = $('#customWaveType').val();
+            const color = $('#customWaveColor').val();
             
             if (name && period) {
                 const newWave = window.waves.addCustomWave(name, period, type, color);
                 if (newWave && window.unifiedListManager) {
                     window.unifiedListManager.updateWavesList();
                     
-                    document.getElementById('customWaveName').value = '';
-                    document.getElementById('customWavePeriod').value = '';
-                    document.getElementById('customWaveColor').value = '#666666';
+                    $('#customWaveName').val('');
+                    $('#customWavePeriod').val('');
+                    $('#customWaveColor').val('#666666');
                     
-                    // НОВОЕ: Обновить статистику группы по умолчанию
                     const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
                     if (defaultGroup && window.unifiedListManager.updateGroupStats) {
                         window.unifiedListManager.updateGroupStats('default-group');
                     }
                     
-                    // Обновить сводную информацию
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        setTimeout(() => {
+                    setTimeout(() => {
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
                             window.summaryManager.updateSummary();
-                        }, 50);
-                    }
+                        }
+                    }, 50);
                 }
             }
             return;
         }
         
-        if (target.id === 'btnPrevDay' || target.closest('#btnPrevDay')) {
+        // Навигация по дням
+        if ($target.is('#btnPrevDay') || $target.closest('#btnPrevDay').length) {
             e.preventDefault();
             console.log('EventManager: предыдущий день');
             if (window.dates) window.dates.navigateDay(-1);
             return;
         }
         
-        if (target.id === 'btnNextDay' || target.closest('#btnNextDay')) {
+        if ($target.is('#btnNextDay') || $target.closest('#btnNextDay').length) {
             e.preventDefault();
             console.log('EventManager: следующий день');
             if (window.dates) window.dates.navigateDay(1);
             return;
         }
         
-        if (target.id === 'btnToday' || target.closest('#btnToday')) {
+        if ($target.is('#btnToday') || $target.closest('#btnToday').length) {
             e.preventDefault();
             console.log('EventManager: сегодня');
             if (window.dates) window.dates.goToToday();
             return;
         }
         
-        // НОВЫЙ ОБРАБОТЧИК: Кнопка "Сейчас"
-        if (target.id === 'btnNow' || target.closest('#btnNow')) {
+        if ($target.is('#btnNow') || $target.closest('#btnNow').length) {
             e.preventDefault();
             console.log('EventManager: сейчас');
             if (window.dates) window.dates.goToNow();
             return;
         }
         
-        if (target.id === 'btnSetDate' || target.closest('#btnSetDate')) {
+        if ($target.is('#btnSetDate') || $target.closest('#btnSetDate').length) {
             e.preventDefault();
             console.log('EventManager: установка даты из инпута');
             if (window.dates) window.dates.setDateFromInput();
             return;
         }
         
-        if (target.id === 'btnAnalyzeDB' || target.closest('#btnAnalyzeDB')) {
+        // DB операции
+        if ($target.is('#btnAnalyzeDB') || $target.closest('#btnAnalyzeDB').length) {
             e.preventDefault();
             console.log('EventManager: анализ DB');
             return;
         }
         
-        if (target.id === 'btnMigrateToNotes' || target.closest('#btnMigrateToNotes')) {
+        if ($target.is('#btnMigrateToNotes') || $target.closest('#btnMigrateToNotes').length) {
             e.preventDefault();
             console.log('EventManager: миграция DB в заметки');
             return;
         }
         
-        if (target.id === 'btnClearImportResults' || target.closest('#btnClearImportResults')) {
+        if ($target.is('#btnClearImportResults') || $target.closest('#btnClearImportResults').length) {
             e.preventDefault();
             console.log('EventManager: очистка результатов импорта');
             if (window.importExport) {
@@ -627,13 +595,14 @@ class EventManager {
             return;
         }
         
-        if (target.id === 'btnCalculateIntersections' || target.closest('#btnCalculateIntersections')) {
+        // Пересечения
+        if ($target.is('#btnCalculateIntersections') || $target.closest('#btnCalculateIntersections').length) {
             e.preventDefault();
             console.log('EventManager: расчет пересечений');
             if (window.waves) {
-                const basePeriod = parseFloat(document.getElementById('intersectionBasePeriod')?.value);
-                const baseAmplitude = parseFloat(document.getElementById('intersectionBaseAmplitude')?.value);
-                const precision = parseFloat(document.getElementById('intersectionPrecision')?.value);
+                const basePeriod = parseFloat($('#intersectionBasePeriod').val());
+                const baseAmplitude = parseFloat($('#intersectionBaseAmplitude').val());
+                const precision = parseFloat($('#intersectionPrecision').val());
                 
                 if (basePeriod && baseAmplitude) {
                     const results = window.waves.calculateIntersections(basePeriod, baseAmplitude, precision);
@@ -645,70 +614,63 @@ class EventManager {
             return;
         }
         
-        if (target.id === 'btnClearIntersections' || target.closest('#btnClearIntersections')) {
+        if ($target.is('#btnClearIntersections') || $target.closest('#btnClearIntersections').length) {
             e.preventDefault();
             console.log('EventManager: очистка пересечений');
-            if (window.appState && window.appCore && window.appCore.elements) {
-                window.appState.intersectionResults = [];
-                window.appCore.elements.intersectionResults.innerHTML = '';
-                window.appCore.elements.intersectionStats.style.display = 'none';
-                
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'list-empty';
-                emptyMessage.textContent = 'Результаты очищены';
-                window.appCore.elements.intersectionResults.appendChild(emptyMessage);
-            }
+            this.clearIntersectionResults();
             return;
         }
         
-        if (target.id === 'btnAddGroup' || target.closest('#btnAddGroup')) {
+        // Добавление группы
+        if ($target.is('#btnAddGroup') || $target.closest('#btnAddGroup').length) {
             e.preventDefault();
             console.log('EventManager: добавление группы');
-            const groupName = document.getElementById('newGroupName')?.value;
+            const groupName = $('#newGroupName').val();
             if (groupName && window.dates) {
                 window.dates.addGroup(groupName);
                 if (window.dataManager) window.dataManager.updateWavesGroups();
-                document.getElementById('newGroupName').value = '';
+                $('#newGroupName').val('');
                 
-                // Обновить сводную информацию
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    setTimeout(() => {
+                setTimeout(() => {
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
-                    }, 50);
-                }
+                    }
+                }, 50);
             }
             return;
         }
         
-        if (target.dataset.action === 'importAll') {
+        // Импорт файлов
+        if ($target.is('[data-action="importAll"]')) {
             e.preventDefault();
             console.log('EventManager: клик по импорту всех данных');
-            document.getElementById('importAllFile').click();
+            $('#importAllFile').click();
             return;
         }
         
-        if (target.dataset.action === 'importDB') {
+        if ($target.is('[data-action="importDB"]')) {
             e.preventDefault();
             console.log('EventManager: клик по импорту DB');
-            document.getElementById('importDBFile').click();
+            $('#importDBFile').click();
             return;
         }
         
-        if (target.classList.contains('spoiler-toggle')) {
+        // Спойлеры
+        if ($target.hasClass('spoiler-toggle')) {
             e.preventDefault();
             e.stopPropagation();
             console.log('EventManager: переключение спойлера');
             if (window.uiManager && window.uiManager.toggleSpoiler) {
-                window.uiManager.toggleSpoiler(target);
+                window.uiManager.toggleSpoiler($target[0]);
             }
             return;
         }
         
-        const addIntersectionBtn = target.closest('[onclick*="addIntersectionWave"]');
-        if (addIntersectionBtn) {
+        // Добавление волны пересечения
+        if ($target.is('[onclick*="addIntersectionWave"]')) {
             e.preventDefault();
             e.stopPropagation();
-            const onclick = addIntersectionBtn.getAttribute('onclick');
+            const onclick = $target.attr('onclick');
             const match = onclick.match(/addIntersectionWave\(([^,]+),\s*([^)]+)\)/);
             if (match) {
                 const period = parseFloat(match[1]);
@@ -717,12 +679,11 @@ class EventManager {
                 if (window.intersectionManager && window.intersectionManager.addIntersectionWave) {
                     window.intersectionManager.addIntersectionWave(period, amplitude);
                     
-                    // Обновить сводную информацию
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        setTimeout(() => {
+                    setTimeout(() => {
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
                             window.summaryManager.updateSummary();
-                        }, 50);
-                    }
+                        }
+                    }, 50);
                 }
             }
             return;
@@ -730,42 +691,35 @@ class EventManager {
     }
     
     handleDragStart(e) {
-        const item = e.target.closest('.list-item--date[data-type="date"]');
-        if (!item || item.classList.contains('list-item--editing')) return;
+        const $item = $(e.currentTarget);
+        const id = $item.data('id');
+        const index = parseInt($item.data('index') || 0);
         
-        const id = item.dataset.id;
-        const index = parseInt(item.dataset.index || 0);
-        
-        e.dataTransfer.setData('text/plain', JSON.stringify({
+        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
             type: 'date',
             id: id,
             index: index
         }));
-        item.classList.add('list-item--dragging');
+        $item.addClass('list-item--dragging');
         
         console.log('EventManager: начало перетаскивания даты:', id, index);
     }
     
     handleDragOver(e) {
-        const item = e.target.closest('.list-item--date[data-type="date"]');
-        if (item) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            item.classList.add('list-item--drag-over');
-        }
+        e.preventDefault();
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+        $(e.currentTarget).addClass('list-item--drag-over');
     }
     
     handleDrop(e) {
-        const item = e.target.closest('.list-item--date[data-type="date"]');
-        if (!item) return;
-        
+        const $item = $(e.currentTarget);
         e.preventDefault();
-        item.classList.remove('list-item--drag-over');
+        $item.removeClass('list-item--drag-over');
         
         try {
-            const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
             if (dragData.type === 'date') {
-                const targetIndex = parseInt(item.dataset.index || 0);
+                const targetIndex = parseInt($item.data('index') || 0);
                 console.log('EventManager: дроп даты с индекса', dragData.index, 'на индекс', targetIndex);
                 
                 if (dragData.index !== targetIndex) {
@@ -774,12 +728,11 @@ class EventManager {
                     window.appState.save();
                     if (window.dataManager) window.dataManager.updateDateList();
                     
-                    // Обновить сводную информацию
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        setTimeout(() => {
+                    setTimeout(() => {
+                        if (window.summaryManager && window.summaryManager.updateSummary) {
                             window.summaryManager.updateSummary();
-                        }, 50);
-                    }
+                        }
+                    }, 50);
                 }
             }
         } catch (error) {
@@ -788,15 +741,13 @@ class EventManager {
     }
     
     handleDragEnd(e) {
-        document.querySelectorAll('.list-item').forEach(item => {
-            item.classList.remove('list-item--dragging', 'list-item--drag-over');
-        });
+        $('.list-item').removeClass('list-item--dragging list-item--drag-over');
         console.log('EventManager: конец перетаскивания');
     }
     
     getContainerId(element) {
-        const container = element.closest('.list-container');
-        return container ? container.id : null;
+        const $container = $(element).closest('.list-container');
+        return $container.length ? $container.attr('id') : null;
     }
     
     findGroupForWave(waveId) {
@@ -825,7 +776,6 @@ class EventManager {
     updateGroupStatsForWave(waveId, isVisible) {
         console.log('Обновление статистики группы для волны:', waveId, isVisible);
         
-        // Найти группу, содержащую эту волну
         if (window.appState && window.appState.data && window.appState.data.groups) {
             window.appState.data.groups.forEach(group => {
                 if (group.waves && Array.isArray(group.waves)) {
@@ -838,76 +788,59 @@ class EventManager {
                     if (waveInGroup) {
                         console.log('Найдена группа для обновления:', group.id, group.name);
                         
-                        // Обновить статистику группы через UnifiedListManager
                         if (window.unifiedListManager && window.unifiedListManager.updateGroupStats) {
                             window.unifiedListManager.updateGroupStats(group.id);
                         }
                         
-                        // Обновить сводную информацию
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            setTimeout(() => {
+                        setTimeout(() => {
+                            if (window.summaryManager && window.summaryManager.updateSummary) {
                                 window.summaryManager.updateSummary();
-                            }, 50);
-                        }
+                            }
+                        }, 50);
                     }
                 }
             });
         }
     }
     
-    updateGroupElementStats(groupElement, group) {
-        const groupId = group.id;
-        
-        // Подсчитать включенные волны
-        let enabledCount = 0;
-        const waveCount = group.waves ? group.waves.length : 0; // Определяем waveCount здесь
-        
-        if (group.waves && Array.isArray(group.waves)) {
-            group.waves.forEach(waveId => {
-                const waveIdStr = String(waveId);
-                if (window.appState.waveVisibility[waveIdStr] !== false) {
-                    enabledCount++;
-                }
-            });
+    recreateAllWaveElements() {
+        // Удалить старые контейнеры через jQuery
+        $('.wave-container').remove();
+        if (window.waves) {
+            window.waves.waveContainers = {};
+            window.waves.wavePaths = {};
         }
         
-        // Обновить текст счетчика в DOM
-        const statsElement = groupElement.querySelector('.list-item__value .group-stats');
-        if (statsElement) {
-            if (enabledCount > 0) {
-                statsElement.innerHTML = `
-                    <span class="group-enabled-count" title="Включено колосков">
-                        Включено: ${enabledCount}
-                    </span>
-                    <span class="group-total-count" title="Всего колосков">
-                        Колосков: ${waveCount}
-                    </span>
-                `;
-            } else {
-                statsElement.innerHTML = `
-                    <span class="group-total-count">
-                        Колосков: ${waveCount}
-                    </span>
-                `;
+        // Создать ВСЕ видимые волны заново
+        window.appState.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const isGroupEnabledNow = window.waves.isWaveGroupEnabled(wave.id);
+            const shouldShow = isWaveVisible && isGroupEnabledNow;
+            
+            if (shouldShow) {
+                window.waves.createWaveElement(wave);
             }
+        });
+        
+        if (window.waves.updatePosition) {
+            window.waves.updatePosition();
         }
     }
-
+    
     setupIntersectionHandlers() {
-        console.log('EventManager: настройка обработчиков пересечений...');
+        console.log('EventManager: настройка обработчиков пересечений с jQuery...');
         
-        // Обработчики для кнопок панели пересечений
-        document.addEventListener('click', (e) => {
+        $(document).on('click', (e) => {
             this.handleIntersectionClick(e);
         });
     }
-
+    
     handleIntersectionClick(e) {
-        const target = e.target;
+        const $target = $(e.target);
         
         // Кнопка "Рассчитать за день"
-        if (target.id === 'btnCalculateIntersections' || 
-            target.closest('#btnCalculateIntersections')) {
+        if ($target.is('#btnCalculateIntersections') || $target.closest('#btnCalculateIntersections').length) {
             e.preventDefault();
             e.stopPropagation();
             console.log('EventManager: расчет пересечений за день');
@@ -917,8 +850,7 @@ class EventManager {
         }
         
         // Кнопка "Для текущей даты"
-        if (target.id === 'btnUpdateForCurrentDate' || 
-            target.closest('#btnUpdateForCurrentDate')) {
+        if ($target.is('#btnUpdateForCurrentDate') || $target.closest('#btnUpdateForCurrentDate').length) {
             e.preventDefault();
             e.stopPropagation();
             console.log('EventManager: обновление для текущей даты');
@@ -930,8 +862,7 @@ class EventManager {
         }
         
         // Кнопка "Очистить"
-        if (target.id === 'btnClearIntersections' || 
-            target.closest('#btnClearIntersections')) {
+        if ($target.is('#btnClearIntersections') || $target.closest('#btnClearIntersections').length) {
             e.preventDefault();
             e.stopPropagation();
             console.log('EventManager: очистка результатов пересечений');
@@ -940,11 +871,11 @@ class EventManager {
             return;
         }
         
-        // Клик по чекбоксу "Только активные колоски"
-        if (target.id === 'onlyActiveWaves' || 
-            target.closest('#onlyActiveWaves')) {
+        // Чекбокс "Только активные колоски"
+        if ($target.is('#onlyActiveWaves') || $target.closest('#onlyActiveWaves').length) {
             e.stopPropagation();
-            const isChecked = target.checked || (target.closest('label')?.querySelector('input')?.checked);
+            const $checkbox = $target.is('input') ? $target : $target.find('input');
+            const isChecked = $checkbox.prop('checked');
             console.log('EventManager: переключение режима колосков:', isChecked ? 'только активные' : 'все');
             
             if (window.intersectionManager) {
@@ -953,21 +884,20 @@ class EventManager {
             return;
         }
         
-        // Клик по элементу пересечения в списке
-        const intersectionItem = target.closest('.intersection-item');
-        if (intersectionItem && 
-            !target.closest('button') && 
-            !target.classList.contains('wave-name')) {
+        // Клик по элементу пересечения
+        const $intersectionItem = $target.closest('.intersection-item');
+        if ($intersectionItem.length && 
+            !$target.is('button') && 
+            !$target.hasClass('wave-name')) {
             
             e.preventDefault();
             e.stopPropagation();
             
-            const timestamp = intersectionItem.dataset.timestamp;
-            const index = intersectionItem.dataset.index;
+            const timestamp = $intersectionItem.data('timestamp');
+            const index = $intersectionItem.data('index');
             
             console.log('EventManager: клик по пересечению', index, timestamp);
             
-            // Установить время визора на момент пересечения
             if (timestamp && window.dates) {
                 const intersectionDate = new Date(parseInt(timestamp));
                 window.dates.setDate(intersectionDate);
@@ -975,28 +905,25 @@ class EventManager {
             return;
         }
     }
-
+    
     calculateIntersectionsForSelectedDay() {
         try {
-            const dateInput = document.getElementById('intersectionDate');
-            const onlyActiveCheckbox = document.getElementById('onlyActiveWaves');
+            const dateInput = $('#intersectionDate');
+            const onlyActiveCheckbox = $('#onlyActiveWaves');
             
-            if (!dateInput || !onlyActiveCheckbox) {
+            if (!dateInput.length || !onlyActiveCheckbox.length) {
                 console.error('EventManager: элементы управления не найдены');
                 return;
             }
             
-            // Получить выбранную дату
-            const selectedDate = dateInput.value ? new Date(dateInput.value) : new Date();
+            const selectedDate = dateInput.val() ? new Date(dateInput.val()) : new Date();
             selectedDate.setHours(12, 0, 0, 0);
             
-            // Получить настройки
-            const onlyActive = onlyActiveCheckbox.checked;
+            const onlyActive = onlyActiveCheckbox.prop('checked');
             
             console.log('Расчет пересечений для:', selectedDate.toDateString(), 
                     onlyActive ? '(только активные)' : '(все колоски)');
             
-            // Выполнить расчет
             if (window.intersectionManager) {
                 window.intersectionManager.onlyActive = onlyActive;
                 const intersections = window.intersectionManager.calculateDailyIntersections(selectedDate);
@@ -1008,21 +935,19 @@ class EventManager {
             alert('Ошибка расчета пересечений: ' + error.message);
         }
     }
-
+    
     clearIntersectionResults() {
-        const container = document.getElementById('intersectionResults');
-        const stats = document.getElementById('intersectionStats');
+        const $container = $('#intersectionResults');
+        const $stats = $('#intersectionStats');
         
-        if (container) {
-            container.innerHTML = '<div class="list-empty">Нет рассчитанных пересечений</div>';
+        if ($container.length) {
+            $container.html('<div class="list-empty">Нет рассчитанных пересечений</div>');
         }
         
-        if (stats) {
-            stats.style.display = 'none';
-            stats.innerHTML = '';
+        if ($stats.length) {
+            $stats.hide().empty();
         }
         
-        // Очистить кэш
         if (window.intersectionManager) {
             window.intersectionManager.clearCache();
         }
