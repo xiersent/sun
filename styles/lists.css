@@ -176,12 +176,30 @@
     justify-content: flex-end;
 }
 
-/* Состояние редактирования */
+/* Состояние редактирования - ДЛЯ ВСЕХ, КРОМЕ ВОЛН ВНУТРИ ГРУПП */
 .list-item--editing .list-item__normal-view {
     display: none;
 }
 
 .list-item--editing .list-item__edit-form {
+    display: flex;
+}
+
+/* ОСОБЫЙ СЛУЧАЙ: волны внутри редактируемой группы НЕ должны скрываться */
+.list-item--group.list-item--editing .group-children .list-item--wave .list-item__normal-view {
+    display: flex !important;
+}
+
+.list-item--group.list-item--editing .group-children .list-item--wave .list-item__edit-form {
+    display: none !important;
+}
+
+/* И убедимся, что волны, которые сами в режиме редактирования, работают нормально */
+.list-item--wave.list-item--editing .list-item__normal-view {
+    display: none;
+}
+
+.list-item--wave.list-item--editing .list-item__edit-form {
     display: flex;
 }
 
