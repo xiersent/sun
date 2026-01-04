@@ -53,60 +53,95 @@ class TimeUtils {
     
     // ================ ПАРСИНГ И ФОРМАТИРОВАНИЕ ================
     
-	// modules/timeUtils.js - ПОЛНЫЙ МЕТОД parseStringToLocal
-	/**
-	 * Парсит строку в локальное время
-	 * Форматы:
-	 * - "2024-01-15 14:30:00" (как локальное время)
-	 * - "2024-01-15" (00:00:00 локальное)
-	 * - "2024-01-15T14:30:00" (ISO, но интерпретируется как локальное)
-	 * 
-	 * @param {string} dateTimeString - Строка с датой
-	 * @returns {Date} Date в локальном времени
-	 */
-	parseStringToLocal(dateTimeString) {
-		if (!dateTimeString) return this.now();
-		
-		try {
-			let normalized = dateTimeString.trim();
-			
-			// Если строка уже в формате "YYYY-MM-DD HH:MM:SS"
-			if (normalized.includes(' ') && !normalized.includes('T')) {
-				const [datePart, timePart] = normalized.split(' ');
-				const [year, month, day] = datePart.split('-').map(Number);
-				
-				let hours = 0, minutes = 0, seconds = 0;
-				if (timePart) {
-					const timeParts = timePart.split(':').map(Number);
-					hours = timeParts[0] || 0;
-					minutes = timeParts[1] || 0;
-					seconds = timeParts[2] || 0;
-				}
-				
-				// Создаем Date в ЛОКАЛЬНОМ времени
-				const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
-				
-				if (isNaN(date.getTime())) {
-					throw new Error(`Некорректная дата: "${dateTimeString}"`);
-				}
-				
-				return date;
-			}
-			
-			// Для других форматов (ISO и т.д.)
-			const date = new Date(normalized);
-			
-			if (isNaN(date.getTime())) {
-				throw new Error(`Некорректная дата: "${dateTimeString}"`);
-			}
-			
-			return date;
-			
-		} catch (error) {
-			console.error('TimeUtils: ошибка парсинга даты:', error.message);
-			return this.now();
-		}
-	}
+    /**
+     * Парсит строку в локальное время
+     * Форматы:
+     * - "2024-01-15 14:30:00" (как локальное время)
+     * - "2024-01-15" (00:00:00 локальное)
+     * - "2024-01-15T14:30:00" (ISO, но интерпретируется как локальное)
+     * 
+     * @param {string} dateTimeString - Строка с датой
+     * @returns {Date} Date в локальном времени
+     */
+    parseStringToLocal(dateTimeString) {
+        if (!dateTimeString) return this.now();
+        
+        try {
+            let normalized = dateTimeString.trim();
+            
+            // Если строка уже в формате "YYYY-MM-DD HH:MM:SS"
+            if (normalized.includes(' ') && !normalized.includes('T')) {
+                const [datePart, timePart] = normalized.split(' ');
+                const [year, month, day] = datePart.split('-').map(Number);
+                
+                let hours = 0, minutes = 0, seconds = 0;
+                if (timePart) {
+                    const timeParts = timePart.split(':').map(Number);
+                    hours = timeParts[0] || 0;
+                    minutes = timeParts[1] || 0;
+                    seconds = timeParts[2] || 0;
+                }
+                
+                // Создаем Date в ЛОКАЛЬНОМ времени
+                const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
+                
+                if (isNaN(date.getTime())) {
+                    throw new Error(`Некорректная дата: "${dateTimeString}"`);
+                }
+                
+                return date;
+            }
+            
+            // Для других форматов (ISO и т.д.)
+            const date = new Date(normalized);
+            
+            if (isNaN(date.getTime())) {
+                throw new Error(`Некорректная дата: "${dateTimeString}"`);
+            }
+            
+            return date;
+            
+        } catch (error) {
+            console.error('TimeUtils: ошибка парсинга даты:', error.message);
+            return this.now();
+        }
+    }
+    
+    /**
+     * Парсит значения из раздельных полей даты и времени
+     * @param {string} dateStr - Строка даты из input[type="date"] (YYYY-MM-DD)
+     * @param {string} timeStr - Строка времени из input[type="time"] (HH:MM:SS)
+     * @returns {Date} Date в локальном времени
+     */
+    parseFromDateAndTimeInputs(dateStr, timeStr) {
+        if (!dateStr) {
+            return this.now();
+        }
+        
+        try {
+            const [year, month, day] = dateStr.split('-').map(Number);
+            
+            let hours = 0, minutes = 0, seconds = 0;
+            if (timeStr) {
+                const [h, m, s] = timeStr.split(':').map(Number);
+                hours = h || 0;
+                minutes = m || 0;
+                seconds = s || 0;
+            }
+            
+            // Создаем Date в ЛОКАЛЬНОМ времени
+            const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
+            
+            if (isNaN(date.getTime())) {
+                throw new Error(`Некорректная дата-время: "${dateStr} ${timeStr}"`);
+            }
+            
+            return date;
+        } catch (error) {
+            console.error('TimeUtils: ошибка парсинга даты и времени:', error.message);
+            return this.now();
+        }
+    }
     
     /**
      * Парсит строку из input[type="datetime-local"]
@@ -178,6 +213,45 @@ class TimeUtils {
     }
     
     /**
+     * Форматирует дату для input[type="date"]
+     * @param {Date|number} date - Дата
+     * @returns {string} "YYYY-MM-DD" (локальная дата)
+     */
+    formatForDateInput(date) {
+        const d = this.toLocalDate(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    /**
+     * Форматирует время для поля input[type="time"]
+     * @param {Date|number} date - Дата
+     * @returns {string} "HH:MM:SS"
+     */
+    formatForTimeInput(date) {
+        const d = this.toLocalDate(date);
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+    
+    /**
+     * Форматирует дату и время для раздельных полей ввода
+     * @param {Date|number} date - Дата
+     * @returns {Object} {date: "YYYY-MM-DD", time: "HH:MM:SS"}
+     */
+    formatForDateTimeInputs(date) {
+        const d = this.toLocalDate(date);
+        return {
+            date: this.formatForDateInput(d),
+            time: this.formatForTimeInput(d)
+        };
+    }
+    
+    /**
      * Форматирует дату для отображения
      * @param {Date|number} date - Дата
      * @returns {string} "DD.MM.YYYY" (локальная дата)
@@ -195,47 +269,34 @@ class TimeUtils {
      * @param {Date|number} date - Дата
      * @returns {string} "DD.MM.YYYY HH:MM:SS" (локальное время)
      */
-	formatDateTime(date) {
-		const d = this.toLocalDate(date);
-		const day = String(d.getDate()).padStart(2, '0');
-		const month = String(d.getMonth() + 1).padStart(2, '0');
-		const year = d.getFullYear();
-		const hours = String(d.getHours()).padStart(2, '0');
-		const minutes = String(d.getMinutes()).padStart(2, '0');
-		const seconds = String(d.getSeconds()).padStart(2, '0');
-		return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
-	}
+    formatDateTime(date) {
+        const d = this.toLocalDate(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const seconds = String(d.getSeconds()).padStart(2, '0');
+        return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+    }
     
     /**
-     * Форматирует дату для input[type="date"]
-     * @param {Date|number} date - Дата
-     * @returns {string} "YYYY-MM-DD" (локальная дата)
+     * Форматирует текущий день с секундами
+     * @param {number} currentDay - Текущий день (дробное число)
+     * @param {Date} [currentDate] - Текущая дата
+     * @returns {string} Отформатированная строка
      */
-    formatForDateInput(date) {
-        const d = this.toLocalDate(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+    formatCurrentDayWithSeconds(currentDay, currentDate = null) {
+        try {
+            // Просто возвращаем число с 5 знаками после запятой
+            // УБРАЛИ добавление времени в скобках
+            return currentDay.toFixed(5);
+        } catch (error) {
+            console.error('TimeUtils: ошибка форматирования дня с секундами:', error);
+            return currentDay.toFixed(5);
+        }
     }
-
-	/**
-	 * Форматирует текущий день с секундами
-	 * @param {number} currentDay - Текущий день (дробное число)
-	 * @param {Date} [currentDate] - Текущая дата
-	 * @returns {string} Отформатированная строка
-	 */
-	formatCurrentDayWithSeconds(currentDay, currentDate = null) {
-		try {
-			// Просто возвращаем число с 5 знаками после запятой
-			// УБРАЛИ добавление времени в скобках
-			return currentDay.toFixed(5);
-		} catch (error) {
-			console.error('TimeUtils: ошибка форматирования дня с секундами:', error);
-			return currentDay.toFixed(5);
-		}
-	}
-
+    
     /**
      * Получает начало дня (00:00:00) для указанной даты в ЛОКАЛЬНОМ времени
      * @param {Date|number|string} date - Дата
@@ -250,6 +311,6 @@ class TimeUtils {
             0, 0, 0, 0
         );
     }
-    
 }
+
 window.timeUtils = new TimeUtils();

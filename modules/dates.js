@@ -8,7 +8,7 @@ class DatesManager {
     cacheElements() {
         const ids = [
             'dateInput', 'dateNameInput', 'btnAddDate', 'dateListForDates',
-            'mainDateInput', 'btnSetDate', 'currentDay', 'btnPrevDay',
+            'mainDateInputDate', 'mainDateInputTime', 'btnSetDate', 'currentDay', 'btnPrevDay',
             'btnNextDay', 'btnToday', 'btnNow', 'noteInput', 'btnAddNote',
             'notesList', 'customWaveName', 'customWavePeriod', 'customWaveType',
             'customWaveColor', 'btnAddCustomWave', 'newGroupName', 'btnAddGroup'
@@ -20,24 +20,24 @@ class DatesManager {
         });
     }
     
-	isCurrentDateOnVizor() {
-		const today = window.timeUtils.now();
-		const vizorDate = window.appState.currentDate;
-		
-		// Сравниваем даты в UTC (только год, месяц, день)
-		const todayStart = new Date(Date.UTC(
-			today.getFullYear(),
-			today.getMonth(),
-			today.getDate()
-		));
-		const vizorStart = new Date(Date.UTC(
-			vizorDate.getFullYear(),
-			vizorDate.getMonth(),
-			vizorDate.getDate()
-		));
-		
-		return todayStart.getTime() === vizorStart.getTime();
-	}
+    isCurrentDateOnVizor() {
+        const today = window.timeUtils.now();
+        const vizorDate = window.appState.currentDate;
+        
+        // Сравниваем даты в UTC (только год, месяц, день)
+        const todayStart = new Date(Date.UTC(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+        ));
+        const vizorStart = new Date(Date.UTC(
+            vizorDate.getFullYear(),
+            vizorDate.getMonth(),
+            vizorDate.getDate()
+        ));
+        
+        return todayStart.getTime() === vizorStart.getTime();
+    }
     
     updateTodayButton() {
         const btnToday = document.getElementById('btnToday');
@@ -131,44 +131,18 @@ class DatesManager {
         }
     }
     
-// modules/dates.js - исправленный setActiveDate
-setActiveDate(dateId, useExactTime = false) {
-    console.log('=== setActiveDate(' + dateId + ', useExactTime=' + useExactTime + ') ===');
-    
-    const oldActiveId = window.appState.activeDateId;
-    window.appState.activeDateId = dateId;
-    
-    const dateIdStr = String(dateId);
-    const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
-    
-    if (!dateObj) {
-        console.warn('DatesManager: дата не найдена, устанавливаем базовую дату на сейчас');
-        // Устанавливаем начало текущего дня в ЛОКАЛЬНОМ времени
-        const now = new Date();
-        window.appState.baseDate = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-            0, 0, 0, 0
-        ).getTime();
-    } else {
-        try {
-            // Устанавливаем baseDate как ЛОКАЛЬНОЕ начало дня выбранной даты
-            const selectedDate = new Date(dateObj.date);
-            const startOfDay = new Date(
-                selectedDate.getFullYear(),
-                selectedDate.getMonth(),
-                selectedDate.getDate(),
-                0, 0, 0, 0
-            );
-            
-            window.appState.baseDate = startOfDay.getTime();
-            
-            console.log('DatesManager: установлена базовая дата (локальное начало дня):', 
-                startOfDay.toLocaleString(),
-                'timestamp:', window.appState.baseDate);
-        } catch (error) {
-            console.error('Error setting active date:', error);
+    setActiveDate(dateId, useExactTime = false) {
+        console.log('=== setActiveDate(' + dateId + ', useExactTime=' + useExactTime + ') ===');
+        
+        const oldActiveId = window.appState.activeDateId;
+        window.appState.activeDateId = dateId;
+        
+        const dateIdStr = String(dateId);
+        const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
+        
+        if (!dateObj) {
+            console.warn('DatesManager: дата не найдена, устанавливаем базовую дату на сейчас');
+            // Устанавливаем начало текущего дня в ЛОКАЛЬНОМ времени
             const now = new Date();
             window.appState.baseDate = new Date(
                 now.getFullYear(),
@@ -176,61 +150,88 @@ setActiveDate(dateId, useExactTime = false) {
                 now.getDate(),
                 0, 0, 0, 0
             ).getTime();
+        } else {
+            try {
+                // Устанавливаем baseDate как ЛОКАЛЬНОЕ начало дня выбранной даты
+                const selectedDate = new Date(dateObj.date);
+                const startOfDay = new Date(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth(),
+                    selectedDate.getDate(),
+                    0, 0, 0, 0
+                );
+                
+                window.appState.baseDate = startOfDay.getTime();
+                
+                console.log('DatesManager: установлена базовая дата (локальное начало дня):', 
+                    startOfDay.toLocaleString(),
+                    'timestamp:', window.appState.baseDate);
+            } catch (error) {
+                console.error('Error setting active date:', error);
+                const now = new Date();
+                window.appState.baseDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                    0, 0, 0, 0
+                ).getTime();
+            }
         }
-    }
-    
-    this.recalculateCurrentDay(useExactTime);
-    
-    console.log('currentDay после recalculate:', window.appState.currentDay);
-    
-    this.updateCurrentDayElement();
-    
-    if (window.dataManager && window.dataManager.updateDateList) {
-        window.dataManager.updateDateList();
-    }
-    
-    if (oldActiveId !== dateId) {
-        console.log('Активная дата изменилась, пересоздаем элементы...');
         
-        document.querySelectorAll('.wave-container').forEach(c => c.remove());
+        this.recalculateCurrentDay(useExactTime);
+        
+        console.log('currentDay после recalculate:', window.appState.currentDay);
+        
+        this.updateCurrentDayElement();
+        
+        if (window.dataManager && window.dataManager.updateDateList) {
+            window.dataManager.updateDateList();
+        }
+        
+        if (oldActiveId !== dateId) {
+            console.log('Активная дата изменилась, пересоздаем элементы...');
+            
+            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            if (window.waves) {
+                window.waves.waveContainers = {};
+                window.waves.wavePaths = {};
+            }
+            
+            if (window.waves && window.waves.createVisibleWaveElements) {
+                window.waves.createVisibleWaveElements();
+            }
+        }
+        
         if (window.waves) {
-            window.waves.waveContainers = {};
-            window.waves.wavePaths = {};
+            window.waves.updatePosition();
+            window.waves.updateCornerSquareColors();
         }
         
-        if (window.waves && window.waves.createVisibleWaveElements) {
-            window.waves.createVisibleWaveElements();
+        if (window.grid) {
+            if (window.grid.createGrid) {
+                window.grid.createGrid();
+            }
+            if (window.grid.updateCenterDate) {
+                window.grid.updateCenterDate();
+                window.grid.updateGridNotesHighlight();
+            }
         }
-    }
-    
-    if (window.waves) {
-        window.waves.updatePosition();
-        window.waves.updateCornerSquareColors();
-    }
-    
-    if (window.grid) {
-        if (window.grid.createGrid) {
-            window.grid.createGrid();
+        
+        window.appState.save();
+        
+        this.updateTodayButton();
+        
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
         }
-        if (window.grid.updateCenterDate) {
-            window.grid.updateCenterDate();
-            window.grid.updateGridNotesHighlight();
-        }
+        
+        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА ПОСЛЕ УСТАНОВКИ ДАТЫ
+        this.updateDateTimeInputs();
+        
+        console.log('=== setActiveDate() завершен ===');
     }
-    
-    window.appState.save();
-    
-    this.updateTodayButton();
-    
-    if (window.summaryManager && window.summaryManager.updateSummary) {
-        setTimeout(() => {
-            window.summaryManager.updateSummary();
-        }, 50);
-    }
-    
-    console.log('=== setActiveDate() завершен ===');
-}
-    
     
     addNote(content) {
         if (!content.trim()) {
@@ -267,7 +268,7 @@ setActiveDate(dateId, useExactTime = false) {
         }
         
         // Используем TimeUtils для сравнения дат в UTC
-        const targetStart = window.timeUtils.getStartOfDayUTC(targetTimestamp);
+        const targetStart = window.timeUtils.getStartOfDay(targetTimestamp);
         const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000);
         
         return window.appState.data.notes.filter(note => {
@@ -352,218 +353,165 @@ setActiveDate(dateId, useExactTime = false) {
             }, 50);
         }
         
+        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+        this.updateDateTimeInputs();
+        
         console.log('=== navigateDay() завершен ===');
     }
     
-
-recalculateCurrentDay(useExactTime = false) {
-    console.log('=== ДЕТАЛЬНЫЙ ДЕБАГ ДРОБНОЙ ЧАСТИ ===');
-    
-    // 1. Получаем currentDate
-    const currentDate = window.appState.currentDate;
-    console.log('1. currentDate:');
-    console.log('   Локальное:', currentDate.toLocaleString());
-    console.log('   Часы (локально):', currentDate.getHours());
-    console.log('   Минуты (локально):', currentDate.getMinutes());
-    console.log('   Секунды (локально):', currentDate.getSeconds());
-    
-    // 2. Получаем baseDate
-    let baseDate;
-    if (typeof window.appState.baseDate === 'number') {
-        baseDate = new Date(window.appState.baseDate);
-    } else {
-        baseDate = new Date(window.appState.baseDate);
+    recalculateCurrentDay(useExactTime = false) {
+        console.log('=== ДЕТАЛЬНЫЙ ДЕБАГ ДРОБНОЙ ЧАСТИ ===');
+        
+        // 1. Получаем currentDate
+        const currentDate = window.appState.currentDate;
+        console.log('1. currentDate:');
+        console.log('   Локальное:', currentDate.toLocaleString());
+        console.log('   Часы (локально):', currentDate.getHours());
+        console.log('   Минуты (локально):', currentDate.getMinutes());
+        console.log('   Секунды (локально):', currentDate.getSeconds());
+        
+        // 2. Получаем baseDate
+        let baseDate;
+        if (typeof window.appState.baseDate === 'number') {
+            baseDate = new Date(window.appState.baseDate);
+        } else {
+            baseDate = new Date(window.appState.baseDate);
+        }
+        
+        console.log('2. baseDate:');
+        console.log('   Локальное:', baseDate.toLocaleString());
+        console.log('   Часы (локально):', baseDate.getHours());
+        
+        // 3. Создаем начала дней в ЛОКАЛЬНОМ времени
+        const currentStart = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            currentDate.getDate(),
+            0, 0, 0, 0
+        );
+        
+        const baseStart = new Date(
+            baseDate.getFullYear(),
+            baseDate.getMonth(),
+            baseDate.getDate(),
+            0, 0, 0, 0
+        );
+        
+        console.log('3. Начала дней (локальные):');
+        console.log('   currentStart:', currentStart.toLocaleString());
+        console.log('   baseStart:', baseStart.toLocaleString());
+        
+        // 4. Разница в миллисекундах по началам дней
+        const diffMsStart = currentStart.getTime() - baseStart.getTime();
+        const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
+        
+        console.log('4. Разница по началам дней:');
+        console.log('   мс:', diffMsStart);
+        console.log('   дней:', daysStart);
+        console.log('   целых дней:', Math.floor(daysStart));
+        
+        // 5. Вычисляем дробную часть от времени суток (только локальное время)
+        const hours = currentDate.getHours();
+        const minutes = currentDate.getMinutes();
+        const seconds = currentDate.getSeconds();
+        const milliseconds = currentDate.getMilliseconds();
+        
+        const timeOfDayFraction = (
+            (hours * 60 * 60 * 1000) +
+            (minutes * 60 * 1000) +
+            (seconds * 1000) +
+            milliseconds
+        ) / (24 * 60 * 60 * 1000);
+        
+        console.log('5. Время суток (локальное):');
+        console.log('   Часы:', hours, 'Минуты:', minutes, 'Секунды:', seconds);
+        console.log('   Дробная часть дня:', timeOfDayFraction.toFixed(8));
+        
+        // 6. Вычисляем окончательный результат
+        let daysDiff;
+        if (useExactTime) {
+            // Для "Сейчас": целые дни от начала дней + дробная часть времени суток
+            daysDiff = Math.floor(daysStart) + timeOfDayFraction;
+            console.log('Используем РЕАЛЬНОЕ время (без смещения часовых поясов):', daysDiff);
+            console.log('  Целые дни:', Math.floor(daysStart));
+            console.log('  Время суток:', timeOfDayFraction.toFixed(8));
+            console.log('  Общее:', daysDiff.toFixed(8));
+        } else {
+            // Для "Сегодня": только целые дни (начало дня)
+            daysDiff = Math.round(daysStart);
+            console.log('Используем начало дня (целые числа):', daysDiff);
+        }
+        
+        window.appState.currentDay = daysDiff;
+        window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
+        
+        console.log('Финальный currentDay:', window.appState.currentDay);
+        
+        this.updateCurrentDayElement();
+        window.appState.save();
+        
+        return window.appState.currentDay;
     }
     
-    console.log('2. baseDate:');
-    console.log('   Локальное:', baseDate.toLocaleString());
-    console.log('   Часы (локально):', baseDate.getHours());
-    
-    // 3. Создаем начала дней в ЛОКАЛЬНОМ времени
-    const currentStart = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate(),
-        0, 0, 0, 0
-    );
-    
-    const baseStart = new Date(
-        baseDate.getFullYear(),
-        baseDate.getMonth(),
-        baseDate.getDate(),
-        0, 0, 0, 0
-    );
-    
-    console.log('3. Начала дней (локальные):');
-    console.log('   currentStart:', currentStart.toLocaleString());
-    console.log('   baseStart:', baseStart.toLocaleString());
-    
-    // 4. Разница в миллисекундах по началам дней
-    const diffMsStart = currentStart.getTime() - baseStart.getTime();
-    const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
-    
-    console.log('4. Разница по началам дней:');
-    console.log('   мс:', diffMsStart);
-    console.log('   дней:', daysStart);
-    console.log('   целых дней:', Math.floor(daysStart));
-    
-    // 5. Вычисляем дробную часть от времени суток (только локальное время)
-    const hours = currentDate.getHours();
-    const minutes = currentDate.getMinutes();
-    const seconds = currentDate.getSeconds();
-    const milliseconds = currentDate.getMilliseconds();
-    
-    const timeOfDayFraction = (
-        (hours * 60 * 60 * 1000) +
-        (minutes * 60 * 1000) +
-        (seconds * 1000) +
-        milliseconds
-    ) / (24 * 60 * 60 * 1000);
-    
-    console.log('5. Время суток (локальное):');
-    console.log('   Часы:', hours, 'Минуты:', minutes, 'Секунды:', seconds);
-    console.log('   Дробная часть дня:', timeOfDayFraction.toFixed(8));
-    
-    // 6. Вычисляем окончательный результат
-    let daysDiff;
-    if (useExactTime) {
-        // Для "Сейчас": целые дни от начала дней + дробная часть времени суток
-        daysDiff = Math.floor(daysStart) + timeOfDayFraction;
-        console.log('Используем РЕАЛЬНОЕ время (без смещения часовых поясов):', daysDiff);
-        console.log('  Целые дни:', Math.floor(daysStart));
-        console.log('  Время суток:', timeOfDayFraction.toFixed(8));
-        console.log('  Общее:', daysDiff.toFixed(8));
-    } else {
-        // Для "Сегодня": только целые дни (начало дня)
-        daysDiff = Math.round(daysStart);
-        console.log('Используем начало дня (целые числа):', daysDiff);
+    goToToday() {
+        console.log('=== goToToday() вызван (локальное время) ===');
+        
+        // Получаем начало текущего дня в локальном времени
+        const todayStart = window.timeUtils.getStartOfDay(new Date());
+        
+        window.appState.currentDate = new Date(todayStart);
+        
+        console.log('После установки currentDate (локальное начало дня):', 
+            window.appState.currentDate.toLocaleString());
+        
+        // Пересчитываем с целыми числами
+        this.recalculateCurrentDay(false);
+        
+        console.log('После recalculateCurrentDay:');
+        console.log('  currentDay (целое число):', window.appState.currentDay);
+        console.log('  currentDate (локальное):', window.appState.currentDate.toLocaleString());
+        
+        if (window.grid && window.grid.createGrid) {
+            window.grid.createGrid();
+        }
+        
+        window.grid.updateCenterDate();
+        window.waves.updatePosition();
+        window.appState.save();
+        
+        this.updateTodayButton();
+        
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+        this.updateDateTimeInputs();
+        
+        console.log('=== goToToday() завершен ===');
     }
     
-    window.appState.currentDay = daysDiff;
-    window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
-    
-    console.log('Финальный currentDay:', window.appState.currentDay);
-    
-    this.updateCurrentDayElement();
-    window.appState.save();
-    
-    return window.appState.currentDay;
-}
-
-goToToday() {
-    console.log('=== goToToday() вызван (локальное время) ===');
-    
-    // Получаем начало текущего дня в локальном времени
-    const todayStart = window.timeUtils.getStartOfDay(new Date());
-    
-    window.appState.currentDate = new Date(todayStart);
-    
-    console.log('После установки currentDate (локальное начало дня):', 
-        window.appState.currentDate.toLocaleString());
-    
-    // Пересчитываем с целыми числами
-    this.recalculateCurrentDay(false);
-    
-    console.log('После recalculateCurrentDay:');
-    console.log('  currentDay (целое число):', window.appState.currentDay);
-    console.log('  currentDate (локальное):', window.appState.currentDate.toLocaleString());
-    
-    if (window.grid && window.grid.createGrid) {
-        window.grid.createGrid();
-    }
-    
-    window.grid.updateCenterDate();
-    window.waves.updatePosition();
-    window.appState.save();
-    
-    this.updateTodayButton();
-    
-    if (window.summaryManager && window.summaryManager.updateSummary) {
-        setTimeout(() => {
-            window.summaryManager.updateSummary();
-        }, 50);
-    }
-    
-    console.log('=== goToToday() завершен ===');
-}
-
-goToNow() {
-    console.log('=== goToNow() вызван (локальное время) ===');
-    
-    // Получаем текущее точное локальное время
-    window.appState.currentDate = new Date();
-    
-    console.log('После установки currentDate (локальное точное время):', 
-        window.appState.currentDate.toLocaleString());
-    console.log('Локальное время:', 
-        window.appState.currentDate.getHours(), 'часов',
-        window.appState.currentDate.getMinutes(), 'минут',
-        window.appState.currentDate.getSeconds(), 'секунд');
-    
-    // Пересчитываем с дробными числами (с учетом времени)
-    this.recalculateCurrentDay(true);
-    
-    console.log('После recalculateCurrentDay:');
-    console.log('  currentDay (с точностью до секунд):', window.appState.currentDay);
-    console.log('  currentDate (локальное):', window.appState.currentDate.toLocaleString());
-    
-    window.grid.createGrid();
-    window.grid.updateCenterDate();
-    window.waves.updatePosition();
-    window.appState.save();
-    
-    this.updateTodayButton();
-    
-    if (window.summaryManager && window.summaryManager.updateSummary) {
-        setTimeout(() => {
-            window.summaryManager.updateSummary();
-        }, 50);
-    }
-    
-    console.log('=== goToNow() завершен ===');
-}
-
-// modules/dates.js - добавьте этот метод
-debugDateInfo() {
-    console.log('=== ДЕБАГ ИНФОРМАЦИЯ О ДАТАХ ===');
-    console.log('baseDate:', new Date(window.appState.baseDate).toLocaleString());
-    console.log('baseDate timestamp:', window.appState.baseDate);
-    console.log('baseDate часы:', new Date(window.appState.baseDate).getHours());
-    
-    console.log('currentDate:', window.appState.currentDate.toLocaleString());
-    console.log('currentDate timestamp:', window.appState.currentDate.getTime());
-    console.log('currentDate часы:', window.appState.currentDate.getHours());
-    
-    console.log('currentDay:', window.appState.currentDay);
-    console.log('=======================');
-}
-
-// modules/dates.js - исправленный метод
-setDateFromInput() {
-    const dateValue = this.elements.mainDateInput.value;
-    if (dateValue) {
-        // Используем TimeUtils для парсинга - важно: это ЛОКАЛЬНОЕ время
-        const newDate = window.timeUtils.parseStringToLocal(dateValue);
+    goToNow() {
+        console.log('=== goToNow() вызван (локальное время) ===');
         
-        // Устанавливаем как локальное время
-        window.appState.currentDate = newDate;
+        // Получаем текущее точное локальное время
+        window.appState.currentDate = new Date();
         
-        // Проверяем, является ли время началом дня
-        const hours = newDate.getHours();
-        const minutes = newDate.getMinutes();
-        const seconds = newDate.getSeconds();
-        const milliseconds = newDate.getMilliseconds();
+        console.log('После установки currentDate (локальное точное время):', 
+            window.appState.currentDate.toLocaleString());
+        console.log('Локальное время:', 
+            window.appState.currentDate.getHours(), 'часов',
+            window.appState.currentDate.getMinutes(), 'минут',
+            window.appState.currentDate.getSeconds(), 'секунд');
         
-        const isStartOfDay = hours === 0 && minutes === 0 && seconds === 0 && milliseconds === 0;
+        // Пересчитываем с дробными числами (с учетом времени)
+        this.recalculateCurrentDay(true);
         
-        console.log('Время в инпуте (локальное):', 
-            `Часы: ${hours}, Минуты: ${minutes}, Секунды: ${seconds}, Мс: ${milliseconds}`);
-        console.log('Начало дня?:', isStartOfDay);
-        
-        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ:
-        // Всегда используем ДРОБНЫЙ расчет при установке из инпута
-        // потому что мы задаем конкретное время
-        this.recalculateCurrentDay(true); // ВСЕГДА true для точного времени
+        console.log('После recalculateCurrentDay:');
+        console.log('  currentDay (с точностью до секунд):', window.appState.currentDay);
+        console.log('  currentDate (локальное):', window.appState.currentDate.toLocaleString());
         
         window.grid.createGrid();
         window.grid.updateCenterDate();
@@ -578,11 +526,81 @@ setDateFromInput() {
             }, 50);
         }
         
-        console.log('Текущий день после установки:', window.appState.currentDay);
-        console.log('Ожидаемое (для 12:00):', Math.floor(window.appState.currentDay) + 0.5);
+        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+        this.updateDateTimeInputs();
+        
+        console.log('=== goToNow() завершен ===');
     }
-}
-
+    
+    /**
+     * Устанавливает дату из раздельных полей ввода
+     */
+    setDateFromInputs() {
+        const dateValue = this.elements.mainDateInputDate?.value;
+        const timeValue = this.elements.mainDateInputTime?.value;
+        
+        if (dateValue) {
+            // Используем TimeUtils для парсинга раздельных полей
+            const newDate = window.timeUtils.parseFromDateAndTimeInputs(dateValue, timeValue);
+            
+            // Устанавливаем как локальное время
+            window.appState.currentDate = newDate;
+            
+            console.log('Дата из полей ввода (локальное):', 
+                `Дата: ${dateValue}, Время: ${timeValue || '00:00:00'}`);
+            
+            // Всегда используем ДРОБНЫЙ расчет при установке из инпута
+            // потому что мы задаем конкретное время
+            this.recalculateCurrentDay(true);
+            
+            window.grid.createGrid();
+            window.grid.updateCenterDate();
+            window.waves.updatePosition();
+            window.appState.save();
+            
+            this.updateTodayButton();
+            
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                setTimeout(() => {
+                    window.summaryManager.updateSummary();
+                }, 50);
+            }
+            
+            console.log('Текущий день после установки:', window.appState.currentDay);
+        }
+    }
+    
+    /**
+     * Устанавливает дату из старого единого поля (обратная совместимость)
+     * @deprecated Используйте setDateFromInputs() для новых полей
+     */
+    setDateFromInput() {
+        console.warn('setDateFromInput() устарел, используйте setDateFromInputs()');
+        this.setDateFromInputs();
+    }
+    
+    /**
+     * Обновляет значения в полях ввода даты и времени
+     */
+    updateDateTimeInputs() {
+        if (window.uiManager && window.uiManager.updateDateTimeInputs) {
+            window.uiManager.updateDateTimeInputs();
+        }
+    }
+    
+    debugDateInfo() {
+        console.log('=== ДЕБАГ ИНФОРМАЦИЯ О ДАТАХ ===');
+        console.log('baseDate:', new Date(window.appState.baseDate).toLocaleString());
+        console.log('baseDate timestamp:', window.appState.baseDate);
+        console.log('baseDate часы:', new Date(window.appState.baseDate).getHours());
+        
+        console.log('currentDate:', window.appState.currentDate.toLocaleString());
+        console.log('currentDate timestamp:', window.appState.currentDate.getTime());
+        console.log('currentDate часы:', window.appState.currentDate.getHours());
+        
+        console.log('currentDay:', window.appState.currentDay);
+        console.log('=======================');
+    }
     
     setDate(newDate) {
         window.appState.isProgrammaticDateChange = true;
@@ -609,6 +627,9 @@ setDateFromInput() {
                 window.summaryManager.updateSummary();
             }, 50);
         }
+        
+        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+        this.updateDateTimeInputs();
         
         setTimeout(() => {
             window.appState.isProgrammaticDateChange = false;
@@ -653,58 +674,58 @@ setDateFromInput() {
             console.warn('DatesManager: элемент currentDay не найден в DOM');
         }
     }
-
-
-forceInitialize() {
-    console.log('=== FORCE INITIALIZE (ЛОКАЛЬНОЕ ВРЕМЯ) ===');
     
-    // Устанавливаем ТОЧНОЕ локальное время
-    window.appState.currentDate = window.timeUtils.now();
-    
-    this.recalculateCurrentDay(true); // При инициализации используем ДРОБНЫЕ числа
-    
-    if (window.appState.activeDateId) {
-        console.log('Принудительная установка активной даты (локальное время):', window.appState.activeDateId);
-        this.setActiveDate(window.appState.activeDateId, true);
-    } else if (window.appState.data.dates.length > 0) {
-        console.log('Нет активной даты, выбираем первую из списка (локальное время)');
-        const firstDateId = window.appState.data.dates[0].id;
-        window.appState.activeDateId = firstDateId;
-        this.setActiveDate(firstDateId, true);
-    } else {
-        console.log('Нет дат в списке, устанавливаем базовую дату (локальное время)');
-        window.appState.baseDate = window.timeUtils.nowTimestamp();
-        this.recalculateCurrentDay(true);
-    }
-    
-    if (window.waves && window.waves.updatePosition) {
-        window.waves.updatePosition();
-    }
-    
-    if (window.grid) {
-        if (window.grid.createGrid) {
-            window.grid.createGrid();
+    forceInitialize() {
+        console.log('=== FORCE INITIALIZE (ЛОКАЛЬНОЕ ВРЕМЯ) ===');
+        
+        // Устанавливаем ТОЧНОЕ локальное время
+        window.appState.currentDate = window.timeUtils.now();
+        
+        this.recalculateCurrentDay(true); // При инициализации используем ДРОБНЫЕ числа
+        
+        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+        this.updateDateTimeInputs();
+        
+        if (window.appState.activeDateId) {
+            console.log('Принудительная установка активной даты (локальное время):', window.appState.activeDateId);
+            this.setActiveDate(window.appState.activeDateId, true);
+        } else if (window.appState.data.dates.length > 0) {
+            console.log('Нет активной даты, выбираем первую из списка (локальное время)');
+            const firstDateId = window.appState.data.dates[0].id;
+            window.appState.activeDateId = firstDateId;
+            this.setActiveDate(firstDateId, true);
+        } else {
+            console.log('Нет дат в списке, устанавливаем базовую дату (локальное время)');
+            window.appState.baseDate = window.timeUtils.nowTimestamp();
+            this.recalculateCurrentDay(true);
         }
-        if (window.grid.updateCenterDate) {
-            window.grid.updateCenterDate();
+        
+        if (window.waves && window.waves.updatePosition) {
+            window.waves.updatePosition();
         }
-    }
-    
-    if (window.dataManager) {
-        if (window.dataManager.updateDateList) {
-            window.dataManager.updateDateList();
+        
+        if (window.grid) {
+            if (window.grid.createGrid) {
+                window.grid.createGrid();
+            }
+            if (window.grid.updateCenterDate) {
+                window.grid.updateCenterDate();
+            }
         }
+        
+        if (window.dataManager) {
+            if (window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            }
+        }
+        
+        this.updateTodayButton();
+        
+        console.log('=== FORCE INITIALIZE завершен (локальное время) ===');
+        console.log('activeDateId:', window.appState?.activeDateId);
+        console.log('currentDay:', window.appState?.currentDay);
+        console.log('currentDate (локальное):', window.appState?.currentDate?.toLocaleString());
     }
-    
-    this.updateTodayButton();
-    
-    console.log('=== FORCE INITIALIZE завершен (локальное время) ===');
-    console.log('activeDateId:', window.appState?.activeDateId);
-    console.log('currentDay:', window.appState?.currentDay);
-    console.log('currentDate (локальное):', window.appState?.currentDate?.toLocaleString());
-}
-    
-
 }
 
 window.dates = new DatesManager();

@@ -191,6 +191,16 @@ class AppCore {
                 window.eventManager = new EventManager();
             }
         }
+
+		const mainDateInputDate = document.getElementById('mainDateInputDate');
+		const mainDateInputTime = document.getElementById('mainDateInputTime');
+		
+		if (mainDateInputDate && mainDateInputTime && window.timeUtils) {
+			const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
+			mainDateInputDate.value = formatted.date;
+			mainDateInputTime.value = formatted.time;
+			console.log('AppCore: установлены начальные значения в поля даты и времени');
+		}
         
         // Обновляем кнопку "Сегодня"
         if (window.dates && window.dates.updateTodayButton) {

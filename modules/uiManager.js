@@ -2,55 +2,65 @@
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
-        this.setupDateTimeInput();
+        this.setupDateTimeInputs();
         this.activeTab = null; // текущий активный таб
     }
     
-    setupDateTimeInput() {
-        const dateInput = document.getElementById('mainDateInput');
-        if (!dateInput) return;
+    setupDateTimeInputs() {
+        const dateInput = document.getElementById('mainDateInputDate');
+        const timeInput = document.getElementById('mainDateInputTime');
         
-        // Автодополнение даты
-        dateInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/[^\d\s\-:]/g, '');
+        if (!dateInput || !timeInput) return;
+        
+        // Автозаполнение текущей даты при фокусе, если поле пустое
+        dateInput.addEventListener('focus', () => {
+            if (!dateInput.value) {
+                const now = new Date();
+                dateInput.value = window.timeUtils.formatForDateInput(now);
+            }
+        });
+        
+        // Автозаполнение текущего времени при фокусе, если поле пустое
+        timeInput.addEventListener('focus', () => {
+            if (!timeInput.value) {
+                const now = new Date();
+                timeInput.value = window.timeUtils.formatForTimeInput(now);
+            }
+        });
+        
+        // Обработка клавиши Enter в полях ввода
+        const handleEnter = (e) => {
+            if (e.key === 'Enter') {
+                if (window.dates && window.dates.setDateFromInputs) {
+                    window.dates.setDateFromInputs();
+                }
+            }
+        };
+        
+        dateInput.addEventListener('keydown', handleEnter);
+        timeInput.addEventListener('keydown', handleEnter);
+        
+        // Валидация времени - добавляем секунды, если их нет
+        timeInput.addEventListener('blur', () => {
+            let value = timeInput.value.trim();
+            if (value && value.split(':').length === 2) {
+                // Если только часы:минуты, добавляем секунды
+                timeInput.value = value + ':00';
+            }
+        });
+        
+        // Автодополнение времени
+        timeInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^\d:]/g, '');
             
             // Автоматическое добавление разделителей
-            if (value.length === 4 && !value.includes('-')) {
-                value = value + '-';
-            } else if (value.length === 7 && value.split('-').length < 3) {
-                value = value + '-';
-            } else if (value.length === 10 && !value.includes(' ')) {
-                value = value + ' ';
-            } else if (value.length === 13 && value.split(':').length < 2) {
+            if (value.length === 2 && !value.includes(':')) {
                 value = value + ':';
-            } else if (value.length === 16 && value.split(':').length < 3) {
+            } else if (value.length === 5 && value.split(':').length < 3) {
                 value = value + ':';
             }
             
             e.target.value = value;
-        });
-        
-        // Подсказка при фокусе
-        dateInput.addEventListener('focus', () => {
-            if (!dateInput.value) {
-                const now = new Date();
-                const example = window.dom.formatDateForDateTimeInputWithSeconds(now);
-                dateInput.placeholder = example;
-            }
-        });
-        
-        // Возвращаем стандартный placeholder при потере фокуса
-        dateInput.addEventListener('blur', () => {
-            dateInput.placeholder = "YYYY-MM-DD HH:MM:SS";
-        });
-        
-        // Обработка клавиши Enter
-        dateInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                if (window.dates && window.dates.setDateFromInput) {
-                    window.dates.setDateFromInput();
-                }
-            }
         });
     }
     
@@ -62,7 +72,7 @@ class UIManager {
             prevDay: () => window.dates.navigateDay(-1),
             nextDay: () => window.dates.navigateDay(1),
             today: () => window.dates.goToToday(),
-            setDate: () => window.dates.setDateFromInput(),
+            setDate: () => window.dates.setDateFromInputs(),
             
             // Трансформации
             flipH: () => this.flipHorizontal(),
@@ -330,17 +340,31 @@ class UIManager {
         window.location.reload();
     }
     
+    /**
+     * Обновляет значения в полях даты и времени
+     */
+    updateDateTimeInputs() {
+        const dateInput = document.getElementById('mainDateInputDate');
+        const timeInput = document.getElementById('mainDateInputTime');
+        
+        if (dateInput && timeInput && window.timeUtils) {
+            const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
+            dateInput.value = formatted.date;
+            timeInput.value = formatted.time;
+        }
+    }
+    
     updateUI() {
         window.dataManager.updateDateList();
         window.dataManager.updateWavesGroups();
         window.dataManager.updateNotesList();
         
-        // ИЗМЕНЕНО: Используем новый метод форматирования с секундами
-        if (document.getElementById('mainDateInput') && window.dom) {
-            document.getElementById('mainDateInput').value = window.dom.formatDateForDateTimeInputWithSeconds(window.appState.currentDate);
-        }
+        // ИСПРАВЛЕНО: Используем новый метод для обновления раздельных полей
+        this.updateDateTimeInputs();
+        
+        // Обновляем поле даты в форме добавления даты (если есть)
         if (document.getElementById('dateInput')) {
-            document.getElementById('dateInput').value = window.dom.formatDateForInput(window.appState.currentDate);
+            document.getElementById('dateInput').value = window.timeUtils.formatForDateInput(window.appState.currentDate);
         }
         
         window.waves.updatePosition();

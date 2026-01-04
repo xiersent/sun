@@ -270,6 +270,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.uiManager.restoreTabState();
             console.log('Состояние табов восстановлено');
         }
+
+		const mainDateInputDate = document.getElementById('mainDateInputDate');
+		const mainDateInputTime = document.getElementById('mainDateInputTime');
+		
+		if (mainDateInputDate && mainDateInputTime && window.timeUtils) {
+			const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
+			mainDateInputDate.value = formatted.date;
+			mainDateInputTime.value = formatted.time;
+			console.log('Установлены значения в поля даты и времени:', formatted.date, formatted.time);
+		}
         
         console.log('=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
         console.log('activeDateId:', window.appState?.activeDateId);
