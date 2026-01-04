@@ -199,43 +199,45 @@ class GridManager {
         }
     }
     
-    // МЕТКИ ОСИ Y - в статическом контейнере
-    createYAxisLabels() {
-        if (!this.staticElementsContainer) return;
-        
-        // Нулевая метка
-        const zeroLabel = document.createElement('div');
-        zeroLabel.className = 'labels y-labels';
-        zeroLabel.style.position = 'absolute';
-        zeroLabel.style.top = '50%';
-        zeroLabel.style.transform = 'translateY(-50%)';
-        zeroLabel.style.left = '10px';
-        zeroLabel.textContent = '0';
-        this.staticElementsContainer.appendChild(zeroLabel);
-        
-        // Положительные и отрицательные метки
-        for (let i = 1; i <= 5; i++) {
-            // Положительные (верх)
-            const labelTop = document.createElement('div');
-            labelTop.className = 'labels y-labels';
-            labelTop.style.position = 'absolute';
-            labelTop.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
-            labelTop.style.transform = 'translateY(-50%)';
-            labelTop.style.left = '10px';
-            labelTop.textContent = i;
-            this.staticElementsContainer.appendChild(labelTop);
-            
-            // Отрицательные (низ)
-            const labelBottom = document.createElement('div');
-            labelBottom.className = 'labels y-labels';
-            labelBottom.style.position = 'absolute';
-            labelBottom.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
-            labelBottom.style.transform = 'translateY(-50%)';
-            labelBottom.style.left = '10px';
-            labelBottom.textContent = -i;
-            this.staticElementsContainer.appendChild(labelBottom);
-        }
-    }
+	// modules/grid.js - ИСПРАВЛЕННЫЙ метод createYAxisLabels()
+	createYAxisLabels() {
+		if (!this.staticElementsContainer) return;
+		
+		// Нулевая метка (середина)
+		const zeroLabel = document.createElement('div');
+		zeroLabel.className = 'labels y-labels';
+		zeroLabel.style.position = 'absolute';
+		zeroLabel.style.top = '50%';
+		zeroLabel.style.transform = 'translateY(-50%)';
+		zeroLabel.style.left = '10px';
+		zeroLabel.textContent = '0';
+		this.staticElementsContainer.appendChild(zeroLabel);
+		
+		// Положительные значения (5, 4, 3, 2, 1) - ВВЕРХУ
+		for (let i = 1; i <= 5; i++) {
+			// Положительные (верх) - должны быть 5, 4, 3, 2, 1
+			const labelTop = document.createElement('div');
+			labelTop.className = 'labels y-labels';
+			labelTop.style.position = 'absolute';
+			// ОТРИЦАТЕЛЬНОЕ смещение ВВЕРХ от центра (чтобы 5 было наверху)
+			labelTop.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
+			labelTop.style.transform = 'translateY(-50%)';
+			labelTop.style.left = '10px';
+			labelTop.textContent = i; // Положительные числа: 5, 4, 3, 2, 1
+			this.staticElementsContainer.appendChild(labelTop);
+			
+			// Отрицательные (низ) - должны быть -1, -2, -3, -4, -5
+			const labelBottom = document.createElement('div');
+			labelBottom.className = 'labels y-labels';
+			labelBottom.style.position = 'absolute';
+			// ПОЛОЖИТЕЛЬНОЕ смещение ВНИЗ от центра (чтобы -5 было внизу)
+			labelBottom.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
+			labelBottom.style.transform = 'translateY(-50%)';
+			labelBottom.style.left = '10px';
+			labelBottom.textContent = -i; // Отрицательные числа: -1, -2, -3, -4, -5
+			this.staticElementsContainer.appendChild(labelBottom);
+		}
+	}
     
     clearGrid() {
         // Удаляем старые контейнеры
