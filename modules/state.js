@@ -67,9 +67,7 @@ class AppState {
                 graphGrayMode: false,
                 cornerSquaresVisible: true,
                 activeDateId: 's25',
-                editingDateId: null,
-                editingWaveId: null,
-                editingGroupId: null,
+                // УДАЛЕНО: editingDateId, editingWaveId, editingGroupId - состояния редактирования не сохраняются
                 waveVisibility: {},
                 waveBold: {},
                 waveCornerColor: {}
@@ -289,9 +287,11 @@ class AppState {
                 this.grayMode = data.uiSettings.grayMode || false;
                 this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
                 this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
-                this.editingDateId = data.uiSettings.editingDateId || null;
-                this.editingWaveId = data.uiSettings.editingWaveId || null;
-                this.editingGroupId = data.uiSettings.editingGroupId || null;
+                
+                // ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются, всегда null
+                this.editingDateId = null;
+                this.editingWaveId = null;
+                this.editingGroupId = null;
                 
                 if (data.uiSettings.activeDateId) {
                     this.activeDateId = data.uiSettings.activeDateId;
@@ -448,9 +448,12 @@ class AppState {
         this.graphGrayMode = false;
         this.cornerSquaresVisible = true;
         this.activeDateId = 's25';
+        
+        // ИСПРАВЛЕНИЕ: Состояния редактирования всегда сбрасываются
         this.editingDateId = null;
         this.editingWaveId = null;
         this.editingGroupId = null;
+        
         this.isProgrammaticDateChange = false;
         this.SQL = null;
         this.currentDB = null;
@@ -499,9 +502,9 @@ class AppState {
 		this.data.uiSettings.graphGrayMode = this.graphGrayMode;
 		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
 		this.data.uiSettings.activeDateId = this.activeDateId;
-		this.data.uiSettings.editingDateId = this.editingDateId;
-		this.data.uiSettings.editingWaveId = this.editingWaveId;
-		this.data.uiSettings.editingGroupId = this.editingGroupId;
+		
+		// ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются
+		// Не сохраняем: editingDateId, editingWaveId, editingGroupId
 		
 		this.data.uiSettings.waveVisibility = this.waveVisibility;
 		this.data.uiSettings.waveBold = this.waveBold;

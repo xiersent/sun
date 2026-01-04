@@ -208,6 +208,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
         console.log('=== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ ===');
         
+        // ИСПРАВЛЕНИЕ: Гарантируем сброс состояний редактирования при инициализации
+        console.log('=== ГАРАНТИЯ СБРОСА СОСТОЯНИЙ РЕДАКТИРОВАНИЯ ===');
+        
+        // Сбрасываем все состояния редактирования
+        if (window.appState) {
+            window.appState.editingDateId = null;
+            window.appState.editingWaveId = null;
+            window.appState.editingGroupId = null;
+            
+            console.log('Состояния редактирования гарантированно сброшены');
+        }
+        
         // ИЗМЕНЕНО: Устанавливаем текущее точное время при инициализации
         const now = new Date();
 		const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -281,12 +293,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 			console.log('Установлены значения в поля даты и времени:', formatted.date, formatted.time);
 		}
         
+        // Обновляем UI, чтобы убрать режимы редактирования (если они были)
+        if (window.unifiedListManager) {
+            if (window.unifiedListManager.updateDatesList) {
+                window.unifiedListManager.updateDatesList();
+            }
+            if (window.unifiedListManager.updateWavesList) {
+                window.unifiedListManager.updateWavesList();
+            }
+        }
+        
         console.log('=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===');
         console.log('activeDateId:', window.appState?.activeDateId);
         console.log('currentDay:', window.appState?.currentDay);
         console.log('baseDate:', window.appState?.baseDate);
         console.log('currentDate:', window.appState?.currentDate);
         console.log('Текущее точное время установлено:', now.toLocaleTimeString());
+        console.log('Состояния редактирования гарантированно сброшены');
         
         console.log('=== ПРОВЕРКА ШАБЛОНОВ ===');
         console.log('⚠️  ЗАПРЕЩЕНО создавать инлайн шаблоны в коде JavaScript!');

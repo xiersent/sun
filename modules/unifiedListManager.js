@@ -438,6 +438,7 @@ class UnifiedListManager {
             
             window.appState.data.dates.forEach(date => {
                 if (String(date.id) === idStr) {
+                    // ИСПРАВЛЕНИЕ: Переключаем состояние, но не сохраняем в appState.save()
                     window.appState.editingDateId = editingDateIdStr === idStr ? null : id;
                 }
             });
@@ -448,6 +449,7 @@ class UnifiedListManager {
             
             window.appState.data.waves.forEach(wave => {
                 if (String(wave.id) === idStr) {
+                    // ИСПРАВЛЕНИЕ: Переключаем состояние, но не сохраняем в appState.save()
                     window.appState.editingWaveId = editingWaveIdStr === idStr ? null : id;
                 }
             });
@@ -456,9 +458,10 @@ class UnifiedListManager {
             const idStr = String(id);
             const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
             
+            // ИСПРАВЛЕНИЕ: Переключаем состояние, но не сохраняем в appState.save()
             window.appState.editingGroupId = editingGroupIdStr === idStr ? null : id;
             console.log('Режим редактирования группы установлен:', id, window.appState.editingGroupId);
-            window.appState.save();
+            // НЕ вызываем: window.appState.save();
             this.updateWavesList();
         }
     }
@@ -494,12 +497,15 @@ class UnifiedListManager {
         console.log('UnifiedListManager: обработка клика отмены:', type, id);
         
         if (type === 'date') {
+            // ИСПРАВЛЕНИЕ: Просто сбрасываем состояние редактирования
             window.appState.editingDateId = null;
             this.updateDatesList();
         } else if (type === 'wave') {
+            // ИСПРАВЛЕНИЕ: Просто сбрасываем состояние редактирования
             window.appState.editingWaveId = null;
             this.updateWavesList();
         } else if (type === 'group') {
+            // ИСПРАВЛЕНИЕ: Просто сбрасываем состояние редактирования
             window.appState.editingGroupId = null;
             this.updateWavesList();
         }
@@ -510,6 +516,7 @@ class UnifiedListManager {
         
         const dateObj = window.appState.data.dates.find(d => String(d.id) === String(dateId));
         if (!dateObj) {
+            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingDateId = null;
             this.updateDatesList();
             return;
@@ -519,6 +526,7 @@ class UnifiedListManager {
         const dateInput = document.getElementById(`editDateValue${dateId}`);
         
         if (!nameInput || !dateInput) {
+            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingDateId = null;
             this.updateDatesList();
             return;
@@ -544,6 +552,8 @@ class UnifiedListManager {
             
             dateObj.name = newName;
             dateObj.date = newDate.getTime();
+            
+            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования после сохранения
             window.appState.editingDateId = null;
             
             if (String(window.appState.activeDateId) === String(dateId)) {
@@ -567,6 +577,7 @@ class UnifiedListManager {
         
         const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
         if (!wave) {
+            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingWaveId = null;
             this.updateWavesList();
             return;
@@ -608,7 +619,10 @@ class UnifiedListManager {
         }
         
         window.waves.createWaveElement(wave);
+        
+        // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования после сохранения
         window.appState.editingWaveId = null;
+        
         this.updateWavesList();
         window.waves.updatePosition();
         window.appState.save();
@@ -619,6 +633,7 @@ class UnifiedListManager {
         
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
+            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingGroupId = null;
             this.updateWavesList();
             return;
@@ -632,6 +647,8 @@ class UnifiedListManager {
         }
         
         group.name = newName;
+        
+        // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования после сохранения
         window.appState.editingGroupId = null;
         
         this.updateWavesList();
