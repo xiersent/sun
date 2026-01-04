@@ -80,7 +80,7 @@ class AppCore {
         }
     }
     
-    async initializeAppComponents() {
+	async initializeAppComponents() {
         console.log('AppCore: инициализация компонентов приложения');
         
         // 1. Ждем загрузки шаблонов

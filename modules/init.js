@@ -1,4 +1,4 @@
-// modules/init.js - ПОЛНАЯ ВЕРСИЯ
+// modules/init.js - ПОЛНАЯ ВЕРСИЯ (без TimestampMigrator)
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('=== НАЧАЛО ИНИЦИАЛИЗАЦИИ ПРИЛОЖЕНИЯ ===');
     
@@ -12,13 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('appState не загружен');
         alert('Ошибка: appState не загружен. Проверьте загрузку state.js');
         return;
-    }
-    
-    // Проверка формата данных
-    if (window.TimestampMigrator) {
-        console.log('Проверка формата данных перед инициализацией...');
-        const migrationReport = window.TimestampMigrator.showMigrationReport();
-        console.log('Результат проверки:', migrationReport.message);
     }
     
     try {
@@ -175,23 +168,6 @@ async function finalizeInitialization() {
     if (window.uiManager && window.uiManager.restoreTabState) {
         window.uiManager.restoreTabState();
         console.log('Состояние табов восстановлено');
-    }
-    
-    // 10. Проверка шаблонов
-    console.log('=== ПРОВЕРКА ШАБЛОНОВ ===');
-    console.log('⚠️ ЗАПРЕЩЕНО создавать инлайн шаблоны в коде!');
-    console.log('✅ Все шаблоны должны быть в папке templates/');
-    
-    if (window.unifiedListManager) {
-        console.log('Шаблоны загружены:', window.unifiedListManager.templatesLoaded);
-        const requiredTemplates = ['date-item-template', 'wave-item-template', 'group-item-template'];
-        requiredTemplates.forEach(templateId => {
-            if (window.unifiedListManager.templateCache[templateId]) {
-                console.log(`✓ Шаблон ${templateId} загружен`);
-            } else {
-                console.error(`✗ Шаблон ${templateId} НЕ ЗАГРУЖЕН!`);
-            }
-        });
     }
     
     console.log('=== ФИНАЛЬНАЯ НАСТРОЙКА ЗАВЕРШЕНА ===');

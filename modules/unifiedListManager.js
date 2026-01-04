@@ -13,7 +13,7 @@ class UnifiedListManager {
         this.templatesLoadPromise = null;
     }
     
-    initTemplates() {
+initTemplates() {
         if (this.templatesLoaded) {
             return Promise.resolve();
         }
@@ -53,22 +53,11 @@ class UnifiedListManager {
                 
                 console.log(`Загружено шаблонов: ${loadedCount} из ${templateIds.length}`);
                 
-                // ⚠️ ВНИМАНИЕ: Этот fallback ТОЛЬКО для критических ошибок!
-                // В нормальных условиях этот код НИКОГДА не должен выполняться!
-                if (loadedCount === 0) {
-                    console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: EJS шаблоны не загрузились!');
-                    console.error('❌ Проверьте наличие файлов в папке templates/');
-                    console.error('❌ Используются emergency fallback шаблоны');
-                    
-                    this.createEmergencyFallbackTemplates();
-                }
-                
                 this.templatesLoaded = true;
                 resolve();
                 
             } catch (error) {
                 console.error('Критическая ошибка загрузки шаблонов:', error);
-                this.createEmergencyFallbackTemplates();
                 this.templatesLoaded = true;
                 resolve();
             }
