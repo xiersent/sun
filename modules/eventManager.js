@@ -17,10 +17,11 @@ class EventManager {
             this.handleClick(e);
         });
         
-        // Drag & Drop с jQuery
+        // Drag & Drop с jQuery - ДОБАВЛЕН dragleave
         $(document)
             .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing)', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
+            .on('dragleave', '.list-item--date[data-type="date"]', this.handleDragLeave.bind(this)) // ДОБАВЛЕНО
             .on('drop', '.list-item--date[data-type="date"]', this.handleDrop.bind(this))
             .on('dragend', '.list-item--date[data-type="date"]', this.handleDragEnd.bind(this));
     }
@@ -708,13 +709,25 @@ class EventManager {
     handleDragOver(e) {
         e.preventDefault();
         e.originalEvent.dataTransfer.dropEffect = 'move';
+        
+        // Убираем подсветку у всех других элементов
+        $('.list-item--date').not(e.currentTarget).removeClass('list-item--drag-over');
+        
+        // Добавляем подсветку только текущему элементу
         $(e.currentTarget).addClass('list-item--drag-over');
+    }
+    
+    handleDragLeave(e) {
+        // Убираем подсветку когда курсор покидает элемент
+        $(e.currentTarget).removeClass('list-item--drag-over');
     }
     
     handleDrop(e) {
         const $item = $(e.currentTarget);
         e.preventDefault();
-        $item.removeClass('list-item--drag-over');
+        
+        // Сразу убираем подсветку
+        $('.list-item').removeClass('list-item--drag-over');
         
         try {
             const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
@@ -741,6 +754,7 @@ class EventManager {
     }
     
     handleDragEnd(e) {
+        // Гарантированно убираем все подсветки
         $('.list-item').removeClass('list-item--dragging list-item--drag-over');
         console.log('EventManager: конец перетаскивания');
     }
