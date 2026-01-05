@@ -1,4 +1,4 @@
-// modules/summaryManager.js
+// modules/summaryManager.js - ОБНОВЛЕННЫЙ ВЕРСИЯ
 class SummaryManager {
     constructor() {
         this.elements = {};
@@ -66,13 +66,24 @@ class SummaryManager {
         // Очищаем текущие опции
         stateSelect.innerHTML = '';
         
-        // Создаем опции от 5 до -5, но -5 по умолчанию
+        // Создаем опции от 5 до -5 с эмодзи для -5, 0, 5
         for (let i = 5; i >= -5; i--) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = i;
+            
+            // Добавляем эмодзи для определенных значений
+            if (i === 5) {
+                option.textContent = '5 😔(😊)';      // грустный и в скобках улыбающийся
+            } else if (i === -5) {
+                option.textContent = '-5 😊';         // улыбающийся
+            } else if (i === 0) {
+                option.textContent = '0 😐';          // нейтральный/покерфейс
+            } else {
+                option.textContent = i.toString();    // остальные без эмодзи
+            }
+            
             if (i === -5) {
-                option.selected = true;
+                option.selected = true;  // -5 по умолчанию
             }
             stateSelect.appendChild(option);
         }
@@ -315,11 +326,25 @@ class SummaryManager {
                         </div>
                     </div>
                     <div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
+                    <div class="summary-item-actions">
+                        <button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
+                            Показать на визоре
+                        </button>
+                    </div>
                 </div>
             `;
         }).join('');
         
         resultsElement.innerHTML = resultsHTML;
+        
+        // Добавляем обработчики для новых кнопок
+        this.setupShowOnVizorButtons();
+    }
+    
+    setupShowOnVizorButtons() {
+        // Используем делегирование событий через EventManager
+        // Кнопки будут обработаны в EventManager.handleClick()
+        // через проверку класса 'show-on-vizor-btn'
     }
     
     getClosenessClass(difference) {

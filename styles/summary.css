@@ -1,4 +1,4 @@
-/* styles/summary.css */
+/* styles/summary.css - ОБНОВЛЕННЫЙ */
 
 /* Панель сводной информации */
 .summary-panel {
@@ -55,10 +55,20 @@
     border: 1px solid var(--clg);
     font-size: var(--font-size-sm);
     height: 25px;
-    min-width: 150px;
 }
 
-/* УДАЛЕНО: стили для #summaryStats */
+/* Кнопки-дублеры */
+.summary-duplicate-buttons {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.summary-duplicate-buttons .ui-btn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
 
 /* Контейнер результатов */
 .summary-results-container {
@@ -90,6 +100,7 @@
     border-bottom: 1px solid #eee;
     background: #fff;
     transition: background-color 0.2s;
+    gap: var(--spacing-sm);
 }
 
 .summary-item:last-child {
@@ -144,13 +155,26 @@
     font-weight: 500;
 }
 
+/* Кнопки действий */
+.summary-item-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-shrink: 0;
+}
+
+.summary-item-actions .ui-btn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
 .summary-item-color {
     width: 20px;
     height: 20px;
     border-radius: 3px;
     border: 1px solid #ccc;
     flex-shrink: 0;
-    margin-left: var(--spacing-sm);
 }
 
 /* Классы близости */
@@ -240,10 +264,18 @@
     
     .summary-select-group {
         min-width: 100%;
+        flex-wrap: wrap;
     }
     
     .summary-select {
         min-width: 0;
+    }
+    
+    .summary-duplicate-buttons {
+        margin-left: 0;
+        margin-top: var(--spacing-xs);
+        width: 100%;
+        justify-content: flex-start;
     }
     
     .summary-item-details {
@@ -253,5 +285,21 @@
     
     .summary-results-container {
         max-height: 200px;
+    }
+    
+    .summary-item {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+    
+    .summary-item-actions {
+        order: 3;
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .summary-item-color {
+        order: 2;
     }
 }

@@ -109,6 +109,7 @@
 					
 					<!-- Контент табов -->
 
+					<!-- В блоке #summary-tab -->
 					<div class="tab-content" id="summary-tab">
 						<div class="panel-section summary-panel" id="summaryPanel">
 							<div class="summary-header">
@@ -118,21 +119,20 @@
 							<div class="summary-controls">
 								<div class="summary-select-row">
 									<div class="summary-select-group">
-										<label class="summary-label">Группа:</label>
 										<select class="summary-select" id="summaryGroupSelect">
 											<option value="all">Все доступные группы с колосками</option>
 											<!-- Опции будут добавлены через JavaScript -->
 										</select>
-									</div>
-									
-									<div class="summary-select-group">
-										<label class="summary-label">Состояние:</label>
 										<select class="summary-select" id="summaryStateSelect">
 											<!-- Опции будут добавлены динамически -->
 										</select>
+										<!-- Кнопки-дублеры -->
+										<div class="summary-duplicate-buttons">
+											<button class="ui-btn" data-action="today">Сегодня</button>
+											<button class="ui-btn" data-action="now">Сейчас</button>
+										</div>
 									</div>
 								</div>
-								
 							</div>
 							
 							<div class="summary-results-container">
@@ -271,8 +271,8 @@
 					<button id="btnPrevDay" class="ui-btn">←</button>
 					<button class="current-day ui-btn" id="currentDay">0.00000</button>
 					<button id="btnNextDay" class="ui-btn">→</button>
-					<button id="btnToday" class="ui-btn">Сегодня</button>
-					<button id="btnNow" class="ui-btn">Сейчас</button>
+					<button id="btnToday" class="ui-btn" data-action="today">Сегодня</button>
+					<button id="btnNow" class="ui-btn" data-action="now">Сейчас</button>
 					
 					<!-- ИЗМЕНЕНО: Раздельные поля для даты и времени -->
 					<div class="date-time-input-group" style="display: flex; gap: 4px; flex: 1; min-width: 0;">

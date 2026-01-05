@@ -97,18 +97,17 @@ class EventManager {
             }, 100);
         }
         
-        // Обработка action-кнопок
-        const $actionBtn = $target.closest('[data-action]');
-        if ($actionBtn.length) {
-            e.preventDefault();
-            e.stopPropagation();
-            const action = $actionBtn.data('action');
-            console.log('EventManager: клик по action-кнопке:', action);
-            if (window.uiManager && action) {
-                window.uiManager.handleAction(action, $actionBtn[0]);
-                return;
-            }
-        }
+		const $actionBtn = $target.closest('[data-action]');
+		if ($actionBtn.length) {
+			e.preventDefault();
+			e.stopPropagation();
+			const action = $actionBtn.data('action');
+			console.log('EventManager: клик по action-кнопке:', action);
+			if (window.uiManager && action) {
+				window.uiManager.handleAction(action, $actionBtn[0]);
+				return;
+			}
+		}
         
         // Обработка табов
         if ($target.hasClass('tab-button')) {
@@ -296,6 +295,31 @@ class EventManager {
             this.handleGroupToggle(groupId, isChecked);
             return;
         }
+
+		// В методе handleClick(e), после обработки других кнопок, перед return:
+		// Кнопка "Показать на визоре" в сводной информации
+		if ($target.hasClass('show-on-vizor-btn')) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			const waveId = $target.data('wave-id');
+			console.log('EventManager: кнопка "Показать на визоре" для волны:', waveId);
+			
+			// Найти чекбокс видимости этой волны
+			const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
+			if (checkbox.length) {
+				// Переключить состояние
+				const isChecked = !checkbox.prop('checked');
+				checkbox.prop('checked', isChecked);
+				
+				// Вызвать обработчик изменения
+				this.handleWaveVisibilityChange(waveId, isChecked, checkbox);
+			} else {
+				console.warn('EventManager: чекбокс видимости не найден для волны:', waveId);
+			}
+			
+			return;
+		}
         
         // Обработка остальных кнопок по ID
         this.handleButtonClicks($target, e);
@@ -553,19 +577,7 @@ class EventManager {
             return;
         }
         
-        if ($target.is('#btnToday') || $target.closest('#btnToday').length) {
-            e.preventDefault();
-            console.log('EventManager: сегодня');
-            if (window.dates) window.dates.goToToday();
-            return;
-        }
-        
-        if ($target.is('#btnNow') || $target.closest('#btnNow').length) {
-            e.preventDefault();
-            console.log('EventManager: сейчас');
-            if (window.dates) window.dates.goToNow();
-            return;
-        }
+		
         
         if ($target.is('#btnSetDate') || $target.closest('#btnSetDate').length) {
             e.preventDefault();

@@ -71,7 +71,8 @@ class UIManager {
             // Навигация
             prevDay: () => window.dates.navigateDay(-1),
             nextDay: () => window.dates.navigateDay(1),
-            today: () => window.dates.goToToday(),
+			today: () => window.dates.goToToday(),
+			now: () => window.dates.goToNow(),
             setDate: () => window.dates.setDateFromInputs(),
             
             // Трансформации
