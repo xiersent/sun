@@ -33,12 +33,10 @@
                                     Включено: <%= data.enabledCount %>
                                 </span>
                                 <span class="group-total-count" title="Всего колосков">
-                                    <!-- ИСПРАВЛЕНО: используем data.waveCount вместо waveCount -->
                                     Колосков: <%= data.waveCount %>
                                 </span>
                             <% } else { %>
                                 <span class="group-total-count">
-                                    <!-- ИСПРАВЛЕНО: используем data.waveCount вместо waveCount -->
                                     Колосков: <%= data.waveCount %>
                                 </span>
                             <% } %>
@@ -79,13 +77,13 @@
             </div>
         </div>
         
-        <!-- Дочерние элементы (волны) -->
-        <% if (data.expanded && data.children && data.children.length > 0) { %>
-        <div class="group-children">
-            <% data.children.forEach((childData, childIndex) => { %>
-                <!-- Дочерние элементы будут добавлены отдельно -->
-            <% }) %>
+        <!-- Дочерние элементы (волны) - ВСЕГДА создаем контейнер -->
+        <div class="group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
+            <% if (data.children && data.children.length > 0) { %>
+                <% data.children.forEach((childData) => { %>
+                    <!-- Дочерние элементы будут добавлены JavaScript -->
+                <% }) %>
+            <% } %>
         </div>
-        <% } %>
     </div>
 </div>

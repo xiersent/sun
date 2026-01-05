@@ -120,24 +120,43 @@ class EventManager {
             return;
         }
         
-        // Кнопка развернуть/свернуть группу
-        const $expandBtn = $target.closest('.expand-collapse-btn');
-        if ($expandBtn.length) {
-            e.preventDefault();
-            e.stopPropagation();
-            const id = $expandBtn.data('id');
-            console.log('EventManager: развернуть/свернуть группу:', id);
-            
-            if (id && window.unifiedListManager) {
-                const group = window.appState.data.groups.find(g => g.id === id);
-                if (group) {
-                    group.expanded = !group.expanded;
-                    window.appState.save();
-                    window.unifiedListManager.updateWavesList();
-                }
-            }
-            return;
-        }
+		// В modules/eventManager.js, в методе handleClick:
+		const $expandBtn = $target.closest('.expand-collapse-btn');
+		if ($expandBtn.length) {
+			e.preventDefault();
+			e.stopPropagation();
+			const id = $expandBtn.data('id');
+			console.log('EventManager: развернуть/свернуть группу:', id);
+			
+			if (id && window.unifiedListManager) {
+				const group = window.appState.data.groups.find(g => g.id === id);
+				if (group) {
+					// Меняем состояние expanded
+					group.expanded = !group.expanded;
+					window.appState.save();
+					
+					// Находим элемент группы в DOM
+					const groupElement = document.querySelector(`.list-item--group[data-id="${id}"]`);
+					if (groupElement) {
+						// Переключаем CSS-класс
+						groupElement.classList.toggle('list-item--expanded');
+						
+						// Находим контейнер детей и меняем его видимость
+						const childrenContainer = groupElement.querySelector('.group-children');
+						if (childrenContainer) {
+							childrenContainer.style.display = group.expanded ? 'block' : 'none';
+						}
+						
+						// Обновляем текст кнопки
+						const expandBtn = groupElement.querySelector('.expand-collapse-btn');
+						if (expandBtn) {
+							expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+						}
+					}
+				}
+			}
+			return;
+		}
         
         // Удаление группы
         const $groupDeleteBtn = $target.closest('.delete-date-btn[data-type="group"]');

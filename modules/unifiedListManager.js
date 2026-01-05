@@ -323,57 +323,67 @@ initTemplates() {
             return;
         }
         
-        if (itemType === 'group') {
-            items.forEach((groupData, index) => {
-                try {
-                    if (groupData.waveCount === undefined) {
-                        groupData.waveCount = groupData.waves ? groupData.waves.length : 0;
-                    }
-                    if (groupData.enabledCount === undefined) {
-                        groupData.enabledCount = 0;
-                    }
-                    
-                    const renderedGroup = ejs.render(templateText, { data: groupData });
-                    
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = renderedGroup;
-                    const groupElement = tempDiv.firstElementChild;
-                    
-                    const childrenContainer = groupElement.querySelector('.group-children');
-                    
-                    if (childrenContainer && groupData.children && groupData.children.length > 0 && groupData.expanded) {
-                        childrenContainer.innerHTML = '';
-                        
-                        groupData.children.forEach((childData, childIndex) => {
-                            try {
-                                childData.type = 'wave';
-                                const waveTemplateText = this.getTemplate('wave-item-template');
-                                const renderedChild = ejs.render(waveTemplateText, { data: childData });
-                                
-                                const childTempDiv = document.createElement('div');
-                                childTempDiv.innerHTML = renderedChild;
-                                const childElement = childTempDiv.firstElementChild;
-                                
-                                childrenContainer.appendChild(childElement);
-                            } catch (error) {
-                                const errorDiv = document.createElement('div');
-                                errorDiv.className = 'list-error';
-                                errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
-                                childrenContainer.appendChild(errorDiv);
-                            }
-                        });
-                    }
-                    
-                    container.appendChild(groupElement);
-                    
-                } catch (error) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'list-error';
-                    errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
-                    container.appendChild(errorDiv);
-                }
-            });
-        } else if (itemType === 'intersection') {
+		if (itemType === 'group') {
+			items.forEach((groupData, index) => {
+				try {
+					if (groupData.waveCount === undefined) {
+						groupData.waveCount = groupData.waves ? groupData.waves.length : 0;
+					}
+					if (groupData.enabledCount === undefined) {
+						groupData.enabledCount = 0;
+					}
+					
+					const renderedGroup = ejs.render(templateText, { data: groupData });
+					
+					const tempDiv = document.createElement('div');
+					tempDiv.innerHTML = renderedGroup;
+					const groupElement = tempDiv.firstElementChild;
+					
+					const childrenContainer = groupElement.querySelector('.group-children');
+					
+					// ВСЕГДА рендерим детей, даже если группа свернута
+					if (childrenContainer && groupData.children && groupData.children.length > 0) {
+						childrenContainer.innerHTML = '';
+						
+						groupData.children.forEach((childData, childIndex) => {
+							try {
+								childData.type = 'wave';
+								const waveTemplateText = this.getTemplate('wave-item-template');
+								const renderedChild = ejs.render(waveTemplateText, { data: childData });
+								
+								const childTempDiv = document.createElement('div');
+								childTempDiv.innerHTML = renderedChild;
+								const childElement = childTempDiv.firstElementChild;
+								
+								childrenContainer.appendChild(childElement);
+							} catch (error) {
+								const errorDiv = document.createElement('div');
+								errorDiv.className = 'list-error';
+								errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
+								childrenContainer.appendChild(errorDiv);
+							}
+						});
+						
+						// Устанавливаем видимость в зависимости от expanded
+						if (groupData.expanded) {
+							childrenContainer.style.display = 'block';
+							groupElement.classList.add('list-item--expanded');
+						} else {
+							childrenContainer.style.display = 'none';
+							groupElement.classList.remove('list-item--expanded');
+						}
+					}
+					
+					container.appendChild(groupElement);
+					
+				} catch (error) {
+					const errorDiv = document.createElement('div');
+					errorDiv.className = 'list-error';
+					errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
+					container.appendChild(errorDiv);
+				}
+			});
+		} else if (itemType === 'intersection') {
             const renderedItems = [];
             items.forEach((item, index) => {
                 try {

@@ -75,7 +75,7 @@ class SummaryManager {
             if (i === 5) {
                 option.textContent = '5 😔(😊)';      // грустный и в скобках улыбающийся
             } else if (i === -5) {
-                option.textContent = '-5 😊';         // улыбающийся
+                option.textContent = '-5 😊(😔)';         // улыбающийся и в скобках грустный
             } else if (i === 0) {
                 option.textContent = '0 😐';          // нейтральный/покерфейс
             } else {

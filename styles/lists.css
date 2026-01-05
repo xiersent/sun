@@ -7,7 +7,7 @@
     background: #fff;
     display: flex;
     flex-direction: column;
-	overflow-y: scroll;
+    overflow-y: scroll;
 }
 
 .list-container--scrollable {
@@ -28,7 +28,7 @@
     gap: 8px;
     min-height: 40px;
     position: relative;
-	outline: 1px solid var(--clg);
+    outline: 1px solid var(--clg);
 }
 
 /* ДОБАВИТЬ: курсор pointer для кликабельных элементов */
@@ -299,13 +299,13 @@
     filter: brightness(0.9);
 }
 
-/* Дочерние элементы - ПРОСТАЯ ВЕРСТКА */
+/* Дочерние элементы - ОБНОВЛЕНО: всегда существует, управляется display */
 .group-children {
     margin-top: var(--spacing-sm);
-    display: none; /* По умолчанию скрыто */
-	max-height: 369px;
-	overflow-y: scroll;
-	border: 1px solid var(--clg);
+    max-height: 369px;
+    overflow-y: scroll;
+    border: 1px solid var(--clg);
+    /* Управляется через style="display: none/block" */
 }
 
 /* Показать дочерние элементы когда группа развернута */
@@ -508,27 +508,27 @@
 
 /* Стили для подсветки области вставки */
 .list-item--drag-over-top::before {
-	content: '';
-	position: absolute;
-	left: -5px;
-	top: -5px;
-	width: 10px;
-	height: 10px;
-	background: #000;
-	transform: rotate(45deg);
-	z-index: 10;
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
 }
 
 .list-item--drag-over-bottom::after {
-	content: '';
-	position: absolute;
-	left: -5px;
-	bottom: -5px;
-	width: 10px;
-	height: 10px;
-	background: #000;
-	transform: rotate(45deg);
-	z-index: 10;
+    content: '';
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
 }
 
 .list-item:first-child {overflow: hidden;}
@@ -538,5 +538,5 @@
 .list-item--dragging {
     opacity: 0.5;
     background-color: #f0f0f0;
-	z-index: 10;
+    z-index: 10;
 }
