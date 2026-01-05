@@ -8,6 +8,7 @@
     display: flex;
     flex-direction: column;
 	overflow-y: scroll;
+	padding: 30px 0;
 }
 
 .list-container--scrollable {
@@ -22,17 +23,15 @@
 /* Элемент списка */
 .list-item {
     padding: var(--spacing-sm);
-    border-bottom: 1px solid var(--clg);
+    border: 1px solid var(--clg);
+	border-left: 0;
+	border-right: 0;
     background: #fff;
     display: flex;
     align-items: center;
     gap: 8px;
     min-height: 40px;
     position: relative;
-}
-
-.list-item:last-child {
-    border-bottom: none;
 }
 
 /* ДОБАВИТЬ: курсор pointer для кликабельных элементов */
@@ -497,4 +496,32 @@
         width: 12px;
         height: 12px;
     }
+}
+
+/* Дополнительные стили для индикатора вставки */
+.drop-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #666;
+    z-index: 100;
+    pointer-events: none;
+}
+
+/* Стили для подсветки области вставки */
+.list-item--drag-over-top {
+    border-top: 1px solid #666 !important;
+    background-color: rgba(102, 102, 102, 0.05) !important;
+}
+
+.list-item--drag-over-bottom {
+    border-bottom: 1px solid #666 !important;
+    background-color: rgba(102, 102, 102, 0.05) !important;
+}
+
+/* Для элемента, который перетаскивается */
+.list-item--dragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
 }

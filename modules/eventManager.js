@@ -691,73 +691,212 @@ class EventManager {
         }
     }
     
-    handleDragStart(e) {
-        const $item = $(e.currentTarget);
-        const id = $item.data('id');
-        const index = parseInt($item.data('index') || 0);
-        
-        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
-            type: 'date',
-            id: id,
-            index: index
-        }));
-        $item.addClass('list-item--dragging');
-        
-        console.log('EventManager: начало перетаскивания даты:', id, index);
-    }
+handleDragStart(e) {
+    const $item = $(e.currentTarget);
+    const id = $item.data('id');
+    const index = parseInt($item.data('index') || 0);
     
-    handleDragOver(e) {
+    // Проверяем, что элемент существует
+    if (!id || index < 0) {
+        console.warn('Неверные данные для перетаскивания:', { id, index });
         e.preventDefault();
-        e.originalEvent.dataTransfer.dropEffect = 'move';
-        
-        // Убираем подсветку у всех других элементов
-        $('.list-item--date').not(e.currentTarget).removeClass('list-item--drag-over');
-        
-        // Добавляем подсветку только текущему элементу
-        $(e.currentTarget).addClass('list-item--drag-over');
+        return;
     }
     
-    handleDragLeave(e) {
-        // Убираем подсветку когда курсор покидает элемент
-        $(e.currentTarget).removeClass('list-item--drag-over');
-    }
+    e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+        type: 'date',
+        id: id,
+        index: index
+    }));
     
-    handleDrop(e) {
-        const $item = $(e.currentTarget);
-        e.preventDefault();
-        
-        // Сразу убираем подсветку
-        $('.list-item').removeClass('list-item--drag-over');
-        
-        try {
-            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
-            if (dragData.type === 'date') {
-                const targetIndex = parseInt($item.data('index') || 0);
-                console.log('EventManager: дроп даты с индекса', dragData.index, 'на индекс', targetIndex);
-                
-                if (dragData.index !== targetIndex) {
-                    const [movedItem] = window.appState.data.dates.splice(dragData.index, 1);
-                    window.appState.data.dates.splice(targetIndex, 0, movedItem);
-                    window.appState.save();
-                    if (window.dataManager) window.dataManager.updateDateList();
-                    
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 50);
+    $item.addClass('list-item--dragging');
+    
+    // Создаем индикатор вставки перед началом перетаскивания
+    this.createDropIndicator($item);
+    
+    console.log('EventManager: начало перетаскивания даты:', id, 'индекс:', index);
+}
+    
+	handleDragOver(e) {
+		e.preventDefault();
+		e.originalEvent.dataTransfer.dropEffect = 'move';
+		
+		const $item = $(e.currentTarget);
+		const rect = $item[0].getBoundingClientRect();
+		const y = e.clientY;
+		
+		// Определяем, куда вставлять: сверху или снизу элемента
+		const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
+		
+		// Убираем подсветку у всех других элементов
+		$('.list-item--date').not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+		
+		// Убираем старые индикаторы
+		$('.drop-indicator').remove();
+		
+		// Показываем индикатор вставки
+		if (insertPosition === 'before') {
+			// Вставка перед элементом - индикатор сверху
+			$item.addClass('list-item--drag-over-top');
+			$item.removeClass('list-item--drag-over-bottom');
+			
+			// Создаем индикатор сверху
+			this.createDropIndicator($item, 'top');
+		} else {
+			// Вставка после элемента - индикатор снизу
+			$item.addClass('list-item--drag-over-bottom');
+			$item.removeClass('list-item--drag-over-top');
+			
+			// Создаем индикатор снизу
+			this.createDropIndicator($item, 'bottom');
+		}
+	}
+    
+	handleDragLeave(e) {
+		const $item = $(e.currentTarget);
+		
+		// Проверяем, действительно ли курсор покинул элемент
+		// Используем relatedTarget для более точной проверки
+		if (e.originalEvent.relatedTarget && 
+			!$item[0].contains(e.originalEvent.relatedTarget)) {
+			
+			// Убираем подсветку
+			$item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+			
+			// Убираем индикатор вставки
+			$('.drop-indicator').remove();
+		}
+	}
+    
+handleDrop(e) {
+    const $item = $(e.currentTarget);
+    e.preventDefault();
+    
+    // Убираем все подсветки и индикаторы
+    $('.list-item').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+    $('.drop-indicator').remove();
+    
+    try {
+        const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
+        if (dragData.type === 'date') {
+            const targetIndex = parseInt($item.data('index') || 0);
+            
+            // Определяем позицию вставки (сверху или снизу)
+            const rect = $item[0].getBoundingClientRect();
+            const y = e.clientY;
+            const insertBefore = y - rect.top < rect.height / 2;
+            
+            console.log('EventManager: дроп даты с индекса', dragData.index, 'на индекс', targetIndex, 
+                      insertBefore ? '(перед)' : '(после)');
+            
+            // Проверяем, нужно ли вообще перемещать элемент
+            if (dragData.index === targetIndex) {
+                // Элемент дропнут на самого себя
+                console.log('Элемент дропнут на самого себя, ничего не делаем');
+                return;
+            }
+            
+            // Извлекаем перемещаемый элемент
+            const [movedItem] = window.appState.data.dates.splice(dragData.index, 1);
+            
+            // Рассчитываем новый индекс с учетом того, что элемент уже удален из массива
+            let newIndex;
+            
+            if (dragData.index < targetIndex) {
+                // Перемещаем элемент ВНИЗ в списке
+                if (insertBefore) {
+                    // Вставляем ПЕРЕД целевым элементом
+                    // После удаления элемента, все элементы сдвинулись вверх
+                    // targetIndex уменьшился на 1
+                    newIndex = targetIndex - 1;
+                } else {
+                    // Вставляем ПОСЛЕ целевого элемента
+                    // targetIndex не изменился
+                    newIndex = targetIndex;
+                }
+            } else {
+                // Перемещаем элемент ВВЕРХ в списке
+                if (insertBefore) {
+                    // Вставляем ПЕРЕД целевым элементом
+                    // targetIndex не изменился
+                    newIndex = targetIndex;
+                } else {
+                    // Вставляем ПОСЛЕ целевого элемента
+                    // targetIndex увеличился на 1
+                    newIndex = targetIndex + 1;
                 }
             }
-        } catch (error) {
-            console.error('EventManager: ошибка при дропе:', error);
+            
+            // Вставляем элемент на новую позицию
+            window.appState.data.dates.splice(newIndex, 0, movedItem);
+            window.appState.save();
+            
+            // Обновляем UI
+            if (window.dataManager) window.dataManager.updateDateList();
+            
+            // Обновляем сводную информацию
+            setTimeout(() => {
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    window.summaryManager.updateSummary();
+                }
+            }, 50);
+            
+            console.log('Элемент перемещен на позицию:', newIndex);
         }
+    } catch (error) {
+        console.error('EventManager: ошибка при дропе:', error);
     }
+}
     
     handleDragEnd(e) {
-        // Гарантированно убираем все подсветки
-        $('.list-item').removeClass('list-item--dragging list-item--drag-over');
+        // Гарантированно убираем все подсветки и индикаторы
+        $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
+        $('.drop-indicator').remove();
         console.log('EventManager: конец перетаскивания');
     }
+    
+	createDropIndicator($targetItem, position = 'top') {
+		// Убираем старые индикаторы
+		$('.drop-indicator').remove();
+		
+		// Проверяем, есть ли элемент в DOM
+		if (!$targetItem || !$targetItem[0] || !$targetItem[0].parentElement) {
+			console.warn('Не удалось создать индикатор: элемент или его родитель не найден');
+			return;
+		}
+		
+		// Создаем новый индикатор
+		const indicator = document.createElement('div');
+		indicator.className = 'drop-indicator';
+		indicator.style.cssText = `
+			position: absolute;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background-color: #666;
+			z-index: 100;
+			pointer-events: none;
+		`;
+		
+		// Определяем позицию
+		const rect = $targetItem[0].getBoundingClientRect();
+		const parentRect = $targetItem.parent()[0].getBoundingClientRect();
+		
+		if (position === 'top') {
+			// Индикатор сверху элемента
+			indicator.style.top = (rect.top - parentRect.top) + 'px';
+		} else {
+			// Индикатор снизу элемента
+			indicator.style.top = (rect.bottom - parentRect.top) + 'px';
+		}
+		
+		// Добавляем индикатор в контейнер списка
+		try {
+			$targetItem.parent().append(indicator);
+		} catch (error) {
+			console.error('Ошибка при добавлении индикатора:', error);
+		}
+	}
     
     getContainerId(element) {
         const $container = $(element).closest('.list-container');
