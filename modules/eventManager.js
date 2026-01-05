@@ -711,8 +711,6 @@ handleDragStart(e) {
     
     $item.addClass('list-item--dragging');
     
-    // Создаем индикатор вставки перед началом перетаскивания
-    this.createDropIndicator($item);
     
     console.log('EventManager: начало перетаскивания даты:', id, 'индекс:', index);
 }
@@ -730,9 +728,7 @@ handleDragStart(e) {
 		
 		// Убираем подсветку у всех других элементов
 		$('.list-item--date').not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-		
-		// Убираем старые индикаторы
-		$('.drop-indicator').remove();
+	
 		
 		// Показываем индикатор вставки
 		if (insertPosition === 'before') {
@@ -740,15 +736,11 @@ handleDragStart(e) {
 			$item.addClass('list-item--drag-over-top');
 			$item.removeClass('list-item--drag-over-bottom');
 			
-			// Создаем индикатор сверху
-			this.createDropIndicator($item, 'top');
 		} else {
 			// Вставка после элемента - индикатор снизу
 			$item.addClass('list-item--drag-over-bottom');
 			$item.removeClass('list-item--drag-over-top');
 			
-			// Создаем индикатор снизу
-			this.createDropIndicator($item, 'bottom');
 		}
 	}
     
@@ -763,8 +755,6 @@ handleDragStart(e) {
 			// Убираем подсветку
 			$item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
 			
-			// Убираем индикатор вставки
-			$('.drop-indicator').remove();
 		}
 	}
     
@@ -774,7 +764,6 @@ handleDrop(e) {
     
     // Убираем все подсветки и индикаторы
     $('.list-item').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-    $('.drop-indicator').remove();
     
     try {
         const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
@@ -851,52 +840,9 @@ handleDrop(e) {
     handleDragEnd(e) {
         // Гарантированно убираем все подсветки и индикаторы
         $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
-        $('.drop-indicator').remove();
         console.log('EventManager: конец перетаскивания');
     }
     
-	createDropIndicator($targetItem, position = 'top') {
-		// Убираем старые индикаторы
-		$('.drop-indicator').remove();
-		
-		// Проверяем, есть ли элемент в DOM
-		if (!$targetItem || !$targetItem[0] || !$targetItem[0].parentElement) {
-			console.warn('Не удалось создать индикатор: элемент или его родитель не найден');
-			return;
-		}
-		
-		// Создаем новый индикатор
-		const indicator = document.createElement('div');
-		indicator.className = 'drop-indicator';
-		indicator.style.cssText = `
-			position: absolute;
-			left: 0;
-			right: 0;
-			height: 3px;
-			background-color: #666;
-			z-index: 100;
-			pointer-events: none;
-		`;
-		
-		// Определяем позицию
-		const rect = $targetItem[0].getBoundingClientRect();
-		const parentRect = $targetItem.parent()[0].getBoundingClientRect();
-		
-		if (position === 'top') {
-			// Индикатор сверху элемента
-			indicator.style.top = (rect.top - parentRect.top) + 'px';
-		} else {
-			// Индикатор снизу элемента
-			indicator.style.top = (rect.bottom - parentRect.top) + 'px';
-		}
-		
-		// Добавляем индикатор в контейнер списка
-		try {
-			$targetItem.parent().append(indicator);
-		} catch (error) {
-			console.error('Ошибка при добавлении индикатора:', error);
-		}
-	}
     
     getContainerId(element) {
         const $container = $(element).closest('.list-container');
