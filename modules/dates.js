@@ -602,39 +602,42 @@ class DatesManager {
         console.log('=======================');
     }
     
-    setDate(newDate) {
-        window.appState.isProgrammaticDateChange = true;
-        
-        if (newDate instanceof Date) {
-            window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
-        } else if (typeof newDate === 'number') {
-            window.appState.currentDate = new Date(newDate);
-        } else {
-            window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
-        }
-        
-        // По умолчанию используем целые числа при установке даты
-        this.recalculateCurrentDay(false);
-        window.waves.updatePosition();
-        window.grid.updateCenterDate();
-        window.grid.updateGridNotesHighlight();
-        window.appState.save();
-        
-        this.updateTodayButton();
-        
-        if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
-        }
-        
-        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
-        this.updateDateTimeInputs();
-        
-        setTimeout(() => {
-            window.appState.isProgrammaticDateChange = false;
-        }, 100);
+// modules/dates.js - метод setDate()
+setDate(newDate, useExactTime = true) { // ← ДОБАВЛЯЕМ ПАРАМЕТР useExactTime
+    window.appState.isProgrammaticDateChange = true;
+    
+    if (newDate instanceof Date) {
+        window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
+    } else if (typeof newDate === 'number') {
+        window.appState.currentDate = new Date(newDate);
+    } else {
+        window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
     }
+    
+    // Используем переданный параметр useExactTime вместо жесткого false
+    this.recalculateCurrentDay(useExactTime); // ← ВОТ ЗДЕСЬ ИСПРАВЛЕНИЕ
+    
+    window.waves.updatePosition();
+    window.grid.createGrid(); // ← Добавляем createGrid для перерисовки сетки
+    window.grid.updateCenterDate();
+    window.grid.updateGridNotesHighlight();
+    window.appState.save();
+    
+    this.updateTodayButton();
+    
+    if (window.summaryManager && window.summaryManager.updateSummary) {
+        setTimeout(() => {
+            window.summaryManager.updateSummary();
+        }, 50);
+    }
+    
+    // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+    this.updateDateTimeInputs();
+    
+    setTimeout(() => {
+        window.appState.isProgrammaticDateChange = false;
+    }, 100);
+}
     
     getCurrentDate() {
         // Возвращаем в UTC

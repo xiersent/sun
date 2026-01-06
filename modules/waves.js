@@ -701,23 +701,18 @@ class WavesManager {
      * Переводит визор на время экстремума
      * @param {number} timestamp - timestamp времени экстремума
      */
-    navigateToExtremumTime(timestamp) {
-        const extremumDate = new Date(timestamp);
-        console.log('Навигация к экстремуму:', extremumDate.toLocaleString());
-        
-        // Устанавливаем дату
-        if (window.dates && window.dates.setDate) {
-            // Используем setDate с ДРОБНЫМ временем (useExactTime = true)
-            window.dates.setDate(extremumDate);
-            
-            // Обновляем поля ввода
-            if (window.uiManager && window.uiManager.updateDateTimeInputs) {
-                window.uiManager.updateDateTimeInputs();
-            }
-            
-            console.log('Визор переведен на время экстремума');
-        }
-    }
+	navigateToExtremumTime(timestamp) {
+		const extremumDate = new Date(timestamp);
+		console.log('Навигация к экстремуму:', extremumDate.toLocaleString());
+		
+		// Переводим визор на это время с точным временем
+		if (window.dates && window.dates.setDate) {
+			// Вызываем setDate с флагом useExactTime = true
+			window.dates.setDate(extremumDate, true);
+			
+			console.log('Визор переведен на время экстремума');
+		}
+	}
     
     /**
      * Вычисляет абсолютное время экстремума на временной ленте
