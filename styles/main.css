@@ -11,7 +11,8 @@
 @import url('waves.css');
 @import url('corners.css');
 @import url('panels.css');
-@import url('summary.css');  /* НОВЫЙ ИМПОРТ */
+@import url('summary.css');
+@import url('script.css');
 @import url('responsive.css');
 
 /* Пустой основной файл, вся логика в импортах */
