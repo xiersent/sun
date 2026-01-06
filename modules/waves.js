@@ -567,112 +567,114 @@ class WavesManager {
     }
     
 	/**
-	 * Вычисляет абсолютное время ближайшего экстремума
+	 * Вычисляет абсолютное время экстремума на временной ленте
 	 * @param {Object} wave - объект волны
 	 * @param {string} position - 'top' или 'bottom'
-	 * @returns {Date} время экстремума
+	 * @returns {Date} время экстремума (абсолютное)
 	 */
 	calculateExtremumTime(wave, position) {
 		console.log(`calculateExtremumTime: ${wave.name}, position: ${position}`);
 		
+		// 1. Период в пикселях
 		const periodPx = window.appState.periods[wave.id] || 
-					(wave.period * window.appState.config.squareSize);
+						(wave.period * window.appState.config.squareSize);
 		
 		if (!periodPx) {
 			console.log('  periodPx not found');
 			return new Date();
 		}
 		
-		const currentDay = window.appState.currentDay || 0;
-		console.log(`  currentDay: ${currentDay} (дробное)`);
-		console.log(`  periodPx: ${periodPx}px, wave.period: ${wave.period} дней`);
+		// 2. Определяем, какой это экстремум (верхний или нижний)
+		// top: π/2 = 0.25 периода, bottom: 3π/2 = 0.75 периода
+		const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
 		
-		// Ключевое: currentDay уже содержит дробную часть времени!
-		// Не нужно использовать целочисленное деление
+		// 3. БАЗОВАЯ ДАТА колоска (начало отсчета)
+		const baseDate = window.appState.baseDate; // timestamp начала
 		
-		// Текущее смещение в пикселях (уже с дробной частью)
-		const currentOffsetPx = currentDay * window.appState.config.squareSize;
-		console.log(`  currentOffsetPx: ${currentOffsetPx}px`);
+		// 4. Находим левую границу визора (самую раннюю дату)
+		const graphWidth = window.appState.graphWidth;
+		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+		const leftDate = new Date(window.appState.currentDate);
 		
-		// Смещение фазы в пикселях
-		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-		console.log(`  phaseOffsetPixels: ${phaseOffsetPixels}px`);
+		// Смещаем к левой границе визора (минус половина квадратов)
+		leftDate.setDate(leftDate.getDate() - squaresLeft);
 		
-		// Общее смещение
-		const totalOffsetPx = currentOffsetPx + phaseOffsetPixels;
-		console.log(`  totalOffsetPx: ${totalOffsetPx}px`);
+		// 5. Рассчитываем фазу на левой границе визора
+		// Используем window.dom.getDaysBetweenDates (он существует!)
+		const daysFromBaseToLeft = window.dom.getDaysBetweenDates(baseDate, leftDate);
+		const phaseAtLeft = (daysFromBaseToLeft % wave.period) / wave.period;
 		
-		// Текущая фаза в периодах (0..1)
-		const currentPhaseNormalized = (totalOffsetPx / periodPx) % 1;
-		if (currentPhaseNormalized < 0) currentPhaseNormalized += 1;
+		// Нормализуем фазу (0..1)
+		const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
 		
-		console.log(`  currentPhaseNormalized: ${currentPhaseNormalized.toFixed(6)} (0..1)`);
+		console.log(`  Левая граница визора: ${leftDate.toLocaleDateString('ru-RU')}`);
+		console.log(`  Дней от базовой даты: ${daysFromBaseToLeft.toFixed(4)}`);
+		console.log(`  Фаза на левой границе: ${normalizedPhaseAtLeft.toFixed(4)} (${(normalizedPhaseAtLeft * wave.period).toFixed(2)} дней)`);
 		
-		// Фаза для нужного экстремума в нормализованном виде (0..1)
-		// top: 0.25 (π/2), bottom: 0.75 (3π/2)
-		const targetPhaseNormalized = position === 'top' ? 0.25 : 0.75;
-		console.log(`  targetPhaseNormalized: ${targetPhaseNormalized}`);
-		
-		// Находим ближайший экстремум ВПЕРЕД
-		let phaseDiff = targetPhaseNormalized - currentPhaseNormalized;
+		// 6. Находим ближайший экстремум ВПЕРЕД от левой границы
+		let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
 		if (phaseDiff < 0) {
-			phaseDiff += 1.0; // Переходим к следующему периоду
+			phaseDiff += 1.0; // Берем следующий экстремум в будущем
 		}
 		
-		console.log(`  phaseDiff: ${phaseDiff.toFixed(6)} периодов`);
+		const daysToExtremumFromLeft = phaseDiff * wave.period;
 		
-		// Дни до экстремума
-		const daysToExtremum = phaseDiff * wave.period;
-		console.log(`  daysToExtremum: ${daysToExtremum.toFixed(6)} дней`);
-		console.log(`  secondsToExtremum: ${daysToExtremum * 24 * 3600} секунд`);
+		console.log(`  Разница фаз до экстремума: ${phaseDiff.toFixed(4)}`);
+		console.log(`  Дней до экстремума: ${daysToExtremumFromLeft.toFixed(2)}`);
 		
-		// Текущее время
-		const currentTime = window.appState.currentDate || new Date();
-		console.log(`  currentTime: ${currentTime.toLocaleTimeString('ru-RU')}`);
+		// 7. Абсолютное время экстремума на ленте
+		const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
 		
-		// Время экстремума (миллисекунды)
-		const extremumTimeMs = currentTime.getTime() + (daysToExtremum * 24 * 3600 * 1000);
-		const extremumTime = new Date(extremumTimeMs);
+		// 8. Проверяем, что экстремум попадает в видимую область
+		const rightDate = new Date(leftDate);
+		rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
 		
-		console.log(`  extremumTime: ${extremumTime.toLocaleTimeString('ru-RU')}`);
-		console.log('---');
+		if (extremumTime >= leftDate && extremumTime <= rightDate) {
+			console.log(`  ✓ Экстремум в видимой области: ${extremumTime.toLocaleDateString('ru-RU')} ${extremumTime.toLocaleTimeString('ru-RU')}`);
+			console.log(`  Время суток: ${extremumTime.getHours().toString().padStart(2, '0')}:${extremumTime.getMinutes().toString().padStart(2, '0')}:${extremumTime.getSeconds().toString().padStart(2, '0')}`);
+			return extremumTime;
+		}
 		
-		return extremumTime;
+		// Если не попал, ищем следующий (на всякий случай)
+		console.log(`  ✗ Экстремум вне видимой области, ищем следующий`);
+		const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
+		console.log(`  Следующий экстремум: ${nextExtremumTime.toLocaleDateString('ru-RU')} ${nextExtremumTime.toLocaleTimeString('ru-RU')}`);
+		return nextExtremumTime;
 	}
     
-    /**
-     * Форматирует время как ЧЧ:ММ:СС
-     * @param {Date} date - время
-     * @returns {string} "ЧЧ:ММ:СС"
-     */
-    formatExtremumTime(date) {
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const seconds = date.getSeconds().toString().padStart(2, '0');
-        
-        return `${hours}:${minutes}:${seconds}`;
-    }
+	/**
+	 * Форматирует время экстремума как ЧЧ:ММ:СС
+	 * @param {Date} date - время экстремума
+	 * @returns {string} "ЧЧ:ММ:СС"
+	 */
+	formatExtremumTime(date) {
+		const hours = date.getHours().toString().padStart(2, '0');
+		const minutes = date.getMinutes().toString().padStart(2, '0');
+		const seconds = date.getSeconds().toString().padStart(2, '0');
+		
+		return `${hours}:${minutes}:${seconds}`;
+	}
     
     /**
      * Обновляет время в вертикальных метках при изменении даты
      */
-    updateVerticalWaveLabelsTime() {
-        document.querySelectorAll('.wave-label.vertical').forEach(label => {
-            const waveId = label.dataset.waveId;
-            const position = label.dataset.position;
-            
-            const wave = window.appState.data.waves.find(w => String(w.id) === waveId);
-            if (!wave) return;
-            
-            const extremumTime = this.calculateExtremumTime(wave, position);
-            const timeString = this.formatExtremumTime(extremumTime);
-            
-            const textElement = label.querySelector('.wave-label-text');
-            if (textElement) {
-                textElement.textContent = timeString;
-            }
-        });
-    }
+	updateVerticalWaveLabelsTime() {
+		document.querySelectorAll('.wave-label.vertical').forEach(label => {
+			const waveId = label.dataset.waveId;
+			const position = label.dataset.position;
+			
+			const wave = window.appState.data.waves.find(w => String(w.id) === waveId);
+			if (!wave) return;
+			
+			const extremumTime = this.calculateExtremumTime(wave, position);
+			const timeString = this.formatExtremumTime(extremumTime);
+			
+			const textElement = label.querySelector('.wave-label-text');
+			if (textElement) {
+				textElement.textContent = timeString;
+			}
+		});
+	}
     
     /**
      * Рассчитывает Y-координату волны в заданной точке X
