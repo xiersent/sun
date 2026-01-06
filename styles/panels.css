@@ -60,67 +60,6 @@
     min-height: 0;
 }
 
-/* Табы */
-.tab-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.tab-buttons {
-    display: flex;
-    border-bottom: 1px solid #dee2e6;
-    padding: 0;
-    gap: 0;
-    flex-wrap: wrap;
-}
-
-.tab-button {
-    padding: 0 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #495057;
-    font-size: var(--font-size-sm);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 500;
-    height: 25px;
-}
-
-.tab-button:last-child {
-    border-right: none;
-}
-
-.tab-button.active {
-    background: var(--cp);
-    color: #fff;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* Формы */
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-sm);
-}
-
-.input-row {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-}
-
 /* Формы волн */
 .add-custom-wave-form {
     display: flex;

@@ -57,6 +57,7 @@
 .list-item--dragging {
     opacity: 0.5;
     background-color: #f0f0f0;
+    z-index: 10;
 }
 
 .list-item--drag-over {
@@ -545,10 +546,3 @@
 
 .list-item:first-child {overflow: hidden;}
 .list-item:last-child {overflow: hidden;}
-
-/* Для элемента, который перетаскивается */
-.list-item--dragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-}
