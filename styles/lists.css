@@ -464,6 +464,48 @@
     color: #4CAF50;
 }
 
+/* ДОБАВЛЕНО: Стили для drag & drop групп */
+.list-item--group.list-item--dragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    z-index: 10;
+}
+
+.list-item--group.list-item--drag-over-top::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
+}
+
+.list-item--group.list-item--drag-over-bottom::after {
+    content: '';
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
+}
+
+/* Курсор перетаскивания для групп */
+.list-item--group:not(.list-item--editing) .list-item__drag-handle {
+    cursor: move;
+}
+
+/* Отключаем перетаскивание при редактировании */
+.list-item--group.list-item--editing .list-item__drag-handle {
+    opacity: 0.3;
+    cursor: default;
+}
+
 /* Адаптация для мобильных */
 @media (max-width: 768px) {
     .group-stats {

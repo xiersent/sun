@@ -13,7 +13,7 @@ class UnifiedListManager {
         this.templatesLoadPromise = null;
     }
     
-initTemplates() {
+    initTemplates() {
         if (this.templatesLoaded) {
             return Promise.resolve();
         }
@@ -692,21 +692,9 @@ initTemplates() {
             return;
         }
         
-        const sortedGroups = [...window.appState.data.groups].sort((a, b) => {
-            if (a.id === 'default-group') return -1;
-            if (b.id === 'default-group') return 1;
-            if (a.id === 'classic-group') return -1;
-            if (b.id === 'classic-group') return 1;
-            if (a.id === 'experimental-group') return -1;
-            if (b.id === 'experimental-group') return 1;
-            if (a.id === '120-waves-group') return -1;
-            if (b.id === '120-waves-group') return 1;
-            if (a.id === '31-waves-group') return -1;
-            if (b.id === '31-waves-group') return 1;
-            return 0;
-        });
-        
-        const allGroups = sortedGroups.map((group, index) => {
+        // ИСПРАВЛЕНО: Убрана жесткая сортировка, используем порядок из appState
+        // Просто берем группы в том порядке, в котором они сохранены
+        const allGroups = window.appState.data.groups.map((group, index) => {
             const groupData = this.prepareGroupData(group, index);
             return groupData;
         });
