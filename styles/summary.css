@@ -74,7 +74,7 @@
 .summary-results-container {
     max-height: 277px;
 	min-height: 277px;
-    overflow-y: auto;
+    overflow-y: scroll;
     border: 1px solid var(--clg);
 }
 
@@ -100,10 +100,6 @@
     outline: 1px solid #eee;
     background: #fff;
     gap: var(--spacing-sm);
-}
-
-.summary-item:last-child {
-    border-bottom: none;
 }
 
 .summary-item:hover {

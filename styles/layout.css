@@ -110,7 +110,7 @@
 
 .tab-buttons {
     display: flex;
-    border: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
     padding: 0;
     gap: 0;
     flex-wrap: wrap;
@@ -129,7 +129,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 500;
-    border-right: 1px solid #dee2e6;
     height: 25px;
 }
 
@@ -176,7 +175,7 @@
 
 .tab-buttons {
     display: flex;
-    border: 1px solid var(--clg);
+    border-bottom: 1px solid var(--clg);
     padding: 0;
     gap: 0;
     flex-wrap: wrap;
@@ -196,7 +195,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 400;
-    border-right: 1px solid var(--clg);
     height: 25px;
     display: flex;
     align-items: center;
