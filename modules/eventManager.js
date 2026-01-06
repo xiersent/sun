@@ -105,17 +105,26 @@ class EventManager {
             }, 100);
         }
         
-		const $actionBtn = $target.closest('[data-action]');
-		if ($actionBtn.length) {
-			e.preventDefault();
-			e.stopPropagation();
-			const action = $actionBtn.data('action');
-			console.log('EventManager: клик по action-кнопке:', action);
-			if (window.uiManager && action) {
-				window.uiManager.handleAction(action, $actionBtn[0]);
-				return;
-			}
-		}
+        const $actionBtn = $target.closest('[data-action]');
+        if ($actionBtn.length) {
+            e.preventDefault();
+            e.stopPropagation();
+            const action = $actionBtn.data('action');
+            console.log('EventManager: клик по action-кнопке:', action);
+            
+            // НОВАЯ ПРОВЕРКА: кнопка "Экстремумы"
+            if (action === 'toggleExtremes') {
+                if (window.uiManager && window.uiManager.toggleExtremes) {
+                    window.uiManager.toggleExtremes();
+                    return;
+                }
+            }
+            
+            if (window.uiManager && action) {
+                window.uiManager.handleAction(action, $actionBtn[0]);
+                return;
+            }
+        }
         
         // Обработка табов
         if ($target.hasClass('tab-button')) {
@@ -128,43 +137,42 @@ class EventManager {
             return;
         }
         
-		// В modules/eventManager.js, в методе handleClick:
-		const $expandBtn = $target.closest('.expand-collapse-btn');
-		if ($expandBtn.length) {
-			e.preventDefault();
-			e.stopPropagation();
-			const id = $expandBtn.data('id');
-			console.log('EventManager: развернуть/свернуть группу:', id);
-			
-			if (id && window.unifiedListManager) {
-				const group = window.appState.data.groups.find(g => g.id === id);
-				if (group) {
-					// Меняем состояние expanded
-					group.expanded = !group.expanded;
-					window.appState.save();
-					
-					// Находим элемент группы в DOM
-					const groupElement = document.querySelector(`.list-item--group[data-id="${id}"]`);
-					if (groupElement) {
-						// Переключаем CSS-класс
-						groupElement.classList.toggle('list-item--expanded');
-						
-						// Находим контейнер детей и меняем его видимость
-						const childrenContainer = groupElement.querySelector('.group-children');
-						if (childrenContainer) {
-							childrenContainer.style.display = group.expanded ? 'block' : 'none';
-						}
-						
-						// Обновляем текст кнопки
-						const expandBtn = groupElement.querySelector('.expand-collapse-btn');
-						if (expandBtn) {
-							expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
-						}
-					}
-				}
-			}
-			return;
-		}
+        const $expandBtn = $target.closest('.expand-collapse-btn');
+        if ($expandBtn.length) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = $expandBtn.data('id');
+            console.log('EventManager: развернуть/свернуть группу:', id);
+            
+            if (id && window.unifiedListManager) {
+                const group = window.appState.data.groups.find(g => g.id === id);
+                if (group) {
+                    // Меняем состояние expanded
+                    group.expanded = !group.expanded;
+                    window.appState.save();
+                    
+                    // Находим элемент группы в DOM
+                    const groupElement = document.querySelector(`.list-item--group[data-id="${id}"]`);
+                    if (groupElement) {
+                        // Переключаем CSS-класс
+                        groupElement.classList.toggle('list-item--expanded');
+                        
+                        // Находим контейнер детей и меняем его видимость
+                        const childrenContainer = groupElement.querySelector('.group-children');
+                        if (childrenContainer) {
+                            childrenContainer.style.display = group.expanded ? 'block' : 'none';
+                        }
+                        
+                        // Обновляем текст кнопки
+                        const expandBtn = groupElement.querySelector('.expand-collapse-btn');
+                        if (expandBtn) {
+                            expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+                        }
+                    }
+                }
+            }
+            return;
+        }
         
         // Удаление группы
         const $groupDeleteBtn = $target.closest('.delete-date-btn[data-type="group"]');
@@ -323,30 +331,30 @@ class EventManager {
             return;
         }
 
-		// В методе handleClick(e), после обработки других кнопок, перед return:
-		// Кнопка "Показать на визоре" в сводной информации
-		if ($target.hasClass('show-on-vizor-btn')) {
-			e.preventDefault();
-			e.stopPropagation();
-			
-			const waveId = $target.data('wave-id');
-			console.log('EventManager: кнопка "Показать на визоре" для волны:', waveId);
-			
-			// Найти чекбокс видимости этой волны
-			const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
-			if (checkbox.length) {
-				// Переключить состояние
-				const isChecked = !checkbox.prop('checked');
-				checkbox.prop('checked', isChecked);
-				
-				// Вызвать обработчик изменения
-				this.handleWaveVisibilityChange(waveId, isChecked, checkbox);
-			} else {
-				console.warn('EventManager: чекбокс видимости не найден для волны:', waveId);
-			}
-			
-			return;
-		}
+        // В методе handleClick(e), после обработки других кнопок, перед return:
+        // Кнопка "Показать на визоре" в сводной информации
+        if ($target.hasClass('show-on-vizor-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const waveId = $target.data('wave-id');
+            console.log('EventManager: кнопка "Показать на визоре" для волны:', waveId);
+            
+            // Найти чекбокс видимости этой волны
+            const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
+            if (checkbox.length) {
+                // Переключить состояние
+                const isChecked = !checkbox.prop('checked');
+                checkbox.prop('checked', isChecked);
+                
+                // Вызвать обработчик изменения
+                this.handleWaveVisibilityChange(waveId, isChecked, checkbox);
+            } else {
+                console.warn('EventManager: чекбокс видимости не найден для волны:', waveId);
+            }
+            
+            return;
+        }
         
         // Обработка остальных кнопок по ID
         this.handleButtonClicks($target, e);
@@ -604,8 +612,6 @@ class EventManager {
             return;
         }
         
-		
-        
         if ($target.is('#btnSetDate') || $target.closest('#btnSetDate').length) {
             e.preventDefault();
             console.log('EventManager: установка даты из инпута');
@@ -754,48 +760,48 @@ class EventManager {
         console.log('EventManager: начало перетаскивания', type, ':', id, 'индекс:', index);
     }
     
-	handleDragOver(e) {
-		e.preventDefault();
-		e.originalEvent.dataTransfer.dropEffect = 'move';
-		
-		const $item = $(e.currentTarget);
-		const rect = $item[0].getBoundingClientRect();
-		const y = e.clientY;
-		const type = $item.data('type');
-		
-		// Определяем, куда вставлять: сверху или снизу элемента
-		const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
-		
-		// Убираем подсветку у всех других элементов ТОГО ЖЕ ТИПА
-		$(`.list-item[data-type="${type}"]`).not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-	
-		// Показываем индикатор вставки
-		if (insertPosition === 'before') {
-			// Вставка перед элементом - индикатор сверху
-			$item.addClass('list-item--drag-over-top');
-			$item.removeClass('list-item--drag-over-bottom');
-			
-		} else {
-			// Вставка после элемента - индикатор снизу
-			$item.addClass('list-item--drag-over-bottom');
-			$item.removeClass('list-item--drag-over-top');
-			
-		}
-	}
+    handleDragOver(e) {
+        e.preventDefault();
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+        
+        const $item = $(e.currentTarget);
+        const rect = $item[0].getBoundingClientRect();
+        const y = e.clientY;
+        const type = $item.data('type');
+        
+        // Определяем, куда вставлять: сверху или снизу элемента
+        const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
+        
+        // Убираем подсветку у всех других элементов ТОГО ЖЕ ТИПА
+        $(`.list-item[data-type="${type}"]`).not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
     
-	handleDragLeave(e) {
-		const $item = $(e.currentTarget);
-		
-		// Проверяем, действительно ли курсор покинул элемент
-		// Используем relatedTarget для более точной проверки
-		if (e.originalEvent.relatedTarget && 
-			!$item[0].contains(e.originalEvent.relatedTarget)) {
-			
-			// Убираем подсветку
-			$item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-			
-		}
-	}
+        // Показываем индикатор вставки
+        if (insertPosition === 'before') {
+            // Вставка перед элементом - индикатор сверху
+            $item.addClass('list-item--drag-over-top');
+            $item.removeClass('list-item--drag-over-bottom');
+            
+        } else {
+            // Вставка после элемента - индикатор снизу
+            $item.addClass('list-item--drag-over-bottom');
+            $item.removeClass('list-item--drag-over-top');
+            
+        }
+    }
+    
+    handleDragLeave(e) {
+        const $item = $(e.currentTarget);
+        
+        // Проверяем, действительно ли курсор покинул элемент
+        // Используем relatedTarget для более точной проверки
+        if (e.originalEvent.relatedTarget && 
+            !$item[0].contains(e.originalEvent.relatedTarget)) {
+            
+            // Убираем подсветку
+            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            
+        }
+    }
     
     handleDrop(e) {
         const $item = $(e.currentTarget);

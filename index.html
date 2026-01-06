@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -16,7 +15,7 @@
             <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
             <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
             <!-- ОТДЕЛЬНЫЕ СТРОКИ ДЛЯ РАЗНОЙ ИНФОРМАЦИИ -->
-			<div style="margin-bottom: 20px;"><button id="readParableBtn" class="ui-btn parable-btn">Притча</button></div>
+            <div style="margin-bottom: 20px;"><button id="readParableBtn" class="ui-btn parable-btn">Притча</button></div>
             <div class="warning-info">
                 <div class="warning-info-item"><strong>Браузер:</strong> <span id="browserInfo">Загрузка...</span></div>
                 <div class="warning-info-item"><strong>Версия от:</strong> <span id="versionInfo">Загрузка...</span></div>
@@ -89,156 +88,156 @@
                 </div>
             </div>
 
-			<div class="panel-section tabs-section" id="tabs-section">
-				<div class="tab-container">
-					<!-- Кнопки табов -->
-					<div class="tab-buttons">
-						<button class="tab-button" data-tab="summary">
-							Состояния (рабочая)
-						</button>
-						<button class="tab-button" data-tab="intersections">
-							Пересечения (в разработке)
-						</button>
-						<button class="tab-button" data-tab="notes">
-							Записи (вроде работало)
-						</button>
-						<button class="tab-button" data-tab="db-import">
-							Импорт базы данных (вроде работало)
-						</button>
-					</div>
-					
-					<!-- Контент табов -->
+            <div class="panel-section tabs-section" id="tabs-section">
+                <div class="tab-container">
+                    <!-- Кнопки табов -->
+                    <div class="tab-buttons">
+                        <button class="tab-button" data-tab="summary">
+                            Состояния (рабочая)
+                        </button>
+                        <button class="tab-button" data-tab="intersections">
+                            Пересечения (в разработке)
+                        </button>
+                        <button class="tab-button" data-tab="notes">
+                            Записи (вроде работало)
+                        </button>
+                        <button class="tab-button" data-tab="db-import">
+                            Импорт базы данных (вроде работало)
+                        </button>
+                    </div>
+                    
+                    <!-- Контент табов -->
 
-					<!-- В блоке #summary-tab -->
-					<div class="tab-content" id="summary-tab">
-						<div class="panel-section summary-panel" id="summaryPanel">
-							<div class="summary-header">
-								<h3>Сводная информация о колосках</h3>
-							</div>
-							
-							<div class="summary-controls">
-								<div class="summary-select-row">
-									<div class="summary-select-group">
-										<select class="summary-select" id="summaryGroupSelect">
-											<option value="all">Все доступные группы с колосками</option>
-											<!-- Опции будут добавлены через JavaScript -->
-										</select>
-										<select class="summary-select" id="summaryStateSelect">
-											<!-- Опции будут добавлены динамически -->
-										</select>
-										<!-- Кнопки-дублеры -->
-										<div class="summary-duplicate-buttons">
-											<button class="ui-btn" data-action="today">Сегодня</button>
-											<button class="ui-btn" data-action="now">Сейчас</button>
-										</div>
-									</div>
-								</div>
-							</div>
-							
-							<div class="summary-results-container">
-								<div class="summary-results" id="summaryResults">
-									<!-- Результаты будут заполнены через JavaScript -->
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="tab-content" id="intersections-tab">
-						<div class="panel-section" id="analysis-panel">
-							<div class="summary-header">
-								<h3>Пересечения колосков за день</h3>
-							</div>
-							
-							<div class="intersection-controls">
-								<div class="intersection-form">
-									<!-- Верхний ряд: чекбокс и дата -->
-									<div class="intersection-form-row">
-										<label class="intersection-form-label">
-											<input type="checkbox" id="onlyActiveWaves" checked>
-											Только активные колоски
-										</label>
-										
-										<div class="intersection-date-group">
-											<label class="intersection-form-label">Дата анализа:</label>
-											<input type="date" class="intersection-form-input" id="intersectionDate">
-										</div>
-									</div>
-									
-									<!-- Второй ряд: кнопки управления -->
-									<div class="intersection-form-row">
-										<div class="intersection-form-actions">
-											<button id="btnCalculateIntersections" class="ui-btn">
-												Рассчитать за день
-											</button>
-											
-											<button id="btnUpdateForCurrentDate" class="ui-btn">
-												Для текущей даты
-											</button>
-											
-											<button id="btnClearIntersections" class="ui-btn">
-												Очистить
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-							
-							<!-- Статистика -->
-							<div class="intersection-stats" id="intersectionStats" style="display:none">
-								<!-- Будет заполняться динамически -->
-							</div>
-							
-							<!-- Результаты -->
-							<div class="intersection-results-container">
-								<div class="intersection-results" id="intersectionResults">
-									<div class="list-empty">
-										Нет рассчитанных пересечений. Нажмите "Рассчитать за день"
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="tab-content" id="notes-tab">
-						<div class="panel-section" id="notes-panel">
-							<div class="summary-header">
-								<h3>Записи</h3>
-							</div>
-							<div class="notes-panel-layout">
-								<div class="notes-list-container">
-									<div class="list-container" id="notesList"></div>
-								</div>
-								<div class="note-editor-container">
-									<div class="notes-section">
-										<textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
-										<button id="btnAddNote" class="ui-btn">Добавить запись</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="tab-content" id="db-import-tab">
-						<div class="panel-section db-import-section">
-							<div class="summary-header">
-								<h3>Импорт базы данных</h3>
-							</div>
-							<div class="db-import-controls">
-								<button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
-								<input type="file" id="importDBFile" accept=".db" style="display:none">
-								<button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
-								<button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
-								<button class="ui-btn" id="btnClearImportResults">Очистить</button>
-							</div>
-							<div class="db-import-progress" id="dbImportProgress" style="display:none">
-								<div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
-							</div>
-							<div id="dbImportStatus"></div>
-							<textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
-						</div>
-					</div>
-				</div>
-			</div>
+                    <!-- В блоке #summary-tab -->
+                    <div class="tab-content" id="summary-tab">
+                        <div class="panel-section summary-panel" id="summaryPanel">
+                            <div class="summary-header">
+                                <h3>Сводная информация о колосках</h3>
+                            </div>
+                            
+                            <div class="summary-controls">
+                                <div class="summary-select-row">
+                                    <div class="summary-select-group">
+                                        <select class="summary-select" id="summaryGroupSelect">
+                                            <option value="all">Все доступные группы с колосками</option>
+                                            <!-- Опции будут добавлены через JavaScript -->
+                                        </select>
+                                        <select class="summary-select" id="summaryStateSelect">
+                                            <!-- Опции будут добавлены динамически -->
+                                        </select>
+                                        <!-- Кнопки-дублеры -->
+                                        <div class="summary-duplicate-buttons">
+                                            <button class="ui-btn" data-action="today">Сегодня</button>
+                                            <button class="ui-btn" data-action="now">Сейчас</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-results-container">
+                                <div class="summary-results" id="summaryResults">
+                                    <!-- Результаты будут заполнены через JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="intersections-tab">
+                        <div class="panel-section" id="analysis-panel">
+                            <div class="summary-header">
+                                <h3>Пересечения колосков за день</h3>
+                            </div>
+                            
+                            <div class="intersection-controls">
+                                <div class="intersection-form">
+                                    <!-- Верхний ряд: чекбокс и дата -->
+                                    <div class="intersection-form-row">
+                                        <label class="intersection-form-label">
+                                            <input type="checkbox" id="onlyActiveWaves" checked>
+                                            Только активные колоски
+                                        </label>
+                                        
+                                        <div class="intersection-date-group">
+                                            <label class="intersection-form-label">Дата анализа:</label>
+                                            <input type="date" class="intersection-form-input" id="intersectionDate">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Второй ряд: кнопки управления -->
+                                    <div class="intersection-form-row">
+                                        <div class="intersection-form-actions">
+                                            <button id="btnCalculateIntersections" class="ui-btn">
+                                                Рассчитать за день
+                                            </button>
+                                            
+                                            <button id="btnUpdateForCurrentDate" class="ui-btn">
+                                                Для текущей даты
+                                            </button>
+                                            
+                                            <button id="btnClearIntersections" class="ui-btn">
+                                                Очистить
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Статистика -->
+                            <div class="intersection-stats" id="intersectionStats" style="display:none">
+                                <!-- Будет заполняться динамически -->
+                            </div>
+                            
+                            <!-- Результаты -->
+                            <div class="intersection-results-container">
+                                <div class="intersection-results" id="intersectionResults">
+                                    <div class="list-empty">
+                                        Нет рассчитанных пересечений. Нажмите "Рассчитать за день"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="notes-tab">
+                        <div class="panel-section" id="notes-panel">
+                            <div class="summary-header">
+                                <h3>Записи</h3>
+                            </div>
+                            <div class="notes-panel-layout">
+                                <div class="notes-list-container">
+                                    <div class="list-container" id="notesList"></div>
+                                </div>
+                                <div class="note-editor-container">
+                                    <div class="notes-section">
+                                        <textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
+                                        <button id="btnAddNote" class="ui-btn">Добавить запись</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="db-import-tab">
+                        <div class="panel-section db-import-section">
+                            <div class="summary-header">
+                                <h3>Импорт базы данных</h3>
+                            </div>
+                            <div class="db-import-controls">
+                                <button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
+                                <input type="file" id="importDBFile" accept=".db" style="display:none">
+                                <button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
+                                <button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
+                                <button class="ui-btn" id="btnClearImportResults">Очистить</button>
+                            </div>
+                            <div class="db-import-progress" id="dbImportProgress" style="display:none">
+                                <div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
+                            </div>
+                            <div id="dbImportStatus"></div>
+                            <textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="graph-section">
                 <div class="graph-container" id="graphContainer">
@@ -261,35 +260,36 @@
                 </div>
             </div>
 
-			<!-- Заменить блок с кнопками навигации в панели buttons-panel -->
-			<div class="panel-section buttons-panel">
-				<div class="top-controls">
-					<button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
-					<button class="ui-btn" data-action="toggleWaveLabels">Переключить выноски</button>
-					<button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
-					<button class="ui-btn" data-action="toggleBg">Фон</button>
-					<button class="ui-btn" data-action="flipH">↔</button>
-					<button class="ui-btn" data-action="flipV">↕</button>
-					<button class="ui-btn" data-action="rotateL">↶</button>
-					<button class="ui-btn" data-action="rotateR">↷</button>
-					<button class="ui-btn" data-action="resetTransform">⟲</button>
-					<button id="btnPrevDay" class="ui-btn">←</button>
-					<button class="current-day ui-btn" id="currentDay">0.00000</button>
-					<button id="btnNextDay" class="ui-btn">→</button>
-					<button id="btnToday" class="ui-btn" data-action="today">Сегодня</button>
-					<button id="btnNow" class="ui-btn" data-action="now">Сейчас</button>
-					
-					<!-- ИЗМЕНЕНО: Раздельные поля для даты и времени -->
-					<div class="date-time-input-group" style="display: flex; gap: 4px; flex: 1; min-width: 0;">
-						<input type="date" class="date-input" id="mainDateInputDate" 
-							title="Выберите дату" style="flex: 1; min-width: 120px;">
-						<input type="time" class="date-input" id="mainDateInputTime" step="1"
-							value="00:00:00" title="Введите время (ЧЧ:ММ:СС)">
-					</div>
-					
-					<button id="btnSetDate" class="ui-btn">Перейти</button>
-				</div>
-			</div>
+            <!-- ОБНОВЛЕНО: Добавлена кнопка "Экстремумы" в разметку -->
+            <div class="panel-section buttons-panel">
+                <div class="top-controls">
+                    <button class="ui-btn" data-action="toggleGraph">Переключить визор</button>
+                    <button class="ui-btn" data-action="toggleWaveLabels">Выноски</button>
+                    <button class="ui-btn" data-action="toggleExtremes">Экстремумы</button>
+                    <button class="ui-btn" data-action="toggleGraphGrayMode">Серость визора</button>
+                    <button class="ui-btn" data-action="toggleBg">Фон</button>
+                    <button class="ui-btn" data-action="flipH">↔</button>
+                    <button class="ui-btn" data-action="flipV">↕</button>
+                    <button class="ui-btn" data-action="rotateL">↶</button>
+                    <button class="ui-btn" data-action="rotateR">↷</button>
+                    <button class="ui-btn" data-action="resetTransform">⟲</button>
+                    <button id="btnPrevDay" class="ui-btn">←</button>
+                    <button class="current-day ui-btn" id="currentDay">0.00000</button>
+                    <button id="btnNextDay" class="ui-btn">→</button>
+                    <button id="btnToday" class="ui-btn" data-action="today">Сегодня</button>
+                    <button id="btnNow" class="ui-btn" data-action="now">Сейчас</button>
+                    
+                    <!-- ИЗМЕНЕНО: Раздельные поля для даты и времени -->
+                    <div class="date-time-input-group" style="display: flex; gap: 4px; flex: 1; min-width: 0;">
+                        <input type="date" class="date-input" id="mainDateInputDate" 
+                            title="Выберите дату" style="flex: 1; min-width: 120px;">
+                        <input type="time" class="date-input" id="mainDateInputTime" step="1"
+                            value="00:00:00" title="Введите время (ЧЧ:ММ:СС)">
+                    </div>
+                    
+                    <button id="btnSetDate" class="ui-btn">Перейти</button>
+                </div>
+            </div>
 
             <div class="main-controls-panel">
                 <div class="control-panel">
@@ -333,25 +333,25 @@
         </div>
     </div>
     
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js"></script>
 
-	<script src="modules/timeUtils.js"></script>
-	<script src="modules/state.js"></script>
-	<script src="modules/dom.js"></script>
-	<script src="modules/appCore.js"></script>
-	<script src="modules/dataManager.js"></script>
-	<script src="modules/intersectionManager.js"></script>
-	<script src="modules/uiManager.js"></script>
-	<script src="modules/dates.js"></script>
-	<script src="modules/waves.js"></script>
-	<script src="modules/grid.js"></script>
-	<script src="modules/import.js"></script>
-	<script src="modules/unifiedListManager.js"></script>
-	<script src="modules/eventManager.js"></script>
-	<script src="modules/summaryManager.js"></script>
-	<script src="modules/init.js"></script>
+    <script src="modules/timeUtils.js"></script>
+    <script src="modules/state.js"></script>
+    <script src="modules/dom.js"></script>
+    <script src="modules/appCore.js"></script>
+    <script src="modules/dataManager.js"></script>
+    <script src="modules/intersectionManager.js"></script>
+    <script src="modules/uiManager.js"></script>
+    <script src="modules/dates.js"></script>
+    <script src="modules/waves.js"></script>
+    <script src="modules/grid.js"></script>
+    <script src="modules/import.js"></script>
+    <script src="modules/unifiedListManager.js"></script>
+    <script src="modules/eventManager.js"></script>
+    <script src="modules/summaryManager.js"></script>
+    <script src="modules/init.js"></script>
 
 </body>
 </html>

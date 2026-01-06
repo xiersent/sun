@@ -1,9 +1,11 @@
-// modules/uiManager.js
+// modules/uiManager.js - ОБНОВЛЕННЫЙ
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
         this.setupDateTimeInputs();
-        this.activeTab = null; // текущий активный таб
+        this.activeTab = null;
+        
+        // УБРАНО: addExtremesButton() так как кнопка теперь в HTML
     }
     
     setupDateTimeInputs() {
@@ -85,7 +87,8 @@ class UIManager {
             // Переключение UI
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
-            toggleWaveLabels: () => this.toggleWaveLabels(), // ОБНОВЛЕННЫЙ МЕТОД
+            toggleWaveLabels: () => this.toggleWaveLabels(), // ТОЛЬКО горизонтальные
+            toggleExtremes: () => this.toggleExtremes(), // НОВАЯ: только вертикальные
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
@@ -134,32 +137,45 @@ class UIManager {
         window.appState.save();
     }
     
+    // ТОЛЬКО горизонтальные выноски (левые/правые)
     toggleWaveLabels() {
-        console.log('Переключение видимости ВСЕХ выносок');
+        console.log('Переключение видимости ГОРИЗОНТАЛЬНЫХ выносок');
         
-        // ГОРИЗОНТАЛЬНЫЕ выноски (слева и справа)
         const horizontalContainer = document.querySelector('.wave-labels-container');
         
-        // ВЕРТИКАЛЬНЫЕ выноски (сверху и снизу)
-        const verticalContainer = document.querySelector('.wave-labels-vertical-container');
-        
-        if (horizontalContainer && verticalContainer) {
-            // Проверяем состояние на основе горизонтального контейнера
+        if (horizontalContainer) {
             const areHidden = horizontalContainer.classList.contains('hidden');
             
             if (areHidden) {
-                // Показываем ВСЕ выноски
                 horizontalContainer.classList.remove('hidden');
-                verticalContainer.classList.remove('hidden');
-                console.log('ВСЕ выноски показаны (горизонтальные и вертикальные)');
+                console.log('ГОРИЗОНТАЛЬНЫЕ выноски показаны');
             } else {
-                // Скрываем ВСЕ выноски
                 horizontalContainer.classList.add('hidden');
-                verticalContainer.classList.add('hidden');
-                console.log('ВСЕ выноски скрыты (горизонтальные и вертикальные)');
+                console.log('ГОРИЗОНТАЛЬНЫЕ выноски скрыты');
             }
         } else {
-            console.warn('Один из контейнеров выносок не найден');
+            console.warn('Контейнер горизонтальных выносок не найден');
+        }
+    }
+    
+    // ТОЛЬКО вертикальные выноски (верхние/нижние)
+    toggleExtremes() {
+        console.log('Переключение видимости ВЕРТИКАЛЬНЫХ выносок (экстремумы)');
+        
+        const verticalContainer = document.querySelector('.wave-labels-vertical-container');
+        
+        if (verticalContainer) {
+            const areHidden = verticalContainer.classList.contains('hidden');
+            
+            if (areHidden) {
+                verticalContainer.classList.remove('hidden');
+                console.log('ВЕРТИКАЛЬНЫЕ выноски (экстремумы) показаны');
+            } else {
+                verticalContainer.classList.add('hidden');
+                console.log('ВЕРТИКАЛЬНЫЕ выноски (экстремумы) скрыты');
+            }
+        } else {
+            console.warn('Контейнер вертикальных выносок не найден');
         }
     }
     

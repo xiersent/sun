@@ -1,4 +1,4 @@
-// modules/waves.js - ИСПРАВЛЕННЫЙ С УЧЕТОМ UTC И ДРОБНЫХ ЧАСТЕЙ И ВЕРТИКАЛЬНЫМИ ВЫНОСКАМИ
+// modules/waves.js - ОБНОВЛЕННЫЙ (методы для выносок)
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -101,7 +101,7 @@ class WavesManager {
                              window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
         
         if (!hasActiveDate) {
-            console.log('WavesManager: нет активной даты, волны не будут созданы');
+            console.log('WavesManager: нет активной дата, волны не будут созданы');
             return;
         }
         
@@ -472,7 +472,95 @@ class WavesManager {
     }
     
     /**
-     * Создает вертикальную выноску для волны
+     * Создает ГОРИЗОНТАЛЬНУЮ выноску для волны
+     * @param {Object} wave - Объект волны
+     * @param {number} y - Y-координата
+     * @param {string} side - 'left' или 'right'
+     * @param {HTMLElement} container - Контейнер для выноски
+     */
+    createHorizontalWaveLabel(wave, y, side, container) {
+        const labelId = `${wave.id}-${side}`;
+        const waveColor = wave.color || '#666666';
+        
+        const labelElement = document.createElement('div');
+        labelElement.className = 'wave-label horizontal';
+        labelElement.id = `waveLabel${labelId}`;
+        labelElement.dataset.waveId = wave.id;
+        labelElement.dataset.side = side;
+        labelElement.dataset.labelType = 'horizontal'; // Добавляем тип
+        
+        labelElement.style.position = 'absolute';
+        labelElement.style.top = `${y}px`;
+        labelElement.style.backgroundColor = waveColor;
+        labelElement.style.color = '#fff';
+        labelElement.style.opacity = '0.5';
+        labelElement.style.zIndex = '1';
+        labelElement.style.padding = '2px 6px';
+        labelElement.style.borderRadius = '3px';
+        labelElement.style.fontSize = '11px';
+        labelElement.style.transform = 'translateY(-50%)';
+        labelElement.style.cursor = 'pointer';
+        
+        // Стрелка
+        const arrow = document.createElement('div');
+        arrow.className = 'wave-label-arrow';
+        arrow.style.position = 'absolute';
+        arrow.style.top = '50%';
+        arrow.style.transform = 'translateY(-50%)';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        
+        if (side === 'left') {
+            arrow.style.right = '-6px';
+            arrow.style.borderWidth = '4px 0 4px 6px';
+            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
+            labelElement.style.right = '0';
+            labelElement.style.marginRight = '10px';
+        } else {
+            arrow.style.left = '-6px';
+            arrow.style.borderWidth = '4px 6px 4px 0';
+            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
+            labelElement.style.left = '0';
+            labelElement.style.marginLeft = '10px';
+        }
+        
+        // Текст
+        const text = document.createElement('div');
+        text.className = 'wave-label-text';
+        text.textContent = wave.name;
+        text.title = `${wave.name} (${wave.period} дней)`;
+        text.style.position = 'relative';
+        text.style.zIndex = '2';
+        
+        labelElement.appendChild(text);
+        labelElement.appendChild(arrow);
+        container.appendChild(labelElement);
+        
+        this.waveLabelElements[labelId] = labelElement;
+        
+        // Обработчик для ГОРИЗОНТАЛЬНЫХ выносок (с подтверждением)
+        labelElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onHorizontalWaveLabelClick(wave.id);
+        });
+        
+        labelElement.addEventListener('mouseenter', () => {
+            labelElement.style.opacity = '1';
+            labelElement.style.zIndex = '10';
+        });
+        
+        labelElement.addEventListener('mouseleave', () => {
+            labelElement.style.opacity = '0.5';
+            labelElement.style.zIndex = '1';
+        });
+        
+        return labelElement;
+    }
+    
+    /**
+     * Создает ВЕРТИКАЛЬНУЮ выноску для волны
      * @param {Object} wave - Объект волны
      * @param {number} x - X-координата
      * @param {string} position - 'top' или 'bottom'
@@ -493,6 +581,8 @@ class WavesManager {
         labelElement.id = `waveLabel${labelId}`;
         labelElement.dataset.waveId = wave.id;
         labelElement.dataset.position = position;
+        labelElement.dataset.labelType = 'vertical'; // Добавляем тип
+        labelElement.dataset.extremumTime = extremumTime.getTime(); // Сохраняем timestamp
         
         labelElement.style.position = 'absolute';
         labelElement.style.left = `${x}px`;
@@ -505,14 +595,13 @@ class WavesManager {
         labelElement.style.fontSize = '11px';
         labelElement.style.transform = 'translateX(-50%)';
         labelElement.style.cursor = 'pointer';
-        labelElement.style.fontFamily = 'monospace'; // Моноширинный для точного времени
-        labelElement.style.letterSpacing = '0.5px'; // Чуть больше расстояния между цифрами
+        labelElement.style.fontFamily = 'monospace';
+        labelElement.style.letterSpacing = '0.5px';
         
         // Текст метки - ТОЛЬКО время xx:xx:xx
         const text = document.createElement('div');
         text.className = 'wave-label-text';
         text.textContent = timeString;
-        // НЕТ ТУЛТИПА
         
         // Стрелка
         const arrow = document.createElement('div');
@@ -524,7 +613,6 @@ class WavesManager {
         arrow.style.zIndex = '1';
         
         if (position === 'top') {
-            // Для верхних выносок: стрелка вниз
             arrow.style.bottom = '-6px';
             arrow.style.left = '50%';
             arrow.style.transform = 'translateX(-50%)';
@@ -533,7 +621,6 @@ class WavesManager {
             labelElement.style.top = '0';
             labelElement.style.marginTop = '5px';
         } else {
-            // Для нижних выносок: стрелка вверх
             arrow.style.top = '-6px';
             arrow.style.left = '50%';
             arrow.style.transform = 'translateX(-50%)';
@@ -547,7 +634,12 @@ class WavesManager {
         labelElement.appendChild(arrow);
         container.appendChild(labelElement);
         
-        // Обработчики событий (только визуальные, без тултипов)
+        // Обработчик для ВЕРТИКАЛЬНЫХ выносок (навигация по времени)
+        labelElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onVerticalWaveLabelClick(labelElement);
+        });
+        
         labelElement.addEventListener('mouseenter', () => {
             labelElement.style.opacity = '1';
             labelElement.style.zIndex = '10';
@@ -558,123 +650,184 @@ class WavesManager {
             labelElement.style.zIndex = '1';
         });
         
-        labelElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.onWaveLabelClick(wave.id);
-        });
-        
         return labelElement;
     }
     
-	/**
-	 * Вычисляет абсолютное время экстремума на временной ленте
-	 * @param {Object} wave - объект волны
-	 * @param {string} position - 'top' или 'bottom'
-	 * @returns {Date} время экстремума (абсолютное)
-	 */
-	calculateExtremumTime(wave, position) {
-		console.log(`calculateExtremumTime: ${wave.name}, position: ${position}`);
-		
-		// 1. Период в пикселях
-		const periodPx = window.appState.periods[wave.id] || 
-						(wave.period * window.appState.config.squareSize);
-		
-		if (!periodPx) {
-			console.log('  periodPx not found');
-			return new Date();
-		}
-		
-		// 2. Определяем, какой это экстремум (верхний или нижний)
-		// top: π/2 = 0.25 периода, bottom: 3π/2 = 0.75 периода
-		const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
-		
-		// 3. БАЗОВАЯ ДАТА колоска (начало отсчета)
-		const baseDate = window.appState.baseDate; // timestamp начала
-		
-		// 4. Находим левую границу визора (самую раннюю дату)
-		const graphWidth = window.appState.graphWidth;
-		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		const leftDate = new Date(window.appState.currentDate);
-		
-		// Смещаем к левой границе визора (минус половина квадратов)
-		leftDate.setDate(leftDate.getDate() - squaresLeft);
-		
-		// 5. Рассчитываем фазу на левой границе визора
-		// Используем window.dom.getDaysBetweenDates (он существует!)
-		const daysFromBaseToLeft = window.dom.getDaysBetweenDates(baseDate, leftDate);
-		const phaseAtLeft = (daysFromBaseToLeft % wave.period) / wave.period;
-		
-		// Нормализуем фазу (0..1)
-		const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
-		
-		console.log(`  Левая граница визора: ${leftDate.toLocaleDateString('ru-RU')}`);
-		console.log(`  Дней от базовой даты: ${daysFromBaseToLeft.toFixed(4)}`);
-		console.log(`  Фаза на левой границе: ${normalizedPhaseAtLeft.toFixed(4)} (${(normalizedPhaseAtLeft * wave.period).toFixed(2)} дней)`);
-		
-		// 6. Находим ближайший экстремум ВПЕРЕД от левой границы
-		let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
-		if (phaseDiff < 0) {
-			phaseDiff += 1.0; // Берем следующий экстремум в будущем
-		}
-		
-		const daysToExtremumFromLeft = phaseDiff * wave.period;
-		
-		console.log(`  Разница фаз до экстремума: ${phaseDiff.toFixed(4)}`);
-		console.log(`  Дней до экстремума: ${daysToExtremumFromLeft.toFixed(2)}`);
-		
-		// 7. Абсолютное время экстремума на ленте
-		const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
-		
-		// 8. Проверяем, что экстремум попадает в видимую область
-		const rightDate = new Date(leftDate);
-		rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
-		
-		if (extremumTime >= leftDate && extremumTime <= rightDate) {
-			console.log(`  ✓ Экстремум в видимой области: ${extremumTime.toLocaleDateString('ru-RU')} ${extremumTime.toLocaleTimeString('ru-RU')}`);
-			console.log(`  Время суток: ${extremumTime.getHours().toString().padStart(2, '0')}:${extremumTime.getMinutes().toString().padStart(2, '0')}:${extremumTime.getSeconds().toString().padStart(2, '0')}`);
-			return extremumTime;
-		}
-		
-		// Если не попал, ищем следующий (на всякий случай)
-		console.log(`  ✗ Экстремум вне видимой области, ищем следующий`);
-		const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
-		console.log(`  Следующий экстремум: ${nextExtremumTime.toLocaleDateString('ru-RU')} ${nextExtremumTime.toLocaleTimeString('ru-RU')}`);
-		return nextExtremumTime;
-	}
+    /**
+     * Обработчик клика по ГОРИЗОНТАЛЬНОЙ выноске
+     * @param {string|number} waveId - ID волны
+     */
+    onHorizontalWaveLabelClick(waveId) {
+        const confirmHide = confirm('Скрыть колосок?');
+        
+        if (!confirmHide) {
+            return;
+        }
+        
+        const waveIdStr = String(waveId);
+        const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
+        
+        // Переключаем видимость
+        window.appState.waveVisibility[waveIdStr] = !isCurrentlyVisible;
+        window.appState.save();
+        
+        // Обновляем UI
+        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+            window.unifiedListManager.updateWavesList();
+        }
+        
+        // Пересоздаем элементы волн
+        this.updatePosition();
+        
+        console.log(`Видимость волны ${waveId} изменена: ${!isCurrentlyVisible ? 'включена' : 'выключена'}`);
+    }
     
-	/**
-	 * Форматирует время экстремума как ЧЧ:ММ:СС
-	 * @param {Date} date - время экстремума
-	 * @returns {string} "ЧЧ:ММ:СС"
-	 */
-	formatExtremumTime(date) {
-		const hours = date.getHours().toString().padStart(2, '0');
-		const minutes = date.getMinutes().toString().padStart(2, '0');
-		const seconds = date.getSeconds().toString().padStart(2, '0');
-		
-		return `${hours}:${minutes}:${seconds}`;
-	}
+    /**
+     * Обработчик клика по ВЕРТИКАЛЬНОЙ выноске
+     * @param {HTMLElement} labelElement - Элемент выноски
+     */
+    onVerticalWaveLabelClick(labelElement) {
+        const waveId = labelElement.dataset.waveId;
+        const extremumTime = parseInt(labelElement.dataset.extremumTime);
+        const position = labelElement.dataset.position;
+        
+        console.log(`Нажата вертикальная выноска: волна ${waveId}, позиция ${position}, время ${new Date(extremumTime).toLocaleString()}`);
+        
+        // Переводим визор на это время
+        this.navigateToExtremumTime(extremumTime);
+    }
+    
+    /**
+     * Переводит визор на время экстремума
+     * @param {number} timestamp - timestamp времени экстремума
+     */
+    navigateToExtremumTime(timestamp) {
+        const extremumDate = new Date(timestamp);
+        console.log('Навигация к экстремуму:', extremumDate.toLocaleString());
+        
+        // Устанавливаем дату
+        if (window.dates && window.dates.setDate) {
+            // Используем setDate с ДРОБНЫМ временем (useExactTime = true)
+            window.dates.setDate(extremumDate);
+            
+            // Обновляем поля ввода
+            if (window.uiManager && window.uiManager.updateDateTimeInputs) {
+                window.uiManager.updateDateTimeInputs();
+            }
+            
+            console.log('Визор переведен на время экстремума');
+        }
+    }
+    
+    /**
+     * Вычисляет абсолютное время экстремума на временной ленте
+     * @param {Object} wave - объект волны
+     * @param {string} position - 'top' или 'bottom'
+     * @returns {Date} время экстремума (абсолютное)
+     */
+    calculateExtremumTime(wave, position) {
+        console.log(`calculateExtremumTime: ${wave.name}, position: ${position}`);
+        
+        // 1. Период в пикселях
+        const periodPx = window.appState.periods[wave.id] || 
+                        (wave.period * window.appState.config.squareSize);
+        
+        if (!periodPx) {
+            console.log('  periodPx not found');
+            return new Date();
+        }
+        
+        // 2. Определяем, какой это экстремум (верхний или нижний)
+        // top: π/2 = 0.25 периода, bottom: 3π/2 = 0.75 периода
+        const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
+        
+        // 3. БАЗОВАЯ ДАТА колоска (начало отсчета)
+        const baseDate = window.appState.baseDate; // timestamp начала
+        
+        // 4. Находим левую границу визора (самую раннюю дату)
+        const graphWidth = window.appState.graphWidth;
+        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+        const leftDate = new Date(window.appState.currentDate);
+        
+        // Смещаем к левой границе визора (минус половина квадратов)
+        leftDate.setDate(leftDate.getDate() - squaresLeft);
+        
+        // 5. Рассчитываем фазу на левой границе визора
+        // Используем window.dom.getDaysBetweenDates (он существует!)
+        const daysFromBaseToLeft = window.dom.getDaysBetweenDates(baseDate, leftDate);
+        const phaseAtLeft = (daysFromBaseToLeft % wave.period) / wave.period;
+        
+        // Нормализуем фазу (0..1)
+        const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
+        
+        console.log(`  Левая граница визора: ${leftDate.toLocaleDateString('ru-RU')}`);
+        console.log(`  Дней от базовой даты: ${daysFromBaseToLeft.toFixed(4)}`);
+        console.log(`  Фаза на левой границе: ${normalizedPhaseAtLeft.toFixed(4)} (${(normalizedPhaseAtLeft * wave.period).toFixed(2)} дней)`);
+        
+        // 6. Находим ближайший экстремум ВПЕРЕД от левой границы
+        let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
+        if (phaseDiff < 0) {
+            phaseDiff += 1.0; // Берем следующий экстремум в будущем
+        }
+        
+        const daysToExtremumFromLeft = phaseDiff * wave.period;
+        
+        console.log(`  Разница фаз до экстремума: ${phaseDiff.toFixed(4)}`);
+        console.log(`  Дней до экстремума: ${daysToExtremumFromLeft.toFixed(2)}`);
+        
+        // 7. Абсолютное время экстремума на ленте
+        const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
+        
+        // 8. Проверяем, что экстремум попадает в видимую область
+        const rightDate = new Date(leftDate);
+        rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
+        
+        if (extremumTime >= leftDate && extremumTime <= rightDate) {
+            console.log(`  ✓ Экстремум в видимой области: ${extremumTime.toLocaleDateString('ru-RU')} ${extremumTime.toLocaleTimeString('ru-RU')}`);
+            console.log(`  Время суток: ${extremumTime.getHours().toString().padStart(2, '0')}:${extremumTime.getMinutes().toString().padStart(2, '0')}:${extremumTime.getSeconds().toString().padStart(2, '0')}`);
+            return extremumTime;
+        }
+        
+        // Если не попал, ищем следующий (на всякий случай)
+        console.log(`  ✗ Экстремум вне видимой области, ищем следующий`);
+        const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
+        console.log(`  Следующий экстремум: ${nextExtremumTime.toLocaleDateString('ru-RU')} ${nextExtremumTime.toLocaleTimeString('ru-RU')}`);
+        return nextExtremumTime;
+    }
+    
+    /**
+     * Форматирует время экстремума как ЧЧ:ММ:СС
+     * @param {Date} date - время экстремума
+     * @returns {string} "ЧЧ:ММ:СС"
+     */
+    formatExtremumTime(date) {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        
+        return `${hours}:${minutes}:${seconds}`;
+    }
     
     /**
      * Обновляет время в вертикальных метках при изменении даты
      */
-	updateVerticalWaveLabelsTime() {
-		document.querySelectorAll('.wave-label.vertical').forEach(label => {
-			const waveId = label.dataset.waveId;
-			const position = label.dataset.position;
-			
-			const wave = window.appState.data.waves.find(w => String(w.id) === waveId);
-			if (!wave) return;
-			
-			const extremumTime = this.calculateExtremumTime(wave, position);
-			const timeString = this.formatExtremumTime(extremumTime);
-			
-			const textElement = label.querySelector('.wave-label-text');
-			if (textElement) {
-				textElement.textContent = timeString;
-			}
-		});
-	}
+    updateVerticalWaveLabelsTime() {
+        document.querySelectorAll('.wave-label.vertical').forEach(label => {
+            const waveId = label.dataset.waveId;
+            const position = label.dataset.position;
+            
+            const wave = window.appState.data.waves.find(w => String(w.id) === waveId);
+            if (!wave) return;
+            
+            const extremumTime = this.calculateExtremumTime(wave, position);
+            const timeString = this.formatExtremumTime(extremumTime);
+            
+            const textElement = label.querySelector('.wave-label-text');
+            if (textElement) {
+                textElement.textContent = timeString;
+            }
+        });
+    }
     
     /**
      * Рассчитывает Y-координату волны в заданной точке X
@@ -786,118 +939,6 @@ class WavesManager {
         });
         
         return bestX;
-    }
-    
-    /**
-     * Создает горизонтальную выноску для волны
-     * @param {Object} wave - Объект волны
-     * @param {number} y - Y-координата
-     * @param {string} side - 'left' или 'right'
-     * @param {HTMLElement} container - Контейнер для выноски
-     */
-    createHorizontalWaveLabel(wave, y, side, container) {
-        const labelId = `${wave.id}-${side}`;
-        const waveColor = wave.color || '#666666';
-        
-        const labelElement = document.createElement('div');
-        labelElement.className = 'wave-label';
-        labelElement.id = `waveLabel${labelId}`;
-        labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.side = side;
-        
-        labelElement.style.position = 'absolute';
-        labelElement.style.top = `${y}px`;
-        labelElement.style.backgroundColor = waveColor;
-        labelElement.style.color = '#fff';
-        labelElement.style.opacity = '0.5';
-        labelElement.style.zIndex = '1';
-        labelElement.style.padding = '2px 6px';
-        labelElement.style.borderRadius = '3px';
-        labelElement.style.fontSize = '11px';
-        labelElement.style.transform = 'translateY(-50%)';
-        labelElement.style.cursor = 'pointer';
-        
-        // Стрелка
-        const arrow = document.createElement('div');
-        arrow.className = 'wave-label-arrow';
-        arrow.style.position = 'absolute';
-        arrow.style.top = '50%';
-        arrow.style.transform = 'translateY(-50%)';
-        arrow.style.width = '0';
-        arrow.style.height = '0';
-        arrow.style.borderStyle = 'solid';
-        arrow.style.zIndex = '1';
-        
-        if (side === 'left') {
-            // Для левых выносок: стрелка справа
-            arrow.style.right = '-6px';
-            arrow.style.borderWidth = '4px 0 4px 6px';
-            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-            labelElement.style.right = '0';
-            labelElement.style.marginRight = '10px';
-        } else {
-            // Для правых выносок: стрелка слева
-            arrow.style.left = '-6px';
-            arrow.style.borderWidth = '4px 6px 4px 0';
-            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-            labelElement.style.left = '0';
-            labelElement.style.marginLeft = '10px';
-        }
-        
-        // Текст
-        const text = document.createElement('div');
-        text.className = 'wave-label-text';
-        text.textContent = wave.name;
-        text.title = `${wave.name} (${wave.period} дней)`;
-        text.style.position = 'relative';
-        text.style.zIndex = '2';
-        
-        labelElement.appendChild(text);
-        labelElement.appendChild(arrow);
-        container.appendChild(labelElement);
-        
-        this.waveLabelElements[labelId] = labelElement;
-        
-        // Обработчики событий
-        labelElement.addEventListener('mouseenter', () => {
-            labelElement.style.opacity = '1';
-            labelElement.style.zIndex = '10';
-        });
-        
-        labelElement.addEventListener('mouseleave', () => {
-            labelElement.style.opacity = '0.5';
-            labelElement.style.zIndex = '1';
-        });
-        
-        labelElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.onWaveLabelClick(wave.id);
-        });
-        
-        return labelElement;
-    }
-    
-    /**
-     * Обработчик клика по выноске
-     * @param {string|number} waveId - ID волны
-     */
-    onWaveLabelClick(waveId) {
-        const waveIdStr = String(waveId);
-        const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
-        
-        // Переключаем видимость
-        window.appState.waveVisibility[waveIdStr] = !isCurrentlyVisible;
-        window.appState.save();
-        
-        // Обновляем UI
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
-        
-        // Пересоздаем элементы волн
-        this.updatePosition();
-        
-        console.log(`Видимость волны ${waveId} изменена: ${!isCurrentlyVisible ? 'включена' : 'выключена'}`);
     }
     
     /**
