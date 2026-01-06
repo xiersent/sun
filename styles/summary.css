@@ -72,8 +72,8 @@
 
 /* Контейнер результатов */
 .summary-results-container {
-    max-height: 277px;
-	min-height: 277px;
+    max-height: 276px;
+	min-height: 276px;
     overflow-y: scroll;
     border: 1px solid var(--clg);
 }
@@ -148,6 +148,7 @@
     border-radius: 3px;
     font-size: var(--font-size-xs);
     font-weight: 500;
+	outline: 1px solid #000;
 }
 
 /* Кнопки действий */
@@ -165,37 +166,35 @@
 }
 
 .summary-item-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    border: 1px solid #ccc;
+    width: 25px;
+    height: 25px;
     flex-shrink: 0;
 }
 
 /* Классы близости */
 .summary-item-exact .summary-item-closeness {
-    background-color: #4CAF50;
-    color: white;
+
+    color: black;
 }
 
 .summary-item-very-close .summary-item-closeness {
-    background-color: #8BC34A;
-    color: white;
+
+    color: black;
 }
 
 .summary-item-close .summary-item-closeness {
-    background-color: #FFC107;
+
     color: black;
 }
 
 .summary-item-fairly-close .summary-item-closeness {
-    background-color: #FF9800;
+
     color: black;
 }
 
 .summary-item-nearby .summary-item-closeness {
-    background-color: #FF5722;
-    color: white;
+
+    color: black;
 }
 
 /* Адаптация для темного режима графика */
@@ -247,54 +246,4 @@
 
 .graph-container.dark-mode + .summary-panel .summary-item-difference {
     color: #999;
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 768px) {
-    .summary-select-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-sm);
-    }
-    
-    .summary-select-group {
-        min-width: 100%;
-        flex-wrap: wrap;
-    }
-    
-    .summary-select {
-        min-width: 0;
-    }
-    
-    .summary-duplicate-buttons {
-        margin-left: 0;
-        margin-top: var(--spacing-xs);
-        width: 100%;
-        justify-content: flex-start;
-    }
-    
-    .summary-item-details {
-        flex-direction: column;
-        gap: var(--spacing-xs);
-    }
-    
-    .summary-results-container {
-        max-height: 200px;
-    }
-    
-    .summary-item {
-        flex-wrap: wrap;
-        gap: var(--spacing-sm);
-    }
-    
-    .summary-item-actions {
-        order: 3;
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: var(--spacing-xs);
-    }
-    
-    .summary-item-color {
-        order: 2;
-    }
 }

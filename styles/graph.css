@@ -6,7 +6,6 @@
     background-color: #fff;
     border: 1px solid var(--clg);
     overflow: hidden;
-    transition: filter 0.3s ease;
 }
 
 .graph-container.graph-gray-mode {

@@ -41,6 +41,18 @@ button:hover {
     background-color: var(--cp);
 }
 
+.parable-btn-wrapper {
+	margin-bottom: 20px;
+}
+
+.mobile-warning-box .parable-btn-wrapper{
+	display: none;
+}
+
+.mobile-warning-box .warning-actions{
+	display: none;
+}
+
 /* Кнопка притчи */
 .parable-btn {
     background-color: #4a6fa5;

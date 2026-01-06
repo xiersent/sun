@@ -506,36 +506,6 @@
     cursor: default;
 }
 
-/* Адаптация для мобильных */
-@media (max-width: 768px) {
-    .group-stats {
-        font-size: var(--font-size-xs);
-    }
-    
-    .group-enabled-count {
-        font-size: var(--font-size-xs);
-    }
-    
-    .group-total-count {
-        font-size: 9px;
-    }
-    
-    .list-item__value {
-        font-size: var(--font-size-xs);
-        min-width: 120px;
-        text-align: right;
-    }
-    
-    /* Мобильная адаптация для элементов управления волн */
-    .wave-controls-inline {
-        gap: 2px;
-    }
-    
-    .wave-corner-color-check {
-        width: 12px;
-        height: 12px;
-    }
-}
 
 /* Дополнительные стили для индикатора вставки */
 .drop-indicator {

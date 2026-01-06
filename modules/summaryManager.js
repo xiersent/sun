@@ -292,7 +292,7 @@ class SummaryManager {
     }
     
     getClosenessLevel(difference) {
-        if (difference < 0.001) return 'точно';
+        if (difference < 0.001) return 'Экстремум';
         if (difference < 0.1) return 'очень близко';
         if (difference < 0.3) return 'близко';
         if (difference < 0.5) return 'довольно близко';

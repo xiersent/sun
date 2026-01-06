@@ -329,7 +329,6 @@ class GridManager {
         
         const invertedTimeOffsetPx = -timeOffsetPx;
         
-        this.gridContainer.style.transition = 'transform 0.3s ease';
         this.gridContainer.style.transform = `translateX(${invertedTimeOffsetPx}px)`;
         
         console.log(`Grid: fractionalOffset=${fractionalOffset}, timeOffsetPx=${timeOffsetPx}, inverted=${invertedTimeOffsetPx}`);
