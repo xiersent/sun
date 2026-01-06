@@ -249,11 +249,12 @@ class ImportExportManager {
                                 }
                             });
                             
-                            const defaultGroupIndex = convertedData.groups.findIndex(g => g.id === 'default-group');
-                            if (defaultGroupIndex > 0) {
-                                const defaultGroup = convertedData.groups.splice(defaultGroupIndex, 1)[0];
-                                convertedData.groups.unshift(defaultGroup);
-                            }
+                            // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
+                            // const defaultGroupIndex = convertedData.groups.findIndex(g => g.id === 'default-group');
+                            // if (defaultGroupIndex > 0) {
+                            //     const defaultGroup = convertedData.groups.splice(defaultGroupIndex, 1)[0];
+                            //     convertedData.groups.unshift(defaultGroup);
+                            // }
                             
                             window.appState.data = convertedData;
                             
@@ -401,11 +402,12 @@ class ImportExportManager {
                                 }
                             });
                             
-                            const defaultGroupIndex = window.appState.data.groups.findIndex(g => g.id === 'default-group');
-                            if (defaultGroupIndex > 0) {
-                                const defaultGroup = window.appState.data.groups.splice(defaultGroupIndex, 1)[0];
-                                window.appState.data.groups.unshift(defaultGroup);
-                            }
+                            // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
+                            // const defaultGroupIndex = window.appState.data.groups.findIndex(g => g.id === 'default-group');
+                            // if (defaultGroupIndex > 0) {
+                            //     const defaultGroup = window.appState.data.groups.splice(defaultGroupIndex, 1)[0];
+                            //     window.appState.data.groups.unshift(defaultGroup);
+                            // }
                             
                             window.appState.waveVisibility = {};
                             window.appState.waveBold = {};

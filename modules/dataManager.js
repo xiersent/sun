@@ -21,22 +21,8 @@ class DataManager {
         // Ждем загрузки шаблонов перед рендерингом
         await window.unifiedListManager.renderListWithWait('wavesList', [], 'group');
         
-        // Обработка групп и их содержимого
-        const sortedGroups = [...window.appState.data.groups].sort((a, b) => {
-            if (a.id === 'default-group') return -1;
-            if (b.id === 'default-group') return 1;
-            if (a.id === 'classic-group') return -1;
-            if (b.id === 'classic-group') return 1;
-            if (a.id === 'experimental-group') return -1;
-            if (b.id === 'experimental-group') return 1;
-            if (a.id === '120-waves-group') return -1;
-            if (b.id === '120-waves-group') return 1;
-            if (a.id === '31-waves-group') return -1;
-            if (b.id === '31-waves-group') return 1;
-            return 0;
-        });
-        
-        const allGroups = sortedGroups.map((group, index) => {
+        // ИСПРАВЛЕНО: Используем группы в сохраненном порядке (без сортировки)
+        const allGroups = window.appState.data.groups.map((group, index) => {
             return window.unifiedListManager.prepareGroupData(group, index);
         });
         

@@ -196,7 +196,7 @@ class SummaryManager {
             select.remove(1);
         }
         
-        // Добавляем группы, которые содержат колоски
+        // ИСПРАВЛЕНО: Добавляем группы в сохраненном порядке
         window.appState.data.groups.forEach(group => {
             if (group.waves && group.waves.length > 0) {
                 const option = document.createElement('option');

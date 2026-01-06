@@ -245,28 +245,28 @@ class AppState {
                     }
                 });
                 
-                const defaultGroupIndex = this.data.groups.findIndex(g => g.id === 'default-group');
-                if (defaultGroupIndex > 0) {
-                    const defaultGroup = this.data.groups.splice(defaultGroupIndex, 1)[0];
-                    this.data.groups.unshift(defaultGroup);
-                }
+                // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
+                // const defaultGroupIndex = this.data.groups.findIndex(g => g.id === 'default-group');
+                // if (defaultGroupIndex > 0) {
+                //     const defaultGroup = this.data.groups.splice(defaultGroupIndex, 1)[0];
+                //     this.data.groups.unshift(defaultGroup);
+                // }
                 
                 // ВАЖНО: Загружаем currentDate и baseDate из сохраненных данных
                 this.currentDate = new Date(data.uiSettings.currentDate);
-                this.baseDate = new Date(data.uiSettings.baseDate);
 
-				// Принудительно устанавливаем baseDate на локальное начало дня
-				const baseDateObj = new Date(data.uiSettings.baseDate);
-				this.baseDate = new Date(
-					baseDateObj.getFullYear(),
-					baseDateObj.getMonth(),
-					baseDateObj.getDate(),
-					0, 0, 0, 0
-				);
+                // Исправление baseDate: принудительно устанавливаем на локальное начало дня
+                const baseDateObj = new Date(data.uiSettings.baseDate);
+                this.baseDate = new Date(
+                    baseDateObj.getFullYear(),
+                    baseDateObj.getMonth(),
+                    baseDateObj.getDate(),
+                    0, 0, 0, 0
+                );
 
-				console.log('baseDate исправлен на локальное начало дня:', 
-					this.baseDate.toLocaleString(), 
-					'часы:', this.baseDate.getHours());
+                console.log('baseDate исправлен на локальное начало дня:', 
+                    this.baseDate.toLocaleString(), 
+                    'часы:', this.baseDate.getHours());
                 
                 // ВАЖНО: Загружаем currentDay из сохраненных данных
                 if (data.uiSettings.currentDay !== undefined && 
@@ -307,7 +307,14 @@ class AppState {
                     if (activeDate) {
                         try {
                             this.baseDate = new Date(activeDate.date);
-                            console.log('baseDate обновлен из activeDate:', this.baseDate.toLocaleString());
+                            // Принудительно устанавливаем на начало дня
+                            this.baseDate = new Date(
+                                this.baseDate.getFullYear(),
+                                this.baseDate.getMonth(),
+                                this.baseDate.getDate(),
+                                0, 0, 0, 0
+                            );
+                            console.log('baseDate обновлен из activeDate и установлен на начало дня:', this.baseDate.toLocaleString());
                         } catch (error) {
                             console.error('Error parsing active date:', error);
                             this.baseDate = new Date();
@@ -477,48 +484,55 @@ class AppState {
         this.data.uiSettings.waveVisibility = this.waveVisibility;
         this.data.uiSettings.waveBold = this.waveBold;
         this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+        
+        // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
+        // const defaultGroupIndex = this.data.groups.findIndex(g => g.id === 'default-group');
+        // if (defaultGroupIndex > 0) {
+        //     const defaultGroup = this.data.groups.splice(defaultGroupIndex, 1)[0];
+        //     this.data.groups.unshift(defaultGroup);
+        // }
     }
     
-	save() {
-		// Сохраняем как timestamp
-		this.data.uiSettings.currentDate = this.currentDate.getTime();
-		
-		// baseDate может быть как Date объектом, так и timestamp
-		if (this.baseDate instanceof Date) {
-			this.data.uiSettings.baseDate = this.baseDate.getTime(); // Сохраняем как timestamp
-		} else if (typeof this.baseDate === 'number') {
-			this.data.uiSettings.baseDate = this.baseDate;
-		} else {
-			this.data.uiSettings.baseDate = Date.now();
-		}
-		
-		this.data.uiSettings.currentDay = this.currentDay;
-		this.data.uiSettings.transform = this.transform;
-		this.data.uiSettings.uiHidden = this.uiHidden;
-		this.data.uiSettings.graphHidden = this.graphHidden;
-		this.data.uiSettings.graphBgWhite = this.graphBgWhite;
-		this.data.uiSettings.showStars = this.showStars;
-		this.data.uiSettings.grayMode = this.grayMode;
-		this.data.uiSettings.graphGrayMode = this.graphGrayMode;
-		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
-		this.data.uiSettings.activeDateId = this.activeDateId;
-		
-		// ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются
-		// Не сохраняем: editingDateId, editingWaveId, editingGroupId
-		
-		this.data.uiSettings.waveVisibility = this.waveVisibility;
-		this.data.uiSettings.waveBold = this.waveBold;
-		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+    save() {
+        // Сохраняем как timestamp
+        this.data.uiSettings.currentDate = this.currentDate.getTime();
+        
+        // baseDate может быть как Date объектом, так и timestamp
+        if (this.baseDate instanceof Date) {
+            this.data.uiSettings.baseDate = this.baseDate.getTime(); // Сохраняем как timestamp
+        } else if (typeof this.baseDate === 'number') {
+            this.data.uiSettings.baseDate = this.baseDate;
+        } else {
+            this.data.uiSettings.baseDate = Date.now();
+        }
+        
+        this.data.uiSettings.currentDay = this.currentDay;
+        this.data.uiSettings.transform = this.transform;
+        this.data.uiSettings.uiHidden = this.uiHidden;
+        this.data.uiSettings.graphHidden = this.graphHidden;
+        this.data.uiSettings.graphBgWhite = this.graphBgWhite;
+        this.data.uiSettings.showStars = this.showStars;
+        this.data.uiSettings.grayMode = this.grayMode;
+        this.data.uiSettings.graphGrayMode = this.graphGrayMode;
+        this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
+        this.data.uiSettings.activeDateId = this.activeDateId;
+        
+        // ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются
+        // Не сохраняем: editingDateId, editingWaveId, editingGroupId
+        
+        this.data.uiSettings.waveVisibility = this.waveVisibility;
+        this.data.uiSettings.waveBold = this.waveBold;
+        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
 
-		console.log('AppState.save(): сохранение дат', {
-			'currentDate': this.currentDate.toLocaleString(),
-			'baseDate': new Date(this.data.uiSettings.baseDate).toLocaleString(), // ИСПРАВЛЕНО: создаем Date из timestamp
-			'baseDate часов': new Date(this.data.uiSettings.baseDate).getHours(), // ИСПРАВЛЕНО
-			'baseDate timestamp': this.data.uiSettings.baseDate
-		});
-		
-		localStorage.setItem('appData', JSON.stringify(this.data));
-	}
+        console.log('AppState.save(): сохранение дат', {
+            'currentDate': this.currentDate.toLocaleString(),
+            'baseDate': new Date(this.data.uiSettings.baseDate).toLocaleString(), // ИСПРАВЛЕНО: создаем Date из timestamp
+            'baseDate часов': new Date(this.data.uiSettings.baseDate).getHours(), // ИСПРАВЛЕНО
+            'baseDate timestamp': this.data.uiSettings.baseDate
+        });
+        
+        localStorage.setItem('appData', JSON.stringify(this.data));
+    }
     
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
