@@ -417,7 +417,7 @@
 }
 
 .group-children > * {
-    display: block !important;
+    display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
 }

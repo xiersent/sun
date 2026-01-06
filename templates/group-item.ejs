@@ -78,12 +78,19 @@
         </div>
         
         <!-- Дочерние элементы (волны) - ВСЕГДА создаем контейнер -->
-        <div class="group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
-            <% if (data.children && data.children.length > 0) { %>
-                <% data.children.forEach((childData) => { %>
-                    <!-- Дочерние элементы будут добавлены JavaScript -->
-                <% }) %>
-            <% } %>
-        </div>
+		<div class="group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
+			<% if (data.children && data.children.length > 0) { %>
+				<% data.children.forEach((childData) => { %>
+					<!-- Дочерние элементы будут добавлены JavaScript -->
+				<% }) %>
+			<% } else { %>
+				<!-- ДОБАВИТЬ ЭТУ СТРОКУ -->
+				<div class="no-waves-message">
+					<span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">
+						Нет колосков в этой группе
+					</span>
+				</div>
+			<% } %>
+		</div>
     </div>
 </div>
