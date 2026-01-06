@@ -310,7 +310,7 @@
     color: #ccc;
 }
 
-/* КОНТЕЙНЕР ДЛЯ ВЫНОСОК КОЛОСКОВ - ВНЕ ОБЛАСТИ OVERFLOW */
+/* КОНТЕЙНЕР ДЛЯ ГОРИЗОНТАЛЬНЫХ ВЫНОСОК КОЛОСКОВ - ВНЕ ОБЛАСТИ OVERFLOW */
 .wave-labels-container {
     position: absolute;
     top: 0;
@@ -322,8 +322,8 @@
     overflow: visible; /* ВАЖНО: разрешаем выходить за пределы */
 }
 
-/* Стороны для выносок */
-.wave-labels-side {
+/* Стороны для горизонтальных выносок */
+.wave-labels-container .wave-labels-side {
     position: absolute;
     top: 0;
     height: 100%;
@@ -340,7 +340,34 @@
     text-align: left;
 }
 
-/* Индивидуальная выноска */
+/* КОНТЕЙНЕР ДЛЯ ВЕРТИКАЛЬНЫХ ВЫНОСОК КОЛОСКОВ */
+.wave-labels-vertical-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: visible;
+}
+
+/* Стороны для вертикальных выносок */
+.wave-labels-vertical-container .wave-labels-side {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+}
+
+.wave-labels-top {
+    top: -30px;
+}
+
+.wave-labels-bottom {
+    bottom: -30px;
+}
+
+/* ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ ВЫНОСОК */
 .wave-label {
     position: absolute;
     display: flex;
@@ -348,56 +375,127 @@
     white-space: nowrap;
     font-size: var(--font-size-sm);
     font-weight: 400;
-    transition: top 0.1s linear;
     pointer-events: auto;
     cursor: default;
-    transform: translateY(-50%);
-    padding: 0 8px;
-    height: 23px;
+    padding: 2px 8px;
     color: #fff;
     border-radius: 3px;
-    opacity: 0.5; /* По умолчанию */
-    z-index: 1; /* По умолчанию */
+    opacity: 0.5;
+    z-index: 1;
     transition: opacity 0.2s, z-index 0.2s, filter 0.2s;
 }
 
 .wave-label:hover {
-    opacity: 1; /* При hover полная видимость */
-    z-index: 10; /* При hover выше других */
+    opacity: 1;
+    z-index: 10;
     filter: brightness(1.2);
 }
 
-/* Левая сторона: текст → стрелка - ИСПРАВЛЕНО */
-.wave-labels-left .wave-label {
-    flex-direction: row-reverse;
-    right: 0; /* Прижимаем к ПРАВОМУ краю родителя */
-    margin-right: 10px; /* Отступ от правого края */
+/* ГОРИЗОНТАЛЬНЫЕ ВЫНОСКИ (левые/правые) */
+.wave-labels-container .wave-label {
+    transform: translateY(-50%);
+    height: 20px;
 }
 
-/* Правая сторона: стрелка → текст - ИСПРАВЛЕНО */
+/* Левая сторона: текст → стрелка */
+.wave-labels-left .wave-label {
+    flex-direction: row-reverse;
+    right: 0;
+    margin-right: 10px;
+}
+
+/* Правая сторона: стрелка → текст */
 .wave-labels-right .wave-label {
     flex-direction: row;
-    left: 0; /* Прижимаем к ЛЕВОМУ краю родителя */
-    margin-left: 10px; /* Отступ от левого края */
+    left: 0;
+    margin-left: 10px;
+}
+
+/* ВЕРТИКАЛЬНЫЕ ВЫНОСКИ (верхние/нижние) */
+.wave-labels-vertical-container .wave-label {
+    transform: translateX(-50%);
+    height: 20px;
+}
+
+/* Верхняя сторона */
+.wave-labels-top .wave-label {
+    top: 0;
+    margin-top: 5px;
+}
+
+/* Нижняя сторона */
+.wave-labels-bottom .wave-label {
+    bottom: 0;
+    margin-bottom: 5px;
 }
 
 /* Текст выноски */
 .wave-label-text {
     white-space: nowrap;
     font-weight: 400;
+    font-size: 11px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Стрелки для выносок */
+.wave-label-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    z-index: 1;
+}
+
+/* Стрелки для горизонтальных выносок */
+.wave-labels-container .wave-label-arrow {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.wave-labels-left .wave-label-arrow {
+    right: -6px;
+    border-width: 4px 0 4px 6px;
+    border-color: transparent transparent transparent inherit;
+}
+
+.wave-labels-right .wave-label-arrow {
+    left: -6px;
+    border-width: 4px 6px 4px 0;
+    border-color: transparent inherit transparent transparent;
+}
+
+/* Стрелки для вертикальных выносок */
+.wave-labels-vertical-container .wave-label-arrow {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.wave-labels-top .wave-label-arrow {
+    bottom: -6px;
+    border-width: 6px 4px 0 4px;
+    border-color: inherit transparent transparent transparent;
+}
+
+.wave-labels-bottom .wave-label-arrow {
+    top: -6px;
+    border-width: 0 4px 6px 4px;
+    border-color: transparent transparent inherit transparent;
 }
 
 /* Темный режим графика */
 .graph-container.dark-mode .wave-label {
-    border-color: rgba(255, 255, 255, 0.3); /* Более видимая обводка в темном режиме */
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* СЕРЫЕ ВЫНОСКИ В РЕЖИМЕ СЕРОСТИ ГРАФИКА */
-.graph-container.graph-gray-mode+.wave-labels-container {
+.graph-container.graph-gray-mode+.wave-labels-container,
+.graph-container.graph-gray-mode+.wave-labels-vertical-container {
     filter: grayscale(1);
 }
 
 /* СКРЫТЫЕ ВЫНОСКИ */
-.wave-labels-container.hidden {
+.wave-labels-container.hidden,
+.wave-labels-vertical-container.hidden {
     display: none !important;
 }

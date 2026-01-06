@@ -21,7 +21,6 @@
                 <div class="warning-info-item"><strong>Браузер:</strong> <span id="browserInfo">Загрузка...</span></div>
                 <div class="warning-info-item"><strong>Версия от:</strong> <span id="versionInfo">Загрузка...</span></div>
                 <div class="warning-info-item"><strong>Сегодня:</strong> <span id="todayInfo">Загрузка...</span></div>
-				<div class="warning-info-item"><span id="Info">Добавлена(исправлена) возможность сортировать даты и группы</span></div>
             </div>
             <div class="warning-actions">
                 <button id="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
@@ -250,10 +249,15 @@
                         <div class="zoom-overlay" id="zoomOverlay"></div>
                     </div>
                 </div>
-                <!-- КОНТЕЙНЕР ДЛЯ ВЫНОСОК ПЕРЕМЕЩАЕМ СЮДА (внутри graph-container, но вне graph) -->
+                <!-- ГОРИЗОНТАЛЬНЫЕ ВЫНОСКИ (слева и справа) -->
                 <div class="wave-labels-container" id="waveLabelsContainer">
                     <div class="wave-labels-side wave-labels-left"></div>
                     <div class="wave-labels-side wave-labels-right"></div>
+                </div>
+                <!-- ВЕРТИКАЛЬНЫЕ ВЫНОСКИ (сверху и снизу) -->
+                <div class="wave-labels-vertical-container" id="waveLabelsVerticalContainer">
+                    <div class="wave-labels-side wave-labels-top"></div>
+                    <div class="wave-labels-side wave-labels-bottom"></div>
                 </div>
             </div>
 

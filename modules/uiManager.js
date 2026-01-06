@@ -71,8 +71,8 @@ class UIManager {
             // Навигация
             prevDay: () => window.dates.navigateDay(-1),
             nextDay: () => window.dates.navigateDay(1),
-			today: () => window.dates.goToToday(),
-			now: () => window.dates.goToNow(),
+            today: () => window.dates.goToToday(),
+            now: () => window.dates.goToNow(),
             setDate: () => window.dates.setDateFromInputs(),
             
             // Трансформации
@@ -85,7 +85,7 @@ class UIManager {
             // Переключение UI
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
-            toggleWaveLabels: () => this.toggleWaveLabels(),
+            toggleWaveLabels: () => this.toggleWaveLabels(), // ОБНОВЛЕННЫЙ МЕТОД
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
@@ -135,16 +135,31 @@ class UIManager {
     }
     
     toggleWaveLabels() {
-        console.log('Переключение видимости выносок');
-        const labelsContainer = document.querySelector('.wave-labels-container');
-        if (labelsContainer) {
-            if (labelsContainer.classList.contains('hidden')) {
-                labelsContainer.classList.remove('hidden');
-                console.log('Выноски показаны');
+        console.log('Переключение видимости ВСЕХ выносок');
+        
+        // ГОРИЗОНТАЛЬНЫЕ выноски (слева и справа)
+        const horizontalContainer = document.querySelector('.wave-labels-container');
+        
+        // ВЕРТИКАЛЬНЫЕ выноски (сверху и снизу)
+        const verticalContainer = document.querySelector('.wave-labels-vertical-container');
+        
+        if (horizontalContainer && verticalContainer) {
+            // Проверяем состояние на основе горизонтального контейнера
+            const areHidden = horizontalContainer.classList.contains('hidden');
+            
+            if (areHidden) {
+                // Показываем ВСЕ выноски
+                horizontalContainer.classList.remove('hidden');
+                verticalContainer.classList.remove('hidden');
+                console.log('ВСЕ выноски показаны (горизонтальные и вертикальные)');
             } else {
-                labelsContainer.classList.add('hidden');
-                console.log('Выноски скрыты');
+                // Скрываем ВСЕ выноски
+                horizontalContainer.classList.add('hidden');
+                verticalContainer.classList.add('hidden');
+                console.log('ВСЕ выноски скрыты (горизонтальные и вертикальные)');
             }
+        } else {
+            console.warn('Один из контейнеров выносок не найден');
         }
     }
     

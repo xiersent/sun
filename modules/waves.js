@@ -1,4 +1,4 @@
-// modules/waves.js - ИСПРАВЛЕННЫЙ С УЧЕТОМ UTC И ДРОБНЫХ ЧАСТЕЙ
+// modules/waves.js - ИСПРАВЛЕННЫЙ С УЧЕТОМ UTC И ДРОБНЫХ ЧАСТЕЙ И ВЕРТИКАЛЬНЫМИ ВЫНОСКАМИ
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -367,16 +367,24 @@ class WavesManager {
             }
         });
         
-        // Обновляем выноски
-        this.updateWaveLabels();
+        // Обновляем ВСЕ выноски (горизонтальные и вертикальные)
+        this.updateAllWaveLabels();
         
         console.log('WavesManager: позиционирование завершено');
     }
     
     /**
-     * Обновляет выноски волн по краям графика
+     * Обновляет ВСЕ выноски (горизонтальные и вертикальные)
      */
-    updateWaveLabels() {
+    updateAllWaveLabels() {
+        this.updateHorizontalWaveLabels();
+        this.updateVerticalWaveLabels();
+    }
+    
+    /**
+     * Обновляет горизонтальные выноски (слева и справа)
+     */
+    updateHorizontalWaveLabels() {
         const now = Date.now();
         
         // Защита от слишком частых обновлений
@@ -390,14 +398,13 @@ class WavesManager {
         const rightContainer = document.querySelector('.wave-labels-right');
         
         if (!leftContainer || !rightContainer) {
-            console.warn('WavesManager: контейнеры выносок не найдены');
+            console.warn('WavesManager: контейнеры горизонтальных выносок не найдены');
             return;
         }
         
         // Очищаем старые выноски
         leftContainer.innerHTML = '';
         rightContainer.innerHTML = '';
-        this.waveLabelElements = {};
         
         // Создаем выноски для активных волн
         window.appState.data.waves.forEach(wave => {
@@ -413,11 +420,50 @@ class WavesManager {
             
             // Создаем выноски, если волна пересекает край
             if (leftY >= 0 && leftY <= window.appState.config.graphHeight) {
-                this.createWaveLabel(wave, leftY, 'left', leftContainer);
+                this.createHorizontalWaveLabel(wave, leftY, 'left', leftContainer);
             }
             
             if (rightY >= 0 && rightY <= window.appState.config.graphHeight) {
-                this.createWaveLabel(wave, rightY, 'right', rightContainer);
+                this.createHorizontalWaveLabel(wave, rightY, 'right', rightContainer);
+            }
+        });
+    }
+    
+    /**
+     * Обновляет вертикальные выноски сверху и снизу
+     */
+    updateVerticalWaveLabels() {
+        const topContainer = document.querySelector('.wave-labels-top');
+        const bottomContainer = document.querySelector('.wave-labels-bottom');
+        
+        if (!topContainer || !bottomContainer) {
+            console.warn('WavesManager: контейнеры вертикальных выносок не найдены');
+            return;
+        }
+        
+        // Очищаем старые выноски
+        topContainer.innerHTML = '';
+        bottomContainer.innerHTML = '';
+        
+        // Создаем выноски для активных волн
+        window.appState.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            
+            if (!shouldShow) return;
+            
+            // Рассчитываем X-координаты на верхней и нижней границах
+            const topX = this.findWaveXAtY(wave, 0); // Y = 0 (верхняя граница)
+            const bottomX = this.findWaveXAtY(wave, window.appState.config.graphHeight); // Y = высота (нижняя граница)
+            
+            // Создаем выноски, если волна пересекает границу
+            if (topX !== null && topX >= 0 && topX <= window.appState.graphWidth) {
+                this.createVerticalWaveLabel(wave, topX, 'top', topContainer);
+            }
+            
+            if (bottomX !== null && bottomX >= 0 && bottomX <= window.appState.graphWidth) {
+                this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer);
             }
         });
     }
@@ -463,16 +509,86 @@ class WavesManager {
     }
     
     /**
-     * Создает выноску для волны
+     * Находит X-координату волны при заданном Y (для вертикальных выносок)
+     * @param {Object} wave - Объект волны
+     * @param {number} targetY - Целевая Y-координата
+     * @returns {number|null} X-координата или null если нет пересечения
+     */
+    findWaveXAtY(wave, targetY) {
+        const wavePeriodPixels = window.appState.periods[wave.id] || 
+                               (wave.period * window.appState.config.squareSize);
+        
+        if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+            return null;
+        }
+        
+        const centerY = window.appState.config.graphHeight / 2;
+        const amplitude = window.appState.config.amplitude;
+        
+        // Проверяем, достижима ли targetY для этой амплитуды
+        if (Math.abs(targetY - centerY) > amplitude) {
+            return null; // Точка вне диапазона волны
+        }
+        
+        // Вычисляем фазу для заданного Y: sin(θ) = (centerY - targetY) / amplitude
+        const sinValue = (centerY - targetY) / amplitude;
+        
+        // Проверяем диапазон синуса
+        if (Math.abs(sinValue) > 1) {
+            return null;
+        }
+        
+        const theta = Math.asin(sinValue); // Основное решение
+        
+        // В синусоиде есть два решения на период: θ и π-θ
+        const solutions = [theta, Math.PI - theta];
+        
+        const currentDay = window.appState.currentDay || 0;
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        
+        // Корректируем для отрицательных значений
+        if (currentOffsetPx < 0) {
+            currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+        }
+        
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        
+        // Ищем ближайшее решение в пределах видимой области
+        let bestX = null;
+        let minDistance = Infinity;
+        
+        solutions.forEach(solution => {
+            // Проверяем несколько периодов вперед и назад
+            for (let n = -2; n <= 2; n++) {
+                // x = (θ/(2π) + n) * period - phaseOffset - currentOffset
+                const x = ((solution / (2 * Math.PI) + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
+                
+                // Корректируем x в диапазон [0, wavePeriodPixels)
+                const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
+                
+                // Проверяем, находится ли в видимой области
+                if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
+                    const distance = Math.abs(normalizedX - window.appState.graphWidth / 2);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        bestX = normalizedX;
+                    }
+                }
+            }
+        });
+        
+        return bestX;
+    }
+    
+    /**
+     * Создает горизонтальную выноску для волны
      * @param {Object} wave - Объект волны
      * @param {number} y - Y-координата
      * @param {string} side - 'left' или 'right'
      * @param {HTMLElement} container - Контейнер для выноски
-     * @returns {HTMLElement} Созданная выноска
      */
-    createWaveLabel(wave, y, side, container) {
+    createHorizontalWaveLabel(wave, y, side, container) {
         const labelId = `${wave.id}-${side}`;
-        
         const waveColor = wave.color || '#666666';
         
         const labelElement = document.createElement('div');
@@ -533,6 +649,95 @@ class WavesManager {
         container.appendChild(labelElement);
         
         this.waveLabelElements[labelId] = labelElement;
+        
+        // Обработчики событий
+        labelElement.addEventListener('mouseenter', () => {
+            labelElement.style.opacity = '1';
+            labelElement.style.zIndex = '10';
+        });
+        
+        labelElement.addEventListener('mouseleave', () => {
+            labelElement.style.opacity = '0.5';
+            labelElement.style.zIndex = '1';
+        });
+        
+        labelElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onWaveLabelClick(wave.id);
+        });
+        
+        return labelElement;
+    }
+    
+    /**
+     * Создает вертикальную выноску для волны
+     * @param {Object} wave - Объект волны
+     * @param {number} x - X-координата
+     * @param {string} position - 'top' или 'bottom'
+     * @param {HTMLElement} container - Контейнер для выноски
+     */
+    createVerticalWaveLabel(wave, x, position, container) {
+        const labelId = `${wave.id}-${position}`;
+        const waveColor = wave.color || '#666666';
+        
+        const labelElement = document.createElement('div');
+        labelElement.className = 'wave-label vertical';
+        labelElement.id = `waveLabel${labelId}`;
+        labelElement.dataset.waveId = wave.id;
+        labelElement.dataset.position = position;
+        
+        labelElement.style.position = 'absolute';
+        labelElement.style.left = `${x}px`;
+        labelElement.style.backgroundColor = waveColor;
+        labelElement.style.color = '#fff';
+        labelElement.style.opacity = '0.5';
+        labelElement.style.zIndex = '1';
+        labelElement.style.padding = '2px 6px';
+        labelElement.style.borderRadius = '3px';
+        labelElement.style.fontSize = '11px';
+        labelElement.style.transform = 'translateX(-50%)';
+        labelElement.style.cursor = 'pointer';
+        
+        // Стрелка
+        const arrow = document.createElement('div');
+        arrow.className = 'wave-label-arrow';
+        arrow.style.position = 'absolute';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        
+        if (position === 'top') {
+            // Для верхних выносок: стрелка вниз
+            arrow.style.bottom = '-6px';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%)';
+            arrow.style.borderWidth = '6px 4px 0 4px';
+            arrow.style.borderColor = `${waveColor} transparent transparent transparent`;
+            labelElement.style.top = '0';
+            labelElement.style.marginTop = '5px';
+        } else {
+            // Для нижних выносок: стрелка вверх
+            arrow.style.top = '-6px';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%)';
+            arrow.style.borderWidth = '0 4px 6px 4px';
+            arrow.style.borderColor = `transparent transparent ${waveColor} transparent`;
+            labelElement.style.bottom = '0';
+            labelElement.style.marginBottom = '5px';
+        }
+        
+        // Текст
+        const text = document.createElement('div');
+        text.className = 'wave-label-text';
+        text.textContent = wave.name;
+        text.title = `${wave.name} (${wave.period} дней)`;
+        text.style.position = 'relative';
+        text.style.zIndex = '2';
+        
+        labelElement.appendChild(text);
+        labelElement.appendChild(arrow);
+        container.appendChild(labelElement);
         
         // Обработчики событий
         labelElement.addEventListener('mouseenter', () => {
@@ -676,12 +881,18 @@ class WavesManager {
         // Удаляем выноски
         const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
         const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
+        const topLabel = document.getElementById(`waveLabel${waveId}-top`);
+        const bottomLabel = document.getElementById(`waveLabel${waveId}-bottom`);
         
         if (leftLabel) leftLabel.remove();
         if (rightLabel) rightLabel.remove();
+        if (topLabel) topLabel.remove();
+        if (bottomLabel) bottomLabel.remove();
         
         delete this.waveLabelElements[`${waveId}-left`];
         delete this.waveLabelElements[`${waveId}-right`];
+        delete this.waveLabelElements[`${waveId}-top`];
+        delete this.waveLabelElements[`${waveId}-bottom`];
         
         this.updatePosition();
         window.grid.updateGridNotesHighlight();
@@ -798,46 +1009,3 @@ class WavesManager {
 }
 
 window.waves = new WavesManager();
-
-// Дебаг функция для проверки позиционирования
-window.debugWavePositioning = function(waveId) {
-    if (!window.waves || !window.appState) {
-        console.error('WavesManager не инициализирован');
-        return;
-    }
-    
-    const wave = window.appState.data.waves.find(w => w.id == waveId);
-    if (!wave) {
-        console.error(`Волна с ID ${waveId} не найдена`);
-        return;
-    }
-    
-    console.log(`=== ДЕБАГ ПОЗИЦИОНИРОВАНИЯ ВОЛНЫ "${wave.name}" ===`);
-    console.log('Параметры волны:');
-    console.log(`  ID: ${wave.id}`);
-    console.log(`  Период: ${wave.period} дней`);
-    console.log(`  periodPx: ${window.appState.periods[wave.id]}px`);
-    
-    console.log('\nСостояние приложения:');
-    console.log(`  currentDay: ${window.appState.currentDay}`);
-    console.log(`  currentDate (UTC): ${window.appState.currentDate.toUTCString()}`);
-    console.log(`  baseDate (UTC): ${new Date(window.appState.baseDate).toUTCString()}`);
-    
-    console.log('\nРасчеты:');
-    const wavePeriodPixels = window.appState.periods[wave.id];
-    const currentDay = window.appState.currentDay || 0;
-    
-    console.log(`  wavePeriodPixels: ${wavePeriodPixels}px`);
-    console.log(`  currentDay: ${currentDay}`);
-    console.log(`  currentPositionPx (расчет): ${(currentDay * window.appState.config.squareSize) % wavePeriodPixels}px`);
-    
-    const container = window.waves.waveContainers[wave.id];
-    if (container) {
-        console.log('\nDOM элемент:');
-        console.log(`  transform: ${container.style.transform}`);
-        console.log(`  display: ${container.style.display}`);
-        console.log(`  width: ${container.style.width}`);
-    }
-    
-    console.log('=== КОНЕЦ ДЕБАГА ===');
-};
