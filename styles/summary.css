@@ -38,7 +38,7 @@
 .summary-select-group {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     min-width: 200px;
 }
 
@@ -72,10 +72,10 @@
 
 /* Контейнер результатов */
 .summary-results-container {
-    max-height: 300px;
+    max-height: 277px;
+	min-height: 277px;
     overflow-y: auto;
     border: 1px solid var(--clg);
-    background: #fafafa;
 }
 
 .summary-results {
@@ -97,9 +97,8 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--spacing-sm);
-    border-bottom: 1px solid #eee;
+    outline: 1px solid #eee;
     background: #fff;
-    transition: background-color 0.2s;
     gap: var(--spacing-sm);
 }
 
