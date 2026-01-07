@@ -751,23 +751,40 @@ class WavesManager {
 		const baseDate = window.appState.baseDate;
 		
 		// 4. Находим левую границу визора (самую раннюю дату)
-		const graphWidth = window.appState.graphWidth;
+		// ВАЖНО: используем ТОЛЬКО ЦЕЛЫЕ ДНИ, без времени суток!
 		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		const leftDate = new Date(window.appState.currentDate);
 		
-		// Смещаем к левой границе визора (минус половина квадратов)
+		// Получаем currentDate как Date объект
+		const currentDate = new Date(window.appState.currentDate);
+		
+		// Создаем leftDate как НАЧАЛО ДНЯ (00:00:00) от currentDate минус squaresLeft
+		const leftDate = new Date(currentDate);
 		leftDate.setDate(leftDate.getDate() - squaresLeft);
+		// ОБНУЛЯЕМ время суток (только целые дни!)
+		leftDate.setHours(0, 0, 0, 0);
 		
 		// 5. Рассчитываем фазу на левой границе визора
-		// Используем window.timeUtils.getDaysBetween для локального времени
-		const daysFromBaseToLeft = window.timeUtils.getDaysBetween(baseDate, leftDate);
-		const phaseAtLeft = (daysFromBaseToLeft % wave.period) / wave.period;
+		// Используем getDaysBetween для получения разницы в днях
+		// Но baseDate уже должна быть с обнуленным временем (00:00:00)
+		
+		// Обеспечиваем, что baseDate тоже имеет время 00:00:00
+		const normalizedBaseDate = new Date(baseDate);
+		normalizedBaseDate.setHours(0, 0, 0, 0);
+		
+		// Рассчитываем разницу в днях (целые дни)
+		const daysFromBaseToLeft = window.timeUtils.getDaysBetween(normalizedBaseDate, leftDate);
+		
+		// ОКРУГЛЯЕМ до целого числа дней (игнорируем дробную часть времени суток)
+		const wholeDaysFromBaseToLeft = Math.floor(daysFromBaseToLeft);
+		
+		// Рассчитываем фазу от ЦЕЛЫХ дней
+		const phaseAtLeft = (wholeDaysFromBaseToLeft % wave.period) / wave.period;
 		
 		// Нормализуем фазу (0..1)
 		const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
 		
 		console.log(`  Левая граница визора: ${leftDate.toLocaleDateString('ru-RU')}`);
-		console.log(`  Дней от базовой даты: ${daysFromBaseToLeft.toFixed(4)}`);
+		console.log(`  Дней от базовой даты (целые): ${wholeDaysFromBaseToLeft}`);
 		console.log(`  Фаза на левой границе: ${normalizedPhaseAtLeft.toFixed(4)} (${(normalizedPhaseAtLeft * wave.period).toFixed(2)} дней)`);
 		
 		// 6. Находим ближайший экстремум ВПЕРЕД от левой границы
@@ -781,7 +798,8 @@ class WavesManager {
 		console.log(`  Разница фаз до экстремума: ${phaseDiff.toFixed(4)}`);
 		console.log(`  Дней до экстремума: ${daysToExtremumFromLeft.toFixed(2)}`);
 		
-		// 7. Абсолютное время экстремума на ленте (локальное время)
+		// 7. Абсолютное время экстремума на ленте
+		// Начинаем от leftDate (уже 00:00:00) и прибавляем ЦЕЛОЕ количество дней
 		const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
 		
 		// 8. Проверяем, что экстремум попадает в видимую область
@@ -794,7 +812,7 @@ class WavesManager {
 			return extremumTime;
 		}
 		
-		// Если не попал, ищем следующий (на всякий случай)
+		// Если не попал, ищем следующий
 		console.log(`  ✗ Экстремум вне видимой области, ищем следующий`);
 		const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
 		console.log(`  Следующий экстремум: ${nextExtremumTime.toLocaleDateString('ru-RU')} ${nextExtremumTime.toLocaleTimeString('ru-RU')}`);
