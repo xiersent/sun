@@ -1,4 +1,4 @@
-// modules/waves.js - ОБНОВЛЕННЫЙ (методы для выносок)
+// modules/waves.js - ОБНОВЛЕННЫЙ (с точками пересечения с осью X)
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -481,6 +481,205 @@ class WavesManager {
                 this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer);
             }
         });
+        
+        // ДОБАВЛЯЕМ: точки пересечения с осью X
+        this.updateAxisXIntersectionPoints();
+    }
+    
+    /**
+     * Обновляет точки пересечения с осью X
+     */
+    updateAxisXIntersectionPoints() {
+        // Контейнер для точек на оси X
+        let axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+        if (!axisXPointsContainer) {
+            axisXPointsContainer = document.createElement('div');
+            axisXPointsContainer.className = 'wave-axis-x-points';
+            axisXPointsContainer.style.position = 'absolute';
+            axisXPointsContainer.style.width = '100%';
+            axisXPointsContainer.style.height = '100%';
+            axisXPointsContainer.style.pointerEvents = 'none';
+            axisXPointsContainer.style.zIndex = '8';
+            axisXPointsContainer.style.top = '0';
+            axisXPointsContainer.style.left = '0';
+            
+            const graphElement = document.getElementById('graphElement');
+            if (graphElement) {
+                graphElement.appendChild(axisXPointsContainer);
+            }
+        }
+        
+        // Очищаем старые точки
+        axisXPointsContainer.innerHTML = '';
+        
+        // Создаем точки для активных волн
+        window.appState.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            
+            if (!shouldShow) return;
+            
+            // Находим точки пересечения с осью X в видимой области
+            const intersectionPoints = this.findAxisXIntersectionPoints(wave);
+            
+            // Создаем точки
+            intersectionPoints.forEach(x => {
+                this.createAxisXPoint(wave, x, axisXPointsContainer);
+            });
+        });
+    }
+    
+    /**
+     * Находит точки пересечения волны с осью X в видимой области
+     * @param {Object} wave - Объект волны
+     * @returns {Array} Массив X-координат точек пересечения
+     */
+    findAxisXIntersectionPoints(wave) {
+        const points = [];
+        const wavePeriodPixels = window.appState.periods[wave.id] || 
+                               (wave.period * window.appState.config.squareSize);
+        
+        if (!wavePeriodPixels) return points;
+        
+        const currentDay = window.appState.currentDay || 0;
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+        
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        
+        // Фазы пересечения с осью X: 0.0 (sin=0 восходящее) и 0.5 (sin=0 нисходящее)
+        const intersectionPhases = [0.0, 0.5];
+        
+        // Проверяем несколько периодов вперед и назад
+        for (let n = -2; n <= 2; n++) {
+            intersectionPhases.forEach(phase => {
+                const x = ((phase + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
+                const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
+                
+                // Проверяем, находится ли в видимой области
+                if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
+                    // Проверяем на дубликаты (близкие точки)
+                    const isDuplicate = points.some(existing => 
+                        Math.abs(existing - normalizedX) < 2
+                    );
+                    
+                    if (!isDuplicate) {
+                        points.push(normalizedX);
+                    }
+                }
+            });
+        }
+        
+        return points.sort((a, b) => a - b);
+    }
+    
+    /**
+     * Создает точку пересечения с осью X
+     * @param {Object} wave - Объект волны
+     * @param {number} x - X-координата точки
+     * @param {HTMLElement} container - Контейнер для точки
+     */
+    createAxisXPoint(wave, x, container) {
+        const centerY = window.appState.config.graphHeight / 2;
+        
+        const point = document.createElement('div');
+        point.className = 'wave-axis-x-point';
+        point.dataset.waveId = wave.id;
+        point.dataset.x = x;
+        
+        point.style.position = 'absolute';
+        point.style.left = `${x}px`;
+        point.style.top = `${centerY}px`;
+        point.style.transform = 'translate(-50%, -50%)';
+        point.style.width = '6px';
+        point.style.height = '6px';
+        point.style.borderRadius = '50%';
+        point.style.backgroundColor = wave.color;
+        point.style.border = '1px solid #fff';
+        point.style.cursor = 'pointer';
+        point.style.pointerEvents = 'auto';
+        point.style.zIndex = '9';
+        point.style.boxShadow = '0 0 2px rgba(0,0,0,0.3)';
+        point.style.transition = 'all 0.2s';
+        
+        point.title = `${wave.name} - пересечение с осью`;
+        
+        // Обработчик клика - навигация к точке
+        point.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.navigateToAxisXIntersection(wave, x);
+        });
+        
+        point.addEventListener('mouseenter', () => {
+            point.style.transform = 'translate(-50%, -50%) scale(1.3)';
+            point.style.zIndex = '10';
+            point.style.boxShadow = '0 0 4px rgba(0,0,0,0.5)';
+        });
+        
+        point.addEventListener('mouseleave', () => {
+            point.style.transform = 'translate(-50%, -50%)';
+            point.style.zIndex = '9';
+            point.style.boxShadow = '0 0 2px rgba(0,0,0,0.3)';
+        });
+        
+        container.appendChild(point);
+    }
+    
+    /**
+     * Навигация к точке пересечения с осью X
+     * @param {Object} wave - Объект волны
+     * @param {number} x - X-координата точки
+     */
+    navigateToAxisXIntersection(wave, x) {
+        // Преобразуем координату X во время
+        const intersectionTime = this.calculateTimeFromXCoordinate(wave, x);
+        
+        // Перемещаем визор
+        if (window.dates && window.dates.setDate) {
+            window.dates.setDate(intersectionTime, true);
+        }
+    }
+    
+    /**
+     * Преобразует координату X на графике во время
+     * @param {Object} wave - Объект волны
+     * @param {number} x - X-координата
+     * @returns {Date} Время точки
+     */
+    calculateTimeFromXCoordinate(wave, x) {
+        // Преобразуем координату X на графике во время
+        const wavePeriodPixels = window.appState.periods[wave.id] || 
+                               (wave.period * window.appState.config.squareSize);
+        
+        // Текущее смещение волны
+        const currentDay = window.appState.currentDay || 0;
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+        
+        // Относительная координата внутри периода
+        const relativeX = x + currentOffsetPx;
+        
+        // Фаза в долях периода
+        const phase = (relativeX / wavePeriodPixels) % 1.0;
+        
+        // БАЗОВАЯ ДАТА колоска (начало отсчета)
+        const baseDate = window.appState.baseDate;
+        
+        // Левая граница визора (самая ранняя дата)
+        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+        const currentDate = new Date(window.appState.currentDate);
+        const leftDate = new Date(currentDate);
+        leftDate.setDate(leftDate.getDate() - squaresLeft);
+        leftDate.setHours(0, 0, 0, 0);
+        
+        // Дни от левой границы до точки
+        const daysFromLeft = (x / window.appState.config.squareSize);
+        
+        // Абсолютное время точки
+        const pointTime = new Date(leftDate.getTime() + (daysFromLeft * 24 * 3600 * 1000));
+        
+        return pointTime;
     }
     
     /**

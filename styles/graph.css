@@ -17,6 +17,10 @@
     filter: grayscale(1) !important;
 }
 
+.graph-container.graph-gray-mode .wave-axis-x-point {
+    filter: grayscale(1) !important;
+}
+
 .graph-container.graph-gray-mode .axis {
     filter: none;
 }
@@ -86,6 +90,47 @@
 
 .wave-labels-bottom {
     bottom: -30px;
+}
+
+/* ТОЧКИ ПЕРЕСЕЧЕНИЯ С ОСЬЮ X */
+.wave-axis-x-points {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.wave-axis-x-point {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 9;
+    transition: all 0.2s;
+    transform: translate(-50%, -50%);
+}
+
+.wave-axis-x-point:hover {
+    transform: translate(-50%, -50%) scale(1.3);
+    z-index: 10;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* Темный режим для точек на оси X */
+.graph-container.dark-mode .wave-axis-x-point {
+    border-color: #000;
+    box-shadow: 0 0 3px rgba(255,255,255,0.3);
+}
+
+.graph-container.dark-mode .wave-axis-x-point:hover {
+    box-shadow: 0 0 5px rgba(255,255,255,0.5);
 }
 
 /* ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ ВЫНОСОК */
@@ -480,21 +525,13 @@
     color: var(--text-color);
 }
 
-.graph-container.dark-mode .center-date-name {
-    color: #fff;
+.center-date-weekday {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 400;
 }
 
 .center-date-star {
-    font-size: 22px;
-}
-
-.center-date-weekday {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-top: 4px;
-    font-weight: 400;
-}
-
-.graph-container.dark-mode .center-date-weekday {
-    color: #ccc;
+  font-size: 22px;
 }
