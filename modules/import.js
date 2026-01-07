@@ -680,11 +680,15 @@ class ImportExportManager {
     }
     
     createNoteFromCard(card) {
-        let timeString = '';
-        if (card.created_at) {
-            const date = new Date(card.created_at * 1000);
-            timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-        }
+		let timeString = '';
+		if (card.created_at) {
+			// Конвертируем из UTC секунд в локальное время
+			const date = window.timeUtils ? 
+				window.timeUtils.toLocalDate(card.created_at * 1000) : 
+				new Date(card.created_at * 1000);
+			
+			timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+		}
         
         let content = '';
         if (card.title && card.title !== 'Без названия') {

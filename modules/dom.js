@@ -21,22 +21,31 @@ class DOM {
         return window.timeUtils.formatForDateTimeInput(timestamp);
     }
     
-    getWeekday(date) {
-        return window.timeUtils.getWeekday(date);
-    }
-    
-    getWeekdayName(date, full = false) {
-        return window.timeUtils.getWeekdayName(date, full);
-    }
     
     getDaysBetweenDates(date1, date2) {
         return window.timeUtils.getDaysBetween(date1, date2);
     }
     
-    getDaysBetweenExact(date1, date2) {
-        // Используем обычный метод, так как getDaysBetween уже точный
-        return window.timeUtils.getDaysBetween(date1, date2);
-    }
+	getWeekday(date) {
+		return window.timeUtils ? window.timeUtils.getWeekday(date) : new Date(date).getDay();
+	}
+
+	getWeekdayName(date, full = false) {
+		if (window.timeUtils) {
+			return window.timeUtils.getWeekdayName(date, full);
+		}
+		
+		// Fallback
+		const d = new Date(date);
+		const weekdays = full ? 
+			['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] :
+			['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+		return weekdays[d.getDay()];
+	}
+
+	getDaysBetweenExact(date1, date2) {
+		return this.getDaysBetweenDates(date1, date2);
+	}
     
     cacheElements() {
         document.querySelectorAll('[id]').forEach(el => {
@@ -148,11 +157,6 @@ class DOM {
     
     getCurrentDate() {
         return new Date(); // Локальное время
-    }
-    
-    // Старый метод для обратной совместимости
-    stringFromDateTimeLocalToTimestamp(dateTimeString) {
-        return this.stringFromDateTimeStringToTimestamp(dateTimeString);
     }
     
     stringToTimestamp(dateString) {

@@ -640,12 +640,12 @@ setDate(newDate, useExactTime = true) { // ← ДОБАВЛЯЕМ ПАРАМЕТ
     
     getWeekday(date) {
         // Используем TimeUtils
-        return window.timeUtils.getWeekdayUTC(date);
+        return window.timeUtils.getWeekday(date);
     }
     
     getWeekdayName(date, full = false) {
         // Используем TimeUtils
-        return window.timeUtils.getWeekdayNameUTC(date, full);
+        return window.timeUtils.getWeekdayName(date, full);
     }
     
     cleanupEditingHandlers() {

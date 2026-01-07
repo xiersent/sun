@@ -252,19 +252,20 @@ class WaveIntersectionManager {
     }
     
     // Количество дней от базовой даты
-    getDaysFromBase(date) {
-        if (!window.dom || !window.dom.getDaysBetweenDates) {
-            // Fallback: простой расчет
-            const baseDate = window.appState.baseDate instanceof Date ? 
-                window.appState.baseDate : 
-                new Date(window.appState.baseDate);
-            
-            const diffMs = date.getTime() - baseDate.getTime();
-            return diffMs / (1000 * 60 * 60 * 24);
-        }
-        
-        return window.dom.getDaysBetweenDates(window.appState.baseDate, date);
-    }
+	getDaysFromBase(date) {
+		// Всегда используем TimeUtils для консистентности
+		if (window.timeUtils && window.timeUtils.getDaysBetween) {
+			return window.timeUtils.getDaysBetween(window.appState.baseDate, date);
+		}
+		
+		// Fallback
+		const baseDate = window.appState.baseDate instanceof Date ? 
+			window.appState.baseDate : 
+			new Date(window.appState.baseDate);
+		
+		const diffMs = date.getTime() - baseDate.getTime();
+		return diffMs / (1000 * 60 * 60 * 24);
+	}
     
     // Секунд от начала дня
     getSecondsFromMidnight(date) {

@@ -1157,7 +1157,7 @@ class WavesManager {
      * Для обратной совместимости
      */
     calculateDaysBetweenDates(date1, date2) {
-        if (!window.timeUtils || !window.timeUtils.getDaysBetweenExactUTC) {
+        if (!window.timeUtils || !window.timeUtils.getDaysBetweenExact) {
             // Fallback
             const d1 = date1 instanceof Date ? date1 : new Date(date1);
             const d2 = date2 instanceof Date ? date2 : new Date(date2);
@@ -1170,7 +1170,7 @@ class WavesManager {
             return timeDiff / (1000 * 60 * 60 * 24);
         }
         
-        return window.timeUtils.getDaysBetweenExactUTC(date1, date2);
+        return window.timeUtils.getDaysBetweenExact(date1, date2);
     }
 }
 
