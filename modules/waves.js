@@ -318,42 +318,75 @@ class WavesManager {
      * Позиционирует ВСЕ волны на графике
      * ВЫЗЫВАЕТСЯ при каждом изменении currentDay
      */
-	// modules/waves.js - КОМБИНИРОВАННЫЙ ПОДХОД
-	updatePosition() {
-		const currentDay = window.appState.currentDay || 0;
-		
-		window.appState.data.waves.forEach(wave => {
-			const wavePeriodPixels = window.appState.periods[wave.id];
-			
-			// 1. Расчет позиции с высокой точностью
-			const virtualPosition = currentDay * window.appState.config.squareSize;
-			
-			// 2. Используем кастомную функцию modulo для избежания ошибок
-			const mod = (n, m) => ((n % m) + m) % m;
-			const currentPositionPx = mod(virtualPosition, wavePeriodPixels);
-			
-			// 3. Смещаем на ДОПОЛНИТЕЛЬНЫЙ период влево
-			const container = this.waveContainers[wave.id];
-			if (container) {
-				const totalPeriods = parseInt(container.dataset.totalPeriods) || 3;
-				const extraOffset = wavePeriodPixels; // 1 дополнительный период
-				
-				// Смещение = -текущая_позиция - дополнительный_период
-				const offsetPx = -currentPositionPx - extraOffset;
-				
-				container.style.transform = `translateX(${offsetPx}px)`;
-				
-				// 4. Логирование для отладки
-				console.log(`Волна ${wave.id}:`, {
-					periodPx: wavePeriodPixels,
-					virtualPosition,
-					currentPositionPx,
-					offsetPx,
-					totalPeriods
-				});
-			}
-		});
-	}
+    updatePosition() {
+        console.log('WavesManager: updatePosition вызван');
+        console.log('  currentDay:', window.appState.currentDay);
+        console.log('  fractional часть:', (window.appState.currentDay || 0) - Math.floor(window.appState.currentDay || 0));
+        
+        // ОБНОВЛЯЕМ СМЕЩЕНИЕ СЕТКИ
+        if (window.grid && window.grid.updateGridOffset) {
+            window.grid.updateGridOffset();
+        }
+        
+        // Проверяем currentDay
+        if (window.appState.currentDay === undefined || 
+            window.appState.currentDay === null ||
+            isNaN(window.appState.currentDay)) {
+            
+            console.warn('WavesManager: currentDay некорректен, исправляем на 0');
+            window.appState.currentDay = 0;
+        }
+        
+        const currentDay = window.appState.currentDay || 0;
+        
+        // Позиционируем каждую волну
+        window.appState.data.waves.forEach(wave => {
+            const wavePeriodPixels = window.appState.periods[wave.id] || 
+                                   (wave.period * window.appState.config.squareSize);
+            
+            // Если период нулевой или отрицательный - пропускаем
+            if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+                return;
+            }
+            
+            // ВАЖНО: используем currentDay целиком (с дробной частью)
+            // Это дает точное позиционирование с учетом времени суток
+            
+            // Текущая позиция в пикселях от начала периода
+            let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+            
+            // Корректируем для отрицательных значений
+            if (currentPositionPx < 0) {
+                currentPositionPx = wavePeriodPixels + currentPositionPx;
+            }
+            
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            
+            const container = this.waveContainers[wave.id];
+            if (container) {
+                // Применяем позиционирование
+                container.style.transition = 'none';
+                container.style.transform = `translateX(${-currentPositionPx}px)`;
+                container.style.display = shouldShow ? 'block' : 'none';
+                
+                // Обновляем жирность
+                const path = this.wavePaths[wave.id];
+                if (path) {
+                    path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+                }
+            }
+        });
+        
+        // Обновляем ВСЕ выноски (горизонтальные и вертикальные)
+        this.updateAllWaveLabels();
+        
+        // Обновляем время в вертикальных метках
+        this.updateVerticalWaveLabelsTime();
+        
+        console.log('WavesManager: позиционирование завершено');
+    }
     
     /**
      * Обновляет ВСЕ выноски (горизонтальные и вертикальные)
