@@ -732,75 +732,74 @@ class WavesManager {
      * @param {string} position - 'top' или 'bottom'
      * @returns {Date} время экстремума (абсолютное)
      */
-    calculateExtremumTime(wave, position) {
-        console.log(`calculateExtremumTime: ${wave.name}, position: ${position}`);
-        
-        // 1. Период в пикселях
-        const periodPx = window.appState.periods[wave.id] || 
-                        (wave.period * window.appState.config.squareSize);
-        
-        if (!periodPx) {
-            console.log('  periodPx not found');
-            return new Date();
-        }
-        
-        // 2. Определяем, какой это экстремум (верхний или нижний)
-        // top: π/2 = 0.25 периода, bottom: 3π/2 = 0.75 периода
-        const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
-        
-        // 3. БАЗОВАЯ ДАТА колоска (начало отсчета)
-        const baseDate = window.appState.baseDate; // timestamp начала
-        
-        // 4. Находим левую границу визора (самую раннюю дату)
-        const graphWidth = window.appState.graphWidth;
-        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-        const leftDate = new Date(window.appState.currentDate);
-        
-        // Смещаем к левой границе визора (минус половина квадратов)
-        leftDate.setDate(leftDate.getDate() - squaresLeft);
-        
-        // 5. Рассчитываем фазу на левой границе визора
-        // Используем window.dom.getDaysBetweenDates (он существует!)
-        const daysFromBaseToLeft = window.dom.getDaysBetweenDates(baseDate, leftDate);
-        const phaseAtLeft = (daysFromBaseToLeft % wave.period) / wave.period;
-        
-        // Нормализуем фазу (0..1)
-        const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
-        
-        console.log(`  Левая граница визора: ${leftDate.toLocaleDateString('ru-RU')}`);
-        console.log(`  Дней от базовой даты: ${daysFromBaseToLeft.toFixed(4)}`);
-        console.log(`  Фаза на левой границе: ${normalizedPhaseAtLeft.toFixed(4)} (${(normalizedPhaseAtLeft * wave.period).toFixed(2)} дней)`);
-        
-        // 6. Находим ближайший экстремум ВПЕРЕД от левой границы
-        let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
-        if (phaseDiff < 0) {
-            phaseDiff += 1.0; // Берем следующий экстремум в будущем
-        }
-        
-        const daysToExtremumFromLeft = phaseDiff * wave.period;
-        
-        console.log(`  Разница фаз до экстремума: ${phaseDiff.toFixed(4)}`);
-        console.log(`  Дней до экстремума: ${daysToExtremumFromLeft.toFixed(2)}`);
-        
-        // 7. Абсолютное время экстремума на ленте
-        const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
-        
-        // 8. Проверяем, что экстремум попадает в видимую область
-        const rightDate = new Date(leftDate);
-        rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
-        
-        if (extremumTime >= leftDate && extremumTime <= rightDate) {
-            console.log(`  ✓ Экстремум в видимой области: ${extremumTime.toLocaleDateString('ru-RU')} ${extremumTime.toLocaleTimeString('ru-RU')}`);
-            console.log(`  Время суток: ${extremumTime.getHours().toString().padStart(2, '0')}:${extremumTime.getMinutes().toString().padStart(2, '0')}:${extremumTime.getSeconds().toString().padStart(2, '0')}`);
-            return extremumTime;
-        }
-        
-        // Если не попал, ищем следующий (на всякий случай)
-        console.log(`  ✗ Экстремум вне видимой области, ищем следующий`);
-        const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
-        console.log(`  Следующий экстремум: ${nextExtremumTime.toLocaleDateString('ru-RU')} ${nextExtremumTime.toLocaleTimeString('ru-RU')}`);
-        return nextExtremumTime;
-    }
+	calculateExtremumTime(wave, position) {
+		console.log(`calculateExtremumTime: ${wave.name}, position: ${position}`);
+		
+		// 1. Период в пикселях
+		const periodPx = window.appState.periods[wave.id] || 
+						(wave.period * window.appState.config.squareSize);
+		
+		if (!periodPx) {
+			console.log('  periodPx not found');
+			return new Date();
+		}
+		
+		// 2. Определяем, какой это экстремум (верхний или нижний)
+		const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
+		
+		// 3. БАЗОВАЯ ДАТА колоска (начало отсчета) - локальное время
+		const baseDate = window.appState.baseDate;
+		
+		// 4. Находим левую границу визора (самую раннюю дату)
+		const graphWidth = window.appState.graphWidth;
+		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+		const leftDate = new Date(window.appState.currentDate);
+		
+		// Смещаем к левой границе визора (минус половина квадратов)
+		leftDate.setDate(leftDate.getDate() - squaresLeft);
+		
+		// 5. Рассчитываем фазу на левой границе визора
+		// Используем window.timeUtils.getDaysBetween для локального времени
+		const daysFromBaseToLeft = window.timeUtils.getDaysBetween(baseDate, leftDate);
+		const phaseAtLeft = (daysFromBaseToLeft % wave.period) / wave.period;
+		
+		// Нормализуем фазу (0..1)
+		const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
+		
+		console.log(`  Левая граница визора: ${leftDate.toLocaleDateString('ru-RU')}`);
+		console.log(`  Дней от базовой даты: ${daysFromBaseToLeft.toFixed(4)}`);
+		console.log(`  Фаза на левой границе: ${normalizedPhaseAtLeft.toFixed(4)} (${(normalizedPhaseAtLeft * wave.period).toFixed(2)} дней)`);
+		
+		// 6. Находим ближайший экстремум ВПЕРЕД от левой границы
+		let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
+		if (phaseDiff < 0) {
+			phaseDiff += 1.0; // Берем следующий экстремум в будущем
+		}
+		
+		const daysToExtremumFromLeft = phaseDiff * wave.period;
+		
+		console.log(`  Разница фаз до экстремума: ${phaseDiff.toFixed(4)}`);
+		console.log(`  Дней до экстремума: ${daysToExtremumFromLeft.toFixed(2)}`);
+		
+		// 7. Абсолютное время экстремума на ленте (локальное время)
+		const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
+		
+		// 8. Проверяем, что экстремум попадает в видимую область
+		const rightDate = new Date(leftDate);
+		rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
+		
+		if (extremumTime >= leftDate && extremumTime <= rightDate) {
+			console.log(`  ✓ Экстремум в видимой области: ${extremumTime.toLocaleDateString('ru-RU')} ${extremumTime.toLocaleTimeString('ru-RU')}`);
+			console.log(`  Время суток: ${extremumTime.getHours().toString().padStart(2, '0')}:${extremumTime.getMinutes().toString().padStart(2, '0')}:${extremumTime.getSeconds().toString().padStart(2, '0')}`);
+			return extremumTime;
+		}
+		
+		// Если не попал, ищем следующий (на всякий случай)
+		console.log(`  ✗ Экстремум вне видимой области, ищем следующий`);
+		const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
+		console.log(`  Следующий экстремум: ${nextExtremumTime.toLocaleDateString('ru-RU')} ${nextExtremumTime.toLocaleTimeString('ru-RU')}`);
+		return nextExtremumTime;
+	}
     
     /**
      * Форматирует время экстремума как ЧЧ:ММ:СС

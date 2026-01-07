@@ -34,7 +34,8 @@ class DOM {
     }
     
     getDaysBetweenExact(date1, date2) {
-        return window.timeUtils.getDaysBetweenExact(date1, date2);
+        // Используем обычный метод, так как getDaysBetween уже точный
+        return window.timeUtils.getDaysBetween(date1, date2);
     }
     
     cacheElements() {
@@ -54,12 +55,11 @@ class DOM {
     $$(selector) {
         return document.querySelectorAll(selector);
     }
-
-    
     
     stringFromDateTimeStringToTimestamp(dateTimeString) {
-        if (window.timeUtils && window.timeUtils.getTimestamp) {
-            return window.timeUtils.getTimestamp(dateTimeString);
+        if (window.timeUtils) {
+            const date = window.timeUtils.parseStringToLocal(dateTimeString);
+            return date.getTime();
         }
         
         // Fallback
@@ -130,41 +130,6 @@ class DOM {
         }
     }
     
-    getWeekday(date) {
-        if (window.timeUtils && window.timeUtils.getWeekday) {
-            return window.timeUtils.getWeekday(date);
-        }
-        
-        // Fallback
-        let dateObj;
-        if (typeof date === 'number') {
-            dateObj = new Date(date);
-        } else if (date instanceof Date) {
-            dateObj = date;
-        } else {
-            dateObj = new Date(date);
-        }
-        return dateObj.getDay();
-    }
-    
-    getWeekdayName(date, full = false) {
-        if (window.timeUtils && window.timeUtils.getWeekdayName) {
-            return window.timeUtils.getWeekdayName(date, full);
-        }
-        
-        // Fallback
-        let dateObj;
-        if (typeof date === 'number') {
-            dateObj = new Date(date);
-        } else if (date instanceof Date) {
-            dateObj = date;
-        } else {
-            dateObj = new Date(date);
-        }
-        const weekday = this.getWeekday(dateObj);
-        return full ? window.appState.config.weekdaysFull[weekday] : window.appState.config.weekdays[weekday];
-    }
-    
     getWaveStyle(type) {
         return type;
     }
@@ -181,34 +146,6 @@ class DOM {
         return descriptions[type] || 'неизвестный тип';
     }
     
-    getDaysBetweenDates(date1, date2) {
-        if (window.timeUtils && window.timeUtils.getDaysBetween) {
-            return window.timeUtils.getDaysBetween(date1, date2);
-        }
-        
-        // Fallback
-        let d1, d2;
-        
-        if (typeof date1 === 'number') {
-            d1 = new Date(date1);
-        } else if (date1 instanceof Date) {
-            d1 = date1;
-        } else {
-            d1 = new Date(date1);
-        }
-        
-        if (typeof date2 === 'number') {
-            d2 = new Date(date2);
-        } else if (date2 instanceof Date) {
-            d2 = date2;
-        } else {
-            d2 = new Date(date2);
-        }
-        
-        const timeDiff = d2.getTime() - d1.getTime();
-        return timeDiff / (1000 * 60 * 60 * 24);
-    }
-    
     getCurrentDate() {
         return new Date(); // Локальное время
     }
@@ -219,8 +156,9 @@ class DOM {
     }
     
     stringToTimestamp(dateString) {
-        if (window.timeUtils && window.timeUtils.getTimestamp) {
-            return window.timeUtils.getTimestamp(dateString);
+        if (window.timeUtils) {
+            const date = window.timeUtils.parseStringToLocal(dateString);
+            return date.getTime();
         }
         
         // Fallback
@@ -241,7 +179,7 @@ class DOM {
             (typeof value === 'number' && !isNaN(value) && value > 0);
     }
     
-    getStartOfDayUTC(timestamp) {
+    getStartOfDayLocal(timestamp) {
         if (window.timeUtils && window.timeUtils.getStartOfDay) {
             return window.timeUtils.getStartOfDay(timestamp);
         }
@@ -250,8 +188,6 @@ class DOM {
         const date = new Date(timestamp);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
     }
-    
-
 }
 
 window.dom = new DOM();

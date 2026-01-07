@@ -256,26 +256,18 @@ class DatesManager {
         window.appState.save();
     }
     
-    getNotesForDate(date) {
-        let targetTimestamp;
-        
-        if (date instanceof Date) {
-            targetTimestamp = date.getTime();
-        } else if (typeof date === 'number') {
-            targetTimestamp = date;
-        } else {
-            targetTimestamp = window.timeUtils.parseStringToLocal(date).getTime();
-        }
-        
-        // Используем TimeUtils для сравнения дат в UTC
-        const targetStart = window.timeUtils.getStartOfDay(targetTimestamp);
-        const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000);
-        
-        return window.appState.data.notes.filter(note => {
-            const noteTime = note.date;
-            return noteTime >= targetStart.getTime() && noteTime < targetEnd.getTime();
-        });
-    }
+	getNotesForDate(date) {
+		// Приводим целевую дату к локальному времени
+		const targetDate = window.timeUtils.toLocalDate(date);
+		const targetStart = window.timeUtils.getStartOfDay(targetDate);
+		const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000);
+		
+		// Конвертируем timestamp заметок в локальные даты для сравнения
+		return window.appState.data.notes.filter(note => {
+			const noteDate = window.timeUtils.toLocalDate(note.date);
+			return noteDate >= targetStart && noteDate < targetEnd;
+		});
+	}
     
     addGroup(name) {
         if (!name.trim()) {

@@ -1,13 +1,9 @@
-// modules/timeUtils.js - ПОЛНОСТЬЮ В ЛОКАЛЬНОМ ВРЕМЕНИ
-/**
- * Утилиты для работы со временем в ЛОКАЛЬНОМ часовом поясе пользователя
- * Все методы работают с локальным временем пользователя
- * НЕТ UTC преобразований, НЕТ часовых поясов
- */
+// modules/timeUtils.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
 class TimeUtils {
     constructor() {
         console.log('TimeUtils: режим ЛОКАЛЬНОЕ время пользователя');
         this.DAY_MS = 24 * 60 * 60 * 1000;
+        this._isConverting = false; // Флаг для предотвращения рекурсии
     }
     
     // ================ БАЗОВЫЕ МЕТОДЫ ================
@@ -34,21 +30,32 @@ class TimeUtils {
      * @returns {Date} Date в локальном времени
      */
     toLocalDate(value) {
-        if (!value) return this.now();
-        
-        if (value instanceof Date) {
-            return new Date(value.getTime());
+        if (this._isConverting) {
+            console.warn('TimeUtils: предотвращена рекурсия в toLocalDate');
+            return this.now();
         }
         
-        if (typeof value === 'number') {
-            return new Date(value);
-        }
+        this._isConverting = true;
         
-        if (typeof value === 'string') {
-            return this.parseStringToLocal(value);
+        try {
+            if (!value) return this.now();
+            
+            if (value instanceof Date) {
+                return new Date(value.getTime());
+            }
+            
+            if (typeof value === 'number') {
+                return new Date(value);
+            }
+            
+            if (typeof value === 'string') {
+                return this.parseStringToLocal(value);
+            }
+            
+            return this.now();
+        } finally {
+            this._isConverting = false;
         }
-        
-        return this.now();
     }
     
     // ================ ПАРСИНГ И ФОРМАТИРОВАНИЕ ================
@@ -93,6 +100,7 @@ class TimeUtils {
             }
             
             // Для других форматов (ISO и т.д.)
+            // НЕ используем this.toLocalDate() чтобы избежать рекурсии!
             const date = new Date(normalized);
             
             if (isNaN(date.getTime())) {
@@ -289,7 +297,6 @@ class TimeUtils {
     formatCurrentDayWithSeconds(currentDay, currentDate = null) {
         try {
             // Просто возвращаем число с 5 знаками после запятой
-            // УБРАЛИ добавление времени в скобках
             return currentDay.toFixed(5);
         } catch (error) {
             console.error('TimeUtils: ошибка форматирования дня с секундами:', error);
@@ -312,35 +319,91 @@ class TimeUtils {
         );
     }
 
-	/**
-	 * Безопасное логирование дат в локальном времени
-	 * @param {string} label - Метка для лога
-	 * @param {Date|number|string} date - Дата
-	 * @returns {string} Форматированная строка для лога
-	 */
-	safeLogDate(label, date) {
-		try {
-			const d = this.toLocalDate(date);
-			return `${label}: ${d.toLocaleString()}`;
-		} catch (error) {
-			return `${label}: ошибка форматирования`;
-		}
+    /**
+     * Безопасное логирование дат в локальном времени
+     * @param {string} label - Метка для лога
+     * @param {Date|number|string} date - Дата
+     * @returns {string} Форматированная строка для лога
+     */
+    safeLogDate(label, date) {
+        try {
+            const d = this.toLocalDate(date);
+            return `${label}: ${d.toLocaleString()}`;
+        } catch (error) {
+            return `${label}: ошибка форматирования`;
+        }
+    }
+
+    /**
+     * Безопасное логирование временных меток
+     * @param {string} label - Метка для лога
+     * @param {number} timestamp - timestamp
+     * @returns {string} Форматированная строка для лога
+     */
+    safeLogTimestamp(label, timestamp) {
+        try {
+            const d = this.toLocalDate(timestamp);
+            return `${label}: ${d.toLocaleString()} (${timestamp})`;
+        } catch (error) {
+            return `${label}: ошибка (${timestamp})`;
+        }
+    }
+    
+    /**
+     * Количество дней между двумя датами (локальное время)
+     * @param {Date|number|string} date1 - Первая дата
+     * @param {Date|number|string} date2 - Вторая дата
+     * @returns {number} Дней между датами
+     */
+    getDaysBetween(date1, date2) {
+        const d1 = this.toLocalDate(date1);
+        const d2 = this.toLocalDate(date2);
+        
+        const timeDiff = d2.getTime() - d1.getTime();
+        return timeDiff / (1000 * 60 * 60 * 24);
+    }
+    
+    /**
+     * Количество лет между двумя датами (локальное время)
+     * @param {Date|number|string} date1 - Первая дата
+     * @param {Date|number|string} date2 - Вторая дата
+     * @returns {number} Лет между датами
+     */
+    getYearsBetween(date1, date2) {
+        const days = this.getDaysBetween(date1, date2);
+        return Math.floor(days / 365.25);
+    }
+    
+    /**
+     * Получает день недели (0-6, где 0 - воскресенье)
+     * @param {Date|number|string} date - Дата
+     * @returns {number} День недели
+     */
+    getWeekday(date) {
+        const d = this.toLocalDate(date);
+        return d.getDay();
+    }
+    
+    /**
+     * Получает название дня недели
+     * @param {Date|number|string} date - Дата
+     * @param {boolean} full - Полное название?
+     * @returns {string} Название дня недели
+     */
+    getWeekdayName(date, full = false) {
+        const weekday = this.getWeekday(date);
+        const weekdays = full ? 
+            window.appState?.config?.weekdaysFull || ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] :
+            window.appState?.config?.weekdays || ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        
+        return weekdays[weekday];
+    }
+
+	isTimestamp(value) {
+		// Проверяем, является ли значение timestamp (числом)
+		return typeof value === 'number' && !isNaN(value) && value > 0;
 	}
 
-	/**
-	 * Безопасное логирование временных меток
-	 * @param {string} label - Метка для лога
-	 * @param {number} timestamp - timestamp
-	 * @returns {string} Форматированная строка для лога
-	 */
-	safeLogTimestamp(label, timestamp) {
-		try {
-			const d = this.toLocalDate(timestamp);
-			return `${label}: ${d.toLocaleString()} (${timestamp})`;
-		} catch (error) {
-			return `${label}: ошибка (${timestamp})`;
-		}
-	}
 }
 
 window.timeUtils = new TimeUtils();
