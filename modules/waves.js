@@ -11,23 +11,35 @@ class WavesManager {
         this.updateInterval = 50;
     }
     
-    init() {
-        if (this.initialized) {
-            console.log('WavesManager: уже инициализирован');
-            return;
-        }
-        
-        console.log('=== WavesManager: инициализация (UTC) ===');
-        console.log('currentDay при инициализации:', window.appState.currentDay);
-        console.log('baseDate (UTC):', new Date(window.appState.baseDate).toUTCString());
-        console.log('currentDate (UTC):', window.appState.currentDate.toUTCString());
-        
-        this.createVisibleWaveElements();
-        this.updatePosition();
-        this.initialized = true;
-        
-        console.log('WavesManager: инициализация завершена');
-    }
+	init() {
+		if (this.initialized) {
+			console.log('WavesManager: уже инициализирован');
+			return;
+		}
+		
+		console.log('=== WavesManager: инициализация (локальное время) ===');
+		console.log('currentDay при инициализации:', window.appState.currentDay);
+		
+		// ЛОГИРОВАНИЕ В ЛОКАЛЬНОМ ВРЕМЕНИ
+		if (window.appState.currentDate) {
+			console.log('currentDate (локальное):', window.appState.currentDate.toLocaleString());
+		}
+		
+		if (window.appState.baseDate instanceof Date) {
+			console.log('baseDate (локальное):', window.appState.baseDate.toLocaleString());
+		} else if (typeof window.appState.baseDate === 'number') {
+			const baseDateLocal = window.timeUtils ? 
+				window.timeUtils.toLocalDate(window.appState.baseDate) : 
+				new Date(window.appState.baseDate);
+			console.log('baseDate (локальное):', baseDateLocal.toLocaleString());
+		}
+		
+		this.createVisibleWaveElements();
+		this.updatePosition();
+		this.initialized = true;
+		
+		console.log('WavesManager: инициализация завершена (локальное время)');
+	}
     
     /**
      * Рассчитывает необходимое количество периодов для бесконечного эффекта

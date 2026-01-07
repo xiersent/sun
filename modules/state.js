@@ -172,216 +172,383 @@ class AppState {
             this.waves31.push(wave);
         }
     }
+
+	save() {
+		// ГАРАНТИЯ: что baseDate - это Date объект перед сохранением
+		if (!(this.baseDate instanceof Date)) {
+			console.warn('save(): baseDate не является Date объектом, исправляем перед сохранением');
+			if (typeof this.baseDate === 'number') {
+				this.baseDate = new Date(this.baseDate);
+			} else {
+				const now = new Date();
+				this.baseDate = new Date(
+					now.getFullYear(),
+					now.getMonth(),
+					now.getDate(),
+					0, 0, 0, 0
+				);
+			}
+		}
+		
+		// Сохраняем как timestamp
+		this.data.uiSettings.currentDate = this.currentDate.getTime();
+		this.data.uiSettings.baseDate = this.baseDate.getTime();
+		
+		this.data.uiSettings.currentDay = this.currentDay;
+		this.data.uiSettings.transform = this.transform;
+		this.data.uiSettings.uiHidden = this.uiHidden;
+		this.data.uiSettings.graphHidden = this.graphHidden;
+		this.data.uiSettings.graphBgWhite = this.graphBgWhite;
+		this.data.uiSettings.showStars = this.showStars;
+		this.data.uiSettings.grayMode = this.grayMode;
+		this.data.uiSettings.graphGrayMode = this.graphGrayMode;
+		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
+		this.data.uiSettings.activeDateId = this.activeDateId;
+		
+		// ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются
+		// Не сохраняем: editingDateId, editingWaveId, editingGroupId
+		
+		this.data.uiSettings.waveVisibility = this.waveVisibility;
+		this.data.uiSettings.waveBold = this.waveBold;
+		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+
+		// Логирование
+		console.log('AppState.save(): сохранение дат', {
+			'currentDate': this.currentDate.toLocaleString(),
+			'baseDate': this.baseDate.toLocaleString(),
+			'baseDate часов': this.baseDate.getHours(),
+			'baseDate timestamp': this.data.uiSettings.baseDate,
+			'currentDay': this.currentDay
+		});
+		
+		localStorage.setItem('appData', JSON.stringify(this.data));
+	}
     
-    load() {
-        const saved = localStorage.getItem('appData');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                this.data = data;
-                
-                this.convertDatesToTimestamp();
-                
-                const has120Waves = this.data.waves.some(w => {
-                    const waveIdStr = String(w.id);
-                    return waveIdStr.startsWith('wave-120-');
-                });
-                
-                if (!has120Waves) {
-                    this.data.waves = this.data.waves.concat(this.waves120);
-                    
-                    if (!this.data.groups.some(g => g.id === '120-waves-group')) {
-                        this.data.groups.push({
-                            id: '120-waves-group',
-                            name: '120 колосков',
-                            enabled: true,
-                            waves: this.waves120Ids,
-                            styleEnabled: true,
-                            styleBold: false,
-                            styleColor: '#666666',
-                            styleColorEnabled: false,
-                            styleType: 'dashed',
-                            expanded: false
-                        });
-                    }
-                }
-                
-                const has31Waves = this.data.waves.some(w => {
-                    const waveIdStr = String(w.id);
-                    return waveIdStr.startsWith('wave-31-');
-                });
-                
-                if (!has31Waves) {
-                    this.data.waves = this.data.waves.concat(this.waves31);
-                    
-                    if (!this.data.groups.some(g => g.id === '31-waves-group')) {
-                        this.data.groups.push({
-                            id: '31-waves-group',
-                            name: '31 колосок',
-                            enabled: true,
-                            waves: this.waves31Ids,
-                            styleEnabled: true,
-                            styleBold: false,
-                            styleColor: '#666666',
-                            styleColorEnabled: false,
-                            styleType: 'dotted',
-                            expanded: false
-                        });
-                    }
-                }
-                
-                this.data.waves.forEach(wave => {
-                    const waveIdStr = String(wave.id);
-                    if (typeof wave.id === 'number') {
-                        wave.id = waveIdStr;
-                    }
-                    if (waveIdStr.startsWith('wave-31-')) {
-                        const match = waveIdStr.match(/wave-31-(\d+)/);
-                        if (match) {
-                            const num = parseInt(match[1]);
-                            wave.name = `Колосок ${num}`;
-                            wave.description = `Период ${num} дней`;
-                        }
-                    }
-                });
-                
-                // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
-                // const defaultGroupIndex = this.data.groups.findIndex(g => g.id === 'default-group');
-                // if (defaultGroupIndex > 0) {
-                //     const defaultGroup = this.data.groups.splice(defaultGroupIndex, 1)[0];
-                //     this.data.groups.unshift(defaultGroup);
-                // }
-                
-                // ВАЖНО: Загружаем currentDate и baseDate из сохраненных данных
-                this.currentDate = new Date(data.uiSettings.currentDate);
+	load() {
+		const saved = localStorage.getItem('appData');
+		if (saved) {
+			try {
+				const data = JSON.parse(saved);
+				this.data = data;
+				
+				this.convertDatesToTimestamp();
+				
+				const has120Waves = this.data.waves.some(w => {
+					const waveIdStr = String(w.id);
+					return waveIdStr.startsWith('wave-120-');
+				});
+				
+				if (!has120Waves) {
+					this.data.waves = this.data.waves.concat(this.waves120);
+					
+					if (!this.data.groups.some(g => g.id === '120-waves-group')) {
+						this.data.groups.push({
+							id: '120-waves-group',
+							name: '120 колосков',
+							enabled: true,
+							waves: this.waves120Ids,
+							styleEnabled: true,
+							styleBold: false,
+							styleColor: '#666666',
+							styleColorEnabled: false,
+							styleType: 'dashed',
+							expanded: false
+						});
+					}
+				}
+				
+				const has31Waves = this.data.waves.some(w => {
+					const waveIdStr = String(w.id);
+					return waveIdStr.startsWith('wave-31-');
+				});
+				
+				if (!has31Waves) {
+					this.data.waves = this.data.waves.concat(this.waves31);
+						
+					if (!this.data.groups.some(g => g.id === '31-waves-group')) {
+						this.data.groups.push({
+							id: '31-waves-group',
+							name: '31 колосок',
+							enabled: true,
+							waves: this.waves31Ids,
+							styleEnabled: true,
+							styleBold: false,
+							styleColor: '#666666',
+							styleColorEnabled: false,
+							styleType: 'dotted',
+							expanded: false
+						});
+					}
+				}
+				
+				this.data.waves.forEach(wave => {
+					const waveIdStr = String(wave.id);
+					if (typeof wave.id === 'number') {
+						wave.id = waveIdStr;
+					}
+					if (waveIdStr.startsWith('wave-31-')) {
+						const match = waveIdStr.match(/wave-31-(\d+)/);
+						if (match) {
+							const num = parseInt(match[1]);
+							wave.name = `Колосок ${num}`;
+							wave.description = `Период ${num} дней`;
+						}
+					}
+				});
+				
+				// ВАЖНО: Загружаем currentDate и baseDate через TimeUtils для локального времени
+				if (window.timeUtils) {
+					// Текущая дата через TimeUtils
+					this.currentDate = window.timeUtils.toLocalDate(data.uiSettings.currentDate);
+					
+					// BaseDate: принудительно устанавливаем на локальное начало дня
+					const baseDateLocal = window.timeUtils.toLocalDate(data.uiSettings.baseDate);
+					this.baseDate = window.timeUtils.getStartOfDay(baseDateLocal);
+					
+					console.log('AppState.load(): загружены даты в локальном времени:');
+					console.log('  currentDate:', this.currentDate.toLocaleString());
+					console.log('  baseDate:', this.baseDate.toLocaleString());
+					console.log('  baseDate часов:', this.baseDate.getHours());
+				} else {
+					// Fallback: если TimeUtils ещё не загружен
+					console.warn('TimeUtils не загружен, используем fallback');
+					this.currentDate = new Date(data.uiSettings.currentDate);
+					
+					// Fallback для baseDate - ГАРАНТИРУЕМ что это будет Date объект
+					let baseDateValue = data.uiSettings.baseDate;
+					if (typeof baseDateValue === 'number') {
+						const baseDateObj = new Date(baseDateValue);
+						this.baseDate = new Date(
+							baseDateObj.getFullYear(),
+							baseDateObj.getMonth(),
+							baseDateObj.getDate(),
+							0, 0, 0, 0
+						);
+					} else if (baseDateValue instanceof Date) {
+						// Если уже Date объект
+						const baseDateObj = new Date(baseDateValue.getTime());
+						this.baseDate = new Date(
+							baseDateObj.getFullYear(),
+							baseDateObj.getMonth(),
+							baseDateObj.getDate(),
+							0, 0, 0, 0
+						);
+					} else {
+						// На всякий случай
+						console.warn('baseDate имеет неожиданный тип, сбрасываем на сегодня');
+						const now = new Date();
+						this.baseDate = new Date(
+							now.getFullYear(),
+							now.getMonth(),
+							now.getDate(),
+							0, 0, 0, 0
+						);
+					}
+				}
+				
+				// ВАЖНО: Загружаем currentDay из сохраненных данных
+				if (data.uiSettings.currentDay !== undefined && 
+					data.uiSettings.currentDay !== null &&
+					typeof data.uiSettings.currentDay === 'number' &&
+					!isNaN(data.uiSettings.currentDay)) {
+					this.currentDay = data.uiSettings.currentDay;
+				} else {
+					console.log('currentDay в сохраненных данных некорректен, пересчитываем...');
+					this.currentDay = 0;
+				}
+				
+				this.transform = data.uiSettings.transform;
+				this.uiHidden = data.uiSettings.uiHidden || false;
+				this.graphHidden = data.uiSettings.graphHidden || false;
+				this.graphBgWhite = data.uiSettings.graphBgWhite !== undefined ? data.uiSettings.graphBgWhite : true;
+				this.showStars = data.uiSettings.showStars !== undefined ? data.uiSettings.showStars : true;
+				this.grayMode = data.uiSettings.grayMode || false;
+				this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
+				this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
+				
+				// ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются, всегда null
+				this.editingDateId = null;
+				this.editingWaveId = null;
+				this.editingGroupId = null;
+				
+				if (data.uiSettings.activeDateId) {
+					this.activeDateId = data.uiSettings.activeDateId;
+				} else if (data.dates && data.dates.length > 0) {
+					this.activeDateId = data.dates[0].id;
+				} else {
+					this.activeDateId = null;
+				}
+				
+				// ВАЖНО: Если есть activeDateId, baseDate должен быть перезаписан датой из activeDate
+				if (this.activeDateId) {
+					const activeDate = data.dates.find(d => d.id === this.activeDateId);
+					if (activeDate) {
+						try {
+							const activeDateLocal = window.timeUtils ? 
+								window.timeUtils.toLocalDate(activeDate.date) : 
+								new Date(activeDate.date);
+							
+							// ГАРАНТИРУЕМ что baseDate будет Date объектом
+							this.baseDate = window.timeUtils ? 
+								window.timeUtils.getStartOfDay(activeDateLocal) : 
+								new Date(
+									activeDateLocal.getFullYear(),
+									activeDateLocal.getMonth(),
+									activeDateLocal.getDate(),
+									0, 0, 0, 0
+								);
+							
+							console.log('baseDate обновлен из activeDate и установлен на начало дня:', 
+								this.baseDate.toLocaleString());
+						} catch (error) {
+							console.error('Error parsing active date:', error);
+							// Гарантируем что baseDate будет Date объектом
+							const now = new Date();
+							this.baseDate = new Date(
+								now.getFullYear(),
+								now.getMonth(),
+								now.getDate(),
+								0, 0, 0, 0
+							);
+						}
+					}
+				}
+				
+				this.virtualPosition = this.currentDay * this.config.squareSize;
+				this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
+				this.isProgrammaticDateChange = false;
+				this.SQL = null;
+				this.currentDB = null;
+				this.dbImportData = null;
+				this.intersectionWaves = [];
+				this.intersectionResults = [];
+				this.waveOriginalColors = {};
+				this.periods = {};
+				
+				// ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ ВОЛН
+				this.waveVisibility = {};
+				this.waveBold = {};
+				this.waveCornerColor = {};
+				
+				if (data.uiSettings.waveVisibility) {
+					this.waveVisibility = data.uiSettings.waveVisibility;
+				}
+				if (data.uiSettings.waveBold) {
+					this.waveBold = data.uiSettings.waveBold;
+				}
+				if (data.uiSettings.waveCornerColor) {
+					this.waveCornerColor = data.uiSettings.waveCornerColor;
+				}
+				
+				this.data.waves.forEach(wave => {
+					const waveIdStr = String(wave.id);
+					if (this.waveVisibility[waveIdStr] === undefined) {
+						this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
+					}
+					if (this.waveBold[waveIdStr] === undefined) {
+						this.waveBold[waveIdStr] = wave.bold || false;
+					}
+					if (this.waveCornerColor[waveIdStr] === undefined) {
+						this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
+					}
+				});
+				
+				// ГАРАНТИЯ: что baseDate - это Date объект
+				if (!(this.baseDate instanceof Date)) {
+					console.warn('baseDate не является Date объектом, исправляем...');
+					if (typeof this.baseDate === 'number') {
+						const baseDateValue = this.baseDate;
+						this.baseDate = new Date(baseDateValue);
+					} else {
+						const now = new Date();
+						this.baseDate = new Date(
+							now.getFullYear(),
+							now.getMonth(),
+							now.getDate(),
+							0, 0, 0, 0
+						);
+					}
+				}
+				
+				console.log('=== AppState.load() завершен ===');
+				console.log('activeDateId:', this.activeDateId);
+				console.log('baseDate (локальное):', this.baseDate.toLocaleString());
+				console.log('currentDate (локальное):', this.currentDate.toLocaleString());
+				console.log('currentDay:', this.currentDay);
+				
+				setTimeout(() => {
+					if (window.dates && window.dates.forceInitialize) {
+						console.log('AppState: автоматический вызов forceInitialize после загрузки');
+						window.dates.forceInitialize();
+					}
+				}, 100);
+				
+			} catch (e) {
+				console.error('Ошибка загрузки состояния:', e);
+				this.reset();
+			}
+		} else {
+			this.reset();
+		}
+	}
 
-                // Исправление baseDate: принудительно устанавливаем на локальное начало дня
-                const baseDateObj = new Date(data.uiSettings.baseDate);
-                this.baseDate = new Date(
-                    baseDateObj.getFullYear(),
-                    baseDateObj.getMonth(),
-                    baseDateObj.getDate(),
-                    0, 0, 0, 0
-                );
-
-                console.log('baseDate исправлен на локальное начало дня:', 
-                    this.baseDate.toLocaleString(), 
-                    'часы:', this.baseDate.getHours());
-                
-                // ВАЖНО: Загружаем currentDay из сохраненных данных
-                if (data.uiSettings.currentDay !== undefined && 
-                    data.uiSettings.currentDay !== null &&
-                    typeof data.uiSettings.currentDay === 'number' &&
-                    !isNaN(data.uiSettings.currentDay)) {
-                    this.currentDay = data.uiSettings.currentDay;
-                } else {
-                    console.log('currentDay в сохраненных данных некорректен, пересчитываем...');
-                    this.currentDay = 0;
-                }
-                
-                this.transform = data.uiSettings.transform;
-                this.uiHidden = data.uiSettings.uiHidden || false;
-                this.graphHidden = data.uiSettings.graphHidden || false;
-                this.graphBgWhite = data.uiSettings.graphBgWhite !== undefined ? data.uiSettings.graphBgWhite : true;
-                this.showStars = data.uiSettings.showStars !== undefined ? data.uiSettings.showStars : true;
-                this.grayMode = data.uiSettings.grayMode || false;
-                this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
-                this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
-                
-                // ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются, всегда null
-                this.editingDateId = null;
-                this.editingWaveId = null;
-                this.editingGroupId = null;
-                
-                if (data.uiSettings.activeDateId) {
-                    this.activeDateId = data.uiSettings.activeDateId;
-                } else if (data.dates && data.dates.length > 0) {
-                    this.activeDateId = data.dates[0].id;
-                } else {
-                    this.activeDateId = null;
-                }
-                
-                // ВАЖНО: Если есть activeDateId, baseDate должен быть перезаписан датой из activeDate
-                if (this.activeDateId) {
-                    const activeDate = data.dates.find(d => d.id === this.activeDateId);
-                    if (activeDate) {
-                        try {
-                            this.baseDate = new Date(activeDate.date);
-                            // Принудительно устанавливаем на начало дня
-                            this.baseDate = new Date(
-                                this.baseDate.getFullYear(),
-                                this.baseDate.getMonth(),
-                                this.baseDate.getDate(),
-                                0, 0, 0, 0
-                            );
-                            console.log('baseDate обновлен из activeDate и установлен на начало дня:', this.baseDate.toLocaleString());
-                        } catch (error) {
-                            console.error('Error parsing active date:', error);
-                            this.baseDate = new Date();
-                        }
-                    }
-                }
-                
-                this.virtualPosition = this.currentDay * this.config.squareSize;
-                this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
-                this.isProgrammaticDateChange = false;
-                this.SQL = null;
-                this.currentDB = null;
-                this.dbImportData = null;
-                this.intersectionWaves = [];
-                this.intersectionResults = [];
-                this.waveOriginalColors = {};
-                this.periods = {};
-                
-                // ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ ВОЛН
-                this.waveVisibility = {};
-                this.waveBold = {};
-                this.waveCornerColor = {};
-                
-                if (data.uiSettings.waveVisibility) {
-                    this.waveVisibility = data.uiSettings.waveVisibility;
-                }
-                if (data.uiSettings.waveBold) {
-                    this.waveBold = data.uiSettings.waveBold;
-                }
-                if (data.uiSettings.waveCornerColor) {
-                    this.waveCornerColor = data.uiSettings.waveCornerColor;
-                }
-                
-                this.data.waves.forEach(wave => {
-                    const waveIdStr = String(wave.id);
-                    if (this.waveVisibility[waveIdStr] === undefined) {
-                        this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
-                    }
-                    if (this.waveBold[waveIdStr] === undefined) {
-                        this.waveBold[waveIdStr] = wave.bold || false;
-                    }
-                    if (this.waveCornerColor[waveIdStr] === undefined) {
-                        this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
-                    }
-                });
-                
-                console.log('=== AppState.load() завершен ===');
-                console.log('activeDateId:', this.activeDateId);
-                console.log('baseDate:', this.baseDate.toLocaleString());
-                console.log('currentDate:', this.currentDate.toLocaleString());
-                console.log('currentDay:', this.currentDay);
-                
-                setTimeout(() => {
-                    if (window.dates && window.dates.forceInitialize) {
-                        console.log('AppState: автоматический вызов forceInitialize после загрузки');
-                        window.dates.forceInitialize();
-                    }
-                }, 100);
-                
-            } catch (e) {
-                console.error('Ошибка загрузки состояния:', e);
-                this.reset();
-            }
-        } else {
-            this.reset();
-        }
-    }
+	reset() {
+		this.data = JSON.parse(JSON.stringify(this.initialData));
+		
+		// Устанавливаем ЛОКАЛЬНЫЕ даты
+		this.currentDate = new Date();
+		
+		// ЛОКАЛЬНОЕ начало текущего дня - ГАРАНТИРУЕМ что это Date объект
+		const now = new Date();
+		this.baseDate = new Date(
+			now.getFullYear(),
+			now.getMonth(),
+			now.getDate(),
+			0, 0, 0, 0
+		);
+		
+		this.currentDay = 0;
+		this.virtualPosition = 0;
+		this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
+		this.transform = { scaleX: 1, scaleY: 1, rotation: 0 };
+		this.uiHidden = false;
+		this.graphHidden = false;
+		this.graphBgWhite = true;
+		this.showStars = true;
+		this.grayMode = false;
+		this.graphGrayMode = false;
+		this.cornerSquaresVisible = true;
+		this.activeDateId = 's25';
+		
+		// ИСПРАВЛЕНИЕ: Состояния редактирования всегда сбрасываются
+		this.editingDateId = null;
+		this.editingWaveId = null;
+		this.editingGroupId = null;
+		
+		this.isProgrammaticDateChange = false;
+		this.SQL = null;
+		this.currentDB = null;
+		this.dbImportData = null;
+		this.intersectionWaves = [];
+		this.intersectionResults = [];
+		this.waveOriginalColors = {};
+		this.periods = {};
+		
+		this.waveVisibility = {};
+		this.waveBold = {};
+		this.waveCornerColor = {};
+		
+		this.data.waves.forEach(wave => {
+			const waveIdStr = String(wave.id);
+			this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
+			this.waveBold[waveIdStr] = wave.bold || false;
+			this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
+		});
+		
+		this.data.uiSettings.waveVisibility = this.waveVisibility;
+		this.data.uiSettings.waveBold = this.waveBold;
+		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+	}
 
     // Добавить новый метод для конвертации дат
     convertDatesToTimestamp() {
@@ -431,107 +598,6 @@ class AppState {
     isTimestamp(value) {
         // Проверяем, является ли значение timestamp (числом)
         return typeof value === 'number' && !isNaN(value) && value > 0;
-    }
-    
-    reset() {
-        this.data = JSON.parse(JSON.stringify(this.initialData));
-        
-        // Устанавливаем ЛОКАЛЬНЫЕ даты
-        this.currentDate = new Date();
-        
-        // ЛОКАЛЬНОЕ начало текущего дня
-        const now = new Date();
-        this.baseDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        
-        this.currentDay = 0;
-        this.virtualPosition = 0;
-        this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
-        this.transform = { scaleX: 1, scaleY: 1, rotation: 0 };
-        this.uiHidden = false;
-        this.graphHidden = false;
-        this.graphBgWhite = true;
-        this.showStars = true;
-        this.grayMode = false;
-        this.graphGrayMode = false;
-        this.cornerSquaresVisible = true;
-        this.activeDateId = 's25';
-        
-        // ИСПРАВЛЕНИЕ: Состояния редактирования всегда сбрасываются
-        this.editingDateId = null;
-        this.editingWaveId = null;
-        this.editingGroupId = null;
-        
-        this.isProgrammaticDateChange = false;
-        this.SQL = null;
-        this.currentDB = null;
-        this.dbImportData = null;
-        this.intersectionWaves = [];
-        this.intersectionResults = [];
-        this.waveOriginalColors = {};
-        this.periods = {};
-        
-        this.waveVisibility = {};
-        this.waveBold = {};
-        this.waveCornerColor = {};
-        
-        this.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
-            this.waveBold[waveIdStr] = wave.bold || false;
-            this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
-        });
-        
-        this.data.uiSettings.waveVisibility = this.waveVisibility;
-        this.data.uiSettings.waveBold = this.waveBold;
-        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
-        
-        // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
-        // const defaultGroupIndex = this.data.groups.findIndex(g => g.id === 'default-group');
-        // if (defaultGroupIndex > 0) {
-        //     const defaultGroup = this.data.groups.splice(defaultGroupIndex, 1)[0];
-        //     this.data.groups.unshift(defaultGroup);
-        // }
-    }
-    
-    save() {
-        // Сохраняем как timestamp
-        this.data.uiSettings.currentDate = this.currentDate.getTime();
-        
-        // baseDate может быть как Date объектом, так и timestamp
-        if (this.baseDate instanceof Date) {
-            this.data.uiSettings.baseDate = this.baseDate.getTime(); // Сохраняем как timestamp
-        } else if (typeof this.baseDate === 'number') {
-            this.data.uiSettings.baseDate = this.baseDate;
-        } else {
-            this.data.uiSettings.baseDate = Date.now();
-        }
-        
-        this.data.uiSettings.currentDay = this.currentDay;
-        this.data.uiSettings.transform = this.transform;
-        this.data.uiSettings.uiHidden = this.uiHidden;
-        this.data.uiSettings.graphHidden = this.graphHidden;
-        this.data.uiSettings.graphBgWhite = this.graphBgWhite;
-        this.data.uiSettings.showStars = this.showStars;
-        this.data.uiSettings.grayMode = this.grayMode;
-        this.data.uiSettings.graphGrayMode = this.graphGrayMode;
-        this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
-        this.data.uiSettings.activeDateId = this.activeDateId;
-        
-        // ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются
-        // Не сохраняем: editingDateId, editingWaveId, editingGroupId
-        
-        this.data.uiSettings.waveVisibility = this.waveVisibility;
-        this.data.uiSettings.waveBold = this.waveBold;
-        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
-
-        console.log('AppState.save(): сохранение дат', {
-            'currentDate': this.currentDate.toLocaleString(),
-            'baseDate': new Date(this.data.uiSettings.baseDate).toLocaleString(), // ИСПРАВЛЕНО: создаем Date из timestamp
-            'baseDate часов': new Date(this.data.uiSettings.baseDate).getHours(), // ИСПРАВЛЕНО
-            'baseDate timestamp': this.data.uiSettings.baseDate
-        });
-        
-        localStorage.setItem('appData', JSON.stringify(this.data));
     }
     
     generateId() {

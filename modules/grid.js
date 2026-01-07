@@ -15,75 +15,87 @@ class GridManager {
         };
     }
     
-    createGrid() {
-        console.log('=== СОЗДАНИЕ СЕТКИ ===');
-        console.log('currentDay:', window.appState.currentDay);
-        console.log('currentDate (UTC):', window.appState.currentDate.toUTCString());
-        console.log('baseDate (UTC):', new Date(window.appState.baseDate).toUTCString());
-        
-        this.clearGrid();
-        
-        const centerX = window.appState.graphWidth / 2;
-        const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
-        
-        // 1. ВЫЧИСЛЯЕМ СМЕЩЕНИЕ ОТ ДРОБНОЙ ЧАСТИ ВРЕМЕНИ
-        const currentDay = window.appState.currentDay || 0;
-        const fractionalOffset = currentDay - Math.floor(currentDay);
-        const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
-        
-        console.log(`Смещение от дробной части времени:`);
-        console.log(`  currentDay: ${currentDay}`);
-        console.log(`  fractionalOffset: ${fractionalOffset.toFixed(5)}`);
-        console.log(`  timeOffsetPx: ${timeOffsetPx.toFixed(2)}px`);
-        
-        // 2. СОЗДАЕМ ОСНОВНОЙ КОНТЕЙНЕР ДЛЯ ВЕРТИКАЛЬНЫХ ЛИНИЙ (которые двигаются)
-        this.gridContainer = document.createElement('div');
-        this.gridContainer.className = 'grid-absolute-container';
-        this.gridContainer.style.position = 'absolute';
-        this.gridContainer.style.width = '100%';
-        this.gridContainer.style.height = '100%';
-        this.gridContainer.style.top = '0';
-        this.gridContainer.style.left = '0';
-        
-        // 3. ПРИМЕНЯЕМ СМЕЩЕНИЕ КО ВСЕЙ СЕТКЕ
-        this.gridContainer.style.transform = `translateX(${-timeOffsetPx}px)`;
-        this.gridContainer.style.transition = 'none';
-        
-        // 4. СОЗДАЕМ СТАТИЧЕСКИЙ КОНТЕЙНЕР для элементов, которые НЕ должны двигаться
-        this.staticElementsContainer = document.createElement('div');
-        this.staticElementsContainer.className = 'grid-static-container';
-        this.staticElementsContainer.style.position = 'absolute';
-        this.staticElementsContainer.style.width = '100%';
-        this.staticElementsContainer.style.height = '100%';
-        this.staticElementsContainer.style.top = '0';
-        this.staticElementsContainer.style.left = '0';
-        this.staticElementsContainer.style.pointerEvents = 'none'; // Чтобы не мешали
-        this.staticElementsContainer.style.zIndex = '5'; // Выше движущихся линий
-        
-        // 5. СОЗДАЕМ ЛИНИИ СЕТКИ И МЕТКИ (БЕЗ УЧЕТА ДРОБНОГО СМЕЩЕНИЯ)
-        for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
-            this.createGridLine(i);
-            this.createDateLabel(i);
-        }
-        
-        // 6. СОЗДАЕМ ГОРИЗОНТАЛЬНЫЕ ЛИНИИ И ОСИ Y - В СТАТИЧЕСКОМ КОНТЕЙНЕРЕ
-        this.createHorizontalGridLines();
-        this.createYAxisLabels();
-        
-        // 7. ДОБАВЛЯЕМ КОНТЕЙНЕРЫ В ГРАФИК
-        const graphElement = document.getElementById('graphElement');
-        if (graphElement) {
-            // Сначала статические элементы (сверху)
-            graphElement.appendChild(this.staticElementsContainer);
-            // Затем движущиеся (снизу)
-            graphElement.appendChild(this.gridContainer);
-        }
-        
-        // 8. ПОДСВЕТКА ЗАМЕТОК
-        this.updateGridNotesHighlight();
-        
-        console.log('=== СЕТКА СОЗДАНА ===');
-    }
+	createGrid() {
+		console.log('=== СОЗДАНИЕ СЕТКИ (локальное время) ===');
+		console.log('currentDay:', window.appState.currentDay);
+		
+		// ЛОГИРОВАНИЕ В ЛОКАЛЬНОМ ВРЕМЕНИ
+		if (window.appState.currentDate) {
+			console.log('currentDate (локальное):', window.appState.currentDate.toLocaleString());
+		}
+		
+		if (window.appState.baseDate instanceof Date) {
+			console.log('baseDate (локальное):', window.appState.baseDate.toLocaleString());
+		} else if (typeof window.appState.baseDate === 'number') {
+			const baseDateLocal = window.timeUtils ? 
+				window.timeUtils.toLocalDate(window.appState.baseDate) : 
+				new Date(window.appState.baseDate);
+			console.log('baseDate (локальное):', baseDateLocal.toLocaleString());
+		}
+		
+		this.clearGrid();
+		
+		const centerX = window.appState.graphWidth / 2;
+		const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
+		
+		// 1. ВЫЧИСЛЯЕМ СМЕЩЕНИЕ ОТ ДРОБНОЙ ЧАСТИ ВРЕМЕНИ
+		const currentDay = window.appState.currentDay || 0;
+		const fractionalOffset = currentDay - Math.floor(currentDay);
+		const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
+		
+		console.log(`Смещение от дробной части времени:`);
+		console.log(`  currentDay: ${currentDay}`);
+		console.log(`  fractionalOffset: ${fractionalOffset.toFixed(5)}`);
+		console.log(`  timeOffsetPx: ${timeOffsetPx.toFixed(2)}px`);
+		
+		// 2. СОЗДАЕМ ОСНОВНОЙ КОНТЕЙНЕР ДЛЯ ВЕРТИКАЛЬНЫХ ЛИНИЙ (которые двигаются)
+		this.gridContainer = document.createElement('div');
+		this.gridContainer.className = 'grid-absolute-container';
+		this.gridContainer.style.position = 'absolute';
+		this.gridContainer.style.width = '100%';
+		this.gridContainer.style.height = '100%';
+		this.gridContainer.style.top = '0';
+		this.gridContainer.style.left = '0';
+		
+		// 3. ПРИМЕНЯЕМ СМЕЩЕНИЕ КО ВСЕЙ СЕТКЕ
+		this.gridContainer.style.transform = `translateX(${-timeOffsetPx}px)`;
+		this.gridContainer.style.transition = 'none';
+		
+		// 4. СОЗДАЕМ СТАТИЧЕСКИЙ КОНТЕЙНЕР для элементов, которые НЕ должны двигаться
+		this.staticElementsContainer = document.createElement('div');
+		this.staticElementsContainer.className = 'grid-static-container';
+		this.staticElementsContainer.style.position = 'absolute';
+		this.staticElementsContainer.style.width = '100%';
+		this.staticElementsContainer.style.height = '100%';
+		this.staticElementsContainer.style.top = '0';
+		this.staticElementsContainer.style.left = '0';
+		this.staticElementsContainer.style.pointerEvents = 'none'; // Чтобы не мешали
+		this.staticElementsContainer.style.zIndex = '5'; // Выше движущихся линий
+		
+		// 5. СОЗДАЕМ ЛИНИИ СЕТКИ И МЕТКИ (БЕЗ УЧЕТА ДРОБНОГО СМЕЩЕНИЯ)
+		for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
+			this.createGridLine(i);
+			this.createDateLabel(i);
+		}
+		
+		// 6. СОЗДАЕМ ГОРИЗОНТАЛЬНЫЕ ЛИНИИ И ОСИ Y - В СТАТИЧЕСКОМ КОНТЕЙНЕРЕ
+		this.createHorizontalGridLines();
+		this.createYAxisLabels();
+		
+		// 7. ДОБАВЛЯЕМ КОНТЕЙНЕРЫ В ГРАФИК
+		const graphElement = document.getElementById('graphElement');
+		if (graphElement) {
+			// Сначала статические элементы (сверху)
+			graphElement.appendChild(this.staticElementsContainer);
+			// Затем движущиеся (снизу)
+			graphElement.appendChild(this.gridContainer);
+		}
+		
+		// 8. ПОДСВЕТКА ЗАМЕТОК
+		this.updateGridNotesHighlight();
+		
+		console.log('=== СЕТКА СОЗДАНА (локальное время) ===');
+	}
     
     createGridLine(offset) {
         if (!this.gridContainer) return;

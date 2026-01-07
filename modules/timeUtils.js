@@ -311,6 +311,36 @@ class TimeUtils {
             0, 0, 0, 0
         );
     }
+
+	/**
+	 * Безопасное логирование дат в локальном времени
+	 * @param {string} label - Метка для лога
+	 * @param {Date|number|string} date - Дата
+	 * @returns {string} Форматированная строка для лога
+	 */
+	safeLogDate(label, date) {
+		try {
+			const d = this.toLocalDate(date);
+			return `${label}: ${d.toLocaleString()}`;
+		} catch (error) {
+			return `${label}: ошибка форматирования`;
+		}
+	}
+
+	/**
+	 * Безопасное логирование временных меток
+	 * @param {string} label - Метка для лога
+	 * @param {number} timestamp - timestamp
+	 * @returns {string} Форматированная строка для лога
+	 */
+	safeLogTimestamp(label, timestamp) {
+		try {
+			const d = this.toLocalDate(timestamp);
+			return `${label}: ${d.toLocaleString()} (${timestamp})`;
+		} catch (error) {
+			return `${label}: ошибка (${timestamp})`;
+		}
+	}
 }
 
 window.timeUtils = new TimeUtils();

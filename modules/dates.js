@@ -324,40 +324,42 @@ class DatesManager {
         return true;
     }
     
-    navigateDay(delta) {
-        console.log('=== navigateDay(' + delta + ') вызван (UTC) ===');
-        console.log('До: currentDate:', window.appState.currentDate.toUTCString());
-        console.log('До: currentDay:', window.appState.currentDay);
-        
-        // Создаем новую дату (не мутируем существующую)
-        const newDate = new Date(window.appState.currentDate);
-        newDate.setDate(newDate.getDate() + delta);
-        
-        window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
-        
-        this.recalculateCurrentDay(false); // Навигация по дням использует целые числа
-        window.waves.updatePosition();
-        window.grid.createGrid();
-        window.grid.updateCenterDate();
-        window.grid.updateGridNotesHighlight();
-        window.appState.save();
-        
-        console.log('После: currentDate:', window.appState.currentDate.toUTCString());
-        console.log('После: currentDay:', window.appState.currentDay);
-        
-        this.updateTodayButton();
-        
-        if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
-        }
-        
-        // ОБНОВЛЯЕМ ПОЛЯ ВВОДА
-        this.updateDateTimeInputs();
-        
-        console.log('=== navigateDay() завершен ===');
-    }
+	navigateDay(delta) {
+		console.log('=== navigateDay(' + delta + ') вызван (локальное время) ===');
+		console.log('До: currentDate (локальное):', window.appState.currentDate.toLocaleString());
+		console.log('До: currentDay:', window.appState.currentDay);
+		
+		// Создаем новую дату (не мутируем существующую)
+		const newDate = new Date(window.appState.currentDate);
+		newDate.setDate(newDate.getDate() + delta);
+		
+		window.appState.currentDate = window.timeUtils ? 
+			window.timeUtils.toLocalDate(newDate) : 
+			newDate;
+		
+		this.recalculateCurrentDay(false); // Навигация по дням использует целые числа
+		window.waves.updatePosition();
+		window.grid.createGrid();
+		window.grid.updateCenterDate();
+		window.grid.updateGridNotesHighlight();
+		window.appState.save();
+		
+		console.log('После: currentDate (локальное):', window.appState.currentDate.toLocaleString());
+		console.log('После: currentDay:', window.appState.currentDay);
+		
+		this.updateTodayButton();
+		
+		if (window.summaryManager && window.summaryManager.updateSummary) {
+			setTimeout(() => {
+				window.summaryManager.updateSummary();
+			}, 50);
+		}
+		
+		// ОБНОВЛЯЕМ ПОЛЯ ВВОДА
+		this.updateDateTimeInputs();
+		
+		console.log('=== navigateDay() завершен ===');
+	}
     
     recalculateCurrentDay(useExactTime = false) {
         console.log('=== ДЕТАЛЬНЫЙ ДЕБАГ ДРОБНОЙ ЧАСТИ ===');
