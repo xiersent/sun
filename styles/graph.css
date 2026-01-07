@@ -455,6 +455,7 @@
     line-height: 1.2;
     font-size: var(--font-size-md);
     min-height: auto;
+	user-select: none;
 }
 
 .graph-container.dark-mode .center-date-label {
