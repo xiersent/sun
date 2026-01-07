@@ -184,32 +184,33 @@ class GridManager {
     }
     
     // ГОРИЗОНТАЛЬНЫЕ ЛИНИИ - в статическом контейнере
-    createHorizontalGridLines() {
-        if (!this.staticElementsContainer) return;
-        
-        for (let i = 1; i <= 5; i++) {
-            const topLine = document.createElement('div');
-            topLine.className = 'grid-line x';
-            topLine.style.position = 'absolute';
-            topLine.style.width = '100%';
-            topLine.style.height = '1px';
-            topLine.style.bottom = `calc(50% + ${i * window.appState.config.squareSize}px)`;
-            topLine.style.left = '0';
-            topLine.style.zIndex = '1';
-            
-            const bottomLine = document.createElement('div');
-            bottomLine.className = 'grid-line x';
-            bottomLine.style.position = 'absolute';
-            bottomLine.style.width = '100%';
-            bottomLine.style.height = '1px';
-            bottomLine.style.bottom = `calc(50% - ${i * window.appState.config.squareSize}px)`;
-            bottomLine.style.left = '0';
-            bottomLine.style.zIndex = '1';
-            
-            this.staticElementsContainer.appendChild(topLine);
-            this.staticElementsContainer.appendChild(bottomLine);
-        }
-    }
+	createHorizontalGridLines() {
+		if (!this.staticElementsContainer) return;
+		
+		// Изменено: было i <= 5, стало i <= 4
+		for (let i = 1; i <= 4; i++) {
+			const topLine = document.createElement('div');
+			topLine.className = 'grid-line x';
+			topLine.style.position = 'absolute';
+			topLine.style.width = '100%';
+			topLine.style.height = '1px';
+			topLine.style.bottom = `calc(50% + ${i * window.appState.config.squareSize}px)`;
+			topLine.style.left = '0';
+			topLine.style.zIndex = '1';
+			
+			const bottomLine = document.createElement('div');
+			bottomLine.className = 'grid-line x';
+			bottomLine.style.position = 'absolute';
+			bottomLine.style.width = '100%';
+			bottomLine.style.height = '1px';
+			bottomLine.style.bottom = `calc(50% - ${i * window.appState.config.squareSize}px)`;
+			bottomLine.style.left = '0';
+			bottomLine.style.zIndex = '1';
+			
+			this.staticElementsContainer.appendChild(topLine);
+			this.staticElementsContainer.appendChild(bottomLine);
+		}
+	}
     
 	// modules/grid.js - ИСПРАВЛЕННЫЙ метод createYAxisLabels()
 	createYAxisLabels() {
@@ -225,28 +226,28 @@ class GridManager {
 		zeroLabel.textContent = '0';
 		this.staticElementsContainer.appendChild(zeroLabel);
 		
-		// Положительные значения (5, 4, 3, 2, 1) - ВВЕРХУ
-		for (let i = 1; i <= 5; i++) {
-			// Положительные (верх) - должны быть 5, 4, 3, 2, 1
+		// Положительные значения (4, 3, 2, 1) - ВВЕРХУ
+		for (let i = 1; i <= 4; i++) { // Изменено: было i <= 5, стало i <= 4
+			// Положительные (верх) - теперь: 4, 3, 2, 1
 			const labelTop = document.createElement('div');
 			labelTop.className = 'labels y-labels';
 			labelTop.style.position = 'absolute';
-			// ОТРИЦАТЕЛЬНОЕ смещение ВВЕРХ от центра (чтобы 5 было наверху)
+			// ОТРИЦАТЕЛЬНОЕ смещение ВВЕРХ от центра
 			labelTop.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
 			labelTop.style.transform = 'translateY(-50%)';
 			labelTop.style.left = '10px';
-			labelTop.textContent = i; // Положительные числа: 5, 4, 3, 2, 1
+			labelTop.textContent = i + 1; // Положительные числа: 5, 4, 3, 2
 			this.staticElementsContainer.appendChild(labelTop);
 			
-			// Отрицательные (низ) - должны быть -1, -2, -3, -4, -5
+			// Отрицательные (низ) - теперь: -1, -2, -3, -4
 			const labelBottom = document.createElement('div');
 			labelBottom.className = 'labels y-labels';
 			labelBottom.style.position = 'absolute';
-			// ПОЛОЖИТЕЛЬНОЕ смещение ВНИЗ от центра (чтобы -5 было внизу)
+			// ПОЛОЖИТЕЛЬНОЕ смещение ВНИЗ от центра
 			labelBottom.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
 			labelBottom.style.transform = 'translateY(-50%)';
 			labelBottom.style.left = '10px';
-			labelBottom.textContent = -i; // Отрицательные числа: -1, -2, -3, -4, -5
+			labelBottom.textContent = -(i + 1); // Отрицательные числа: -5, -4, -3, -2
 			this.staticElementsContainer.appendChild(labelBottom);
 		}
 	}
