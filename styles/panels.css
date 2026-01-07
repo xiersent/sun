@@ -15,7 +15,7 @@
     padding: var(--spacing-md);
     overflow: visible;
     min-width: 0;
-    border: 1px solid var(--clg);
+    outline: 1px solid var(--clg);
 }
 
 /* НОВАЯ ПАНЕЛЬ АНАЛИЗА */
