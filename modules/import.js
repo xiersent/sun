@@ -19,59 +19,14 @@ class ImportExportManager {
     }
     
 	convertImportedDatesToTimestamp(data) {
-		// Конвертировать dates
-		if (data.dates) {
-			data.dates.forEach(date => {
-				if (date.date && !this.isTimestamp(date.date)) {
-					try {
-						// Используем TimeUtils для парсинга в локальное время
-						const dateObj = window.timeUtils.parseStringToLocal(date.date);
-						if (!isNaN(dateObj.getTime())) {
-							date.date = dateObj.getTime(); // Сохраняем как timestamp
-							console.log('Конвертирована импортированная дата в timestamp:', date.date);
-						}
-					} catch (e) {
-						console.warn('Ошибка конвертации импортированной даты:', date.date, e);
-					}
-				}
-			});
-		}
-		
-		// Конвертировать notes
-		if (data.notes) {
-			data.notes.forEach(note => {
-				if (note.date && !this.isTimestamp(note.date)) {
-					try {
-						const dateObj = window.timeUtils.parseStringToLocal(note.date);
-						if (!isNaN(dateObj.getTime())) {
-							note.date = dateObj.getTime();
-							console.log('Конвертирована импортированная заметка в timestamp:', note.date);
-						}
-					} catch (e) {
-						console.warn('Ошибка конвертации импортированной заметки:', note.date, e);
-					}
-				}
-			});
-		}
-		
-		// Конвертировать uiSettings даты
-		if (data.uiSettings) {
-			['currentDate', 'baseDate'].forEach(key => {
-				if (data.uiSettings[key] && !this.isTimestamp(data.uiSettings[key])) {
-					try {
-						const dateObj = window.timeUtils.parseStringToLocal(data.uiSettings[key]);
-						if (!isNaN(dateObj.getTime())) {
-							data.uiSettings[key] = dateObj.getTime();
-							console.log(`Конвертирован импортированный ${key} в timestamp:`, data.uiSettings[key]);
-						}
-					} catch (e) {
-						console.warn(`Ошибка конвертации импортированного ${key}:`, e);
-					}
-				}
-			});
-		}
-		
-		return data;
+		data.dates.forEach(date => {
+			if (date.date && !this.isTimestamp(date.date)) {
+				// БЫЛО: parseStringToUTC
+				// СТАЛО: parseStringToLocal + getTime()
+				const dateObj = window.timeUtils.parseStringToLocal(date.date);
+				date.date = dateObj.getTime();
+			}
+		});
 	}
     
     exportAll() {
