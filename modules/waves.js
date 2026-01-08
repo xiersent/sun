@@ -535,44 +535,48 @@ class WavesManager {
      * @param {Object} wave - Объект волны
      * @returns {Array} Массив X-координат точек пересечения
      */
-    findAxisXIntersectionPoints(wave) {
-        const points = [];
-        const wavePeriodPixels = window.appState.periods[wave.id] || 
-                               (wave.period * window.appState.config.squareSize);
-        
-        if (!wavePeriodPixels) return points;
-        
-        const currentDay = window.appState.currentDay || 0;
-        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
-        
-        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-        
-        // Фазы пересечения с осью X: 0.0 (sin=0 восходящее) и 0.5 (sin=0 нисходящее)
-        const intersectionPhases = [0.0, 0.5];
-        
-        // Проверяем несколько периодов вперед и назад
-        for (let n = -2; n <= 2; n++) {
-            intersectionPhases.forEach(phase => {
-                const x = ((phase + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
-                const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
-                
-                // Проверяем, находится ли в видимой области
-                if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
-                    // Проверяем на дубликаты (близкие точки)
-                    const isDuplicate = points.some(existing => 
-                        Math.abs(existing - normalizedX) < 2
-                    );
-                    
-                    if (!isDuplicate) {
-                        points.push(normalizedX);
-                    }
-                }
-            });
-        }
-        
-        return points.sort((a, b) => a - b);
-    }
+	findAxisXIntersectionPoints(wave) {
+		const points = [];
+		const wavePeriodPixels = window.appState.periods[wave.id] || 
+							(wave.period * window.appState.config.squareSize);
+		
+		if (!wavePeriodPixels) return points;
+		
+		// Текущее смещение волны (целые дни + дробная часть)
+		const currentDay = window.appState.currentDay || 0;
+		let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+		if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+		
+		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+		
+		// Точки пересечения с осью X: фазы 0.0 и 0.5
+		const intersectionPhases = [0.0, 0.5];
+		
+		// Проверяем несколько периодов
+		for (let n = -3; n <= 3; n++) {
+			intersectionPhases.forEach(phase => {
+				// Формула: x = (phase + n) * period - phaseOffset - currentOffset
+				const x = ((phase + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
+				
+				// Нормализуем в диапазон [0, wavePeriodPixels)
+				const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
+				
+				// Проверяем, находится ли в видимой области
+				if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
+					// Проверяем на дубликаты (близкие точки)
+					const isDuplicate = points.some(existing => 
+						Math.abs(existing - normalizedX) < 2
+					);
+					
+					if (!isDuplicate) {
+						points.push(normalizedX);
+					}
+				}
+			});
+		}
+		
+		return points.sort((a, b) => a - b);
+	}
     
     /**
      * Создает точку пересечения с осью X
@@ -631,15 +635,92 @@ class WavesManager {
      * @param {Object} wave - Объект волны
      * @param {number} x - X-координата точки
      */
-    navigateToAxisXIntersection(wave, x) {
-        // Преобразуем координату X во время
-        const intersectionTime = this.calculateTimeFromXCoordinate(wave, x);
-        
-        // Перемещаем визор
-        if (window.dates && window.dates.setDate) {
-            window.dates.setDate(intersectionTime, true);
-        }
-    }
+	navigateToAxisXIntersection(wave, x) {
+		console.log('Навигация к точке пересечения с осью X:');
+		console.log('  Волна:', wave.name, 'Период:', wave.period);
+		console.log('  Координата X:', x, 'px');
+		
+		// 1. Находим левую границу визора (как в вертикальных выносках)
+		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+		const currentDate = new Date(window.appState.currentDate);
+		const leftDate = new Date(currentDate);
+		leftDate.setDate(leftDate.getDate() - squaresLeft);
+		leftDate.setHours(0, 0, 0, 0); // ОБНУЛЯЕМ время суток!
+		
+		// 2. Рассчитываем фазу пересечения с осью X в этой точке
+		const wavePeriodPixels = window.appState.periods[wave.id] || 
+							(wave.period * window.appState.config.squareSize);
+		
+		const currentDay = window.appState.currentDay || 0;
+		let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+		if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+		
+		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+		
+		// 3. Находим фазу пересечения с осью X в точке x
+		// x + currentOffset - это позиция от начала периода волны
+		const relativePosition = x + currentOffsetPx + phaseOffsetPixels;
+		
+		// 4. Определяем, какое это пересечение: фаза 0.0 (восходящее) или 0.5 (нисходящее)
+		const phaseInPeriod = (relativePosition % wavePeriodPixels) / wavePeriodPixels;
+		
+		// Находим ближайшую фазу пересечения (0.0 или 0.5)
+		let targetPhase;
+		const distanceToZero = Math.min(
+			Math.abs(phaseInPeriod - 0.0),
+			Math.abs(phaseInPeriod - 1.0) // учитываем переход через границу периода
+		);
+		const distanceToHalf = Math.abs(phaseInPeriod - 0.5);
+		
+		if (distanceToZero < distanceToHalf) {
+			targetPhase = 0.0; // Восходящее пересечение
+		} else {
+			targetPhase = 0.5; // Нисходящее пересечение
+		}
+		
+		// 5. Рассчитываем время пересечения (как в вертикальных выносках)
+		const phaseAtLeft = this.getPhaseAtTime(wave, leftDate); // Фаза на левой границе
+		
+		// Находим ближайшее пересечение ВПЕРЕД от левой границы
+		let phaseDiff = targetPhase - phaseAtLeft;
+		if (phaseDiff < 0) {
+			phaseDiff += 1.0; // Берем следующее пересечение в будущем
+		}
+		
+		const daysToIntersection = phaseDiff * wave.period;
+		
+		// 6. Абсолютное время пересечения
+		const intersectionTime = new Date(leftDate.getTime() + (daysToIntersection * 24 * 3600 * 1000));
+		
+		console.log('  Левая граница:', leftDate.toLocaleDateString('ru-RU'));
+		console.log('  Фаза на левой границе:', phaseAtLeft.toFixed(4));
+		console.log('  Фаза в точке X:', phaseInPeriod.toFixed(4));
+		console.log('  Целевая фаза:', targetPhase);
+		console.log('  Дней до пересечения:', daysToIntersection.toFixed(2));
+		console.log('  Время пересечения:', intersectionTime.toLocaleString('ru-RU'));
+		
+		// 7. Переводим визор на это время
+		if (window.dates && window.dates.setDate) {
+			window.dates.setDate(intersectionTime, true);
+		}
+	}
+
+	/**
+	 * Получает фазу волны (0-1) в заданный момент времени
+	 * @param {Object} wave - Объект волны
+	 * @param {Date} time - Время
+	 * @returns {number} Фаза (0-1)
+	 */
+	getPhaseAtTime(wave, time) {
+		// Дней от базовой даты
+		const daysFromBase = window.timeUtils.getDaysBetween(window.appState.baseDate, time);
+		
+		// Фаза в пределах периода (0-1)
+		const phase = (daysFromBase % wave.period) / wave.period;
+		
+		// Нормализуем к диапазону 0-1
+		return phase < 0 ? phase + 1 : phase;
+	}
     
     /**
      * Преобразует координату X на графике во время
@@ -647,40 +728,32 @@ class WavesManager {
      * @param {number} x - X-координата
      * @returns {Date} Время точки
      */
-    calculateTimeFromXCoordinate(wave, x) {
-        // Преобразуем координату X на графике во время
-        const wavePeriodPixels = window.appState.periods[wave.id] || 
-                               (wave.period * window.appState.config.squareSize);
-        
-        // Текущее смещение волны
-        const currentDay = window.appState.currentDay || 0;
-        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
-        
-        // Относительная координата внутри периода
-        const relativeX = x + currentOffsetPx;
-        
-        // Фаза в долях периода
-        const phase = (relativeX / wavePeriodPixels) % 1.0;
-        
-        // БАЗОВАЯ ДАТА колоска (начало отсчета)
-        const baseDate = window.appState.baseDate;
-        
-        // Левая граница визора (самая ранняя дата)
-        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-        const currentDate = new Date(window.appState.currentDate);
-        const leftDate = new Date(currentDate);
-        leftDate.setDate(leftDate.getDate() - squaresLeft);
-        leftDate.setHours(0, 0, 0, 0);
-        
-        // Дни от левой границы до точки
-        const daysFromLeft = (x / window.appState.config.squareSize);
-        
-        // Абсолютное время точки
-        const pointTime = new Date(leftDate.getTime() + (daysFromLeft * 24 * 3600 * 1000));
-        
-        return pointTime;
-    }
+	calculateTimeFromXCoordinate(wave, x) {
+		// ВЕРНОЕ РЕШЕНИЕ: Используем ту же логику, что и в вертикальных выносках
+		
+		// 1. Находим левую границу визора (самую раннюю дату)
+		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+		const currentDate = new Date(window.appState.currentDate);
+		const leftDate = new Date(currentDate);
+		leftDate.setDate(leftDate.getDate() - squaresLeft);
+		leftDate.setHours(0, 0, 0, 0); // ОБНУЛЯЕМ время суток!
+		
+		// 2. Рассчитываем дни от левой границы до точки
+		// x - это координата от левого края графика (0..ширина)
+		const daysFromLeft = (x / window.appState.config.squareSize);
+		
+		// 3. Абсолютное время точки
+		// Добавляем ЦЕЛОЕ количество дней к левой границе
+		const pointTime = new Date(leftDate.getTime() + (daysFromLeft * 24 * 3600 * 1000));
+		
+		console.log('Точка на оси X:');
+		console.log('  Левая граница:', leftDate.toLocaleDateString('ru-RU'));
+		console.log('  Координата X:', x, 'px');
+		console.log('  Дней от левой границы:', daysFromLeft.toFixed(5));
+		console.log('  Время точки:', pointTime.toLocaleString('ru-RU'));
+		
+		return pointTime;
+	}
     
     /**
      * Создает ГОРИЗОНТАЛЬНУЮ выноску для волны
