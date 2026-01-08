@@ -115,8 +115,7 @@ class ImportExportManager {
                 try {
                     const data = JSON.parse(event.target.result);
                     
-                    // КОНВЕРТИРОВАТЬ ИМПОРТИРОВАННЫЕ ДАННЫЕ В TIMESTAMP
-                    const convertedData = window.importExport.convertImportedDatesToTimestamp(data);
+					const convertedData = data;
                     
                     const isFullExport = convertedData.waves && convertedData.groups && convertedData.dates;
                     const isDatesOnly = convertedData.type === 'dates-only' || (convertedData.dates && !convertedData.waves);
