@@ -120,6 +120,14 @@ class EventManager {
                 }
             }
             
+            // НОВАЯ ПРОВЕРКА: кнопка "Эквилибриум"
+            if (action === 'toggleEquilibrium') {
+                if (window.uiManager && window.uiManager.toggleEquilibrium) {
+                    window.uiManager.toggleEquilibrium();
+                    return;
+                }
+            }
+            
             if (window.uiManager && action) {
                 window.uiManager.handleAction(action, $actionBtn[0]);
                 return;
@@ -907,7 +915,7 @@ class EventManager {
                 // targetIndex уменьшился на 1
                 return targetIndex - 1;
             } else {
-                // Вставляем ПОСЛЕ целевого элемента
+                // Вставляем ПОСЛЕ целевым элементом
                 // targetIndex не изменился
                 return targetIndex;
             }
@@ -918,7 +926,7 @@ class EventManager {
                 // targetIndex не изменился
                 return targetIndex;
             } else {
-                // Вставляем ПОСЛЕ целевого элемента
+                // Вставляем ПОСЛЕ целевым элементом
                 // targetIndex увеличился на 1
                 return targetIndex + 1;
             }

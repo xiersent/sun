@@ -102,6 +102,12 @@ class WavesManager {
         document.querySelectorAll('.wave-container').forEach(c => c.remove());
         document.querySelectorAll('.wave-label').forEach(l => l.remove());
         
+        // НОВОЕ: Очищаем точки на оси X
+        const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+        if (axisXPointsContainer) {
+            axisXPointsContainer.innerHTML = '';
+        }
+        
         this.waveContainers = {};
         this.wavePaths = {};
         this.waveLabelElements = {};
@@ -355,7 +361,7 @@ class WavesManager {
             // Текущая позиция в пикселях от начала периода
             let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
             
-            // Корректируем для отрицательных значений
+            // Корректируем для отрицательных значениях
             if (currentPositionPx < 0) {
                 currentPositionPx = wavePeriodPixels + currentPositionPx;
             }
@@ -394,6 +400,8 @@ class WavesManager {
     updateAllWaveLabels() {
         this.updateHorizontalWaveLabels();
         this.updateVerticalWaveLabels();
+        // ОБНОВЛЕНО: всегда обновляем точки на оси X
+        this.updateAxisXIntersectionPoints();
     }
     
     /**
@@ -481,9 +489,6 @@ class WavesManager {
                 this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer);
             }
         });
-        
-        // ДОБАВЛЯЕМ: точки пересечения с осью X
-        this.updateAxisXIntersectionPoints();
     }
     
     /**
@@ -507,6 +512,13 @@ class WavesManager {
             if (graphElement) {
                 graphElement.appendChild(axisXPointsContainer);
             }
+        }
+        
+        // Проверяем, должен ли контейнер быть скрыт
+        if (axisXPointsContainer.classList.contains('hidden')) {
+            // Если скрыт, просто очищаем старые точки и выходим
+            axisXPointsContainer.innerHTML = '';
+            return;
         }
         
         // Очищаем старые точки

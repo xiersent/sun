@@ -89,6 +89,7 @@ class UIManager {
             toggleGraph: () => this.toggleGraph(),
             toggleWaveLabels: () => this.toggleWaveLabels(), // ТОЛЬКО горизонтальные
             toggleExtremes: () => this.toggleExtremes(), // НОВАЯ: только вертикальные
+            toggleEquilibrium: () => this.toggleEquilibrium(), // НОВАЯ: точки на оси X
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
@@ -176,6 +177,48 @@ class UIManager {
             }
         } else {
             console.warn('Контейнер вертикальных выносок не найден');
+        }
+    }
+    
+    // НОВЫЙ МЕТОД: ТОЧКИ ПЕРЕСЕЧЕНИЯ С ОСЬЮ X (эквилибриум)
+    toggleEquilibrium() {
+        console.log('Переключение видимости ТОЧЕК НА ОСИ X (эквилибриум)');
+        
+        // Находим контейнер точек на оси X
+        const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+        
+        if (axisXPointsContainer) {
+            const areHidden = axisXPointsContainer.classList.contains('hidden');
+            
+            if (areHidden) {
+                axisXPointsContainer.classList.remove('hidden');
+                console.log('Точки на оси X (эквилибриум) показаны');
+                
+                // Обновляем точки
+                if (window.waves && window.waves.updateAxisXIntersectionPoints) {
+                    window.waves.updateAxisXIntersectionPoints();
+                }
+            } else {
+                axisXPointsContainer.classList.add('hidden');
+                console.log('Точки на оси X (эквилибриум) скрыты');
+            }
+        } else {
+            console.warn('Контейнер точек на оси X не найден');
+            
+            // Если контейнер не существует, создаем его через WavesManager
+            if (window.waves && window.waves.updateAxisXIntersectionPoints) {
+                console.log('Создаем контейнер точек на оси X...');
+                window.waves.updateAxisXIntersectionPoints();
+                
+                // Пробуем снова найти и показать
+                setTimeout(() => {
+                    const newContainer = document.querySelector('.wave-axis-x-points');
+                    if (newContainer) {
+                        newContainer.classList.remove('hidden');
+                        console.log('Контейнер создан и точки показаны');
+                    }
+                }, 100);
+            }
         }
     }
     

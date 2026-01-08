@@ -92,7 +92,7 @@
     bottom: -30px;
 }
 
-/* ТОЧКИ ПЕРЕСЕЧЕНИЯ С ОСЬЮ X */
+/* ТОЧКИ ПЕРЕСЕЧЕНИЯ С ОСЬЮ X (ЭКВИЛИБРИУМ) */
 .wave-axis-x-points {
     position: absolute;
     top: 0;
@@ -101,6 +101,10 @@
     height: 100%;
     pointer-events: none;
     z-index: 8;
+}
+
+.wave-axis-x-points.hidden {
+    display: none !important;
 }
 
 .wave-axis-x-point {
