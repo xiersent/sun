@@ -111,8 +111,14 @@ class UIManager {
         window.appState.uiHidden = !window.appState.uiHidden;
         if (window.appState.uiHidden) {
             document.body.classList.add('ui-hidden');
+            if (window.timeBarManager && window.timeBarManager.container) {
+                window.timeBarManager.container.style.display = 'none';
+            }
         } else {
             document.body.classList.remove('ui-hidden');
+            if (window.timeBarManager && window.timeBarManager.container) {
+                window.timeBarManager.container.style.display = 'block';
+            }
         }
         window.appState.save();
     }

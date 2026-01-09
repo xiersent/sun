@@ -1,3 +1,4 @@
+// modules/init.js
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {
@@ -25,7 +26,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             { name: 'importExport', class: ImportExportManager },
             { name: 'intersectionManager', class: WaveIntersectionManager },
             { name: 'summaryManager', class: SummaryManager },
-            { name: 'eventManager', class: EventManager }
+            { name: 'eventManager', class: EventManager },
+            { name: 'timeBarManager' }
         ];
         
         for (const manager of managers) {
@@ -44,7 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
         }
         
-        await this.finalizeInitialization();
+        if (window.timeBarManager && window.timeBarManager.init) {
+            window.timeBarManager.init();
+        }
+        
+        await finalizeInitialization();
         
     } catch (error) {
     }

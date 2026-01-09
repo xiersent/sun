@@ -233,6 +233,10 @@ class WavesManager {
     }
     
     updatePosition() {
+        if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
+            window.timeBarManager.updateTimeIndicator();
+        }
+        
         if (window.grid && window.grid.updateGridOffset) {
             window.grid.updateGridOffset();
         }
