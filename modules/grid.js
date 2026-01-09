@@ -45,7 +45,8 @@ class GridManager {
 		this.staticElementsContainer.style.pointerEvents = 'none';
 		this.staticElementsContainer.style.zIndex = '5';
 		
-		for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
+		// ИЗМЕНЕНИЕ: начинаем с -halfSquaresX + 1, а не с -halfSquaresX
+		for (let i = -halfSquaresX + 1; i <= halfSquaresX; i++) {
 			this.createGridLine(i);
 			this.createDateLabel(i);
 		}
