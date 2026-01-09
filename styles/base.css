@@ -129,45 +129,29 @@ body.graph-hidden .graph-section{display: none !important;}
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Индикатор текущего времени */
+/* Обновляем стили для time-indicator в styles/components.css */
 .time-indicator {
     position: absolute;
     top: 0;
-    width: 2px;
+    width: 2px; /* Оставляем ширину, но сделаем прозрачной */
     height: 100%;
-    background-color: var(--danger-color);
+    background-color: transparent; /* Делаем прозрачной */
     z-index: 10;
     pointer-events: none;
 }
 
-.time-indicator::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -2px;
-    width: 6px;
-    height: 6px;
-    background-color: var(--danger-color);
-    border-radius: 50%;
-}
-
+/* Убираем риски (кружки) сверху и снизу */
+.time-indicator::before,
 .time-indicator::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -2px;
-    width: 6px;
-    height: 6px;
-    background-color: var(--danger-color);
-    border-radius: 50%;
+    display: none;
 }
 
-/* Метка времени на индикаторе */
+/* Выноска с текущим временем - теперь посередине полосы */
 .time-indicator-label {
     position: absolute;
-    top: -20px;
+    top: 50%; /* Посередине полосы */
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     background-color: var(--danger-color);
     color: white;
     padding: 2px 6px;
@@ -176,18 +160,31 @@ body.graph-hidden .graph-section{display: none !important;}
     white-space: nowrap;
     font-weight: 600;
     font-family: monospace;
+    z-index: 11;
 }
 
+/* Стрелочки сверху и снизу у выноски */
+.time-indicator-label::before,
 .time-indicator-label::after {
     content: '';
     position: absolute;
-    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
+}
+
+/* Стрелочка сверху */
+.time-indicator-label::before {
+    top: -4px;
+    border-bottom: 4px solid var(--danger-color);
+}
+
+/* Стрелочка снизу */
+.time-indicator-label::after {
+    bottom: -4px;
     border-top: 4px solid var(--danger-color);
 }
 

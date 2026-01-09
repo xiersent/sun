@@ -21,44 +21,57 @@ class TimeBarManager {
         this.isInitialized = true;
     }
     
-    createTimeBar() {
-        if (document.getElementById('timeBarContainer')) {
-            this.container = document.getElementById('timeBarContainer');
-            this.timeScale = document.getElementById('timeScale');
-            this.timeIndicator = document.getElementById('timeIndicator');
-            this.timeLabels = document.getElementById('timeLabels');
-            this.indicatorLabel = this.timeIndicator.querySelector('.time-indicator-label');
-            return;
-        }
-        
-        const timeBarHTML = `
-            <div class="time-bar">
-                <div class="time-scale" id="timeScale"></div>
-                <div class="time-indicator" id="timeIndicator">
-                    <div class="time-indicator-label"></div>
-                </div>
-                <div class="time-labels" id="timeLabels"></div>
-            </div>
-        `;
-        
-        const container = document.createElement('div');
-        container.id = 'timeBarContainer';
-        container.className = 'time-bar-container';
-        container.innerHTML = timeBarHTML;
-        
-        const graphSection = document.querySelector('.graph-section');
-        const graphContainer = document.querySelector('.graph-container');
-        
-        if (graphContainer && graphSection) {
-            graphSection.insertBefore(container, graphContainer);
-            
-            this.container = container;
-            this.timeScale = document.getElementById('timeScale');
-            this.timeIndicator = document.getElementById('timeIndicator');
-            this.timeLabels = document.getElementById('timeLabels');
-            this.indicatorLabel = this.timeIndicator.querySelector('.time-indicator-label');
-        }
-    }
+
+	createTimeBar() {
+		if (document.getElementById('timeBarContainer')) {
+			this.container = document.getElementById('timeBarContainer');
+			this.timeScale = document.getElementById('timeScale');
+			this.timeIndicator = document.getElementById('timeIndicator');
+			this.timeLabels = document.getElementById('timeLabels');
+			this.indicatorLabel = this.timeIndicator.querySelector('.time-indicator-label');
+			return;
+		}
+		
+		// Убираем .time-indicator элемент, оставляем только .time-indicator-label
+		const timeBarHTML = `
+			<div class="time-bar">
+				<div class="time-scale" id="timeScale"></div>
+				<div class="time-labels" id="timeLabels"></div>
+			</div>
+		`;
+		
+		const container = document.createElement('div');
+		container.id = 'timeBarContainer';
+		container.className = 'time-bar-container';
+		container.innerHTML = timeBarHTML;
+		
+		const graphSection = document.querySelector('.graph-section');
+		const graphContainer = document.querySelector('.graph-container');
+		
+		if (graphContainer && graphSection) {
+			graphSection.insertBefore(container, graphContainer);
+			
+			this.container = container;
+			this.timeScale = document.getElementById('timeScale');
+			this.timeLabels = document.getElementById('timeLabels');
+			
+			// Создаем индикатор отдельно
+			this.timeIndicator = document.createElement('div');
+			this.timeIndicator.className = 'time-indicator';
+			this.timeIndicator.style.position = 'absolute';
+			this.timeIndicator.style.top = '0';
+			this.timeIndicator.style.width = '0'; // Нет ширины
+			this.timeIndicator.style.height = '100%';
+			this.timeIndicator.style.zIndex = '10';
+			this.timeIndicator.style.pointerEvents = 'none';
+			
+			this.indicatorLabel = document.createElement('div');
+			this.indicatorLabel.className = 'time-indicator-label';
+			this.timeIndicator.appendChild(this.indicatorLabel);
+			
+			this.timeScale.appendChild(this.timeIndicator);
+		}
+	}
     
     createHourMarkers() {
         if (!this.timeScale) return;
@@ -114,25 +127,26 @@ class TimeBarManager {
         }
     }
     
-    updateTimeIndicator() {
-        if (!this.timeIndicator || !this.indicatorLabel) return;
-        
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentSecond = now.getSeconds();
-        
-        const secondsInDay = currentHour * 3600 + currentMinute * 60 + currentSecond;
-        const percentOfDay = (secondsInDay / 86400) * 100;
-        
-        this.timeIndicator.style.left = `${percentOfDay}%`;
-        
-        const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:${currentSecond.toString().padStart(2, '0')}`;
-        this.indicatorLabel.textContent = timeString;
-        this.timeIndicator.title = `Текущее время: ${timeString}`;
-        
-        this.highlightActiveHour(currentHour);
-    }
+	updateTimeIndicator() {
+		if (!this.timeIndicator || !this.indicatorLabel) return;
+		
+		const now = new Date();
+		const currentHour = now.getHours();
+		const currentMinute = now.getMinutes();
+		const currentSecond = now.getSeconds();
+		
+		const secondsInDay = currentHour * 3600 + currentMinute * 60 + currentSecond;
+		const percentOfDay = (secondsInDay / 86400) * 100;
+		
+		// Позиционируем только метку, без полоски
+		this.timeIndicator.style.left = `${percentOfDay}%`;
+		
+		const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:${currentSecond.toString().padStart(2, '0')}`;
+		this.indicatorLabel.textContent = timeString;
+		this.timeIndicator.title = `Текущее время: ${timeString}`;
+		
+		this.highlightActiveHour(currentHour);
+	}
     
     updateTimeBarAppearance() {
         if (!this.container) return;
