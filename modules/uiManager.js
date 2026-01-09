@@ -125,27 +125,18 @@ class UIManager {
         }
     }
     
-	// В методе toggleUI() добавить обработку временной полосы
-	toggleUI() {
-		console.log('Переключение UI');
-		window.appState.uiHidden = !window.appState.uiHidden;
-		if (window.appState.uiHidden) {
-			document.body.classList.add('ui-hidden');
-			// Скрываем временную полосу
-			if (window.timeBarManager && window.timeBarManager.container) {
-				window.timeBarManager.container.style.display = 'none';
-			}
-			console.log('UI скрыт');
-		} else {
-			document.body.classList.remove('ui-hidden');
-			// Показываем временную полосу
-			if (window.timeBarManager && window.timeBarManager.container) {
-				window.timeBarManager.container.style.display = 'block';
-			}
-			console.log('UI показан');
-		}
-		window.appState.save();
-	}
+    toggleUI() {
+        console.log('Переключение UI');
+        window.appState.uiHidden = !window.appState.uiHidden;
+        if (window.appState.uiHidden) {
+            document.body.classList.add('ui-hidden');
+            console.log('UI скрыт');
+        } else {
+            document.body.classList.remove('ui-hidden');
+            console.log('UI показан');
+        }
+        window.appState.save();
+    }
     
     // ТОЛЬКО горизонтальные выноски (левые/правые)
     toggleWaveLabels() {

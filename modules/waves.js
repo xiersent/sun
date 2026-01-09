@@ -325,19 +325,9 @@ class WavesManager {
      * ВЫЗЫВАЕТСЯ при каждом изменении currentDay
      */
     updatePosition() {
-		console.log('WavesManager: updatePosition вызван');
-		console.log('  currentDay:', window.appState.currentDay);
-		console.log('  fractional часть:', (window.appState.currentDay || 0) - Math.floor(window.appState.currentDay || 0));
-		
-		// ОБНОВЛЯЕМ СМЕЩЕНИЕ СЕТКИ
-		if (window.grid && window.grid.updateGridOffset) {
-			window.grid.updateGridOffset();
-		}
-		
-		// ОБНОВЛЯЕМ ВРЕМЕННУЮ ПОЛОСУ
-		if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
-			window.timeBarManager.updateTimeIndicator();
-		}
+        console.log('WavesManager: updatePosition вызван');
+        console.log('  currentDay:', window.appState.currentDay);
+        console.log('  fractional часть:', (window.appState.currentDay || 0) - Math.floor(window.appState.currentDay || 0));
         
         // ОБНОВЛЯЕМ СМЕЩЕНИЕ СЕТКИ
         if (window.grid && window.grid.updateGridOffset) {
