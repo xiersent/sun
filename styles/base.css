@@ -145,7 +145,6 @@ body.graph-hidden .graph-section {
     outline: 1px solid var(--clg);
     position: relative;
     overflow: hidden;
-    margin-bottom: 10px;
     user-select: none;
 }
 
