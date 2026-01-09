@@ -559,6 +559,21 @@ class EventManager {
             }
             return;
         }
+
+		if ($target.hasClass('extremum-wave-name')) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			const waveId = $target.data('wave-id');
+			
+			// Найти соответствующий чекбокс видимости
+			const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
+			if (checkbox.length) {
+				// Эмулируем клик - существующая логика всё обработает
+				checkbox.click();
+			}
+			return;
+		}
         
         if ($target.is('#btnCalculateIntersections') || $target.closest('#btnCalculateIntersections').length) {
             e.preventDefault();

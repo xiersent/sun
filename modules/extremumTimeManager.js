@@ -174,7 +174,7 @@ class ExtremumTimeManager {
             
             marker.style.backgroundColor = dominantColor;
             
-            // Выноска с ПЕРЕЧИСЛЕНИЕМ колосков
+            // Выноска с ПЕРЕЧИСЛЕНИЕМ колосков (кликабельными именами)
             const label = document.createElement('div');
             label.className = 'extremum-label';
             label.dataset.waveId = group.waves[0].id;
@@ -195,17 +195,28 @@ class ExtremumTimeManager {
             label.style.color = '#fff';
             label.style.textAlign = 'center';
             
-            // Перечисляем ВСЕ колоски в группе через запятую
-            const waveNames = group.waves.map(w => w.name);
-            const uniqueNames = [...new Set(waveNames)];
-            const labelText = uniqueNames.join(', ');
+            // СОЗДАЕМ КЛИКАБЕЛЬНЫЕ ИМЕНА КОЛОСКОВ
+            // Уникальные имена с их wave.id
+            const waveNameMap = new Map();
+            group.waves.forEach(wave => {
+                waveNameMap.set(wave.name, wave.id);
+            });
+            
+            const uniqueNames = Array.from(waveNameMap.keys());
+            const waveIds = Array.from(waveNameMap.values());
+            
+            // Создаем HTML с кликабельными span элементами
+            const labelHTML = uniqueNames.map((name, index) => {
+                const waveId = waveIds[index];
+                return `<span class="extremum-wave-name" data-wave-id="${waveId}" style="cursor: pointer;">${name}</span>`;
+            }).join(', ');
             
             // Создаем внутреннюю структуру выноски
             const labelTextElement = document.createElement('div');
             labelTextElement.className = 'extremum-label-text';
             labelTextElement.style.textAlign = 'center';
             labelTextElement.style.fontWeight = '400';
-            labelTextElement.textContent = labelText;
+            labelTextElement.innerHTML = labelHTML;
             
             // Стрелочка
             const arrow = document.createElement('div');
@@ -261,6 +272,39 @@ class ExtremumTimeManager {
             
             this.markers.push(marker);
             this.labels.push(label);
+            
+            // Добавляем обработчики кликов на имена колосков
+            setTimeout(() => {
+                labelTextElement.querySelectorAll('.extremum-wave-name').forEach(span => {
+                    span.style.pointerEvents = 'auto';
+                    span.style.cursor = 'pointer';
+                    
+                    // Добавляем hover эффект
+                    span.addEventListener('mouseenter', () => {
+                        span.style.opacity = '0.8';
+                    });
+                    
+                    span.addEventListener('mouseleave', () => {
+                        span.style.opacity = '1';
+                    });
+                    
+                    // Обработчик клика для переключения видимости
+                    span.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const waveId = span.dataset.waveId;
+                        if (waveId) {
+                            // Найти соответствующий чекбокс видимости
+                            const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+                            if (checkbox) {
+                                // Эмулируем клик - существующая логика всё обработает
+                                checkbox.click();
+                            }
+                        }
+                    });
+                });
+            }, 10);
         });
     }
 
