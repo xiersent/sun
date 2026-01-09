@@ -188,6 +188,11 @@ class DatesManager {
             window.waves.updatePosition();
             window.waves.updateCornerSquareColors();
         }
+
+		// ДОБАВИТЬ ЭТО:
+		if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+			window.extremumTimeManager.updateExtremums();
+		}
         
         if (window.grid) {
             if (window.grid.createGrid) {
@@ -200,6 +205,7 @@ class DatesManager {
         }
         
         window.appState.save();
+		
         
         this.updateTodayButton();
         
