@@ -1,4 +1,4 @@
-// modules/extremumTimeManager.js - ГРУППИРОВКА КОЛОСКОВ В ВЫНОСКАХ
+// modules/extremumTimeManager.js - ПЕРЕЧИСЛЕНИЕ КОЛОСКОВ В ВЫНОСКАХ
 class ExtremumTimeManager {
     constructor() {
         this.markers = [];
@@ -174,9 +174,13 @@ class ExtremumTimeManager {
             
             marker.style.backgroundColor = dominantColor;
             
-            // Выноска с перечислением колосков
+            // Выноска с ПЕРЕЧИСЛЕНИЕМ колосков
             const label = document.createElement('div');
             label.className = 'extremum-label';
+            label.dataset.waveId = group.waves[0].id;
+            label.dataset.position = group.position;
+            label.dataset.time = group.time.toISOString();
+            
             label.style.position = 'absolute';
             label.style.left = `${clampedPercent}%`;
             label.style.transform = 'translateX(-50%)';
@@ -190,40 +194,65 @@ class ExtremumTimeManager {
             label.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             label.style.color = '#fff';
             label.style.textAlign = 'center';
-            label.style.minWidth = '40px';
             
-            // Формируем текст выноски
-            let labelText = '';
-            if (group.waves.length === 1) {
-                // Один колосок
-                labelText = group.waves[0].name;
-            } else {
-                // Несколько колосков
-                const uniqueNames = [...new Set(group.waves.map(w => w.name))];
-                if (uniqueNames.length <= 3) {
-                    labelText = uniqueNames.join(', ');
-                } else {
-                    labelText = `${uniqueNames.length} колосков`;
-                }
-            }
+            // Перечисляем ВСЕ колоски в группе через запятую
+            const waveNames = group.waves.map(w => w.name);
+            const uniqueNames = [...new Set(waveNames)];
+            const labelText = uniqueNames.join(', ');
+            
+            // Создаем внутреннюю структуру выноски
+            const labelTextElement = document.createElement('div');
+            labelTextElement.className = 'extremum-label-text';
+            labelTextElement.style.textAlign = 'center';
+            labelTextElement.style.fontWeight = '400';
+            labelTextElement.textContent = labelText;
+            
+            // Стрелочка
+            const arrow = document.createElement('div');
+            arrow.className = 'extremum-label-arrow';
+            arrow.style.position = 'absolute';
+            arrow.style.width = '0';
+            arrow.style.height = '0';
+            arrow.style.borderStyle = 'solid';
+            arrow.style.zIndex = '1';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%)';
             
             // Позиционируем выноску в зависимости от положения маркера
             if (group.position === 'top') {
+                // Выноска над рисочкой
                 label.style.bottom = '100%';
                 label.style.marginBottom = '5px';
-                // Стрелка вниз
-                label.innerHTML = `
-                    <div style="text-align: center; font-weight: 400;">${labelText}</div>
-                    <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid rgba(0, 0, 0, 0.8);"></div>
-                `;
+                
+                // Стрелочка вниз
+                arrow.style.bottom = '-6px';
+                arrow.style.borderWidth = '6px 4px 0 4px';
+                arrow.style.borderColor = 'rgba(0, 0, 0, 0.8) transparent transparent transparent';
             } else {
+                // Выноска под рисочкой
                 label.style.top = '100%';
                 label.style.marginTop = '5px';
-                // Стрелка вверх
-                label.innerHTML = `
-                    <div style="text-align: center; font-weight: 400;">${labelText}</div>
-                    <div style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid rgba(0, 0, 0, 0.8);"></div>
-                `;
+                
+                // Стрелочка вверх
+                arrow.style.top = '-6px';
+                arrow.style.borderWidth = '0 4px 6px 4px';
+                arrow.style.borderColor = 'transparent transparent rgba(0, 0, 0, 0.8) transparent';
+            }
+            
+            label.appendChild(labelTextElement);
+            label.appendChild(arrow);
+            
+            // Для темного режима
+            const graphContainer = document.querySelector('.graph-container');
+            if (graphContainer && graphContainer.classList.contains('dark-mode')) {
+                label.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                label.style.color = '#000';
+                
+                if (group.position === 'top') {
+                    arrow.style.borderTopColor = 'rgba(255, 255, 255, 0.9)';
+                } else {
+                    arrow.style.borderBottomColor = 'rgba(255, 255, 255, 0.9)';
+                }
             }
             
             // Добавляем в контейнер временной шкалы
