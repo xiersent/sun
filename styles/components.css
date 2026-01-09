@@ -64,7 +64,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 .color-input{width: 30px; height: 20px; padding: 0; border: 1px solid var(--clg); cursor: pointer; background: transparent;}
 
 /* Заголовки */
-.warning-title{font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-md); color: #d00;}
+.warning-title{font-size: var(--font-size-xl); margin-bottom: var(--spacing-md);}
 .warning-text{line-height: 1.5; margin-bottom: var(--spacing-lg);}
 
 /* Контейнер для информации предупреждения */

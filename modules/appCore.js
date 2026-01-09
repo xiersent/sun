@@ -276,14 +276,53 @@ class AppCore {
         return 'Мобильное устройство';
     }
     
-    getBrowserInfo() {
-        const ua = navigator.userAgent;
-        if (ua.includes("Chrome") && !ua.includes("Edg")) return "Google Chrome";
-        if (ua.includes("Firefox")) return "Mozilla Firefox";
-        if (ua.includes("Safari") && !ua.includes("Chrome")) return "Apple Safari";
-        if (ua.includes("Edg")) return "Microsoft Edge";
-        return "Неизвестный браузер";
-    }
+	getBrowserInfo() {
+		const ua = navigator.userAgent;
+		
+		// Google Chrome (также детектит Chromium-based браузеры как Chrome)
+		if (ua.includes("Chrome") && !ua.includes("Edg")) {
+			const match = ua.match(/Chrome\/([\d.]+)/);
+			return match ? `Google Chrome ${match[1]}` : "Google Chrome";
+		}
+		
+		// Microsoft Edge (на базе Chromium)
+		if (ua.includes("Edg")) {
+			const match = ua.match(/Edg\/([\d.]+)/);
+			return match ? `Microsoft Edge ${match[1]}` : "Microsoft Edge";
+		}
+		
+		// Firefox
+		if (ua.includes("Firefox")) {
+			const match = ua.match(/Firefox\/([\d.]+)/);
+			return match ? `Mozilla Firefox ${match[1]}` : "Mozilla Firefox";
+		}
+		
+		// Safari (но не Chrome)
+		if (ua.includes("Safari") && !ua.includes("Chrome")) {
+			const match = ua.match(/Version\/([\d.]+)/);
+			return match ? `Apple Safari ${match[1]}` : "Apple Safari";
+		}
+		
+		// Opera
+		if (ua.includes("Opera") || ua.includes("OPR")) {
+			const match = ua.match(/(?:Opera|OPR)\/([\d.]+)/);
+			return match ? `Opera ${match[1]}` : "Opera";
+		}
+		
+		// Internet Explorer
+		if (ua.includes("MSIE") || ua.includes("Trident")) {
+			const match = ua.match(/(?:MSIE |Trident\/.*rv:)([\d.]+)/);
+			return match ? `Internet Explorer ${match[1]}` : "Internet Explorer";
+		}
+		
+		// Brave (также показывается как Chrome, но можно детектить)
+		if (ua.includes("Brave")) {
+			const match = ua.match(/Chrome\/([\d.]+)/);
+			return match ? `Brave ${match[1]}` : "Brave";
+		}
+		
+		return "Неизвестный браузер";
+	}
     
     updateCSSVariables() {
         document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
