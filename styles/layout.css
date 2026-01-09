@@ -1,246 +1,50 @@
 /* optimized3/styles/layout.css */
 /* Секции и контейнеры */
-.controls-section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-    width: 100%;
-}
+.controls-section{display: flex; flex-direction: column; gap: var(--spacing-lg); width: 100%;}
+.graph-section{display: flex !important; flex-direction: column; gap: var(--spacing-lg); width: 100%; align-items: center; position: relative; margin: 25px 0;}
+.main-controls-panel{display: flex; flex-direction: column; gap: var(--spacing-lg); width: 100%;}
 
-.graph-section {
-    display: flex !important; /* Явно задаем display */
-    flex-direction: column;
-    gap: var(--spacing-lg);
-    width: 100%;
-    align-items: center;
-	position: relative;
-	margin: 25px 0;
-}
-
-.main-controls-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-    width: 100%;
-}
-
-/* ОСНОВНОЙ КОНТЕЙНЕР ПАНЕЛЕЙ - объединяем все стили здесь */
-.control-panel {
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Даты 1/3, Волны 2/3 */
-    gap: var(--spacing-lg);
-    width: 100%;
-}
+/* Основной контейнер панелей - объединяем все стили здесь */
+.control-panel{display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-lg); width: 100%;}
 
 /* Позиционирование дочерних панелей */
-#dates-panel {
-    grid-column: 1;
-}
-
-#waves-panel {
-    grid-column: 2;
-}
-
-.panel-section {
-    background: #fff;
-    padding: var(--spacing-md);
-    overflow: visible;
-    min-width: 0;
-}
+#dates-panel{grid-column: 1;}
+#waves-panel{grid-column: 2;}
+.panel-section{background: #fff; padding: var(--spacing-md); overflow: visible; min-width: 0;}
 
 /* Контейнер для списка волн с фиксированным скроллом */
-.waves-list-container {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-}
-
-.waves-list {
-    height: 100%;
-    background: #fff;
-    overflow-y: auto;
-}
-
-.notes-panel-layout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
-
-.notes-list-container {
-    flex: 1;
-    min-width: 200px;
-}
-
-.note-editor-container {
-    flex: 2;
-    min-width: 300px;
-}
-
-.warning-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--cbg);
-    z-index: var(--z-overlay);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: var(--spacing-lg);
-}
-
-.warning-box {
-    background: #fff;
-    padding: var(--spacing-xl);
-    border: 1px solid var(--clg);
-    max-width: 525px;
-    text-align: center;
-}
+.waves-list-container{overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 0;}
+.waves-list{height: 100%; background: #fff; overflow-y: auto;}
+.notes-panel-layout{display: flex; flex-direction: column; gap: var(--spacing-lg);}
+.notes-list-container{flex: 1; min-width: 200px;}
+.note-editor-container{flex: 2; min-width: 300px;}
+.warning-overlay{position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--cbg); z-index: var(--z-overlay); display: flex; justify-content: center; align-items: center; flex-direction: column; padding: var(--spacing-lg);}
+.warning-box{background: #fff; padding: var(--spacing-xl); border: 1px solid var(--clg); max-width: 525px; text-align: center;}
 
 /* Табы */
-.tab-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.tab-buttons {
-    display: flex;
-    border-bottom: 1px solid #dee2e6;
-    padding: 0;
-    gap: 0;
-    flex-wrap: wrap;
-}
-
-.tab-button {
-    padding: 0 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #495057;
-    font-size: var(--font-size-sm);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 500;
-    height: 25px;
-}
-
-.tab-button:last-child {
-    border-right: none;
-}
-
-.tab-button.active {
-    background: var(--cp);
-    color: #fff;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
+.tab-container{display: flex; flex-direction: column;}
+.tab-buttons{display: flex; border-bottom: 1px solid #dee2e6; padding: 0; gap: 0; flex-wrap: wrap;}
+.tab-button{padding: 0 16px; background: none; border: none; cursor: pointer; color: #495057; font-size: var(--font-size-sm); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; height: 25px;}
+.tab-button:last-child{border-right: none;}
+.tab-button.active{background: var(--cp); color: #fff;}
+.tab-content{display: none;}
+.tab-content.active{display: block;}
 
 /* Формы */
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-sm);
-}
+.input-group{display: flex; flex-direction: column; gap: var(--spacing-xs); margin-bottom: var(--spacing-sm);}
+.input-row{display: flex; gap: var(--spacing-xs); align-items: center;}
 
-.input-row {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-}
-
-/* styles/layout.css - добавить */
-.tabs-section {
-    width: var(--gw);
-}
-
-.tab-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.tab-buttons {
-    display: flex;
-    border-bottom: 1px solid var(--clg);
-    padding: 0;
-    gap: 0;
-    flex-wrap: wrap;
-    background: #fff;
-}
-
-.tab-button {
-    padding: 8px 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 400;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.tab-button:last-child {
-    border-right: none;
-}
-
-.tab-button.active {
-    background: var(--cp);
-    color: #fff;
-    font-weight: 500;
-}
-
-.tab-button:hover:not(.active) {
-    background: #f5f5f5;
-}
-
-.tab-content {
-    display: none;
-    background: #fff;
-    border: 1px solid var(--clg);
-    border-top: none;
-    padding: var(--spacing-md);
-}
-
-.tab-content.active {
-    display: block;
-}
+/* Styles/layout.css - добавить */
+.tabs-section{width: var(--gw);}
+.tab-container{display: flex; flex-direction: column;}
+.tab-buttons{display: flex; border-bottom: 1px solid var(--clg); padding: 0; gap: 0; flex-wrap: wrap; background: #fff;}
+.tab-button{padding: 8px 16px; background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: var(--font-size-sm); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; height: 25px; display: flex; align-items: center; justify-content: center;}
+.tab-button:last-child{border-right: none;}
+.tab-button.active{background: var(--cp); color: #fff; font-weight: 500;}
+.tab-button:hover:not(.active){background: #f5f5f5;}
+.tab-content{display: none; background: #fff; border: 1px solid var(--clg); border-top: none; padding: var(--spacing-md);}
+.tab-content.active{display: block;}
 
 /* Стили для содержимого внутри табов */
-.tab-content .summary-panel,
-.tab-content #analysis-panel,
-.tab-content #notes-panel,
-.tab-content .db-import-section {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    border: none;
-    background: transparent;
-}
-
-.tab-content .panel-section {
-    border: none;
-    padding: 0;
-	outline: none;
-}
+.tab-content .summary-panel, .tab-content #analysis-panel, .tab-content #notes-panel, .tab-content .db-import-section{width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
+.tab-content .panel-section{border: none; padding: 0; outline: none;}

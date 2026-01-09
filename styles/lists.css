@@ -1,548 +1,123 @@
 /* optimized3/styles/lists.css */
-/* Абстрактные стили для списков и их элементов */
-
 /* Контейнер списка */
-.list-container {
-    border: 1px solid var(--clg);
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
-}
-
-.list-container--scrollable {
-    overflow-y: auto;
-    max-height: 400px;
-}
-
-.list-container--no-scroll {
-    overflow-y: visible;
-}
+.list-container{border: 1px solid var(--clg); background: #fff; display: flex; flex-direction: column; overflow-y: scroll;}
+.list-container--scrollable{overflow-y: auto; max-height: 400px;}
+.list-container--no-scroll{overflow-y: visible;}
 
 /* Элемент списка */
-.list-item {
-    padding: var(--spacing-sm);
-    background: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 40px;
-    position: relative;
-    outline: 1px solid var(--clg);
-}
-
-/* ДОБАВИТЬ: курсор pointer для кликабельных элементов */
-.list-item--clickable {
-    cursor: pointer;
-}
-
-.list-item--draggable {
-    cursor: move;
-}
-
-/* Drag handle */
-.list-item__drag-handle {
-    cursor: move;
-    color: #999;
-    padding: 2px;
-    flex-shrink: 0;
-    user-select: none;
-}
-
-.list-item__drag-handle:hover {
-    color: var(--text-color);
-}
+.list-item{padding: var(--spacing-sm); background: #fff; display: flex; align-items: center; gap: 8px; min-height: 40px; position: relative; outline: 1px solid var(--clg);}
+.list-item--clickable{cursor: pointer;}
+.list-item--draggable{cursor: move;}
+.list-item__drag-handle{cursor: move; color: #999; padding: 2px; flex-shrink: 0; user-select: none;}
+.list-item__drag-handle:hover{color: var(--text-color);}
 
 /* Состояния drag & drop */
-.list-item--dragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-}
-
-.list-item--drag-over {
-    background-color: #e6f2ff;
-    border-top: 2px solid var(--cp);
-}
+.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+.list-item--drag-over{background-color: #e6f2ff; border-top: 2px solid var(--cp);}
 
 /* Основное содержимое */
-.list-item__content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.list-item__row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--spacing-sm);
-    width: 100%;
-}
+.list-item__content{flex: 1; min-width: 0; display: flex; flex-direction: column;}
+.list-item__row{display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-sm); width: 100%;}
 
 /* Левая часть элемента */
-.list-item__left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 0;
-}
-
-.list-item__title-container {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    min-width: 0;
-    flex: 1;
-}
-
-.list-item__title {
-    font-weight: 400;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--text-color);
-}
-
-.list-item__icon {
-    color: var(--text-secondary);
-    font-size: var(--font-size-lg);
-    flex-shrink: 0;
-}
+.list-item__left{display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;}
+.list-item__title-container{display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; flex: 1;}
+.list-item__title{font-weight: 400; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);}
+.list-item__icon{color: var(--text-secondary); font-size: var(--font-size-lg); flex-shrink: 0;}
 
 /* Правая часть элемента */
-.list-item__right {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-shrink: 0;
-}
+.list-item__right{display: flex; gap: 8px; align-items: center; flex-shrink: 0;}
+.list-item__value{color: var(--text-secondary); white-space: nowrap; font-size: var(--font-size-sm);}
+.list-item__actions{display: flex; gap: 3px; flex-shrink: 0;}
 
-.list-item__value {
-    color: var(--text-secondary);
-    white-space: nowrap;
-    font-size: var(--font-size-sm);
-}
+/* Формы редактирования */
+.list-item__edit-form{display: none; gap: 8px; width: 100%;}
+.list-item__edit-row{display: flex; gap: var(--spacing-xs); align-items: center; width: 100%;}
+.list-item__edit-label{font-weight: 400; flex-shrink: 0; font-size: var(--font-size-sm); color: var(--text-color);}
+.list-item__edit-input{flex: 1; padding: 3px 5px; border: 1px solid var(--clg); min-width: 0; font-size: var(--font-size-sm); height: 25px;}
+.list-item__edit-actions{display: flex; gap: var(--spacing-xs); align-items: center; justify-content: flex-end;}
 
-.list-item__actions {
-    display: flex;
-    gap: 3px;
-    flex-shrink: 0;
-}
+/* Состояние редактирования */
+.list-item--editing .list-item__normal-view{display: none;}
+.list-item--editing .list-item__edit-form{display: flex;}
+.list-item--group.list-item--editing .group-children .list-item--wave .list-item__normal-view{display: flex !important;}
+.list-item--group.list-item--editing .group-children .list-item--wave .list-item__edit-form{display: none !important;}
+.list-item--wave.list-item--editing .list-item__normal-view{display: none;}
+.list-item--wave.list-item--editing .list-item__edit-form{display: flex;}
+.list-item--editing .list-item__drag-handle{opacity: 0.3; cursor: default;}
 
-/* Формы редактирования - ВЕРНУТЬ ИСХОДНУЮ СТИЛИЗАЦИЮ */
-.list-item__edit-form {
-    display: none;
-    gap: 8px;
-    width: 100%;
-}
+/* Типы элементов - дата */
+.list-item--date{cursor: pointer;}
+.list-item--date:hover{background-color: #f5f5f5;}
+.list-item--date.active{background-color: #e6f2ff;}
 
-.list-item__edit-row {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-    width: 100%;
-}
+/* Типы элементов - волна */
+.list-item--wave{cursor: default;}
+.list-item--wave:hover{background-color: #f5f5f5;}
+.list-item--wave .wave-controls-inline{display: flex; align-items: center; gap: 4px; margin-right: 8px;}
+.list-item--wave .wave-corner-color-check{margin-left: 2px; margin-right: 2px; flex-shrink: 0;}
+.list-item--wave .wave-corner-color-check:checked{accent-color: #ff6b6b;}
+.list-item--wave .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); margin-left: 8px; flex-shrink: 0;}
+.list-item--wave .wave-color-preview-small{width: 12px; height: 12px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; flex-shrink: 0;}
 
-.list-item__edit-label {
-    font-weight: 400;
-    flex-shrink: 0;
-    font-size: var(--font-size-sm);
-    color: var(--text-color);
-}
+/* Типы элементов - группа */
+.list-item--group{cursor: default;}
+.list-item--group:not(.list-item--expanded):hover{background-color: #f5f5f5;}
+.list-item--group.list-item--expanded{background-color: inherit;}
+.list-item--group.list-item--expanded:hover{background-color: inherit;}
+.list-item--group.active{background-color: #e6f2ff;}
+.list-item--group .wave-group-toggle{width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; margin-right: 8px;}
+.list-item--group .wave-group-toggle:hover{filter: brightness(0.9);}
+.group-children{margin-top: var(--spacing-sm); max-height: 369px; overflow-y: scroll; border: 1px solid var(--clg);}
+.list-item--expanded .group-children{display: block;}
+.group-children .list-item--wave{background: #fafafa;}
+.group-children .list-item--wave:last-child{margin-bottom: 0;}
+.group-children .list-item--wave:hover{background: #f0f0f0;}
+.group-children .wave-controls-inline{display: flex; align-items: center; gap: 6px; margin-right: 8px;}
+.group-children .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-left: 6px;}
+.group-children .wave-color-preview-small{width: 12px; height: 12px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;}
+.group-children .wave-corner-color-check{margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
+.group-children .wave-corner-color-check:checked{accent-color: #ff6b6b;}
 
-.list-item__edit-input {
-    flex: 1;
-    padding: 3px 5px;
-    border: 1px solid var(--clg);
-    min-width: 0;
-    font-size: var(--font-size-sm);
-    height: 25px;
-}
+/* Типы элементов - заметка */
+.list-item--note{cursor: default; flex-direction: column; align-items: flex-start; padding: var(--spacing-md);}
+.list-item--note:hover{background-color: #fff;}
+.list-item--note .note-content-wrapper{width: 100%; margin-bottom: 8px;}
+.list-item--note .note-time{font-weight: 700; color: var(--text-color); margin-bottom: 3px;}
+.list-item--note .note-text{color: var(--text-secondary); line-height: 1.4; margin-bottom: var(--spacing-xs);}
 
-/* БЫЛО: .list-item__edit-actions с отдельной линией сверху */
-/* СТАЛО: просто flex контейнер для кнопок, как в оригинале */
-.list-item__edit-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-    justify-content: flex-end;
-}
-
-/* Состояние редактирования - ДЛЯ ВСЕХ, КРОМЕ ВОЛН ВНУТРИ ГРУПП */
-.list-item--editing .list-item__normal-view {
-    display: none;
-}
-
-.list-item--editing .list-item__edit-form {
-    display: flex;
-}
-
-/* ОСОБЫЙ СЛУЧАЙ: волны внутри редактируемой группы НЕ должны скрываться */
-.list-item--group.list-item--editing .group-children .list-item--wave .list-item__normal-view {
-    display: flex !important;
-}
-
-.list-item--group.list-item--editing .group-children .list-item--wave .list-item__edit-form {
-    display: none !important;
-}
-
-/* И убедимся, что волны, которые сами в режиме редактирования, работают нормально */
-.list-item--wave.list-item--editing .list-item__normal-view {
-    display: none;
-}
-
-.list-item--wave.list-item--editing .list-item__edit-form {
-    display: flex;
-}
-
-.list-item--editing .list-item__drag-handle {
-    opacity: 0.3;
-    cursor: default;
-}
-
-/* Типы элементов */
-/* Дата - ДОБАВИТЬ cursor: pointer */
-.list-item--date {
-    cursor: pointer;
-}
-
-.list-item--date:hover {
-    background-color: #f5f5f5;
-}
-
-.list-item--date.active {
-    background-color: #e6f2ff;
-    /* УБИРАЕМ ПОЛОСОЧКУ СЛЕВА */
-}
-
-/* Волна */
-.list-item--wave {
-    cursor: default;
-}
-
-.list-item--wave:hover {
-    background-color: #f5f5f5;
-}
-
-.list-item--wave .wave-controls-inline {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-right: 8px;
-}
-
-/* ДОБАВЛЕНО: Стили для чекбокса окраски краев */
-.list-item--wave .wave-corner-color-check {
-    margin-left: 2px;
-    margin-right: 2px;
-    flex-shrink: 0;
-}
-
-.list-item--wave .wave-corner-color-check:checked {
-    accent-color: #ff6b6b; /* Яркий цвет для активного состояния */
-}
-
-.list-item--wave .wave-period-badge {
-    background: #e0e0e0;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: var(--font-size-xs);
-    margin-left: 8px;
-    flex-shrink: 0;
-}
-
-.list-item--wave .wave-color-preview-small {
-    width: 12px;
-    height: 12px;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-/* Группа - ИСПРАВЛЕНО: Убрать hover для развернутых групп */
-.list-item--group {
-    cursor: default; /* Не кликабельно целиком */
-}
-
-/* Hover эффекты для групп - ТОЛЬКО для свернутых */
-.list-item--group:not(.list-item--expanded):hover {
-    background-color: #f5f5f5; /* Hover только для свернутых групп */
-}
-
-.list-item--group.list-item--expanded {
-    background-color: inherit; /* НЕТ hover для развернутых */
-}
-
-.list-item--group.list-item--expanded:hover {
-    background-color: inherit; /* НЕТ hover для развернутых */
-}
-
-.list-item--group.active {
-    background-color: #e6f2ff;
-}
-
-/* Чекбокс группы */
-.list-item--group .wave-group-toggle {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-    flex-shrink: 0;
-    margin-right: 8px;
-}
-
-.list-item--group .wave-group-toggle:hover {
-    filter: brightness(0.9);
-}
-
-/* Дочерние элементы - ОБНОВЛЕНО: всегда существует, управляется display */
-.group-children {
-    margin-top: var(--spacing-sm);
-    max-height: 369px;
-    overflow-y: scroll;
-    border: 1px solid var(--clg);
-    /* Управляется через style="display: none/block" */
-}
-
-/* Показать дочерние элементы когда группа развернута */
-.list-item--expanded .group-children {
-    display: block;
-}
-
-.group-children .list-item--wave {
-    background: #fafafa;
-}
-
-.group-children .list-item--wave:last-child {
-    margin-bottom: 0;
-}
-
-.group-children .list-item--wave:hover {
-    background: #f0f0f0;
-}
-
-/* Иконка волны внутри группы */
-.group-children .wave-controls-inline {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-right: 8px;
-}
-
-.group-children .wave-period-badge {
-    background: #e0e0e0;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 9px;
-    margin-left: 6px;
-}
-
-.group-children .wave-color-preview-small {
-    width: 12px;
-    height: 12px;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    cursor: pointer;
-}
-
-/* Чекбокс окраски краев внутри группы */
-.group-children .wave-corner-color-check {
-    margin-left: 1px;
-    margin-right: 1px;
-    flex-shrink: 0;
-}
-
-.group-children .wave-corner-color-check:checked {
-    accent-color: #ff6b6b;
-}
-
-/* Заметка */
-.list-item--note {
-    cursor: default;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: var(--spacing-md);
-}
-
-.list-item--note:hover {
-    background-color: #fff;
-}
-
-.list-item--note .note-content-wrapper {
-    width: 100%;
-    margin-bottom: 8px;
-}
-
-.list-item--note .note-time {
-    font-weight: 700;
-    color: var(--text-color);
-    margin-bottom: 3px;
-}
-
-.list-item--note .note-text {
-    color: var(--text-secondary);
-    line-height: 1.4;
-    margin-bottom: var(--spacing-xs);
-}
-
-/* Пересечение */
-.list-item--intersection.exact-match {
-    background-color: #e6f7e6;
-}
-
-.list-item--intersection.close-match {
-    background-color: #fffbe6;
-}
-
-.list-item--intersection .intersection-info {
-    flex: 1;
-}
-
-.list-item--intersection .intersection-period {
-    font-weight: 700;
-    color: var(--text-color);
-}
-
-.list-item--intersection .intersection-match-type {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-.list-item--intersection .intersection-controls {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-    flex-shrink: 0;
-}
+/* Типы элементов - пересечение */
+.list-item--intersection.exact-match{background-color: #e6f7e6;}
+.list-item--intersection.close-match{background-color: #fffbe6;}
+.list-item--intersection .intersection-info{flex: 1;}
+.list-item--intersection .intersection-period{font-weight: 700; color: var(--text-color);}
+.list-item--intersection .intersection-match-type{font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 2px;}
+.list-item--intersection .intersection-controls{display: flex; gap: var(--spacing-xs); align-items: center; flex-shrink: 0;}
 
 /* Пустой список */
-.list-empty {
-    padding: var(--spacing-lg);
-    text-align: center;
-    color: #999;
-    font-style: italic;
-    font-size: var(--font-size-sm);
-}
+.list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
 
 /* Ошибка */
-.list-error {
-    padding: var(--spacing-sm);
-    text-align: center;
-    color: var(--danger-color);
-    font-size: var(--font-size-sm);
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
+.list-error{padding: var(--spacing-sm); text-align: center; color: var(--danger-color); font-size: var(--font-size-sm); background: #f8d7da; border: 1px solid #f5c6cb;}
 
 /* Стили для статистики группы */
-.group-stats {
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
-    display: flex;
-    gap: 8px;
-}
-
-.group-enabled-count {
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    opacity: 0.8;
-}
-
-.group-total-count {
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    opacity: 0.8;
-}
+.group-stats{font-size: var(--font-size-sm); white-space: nowrap; display: flex; gap: 8px;}
+.group-enabled-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
+.group-total-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
 
 /* Для темного режима графика */
-.graph-container.dark-mode .group-enabled-count {
-    color: #4CAF50;
-}
+.graph-container.dark-mode .group-enabled-count{color: #4CAF50;}
 
-/* ДОБАВЛЕНО: Стили для drag & drop групп */
-.list-item--group.list-item--dragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-}
-
-.list-item--group.list-item--drag-over-top::before {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-}
-
-.list-item--group.list-item--drag-over-bottom::after {
-    content: '';
-    position: absolute;
-    left: -5px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-}
-
-/* Курсор перетаскивания для групп */
-.list-item--group:not(.list-item--editing) .list-item__drag-handle {
-    cursor: move;
-}
-
-/* Отключаем перетаскивание при редактировании */
-.list-item--group.list-item--editing .list-item__drag-handle {
-    opacity: 0.3;
-    cursor: default;
-}
-
+/* Стили для drag & drop групп */
+.list-item--group.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+.list-item--group.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+.list-item--group.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+.list-item--group:not(.list-item--editing) .list-item__drag-handle{cursor: move;}
+.list-item--group.list-item--editing .list-item__drag-handle{opacity: 0.3; cursor: default;}
 
 /* Дополнительные стили для индикатора вставки */
-.drop-indicator {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: #666;
-    z-index: 100;
-    pointer-events: none;
-}
-
-/* Стили для подсветки области вставки */
-.list-item--drag-over-top::before {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-}
-
-.list-item--drag-over-bottom::after {
-    content: '';
-    position: absolute;
-    left: -5px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-}
-
-.list-item:first-child {overflow: hidden;}
-.list-item:last-child {overflow: hidden;}
+.drop-indicator{position: absolute; left: 0; right: 0; height: 2px; background-color: #666; z-index: 100; pointer-events: none;}
+.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+.list-item:first-child{overflow: hidden;}
+.list-item:last-child{overflow: hidden;}

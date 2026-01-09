@@ -1,89 +1,21 @@
 /* Контейнеры сетки */
-.grid-absolute-container,
-.grid-static-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.grid-static-container {
-    pointer-events: none;
-    z-index: 5;
-}
+.grid-absolute-container, .grid-static-container{position: absolute; width: 100%; height: 100%; top: 0; left: 0;}
+.grid-static-container{pointer-events: none; z-index: 5;}
 
 /* Метки */
-.labels {
-    position: absolute;
-}
-
-.date-labels {
-    bottom: 30px;
-    transform: translateX(-50%);
-}
-
-.weekday-label {
-    bottom: 10px;
-    transform: translateX(-50%);
-}
-
-.y-labels {
-    left: 10px;
-    transform: translateY(-50%);
-}
+.labels{position: absolute;}
+.date-labels{bottom: 30px; transform: translateX(-50%);}
+.weekday-label{bottom: 10px; transform: translateX(-50%);}
+.y-labels{left: 10px; transform: translateY(-50%);}
 
 /* Горизонтальные выноски */
-.wave-label.horizontal {
-    position: absolute;
-    background-color: var(--wave-color, #666);
-    color: #fff;
-    opacity: 0.5;
-    z-index: 1;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 11px;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-
-.wave-label.horizontal:hover {
-    opacity: 1;
-    z-index: 10;
-}
-
-.wave-label.horizontal.left {
-    right: 0;
-    margin-right: 10px;
-}
-
-.wave-label.horizontal.right {
-    left: 0;
-    margin-left: 10px;
-}
+.wave-label.horizontal{position: absolute; background-color: var(--wave-color, #666); color: #fff; opacity: 0.5; z-index: 1; padding: 2px 6px; border-radius: 3px; font-size: 11px; transform: translateY(-50%); cursor: pointer;}
+.wave-label.horizontal:hover{opacity: 1; z-index: 10;}
+.wave-label.horizontal.left{right: 0; margin-right: 10px;}
+.wave-label.horizontal.right{left: 0; margin-left: 10px;}
 
 /* Стрелки */
-.wave-label-arrow {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    z-index: 1;
-}
+.wave-label-arrow{position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
 
 /* Вертикальные выноски */
-.wave-label.vertical {
-    position: absolute;
-    background-color: var(--wave-color, #666);
-    color: #fff;
-    opacity: 0.5;
-    z-index: 1;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 11px;
-    transform: translateX(-50%);
-    cursor: pointer;
-    font-family: monospace;
-    letter-spacing: 0.5px;
-}
-
+.wave-label.vertical{position: absolute; background-color: var(--wave-color, #666); color: #fff; opacity: 0.5; z-index: 1; padding: 2px 6px; border-radius: 3px; font-size: 11px; transform: translateX(-50%); cursor: pointer; font-family: monospace; letter-spacing: 0.5px;}

@@ -1,541 +1,126 @@
 /* optimized3/styles/graph.css - ОБНОВЛЕННЫЙ */
-.graph-container {
-    position: relative;
-    width: var(--gw);
-    height: var(--gh);
-    background-color: #fff;
-    outline: 1px solid var(--clg);
-    overflow: hidden;
-}
+/* Graph container */
+.graph-container{position: relative; width: var(--gw); height: var(--gh); background-color: #fff; outline: 1px solid var(--clg); overflow: hidden;}
+.graph-container.graph-gray-mode{filter: grayscale(1);}
 
-.graph-container.graph-gray-mode {
-    filter: grayscale(1);
-}
+/* Важное исправление: серость должна применяться и к выноскам */
+.graph-container.graph-gray-mode .wave-label{filter: grayscale(1) !important;}
+.graph-container.graph-gray-mode .wave-axis-x-point{filter: grayscale(1) !important;}
+.graph-container.graph-gray-mode .axis{filter: none;}
+.graph-container.graph-gray-mode .grid-line, .graph-container.graph-gray-mode .grid-line-inner, .graph-container.graph-gray-mode .wave-path{filter: none;}
+.graph-container.dark-mode{background-color: #000;}
 
-/* ВАЖНОЕ ИСПРАВЛЕНИЕ: серость должна применяться и к выноскам */
-.graph-container.graph-gray-mode .wave-label {
-    filter: grayscale(1) !important;
-}
+/* Контейнер для горизонтальных выносок колосков */
+.wave-labels-container{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible;}
+.wave-labels-container .wave-labels-side{position: absolute; top: 0; height: 100%; width: 200px;}
+.wave-labels-left{left: -200px; text-align: right;}
+.wave-labels-right{right: -200px; text-align: left;}
 
-.graph-container.graph-gray-mode .wave-axis-x-point {
-    filter: grayscale(1) !important;
-}
+/* Контейнер для вертикальных выносок колосков */
+.wave-labels-vertical-container{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible;}
+.wave-labels-vertical-container .wave-labels-side{position: absolute; width: 100%; height: 30px;}
+.wave-labels-top{top: -30px;}
+.wave-labels-bottom{bottom: -30px;}
 
-.graph-container.graph-gray-mode .axis {
-    filter: none;
-}
-
-.graph-container.graph-gray-mode .grid-line,
-.graph-container.graph-gray-mode .grid-line-inner,
-.graph-container.graph-gray-mode .wave-path {
-    filter: none;
-}
-
-.graph-container.dark-mode {
-    background-color: #000;
-}
-
-/* КОНТЕЙНЕР ДЛЯ ГОРИЗОНТАЛЬНЫХ ВЫНОСОК КОЛОСКОВ */
-.wave-labels-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-    overflow: visible; /* ВАЖНО: разрешаем выходить за пределы */
-}
-
-/* Стороны для горизонтальных выносок */
-.wave-labels-container .wave-labels-side {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 200px;
-}
-
-.wave-labels-left {
-    left: -200px;
-    text-align: right;
-}
-
-.wave-labels-right {
-    right: -200px;
-    text-align: left;
-}
-
-/* КОНТЕЙНЕР ДЛЯ ВЕРТИКАЛЬНЫХ ВЫНОСОК КОЛОСКОВ */
-.wave-labels-vertical-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-    overflow: visible;
-}
-
-/* Стороны для вертикальных выносок */
-.wave-labels-vertical-container .wave-labels-side {
-    position: absolute;
-    width: 100%;
-    height: 30px;
-}
-
-.wave-labels-top {
-    top: -30px;
-}
-
-.wave-labels-bottom {
-    bottom: -30px;
-}
-
-/* ТОЧКИ ПЕРЕСЕЧЕНИЯ С ОСЬЮ X (ЭКВИЛИБРИУМ) */
-.wave-axis-x-points {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 8;
-}
-
-.wave-axis-x-points.hidden {
-    display: none !important;
-}
-
-.wave-axis-x-point {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    border: 1px solid #fff;
-    box-shadow: 0 0 2px rgba(0,0,0,0.3);
-    cursor: pointer;
-    pointer-events: auto;
-    z-index: 9;
-    transition: all 0.2s;
-    transform: translate(-50%, -50%);
-}
-
-.wave-axis-x-point:hover {
-    transform: translate(-50%, -50%) scale(1.3);
-    z-index: 10;
-    box-shadow: 0 0 4px rgba(0,0,0,0.5);
-}
+/* Точки пересечения с осью X (эквилибриум) */
+.wave-axis-x-points{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8;}
+.wave-axis-x-points.hidden{display: none !important;}
+.wave-axis-x-point{position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #fff; box-shadow: 0 0 2px rgba(0,0,0,0.3); cursor: pointer; pointer-events: auto; z-index: 9; transition: all 0.2s; transform: translate(-50%, -50%);}
+.wave-axis-x-point:hover{transform: translate(-50%, -50%) scale(1.3); z-index: 10; box-shadow: 0 0 4px rgba(0,0,0,0.5);}
 
 /* Темный режим для точек на оси X */
-.graph-container.dark-mode .wave-axis-x-point {
-    border-color: #000;
-    box-shadow: 0 0 3px rgba(255,255,255,0.3);
-}
+.graph-container.dark-mode .wave-axis-x-point{border-color: #000; box-shadow: 0 0 3px rgba(255,255,255,0.3);}
+.graph-container.dark-mode .wave-axis-x-point:hover{box-shadow: 0 0 5px rgba(255,255,255,0.5);}
 
-.graph-container.dark-mode .wave-axis-x-point:hover {
-    box-shadow: 0 0 5px rgba(255,255,255,0.5);
-}
+/* Общие стили для всех выносок */
+.wave-label{position: absolute; display: flex; align-items: center; white-space: nowrap; font-size: var(--font-size-sm); font-weight: 400; pointer-events: auto; cursor: default; padding: 2px 8px; color: #fff; border-radius: 3px; opacity: 0.5; z-index: 1;}
+.wave-label:hover{opacity: 1; z-index: 10; filter: brightness(1.2);}
 
-/* ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ ВЫНОСОК */
-.wave-label {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    font-size: var(--font-size-sm);
-    font-weight: 400;
-    pointer-events: auto;
-    cursor: default;
-    padding: 2px 8px;
-    color: #fff;
-    border-radius: 3px;
-    opacity: 0.5;
-    z-index: 1;
-}
-
-.wave-label:hover {
-    opacity: 1;
-    z-index: 10;
-    filter: brightness(1.2);
-}
-
-/* ГОРИЗОНТАЛЬНЫЕ ВЫНОСКИ (левые/правые) */
-.wave-labels-container .wave-label.horizontal {
-    transform: translateY(-50%);
-    height: 20px;
-}
+/* Горизонтальные выноски (левые/правые) */
+.wave-labels-container .wave-label.horizontal{transform: translateY(-50%); height: 20px;}
 
 /* Левая сторона: текст → стрелка */
-.wave-labels-left .wave-label {
-    flex-direction: row-reverse;
-    right: 0;
-    margin-right: 10px;
-}
+.wave-labels-left .wave-label{flex-direction: row-reverse; right: 0; margin-right: 10px;}
 
 /* Правая сторона: стрелка → текст */
-.wave-labels-right .wave-label {
-    flex-direction: row;
-    left: 0;
-    margin-left: 10px;
-}
+.wave-labels-right .wave-label{flex-direction: row; left: 0; margin-left: 10px;}
 
-/* ВЕРТИКАЛЬНЫЕ ВЫНОСКИ (верхние/нижние) */
-.wave-labels-vertical-container .wave-label.vertical {
-    transform: translateX(-50%);
-    height: 20px;
-}
+/* Вертикальные выноски (верхние/нижние) */
+.wave-labels-vertical-container .wave-label.vertical{transform: translateX(-50%); height: 20px;}
 
 /* Верхняя сторона */
-.wave-labels-top .wave-label {
-    top: 0;
-    margin-top: 5px;
-}
+.wave-labels-top .wave-label{top: 0; margin-top: 5px;}
 
 /* Нижняя сторона */
-.wave-labels-bottom .wave-label {
-    bottom: 0;
-    margin-bottom: 5px;
-}
+.wave-labels-bottom .wave-label{bottom: 0; margin-bottom: 5px;}
 
 /* Текст выноски */
-.wave-label-text {
-    white-space: nowrap;
-    font-weight: 400;
-    font-size: 11px;
-    position: relative;
-    z-index: 2;
-}
+.wave-label-text{white-space: nowrap; font-weight: 400; font-size: 11px; position: relative; z-index: 2;}
 
 /* Стрелки для выносок */
-.wave-label-arrow {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    z-index: 1;
-}
+.wave-label-arrow{position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
 
 /* Стрелки для горизонтальных выносок */
-.wave-labels-container .wave-label-arrow {
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.wave-labels-left .wave-label-arrow {
-    right: -6px;
-    border-width: 4px 0 4px 6px;
-    border-color: transparent transparent transparent inherit;
-}
-
-.wave-labels-right .wave-label-arrow {
-    left: -6px;
-    border-width: 4px 6px 4px 0;
-    border-color: transparent inherit transparent transparent;
-}
+.wave-labels-container .wave-label-arrow{top: 50%; transform: translateY(-50%);}
+.wave-labels-left .wave-label-arrow{right: -6px; border-width: 4px 0 4px 6px; border-color: transparent transparent transparent inherit;}
+.wave-labels-right .wave-label-arrow{left: -6px; border-width: 4px 6px 4px 0; border-color: transparent inherit transparent transparent;}
 
 /* Стрелки для вертикальных выносок */
-.wave-labels-vertical-container .wave-label-arrow {
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.wave-labels-top .wave-label-arrow {
-    bottom: -6px;
-    border-width: 6px 4px 0 4px;
-    border-color: inherit transparent transparent transparent;
-}
-
-.wave-labels-bottom .wave-label-arrow {
-    top: -6px;
-    border-width: 0 4px 6px 4px;
-    border-color: transparent transparent inherit transparent;
-}
+.wave-labels-vertical-container .wave-label-arrow{left: 50%; transform: translateX(-50%);}
+.wave-labels-top .wave-label-arrow{bottom: -6px; border-width: 6px 4px 0 4px; border-color: inherit transparent transparent transparent;}
+.wave-labels-bottom .wave-label-arrow{top: -6px; border-width: 0 4px 6px 4px; border-color: transparent transparent inherit transparent;}
 
 /* Темный режим графика */
-.graph-container.dark-mode .wave-label {
-    border-color: rgba(255, 255, 255, 0.3);
-}
+.graph-container.dark-mode .wave-label{border-color: rgba(255, 255, 255, 0.3);}
 
-/* СКРЫТЫЕ ВЫНОСКИ */
-.wave-labels-container.hidden,
-.wave-labels-vertical-container.hidden {
-    display: none !important;
-}
+/* Скрытые выноски */
+.wave-labels-container.hidden, .wave-labels-vertical-container.hidden{display: none !important;}
 
 /* Остальные стили без изменений... */
-
-.graph {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform: scaleX(1) scaleY(1);
-}
-
-.axis {
-    position: absolute;
-    background-color: #c9c9c9;
-    z-index: 5;
-    cursor: pointer;
-    pointer-events: none;
-}
-
-.graph-container.dark-mode .axis {
-    background-color: #644e4e;
-}
-
-.x-axis {
-    width: 100%;
-    height: 1px;
-    bottom: 50%;
-    left: 0;
-}
-
-.y-axis {
-    width: 1px;
-    height: 100%;
-    left: 50%;
-    top: 0;
-}
-
-.grid-wrapper {
-    position: absolute;
-    width: var(--sq);
-    height: 100%;
-    cursor: pointer;
-    z-index: 4;
-}
-
-.grid-wrapper:hover .grid-line-inner {
-    background-color: #ccc;
-}
-
-.grid-line-inner {
-    position: absolute;
-    left: 50%;
-    width: 1px;
-    height: 100%;
-    background-color: #eee;
-    z-index: 5;
-}
-
-.graph-container.dark-mode .grid-line-inner {
-    background-color: #2b2727
-}
-
-.grid-line-inner.active {
-    background-color: var(--cp) !important;
-    z-index: 6 !important;
-}
-
-.grid-line-inner.has-notes {
-    background-color: var(--danger-color);
-}
-
-.grid-wrapper:hover .grid-line-inner.has-notes {
-    background-color: #ff4444;
-}
-
-.grid-line-inner.active:hover,
-.grid-wrapper:hover .grid-line-inner.active {
-    background-color: var(--cp) !important;
-}
-
-.grid-line-inner.active.has-notes,
-.grid-wrapper:hover .grid-line-inner.active.has-notes {
-    background-color: var(--danger-color) !important;
-}
-
-.grid-line {
-    position: absolute;
-    background-color: #eee;
-    z-index: 1;
-}
-
-.graph-container.dark-mode .grid-line {
-    background-color: #2b2727
-}
-
-.grid-line.x {
-    width: 100%;
-    height: 1px;
-    left: 0;
-}
-
-.grid-line.y {
-    width: 1px;
-    height: 100%;
-    top: 0;
-    cursor: pointer;
-    z-index: 6;
-    background-color: #eee;
-    transition: width 0.2s, background-color 0.2s;
-}
-
-.graph-container.dark-mode .grid-line.y:hover {
-    background-color: #888;
-}
-
-.grid-line.y.active {
-    background-color: var(--cp);
-    width: 1px;
-    z-index: 7;
-}
-
-.grid-line.y.active:hover {
-    background-color: var(--cp);
-    width: 1px;
-}
-
-.grid-line.y.has-notes {
-    background-color: var(--danger-color);
-}
-
-.grid-line.y.has-notes:hover {
-    background-color: #ff4444;
-    width: 3px;
-}
-
-.graph-container.dark-mode .grid-line.y.has-notes:hover {
-    background-color: #ff6666;
-    width: 3px;
-}
-
-.grid-line.y.active.has-notes {
-    background-color: var(--danger-color);
-}
-
-.grid-line.y.active.has-notes:hover {
-    background-color: var(--danger-color);
-    width: 1px;
-}
-
-.x-labels {
-    bottom: 10px;
-    transform: translateX(-50%);
-    color: var(--text-secondary);
-}
-
-.graph-container.dark-mode .x-labels {
-    color: #ccc;
-}
-
-.date-labels {
-    bottom: 30px;
-    transform: translateX(-50%);
-    color: var(--text-secondary);
-}
-
-.graph-container.dark-mode .date-labels {
-    color: #fff;
-}
-
-.y-labels {
-    left: 10px;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-}
-
-.graph-container.dark-mode .y-labels {
-    color: #ccc;
-}
-
-.center-date-label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.9);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    z-index: 20;
-    color: var(--text-color);
-    text-align: center;
-    pointer-events: none;
-    font-weight: 400;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    line-height: 1.2;
-    font-size: var(--font-size-md);
-    min-height: auto;
-}
-
-.graph-container.dark-mode .center-date-label {
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-}
-
-.center-date-time {
-    font-size: var(--font-size-md);
-    color: var(--text-secondary);
-    margin: 2px 0;
-}
-
-.graph-container.dark-mode .center-date-time {
-    color: #ccc;
-}
-
-.center-date-fractional {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin: 2px 0;
-    opacity: 0.7;
-}
-
-.graph-container.dark-mode .center-date-fractional {
-    color: #aaa;
-}
-
-.center-date-name {
-    font-size: var(--font-size-md);
-    color: var(--text-color);
-    margin-top: 2px;
-}
-
-.graph-container.dark-mode .center-date-name {
-    color: #fff;
-}
-
-.center-date-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    margin-bottom: 4px;
-}
-
-.center-date-datetime {
-    font-size: var(--font-size-md);
-    color: var(--text-color);
-    font-weight: 400;
-    white-space: nowrap;
-}
-
-.graph-container.dark-mode .center-date-datetime {
-    color: #fff;
-}
-
-.center-name-container {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 2px;
-}
-
-.center-date-name {
-    font-size: var(--font-size-md);
-    color: var(--text-color);
-}
-
-.center-date-weekday {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin-top: 4px;
-  font-weight: 400;
-}
-
-.center-date-star {
-  font-size: 22px;
-}
+.graph{position: relative; width: 100%; height: 100%; transform: scaleX(1) scaleY(1);}
+.axis{position: absolute; background-color: #c9c9c9; z-index: 5; cursor: pointer; pointer-events: none;}
+.graph-container.dark-mode .axis{background-color: #644e4e;}
+.x-axis{width: 100%; height: 1px; bottom: 50%; left: 0;}
+.y-axis{width: 1px; height: 100%; left: 50%; top: 0;}
+.grid-wrapper{position: absolute; width: var(--sq); height: 100%; cursor: pointer; z-index: 4;}
+.grid-wrapper:hover .grid-line-inner{background-color: #ccc;}
+.grid-line-inner{position: absolute; left: 50%; width: 1px; height: 100%; background-color: #eee; z-index: 5;}
+.graph-container.dark-mode .grid-line-inner{background-color: #2b2727;}
+.grid-line-inner.active{background-color: var(--cp) !important; z-index: 6 !important;}
+.grid-line-inner.has-notes{background-color: var(--danger-color);}
+.grid-wrapper:hover .grid-line-inner.has-notes{background-color: #ff4444;}
+.grid-line-inner.active:hover, .grid-wrapper:hover .grid-line-inner.active{background-color: var(--cp) !important;}
+.grid-line-inner.active.has-notes, .grid-wrapper:hover .grid-line-inner.active.has-notes{background-color: var(--danger-color) !important;}
+.grid-line{position: absolute; background-color: #eee; z-index: 1;}
+.graph-container.dark-mode .grid-line{background-color: #2b2727;}
+.grid-line.x{width: 100%; height: 1px; left: 0;}
+.grid-line.y{width: 1px; height: 100%; top: 0; cursor: pointer; z-index: 6; background-color: #eee; transition: width 0.2s, background-color 0.2s;}
+.graph-container.dark-mode .grid-line.y:hover{background-color: #888;}
+.grid-line.y.active{background-color: var(--cp); width: 1px; z-index: 7;}
+.grid-line.y.active:hover{background-color: var(--cp); width: 1px;}
+.grid-line.y.has-notes{background-color: var(--danger-color);}
+.grid-line.y.has-notes:hover{background-color: #ff4444; width: 3px;}
+.graph-container.dark-mode .grid-line.y.has-notes:hover{background-color: #ff6666; width: 3px;}
+.grid-line.y.active.has-notes{background-color: var(--danger-color);}
+.grid-line.y.active.has-notes:hover{background-color: var(--danger-color); width: 1px;}
+.x-labels{bottom: 10px; transform: translateX(-50%); color: var(--text-secondary);}
+.graph-container.dark-mode .x-labels{color: #ccc;}
+.date-labels{bottom: 30px; transform: translateX(-50%); color: var(--text-secondary);}
+.graph-container.dark-mode .date-labels{color: #fff;}
+.y-labels{left: 10px; transform: translateY(-50%); color: var(--text-secondary);}
+.graph-container.dark-mode .y-labels{color: #ccc;}
+.center-date-label{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, 0.9); padding: var(--spacing-xs) var(--spacing-sm); z-index: 20; color: var(--text-color); text-align: center; pointer-events: none; font-weight: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; font-size: var(--font-size-md); min-height: auto;}
+.graph-container.dark-mode .center-date-label{background: rgba(0, 0, 0, 0.8); color: #fff;}
+.center-date-time{font-size: var(--font-size-md); color: var(--text-secondary); margin: 2px 0;}
+.graph-container.dark-mode .center-date-time{color: #ccc;}
+.center-date-fractional{font-size: var(--font-size-sm); color: var(--text-secondary); margin: 2px 0; opacity: 0.7;}
+.graph-container.dark-mode .center-date-fractional{color: #aaa;}
+.center-date-name{font-size: var(--font-size-md); color: var(--text-color); margin-top: 2px;}
+.graph-container.dark-mode .center-date-name{color: #fff;}
+.center-date-main{display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-bottom: 4px;}
+.center-date-datetime{font-size: var(--font-size-md); color: var(--text-color); font-weight: 400; white-space: nowrap;}
+.graph-container.dark-mode .center-date-datetime{color: #fff;}
+.center-name-container{display: flex; align-items: center; gap: 4px; margin-top: 2px;}
+.center-date-name{font-size: var(--font-size-md); color: var(--text-color);}
+.center-date-weekday{font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 4px; font-weight: 400;}
+.center-date-star{font-size: 22px;}

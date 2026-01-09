@@ -1,234 +1,55 @@
 /* optimized3/styles/responsive.css */
 @media (max-width: 768px) {
     /* Адаптация для мобильных - меняем grid на flex */
-    .control-panel {
-        grid-template-columns: 1fr;
-    }
-    
-    #dates-panel {
-        grid-column: 1;
-    }
-    
-    #waves-panel {
-        grid-column: 1;
-    }
-    
-    .top-controls {
-        flex-direction: column;
-        height: auto;
-    }
-    
-    .top-controls > * {
-        height: auto;
-        width: 100%;
-    }
-    
-    .transform-controls {
-        flex-wrap: wrap;
-    }
-    
-    .form-row,
-    .edit-form-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .form-label,
-    .edit-form-label {
-        width: auto;
-    }
-    
-    .input-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .input-label {
-        width: auto;
-    }
-    
-    .tab-buttons {
-        flex-direction: column;
-    }
-    
-    .tab-button {
-        text-align: center;
-        border-right: none;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .tab-button:last-child {
-        border-bottom: none;
-    }
-    
-    .wave-control {
-        flex-wrap: wrap;
-    }
-    
-    .date-item {
-        flex-wrap: wrap;
-    }
-    
-    .date-name {
-        min-width: 100%;
-        margin-bottom: var(--spacing-xs);
-    }
-    
-    .custom-wave-item-controls {
-        flex-wrap: wrap;
-    }
-    
-    .corner-square.tc,
-    .corner-square.bc,
-    .corner-square.lc,
-    .corner-square.rc,
-    .corner-square.mt,
-    .corner-square.mb,
-    .corner-square.ml,
-    .corner-square.mr,
-    .corner-square.mt2,
-    .corner-square.mb2,
-    .corner-square.ml2,
-    .corner-square.mr2 {
-        display: none;
-    }
-    
-    .add-custom-wave-form {
-        flex-direction: column;
-    }
-    
-    .add-custom-wave-form.compact {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .add-custom-wave-form.compact .add-group-form {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .add-custom-wave-form.compact .add-group-input,
-    .add-custom-wave-form.compact .wave-inputs-row .form-input,
-    .add-custom-wave-form.compact .wave-inputs-row select,
-    .add-custom-wave-form.compact .wave-inputs-row .color-input {
-        width: 100%;
-        min-width: 0;
-    }
-    
-    .add-custom-wave-form.compact .add-group-btn,
-    .add-custom-wave-form.compact .wave-inputs-row #btnAddCustomWave {
-        width: 100%;
-    }
-    
-    .add-custom-wave-form.compact .wave-inputs-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .date-controls-buttons {
-        flex-direction: column;
-    }
-    
-    .notes-panel-layout {
-        flex-direction: column;
-    }
-    
-    .add-group-form {
-        flex-direction: column;
-    }
-    
-    .db-import-controls {
-        flex-direction: column;
-    }
-    
-    .intersection-form-row {
-        flex-direction: column;
-    }
-    
-    .intersection-form-label {
-        width: auto;
-    }
-    
-    .corner-controls {
-        flex-direction: column;
-    }
-    
-    .wave-group-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-    
-    .wave-group-right {
-        margin-left: 0;
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .wave-group-count {
-        display: none;
-    }
-    
-    .date-normal-view,
-    .edit-date-form {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-    
-    .wave-group-children {
-        padding: var(--spacing-xs) var(--spacing-sm);
-    }
-    
-    .wave-group-left {
-        flex-wrap: wrap;
-    }
-    
-    .wave-group-title {
-        font-size: var(--font-size-sm);
-    }
+    .control-panel{grid-template-columns: 1fr;}
+    #dates-panel{grid-column: 1;}
+    #waves-panel{grid-column: 1;}
+    .top-controls{flex-direction: column; height: auto;}
+    .top-controls > *{height: auto; width: 100%;}
+    .transform-controls{flex-wrap: wrap;}
+    .form-row, .edit-form-row{flex-direction: column; align-items: flex-start;}
+    .form-label, .edit-form-label{width: auto;}
+    .input-row{flex-direction: column; align-items: flex-start;}
+    .input-label{width: auto;}
+    .tab-buttons{flex-direction: column;}
+    .tab-button{text-align: center; border-right: none; border-bottom: 1px solid #dee2e6;}
+    .tab-button:last-child{border-bottom: none;}
+    .wave-control{flex-wrap: wrap;}
+    .date-item{flex-wrap: wrap;}
+    .date-name{min-width: 100%; margin-bottom: var(--spacing-xs);}
+    .custom-wave-item-controls{flex-wrap: wrap;}
+    .corner-square.tc, .corner-square.bc, .corner-square.lc, .corner-square.rc, .corner-square.mt, .corner-square.mb, .corner-square.ml, .corner-square.mr, .corner-square.mt2, .corner-square.mb2, .corner-square.ml2, .corner-square.mr2{display: none;}
+    .add-custom-wave-form{flex-direction: column;}
+    .add-custom-wave-form.compact{flex-direction: column; gap: 10px;}
+    .add-custom-wave-form.compact .add-group-form{flex-direction: column; gap: 8px;}
+    .add-custom-wave-form.compact .add-group-input, .add-custom-wave-form.compact .wave-inputs-row .form-input, .add-custom-wave-form.compact .wave-inputs-row select, .add-custom-wave-form.compact .wave-inputs-row .color-input{width: 100%; min-width: 0;}
+    .add-custom-wave-form.compact .add-group-btn, .add-custom-wave-form.compact .wave-inputs-row #btnAddCustomWave{width: 100%;}
+    .add-custom-wave-form.compact .wave-inputs-row{flex-direction: column; gap: 10px;}
+    .date-controls-buttons{flex-direction: column;}
+    .notes-panel-layout{flex-direction: column;}
+    .add-group-form{flex-direction: column;}
+    .db-import-controls{flex-direction: column;}
+    .intersection-form-row{flex-direction: column;}
+    .intersection-form-label{width: auto;}
+    .corner-controls{flex-direction: column;}
+    .wave-group-header{flex-direction: column; align-items: flex-start; gap: var(--spacing-sm);}
+    .wave-group-right{margin-left: 0; width: 100%; justify-content: space-between;}
+    .wave-group-count{display: none;}
+    .date-normal-view, .edit-date-form{flex-direction: column; align-items: stretch; gap: 8px;}
+    .wave-group-children{padding: var(--spacing-xs) var(--spacing-sm);}
+    .wave-group-left{flex-wrap: wrap;}
+    .wave-group-title{font-size: var(--font-size-sm);}
     
     /* Адаптация для очень маленьких экранов */
     @media (max-width: 480px) {
-        .mobile-warning-overlay .warning-box {
-            max-width: 95%;
-            padding: 15px;
-        }
-        
-        .mobile-warning-box .warning-title {
-            font-size: 16px;
-        }
-        
-        .mobile-warning-box .warning-text {
-            font-size: 13px;
-        }
-        
-        .warning-info {
-            font-size: 12px;
-        }
+        .mobile-warning-overlay .warning-box{max-width: 95%; padding: 15px;}
+        .mobile-warning-box .warning-title{font-size: 16px;}
+        .mobile-warning-box .warning-text{font-size: 13px;}
+        .warning-info{font-size: 12px;}
     }
 }
 
 /* Мобильные устройства - полный тупик */
-body.mobile-device .interface-container,
-body.mobile-device .controls-section,
-body.mobile-device .graph-section,
-body.mobile-device .panel-section,
-body.mobile-device .corner-square {
-    display: none !important;
-}
-
-body.mobile-device {
-    overflow: hidden;
-    height: 100vh;
-}
-
-body.mobile-device .warning-overlay {
-    display: flex !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 99999;
-}
+body.mobile-device .interface-container, body.mobile-device .controls-section, body.mobile-device .graph-section, body.mobile-device .panel-section, body.mobile-device .corner-square{display: none !important;}
+body.mobile-device{overflow: hidden; height: 100vh;}
+body.mobile-device .warning-overlay{display: flex !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999;}
