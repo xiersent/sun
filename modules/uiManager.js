@@ -316,20 +316,25 @@ class UIManager {
         window.appState.save();
     }
     
-    toggleGraphGrayMode() {
-        window.appState.graphGrayMode = !window.appState.graphGrayMode;
-        
-        const graphContainer = document.getElementById('graphContainer');
-        if (graphContainer) {
-            if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('graph-gray-mode');
-            } else {
-                graphContainer.classList.remove('graph-gray-mode');
-            }
-        }
-        
-        window.appState.save();
-    }
+	toggleGraphGrayMode() {
+		window.appState.graphGrayMode = !window.appState.graphGrayMode;
+		
+		if (window.appState.graphGrayMode) {
+			document.body.classList.add('graph-gray-mode');
+		} else {
+			document.body.classList.remove('graph-gray-mode');
+		}
+		
+		// Сохраняем класс на graphContainer для обратной совместимости
+		const graphContainer = document.getElementById('graphContainer');
+		if (graphContainer) {
+			if (window.appState.graphGrayMode) {
+				graphContainer.classList.add('graph-gray-mode');
+			} else {
+				graphContainer.classList.remove('graph-gray-mode');
+			}
+		}
+	}
     
     toggleStars() {
         window.appState.showStars = !window.appState.showStars;

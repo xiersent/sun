@@ -125,6 +125,19 @@
 .center-date-weekday{font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 4px; font-weight: 400;}
 .center-date-star{font-size: 22px;}
 
+body.graph-gray-mode .graph-container,
+body.graph-gray-mode .wave-labels-container,
+body.graph-gray-mode .wave-labels-vertical-container,
+body.graph-gray-mode .time-bar-container {
+    filter: grayscale(1);
+}
+
+body.graph-gray-mode .wave-label,
+body.graph-gray-mode .extremum-label,
+body.graph-gray-mode .wave-axis-x-point {
+    filter: grayscale(1) !important;
+}
+
 /* В styles/main.css или styles/graph.css добавляем */
 .extremum-marker {
     position: absolute;
