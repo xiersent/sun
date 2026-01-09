@@ -1,4 +1,3 @@
-// modules/appCore.js - ПОЛНАЯ ВЕРСИЯ
 class AppCore {
     constructor() {
         this.elements = {};
@@ -28,29 +27,19 @@ class AppCore {
         if (this.isInitializing) return;
         this.isInitializing = true;
         
-        console.log('=== AppCore: ИНИЦИАЛИЗАЦИЯ ===');
-        
         try {
-            // 1. Настройка обработчиков
             this.setupEventListeners();
             this.updateCSSVariables();
             
-            // 2. Загрузка притчи
             this.loadParableText();
             
-            // 3. Проверка мобильного устройства
             const isMobile = this.isMobileDevice();
             if (isMobile) {
                 this.showWarning();
                 document.body.classList.add('mobile-device');
-                console.log('AppCore: Мобильное устройство обнаружено');
                 return;
             }
             
-            // 4. Для десктопов - полная инициализация
-            console.log('AppCore: Десктоп, продолжаем инициализацию');
-            
-            // Устанавливаем режим отображения звезд/имен
             if (window.appState.showStars) {
                 document.body.classList.add('stars-mode');
                 document.body.classList.remove('names-mode');
@@ -59,62 +48,41 @@ class AppCore {
                 document.body.classList.add('names-mode');
             }
             
-            // Устанавливаем текущую дату
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
             window.appState.currentDate = startOfDay;
             
-            // 5. Инициализация компонентов
             await this.initializeAppComponents();
             
-            // 6. Показ предупреждения
             this.showWarning();
             
-            console.log('AppCore: инициализация завершена успешно');
-            
         } catch (error) {
-            console.error('AppCore: ошибка инициализации:', error);
             throw error;
         } finally {
             this.isInitializing = false;
         }
     }
     
-	async initializeAppComponents() {
-        console.log('AppCore: инициализация компонентов приложения');
-        
-        // 1. Ждем загрузки шаблонов
+    async initializeAppComponents() {
         if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
-            console.log('AppCore: ожидание загрузки шаблонов...');
             try {
                 await window.unifiedListManager.initTemplates();
-                console.log('AppCore: шаблоны загружены успешно');
-            } catch (error) {
-                console.error('AppCore: ошибка загрузки шаблонов:', error);
-            }
+            } catch (error) {}
         }
         
-        // 2. Инициализация волн
         if (window.waves && window.waves.init) {
-            console.log('AppCore: инициализация WavesManager...');
             await window.waves.init();
         }
         
-        // 3. Создание сетки
         if (window.grid && window.grid.createGrid) {
             window.grid.createGrid();
         }
         
-        // 4. Инициализация сводной информации
         if (window.summaryManager && window.summaryManager.init) {
-            console.log('AppCore: инициализация SummaryManager...');
             window.summaryManager.init();
         }
         
-        // 5. Рендеринг UI
-        console.log('AppCore: рендеринг UI...');
         if (window.dataManager) {
-            // Используем асинхронные вызовы
             if (window.dataManager.updateDateList) {
                 await window.dataManager.updateDateList();
             }
@@ -128,24 +96,18 @@ class AppCore {
             }
         }
         
-        // 6. Настройка фона графика
         this.updateGraphBackground();
         
-        // 7. Установка полей даты и времени
         this.setDateTimeInputs();
         
-        // 8. Обновление кнопки "Сегодня"
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
         }
-        
-        console.log('AppCore: все компоненты инициализированы');
     }
     
     updateGraphBackground() {
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
-            // ТОЛЬКО управление CSS-классами
             if (!window.appState.graphBgWhite) {
                 graphContainer.classList.add('dark-mode');
             } else {
@@ -168,11 +130,8 @@ class AppCore {
             const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
             mainDateInputDate.value = formatted.date;
             mainDateInputTime.value = formatted.time;
-            console.log('AppCore: установлены начальные значения в поля даты и времени');
         }
     }
-    
-    // ========== ОСТАЛЬНЫЕ МЕТОДЫ БЕЗ ИЗМЕНЕНИЙ ==========
     
     async getVersion() {
         try {
@@ -182,7 +141,6 @@ class AppCore {
             }
             return '(файл не найден)';
         } catch (error) {
-            console.error('Ошибка загрузки версии:', error);
             return '(ошибка загрузки)';
         }
     }
@@ -218,13 +176,11 @@ class AppCore {
         warningOverlay.classList.add('desktop-warning');
         document.body.style.overflow = 'hidden';
         
-        // 1. Информация о браузере - СРАЗУ
         const browserInfoEl = document.getElementById('browserInfo');
         if (browserInfoEl) {
             browserInfoEl.textContent = this.getBrowserInfo();
         }
         
-        // 2. Информация о сегодняшней дате - СРАЗУ
         const todayInfoEl = document.getElementById('todayInfo');
         if (todayInfoEl) {
             const today = new Date();
@@ -232,7 +188,6 @@ class AppCore {
             todayInfoEl.textContent = todayFormatted;
         }
         
-        // 3. Версия приложения - АСИНХРОННО
         const versionInfoEl = document.getElementById('versionInfo');
         if (versionInfoEl) {
             versionInfoEl.textContent = 'Загрузка...';
@@ -336,9 +291,6 @@ class AppCore {
     }
     
     setupEventListeners() {
-        console.log('AppCore: настройка обработчиков событий...');
-        
-        // Кнопки притчи
         const readParableBtn = document.getElementById('readParableBtn');
         if (readParableBtn) {
             readParableBtn.addEventListener('click', () => {
@@ -353,7 +305,6 @@ class AppCore {
             });
         }
         
-        // Кнопка согласия
         const acceptWarningBtn = document.getElementById('acceptWarning');
         if (acceptWarningBtn) {
             acceptWarningBtn.addEventListener('click', () => {
@@ -365,7 +316,6 @@ class AppCore {
             });
         }
         
-        // Основные формы (оставляем для гарантии)
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
         if (btnAddCustomWave) {
             btnAddCustomWave.addEventListener('click', () => {
@@ -429,7 +379,6 @@ class AppCore {
             });
         }
         
-        // Импорт файлов
         const importAllFile = document.getElementById('importAllFile');
         const importDBFile = document.getElementById('importDBFile');
         
@@ -487,7 +436,6 @@ class AppCore {
             });
         }
         
-        // Анализ DB
         const btnAnalyzeDB = document.getElementById('btnAnalyzeDB');
         if (btnAnalyzeDB) {
             btnAnalyzeDB.addEventListener('click', async () => {
@@ -523,7 +471,6 @@ class AppCore {
             });
         }
         
-        // Миграция DB в заметки
         const btnMigrateToNotes = document.getElementById('btnMigrateToNotes');
         if (btnMigrateToNotes) {
             btnMigrateToNotes.addEventListener('click', () => {
@@ -567,7 +514,6 @@ class AppCore {
             });
         }
         
-        // Клавиатура
         document.addEventListener('keydown', (e) => {
             if (!window.dates) return;
             
@@ -589,8 +535,6 @@ class AppCore {
                     break;
             }
         });
-        
-        console.log('AppCore: обработчики событий настроены');
     }
     
     loadParableText() {

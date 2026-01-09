@@ -1,4 +1,3 @@
-// optimized3/modules/import.js
 class ImportExportManager {
     constructor() {
         this.SQL = null;
@@ -13,7 +12,6 @@ class ImportExportManager {
         return this.SQL;
     }
     
-    // НОВЫЙ МЕТОД: Проверка, является ли значение timestamp
     isTimestamp(value) {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }
@@ -21,8 +19,6 @@ class ImportExportManager {
 	convertImportedDatesToTimestamp(data) {
 		data.dates.forEach(date => {
 			if (date.date && !this.isTimestamp(date.date)) {
-				// БЫЛО: parseStringToUTC
-				// СТАЛО: parseStringToLocal + getTime()
 				const dateObj = window.timeUtils.parseStringToLocal(date.date);
 				date.date = dateObj.getTime();
 			}
@@ -34,8 +30,8 @@ class ImportExportManager {
             ...window.appState.data
         };
         
-        dataToSave.uiSettings.currentDate = window.appState.currentDate.getTime(); // timestamp
-        dataToSave.uiSettings.baseDate = window.appState.baseDate.getTime(); // timestamp
+        dataToSave.uiSettings.currentDate = window.appState.currentDate.getTime();
+        dataToSave.uiSettings.baseDate = window.appState.baseDate.getTime();
         dataToSave.uiSettings.currentDay = window.appState.currentDay;
         dataToSave.uiSettings.transform = window.appState.transform;
         dataToSave.uiSettings.uiHidden = window.appState.uiHidden;
@@ -45,7 +41,7 @@ class ImportExportManager {
         dataToSave.uiSettings.grayMode = window.appState.grayMode;
         dataToSave.uiSettings.graphGrayMode = window.appState.graphGrayMode;
         dataToSave.uiSettings.cornerSquaresVisible = window.appState.cornerSquaresVisible;
-        dataToSave.exportDate = new Date().getTime(); // timestamp
+        dataToSave.exportDate = new Date().getTime();
         dataToSave.version = '1.0';
         
         const dataStr = JSON.stringify(dataToSave, null, 2);
@@ -66,7 +62,7 @@ class ImportExportManager {
         const dataToSave = {
             dates: window.appState.data.dates,
             notes: window.appState.data.notes,
-            exportDate: new Date().getTime(), // timestamp
+            exportDate: new Date().getTime(),
             version: '1.0',
             type: 'dates-only'
         };
@@ -89,7 +85,7 @@ class ImportExportManager {
         const dataToSave = {
             waves: window.appState.data.waves,
             groups: window.appState.data.groups,
-            exportDate: new Date().getTime(), // timestamp
+            exportDate: new Date().getTime(),
             version: '1.0',
             type: 'waves-only'
         };
@@ -203,13 +199,6 @@ class ImportExportManager {
                                 }
                             });
                             
-                            // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
-                            // const defaultGroupIndex = convertedData.groups.findIndex(g => g.id === 'default-group');
-                            // if (defaultGroupIndex > 0) {
-                            //     const defaultGroup = convertedData.groups.splice(defaultGroupIndex, 1)[0];
-                            //     convertedData.groups.unshift(defaultGroup);
-                            // }
-                            
                             window.appState.data = convertedData;
                             
                             window.appState.waveVisibility = {};
@@ -239,7 +228,6 @@ class ImportExportManager {
                                 }
                             });
                             
-                            // Преобразуем timestamp обратно в Date объекты
                             window.appState.currentDate = new Date(convertedData.uiSettings.currentDate);
                             window.appState.baseDate = new Date(convertedData.uiSettings.baseDate);
                             window.appState.currentDay = convertedData.uiSettings.currentDay;
@@ -356,13 +344,6 @@ class ImportExportManager {
                                 }
                             });
                             
-                            // УДАЛЕН КОД ПЕРЕМЕЩЕНИЯ DEFAULT-GROUP
-                            // const defaultGroupIndex = window.appState.data.groups.findIndex(g => g.id === 'default-group');
-                            // if (defaultGroupIndex > 0) {
-                            //     const defaultGroup = window.appState.data.groups.splice(defaultGroupIndex, 1)[0];
-                            //     window.appState.data.groups.unshift(defaultGroup);
-                            // }
-                            
                             window.appState.waveVisibility = {};
                             window.appState.waveBold = {};
                             window.appState.waveCornerColor = {};
@@ -421,7 +402,6 @@ class ImportExportManager {
                     let result = '=== УСПЕШНАЯ ЗАГРРУЗКА БАЗЫ ДАННЫХ ===\n\n';
                     result += `Файл: ${file.name}\n`;
                     result += `Размер: ${file.size} байт\n`;
-                    result += `Статус: ✅ Валидная SQLite база данных\n\n`;
                     
                     const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'";
                     const tablesResult = this.currentDB.exec(tablesQuery);
@@ -445,7 +425,6 @@ class ImportExportManager {
                     
                     resolve(result);
                 } catch (error) {
-                    console.error('DB Import Error:', error);
                     reject(error);
                 }
             };
@@ -594,7 +573,6 @@ class ImportExportManager {
                         });
                         
                         if (existingNote) {
-                            migrationReport += `Пропущена дублирующая карточка ${card.id}\n`;
                             return;
                         }
                         
@@ -603,7 +581,7 @@ class ImportExportManager {
                         
                         const newNote = {
                             id: window.appState.generateId(),
-                            date: noteDate.getTime(), // Сохраняем как timestamp
+                            date: noteDate.getTime(),
                             content: noteContent
                         };
                         
@@ -636,7 +614,6 @@ class ImportExportManager {
     createNoteFromCard(card) {
 		let timeString = '';
 		if (card.created_at) {
-			// Конвертируем из UTC секунд в локальное время
 			const date = window.timeUtils ? 
 				window.timeUtils.toLocalDate(card.created_at * 1000) : 
 				new Date(card.created_at * 1000);

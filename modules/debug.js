@@ -1,4 +1,3 @@
-// optimized3/modules/debug.js
 class WavesDebugger {
     constructor() {
         this.debugInfo = {};
@@ -10,37 +9,9 @@ class WavesDebugger {
         const periodPx = wave.period * window.appState.config.squareSize;
         const totalPeriods = window.waves.calculateRequiredPeriods(periodPx);
         const containerWidth = periodPx * totalPeriods;
-        
-        console.group(`🔍 Отладка волны: ${wave.name} (${wave.period} дней)`);
-        console.log(`📏 Период в пикселях: ${periodPx}px`);
-        console.log(`📈 Необходимо периодов: ${totalPeriods}`);
-        console.log(`📐 Ширина контейнера: ${containerWidth}px`);
-        console.log(`🎯 Видимая ширина (визор): ${window.appState.graphWidth}px`);
-        console.log(`⚙️  Минимально периодов: ${window.appState.config.minVisiblePeriods}`);
-        
-        // Проверяем, достаточно ли периодов
-        const visiblePeriods = window.appState.graphWidth / periodPx;
-        console.log(`👁️  Периодов в видимой области: ${visiblePeriods.toFixed(2)}`);
-        
-        if (visiblePeriods < 3) {
-            console.warn(`⚠️  Внимание: видно менее 3 периодов! Нужно ${totalPeriods}`);
-        }
-        
-        console.groupEnd();
-        
-        // Сохраняем для визуальной отладки
-        this.debugInfo[wave.id] = {
-            period: wave.period,
-            periodPx,
-            totalPeriods,
-            containerWidth,
-            visiblePeriods
-        };
     }
     
     showAllWavesInfo() {
-        console.group('📊 Информация о всех волнах');
-        
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
@@ -50,11 +21,8 @@ class WavesDebugger {
                 this.logWaveInfo(wave);
             }
         });
-        
-        console.groupEnd();
     }
     
-    // Визуальная отладка - показывать границы периодов
     addPeriodMarkers(waveContainer) {
         if (!waveContainer || !waveContainer.dataset.periodPx) return;
         
@@ -85,7 +53,6 @@ class WavesDebugger {
 
 window.wavesDebugger = new WavesDebugger();
 
-// Команды для консоли
 window.debugWaves = function() {
     window.wavesDebugger.showAllWavesInfo();
 };

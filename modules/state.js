@@ -10,21 +10,17 @@ class AppState {
             phaseOffsetDays: -12,
             weekdays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
             weekdaysFull: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
-            
-            // НОВЫЕ ПАРАМЕТРЫ ДЛЯ ДИНАМИЧЕСКИХ ПЕРИОДОВ
-            minVisiblePeriods: 3,           // Минимум периодов для эффекта бесконечности
-            viewportCoverageFactor: 1.2,    // Контейнер должен быть шире визора на 20%
-            safetyMarginPeriods: 1,         // Дополнительный период "про запас"
-            maxRenderPoints: 3000           // Ограничение на количество точек рендеринга
+            minVisiblePeriods: 3,
+            viewportCoverageFactor: 1.2,
+            safetyMarginPeriods: 1,
+            maxRenderPoints: 3000
         };
         
         this.create120Waves();
         this.create31Waves();
         
-        // СОЗДАЕМ ЛОКАЛЬНУЮ ДАТУ 25.01.1990 00:00:00
-        const s25LocalDate = new Date(1990, 0, 25, 0, 0, 0, 0); // 25 января 1990, 00:00:00 ЛОКАЛЬНОЕ
+        const s25LocalDate = new Date(1990, 0, 25, 0, 0, 0, 0);
         
-        // СОЗДАЕМ ЛОКАЛЬНОЕ НАЧАЛО ТЕКУЩЕГО ДНЯ
         const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
         
@@ -42,7 +38,7 @@ class AppState {
             dates: [
                 { 
                     id: 's25', 
-                    date: s25LocalDate.getTime(), // ЛОКАЛЬНЫЙ timestamp
+                    date: s25LocalDate.getTime(),
                     name: 's25' 
                 }
             ],
@@ -55,8 +51,8 @@ class AppState {
                 { id: '31-waves-group', name: '31 колосок', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false }
             ],
             uiSettings: {
-                currentDate: Date.now(), // Текущее локальное время
-                baseDate: todayStart.getTime(), // ЛОКАЛЬНОЕ начало текущего дня
+                currentDate: Date.now(),
+                baseDate: todayStart.getTime(),
                 currentDay: 0,
                 transform: { scaleX: 1, scaleY: 1, rotation: 0 },
                 uiHidden: false,
@@ -67,7 +63,6 @@ class AppState {
                 graphGrayMode: false,
                 cornerSquaresVisible: true,
                 activeDateId: 's25',
-                // УДАЛЕНО: editingDateId, editingWaveId, editingGroupId - состояния редактирования не сохраняются
                 waveVisibility: {},
                 waveBold: {},
                 waveCornerColor: {}
@@ -174,9 +169,7 @@ class AppState {
     }
 
 	save() {
-		// ГАРАНТИЯ: что baseDate - это Date объект перед сохранением
 		if (!(this.baseDate instanceof Date)) {
-			console.warn('save(): baseDate не является Date объектом, исправляем перед сохранением');
 			if (typeof this.baseDate === 'number') {
 				this.baseDate = new Date(this.baseDate);
 			} else {
@@ -190,7 +183,6 @@ class AppState {
 			}
 		}
 		
-		// Сохраняем как timestamp
 		this.data.uiSettings.currentDate = this.currentDate.getTime();
 		this.data.uiSettings.baseDate = this.baseDate.getTime();
 		
@@ -205,22 +197,10 @@ class AppState {
 		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
 		this.data.uiSettings.activeDateId = this.activeDateId;
 		
-		// ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются
-		// Не сохраняем: editingDateId, editingWaveId, editingGroupId
-		
 		this.data.uiSettings.waveVisibility = this.waveVisibility;
 		this.data.uiSettings.waveBold = this.waveBold;
 		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
 
-		// Логирование
-		console.log('AppState.save(): сохранение дат', {
-			'currentDate': this.currentDate.toLocaleString(),
-			'baseDate': this.baseDate.toLocaleString(),
-			'baseDate часов': this.baseDate.getHours(),
-			'baseDate timestamp': this.data.uiSettings.baseDate,
-			'currentDay': this.currentDay
-		});
-		
 		localStorage.setItem('appData', JSON.stringify(this.data));
 	}
     
@@ -296,25 +276,14 @@ class AppState {
 					}
 				});
 				
-				// ВАЖНО: Загружаем currentDate и baseDate через TimeUtils для локального времени
 				if (window.timeUtils) {
-					// Текущая дата через TimeUtils
 					this.currentDate = window.timeUtils.toLocalDate(data.uiSettings.currentDate);
 					
-					// BaseDate: принудительно устанавливаем на локальное начало дня
 					const baseDateLocal = window.timeUtils.toLocalDate(data.uiSettings.baseDate);
 					this.baseDate = window.timeUtils.getStartOfDay(baseDateLocal);
-					
-					console.log('AppState.load(): загружены даты в локальном времени:');
-					console.log('  currentDate:', this.currentDate.toLocaleString());
-					console.log('  baseDate:', this.baseDate.toLocaleString());
-					console.log('  baseDate часов:', this.baseDate.getHours());
 				} else {
-					// Fallback: если TimeUtils ещё не загружен
-					console.warn('TimeUtils не загружен, используем fallback');
 					this.currentDate = new Date(data.uiSettings.currentDate);
 					
-					// Fallback для baseDate - ГАРАНТИРУЕМ что это будет Date объект
 					let baseDateValue = data.uiSettings.baseDate;
 					if (typeof baseDateValue === 'number') {
 						const baseDateObj = new Date(baseDateValue);
@@ -325,7 +294,6 @@ class AppState {
 							0, 0, 0, 0
 						);
 					} else if (baseDateValue instanceof Date) {
-						// Если уже Date объект
 						const baseDateObj = new Date(baseDateValue.getTime());
 						this.baseDate = new Date(
 							baseDateObj.getFullYear(),
@@ -334,8 +302,6 @@ class AppState {
 							0, 0, 0, 0
 						);
 					} else {
-						// На всякий случай
-						console.warn('baseDate имеет неожиданный тип, сбрасываем на сегодня');
 						const now = new Date();
 						this.baseDate = new Date(
 							now.getFullYear(),
@@ -346,14 +312,12 @@ class AppState {
 					}
 				}
 				
-				// ВАЖНО: Загружаем currentDay из сохраненных данных
 				if (data.uiSettings.currentDay !== undefined && 
 					data.uiSettings.currentDay !== null &&
 					typeof data.uiSettings.currentDay === 'number' &&
 					!isNaN(data.uiSettings.currentDay)) {
 					this.currentDay = data.uiSettings.currentDay;
 				} else {
-					console.log('currentDay в сохраненных данных некорректен, пересчитываем...');
 					this.currentDay = 0;
 				}
 				
@@ -366,7 +330,6 @@ class AppState {
 				this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
 				this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
 				
-				// ИСПРАВЛЕНИЕ: Состояния редактирования НЕ сохраняются, всегда null
 				this.editingDateId = null;
 				this.editingWaveId = null;
 				this.editingGroupId = null;
@@ -379,7 +342,6 @@ class AppState {
 					this.activeDateId = null;
 				}
 				
-				// ВАЖНО: Если есть activeDateId, baseDate должен быть перезаписан датой из activeDate
 				if (this.activeDateId) {
 					const activeDate = data.dates.find(d => d.id === this.activeDateId);
 					if (activeDate) {
@@ -388,7 +350,6 @@ class AppState {
 								window.timeUtils.toLocalDate(activeDate.date) : 
 								new Date(activeDate.date);
 							
-							// ГАРАНТИРУЕМ что baseDate будет Date объектом
 							this.baseDate = window.timeUtils ? 
 								window.timeUtils.getStartOfDay(activeDateLocal) : 
 								new Date(
@@ -397,12 +358,7 @@ class AppState {
 									activeDateLocal.getDate(),
 									0, 0, 0, 0
 								);
-							
-							console.log('baseDate обновлен из activeDate и установлен на начало дня:', 
-								this.baseDate.toLocaleString());
 						} catch (error) {
-							console.error('Error parsing active date:', error);
-							// Гарантируем что baseDate будет Date объектом
 							const now = new Date();
 							this.baseDate = new Date(
 								now.getFullYear(),
@@ -425,7 +381,6 @@ class AppState {
 				this.waveOriginalColors = {};
 				this.periods = {};
 				
-				// ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ ВОЛН
 				this.waveVisibility = {};
 				this.waveBold = {};
 				this.waveCornerColor = {};
@@ -453,9 +408,7 @@ class AppState {
 					}
 				});
 				
-				// ГАРАНТИЯ: что baseDate - это Date объект
 				if (!(this.baseDate instanceof Date)) {
-					console.warn('baseDate не является Date объектом, исправляем...');
 					if (typeof this.baseDate === 'number') {
 						const baseDateValue = this.baseDate;
 						this.baseDate = new Date(baseDateValue);
@@ -470,21 +423,13 @@ class AppState {
 					}
 				}
 				
-				console.log('=== AppState.load() завершен ===');
-				console.log('activeDateId:', this.activeDateId);
-				console.log('baseDate (локальное):', this.baseDate.toLocaleString());
-				console.log('currentDate (локальное):', this.currentDate.toLocaleString());
-				console.log('currentDay:', this.currentDay);
-				
 				setTimeout(() => {
 					if (window.dates && window.dates.forceInitialize) {
-						console.log('AppState: автоматический вызов forceInitialize после загрузки');
 						window.dates.forceInitialize();
 					}
 				}, 100);
 				
 			} catch (e) {
-				console.error('Ошибка загрузки состояния:', e);
 				this.reset();
 			}
 		} else {
@@ -495,10 +440,8 @@ class AppState {
 	reset() {
 		this.data = JSON.parse(JSON.stringify(this.initialData));
 		
-		// Устанавливаем ЛОКАЛЬНЫЕ даты
 		this.currentDate = new Date();
 		
-		// ЛОКАЛЬНОЕ начало текущего дня - ГАРАНТИРУЕМ что это Date объект
 		const now = new Date();
 		this.baseDate = new Date(
 			now.getFullYear(),
@@ -520,7 +463,6 @@ class AppState {
 		this.cornerSquaresVisible = true;
 		this.activeDateId = 's25';
 		
-		// ИСПРАВЛЕНИЕ: Состояния редактирования всегда сбрасываются
 		this.editingDateId = null;
 		this.editingWaveId = null;
 		this.editingGroupId = null;
@@ -550,23 +492,19 @@ class AppState {
 		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
 	}
 
-    // Добавить новый метод для конвертации дат
     convertDatesToTimestamp() {
-        // Конвертировать даты в dates
         this.data.dates.forEach(date => {
             if (date.date && !this.isTimestamp(date.date)) {
                 try {
                     const dateObj = new Date(date.date);
                     if (!isNaN(dateObj.getTime())) {
-                        date.date = dateObj.getTime(); // Сохраняем как timestamp
+                        date.date = dateObj.getTime();
                     }
                 } catch (e) {
-                    console.warn('Ошибка конвертации даты:', date.date, e);
                 }
             }
         });
         
-        // Конвертировать даты в notes
         this.data.notes.forEach(note => {
             if (note.date && !this.isTimestamp(note.date)) {
                 try {
@@ -575,12 +513,10 @@ class AppState {
                         note.date = dateObj.getTime();
                     }
                 } catch (e) {
-                    console.warn('Ошибка конвертации даты заметки:', note.date, e);
                 }
             }
         });
         
-        // Конвертировать uiSettings даты
         ['currentDate', 'baseDate'].forEach(key => {
             if (this.data.uiSettings[key] && !this.isTimestamp(this.data.uiSettings[key])) {
                 try {
@@ -589,14 +525,12 @@ class AppState {
                         this.data.uiSettings[key] = dateObj.getTime();
                     }
                 } catch (e) {
-                    console.warn(`Ошибка конвертации ${key}:`, e);
                 }
             }
         });
     }
 
     isTimestamp(value) {
-        // Проверяем, является ли значение timestamp (числом)
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }
     

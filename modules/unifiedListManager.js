@@ -24,40 +24,30 @@ class UnifiedListManager {
         
         this.templatesLoadPromise = new Promise(async (resolve, reject) => {
             try {
-                console.log('UnifiedListManager: начинаем загрузку шаблонов...');
-                
                 const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template', 'intersection-item-template'];
                 let loadedCount = 0;
                 
                 const loadPromises = templateIds.map(async (templateId) => {
                     try {
                         const url = `templates/${templateId.replace('-template', '')}.ejs`;
-                        console.log(`Попытка загрузки шаблона из файла: ${url}`);
                         
                         const response = await fetch(url);
                         
                         if (response.ok) {
                             const templateText = await response.text();
                             this.templateCache[templateId] = templateText;
-                            console.log(`Загружен файловый шаблон: ${templateId} из ${url}`);
                             loadedCount++;
-                        } else {
-                            console.warn(`Не удалось загрузить шаблон ${templateId} из ${url}: ${response.status}`);
                         }
                     } catch (error) {
-                        console.error(`Ошибка загрузки шаблона ${templateId}:`, error);
                     }
                 });
                 
                 await Promise.allSettled(loadPromises);
                 
-                console.log(`Загружено шаблонов: ${loadedCount} из ${templateIds.length}`);
-                
                 this.templatesLoaded = true;
                 resolve();
                 
             } catch (error) {
-                console.error('Критическая ошибка загрузки шаблонов:', error);
                 this.templatesLoaded = true;
                 resolve();
             }
@@ -66,14 +56,7 @@ class UnifiedListManager {
         return this.templatesLoadPromise;
     }
     
-    // ⚠️ ЭТОТ МЕТОД ТОЛЬКО ДЛЯ ЧРЕЗВЫЧАЙНЫХ СИТУАЦИЙ!
-    // В НОРМАЛЬНЫХ УСЛОВИЯХ ЭТОТ КОД НИКОГДА НЕ ДОЛЖЕН ВЫПОЛНЯТЬСЯ!
     createEmergencyFallbackTemplates() {
-        console.error('❌ ВНИМАНИЕ: Используются emergency fallback шаблоны!');
-        console.error('❌ Это означает, что EJS шаблоны не загрузились!');
-        console.error('❌ Проверьте наличие файлов в папке templates/');
-        
-        // Простые шаблоны только для отображения ошибки
         this.templateCache['date-item-template'] = `
 <div class="list-item list-item--date" style="background:#ffe6e6;border:2px solid red;">
     <div class="list-item__content">
@@ -114,11 +97,9 @@ class UnifiedListManager {
     
     async renderListWithWait(containerId, items, itemType) {
         if (!this.templatesLoaded) {
-            console.log(`Шаблоны не загружены, ожидание загрузки для ${containerId}...`);
             try {
                 await this.initTemplates();
             } catch (error) {
-                console.error('Ошибка при ожидании загрузки шаблонов:', error);
             }
         }
         
@@ -130,7 +111,6 @@ class UnifiedListManager {
             return this.templateCache[templateId];
         }
         
-        console.warn(`Шаблон ${templateId} не загружен, создаем простой`);
         return '<div class="list-item">Элемент списка</div>';
     }
     
@@ -274,13 +254,11 @@ class UnifiedListManager {
     renderList(containerId, items, itemType) {
         const container = document.getElementById(containerId);
         if (!container) {
-            console.error('UnifiedListManager: контейнер не найден:', containerId);
             return;
         }
         
         if (!this.templatesLoaded) {
             container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
-            console.warn(`Шаблоны не загружены для рендеринга ${containerId}, отображаем сообщение`);
             
             setTimeout(() => {
                 this.initTemplates().then(() => {
@@ -312,13 +290,10 @@ class UnifiedListManager {
         const templateText = this.getTemplate(templateId);
         if (!templateText) {
             container.innerHTML = '<div class="list-error">Ошибка: шаблон не загружен</div>';
-            console.error(`Шаблон ${templateId} не найден в кэше`);
             return;
         }
         
-        // Проверяем, что EJS загружен
         if (typeof ejs === 'undefined') {
-            console.error('EJS не загружен!');
             container.innerHTML = '<div class="list-error">Ошибка: EJS не загружен</div>';
             return;
         }
@@ -341,7 +316,6 @@ class UnifiedListManager {
                     
                     const childrenContainer = groupElement.querySelector('.group-children');
                     
-                    // ВСЕГДА рендерим детей, даже если группа свернута
                     if (childrenContainer && groupData.children && groupData.children.length > 0) {
                         childrenContainer.innerHTML = '';
                         
@@ -364,7 +338,6 @@ class UnifiedListManager {
                             }
                         });
                         
-                        // Устанавливаем видимость в зависимости от expanded
                         if (groupData.expanded) {
                             childrenContainer.style.display = 'block';
                             groupElement.classList.add('list-item--expanded');
@@ -391,7 +364,6 @@ class UnifiedListManager {
                     const rendered = ejs.render(templateText, { data });
                     renderedItems.push(rendered);
                 } catch (error) {
-                    console.error('Ошибка рендеринга элемента пересечения:', error);
                     renderedItems.push(`<div class="list-error">Ошибка рендеринга пересечения</div>`);
                 }
             });
@@ -413,8 +385,6 @@ class UnifiedListManager {
             
             container.innerHTML = renderedItems.join('');
         }
-        
-        console.log('UnifiedListManager: список отрендерен в контейнере:', containerId, 'элементов:', items.length);
     }
     
     getEmptyMessage(type) {
@@ -429,15 +399,12 @@ class UnifiedListManager {
     }
     
     handleEditClick(id, type, containerId) {
-        console.log('UnifiedListManager: обработка клика редактирования:', type, id);
-        
         if (type === 'date') {
             const idStr = String(id);
             const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
             
             window.appState.data.dates.forEach(date => {
                 if (String(date.id) === idStr) {
-                    // ИСПРАВЛЕНИЕ: Переключаем состояние, но не сохраняем в appState.save()
                     window.appState.editingDateId = editingDateIdStr === idStr ? null : id;
                 }
             });
@@ -448,7 +415,6 @@ class UnifiedListManager {
             
             window.appState.data.waves.forEach(wave => {
                 if (String(wave.id) === idStr) {
-                    // ИСПРАВЛЕНИЕ: Переключаем состояние, но не сохраняем в appState.save()
                     window.appState.editingWaveId = editingWaveIdStr === idStr ? null : id;
                 }
             });
@@ -457,17 +423,12 @@ class UnifiedListManager {
             const idStr = String(id);
             const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
             
-            // ИСПРАВЛЕНИЕ: Переключаем состояние, но не сохраняем в appState.save()
             window.appState.editingGroupId = editingGroupIdStr === idStr ? null : id;
-            console.log('Режим редактирования группы установлен:', id, window.appState.editingGroupId);
-            // НЕ вызываем: window.appState.save();
             this.updateWavesList();
         }
     }
     
     handleDeleteClick(id, type, containerId) {
-        console.log('UnifiedListManager: обработка клика удаления:', type, id);
-        
         if (type === 'date') {
             window.dates.deleteDate(String(id));
             this.updateDatesList();
@@ -481,8 +442,6 @@ class UnifiedListManager {
     }
     
     handleSaveClick(id, type, containerId) {
-        console.log('UnifiedListManager: обработка клика сохранения:', type, id);
-        
         if (type === 'date') {
             this.saveDateChanges(id);
         } else if (type === 'wave') {
@@ -493,29 +452,21 @@ class UnifiedListManager {
     }
     
     handleCancelClick(id, type, containerId) {
-        console.log('UnifiedListManager: обработка клика отмены:', type, id);
-        
         if (type === 'date') {
-            // ИСПРАВЛЕНИЕ: Просто сбрасываем состояние редактирования
             window.appState.editingDateId = null;
             this.updateDatesList();
         } else if (type === 'wave') {
-            // ИСПРАВЛЕНИЕ: Просто сбрасываем состояние редактирования
             window.appState.editingWaveId = null;
             this.updateWavesList();
         } else if (type === 'group') {
-            // ИСПРАВЛЕНИЕ: Просто сбрасываем состояние редактирования
             window.appState.editingGroupId = null;
             this.updateWavesList();
         }
     }
     
     saveDateChanges(dateId) {
-        console.log('UnifiedListManager: сохранение изменений даты:', dateId);
-        
         const dateObj = window.appState.data.dates.find(d => String(d.id) === String(dateId));
         if (!dateObj) {
-            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingDateId = null;
             this.updateDatesList();
             return;
@@ -525,7 +476,6 @@ class UnifiedListManager {
         const dateInput = document.getElementById(`editDateValue${dateId}`);
         
         if (!nameInput || !dateInput) {
-            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingDateId = null;
             this.updateDatesList();
             return;
@@ -552,7 +502,6 @@ class UnifiedListManager {
             dateObj.name = newName;
             dateObj.date = newDate.getTime();
             
-            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования после сохранения
             window.appState.editingDateId = null;
             
             if (String(window.appState.activeDateId) === String(dateId)) {
@@ -572,11 +521,8 @@ class UnifiedListManager {
     }
     
     saveWaveChanges(waveId) {
-        console.log('UnifiedListManager: сохранение изменений волны:', waveId);
-        
         const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
         if (!wave) {
-            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingWaveId = null;
             this.updateWavesList();
             return;
@@ -619,7 +565,6 @@ class UnifiedListManager {
         
         window.waves.createWaveElement(wave);
         
-        // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования после сохранения
         window.appState.editingWaveId = null;
         
         this.updateWavesList();
@@ -628,11 +573,8 @@ class UnifiedListManager {
     }
     
     saveGroupChanges(groupId) {
-        console.log('UnifiedListManager: сохранение изменений группы:', groupId);
-        
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
-            // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования
             window.appState.editingGroupId = null;
             this.updateWavesList();
             return;
@@ -647,18 +589,13 @@ class UnifiedListManager {
         
         group.name = newName;
         
-        // ИСПРАВЛЕНИЕ: Сбрасываем состояние редактирования после сохранения
         window.appState.editingGroupId = null;
         
         this.updateWavesList();
         window.appState.save();
-        
-        console.log('Группа сохранена:', groupId, newName);
     }
     
     changeWaveColor(wave) {
-        console.log('UnifiedListManager: изменение цвета волны:', wave.id);
-        
         const colorInput = document.createElement('input');
         colorInput.type = 'color';
         colorInput.value = wave.color;
@@ -679,21 +616,15 @@ class UnifiedListManager {
     }
     
     updateDatesList() {
-        console.log('UnifiedListManager: обновление списка дат...');
         this.renderList('dateListForDates', window.appState.data.dates, 'date');
     }
     
     updateWavesList() {
-        console.log('UnifiedListManager: обновление списка волн...');
-        
         const container = document.getElementById('wavesList');
         if (!container) {
-            console.error('UnifiedListManager: контейнер wavesList не найден');
             return;
         }
         
-        // ИСПРАВЛЕНО: Убрана жесткая сортировка, используем порядок из appState
-        // Просто берем группы в том порядке, в котором они сохранены
         const allGroups = window.appState.data.groups.map((group, index) => {
             const groupData = this.prepareGroupData(group, index);
             return groupData;
@@ -703,22 +634,17 @@ class UnifiedListManager {
     }
     
     updateIntersectionResults(intersections) {
-        console.log('UnifiedListManager: обновление результатов пересечений...');
         this.renderList('intersectionResults', intersections, 'intersection');
     }
     
     updateGroupStats(groupId) {
-        console.log('UnifiedListManager: обновление статистики группы:', groupId);
-        
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
-            console.warn('Группа не найдена:', groupId);
             return;
         }
         
         const groupElement = document.querySelector(`.list-item--group[data-id="${groupId}"]`);
         if (!groupElement) {
-            console.warn('Элемент группы не найден в DOM:', groupId);
             return;
         }
         
@@ -753,15 +679,12 @@ class UnifiedListManager {
                 `;
             }
         }
-        
-        console.log('Статистика обновлена:', groupId, 'включено:', enabledCount, 'всего:', waveCount);
     }
     
     async reloadTemplates() {
         this.templatesLoaded = false;
         this.templatesLoadPromise = null;
         await this.initTemplates();
-        console.log('Шаблоны перезагружены');
     }
 }
 

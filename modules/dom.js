@@ -1,4 +1,3 @@
-// modules/dom.js - ИСПРАВЛЕННЫЙ
 class DOM {
     constructor() {
         this.elements = {};
@@ -21,7 +20,6 @@ class DOM {
         return window.timeUtils.formatForDateTimeInput(timestamp);
     }
     
-    
     getDaysBetweenDates(date1, date2) {
         return window.timeUtils.getDaysBetween(date1, date2);
     }
@@ -35,7 +33,6 @@ class DOM {
 			return window.timeUtils.getWeekdayName(date, full);
 		}
 		
-		// Fallback
 		const d = new Date(date);
 		const weekdays = full ? 
 			['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'] :
@@ -71,7 +68,6 @@ class DOM {
             return date.getTime();
         }
         
-        // Fallback
         try {
             if (!dateTimeString) return Date.now();
             
@@ -97,11 +93,10 @@ class DOM {
             const date = new Date(year, month - 1, day, hours, minutes, seconds, 0);
             
             if (isNaN(date.getTime())) {
-                throw new Error('Некорректная дата-время');
+                return Date.now();
             }
             return date.getTime();
         } catch (error) {
-            console.error('Ошибка преобразования строки в timestamp:', error);
             return Date.now();
         }
     }
@@ -111,7 +106,6 @@ class DOM {
             return window.timeUtils.formatForDateInput(timestamp);
         }
         
-        // Fallback
         if (!timestamp) return '';
         const date = new Date(timestamp);
         if (isNaN(date.getTime())) return '';
@@ -123,7 +117,6 @@ class DOM {
             return window.timeUtils.getYearsBetween(timestamp1, timestamp2);
         }
         
-        // Fallback
         if (!timestamp1 || !timestamp2) return 0;
         try {
             const date1 = new Date(timestamp1);
@@ -156,7 +149,7 @@ class DOM {
     }
     
     getCurrentDate() {
-        return new Date(); // Локальное время
+        return new Date();
     }
     
     stringToTimestamp(dateString) {
@@ -165,15 +158,13 @@ class DOM {
             return date.getTime();
         }
         
-        // Fallback
         try {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) {
-                throw new Error('Некорректная дата');
+                return Date.now();
             }
             return date.getTime();
         } catch (error) {
-            console.error('Ошибка преобразования строки в timestamp:', error);
             return Date.now();
         }
     }
@@ -188,7 +179,6 @@ class DOM {
             return window.timeUtils.getStartOfDay(timestamp);
         }
         
-        // Fallback
         const date = new Date(timestamp);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
     }

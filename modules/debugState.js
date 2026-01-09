@@ -1,4 +1,3 @@
-// modules/debugState.js
 class DebugState {
     constructor() {
         this.logs = [];
@@ -17,8 +16,6 @@ class DebugState {
         if (this.logs.length > this.maxLogs) {
             this.logs.pop();
         }
-        
-        console.log(`[Save] ${action}`, data);
     }
     
     getStateSnapshot() {
@@ -66,7 +63,6 @@ class DebugState {
     checkForMissingSaves() {
         const missing = [];
         
-        // Проверяем основные настройки
         const requiredSettings = [
             'graphHeight6Squares',
             'graphGrayMode',
@@ -80,7 +76,6 @@ class DebugState {
         });
         
         if (missing.length > 0) {
-            console.warn('Найдены непрописанные настройки:', missing);
             return missing;
         }
         
@@ -88,42 +83,12 @@ class DebugState {
     }
 }
 
-// Глобальные команды для отладки
 window.debugState = new DebugState();
 
-// Команды для консоли
 window.showState = function() {
-    console.log('=== ТЕКУЩЕЕ СОСТОЯНИЕ ===');
-    console.log('UI Settings:', window.appState?.uiSettings);
-    console.log('States:', window.appState?.states);
-    console.log('Data counts:', {
-        dates: window.appState?.data.dates.length,
-        waves: window.appState?.data.waves.length,
-        notes: window.appState?.data.notes.length,
-        groups: window.appState?.data.groups.length
-    });
-    
-    // Проверяем сохранение в localStorage
-    const v1 = localStorage.getItem('appData');
-    const v2 = localStorage.getItem('appStateV2');
-    
-    console.log('LocalStorage:');
-    console.log('  V1 (старый формат):', v1 ? '✓ Есть' : '✗ Нет');
-    console.log('  V2 (новый формат):', v2 ? '✓ Есть' : '✗ Нет');
-    
-    if (v2) {
-        try {
-            const parsed = JSON.parse(v2);
-            console.log('  V2 метаданные:', parsed._metadata);
-        } catch (e) {
-            console.error('Ошибка парсинга V2:', e);
-        }
-    }
 };
 
 window.forceSaveAll = function() {
-    console.log('Принудительное сохранение всех данных...');
-    
     if (window.appState?.save) {
         window.appState.save();
     }
@@ -131,8 +96,6 @@ window.forceSaveAll = function() {
     if (window.stateManager?.forceSave) {
         window.stateManager.forceSave();
     }
-    
-    console.log('Сохранение завершено');
 };
 
 window.exportStateDebug = function() {
@@ -145,7 +108,6 @@ window.checkStateIssues = function() {
     if (window.debugState?.checkForMissingSaves) {
         const issues = window.debugState.checkForMissingSaves();
         if (issues.length === 0) {
-            console.log('✓ Все настройки корректно сохраняются');
         }
         return issues;
     }

@@ -4,8 +4,6 @@ class UIManager {
         this.elements = window.appCore ? window.appCore.elements : {};
         this.setupDateTimeInputs();
         this.activeTab = null;
-        
-        // УБРАНО: addExtremesButton() так как кнопка теперь в HTML
     }
     
     setupDateTimeInputs() {
@@ -14,7 +12,6 @@ class UIManager {
         
         if (!dateInput || !timeInput) return;
         
-        // Автозаполнение текущей даты при фокусе, если поле пустое
         dateInput.addEventListener('focus', () => {
             if (!dateInput.value) {
                 const now = new Date();
@@ -22,7 +19,6 @@ class UIManager {
             }
         });
         
-        // Автозаполнение текущего времени при фокусе, если поле пустое
         timeInput.addEventListener('focus', () => {
             if (!timeInput.value) {
                 const now = new Date();
@@ -30,7 +26,6 @@ class UIManager {
             }
         });
         
-        // Обработка клавиши Enter в полях ввода
         const handleEnter = (e) => {
             if (e.key === 'Enter') {
                 if (window.dates && window.dates.setDateFromInputs) {
@@ -42,20 +37,16 @@ class UIManager {
         dateInput.addEventListener('keydown', handleEnter);
         timeInput.addEventListener('keydown', handleEnter);
         
-        // Валидация времени - добавляем секунды, если их нет
         timeInput.addEventListener('blur', () => {
             let value = timeInput.value.trim();
             if (value && value.split(':').length === 2) {
-                // Если только часы:минуты, добавляем секунды
                 timeInput.value = value + ':00';
             }
         });
         
-        // Автодополнение времени
         timeInput.addEventListener('input', (e) => {
             let value = e.target.value.replace(/[^\d:]/g, '');
             
-            // Автоматическое добавление разделителей
             if (value.length === 2 && !value.includes(':')) {
                 value = value + ':';
             } else if (value.length === 5 && value.split(':').length < 3) {
@@ -67,36 +58,30 @@ class UIManager {
     }
     
     handleAction(action, element) {
-        console.log('Обработка действия:', action);
-        
         const actions = {
-            // Навигация
             prevDay: () => window.dates.navigateDay(-1),
             nextDay: () => window.dates.navigateDay(1),
             today: () => window.dates.goToToday(),
             now: () => window.dates.goToNow(),
             setDate: () => window.dates.setDateFromInputs(),
             
-            // Трансформации
             flipH: () => this.flipHorizontal(),
             flipV: () => this.flipVertical(),
             rotateL: () => this.rotate(-90),
             rotateR: () => this.rotate(90),
             resetTransform: () => this.resetTransform(),
             
-            // Переключение UI
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
-            toggleWaveLabels: () => this.toggleWaveLabels(), // ТОЛЬКО горизонтальные
-            toggleExtremes: () => this.toggleExtremes(), // НОВАЯ: только вертикальные
-            toggleEquilibrium: () => this.toggleEquilibrium(), // НОВАЯ: точки на оси X
+            toggleWaveLabels: () => this.toggleWaveLabels(),
+            toggleExtremes: () => this.toggleExtremes(),
+            toggleEquilibrium: () => this.toggleEquilibrium(),
             toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
             toggleGraphGrayMode: () => this.toggleGraphGrayMode(),
             toggleStars: () => this.toggleStars(),
             
-            // Управление углами
             toggleCorners: () => this.toggleCornerSquares('corners'),
             toggleAxial: () => this.toggleCornerSquares('axial'),
             toggleVertical: () => this.toggleCornerSquares('vertical'),
@@ -109,7 +94,6 @@ class UIManager {
             toggleAllSquares: () => this.toggleAllSquares(),
             resetCorners: () => this.resetCorners(),
             
-            // Экспорт/Импорт
             exportAll: () => window.importExport.exportAll(),
             exportDates: () => window.importExport.exportDates(),
             exportWaves: () => window.importExport.exportWaves(),
@@ -120,28 +104,20 @@ class UIManager {
         
         if (actions[action]) {
             actions[action]();
-        } else {
-            console.warn('Неизвестное действие:', action);
         }
     }
     
     toggleUI() {
-        console.log('Переключение UI');
         window.appState.uiHidden = !window.appState.uiHidden;
         if (window.appState.uiHidden) {
             document.body.classList.add('ui-hidden');
-            console.log('UI скрыт');
         } else {
             document.body.classList.remove('ui-hidden');
-            console.log('UI показан');
         }
         window.appState.save();
     }
     
-    // ТОЛЬКО горизонтальные выноски (левые/правые)
     toggleWaveLabels() {
-        console.log('Переключение видимости ГОРИЗОНТАЛЬНЫХ выносок');
-        
         const horizontalContainer = document.querySelector('.wave-labels-container');
         
         if (horizontalContainer) {
@@ -149,20 +125,13 @@ class UIManager {
             
             if (areHidden) {
                 horizontalContainer.classList.remove('hidden');
-                console.log('ГОРИЗОНТАЛЬНЫЕ выноски показаны');
             } else {
                 horizontalContainer.classList.add('hidden');
-                console.log('ГОРИЗОНТАЛЬНЫЕ выноски скрыты');
             }
-        } else {
-            console.warn('Контейнер горизонтальных выносок не найден');
         }
     }
     
-    // ТОЛЬКО вертикальные выноски (верхние/нижние)
     toggleExtremes() {
-        console.log('Переключение видимости ВЕРТИКАЛЬНЫХ выносок (экстремумы)');
-        
         const verticalContainer = document.querySelector('.wave-labels-vertical-container');
         
         if (verticalContainer) {
@@ -170,21 +139,13 @@ class UIManager {
             
             if (areHidden) {
                 verticalContainer.classList.remove('hidden');
-                console.log('ВЕРТИКАЛЬНЫЕ выноски (экстремумы) показаны');
             } else {
                 verticalContainer.classList.add('hidden');
-                console.log('ВЕРТИКАЛЬНЫЕ выноски (экстремумы) скрыты');
             }
-        } else {
-            console.warn('Контейнер вертикальных выносок не найден');
         }
     }
     
-    // НОВЫЙ МЕТОД: ТОЧКИ ПЕРЕСЕЧЕНИЯ С ОСЬЮ X (эквилибриум)
     toggleEquilibrium() {
-        console.log('Переключение видимости ТОЧЕК НА ОСИ X (эквилибриум)');
-        
-        // Находим контейнер точек на оси X
         const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
         
         if (axisXPointsContainer) {
@@ -192,30 +153,21 @@ class UIManager {
             
             if (areHidden) {
                 axisXPointsContainer.classList.remove('hidden');
-                console.log('Точки на оси X (эквилибриум) показаны');
                 
-                // Обновляем точки
                 if (window.waves && window.waves.updateAxisXIntersectionPoints) {
                     window.waves.updateAxisXIntersectionPoints();
                 }
             } else {
                 axisXPointsContainer.classList.add('hidden');
-                console.log('Точки на оси X (эквилибриум) скрыты');
             }
         } else {
-            console.warn('Контейнер точек на оси X не найден');
-            
-            // Если контейнер не существует, создаем его через WavesManager
             if (window.waves && window.waves.updateAxisXIntersectionPoints) {
-                console.log('Создаем контейнер точек на оси X...');
                 window.waves.updateAxisXIntersectionPoints();
                 
-                // Пробуем снова найти и показать
                 setTimeout(() => {
                     const newContainer = document.querySelector('.wave-axis-x-points');
                     if (newContainer) {
                         newContainer.classList.remove('hidden');
-                        console.log('Контейнер создан и точки показаны');
                     }
                 }, 100);
             }
@@ -265,33 +217,27 @@ class UIManager {
     }
     
     resetCorners() {
-        // Сбросить все флаги окраски углов
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             window.appState.waveCornerColor[waveIdStr] = false;
         });
         
-        // Вернуть стандартный цвет углов
         this.updateCornerSquareColors();
         
-        // Обновить UI
         if (window.dataManager && window.dataManager.updateWavesGroups) {
             window.dataManager.updateWavesGroups();
         }
         
-        // Обновить чекбоксы в DOM
         document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
             checkbox.checked = false;
         });
         
         window.appState.save();
-        
-        console.log('Цвет краев сброшен к стандартному');
     }
     
     updateCornerSquareColors() {
         document.querySelectorAll('.corner-square').forEach(square => {
-            square.style.backgroundColor = 'red'; // стандартный цвет
+            square.style.backgroundColor = 'red';
         });
     }
     
@@ -345,17 +291,12 @@ class UIManager {
     }
     
     toggleBackground() {
-        console.log('Переключение фона через CSS-класс');
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
-            // ТОЛЬКО ПЕРЕКЛЮЧЕНИЕ CSS-КЛАССА
             graphContainer.classList.toggle('dark-mode');
             
-            // Сохраняем состояние: true = светлый (нет класса), false = темный (есть класс)
             window.appState.graphBgWhite = !graphContainer.classList.contains('dark-mode');
             window.appState.save();
-            
-            console.log('Состояние фона:', window.appState.graphBgWhite ? 'светлый' : 'темный');
         }
     }
     
@@ -382,7 +323,6 @@ class UIManager {
         }
         
         window.appState.save();
-        console.log('Серость графика:', window.appState.graphGrayMode ? 'включена' : 'выключена');
     }
     
     toggleStars() {
@@ -408,16 +348,10 @@ class UIManager {
             return;
         }
         
-        // ПРОСТОЕ РЕШЕНИЕ: очистить localStorage и перезагрузить
         localStorage.clear();
-        
-        // Перезагрузка страницы
         window.location.reload();
     }
     
-    /**
-     * Обновляет значения в полях даты и времени
-     */
     updateDateTimeInputs() {
         const dateInput = document.getElementById('mainDateInputDate');
         const timeInput = document.getElementById('mainDateInputTime');
@@ -434,10 +368,8 @@ class UIManager {
         window.dataManager.updateWavesGroups();
         window.dataManager.updateNotesList();
         
-        // ИСПРАВЛЕНО: Используем новый метод для обновления раздельных полей
         this.updateDateTimeInputs();
         
-        // Обновляем поле даты в форме добавления даты (если есть)
         if (document.getElementById('dateInput')) {
             document.getElementById('dateInput').value = window.timeUtils.formatForDateInput(window.appState.currentDate);
         }
@@ -454,16 +386,13 @@ class UIManager {
         document.getElementById('customWaveColor').value = '#666666';
     }
     
-    // НОВАЯ ЛОГИКА ТАБОВ
     handleTabClick(tabButton) {
         const tabId = tabButton.dataset.tab;
         
-        // Если кликаем по уже активному табу - выключаем его
         if (this.activeTab === tabId) {
             this.deactivateTab(tabButton);
             this.activeTab = null;
         } else {
-            // Выключаем предыдущий активный таб, если есть
             if (this.activeTab) {
                 const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
                 if (prevTabButton) {
@@ -471,30 +400,24 @@ class UIManager {
                 }
             }
             
-            // Включаем новый таб
             this.activateTab(tabButton);
             this.activeTab = tabId;
         }
         
-        // Сохраняем состояние
         localStorage.setItem('activeTab', this.activeTab);
     }
     
-    // Метод активации таба
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
         
-        // Убираем active со всех кнопок
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
         
-        // Убираем active со всех контентов
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         
-        // Активируем выбранный
         tabButton.classList.add('active');
         
         const tabContent = document.querySelector(`#${tabId}-tab`);
@@ -502,13 +425,11 @@ class UIManager {
             tabContent.classList.add('active');
         }
         
-        // Обновляем пересечения если нужно
         if (tabId === 'intersections' && window.intersectionManager) {
             window.intersectionManager.updateForCurrentDate();
         }
     }
     
-    // Метод деактивации таба
     deactivateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
         
@@ -519,7 +440,6 @@ class UIManager {
         }
     }
     
-    // Восстановление состояния при загрузке
     restoreTabState() {
         const savedTab = localStorage.getItem('activeTab');
         if (savedTab) {
@@ -566,16 +486,14 @@ class UIManager {
         }
     }
     
-    // ДОПОЛНИТЕЛЬНЫЙ МЕТОД: Тоггл группы (если используется)
     toggleGroup(groupId) {
         const group = window.appState.data.groups.find(g => g.id === groupId);
         if (group) {
             group.enabled = !group.enabled;
             window.appState.save();
             
-            // Обновить видимость волн и их позиции
             if (window.waves) {
-                window.waves.updatePosition(); // <- Добавить эту строку
+                window.waves.updatePosition();
             }
             
             window.dataManager.updateWavesGroups();

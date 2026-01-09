@@ -63,34 +63,30 @@ class SummaryManager {
         const stateSelect = this.elements.summaryStateSelect;
         if (!stateSelect) return;
         
-        // Очищаем текущие опции
         stateSelect.innerHTML = '';
         
-        // Создаем опции от 5 до -5 с эмодзи для -5, 0, 5
         for (let i = 5; i >= -5; i--) {
             const option = document.createElement('option');
             option.value = i;
             
-            // Добавляем эмодзи для определенных значений
             if (i === 5) {
-                option.textContent = '5 😔(😊)';      // грустный и в скобках улыбающийся
+                option.textContent = '5 😔(😊)';
             } else if (i === -5) {
-                option.textContent = '-5 😊(😔)';         // улыбающийся и в скобках грустный
+                option.textContent = '-5 😊(😔)';
             } else if (i === 0) {
-                option.textContent = '0 😐';          // нейтральный/покерфейс
+                option.textContent = '0 😐';
             } else {
-                option.textContent = i.toString();    // остальные без эмодзи
+                option.textContent = i.toString();
             }
             
             if (i === -5) {
-                option.selected = true;  // -5 по умолчанию
+                option.selected = true;
             }
             stateSelect.appendChild(option);
         }
     }
     
     restoreSelections() {
-        // Восстанавливаем выбранные значения из localStorage
         const savedGroup = localStorage.getItem('summarySelectedGroup');
         const savedState = localStorage.getItem('summarySelectedState');
         
@@ -117,7 +113,6 @@ class SummaryManager {
     }
     
     setupStateObservers() {
-        // Наблюдаем за изменениями currentDate в appState
         const originalCurrentDate = window.appState.currentDate;
         Object.defineProperty(window.appState, 'currentDate', {
             get() {
@@ -127,22 +122,18 @@ class SummaryManager {
                 const oldValue = this._currentDate;
                 this._currentDate = value;
                 
-                // Если сводная информация инициализирована, обновляем ее
                 if (window.summaryManager && !this.isProgrammaticDateChange) {
                     window.summaryManager.debouncedUpdate();
                 }
             }
         });
         
-        // Инициализируем значение
         window.appState._currentDate = originalCurrentDate;
         
-        // Также наблюдаем за currentDay
         this.setupGlobalDateObserver();
     }
     
     setupGlobalDateObserver() {
-        // Перехватываем все изменения currentDay
         const originalCurrentDay = window.appState.currentDay;
         Object.defineProperty(window.appState, 'currentDay', {
             get() {
@@ -152,9 +143,7 @@ class SummaryManager {
                 const oldValue = this._currentDay;
                 this._currentDay = value;
                 
-                // Если значение изменилось значительно (более 0.001 дня ≈ 1.4 минуты)
                 if (Math.abs(value - oldValue) > 0.001) {
-                    // Запускаем обновление сводки с задержкой
                     if (window.summaryManager && !this.isProgrammaticDateChange) {
                         window.summaryManager.debouncedUpdate();
                     }
@@ -162,26 +151,22 @@ class SummaryManager {
             }
         });
         
-        // Инициализируем значение
         window.appState._currentDay = originalCurrentDay;
     }
     
     debouncedUpdate() {
         const now = Date.now();
         
-        // Сбрасываем предыдущий таймер
         if (this.updateTimeout) {
             clearTimeout(this.updateTimeout);
         }
         
-        // Если с последнего обновления прошло меньше задержки, ждем
         if (now - this.lastUpdateTime < this.updateDebounceDelay) {
             this.updateTimeout = setTimeout(() => {
                 this.updateSummary();
                 this.lastUpdateTime = Date.now();
             }, this.updateDebounceDelay);
         } else {
-            // Обновляем сразу
             this.updateSummary();
             this.lastUpdateTime = now;
         }
@@ -191,12 +176,10 @@ class SummaryManager {
         const select = this.elements.summaryGroupSelect;
         if (!select || !window.appState || !window.appState.data) return;
         
-        // Очищаем все опции кроме первой
         while (select.options.length > 1) {
             select.remove(1);
         }
         
-        // ИСПРАВЛЕНО: Добавляем группы в сохраненном порядке
         window.appState.data.groups.forEach(group => {
             if (group.waves && group.waves.length > 0) {
                 const option = document.createElement('option');
@@ -208,7 +191,6 @@ class SummaryManager {
     }
     
     updateSummary() {
-        // Защита от рекурсивных вызовов
         if (this.isUpdating) return;
         
         try {
@@ -220,7 +202,6 @@ class SummaryManager {
             this.updateResults(stateWaves);
             
         } catch (error) {
-            console.error('Ошибка при обновлении сводной информации:', error);
         } finally {
             this.isUpdating = false;
         }
@@ -230,11 +211,9 @@ class SummaryManager {
         if (!window.appState || !window.appState.data) return [];
         
         if (this.currentGroup === 'all') {
-            // Все колоски из всех групп
             return window.appState.data.waves;
         }
         
-        // Колоски из выбранной группы
         const group = window.appState.data.groups.find(g => g.id === this.currentGroup);
         if (!group || !group.waves) return [];
         
@@ -262,16 +241,12 @@ class SummaryManager {
         waves.forEach(wave => {
             if (!wave.period || wave.period <= 0) return;
             
-            // Рассчитываем текущую фазу волны (в днях от начала периода)
             const phase = (currentDay % wave.period);
             
-            // Нормализуем фазу к диапазону [-П, П] или другому удобному
             const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
             
-            // Переводим в состояние от -5 до 5
             const waveState = (Math.sin(normalizedPhase) * 5);
             
-            // Разница с целевым состоянием
             const difference = Math.abs(waveState - this.currentState);
             
             if (difference <= this.tolerance) {
@@ -285,7 +260,6 @@ class SummaryManager {
             }
         });
         
-        // Сортируем по близости к целевому состоянию
         results.sort((a, b) => a.difference - b.difference);
         
         return results;
@@ -336,15 +310,6 @@ class SummaryManager {
         }).join('');
         
         resultsElement.innerHTML = resultsHTML;
-        
-        // Добавляем обработчики для новых кнопок
-        this.setupShowOnVizorButtons();
-    }
-    
-    setupShowOnVizorButtons() {
-        // Используем делегирование событий через EventManager
-        // Кнопки будут обработаны в EventManager.handleClick()
-        // через проверку класса 'show-on-vizor-btn'
     }
     
     getClosenessClass(difference) {
