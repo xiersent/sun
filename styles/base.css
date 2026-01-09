@@ -51,7 +51,7 @@ body.graph-hidden .graph-section{display: none !important;}
     outline: 1px solid var(--clg);
     position: relative;
     user-select: none;
-	margin-top: 20px;
+	margin: 21px 0;
 }
 
 /* Темный режим для временной полосы */

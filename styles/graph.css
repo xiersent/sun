@@ -124,3 +124,45 @@
 .center-date-name{font-size: var(--font-size-md); color: var(--text-color);}
 .center-date-weekday{font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 4px; font-weight: 400;}
 .center-date-star{font-size: 22px;}
+
+/* В styles/main.css или styles/graph.css добавляем */
+.extremum-marker {
+    position: absolute;
+    width: 1px;
+    height: 15px;
+    opacity: 0.7;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.extremum-label {
+    position: absolute;
+    font-size: 10px;
+    font-family: Tahoma, sans-serif;
+    white-space: nowrap;
+    padding: 2px 4px;
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    z-index: 9;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.time-scale {
+    position: relative;
+}
+
+/* Для темного режима */
+.graph-container.dark-mode + .time-bar-container .extremum-label {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+}
+
+.graph-container.dark-mode + .time-bar-container .extremum-label div[style*="border-top"] {
+    border-top-color: rgba(255, 255, 255, 0.9);
+}
+
+.graph-container.dark-mode + .time-bar-container .extremum-label div[style*="border-bottom"] {
+    border-bottom-color: rgba(255, 255, 255, 0.9);
+}

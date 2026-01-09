@@ -129,6 +129,13 @@ async function finalizeInitialization() {
     if (window.uiManager && window.uiManager.restoreTabState) {
         window.uiManager.restoreTabState();
     }
+
+    // АВТОМАТИЧЕСКАЯ ИНИЦИАЛИЗАЦИЯ ЭКСТРЕМУМОВ
+    if (window.extremumTimeManager && window.extremumTimeManager.init) {
+        setTimeout(() => {
+            window.extremumTimeManager.init();
+        }, 500);
+    }
 }
 
 window.finalizeInitialization = finalizeInitialization;
