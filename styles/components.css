@@ -7,12 +7,12 @@ button:hover{filter: brightness(0.9);}
 /* Кнопка предупреждения */
 #acceptWarning.ui-btn{background-color: var(--cp); color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
 #acceptWarning.ui-btn:hover{filter: brightness(0.9); background-color: var(--cp);}
-.parable-btn-wrapper{margin-bottom: 20px;}
+.parable-btn-wrapper{margin-bottom: 20px; display: flex; justify-content: center; gap: 8px;}
 .mobile-warning-box .parable-btn-wrapper{display: none;}
 .mobile-warning-box .warning-actions{display: none;}
 
 /* Кнопка притчи */
-.parable-btn{background-color: #4a6fa5; color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px; margin-right: var(--spacing-xs);}
+.parable-btn{background-color: #4a6fa5; color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
 .parable-btn:hover{filter: brightness(0.9); background-color: #3a5a8a;}
 .small-button{padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
 .transform-btn{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
@@ -68,7 +68,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 .warning-text{line-height: 1.5; margin-bottom: var(--spacing-lg);}
 
 /* Контейнер для информации предупреждения */
-.warning-info{display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--spacing-lg); align-items: center;}
+.warning-info{display: flex; flex-direction: column; gap: 8px; align-items: center;}
 .warning-info-item{display: flex; align-items: center; gap: 5px;}
 .warning-info-item strong{font-weight: 600; color: #333;}
 .warning-info-item span{color: #666; font-weight: 400;}

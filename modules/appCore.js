@@ -305,16 +305,16 @@ class AppCore {
             });
         }
         
-        const acceptWarningBtn = document.getElementById('acceptWarning');
-        if (acceptWarningBtn) {
-            acceptWarningBtn.addEventListener('click', () => {
-                const warningOverlay = document.getElementById('warningOverlay');
-                if (warningOverlay) {
-                    warningOverlay.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                }
-            });
-        }
+		document.addEventListener('click', (e) => {
+			const target = e.target;
+			if (target.matches('[data-action="acceptWarning"]')) {
+				const warningOverlay = document.getElementById('warningOverlay');
+				if (warningOverlay) {
+					warningOverlay.classList.add('hidden');
+					document.body.style.overflow = 'auto';
+				}
+			}
+		});
         
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
         if (btnAddCustomWave) {
