@@ -136,3 +136,172 @@ body.graph-hidden .graph-section {
     max-width: 1200px;
     width: 100%;
 }
+
+/* Контейнер временной полосы */
+.time-bar-container {
+    width: var(--gw);
+    height: 60px;
+    background-color: #fff;
+    outline: 1px solid var(--clg);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+    user-select: none;
+}
+
+/* Темный режим для временной полосы */
+.graph-container.dark-mode + .time-bar-container {
+    background-color: #000;
+    border-color: #444;
+}
+
+/* Графическая серая полоса */
+.graph-container.graph-gray-mode + .time-bar-container {
+    filter: grayscale(1);
+}
+
+/* Полоса времени */
+.time-bar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Шкала времени */
+.time-scale {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+/* Маркер часа */
+.hour-marker {
+    flex: 1;
+    border-left: 1px solid var(--clg);
+    position: relative;
+    cursor: pointer;
+}
+
+.hour-marker:first-child {
+    border-left: none;
+}
+
+.hour-marker:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.graph-container.dark-mode + .time-bar-container .hour-marker:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Подписи часов */
+.hour-label {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-weight: 400;
+    font-family: var(--font-family);
+}
+
+/* Полчаса - тонкая линия */
+.half-hour-marker {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 1px;
+    height: 30%;
+    background-color: rgba(0, 0, 0, 0.15);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.graph-container.dark-mode + .time-bar-container .half-hour-marker {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Индикатор текущего времени */
+.time-indicator {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background-color: var(--danger-color);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.time-indicator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -2px;
+    width: 6px;
+    height: 6px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+}
+
+.time-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -2px;
+    width: 6px;
+    height: 6px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+}
+
+/* Метка времени на индикаторе */
+.time-indicator-label {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--danger-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.time-indicator-label::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid var(--danger-color);
+}
+
+/* Дополнительные стили для графического соответствия */
+.time-bar-container .hour-label {
+    font-size: 10px;
+}
+
+/* Стили для кликабельных часов */
+.hour-marker.clickable {
+    cursor: pointer;
+}
+
+/* Полночь особый маркер */
+.hour-marker.midnight {
+    border-left-color: var(--danger-color);
+}
+
+.hour-marker.midnight .hour-label {
+    color: var(--danger-color);
+    font-weight: 700;
+}

@@ -8,6 +8,8 @@
     overflow: hidden;
 }
 
+.graph-gray-mode
+
 .graph-container.graph-gray-mode {
     filter: grayscale(1);
 }
@@ -539,3 +541,8 @@
 .center-date-star {
   font-size: 22px;
 }
+
+
+
+
+
