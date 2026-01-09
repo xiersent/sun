@@ -50,9 +50,8 @@ body.graph-hidden .graph-section{display: none !important;}
     background-color: #fff;
     outline: 1px solid var(--clg);
     position: relative;
-    overflow: hidden;
-    margin-bottom: 10px;
     user-select: none;
+	margin-top: 20px;
 }
 
 /* Темный режим для временной полосы */
