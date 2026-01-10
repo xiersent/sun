@@ -74,6 +74,7 @@ class UIManager {
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
             toggleWaveLabels: () => this.toggleWaveLabels(),
+			toggleWaveIntersections: () => this.toggleWaveIntersections(),
             toggleExtremes: () => this.toggleExtremes(),
             toggleEquilibrium: () => this.toggleEquilibrium(),
             toggleBg: () => this.toggleBackground(),
@@ -332,6 +333,26 @@ class UIManager {
 				graphContainer.classList.add('graph-gray-mode');
 			} else {
 				graphContainer.classList.remove('graph-gray-mode');
+			}
+		}
+	}
+
+	// В modules/uiManager.js добавить:
+	toggleWaveIntersections() {
+		const container = document.querySelector('.wave-intersection-points');
+		if (container) {
+			const isHidden = container.classList.contains('hidden');
+			if (isHidden) {
+				container.classList.remove('hidden');
+				if (window.waves && window.waves.renderWaveIntersectionPoints) {
+					window.waves.renderWaveIntersectionPoints();
+				}
+			} else {
+				container.classList.add('hidden');
+			}
+		} else {
+			if (window.waves && window.waves.renderWaveIntersectionPoints) {
+				window.waves.renderWaveIntersectionPoints();
 			}
 		}
 	}

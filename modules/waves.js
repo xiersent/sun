@@ -289,6 +289,7 @@ class WavesManager {
         this.updateHorizontalWaveLabels();
         this.updateVerticalWaveLabels();
         this.updateAxisXIntersectionPoints();
+		this.renderWaveIntersectionPoints();
     }
     
     updateHorizontalWaveLabels() {
@@ -1105,6 +1106,171 @@ class WavesManager {
         
         return window.timeUtils.getDaysBetweenExact(date1, date2);
     }
+
+	// В modules/waves.js добавить:
+	findWaveIntersectionPoints(wave1, wave2) {
+		const points = [];
+		const period1 = wave1.period;
+		const period2 = wave2.period;
+		
+		// Упрощение: ищем точки, где значения волн совпадают
+		// Уравнение: sin(2πx/P1) = sin(2πx/P2)
+		
+		// Для одинаковых амплитуд упрощаем:
+		// 2πx/P1 = 2πx/P2 + 2πk или 2πx/P1 = π - 2πx/P2 + 2πk
+		
+		// Более практично: пробуем дискретные значения и ищем совпадения
+		const searchPoints = 1000; // Точность поиска
+		const graphWidth = window.appState.graphWidth;
+		
+		for (let i = 0; i <= searchPoints; i++) {
+			const x = (i / searchPoints) * graphWidth;
+			
+			const y1 = this.calculateWaveYAtX(wave1, x);
+			const y2 = this.calculateWaveYAtX(wave2, x);
+			
+			// Если значения близки (допуск 2-3 пикселя)
+			if (Math.abs(y1 - y2) < 3) {
+				// Проверяем, не дубликат ли это
+				const isDuplicate = points.some(p => Math.abs(p.x - x) < 10);
+				if (!isDuplicate) {
+					points.push({
+						x: x,
+						y: (y1 + y2) / 2,
+						wave1: wave1,
+						wave2: wave2
+					});
+				}
+			}
+		}
+		
+		return points;
+	}
+
+	calculateAllWaveIntersections() {
+		const visibleWaves = this.getActiveWaves();
+		const allIntersections = [];
+		
+		if (visibleWaves.length < 2) return allIntersections;
+		
+		// Проверяем каждую пару волн
+		for (let i = 0; i < visibleWaves.length; i++) {
+			for (let j = i + 1; j < visibleWaves.length; j++) {
+				const points = this.findWaveIntersectionPoints(
+					visibleWaves[i], 
+					visibleWaves[j]
+				);
+				
+				points.forEach(point => {
+					allIntersections.push({
+						...point,
+						time: this.calculateTimeFromXCoordinate(visibleWaves[i], point.x),
+						wavePair: `${visibleWaves[i].name} × ${visibleWaves[j].name}`
+					});
+				});
+			}
+		}
+		
+		return allIntersections;
+	}
+
+	renderWaveIntersectionPoints() {
+		// Удаляем старые точки
+		this.removeWaveIntersectionPoints();
+		
+		const intersections = this.calculateAllWaveIntersections();
+		
+		const container = document.createElement('div');
+		container.className = 'wave-intersection-points';
+		container.style.position = 'absolute';
+		container.style.width = '100%';
+		container.style.height = '100%';
+		container.style.pointerEvents = 'none';
+		container.style.zIndex = '9';
+		container.style.top = '0';
+		container.style.left = '0';
+		
+		intersections.forEach(point => {
+			const pointElement = document.createElement('div');
+			pointElement.className = 'wave-intersection-point';
+			pointElement.dataset.time = point.time.toISOString();
+			pointElement.dataset.wavePair = point.wavePair;
+			pointElement.title = `${point.wavePair}\n${this.formatExtremumTime(point.time)}`;
+			
+			// Стиль точки
+			pointElement.style.position = 'absolute';
+			pointElement.style.left = `${point.x}px`;
+			pointElement.style.top = `${point.y}px`;
+			pointElement.style.width = '6px';
+			pointElement.style.height = '6px';
+			pointElement.style.borderRadius = '50%';
+			pointElement.style.backgroundColor = '#ff0000'; // Красный для отличия от эквилибриумов
+			pointElement.style.border = '2px solid #fff';
+			pointElement.style.cursor = 'pointer';
+			pointElement.style.pointerEvents = 'auto';
+			pointElement.style.zIndex = '10';
+			pointElement.style.boxShadow = '0 0 3px rgba(0,0,0,0.5)';
+			
+			// При наведении
+			pointElement.addEventListener('mouseenter', (e) => {
+				this.showIntersectionTooltip(e.target, point);
+			});
+			
+			pointElement.addEventListener('mouseleave', () => {
+				this.hideIntersectionTooltip();
+			});
+			
+			// Клик для навигации
+			pointElement.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.navigateToIntersectionTime(point.time);
+			});
+			
+			container.appendChild(pointElement);
+		});
+		
+		const graphElement = document.getElementById('graphElement');
+		if (graphElement) {
+			graphElement.appendChild(container);
+		}
+		
+		return container;
+	}
+
+	removeWaveIntersectionPoints() {
+		document.querySelectorAll('.wave-intersection-points').forEach(el => el.remove());
+	}
+
+	showIntersectionTooltip(element, point) {
+		// Можно использовать существующий tooltip или создать новый
+		const tooltip = document.createElement('div');
+		tooltip.className = 'intersection-tooltip';
+		tooltip.textContent = `${point.wavePair}\n${this.formatExtremumTime(point.time)}`;
+		
+		tooltip.style.position = 'absolute';
+		tooltip.style.left = `${element.offsetLeft + 10}px`;
+		tooltip.style.top = `${element.offsetTop - 30}px`;
+		tooltip.style.backgroundColor = 'rgba(0,0,0,0.8)';
+		tooltip.style.color = '#fff';
+		tooltip.style.padding = '5px 10px';
+		tooltip.style.borderRadius = '3px';
+		tooltip.style.fontSize = '11px';
+		tooltip.style.zIndex = '100';
+		tooltip.style.whiteSpace = 'pre-line';
+		tooltip.style.pointerEvents = 'none';
+		
+		element.appendChild(tooltip);
+	}
+
+	hideIntersectionTooltip() {
+		document.querySelectorAll('.intersection-tooltip').forEach(el => el.remove());
+	}
+
+	navigateToIntersectionTime(time) {
+		if (window.dates && window.dates.setDate) {
+			window.dates.setDate(time, true);
+		}
+	}
 }
 
 window.waves = new WavesManager();
