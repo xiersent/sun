@@ -68,7 +68,7 @@
 .list-item--group.active{background-color: #e6f2ff;}
 .list-item--group .wave-group-toggle{width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; margin-right: 8px;}
 .list-item--group .wave-group-toggle:hover{filter: brightness(0.9);}
-.group-children{margin-top: var(--spacing-sm); max-height: 369px; overflow-y: scroll; border: 1px solid var(--clg);}
+.group-children{margin-top: var(--spacing-sm); max-height: 361px; overflow-y: scroll; border: 1px solid var(--clg);}
 .list-item--expanded .group-children{display: block;}
 .group-children .list-item--wave{background: #fafafa;}
 .group-children .list-item--wave:last-child{margin-bottom: 0;}

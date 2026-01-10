@@ -1,8 +1,12 @@
 <div class="list-item list-item--wave <%= data.editing ? 'list-item--editing' : '' %>"
     data-id="<%= data.id %>"
     data-type="wave"
-    draggable="false"
-    data-index="<%= data.index %>">
+    draggable="<%= !data.editing %>"
+    data-index="<%= data.index %>"
+    data-wave-id="<%= data.id %>">
+    
+    <!-- ДОБАВЛЕНО: ручка для перетаскивания -->
+    <div class="list-item__drag-handle wave-drag-handle">⋮⋮</div>
     
     <div class="list-item__content">
         <!-- Нормальный вид -->
@@ -26,7 +30,7 @@
                              data-id="<%= data.id %>" 
                              title="Изменить цвет"></div>
                         
-                        <!-- Чекбокс окраски краев - ДОБАВЛЕНО -->
+                        <!-- Чекбокс окраски краев -->
                         <input type="checkbox" class="wave-corner-color-check" 
                                <%= data.cornerColor ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
