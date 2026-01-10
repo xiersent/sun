@@ -134,11 +134,21 @@ class TimeBarManager {
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
         const currentSecond = now.getSeconds();
+        const currentMillisecond = now.getMilliseconds(); // ДОБАВЛЕНО для точности
         
-        const secondsInDay = currentHour * 3600 + currentMinute * 60 + currentSecond;
+        // УЛУЧШЕННЫЙ РАСЧЁТ: добавляем миллисекунды для большей точности
+        const secondsInDay = currentHour * 3600 + 
+                            currentMinute * 60 + 
+                            currentSecond +
+                            currentMillisecond / 1000;
+        
         const percentOfDay = (secondsInDay / 86400) * 100;
         
+        // УСТАНАВЛИВАЕМ ПОЗИЦИЮ ИНДИКАТОРА
         this.timeIndicator.style.left = `${percentOfDay}%`;
+        
+        // УБЕДИТЕСЬ, ЧТО ПРЕОБРАЗОВАНИЕ ПРИМЕНЕНО
+        this.timeIndicator.style.transform = 'translateX(-50%)';
         
         const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:${currentSecond.toString().padStart(2, '0')}`;
         this.indicatorLabel.textContent = timeString;
@@ -147,27 +157,26 @@ class TimeBarManager {
         this.highlightActiveHour(currentHour);
     }
     
-	// modules/dates.js - добавляем метод
-	isCurrentDateToday() {
-		const today = new Date();
-		const vizorDate = window.appState.currentDate;
-		
-		const todayStart = new Date(
-			today.getFullYear(),
-			today.getMonth(),
-			today.getDate(),
-			0, 0, 0, 0
-		);
-		
-		const vizorStart = new Date(
-			vizorDate.getFullYear(),
-			vizorDate.getMonth(),
-			vizorDate.getDate(),
-			0, 0, 0, 0
-		);
-		
-		return todayStart.getTime() === vizorStart.getTime();
-	}
+    isCurrentDateToday() {
+        const today = new Date();
+        const vizorDate = window.appState.currentDate;
+        
+        const todayStart = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            0, 0, 0, 0
+        );
+        
+        const vizorStart = new Date(
+            vizorDate.getFullYear(),
+            vizorDate.getMonth(),
+            vizorDate.getDate(),
+            0, 0, 0, 0
+        );
+        
+        return todayStart.getTime() === vizorStart.getTime();
+    }
     
     updateTimeBarAppearance() {
         if (!this.container) return;

@@ -133,11 +133,12 @@ body.graph-hidden .graph-section{display: none !important;}
 .time-indicator {
     position: absolute;
     top: 0;
-    width: 2px; /* Оставляем ширину, но сделаем прозрачной */
+    width: 2px;
     height: 100%;
-    background-color: transparent; /* Делаем прозрачной */
+    background-color: transparent;
     z-index: 10;
     pointer-events: none;
+    transform: translateX(-50%); /* ДОБАВЛЕНО: центрирование по ширине */
 }
 
 /* Убираем риски (кружки) сверху и снизу */
