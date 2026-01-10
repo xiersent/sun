@@ -145,83 +145,89 @@ class UnifiedListManager {
         };
     }
     
-    prepareWaveData(wave, index) {
-        const waveIdStr = String(wave.id);
-        const editingWaveIdStr = window.appState.editingWaveId ? String(window.appState.editingWaveId) : null;
-        
-        return {
-            id: wave.id,
-            name: wave.name,
-            type: 'wave',
-            period: wave.period,
-            color: wave.color,
-            typeValue: wave.type,
-            description: window.dom.getWaveDescription(wave.type),
-            visible: window.appState.waveVisibility[waveIdStr] !== false,
-            bold: window.appState.waveBold[waveIdStr] || false,
-            cornerColor: window.appState.waveCornerColor[waveIdStr] || false,
-            editing: editingWaveIdStr === waveIdStr,
-            index: index
-        };
-    }
-    
-    prepareGroupData(groupData, index) {
-        const originalGroup = window.appState.data.groups.find(g => g.id === groupData.id);
-        
-        if (!originalGroup) {
-            return {
-                ...groupData,
-                waveCount: 0,
-                enabledCount: 0,
-                children: [],
-                expanded: false,
-                enabled: false,
-                editing: false
-            };
-        }
-        
-        const existingWaves = [];
-        let enabledCount = 0;
-        
-        if (originalGroup.waves && Array.isArray(originalGroup.waves)) {
-            originalGroup.waves.forEach((waveId, i) => {
-                const waveIdStr = String(waveId);
-                const wave = window.appState.data.waves.find(w => {
-                    const wIdStr = String(w.id);
-                    return wIdStr === waveIdStr;
-                });
-                
-                if (wave) {
-                    existingWaves.push(wave);
-                    const waveIdStrForCheck = String(wave.id);
-                    if (window.appState.waveVisibility[waveIdStrForCheck] !== false) {
-                        enabledCount++;
-                    }
-                }
-            });
-        }
-        
-        const waveCount = existingWaves.length;
-        const childrenData = existingWaves.map((wave, waveIndex) => {
-            return this.prepareWaveData(wave, waveIndex);
-        });
-        
-        const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
-        const groupIdStr = String(originalGroup.id);
-        
-        return {
-            id: originalGroup.id,
-            name: originalGroup.name,
-            type: 'group',
-            waveCount: waveCount,
-            enabledCount: enabledCount,
-            enabled: originalGroup.enabled !== undefined ? originalGroup.enabled : false,
-            expanded: originalGroup.expanded !== undefined ? originalGroup.expanded : false,
-            children: childrenData,
-            index: index,
-            editing: editingGroupIdStr === groupIdStr
-        };
-    }
+	// В unifiedListManager.js - в методе prepareGroupData ДОБАВИТЬ
+	prepareGroupData(groupData, index) {
+		const originalGroup = window.appState.data.groups.find(g => g.id === groupData.id);
+		
+		if (!originalGroup) {
+			return {
+				...groupData,
+				waveCount: 0,
+				enabledCount: 0,
+				children: [],
+				expanded: false,
+				enabled: false,
+				editing: false
+			};
+		}
+		
+		const existingWaves = [];
+		let enabledCount = 0;
+		
+		if (originalGroup.waves && Array.isArray(originalGroup.waves)) {
+			originalGroup.waves.forEach((waveId, waveIndex) => {
+				const waveIdStr = String(waveId);
+				const wave = window.appState.data.waves.find(w => {
+					const wIdStr = String(w.id);
+					return wIdStr === waveIdStr;
+				});
+				
+				if (wave) {
+					existingWaves.push(wave);
+					const waveIdStrForCheck = String(wave.id);
+					if (window.appState.waveVisibility[waveIdStrForCheck] !== false) {
+						enabledCount++;
+					}
+				}
+			});
+		}
+		
+		const waveCount = existingWaves.length;
+		const childrenData = existingWaves.map((wave, waveIndex) => {
+			// ДОБАВЛЕНО: передаем parentGroupId в данные волны
+			const waveData = this.prepareWaveData(wave, waveIndex);
+			waveData.parentGroupId = originalGroup.id; // Ключевое добавление
+			return waveData;
+		});
+		
+		const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
+		const groupIdStr = String(originalGroup.id);
+		
+		return {
+			id: originalGroup.id,
+			name: originalGroup.name,
+			type: 'group',
+			waveCount: waveCount,
+			enabledCount: enabledCount,
+			enabled: originalGroup.enabled !== undefined ? originalGroup.enabled : false,
+			expanded: originalGroup.expanded !== undefined ? originalGroup.expanded : false,
+			children: childrenData,
+			index: index,
+			editing: editingGroupIdStr === groupIdStr
+		};
+	}
+
+	// В методе prepareWaveData - ДОБАВИТЬ в возвращаемый объект
+	prepareWaveData(wave, index) {
+		const waveIdStr = String(wave.id);
+		const editingWaveIdStr = window.appState.editingWaveId ? String(window.appState.editingWaveId) : null;
+		
+		return {
+			id: wave.id,
+			name: wave.name,
+			type: 'wave',
+			period: wave.period,
+			color: wave.color,
+			typeValue: wave.type,
+			description: window.dom.getWaveDescription(wave.type),
+			visible: window.appState.waveVisibility[waveIdStr] !== false,
+			bold: window.appState.waveBold[waveIdStr] || false,
+			cornerColor: window.appState.waveCornerColor[waveIdStr] || false,
+			editing: editingWaveIdStr === waveIdStr,
+			index: index,
+			// parentGroupId будет добавлен в prepareGroupData
+		};
+	}
     
     prepareIntersectionData(intersectionData, index) {
         return {

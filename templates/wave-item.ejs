@@ -1,15 +1,20 @@
 <div class="list-item list-item--wave <%= data.editing ? 'list-item--editing' : '' %>"
     data-id="<%= data.id %>"
     data-type="wave"
+    <% if (data.parentGroupId) { %>
+        data-parent-group-id="<%= data.parentGroupId %>"
+    <% } %>
     draggable="<%= !data.editing %>"
     data-index="<%= data.index %>"
     data-wave-id="<%= data.id %>">
+    
+    <!-- Добавлен атрибут data-parent-group-id для фильтрации drag -->
     
     <!-- ДОБАВЛЕНО: ручка для перетаскивания -->
     <div class="list-item__drag-handle wave-drag-handle">⋮⋮</div>
     
     <div class="list-item__content">
-        <!-- Нормальный вид -->
+        <!-- Остальное без изменений -->
         <div class="list-item__normal-view">
             <div class="list-item__row">
                 <div class="list-item__left">

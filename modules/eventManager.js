@@ -11,7 +11,15 @@ class EventManager {
         $(document).on('click', (e) => {
             this.handleClick(e);
         });
+
+		$(document)
+		.on('mousedown touchstart', '.group-children .list-item--wave', function(e) {
+			// Если клик на волне - останавливаем распространение до обработчика группы
+			console.log('volnidrag');
+			e.stopPropagation();
+		});
         
+        // Существующие обработчики drag для дат и групп
         $(document)
             .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing)', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
@@ -25,6 +33,340 @@ class EventManager {
             .on('dragleave', '.list-item--group[data-type="group"]', this.handleDragLeave.bind(this))
             .on('drop', '.list-item--group[data-type="group"]', this.handleDrop.bind(this))
             .on('dragend', '.list-item--group[data-type="group"]', this.handleDragEnd.bind(this));
+        $(document)
+            .on('dragstart', '.group-children .list-item--wave:not(.list-item--editing)', this.handleWaveDragStart.bind(this))
+            .on('dragover', '.group-children .list-item--wave', this.handleWaveDragOver.bind(this))
+            .on('dragleave', '.group-children .list-item--wave', this.handleWaveDragLeave.bind(this))
+            .on('drop', '.group-children .list-item--wave', this.handleWaveDrop.bind(this))
+            .on('dragend', '.group-children .list-item--wave', this.handleWaveDragEnd.bind(this));
+    }
+    
+    
+    // НОВЫЙ метод: dragstart для волн
+    handleWaveDragStart(e) {
+        const $item = $(e.currentTarget);
+        const $group = $item.closest('.list-item--group');
+        const waveId = $item.data('id');
+        const index = parseInt($item.data('index') || 0);
+        const groupId = $group.data('id');
+        
+        if (!waveId || index < 0 || !groupId) {
+            e.preventDefault();
+            return;
+        }
+        
+        // Устанавливаем данные с меткой типа и ID группы
+        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+            type: 'wave',
+            id: waveId,
+            index: index,
+            groupId: groupId,
+            source: 'wave-drag'
+        }));
+        
+        $item.addClass('list-item--dragging');
+    }
+    
+    // НОВЫЙ метод: dragover для волн
+    handleWaveDragOver(e) {
+        // Если это НЕ волна или драг не начался с волны - игнорируем
+        if (!this.isDraggingWave) {
+            return;
+        }
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        try {
+            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
+            
+            if (!dragData || dragData.type !== 'wave') {
+                e.originalEvent.dataTransfer.dropEffect = 'none';
+                return;
+            }
+            
+            const $item = $(e.currentTarget);
+            const $group = $item.closest('.list-item--group');
+            const targetGroupId = $group.data('id');
+            
+            // Строгая проверка: группы должны совпадать
+            if (dragData.groupId !== targetGroupId) {
+                e.originalEvent.dataTransfer.dropEffect = 'none';
+                
+                // Убираем подсветку у всех волн
+                $('.group-children .list-item--wave')
+                    .removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+                    
+                return;
+            }
+            
+            e.originalEvent.dataTransfer.dropEffect = 'move';
+            
+            const rect = $item[0].getBoundingClientRect();
+            const y = e.clientY;
+            const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
+            
+            // Подсвечиваем только волны в ЭТОЙ группе
+            $(`.group-children .list-item--wave[data-parent-group-id="${targetGroupId}"]`)
+                .not($item)
+                .removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            
+            if (insertPosition === 'before') {
+                $item.addClass('list-item--drag-over-top');
+                $item.removeClass('list-item--drag-over-bottom');
+            } else {
+                $item.addClass('list-item--drag-over-bottom');
+                $item.removeClass('list-item--drag-over-top');
+            }
+        } catch (error) {
+            e.originalEvent.dataTransfer.dropEffect = 'none';
+        }
+    }
+    
+    // НОВЫЙ метод: dragleave для волн
+    handleWaveDragLeave(e) {
+        const $item = $(e.currentTarget);
+        
+        if (e.originalEvent.relatedTarget && 
+            !$item[0].contains(e.originalEvent.relatedTarget)) {
+            
+            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        }
+    }
+    
+    // НОВЫЙ метод: drop для волн
+    handleWaveDrop(e) {
+        if (!this.isDraggingWave) {
+            return;
+        }
+        
+        const $item = $(e.currentTarget);
+        e.preventDefault();
+        e.stopPropagation();
+        
+        $('.list-item--wave').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        
+        try {
+            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
+            
+            if (!dragData || dragData.type !== 'wave') {
+                return;
+            }
+            
+            const $group = $item.closest('.list-item--group');
+            const targetGroupId = $group.data('id');
+            
+            // Строгая проверка групп
+            if (dragData.groupId !== targetGroupId) {
+                return;
+            }
+            
+            const targetIndex = parseInt($item.data('index') || 0);
+            
+            const rect = $item[0].getBoundingClientRect();
+            const y = e.clientY;
+            const insertBefore = y - rect.top < rect.height / 2;
+            
+            if (dragData.index === targetIndex) {
+                return;
+            }
+            
+            this.reorderWaveInGroup(dragData.groupId, dragData.index, targetIndex, insertBefore);
+            
+        } catch (error) {
+        }
+    }
+    
+    // НОВЫЙ метод: dragend для волн
+    handleWaveDragEnd(e) {
+        $('.list-item--wave').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
+    }
+    
+    // НОВЫЙ метод: перестановка волны в группе
+    reorderWaveInGroup(groupId, sourceIndex, targetIndex, insertBefore) {
+        const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
+        
+        if (!group || !group.waves || !Array.isArray(group.waves)) {
+            return;
+        }
+        
+        const waves = [...group.waves];
+        
+        // Находим waveId по индексу
+        const waveId = waves[sourceIndex];
+        if (!waveId) {
+            return;
+        }
+        
+        // Удаляем из исходной позиции
+        waves.splice(sourceIndex, 1);
+        
+        // Рассчитываем новую позицию
+        let newIndex = this.calculateNewIndex(sourceIndex, targetIndex, insertBefore);
+        
+        // Вставляем на новую позицию
+        waves.splice(newIndex, 0, waveId);
+        
+        // Обновляем массив волн в группе
+        group.waves = waves;
+        
+        // Сохраняем состояние
+        window.appState.save();
+        
+        // Обновляем отображение
+        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+            window.unifiedListManager.updateWavesList();
+        }
+        
+        // Обновляем сводку
+        setTimeout(() => {
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+        }, 50);
+    }
+    
+    // МОДИФИЦИРОВАННЫЙ метод: calculateNewIndex
+    calculateNewIndex(sourceIndex, targetIndex, insertBefore) {
+        if (sourceIndex < targetIndex) {
+            if (insertBefore) {
+                return targetIndex - 1;
+            } else {
+                return targetIndex;
+            }
+        } else {
+            if (insertBefore) {
+                return targetIndex;
+            } else {
+                return targetIndex + 1;
+            }
+        }
+    }
+    
+    // МОДИФИЦИРОВАННЫЙ метод: handleDragStart - добавляем проверку на drag волн
+    handleDragStart(e) {
+        // Пробуем получить данные drag - если это волна, игнорируем
+        try {
+            const data = e.originalEvent.dataTransfer.getData('text/plain');
+            if (data) {
+                const dragData = JSON.parse(data);
+                if (dragData && dragData.type === 'wave') {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        } catch (error) {
+            // Продолжаем обычную обработку
+        }
+        
+        const $item = $(e.currentTarget);
+        const type = $item.data('type');
+        const id = $item.data('id');
+        const index = parseInt($item.data('index') || 0);
+        
+        if (!id || index < 0) {
+            e.preventDefault();
+            return;
+        }
+        
+        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+            type: type,
+            id: id,
+            index: index
+        }));
+        
+        $item.addClass('list-item--dragging');
+    }
+    
+    // МОДИФИЦИРОВАННЫЙ метод: handleDragOver - добавляем проверку на drag волн
+    handleDragOver(e) {
+        // Пробуем получить данные drag - если это волна, игнорируем
+        try {
+            const data = e.originalEvent.dataTransfer.getData('text/plain');
+            if (data) {
+                const dragData = JSON.parse(data);
+                if (dragData && dragData.type === 'wave') {
+                    return; // Игнорируем drag волн в обработчиках групп/дат
+                }
+            }
+        } catch (error) {
+            // Продолжаем обычную обработку
+        }
+        
+        e.preventDefault();
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+        
+        const $item = $(e.currentTarget);
+        const rect = $item[0].getBoundingClientRect();
+        const y = e.clientY;
+        const type = $item.data('type');
+        
+        const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
+        
+        $(`.list-item[data-type="${type}"]`).not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+    
+        if (insertPosition === 'before') {
+            $item.addClass('list-item--drag-over-top');
+            $item.removeClass('list-item--drag-over-bottom');
+        } else {
+            $item.addClass('list-item--drag-over-bottom');
+            $item.removeClass('list-item--drag-over-top');
+        }
+    }
+    
+    // МОДИФИЦИРОВАННЫЙ метод: handleDrop - добавляем проверку на drag волн
+    handleDrop(e) {
+        // ПРОВЕРКА: если drag волны - игнорируем
+        if (this.isDraggingWave) {
+            return;
+        }
+        
+        try {
+            const textData = e.originalEvent.dataTransfer.getData('text');
+            if (textData === 'WAVE_DRAG') {
+                return;
+            }
+        } catch (error) {
+            // Продолжаем
+        }
+        
+        const $item = $(e.currentTarget);
+        e.preventDefault();
+        
+        $('.list-item').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        
+        try {
+            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
+            
+            // Проверяем что это НЕ волна
+            if (dragData && (dragData.type === 'wave' || dragData.isWaveDrag)) {
+                return;
+            }
+            
+            const targetType = $item.data('type');
+            
+            if (dragData.type !== targetType) {
+                return;
+            }
+            
+            const targetIndex = parseInt($item.data('index') || 0);
+            
+            const rect = $item[0].getBoundingClientRect();
+            const y = e.clientY;
+            const insertBefore = y - rect.top < rect.height / 2;
+            
+            if (dragData.index === targetIndex) {
+                return;
+            }
+            
+            if (dragData.type === 'date') {
+                this.handleDateDrop(dragData, targetIndex, insertBefore);
+            } else if (dragData.type === 'group') {
+                this.handleGroupDrop(dragData, targetIndex, insertBefore);
+            }
+            
+        } catch (error) {
+        }
     }
     
     setupDateChangeObservers() {

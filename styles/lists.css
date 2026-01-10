@@ -121,3 +121,63 @@
 .list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 .list-item:first-child{overflow: hidden;}
 .list-item:last-child{overflow: hidden;}
+
+/* styles/lists.css - ДОБАВЛЕНО */
+/* Стили для drag & drop волн внутри групп */
+.group-children .list-item--wave.list-item--dragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    z-index: 10;
+}
+
+.group-children .list-item--wave.list-item--drag-over-top {
+    border-top: 2px solid var(--cp);
+}
+
+.group-children .list-item--wave.list-item--drag-over-bottom {
+    border-bottom: 2px solid var(--cp);
+}
+
+/* Индикаторы вставки для волн */
+.group-children .list-item--wave.list-item--drag-over-top::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--cp);
+    transform: rotate(45deg);
+    z-index: 10;
+}
+
+.group-children .list-item--wave.list-item--drag-over-bottom::after {
+    content: '';
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--cp);
+    transform: rotate(45deg);
+    z-index: 10;
+}
+
+/* Ручка для перетаскивания волн */
+.wave-drag-handle {
+    color: #999;
+    cursor: move;
+    padding: 2px;
+    flex-shrink: 0;
+    user-select: none;
+    margin-right: 4px;
+}
+
+.wave-drag-handle:hover {
+    color: var(--text-color);
+}
+
+.list-item--wave.list-item--editing .wave-drag-handle {
+    opacity: 0.3;
+    cursor: default;
+}
