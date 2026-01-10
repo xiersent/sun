@@ -1,5 +1,5 @@
 /* Контейнеры волн */
-.wave-container{position: absolute; width: 3600px; height: 100%; left: -1200px; top: 0; z-index: var(--z-waves);}
+.wave-container{position: absolute; width: 3600px; height: 100%; left: -1200px; top: 0; z-index: 6;}
 .wave{position: absolute; width: 100%; height: 100%; left: 0; top: 50%; transform: translateY(-50%);}
 
 /* Пути волн */
