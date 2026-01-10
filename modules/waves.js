@@ -533,6 +533,27 @@ class WavesManager {
 		}
 	}
 
+	calculateTimeFromIntersection(point) {
+		// Аналогично методу navigateToAxisXIntersection
+		
+		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+		const currentDate = new Date(window.appState.currentDate);
+		const leftDate = new Date(currentDate);
+		leftDate.setDate(leftDate.getDate() - squaresLeft);
+		leftDate.setHours(0, 0, 0, 0);
+		
+		// X координата в пикселях от левого края
+		const pixelPosition = point.x;
+		
+		// Дни от левого края
+		const daysFromLeft = pixelPosition / window.appState.config.squareSize;
+		
+		// Время пересечения
+		const intersectionTime = new Date(leftDate.getTime() + (daysFromLeft * 24 * 3600 * 1000));
+		
+		return intersectionTime;
+	}
+
 	getPhaseAtTime(wave, time) {
 		const daysFromBase = window.timeUtils.getDaysBetween(window.appState.baseDate, time);
 		
@@ -1110,35 +1131,50 @@ class WavesManager {
 	// В modules/waves.js добавить:
 	findWaveIntersectionPoints(wave1, wave2) {
 		const points = [];
-		const period1 = wave1.period;
-		const period2 = wave2.period;
 		
-		// Упрощение: ищем точки, где значения волн совпадают
-		// Уравнение: sin(2πx/P1) = sin(2πx/P2)
+		const periodPx1 = wave1.period * window.appState.config.squareSize;
+		const periodPx2 = wave2.period * window.appState.config.squareSize;
 		
-		// Для одинаковых амплитуд упрощаем:
-		// 2πx/P1 = 2πx/P2 + 2πk или 2πx/P1 = π - 2πx/P2 + 2πk
+		// Смещения для обеих волн
+		const currentDay = window.appState.currentDay || 0;
+		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
 		
-		// Более практично: пробуем дискретные значения и ищем совпадения
-		const searchPoints = 1000; // Точность поиска
+		let offset1 = (currentDay * window.appState.config.squareSize) % periodPx1;
+		let offset2 = (currentDay * window.appState.config.squareSize) % periodPx2;
+		if (offset1 < 0) offset1 = periodPx1 + offset1;
+		if (offset2 < 0) offset2 = periodPx2 + offset2;
+		
+		offset1 += phaseOffsetPixels;
+		offset2 += phaseOffsetPixels;
+		
+		// Дискретный поиск с учетом обеих волн
+		const searchPoints = 2000;
 		const graphWidth = window.appState.graphWidth;
 		
 		for (let i = 0; i <= searchPoints; i++) {
 			const x = (i / searchPoints) * graphWidth;
 			
-			const y1 = this.calculateWaveYAtX(wave1, x);
-			const y2 = this.calculateWaveYAtX(wave2, x);
+			// Y с учетом смещений
+			const y1 = window.appState.config.graphHeight / 2 - 
+					window.appState.config.amplitude * 
+					Math.sin(2 * Math.PI * (x + offset1) / periodPx1);
 			
-			// Если значения близки (допуск 2-3 пикселя)
-			if (Math.abs(y1 - y2) < 3) {
-				// Проверяем, не дубликат ли это
-				const isDuplicate = points.some(p => Math.abs(p.x - x) < 10);
+			const y2 = window.appState.config.graphHeight / 2 - 
+					window.appState.config.amplitude * 
+					Math.sin(2 * Math.PI * (x + offset2) / periodPx2);
+			
+			if (Math.abs(y1 - y2) < 2) {
+				const isDuplicate = points.some(p => Math.abs(p.x - x) < 5);
 				if (!isDuplicate) {
 					points.push({
 						x: x,
 						y: (y1 + y2) / 2,
 						wave1: wave1,
-						wave2: wave2
+						wave2: wave2,
+						offset1: offset1,
+						offset2: offset2,
+						periodPx1: periodPx1,
+						periodPx2: periodPx2
 					});
 				}
 			}
@@ -1242,24 +1278,10 @@ class WavesManager {
 	}
 
 	showIntersectionTooltip(element, point) {
-		// Можно использовать существующий tooltip или создать новый
-		const tooltip = document.createElement('div');
-		tooltip.className = 'intersection-tooltip';
-		tooltip.textContent = `${point.wavePair}\n${this.formatExtremumTime(point.time)}`;
+		// Показываем просто title атрибут без сложного позиционирования
+		element.title = `${point.wave1.name} × ${point.wave2.name}\n${this.formatExtremumTime(point.time)}`;
 		
-		tooltip.style.position = 'absolute';
-		tooltip.style.left = `${element.offsetLeft + 10}px`;
-		tooltip.style.top = `${element.offsetTop - 30}px`;
-		tooltip.style.backgroundColor = 'rgba(0,0,0,0.8)';
-		tooltip.style.color = '#fff';
-		tooltip.style.padding = '5px 10px';
-		tooltip.style.borderRadius = '3px';
-		tooltip.style.fontSize = '11px';
-		tooltip.style.zIndex = '100';
-		tooltip.style.whiteSpace = 'pre-line';
-		tooltip.style.pointerEvents = 'none';
-		
-		element.appendChild(tooltip);
+		// Или вообще убрать тултип, использовать только title
 	}
 
 	hideIntersectionTooltip() {
