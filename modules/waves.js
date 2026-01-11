@@ -289,7 +289,7 @@ class WavesManager {
         this.updateHorizontalWaveLabels();
         this.updateVerticalWaveLabels();
         this.updateAxisXIntersectionPoints();
-		this.renderWaveIntersectionPoints();
+		//this.renderWaveIntersectionPoints();
     }
     
     updateHorizontalWaveLabels() {
