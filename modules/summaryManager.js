@@ -69,15 +69,7 @@ class SummaryManager {
             const option = document.createElement('option');
             option.value = i;
             
-            if (i === 5) {
-                option.textContent = '5 😔(😊)';
-            } else if (i === -5) {
-                option.textContent = '-5 😊(😔)';
-            } else if (i === 0) {
-                option.textContent = '0 😐';
-            } else {
-                option.textContent = i.toString();
-            }
+            option.textContent = i.toString();
             
             if (i === -5) {
                 option.selected = true;
