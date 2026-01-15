@@ -1,7 +1,7 @@
 /* optimized3/styles/base.css */
 /* Базовые сбросы */
 *{box-sizing: border-box;}
-body{display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: var(--spacing-xl); background-color: var(--cbg); font-family: var(--font-family); font-size: var(--font-size-md); font-weight: 400; overflow-y: scroll !important; overflow-x: auto;}
+body{display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: var(--spacing-xl); background-color: var(--cbg); font-family: var(--font-family); font-size: var(--font-size-md); font-weight: 400; overflow-y: scroll !important; overflow-x: auto;}
 
 /* Утилиты для скрытия */
 .hidden{display: none !important;}
