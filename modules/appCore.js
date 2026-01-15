@@ -32,6 +32,10 @@ class AppCore {
             this.updateCSSVariables();
             
             this.loadParableText();
+
+			if (window.appState && window.appState.graphHidden) {
+				document.body.classList.add('graph-hidden');
+			}
             
             const isMobile = this.isMobileDevice();
             if (isMobile) {

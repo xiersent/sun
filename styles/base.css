@@ -34,7 +34,7 @@ body.ui-hidden .interface-container, body.ui-hidden .controls-section, body.ui-h
 body.ui-hidden .corner-square{display: block !important;}
 
 /* Важное исправление: display для graph-section */
-body .graph-section{display: flex !important; flex-direction: column; align-items: center;}
+body .graph-section{display: flex; flex-direction: column; align-items: center;}
 
 /* Скрытие графика */
 body.graph-hidden .graph-section{display: none !important;}
