@@ -65,7 +65,12 @@ class AppState {
                 activeDateId: 's25',
                 waveVisibility: {},
                 waveBold: {},
-                waveCornerColor: {}
+                waveCornerColor: {},
+                // ДОБАВЛЕНО: состояния выделения дат
+                dateSelections: {
+                    typeA: null,  // ID даты с выделением типа A
+                    typeB: null   // ID даты с выделением типа B
+                }
             }
         };
         
@@ -200,6 +205,9 @@ class AppState {
 		this.data.uiSettings.waveVisibility = this.waveVisibility;
 		this.data.uiSettings.waveBold = this.waveBold;
 		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+		
+		// ДОБАВЛЕНО: сохранение состояний выделения дат
+		this.data.uiSettings.dateSelections = this.dateSelections;
 
 		localStorage.setItem('appData', JSON.stringify(this.data));
 	}
@@ -408,6 +416,16 @@ class AppState {
 					}
 				});
 				
+				// ДОБАВЛЕНО: загрузка состояний выделения дат
+				if (data.uiSettings.dateSelections) {
+					this.dateSelections = data.uiSettings.dateSelections;
+				} else {
+					this.dateSelections = {
+						typeA: null,
+						typeB: null
+					};
+				}
+				
 				if (!(this.baseDate instanceof Date)) {
 					if (typeof this.baseDate === 'number') {
 						const baseDateValue = this.baseDate;
@@ -490,6 +508,13 @@ class AppState {
 		this.data.uiSettings.waveVisibility = this.waveVisibility;
 		this.data.uiSettings.waveBold = this.waveBold;
 		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+		
+		// ДОБАВЛЕНО: сброс состояний выделения дат
+		this.dateSelections = {
+			typeA: null,
+			typeB: null
+		};
+		this.data.uiSettings.dateSelections = this.dateSelections;
 	}
 
     convertDatesToTimestamp() {

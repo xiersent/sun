@@ -136,6 +136,38 @@ async function finalizeInitialization() {
             window.extremumTimeManager.init();
         }, 500);
     }
+    
+    // ===== СИНХРОНИЗАЦИЯ DATE SELECTIONS =====
+    setTimeout(() => {
+        if (window.appState && window.appState.activeDateId) {
+            // Инициализируем dateSelections если нет
+            if (!window.appState.dateSelections) {
+                window.appState.dateSelections = {
+                    typeA: null,
+                    typeB: null
+                };
+            }
+            
+            // Синхронизируем активную дату с typeA
+            const activeDateIdStr = String(window.appState.activeDateId);
+            const currentTypeAStr = window.appState.dateSelections.typeA ? 
+                String(window.appState.dateSelections.typeA) : null;
+            
+            if (currentTypeAStr !== activeDateIdStr) {
+                console.log('Initializing dateSelections - syncing active date:', 
+                    window.appState.activeDateId);
+                window.appState.dateSelections.typeA = window.appState.activeDateId;
+                window.appState.dateSelections.typeB = null;
+                window.appState.save();
+                
+                if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                    setTimeout(() => {
+                        window.unifiedListManager.updateDatesList();
+                    }, 100);
+                }
+            }
+        }
+    }, 1000);
 }
 
 window.finalizeInitialization = finalizeInitialization;

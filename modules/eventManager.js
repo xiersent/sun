@@ -1,11 +1,13 @@
 class EventManager {
-    constructor() {
-        this.askedGroups = new Set();
-        this.$ = window.jQuery;
-        this.setupGlobalHandlers();
-        this.setupDateChangeObservers();
-        this.setupIntersectionHandlers();
-    }
+	// modules/eventManager.js - в конструкторе
+	constructor() {
+		this.askedGroups = new Set();
+		this.$ = window.jQuery;
+		this.setupGlobalHandlers();
+		this.setupDateChangeObservers();
+		this.setupIntersectionHandlers();
+		this.setupDateSelectionHandlers(); // ДОБАВИТЬ ЭТУ СТРОЧКУ
+	}
     
     setupGlobalHandlers() {
         $(document).on('click', (e) => {
@@ -369,57 +371,121 @@ class EventManager {
         }
     }
     
-    setupDateChangeObservers() {
-        $(document).on('click', '.list-item--date[data-type="date"]', (e) => {
-            const $target = $(e.target);
-            const $item = $target.closest('.list-item--date');
-            
-            if ($target.is('button, input, textarea, select, .list-item__drag-handle, .delete-date-btn, .edit-btn')) {
-                return;
-            }
-            
-            if ($item.length && !$item.hasClass('list-item--editing')) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const dateId = $item.data('id');
-                
-                if (dateId && window.dates) {
-                    window.dates.setActiveDate(dateId, true);
-                    
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 100);
-                }
-            }
-        });
-        
-        $(document).on('click', '.list-item--note', (e) => {
-            const $target = $(e.target);
-            if ($target.hasClass('delete-btn') || $target.closest('.delete-btn').length) {
-                return;
-            }
-            
-            const $item = $(e.currentTarget);
-            const noteDate = $item.data('date');
-            
-            if (noteDate && window.dates) {
-                const newDate = new Date(noteDate);
-                window.dates.setDate(newDate);
-                
-                setTimeout(() => {
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
-                }, 100);
-            }
-        });
-    }
+
+	setupDateChangeObservers() {
+
+		$(document).on('click', '.list-item--date[data-type="date"]', (e) => {
+			const $target = $(e.target);
+			const $item = $target.closest('.list-item--date');
+			
+			// Игнорируем клики на:
+			// 1. Чекбоксах (уже обработано другим обработчиком)
+			if ($target.is('.date-checkbox') || $target.closest('.date-checkbox').length) {
+				return;
+			}
+			
+			// 2. Кнопках управления (Изменить, Уничтожить)
+			if ($target.is('button, input, textarea, select, .list-item__drag-handle, .delete-date-btn, .edit-btn')) {
+				return;
+			}
+			
+			// 3. Если редактирование активно
+			if ($item.hasClass('list-item--editing')) {
+				return;
+			}
+			
+			if ($item.length) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				const dateId = $item.data('id');
+				
+				if (dateId && window.dates) {
+					// При клике на дату выделяем ее тип A
+					if (!window.appState.dateSelections) {
+						window.appState.dateSelections = {
+							typeA: null,
+							typeB: null
+						};
+					}
+					
+					window.appState.dateSelections.typeA = dateId;
+					window.appState.dateSelections.typeB = null; // Снимаем тип B
+					
+					// Активируем дату
+					window.dates.setActiveDate(dateId, true);
+					
+					// Сохраняем состояние
+					window.appState.save();
+					
+					// Обновляем отображение
+					if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+						window.unifiedListManager.updateDatesList();
+					}
+					
+					setTimeout(() => {
+						if (window.summaryManager && window.summaryManager.updateSummary) {
+							window.summaryManager.updateSummary();
+						}
+					}, 100);
+				}
+			}
+		});
+		
+		$(document).on('click', '.list-item--note', (e) => {
+			const $target = $(e.target);
+			if ($target.hasClass('delete-btn') || $target.closest('.delete-btn').length) {
+				return;
+			}
+			
+			const $item = $(e.currentTarget);
+			const noteDate = $item.data('date');
+			
+			if (noteDate && window.dates) {
+				const newDate = new Date(noteDate);
+				window.dates.setDate(newDate);
+				
+				// СИНХРОНИЗАЦИЯ: При переходе к заметке тоже выделяем тип A
+				if (!window.appState.dateSelections) {
+					window.appState.dateSelections = {
+						typeA: null,
+						typeB: null
+					};
+				}
+				
+				// Находим дату, соответствующую заметке
+				const noteTimestamp = newDate.getTime();
+				const correspondingDate = window.appState.data.dates.find(date => {
+					const dateStart = window.timeUtils.getStartOfDay(date.date);
+					const noteStart = window.timeUtils.getStartOfDay(noteTimestamp);
+					return dateStart.getTime() === noteStart.getTime();
+				});
+				
+				if (correspondingDate) {
+					window.appState.dateSelections.typeA = correspondingDate.id;
+					window.appState.dateSelections.typeB = null;
+					window.appState.save();
+					
+					if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+						setTimeout(() => {
+							window.unifiedListManager.updateDatesList();
+						}, 100);
+					}
+				}
+				
+				setTimeout(() => {
+					if (window.summaryManager && window.summaryManager.updateSummary) {
+						window.summaryManager.updateSummary();
+					}
+				}, 100);
+			}
+		});
+	}
+
     
     handleClick(e) {
         const $target = $(e.target);
+		
         
         if ($target.is('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate') || 
             $target.closest('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate').length) {
@@ -1311,6 +1377,133 @@ class EventManager {
             alert('Ошибка расчета пересечений: ' + error.message);
         }
     }
+
+	// modules/eventManager.js - ДОБАВИТЬ в конструктор или setupGlobalHandlers
+	setupDateSelectionHandlers() {
+		$(document).on('click', '.date-checkbox', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			const $checkbox = $(e.currentTarget);
+			const dateId = $checkbox.data('id');
+			const checkboxType = $checkbox.data('type'); // 'a' или 'b'
+			
+			this.handleDateCheckboxClick(dateId, checkboxType);
+		});
+	}
+
+
+	// modules/eventManager.js - handleDateCheckboxClick()
+	handleDateCheckboxClick(dateId, checkboxType) {
+		// Инициализация если нет
+		if (!window.appState.dateSelections) {
+			window.appState.dateSelections = {
+				typeA: null,
+				typeB: null
+			};
+		}
+		
+		const selections = window.appState.dateSelections;
+		const dateIdStr = String(dateId);
+		
+		const targetKey = checkboxType === 'a' ? 'typeA' : 'typeB';
+		const oppositeKey = checkboxType === 'a' ? 'typeB' : 'typeA';
+		
+		// Приводим все к строкам для сравнения
+		const currentTargetStr = selections[targetKey] ? String(selections[targetKey]) : null;
+		const currentOppositeStr = selections[oppositeKey] ? String(selections[oppositeKey]) : null;
+		
+		// ===== ОСОБЫЙ СЛУЧАЙ: выделяем B на дату, которая уже А =====
+		if (checkboxType === 'b' && selections.typeA && String(selections.typeA) === dateIdStr) {
+			// Находим первую другую дату для переноса типа A
+			const allDates = window.appState.data.dates || [];
+			
+			// Ищем первую дату, которая не совпадает с текущей
+			const newTypeADate = allDates.find(date => {
+				const dateStr = String(date.id);
+				return dateStr !== dateIdStr;
+			});
+			
+			if (newTypeADate) {
+				// Переносим тип A на первую найденную дату
+				selections.typeA = newTypeADate.id;
+				
+				// Обновляем активную дату (если была привязана к старой дате A)
+				if (window.appState.activeDateId && String(window.appState.activeDateId) === dateIdStr) {
+					window.appState.activeDateId = newTypeADate.id;
+					if (window.dates) {
+						window.dates.setActiveDate(newTypeADate.id, true);
+					}
+				}
+				
+				// Теперь устанавливаем тип B на выбранную дату
+				selections.typeB = dateId;
+				
+				// Сохраняем состояние
+				window.appState.save();
+				
+				// Обновляем отображение
+				if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+					window.unifiedListManager.updateDatesList();
+				}
+				
+				// Показываем уведомление пользователю
+				console.log(`Тип A автоматически перенесен на дату: ${newTypeADate.name}`);
+				return;
+			} else {
+				// Если нет других дат - отменяем выделение типа B
+				console.log('Невозможно выделить тип B: только одна дата в списке');
+				return;
+			}
+		}
+		
+		// ===== СТАНДАРТНАЯ ЛОГИКА =====
+		
+		// 1. Для чекбокса A - особая логика: нельзя снять, только перенести
+		if (checkboxType === 'a') {
+			// Если кликаем на уже выделенную дату типа A - НИЧЕГО НЕ ДЕЛАЕМ (нельзя снять)
+			if (currentTargetStr === dateIdStr) {
+				// Ничего не делаем - чекбокс A должен остаться отмеченным
+				console.log('Чекбокс A нельзя снять. Для изменения выберите другую дату.');
+				return;
+			}
+			// Иначе - устанавливаем новую дату типа A
+			else {
+				selections.typeA = dateId;
+				
+				// Снимаем тип B с этой даты, если он был
+				if (selections.typeB && String(selections.typeB) === dateIdStr) {
+					selections.typeB = null;
+				}
+				
+				// Активируем дату
+				if (window.dates) {
+					window.dates.setActiveDate(dateId, true);
+				}
+			}
+		}
+		// 2. Для чекбокса B - обычная логика, но с проверкой на конфликт с A
+		else if (checkboxType === 'b') {
+			// Если пытаемся установить B на дату, которая уже A - обработано выше
+			// Если кликаем на уже выделенную дату типа B - снимаем выделение
+			if (currentTargetStr === dateIdStr) {
+				selections.typeB = null;
+			} 
+			// Иначе - устанавливаем новую дату типа B
+			else {
+				selections.typeB = dateId;
+			}
+		}
+		
+		// Сохраняем состояние
+		window.appState.save();
+		
+		// Обновляем отображение
+		if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+			window.unifiedListManager.updateDatesList();
+		}
+	}
+
     
     clearIntersectionResults() {
         const $container = $('#intersectionResults');

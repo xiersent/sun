@@ -1,3 +1,4 @@
+<!-- templates/date-item.ejs -->
 <div class="list-item list-item--date <%= data.active ? 'active' : '' %> <%= data.editing ? 'list-item--editing' : '' %>"
     data-id="<%= data.id %>"
     data-type="date"
@@ -11,6 +12,20 @@
         <div class="list-item__normal-view">
             <div class="list-item__row">
                 <div class="list-item__left">
+                    <!-- Два чекбокса выделения -->
+                    <div class="date-selection-checks">
+                        <input type="checkbox" class="date-checkbox" 
+                               <%= data.selectedTypeA ? 'checked' : '' %>
+                               data-id="<%= data.id %>" 
+                               data-type="a"
+                               title="Выделение типа A">
+                        <input type="checkbox" class="date-checkbox"
+                               <%= data.selectedTypeB ? 'checked' : '' %>
+                               data-id="<%= data.id %>" 
+                               data-type="b"
+                               title="Выделение типа B">
+                    </div>
+                    
                     <div class="list-item__title-container">
                         <div class="list-item__title date-name">
                             <%= data.name %>

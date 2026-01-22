@@ -5,7 +5,7 @@
 .main-controls-panel{display: flex; flex-direction: column; gap: var(--spacing-lg); width: 100%;}
 
 /* Основной контейнер панелей - объединяем все стили здесь */
-.control-panel{display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-lg); width: 100%;}
+.control-panel{display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-lg); width: 100%;}
 
 /* Позиционирование дочерних панелей */
 #dates-panel{grid-column: 1;}

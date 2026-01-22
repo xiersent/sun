@@ -120,30 +120,39 @@ class UnifiedListManager {
         }
     }
     
-    prepareDateData(dateObj, index) {
-        const dateObjDate = new Date(dateObj.date);
-        
-        const currentTimestamp = window.appState.currentDate instanceof Date ? 
-            window.appState.currentDate.getTime() : 
-            window.appState.currentDate;
-        
-        const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObj.date, currentTimestamp);
-        const activeDateIdStr = window.appState.activeDateId ? String(window.appState.activeDateId) : null;
-        const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
-        const dateObjIdStr = String(dateObj.id);
-        
-        return {
-            id: dateObj.id,
-            name: dateObj.name,
-            type: 'date',
-            formattedDate: window.dom.formatDate(dateObj.date),
-            dateForInput: window.dom.formatDateForInput(dateObj.date),
-            yearsFromCurrent: yearsFromCurrent,
-            active: activeDateIdStr === dateObjIdStr,
-            editing: editingDateIdStr === dateObjIdStr,
-            index: index
-        };
-    }
+
+	prepareDateData(dateObj, index) {
+		const dateObjDate = new Date(dateObj.date);
+		
+		const currentTimestamp = window.appState.currentDate instanceof Date ? 
+			window.appState.currentDate.getTime() : 
+			window.appState.currentDate;
+		
+		const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObj.date, currentTimestamp);
+		const activeDateIdStr = window.appState.activeDateId ? String(window.appState.activeDateId) : null;
+		const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
+		const dateObjIdStr = String(dateObj.id);
+		
+		// ДОБАВЛЕНО: состояния выделения
+		const isSelectedTypeA = window.appState.dateSelections.typeA === dateObj.id;
+		const isSelectedTypeB = window.appState.dateSelections.typeB === dateObj.id;
+		
+		return {
+			id: dateObj.id,
+			name: dateObj.name,
+			type: 'date',
+			formattedDate: window.dom.formatDate(dateObj.date),
+			dateForInput: window.dom.formatDateForInput(dateObj.date),
+			yearsFromCurrent: yearsFromCurrent,
+			active: activeDateIdStr === dateObjIdStr,
+			editing: editingDateIdStr === dateObjIdStr,
+			index: index,
+			// ДОБАВЛЕНО: состояния выделения
+			selectedTypeA: isSelectedTypeA,
+			selectedTypeB: isSelectedTypeB,
+			selectionType: isSelectedTypeA ? 'a' : (isSelectedTypeB ? 'b' : null)
+		};
+	}
     
 	// В unifiedListManager.js - в методе prepareGroupData ДОБАВИТЬ
 	prepareGroupData(groupData, index) {

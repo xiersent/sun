@@ -95,14 +95,37 @@ class TimeBarManager {
         }
     }
     
-    navigateToHour(hour) {
-        if (window.dates && window.appState) {
-            const currentDate = new Date(window.appState.currentDate);
-            currentDate.setHours(hour, 0, 0, 0);
-            window.dates.setDate(currentDate, true);
-            this.highlightActiveHour(hour);
-        }
-    }
+	navigateToHour(hour) {
+		if (window.dates && window.appState) {
+			const currentVizorDate = new Date(window.appState.currentDate);
+			const now = new Date();
+			
+			// Определяем, на какой день переходить
+			let targetDate = new Date(currentVizorDate);
+			
+			if (hour === 0) {
+				// Всегда спрашиваем для 00:00
+				const tomorrow = new Date(targetDate);
+				tomorrow.setDate(tomorrow.getDate() + 1);
+				
+				const userChoice = confirm(
+					`Куда перейти?\n\n` +
+					`Текущая дата на визоре: ${currentVizorDate.toLocaleDateString('ru-RU')}\n` +
+					`• ОК - перейти на 00:00 следующего дня (${tomorrow.toLocaleDateString('ru-RU')})\n` +
+					`• Отмена - перейти на 00:00 текущего дня`
+				);
+				
+				if (userChoice) {
+					// Следующий день
+					targetDate.setDate(targetDate.getDate() + 1);
+				}
+				// Иначе остаемся на текущем дне
+			}
+			
+			targetDate.setHours(hour, 0, 0, 0);
+			window.dates.setDate(targetDate, true);
+		}
+	}
     
     highlightActiveHour(hour) {
         document.querySelectorAll('.hour-marker.active').forEach(marker => {

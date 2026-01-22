@@ -56,7 +56,6 @@
 .list-item--wave:hover{background-color: #f5f5f5;}
 .list-item--wave .wave-controls-inline{display: flex; align-items: center; gap: 4px; margin-right: 8px;}
 .list-item--wave .wave-corner-color-check{margin-left: 2px; margin-right: 2px; flex-shrink: 0;}
-.list-item--wave .wave-corner-color-check:checked{accent-color: #ff6b6b;}
 .list-item--wave .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); margin-left: 8px; flex-shrink: 0;}
 .list-item--wave .wave-color-preview-small{width: 12px; height: 12px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; flex-shrink: 0;}
 
@@ -77,7 +76,6 @@
 .group-children .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-left: 6px;}
 .group-children .wave-color-preview-small{width: 12px; height: 12px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;}
 .group-children .wave-corner-color-check{margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
-.group-children .wave-corner-color-check:checked{accent-color: #ff6b6b;}
 
 /* Типы элементов - заметка */
 .list-item--note{cursor: default; flex-direction: column; align-items: flex-start; padding: var(--spacing-md);}
@@ -180,4 +178,96 @@
 .list-item--wave.list-item--editing .wave-drag-handle {
     opacity: 0.3;
     cursor: default;
+}
+
+/* Стили для всех чекбоксов */
+.date-checkbox,
+.wave-group-toggle,
+.wave-visibility-check,
+.wave-bold-check,
+.wave-corner-color-check {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    position: relative;
+    background-color: white;
+}
+
+/* Отдельные цвета для чекбоксов A и B в датах */
+.date-checkbox[data-type="a"]:checked {
+    background-color: #2196F3; /* Синий для типа A */
+}
+
+.date-checkbox[data-type="b"]:checked {
+    background-color: #FF9800; /* Оранжевый для типа B */
+}
+
+/* Все остальные чекбоксы (группы, волны) - синие как A */
+.wave-group-toggle:checked,
+.wave-visibility-check:checked,
+.wave-bold-check:checked,
+.wave-corner-color-check:checked {
+    background-color: #2196F3; /* Синий как у checkbox-a */
+}
+
+/* Галочка для всех чекбоксов */
+.date-checkbox:checked::after,
+.wave-group-toggle:checked::after,
+.wave-visibility-check:checked::after,
+.wave-bold-check:checked::after,
+.wave-corner-color-check:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.date-checkbox:checked,
+.wave-group-toggle:checked,
+.wave-visibility-check:checked,
+.wave-bold-check:checked,
+.wave-corner-color-check:checked {
+    border-color: transparent;
+}
+
+/* Для темного режима */
+.graph-container.dark-mode + .summary-panel .date-checkbox,
+.graph-container.dark-mode + .summary-panel .wave-group-toggle,
+.graph-container.dark-mode + .summary-panel .wave-visibility-check,
+.graph-container.dark-mode + .summary-panel .wave-bold-check,
+.graph-container.dark-mode + .summary-panel .wave-corner-color-check {
+    background-color: #333;
+    border-color: #555;
+}
+
+.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="a"]:checked {
+    background-color: #64B5F6; /* Более светлый синий для темного режима */
+}
+
+.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="b"]:checked {
+    background-color: #FFB74D; /* Более светлый оранжевый для темного режима */
+}
+
+.graph-container.dark-mode + .summary-panel .wave-group-toggle:checked,
+.graph-container.dark-mode + .summary-panel .wave-visibility-check:checked,
+.graph-container.dark-mode + .summary-panel .wave-bold-check:checked,
+.graph-container.dark-mode + .summary-panel .wave-corner-color-check:checked {
+    background-color: #64B5F6; /* Синий как у checkbox-a для темного режима */
+}
+
+.list-item--date .date-selection-checks {
+    pointer-events: auto;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
