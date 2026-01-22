@@ -148,6 +148,140 @@ class AppCore {
             return '(ошибка загрузки)';
         }
     }
+
+
+	// В класс AppCore, после метода getVersion()
+	async getFirmwareDate() {
+		try {
+			const response = await fetch('firmware.txt');
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл не найден)';
+		} catch (error) {
+			return '(ошибка загрузки)';
+		}
+	}
+
+	// Обновить метод showDesktopWarning():
+	showDesktopWarning(warningOverlay) {
+		warningOverlay.classList.remove('hidden');
+		warningOverlay.classList.add('desktop-warning');
+		document.body.style.overflow = 'hidden';
+		
+		const browserInfoEl = document.getElementById('browserInfo');
+		if (browserInfoEl) {
+			browserInfoEl.textContent = this.getBrowserInfo();
+		}
+		
+		const todayInfoEl = document.getElementById('todayInfo');
+		if (todayInfoEl) {
+			const today = new Date();
+			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+			todayInfoEl.textContent = todayFormatted;
+		}
+		
+		const versionInfoEl = document.getElementById('versionInfo');
+		if (versionInfoEl) {
+			versionInfoEl.textContent = 'Загрузка...';
+			this.getVersion().then(version => {
+				if (versionInfoEl) {
+					versionInfoEl.textContent = version || 'неизвестно';
+				}
+			}).catch(error => {
+				if (versionInfoEl) {
+					versionInfoEl.textContent = 'неизвестно';
+				}
+			});
+		}
+		
+		// ДОБАВИТЬ: Загрузка информации о прошивке
+		const firmwareInfoEl = document.getElementById('firmwareInfo');
+		if (firmwareInfoEl) {
+			firmwareInfoEl.textContent = 'Загрузка...';
+			this.getFirmwareDate().then(firmwareDate => {
+				if (firmwareInfoEl) {
+					firmwareInfoEl.textContent = firmwareDate || 'неизвестно';
+				}
+			}).catch(error => {
+				if (firmwareInfoEl) {
+					firmwareInfoEl.textContent = 'неизвестно';
+				}
+			});
+		}
+	}
+
+	// Также обновить метод showMobileWarning():
+	showMobileWarning(warningOverlay) {
+		document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
+			el.style.display = 'none';
+		});
+		
+		warningOverlay.classList.remove('hidden');
+		warningOverlay.classList.add('mobile-warning-overlay');
+		
+		const acceptButton = document.getElementById('acceptWarning');
+		if (acceptButton) {
+			acceptButton.style.display = 'none';
+		}
+		
+		const parableButton = document.getElementById('readParableBtn');
+		if (parableButton) {
+			parableButton.style.display = 'none';
+		}
+		
+		const warningBox = warningOverlay.querySelector('.warning-box');
+		if (warningBox) {
+			warningBox.classList.add('mobile-warning-box');
+			
+			const warningTitle = warningBox.querySelector('.warning-title');
+			if (warningTitle) {
+				warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+				warningTitle.style.color = '#ff0000';
+			}
+			
+			const warningText = warningBox.querySelector('.warning-text');
+			if (warningText) {
+				warningText.innerHTML = ``;
+			}
+			
+			const browserInfoEl = document.getElementById('browserInfo');
+			if (browserInfoEl) {
+				browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+			}
+			
+			const todayInfoEl = document.getElementById('todayInfo');
+			if (todayInfoEl) {
+				const today = new Date();
+				const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+				todayInfoEl.textContent = todayFormatted;
+			}
+			
+			const versionInfoEl = document.getElementById('versionInfo');
+			if (versionInfoEl) {
+				versionInfoEl.textContent = 'Только для ПК';
+			}
+			
+			// ДОБАВИТЬ для мобильного предупреждения
+			const firmwareInfoEl = document.getElementById('firmwareInfo');
+			if (firmwareInfoEl) {
+				firmwareInfoEl.textContent = 'Только для ПК';
+			}
+			
+			const retryButton = document.createElement('button');
+			retryButton.className = 'ui-btn mobile-retry-btn';
+			retryButton.textContent = 'Проверить снова (если вы на компьютере)';
+			retryButton.style.marginTop = '20px';
+			retryButton.style.backgroundColor = '#666';
+			retryButton.addEventListener('click', () => {
+				location.reload();
+			});
+			
+			warningBox.appendChild(retryButton);
+		}
+	}
+
+
     
     isMobileDevice() {
         const userAgent = navigator.userAgent.toLowerCase();
@@ -173,39 +307,6 @@ class AppCore {
         }
         
         this.showDesktopWarning(warningOverlay);
-    }
-    
-    showDesktopWarning(warningOverlay) {
-        warningOverlay.classList.remove('hidden');
-        warningOverlay.classList.add('desktop-warning');
-        document.body.style.overflow = 'hidden';
-        
-        const browserInfoEl = document.getElementById('browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = this.getBrowserInfo();
-        }
-        
-        const todayInfoEl = document.getElementById('todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-            todayInfoEl.textContent = todayFormatted;
-        }
-        
-        const versionInfoEl = document.getElementById('versionInfo');
-        if (versionInfoEl) {
-            versionInfoEl.textContent = 'Загрузка...';
-            
-            this.getVersion().then(version => {
-                if (versionInfoEl) {
-                    versionInfoEl.textContent = version || 'неизвестно';
-                }
-            }).catch(error => {
-                if (versionInfoEl) {
-                    versionInfoEl.textContent = 'неизвестно';
-                }
-            });
-        }
     }
     
     showMobileWarning(warningOverlay) {
