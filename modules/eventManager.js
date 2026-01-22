@@ -1497,7 +1497,7 @@ class EventManager {
 		
 		// Сохраняем состояние
 		window.appState.save();
-		
+
 		// Обновляем отображение
 		if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
 			window.unifiedListManager.updateDatesList();

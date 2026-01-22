@@ -271,3 +271,21 @@
 	align-items: center;
 	gap: 6px;
 }
+
+/* Стили выделения строк дат */
+.list-item--date.selected-type-a {
+    background-color: rgba(33, 150, 243, 0.1); /* Светло-синий фон для типа A */
+}
+
+.list-item--date.selected-type-b {
+    background-color: rgba(255, 152, 0, 0.1); /* Светло-оранжевый фон для типа B */
+}
+
+/* Для темного режима */
+.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-a {
+    background-color: rgba(100, 181, 246, 0.15);
+}
+
+.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-b {
+    background-color: rgba(255, 183, 77, 0.15);
+}

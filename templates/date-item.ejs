@@ -1,5 +1,9 @@
 <!-- templates/date-item.ejs -->
-<div class="list-item list-item--date <%= data.active ? 'active' : '' %> <%= data.editing ? 'list-item--editing' : '' %>"
+<div class="list-item list-item--date 
+    <%= data.active ? 'active' : '' %> 
+    <%= data.editing ? 'list-item--editing' : '' %>
+    <%= data.selectedTypeA ? 'selected-type-a' : '' %>
+    <%= data.selectedTypeB ? 'selected-type-b' : '' %>"
     data-id="<%= data.id %>"
     data-type="date"
     draggable="<%= !data.editing %>"

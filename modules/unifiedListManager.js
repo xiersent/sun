@@ -121,6 +121,7 @@ class UnifiedListManager {
     }
     
 
+
 	prepareDateData(dateObj, index) {
 		const dateObjDate = new Date(dateObj.date);
 		
@@ -133,7 +134,7 @@ class UnifiedListManager {
 		const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
 		const dateObjIdStr = String(dateObj.id);
 		
-		// ДОБАВЛЕНО: состояния выделения
+		// Состояния выделения
 		const isSelectedTypeA = window.appState.dateSelections.typeA === dateObj.id;
 		const isSelectedTypeB = window.appState.dateSelections.typeB === dateObj.id;
 		
@@ -147,7 +148,7 @@ class UnifiedListManager {
 			active: activeDateIdStr === dateObjIdStr,
 			editing: editingDateIdStr === dateObjIdStr,
 			index: index,
-			// ДОБАВЛЕНО: состояния выделения
+			// Состояния выделения
 			selectedTypeA: isSelectedTypeA,
 			selectedTypeB: isSelectedTypeB,
 			selectionType: isSelectedTypeA ? 'a' : (isSelectedTypeB ? 'b' : null)
