@@ -23,15 +23,7 @@ class WavesManager {
 
 
 
-	getAllVisibleWaveIds() {
-		const visibleIds = [];
-		Object.entries(window.appState.waveVisibility).forEach(([waveId, isVisible]) => {
-			if (isVisible) {
-				visibleIds.push(waveId);
-			}
-		});
-		return visibleIds;
-	}
+
 
 	
     
@@ -60,72 +52,52 @@ class WavesManager {
         return Math.max(3, periodsToCoverViewport + safetyMargin);
     }
     
-	isWaveGroupEnabled(waveId) {
-		const waveIdStr = String(waveId);
-		
-		// Ищем группу, содержащую этот колосок
-		for (const group of window.appState.data.groups) {
-			if (group.waves && group.waves.some(wId => {
-				const wIdStr = String(wId);
-				return wIdStr === waveIdStr;
-			})) {
-				// Возвращаем состояние группы (true/false)
-				return group.enabled === true;
-			}
-		}
-		
-		// Если колосок не найден ни в одной группе, считаем что группа выключена
-		return false;
-	}
+    isWaveGroupEnabled(waveId) {
+        const waveIdStr = String(waveId);
+        
+        for (const group of window.appState.data.groups) {
+            if (group.waves && group.waves.some(wId => String(wId) === waveIdStr)) {
+                if (group.enabled) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
     
-	createVisibleWaveElements() {
-		document.querySelectorAll('.wave-container').forEach(c => c.remove());
-		document.querySelectorAll('.wave-label').forEach(l => l.remove());
-		
-		const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
-		if (axisXPointsContainer) {
-			axisXPointsContainer.innerHTML = '';
-		}
-		
-		this.waveContainers = {};
-		this.wavePaths = {};
-		this.waveLabelElements = {};
-		
-		const hasActiveDate = window.appState.activeDateId && 
-							window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
-		
-		if (!hasActiveDate) {
-			return;
-		}
-		
-		// Создаем волны с учетом ВИДИМОСТИ и ВКЛЮЧЕННОСТИ ГРУПП
-		window.appState.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
-			
-			// Проверяем ВИДИМОСТЬ колоска из waveVisibility
-			const isWaveVisible = window.appState.waveVisibility[waveIdStr] === true;
-			
-			// Проверяем включена ли ГРУППА этого колоска
-			const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
-			
-			// Колосок показывается только если ОБА условия истинны
-			const shouldShow = isWaveVisible && isGroupEnabled;
-			
-			if (shouldShow) {
-				this.createWaveElement(wave);
-			}
-		});
-		
-		// Применяем жирность из пресета
-		window.appState.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
-			const path = this.wavePaths[wave.id];
-			if (path) {
-				const isBold = window.appState.waveBold[waveIdStr] === true;
-				path.classList.toggle('bold', isBold);
-			}
-		});
-	}
+    createVisibleWaveElements() {
+        document.querySelectorAll('.wave-container').forEach(c => c.remove());
+        document.querySelectorAll('.wave-label').forEach(l => l.remove());
+        
+        const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+        if (axisXPointsContainer) {
+            axisXPointsContainer.innerHTML = '';
+        }
+        
+        this.waveContainers = {};
+        this.wavePaths = {};
+        this.waveLabelElements = {};
+        
+        let createdCount = 0;
+        
+        const hasActiveDate = window.appState.activeDateId && 
+                             window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
+        
+        if (!hasActiveDate) {
+            return;
+        }
+        
+        window.appState.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            
+            if (isWaveVisible && this.isWaveGroupEnabled(wave.id)) {
+                this.createWaveElement(wave);
+                createdCount++;
+            }
+        });
+    }
     
     createWaveElement(wave) {
         const container = document.createElement('div');

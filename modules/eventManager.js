@@ -1,28 +1,27 @@
-// modules/eventManager.js
 class EventManager {
-    constructor() {
-        this.askedGroups = new Set();
-        this.$ = window.jQuery;
-        this.isDraggingWave = false;
-        
-        this.setupGlobalHandlers();
-        this.setupDateChangeObservers();
-        this.setupIntersectionHandlers();
-        this.setupDateSelectionHandlers();
-        this.setupPresetHandlers();
-    }
+	// modules/eventManager.js - в конструкторе
+	constructor() {
+		this.askedGroups = new Set();
+		this.$ = window.jQuery;
+		this.setupGlobalHandlers();
+		this.setupDateChangeObservers();
+		this.setupIntersectionHandlers();
+		this.setupDateSelectionHandlers(); // ДОБАВИТЬ ЭТУ СТРОЧКУ
+	}
     
     setupGlobalHandlers() {
         $(document).on('click', (e) => {
             this.handleClick(e);
         });
 
-        $(document)
-        .on('mousedown touchstart', '.group-children .list-item--wave', function(e) {
-            console.log('volnidrag');
-            e.stopPropagation();
-        });
+		$(document)
+		.on('mousedown touchstart', '.group-children .list-item--wave', function(e) {
+			// Если клик на волне - останавливаем распространение до обработчика группы
+			console.log('volnidrag');
+			e.stopPropagation();
+		});
         
+        // Существующие обработчики drag для дат и групп
         $(document)
             .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing)', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
@@ -36,7 +35,6 @@ class EventManager {
             .on('dragleave', '.list-item--group[data-type="group"]', this.handleDragLeave.bind(this))
             .on('drop', '.list-item--group[data-type="group"]', this.handleDrop.bind(this))
             .on('dragend', '.list-item--group[data-type="group"]', this.handleDragEnd.bind(this));
-            
         $(document)
             .on('dragstart', '.group-children .list-item--wave:not(.list-item--editing)', this.handleWaveDragStart.bind(this))
             .on('dragover', '.group-children .list-item--wave', this.handleWaveDragOver.bind(this))
@@ -45,6 +43,8 @@ class EventManager {
             .on('dragend', '.group-children .list-item--wave', this.handleWaveDragEnd.bind(this));
     }
     
+    
+    // НОВЫЙ метод: dragstart для волн
     handleWaveDragStart(e) {
         const $item = $(e.currentTarget);
         const $group = $item.closest('.list-item--group');
@@ -57,6 +57,7 @@ class EventManager {
             return;
         }
         
+        // Устанавливаем данные с меткой типа и ID группы
         e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
             type: 'wave',
             id: waveId,
@@ -66,10 +67,11 @@ class EventManager {
         }));
         
         $item.addClass('list-item--dragging');
-        this.isDraggingWave = true;
     }
     
+    // НОВЫЙ метод: dragover для волн
     handleWaveDragOver(e) {
+        // Если это НЕ волна или драг не начался с волны - игнорируем
         if (!this.isDraggingWave) {
             return;
         }
@@ -89,9 +91,11 @@ class EventManager {
             const $group = $item.closest('.list-item--group');
             const targetGroupId = $group.data('id');
             
+            // Строгая проверка: группы должны совпадать
             if (dragData.groupId !== targetGroupId) {
                 e.originalEvent.dataTransfer.dropEffect = 'none';
                 
+                // Убираем подсветку у всех волн
                 $('.group-children .list-item--wave')
                     .removeClass('list-item--drag-over-top list-item--drag-over-bottom');
                     
@@ -104,6 +108,7 @@ class EventManager {
             const y = e.clientY;
             const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
             
+            // Подсвечиваем только волны в ЭТОЙ группе
             $(`.group-children .list-item--wave[data-parent-group-id="${targetGroupId}"]`)
                 .not($item)
                 .removeClass('list-item--drag-over-top list-item--drag-over-bottom');
@@ -120,6 +125,7 @@ class EventManager {
         }
     }
     
+    // НОВЫЙ метод: dragleave для волн
     handleWaveDragLeave(e) {
         const $item = $(e.currentTarget);
         
@@ -130,6 +136,7 @@ class EventManager {
         }
     }
     
+    // НОВЫЙ метод: drop для волн
     handleWaveDrop(e) {
         if (!this.isDraggingWave) {
             return;
@@ -151,6 +158,7 @@ class EventManager {
             const $group = $item.closest('.list-item--group');
             const targetGroupId = $group.data('id');
             
+            // Строгая проверка групп
             if (dragData.groupId !== targetGroupId) {
                 return;
             }
@@ -168,15 +176,15 @@ class EventManager {
             this.reorderWaveInGroup(dragData.groupId, dragData.index, targetIndex, insertBefore);
             
         } catch (error) {
-            console.error('Error handling wave drop:', error);
         }
     }
     
+    // НОВЫЙ метод: dragend для волн
     handleWaveDragEnd(e) {
         $('.list-item--wave').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
-        this.isDraggingWave = false;
     }
     
+    // НОВЫЙ метод: перестановка волны в группе
     reorderWaveInGroup(groupId, sourceIndex, targetIndex, insertBefore) {
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         
@@ -185,25 +193,34 @@ class EventManager {
         }
         
         const waves = [...group.waves];
-        const waveId = waves[sourceIndex];
         
+        // Находим waveId по индексу
+        const waveId = waves[sourceIndex];
         if (!waveId) {
             return;
         }
         
+        // Удаляем из исходной позиции
         waves.splice(sourceIndex, 1);
         
+        // Рассчитываем новую позицию
         let newIndex = this.calculateNewIndex(sourceIndex, targetIndex, insertBefore);
         
+        // Вставляем на новую позицию
         waves.splice(newIndex, 0, waveId);
         
+        // Обновляем массив волн в группе
         group.waves = waves;
+        
+        // Сохраняем состояние
         window.appState.save();
         
+        // Обновляем отображение
         if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
             window.unifiedListManager.updateWavesList();
         }
         
+        // Обновляем сводку
         setTimeout(() => {
             if (window.summaryManager && window.summaryManager.updateSummary) {
                 window.summaryManager.updateSummary();
@@ -211,6 +228,7 @@ class EventManager {
         }, 50);
     }
     
+    // МОДИФИЦИРОВАННЫЙ метод: calculateNewIndex
     calculateNewIndex(sourceIndex, targetIndex, insertBefore) {
         if (sourceIndex < targetIndex) {
             if (insertBefore) {
@@ -227,7 +245,9 @@ class EventManager {
         }
     }
     
+    // МОДИФИЦИРОВАННЫЙ метод: handleDragStart - добавляем проверку на drag волн
     handleDragStart(e) {
+        // Пробуем получить данные drag - если это волна, игнорируем
         try {
             const data = e.originalEvent.dataTransfer.getData('text/plain');
             if (data) {
@@ -238,7 +258,7 @@ class EventManager {
                 }
             }
         } catch (error) {
-            // Continue normal processing
+            // Продолжаем обычную обработку
         }
         
         const $item = $(e.currentTarget);
@@ -260,17 +280,19 @@ class EventManager {
         $item.addClass('list-item--dragging');
     }
     
+    // МОДИФИЦИРОВАННЫЙ метод: handleDragOver - добавляем проверку на drag волн
     handleDragOver(e) {
+        // Пробуем получить данные drag - если это волна, игнорируем
         try {
             const data = e.originalEvent.dataTransfer.getData('text/plain');
             if (data) {
                 const dragData = JSON.parse(data);
                 if (dragData && dragData.type === 'wave') {
-                    return;
+                    return; // Игнорируем drag волн в обработчиках групп/дат
                 }
             }
         } catch (error) {
-            // Continue normal processing
+            // Продолжаем обычную обработку
         }
         
         e.preventDefault();
@@ -294,7 +316,9 @@ class EventManager {
         }
     }
     
+    // МОДИФИЦИРОВАННЫЙ метод: handleDrop - добавляем проверку на drag волн
     handleDrop(e) {
+        // ПРОВЕРКА: если drag волны - игнорируем
         if (this.isDraggingWave) {
             return;
         }
@@ -305,7 +329,7 @@ class EventManager {
                 return;
             }
         } catch (error) {
-            // Continue
+            // Продолжаем
         }
         
         const $item = $(e.currentTarget);
@@ -316,6 +340,7 @@ class EventManager {
         try {
             const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
             
+            // Проверяем что это НЕ волна
             if (dragData && (dragData.type === 'wave' || dragData.isWaveDrag)) {
                 return;
             }
@@ -343,160 +368,124 @@ class EventManager {
             }
             
         } catch (error) {
-            console.error('Error handling drop:', error);
         }
     }
     
-    handleDateDrop(dragData, targetIndex, insertBefore) {
-        const [movedItem] = window.appState.data.dates.splice(dragData.index, 1);
-        
-        let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
-        
-        window.appState.data.dates.splice(newIndex, 0, movedItem);
-        window.appState.save();
-        
-        if (window.dataManager) window.dataManager.updateDateList();
-        
-        setTimeout(() => {
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
-        }, 50);
-    }
-    
-    handleGroupDrop(dragData, targetIndex, insertBefore) {
-        const [movedItem] = window.appState.data.groups.splice(dragData.index, 1);
-        
-        let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
-        
-        window.appState.data.groups.splice(newIndex, 0, movedItem);
-        window.appState.save();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
-        
-        setTimeout(() => {
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
-        }, 50);
-    }
-    
-    handleDragLeave(e) {
-        const $item = $(e.currentTarget);
-        
-        if (e.originalEvent.relatedTarget && 
-            !$item[0].contains(e.originalEvent.relatedTarget)) {
-            
-            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-        }
-    }
-    
-    handleDragEnd(e) {
-        $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
-    }
 
-    setupDateChangeObservers() {
-        $(document).on('click', '.list-item--date[data-type="date"]', (e) => {
-            const $target = $(e.target);
-            const $item = $target.closest('.list-item--date');
-            
-            if ($target.is('.date-checkbox') || $target.closest('.date-checkbox').length) {
-                return;
-            }
-            
-            if ($target.is('button, input, textarea, select, .list-item__drag-handle, .delete-date-btn, .edit-btn')) {
-                return;
-            }
-            
-            if ($item.hasClass('list-item--editing')) {
-                return;
-            }
-            
-            if ($item.length) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const dateId = $item.data('id');
-                
-                if (dateId && window.dates) {
-                    if (!window.appState.dateSelections) {
-                        window.appState.dateSelections = {
-                            typeA: null,
-                            typeB: null
-                        };
-                    }
-                    
-                    window.appState.dateSelections.typeA = dateId;
-                    window.appState.dateSelections.typeB = null;
-                    
-                    window.dates.setActiveDate(dateId, true);
-                    window.appState.save();
-                    
-                    if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                        window.unifiedListManager.updateDatesList();
-                    }
-                    
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 100);
-                }
-            }
-        });
-        
-        $(document).on('click', '.list-item--note', (e) => {
-            const $target = $(e.target);
-            if ($target.hasClass('delete-btn') || $target.closest('.delete-btn').length) {
-                return;
-            }
-            
-            const $item = $(e.currentTarget);
-            const noteDate = $item.data('date');
-            
-            if (noteDate && window.dates) {
-                const newDate = new Date(noteDate);
-                window.dates.setDate(newDate);
-                
-                if (!window.appState.dateSelections) {
-                    window.appState.dateSelections = {
-                        typeA: null,
-                        typeB: null
-                    };
-                }
-                
-                const noteTimestamp = newDate.getTime();
-                const correspondingDate = window.appState.data.dates.find(date => {
-                    const dateStart = window.timeUtils.getStartOfDay(date.date);
-                    const noteStart = window.timeUtils.getStartOfDay(noteTimestamp);
-                    return dateStart.getTime() === noteStart.getTime();
-                });
-                
-                if (correspondingDate) {
-                    window.appState.dateSelections.typeA = correspondingDate.id;
-                    window.appState.dateSelections.typeB = null;
-                    window.appState.save();
-                    
-                    if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                        setTimeout(() => {
-                            window.unifiedListManager.updateDatesList();
-                        }, 100);
-                    }
-                }
-                
-                setTimeout(() => {
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
-                }, 100);
-            }
-        });
-    }
+	setupDateChangeObservers() {
+
+		$(document).on('click', '.list-item--date[data-type="date"]', (e) => {
+			const $target = $(e.target);
+			const $item = $target.closest('.list-item--date');
+			
+			// Игнорируем клики на:
+			// 1. Чекбоксах (уже обработано другим обработчиком)
+			if ($target.is('.date-checkbox') || $target.closest('.date-checkbox').length) {
+				return;
+			}
+			
+			// 2. Кнопках управления (Изменить, Уничтожить)
+			if ($target.is('button, input, textarea, select, .list-item__drag-handle, .delete-date-btn, .edit-btn')) {
+				return;
+			}
+			
+			// 3. Если редактирование активно
+			if ($item.hasClass('list-item--editing')) {
+				return;
+			}
+			
+			if ($item.length) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				const dateId = $item.data('id');
+				
+				if (dateId && window.dates) {
+					// При клике на дату выделяем ее тип A
+					if (!window.appState.dateSelections) {
+						window.appState.dateSelections = {
+							typeA: null,
+							typeB: null
+						};
+					}
+					
+					window.appState.dateSelections.typeA = dateId;
+					window.appState.dateSelections.typeB = null; // Снимаем тип B
+					
+					// Активируем дату
+					window.dates.setActiveDate(dateId, true);
+					
+					// Сохраняем состояние
+					window.appState.save();
+					
+					// Обновляем отображение
+					if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+						window.unifiedListManager.updateDatesList();
+					}
+					
+					setTimeout(() => {
+						if (window.summaryManager && window.summaryManager.updateSummary) {
+							window.summaryManager.updateSummary();
+						}
+					}, 100);
+				}
+			}
+		});
+		
+		$(document).on('click', '.list-item--note', (e) => {
+			const $target = $(e.target);
+			if ($target.hasClass('delete-btn') || $target.closest('.delete-btn').length) {
+				return;
+			}
+			
+			const $item = $(e.currentTarget);
+			const noteDate = $item.data('date');
+			
+			if (noteDate && window.dates) {
+				const newDate = new Date(noteDate);
+				window.dates.setDate(newDate);
+				
+				// СИНХРОНИЗАЦИЯ: При переходе к заметке тоже выделяем тип A
+				if (!window.appState.dateSelections) {
+					window.appState.dateSelections = {
+						typeA: null,
+						typeB: null
+					};
+				}
+				
+				// Находим дату, соответствующую заметке
+				const noteTimestamp = newDate.getTime();
+				const correspondingDate = window.appState.data.dates.find(date => {
+					const dateStart = window.timeUtils.getStartOfDay(date.date);
+					const noteStart = window.timeUtils.getStartOfDay(noteTimestamp);
+					return dateStart.getTime() === noteStart.getTime();
+				});
+				
+				if (correspondingDate) {
+					window.appState.dateSelections.typeA = correspondingDate.id;
+					window.appState.dateSelections.typeB = null;
+					window.appState.save();
+					
+					if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+						setTimeout(() => {
+							window.unifiedListManager.updateDatesList();
+						}, 100);
+					}
+				}
+				
+				setTimeout(() => {
+					if (window.summaryManager && window.summaryManager.updateSummary) {
+						window.summaryManager.updateSummary();
+					}
+				}, 100);
+			}
+		});
+	}
+
     
     handleClick(e) {
         const $target = $(e.target);
+		
         
         if ($target.is('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate') || 
             $target.closest('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate').length) {
@@ -515,12 +504,12 @@ class EventManager {
             e.stopPropagation();
             const action = $actionBtn.data('action');
             
-			if (action === 'toggleExtremes') {
-				if (window.uiManager && window.uiManager.toggleExtremes) {
-					window.uiManager.toggleExtremes();
-					return;
-				}
-			}
+            if (action === 'toggleExtremes') {
+                if (window.uiManager && window.uiManager.toggleExtremes) {
+                    window.uiManager.toggleExtremes();
+                    return;
+                }
+            }
             
             if (action === 'toggleEquilibrium') {
                 if (window.uiManager && window.uiManager.toggleEquilibrium) {
@@ -655,22 +644,7 @@ class EventManager {
             const waveId = $target.data('id');
             
             if (waveId && window.appState) {
-                const waveIdStr = String(waveId);
-                window.appState.waveBold[waveIdStr] = $target.prop('checked');
-                
-                if (window.appState.presets && window.appState.presets.activePresetId) {
-                    const activePreset = window.appState.presets.list.find(
-                        p => p.id === window.appState.presets.activePresetId
-                    );
-                    if (activePreset) {
-                        if ($target.prop('checked')) {
-                            activePreset.waveBold[waveIdStr] = true;
-                        } else {
-                            delete activePreset.waveBold[waveIdStr];
-                        }
-                    }
-                }
-                
+                window.appState.waveBold[waveId] = $target.prop('checked');
                 window.appState.save();
                 if (window.waves) window.waves.updatePosition();
                 
@@ -765,9 +739,6 @@ class EventManager {
                             
                             const waveIdStr = String(waveId);
                             window.appState.waveVisibility[waveIdStr] = true;
-                            
-                            this.saveWaveVisibilityToPreset(waveIdStr, true);
-                            
                             window.appState.save();
                             
                             setTimeout(() => {
@@ -792,9 +763,6 @@ class EventManager {
                         
                         const waveIdStr = String(waveId);
                         window.appState.waveVisibility[waveIdStr] = true;
-                        
-                        this.saveWaveVisibilityToPreset(waveIdStr, true);
-                        
                         window.appState.save();
                         
                         setTimeout(() => {
@@ -814,9 +782,6 @@ class EventManager {
                 } else if (groupId && this.askedGroups.has(groupId)) {
                     const waveIdStr = String(waveId);
                     window.appState.waveVisibility[waveIdStr] = true;
-                    
-                    this.saveWaveVisibilityToPreset(waveIdStr, true);
-                    
                     window.appState.save();
                     
                     setTimeout(() => {
@@ -839,9 +804,6 @@ class EventManager {
         if (waveId && window.appState) {
             const waveIdStr = String(waveId);
             window.appState.waveVisibility[waveIdStr] = isChecked;
-            
-            this.saveWaveVisibilityToPreset(waveIdStr, isChecked);
-            
             window.appState.save();
             
             const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
@@ -875,21 +837,6 @@ class EventManager {
         }
     }
     
-    saveWaveVisibilityToPreset(waveIdStr, isVisible) {
-        if (window.appState.presets && window.appState.presets.activePresetId) {
-            const activePreset = window.appState.presets.list.find(
-                p => p.id === window.appState.presets.activePresetId
-            );
-            if (activePreset) {
-                if (isVisible) {
-                    activePreset.waveVisibility[waveIdStr] = true;
-                } else {
-                    delete activePreset.waveVisibility[waveIdStr];
-                }
-            }
-        }
-    }
-    
     handleGroupToggle(groupId, isChecked) {
         if (groupId && window.appState) {
             const group = window.appState.data.groups.find(g => g.id === groupId);
@@ -902,7 +849,28 @@ class EventManager {
                 }
                 
                 setTimeout(() => {
-                    this.recreateAllWavesForPreset();
+                    $('.wave-container').remove();
+                    if (window.waves) {
+                        window.waves.waveContainers = {};
+                        window.waves.wavePaths = {};
+                    }
+                    
+                    window.appState.data.waves.forEach(wave => {
+                        const waveIdStr = String(wave.id);
+                        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                        const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
+                        const shouldShow = isWaveVisible && isGroupEnabled;
+                        
+                        if (shouldShow) {
+                            window.waves.createWaveElement(wave);
+                        }
+                    });
+                    
+                    if (window.waves.updatePosition) {
+                        window.waves.updatePosition();
+                    }
+                    
+                    window.unifiedListManager.updateWavesList();
                     
                     if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
@@ -911,7 +879,7 @@ class EventManager {
             }
         }
     }
-        
+    
     handleButtonClicks($target, e) {
         if ($target.is('#btnAddNote') || $target.closest('#btnAddNote').length) {
             e.preventDefault();
@@ -1000,18 +968,20 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('extremum-wave-name')) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const waveId = $target.data('wave-id');
-            
-            const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
-            if (checkbox.length) {
-                checkbox.click();
-            }
-            return;
-        }
+		if ($target.hasClass('extremum-wave-name')) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			const waveId = $target.data('wave-id');
+			
+			// Найти соответствующий чекбокс видимости
+			const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
+			if (checkbox.length) {
+				// Эмулируем клик - существующая логика всё обработает
+				checkbox.click();
+			}
+			return;
+		}
         
         if ($target.is('#btnCalculateIntersections') || $target.closest('#btnCalculateIntersections').length) {
             e.preventDefault();
@@ -1094,6 +1064,151 @@ class EventManager {
             }
             return;
         }
+    }
+    
+    handleDragStart(e) {
+        const $item = $(e.currentTarget);
+        const type = $item.data('type');
+        const id = $item.data('id');
+        const index = parseInt($item.data('index') || 0);
+        
+        if (!id || index < 0) {
+            e.preventDefault();
+            return;
+        }
+        
+        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+            type: type,
+            id: id,
+            index: index
+        }));
+        
+        $item.addClass('list-item--dragging');
+    }
+    
+    handleDragOver(e) {
+        e.preventDefault();
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+        
+        const $item = $(e.currentTarget);
+        const rect = $item[0].getBoundingClientRect();
+        const y = e.clientY;
+        const type = $item.data('type');
+        
+        const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
+        
+        $(`.list-item[data-type="${type}"]`).not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+    
+        if (insertPosition === 'before') {
+            $item.addClass('list-item--drag-over-top');
+            $item.removeClass('list-item--drag-over-bottom');
+            
+        } else {
+            $item.addClass('list-item--drag-over-bottom');
+            $item.removeClass('list-item--drag-over-top');
+            
+        }
+    }
+    
+    handleDragLeave(e) {
+        const $item = $(e.currentTarget);
+        
+        if (e.originalEvent.relatedTarget && 
+            !$item[0].contains(e.originalEvent.relatedTarget)) {
+            
+            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            
+        }
+    }
+    
+    handleDrop(e) {
+        const $item = $(e.currentTarget);
+        e.preventDefault();
+        
+        $('.list-item').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        
+        try {
+            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
+            const targetType = $item.data('type');
+            
+            if (dragData.type !== targetType) {
+                return;
+            }
+            
+            const targetIndex = parseInt($item.data('index') || 0);
+            
+            const rect = $item[0].getBoundingClientRect();
+            const y = e.clientY;
+            const insertBefore = y - rect.top < rect.height / 2;
+            
+            if (dragData.index === targetIndex) {
+                return;
+            }
+            
+            if (dragData.type === 'date') {
+                this.handleDateDrop(dragData, targetIndex, insertBefore);
+            } else if (dragData.type === 'group') {
+                this.handleGroupDrop(dragData, targetIndex, insertBefore);
+            }
+            
+        } catch (error) {
+        }
+    }
+    
+    handleDateDrop(dragData, targetIndex, insertBefore) {
+        const [movedItem] = window.appState.data.dates.splice(dragData.index, 1);
+        
+        let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
+        
+        window.appState.data.dates.splice(newIndex, 0, movedItem);
+        window.appState.save();
+        
+        if (window.dataManager) window.dataManager.updateDateList();
+        
+        setTimeout(() => {
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+        }, 50);
+    }
+    
+    handleGroupDrop(dragData, targetIndex, insertBefore) {
+        const [movedItem] = window.appState.data.groups.splice(dragData.index, 1);
+        
+        let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
+        
+        window.appState.data.groups.splice(newIndex, 0, movedItem);
+        window.appState.save();
+        
+        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+            window.unifiedListManager.updateWavesList();
+        }
+        
+        setTimeout(() => {
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+        }, 50);
+    }
+    
+    calculateNewIndex(sourceIndex, targetIndex, insertBefore) {
+        if (sourceIndex < targetIndex) {
+            if (insertBefore) {
+                return targetIndex - 1;
+            } else {
+                return targetIndex;
+            }
+        } else {
+            if (insertBefore) {
+                return targetIndex;
+            } else {
+                return targetIndex + 1;
+            }
+        }
+    }
+    
+    handleDragEnd(e) {
+        $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
     }
     
     getContainerId(element) {
@@ -1263,195 +1378,132 @@ class EventManager {
         }
     }
 
-    setupDateSelectionHandlers() {
-        $(document).on('click', '.date-checkbox', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const $checkbox = $(e.currentTarget);
-            const dateId = $checkbox.data('id');
-            const checkboxType = $checkbox.data('type');
-            
-            this.handleDateCheckboxClick(dateId, checkboxType);
-        });
-    }
+	// modules/eventManager.js - ДОБАВИТЬ в конструктор или setupGlobalHandlers
+	setupDateSelectionHandlers() {
+		$(document).on('click', '.date-checkbox', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			const $checkbox = $(e.currentTarget);
+			const dateId = $checkbox.data('id');
+			const checkboxType = $checkbox.data('type'); // 'a' или 'b'
+			
+			this.handleDateCheckboxClick(dateId, checkboxType);
+		});
+	}
 
-    handleDateCheckboxClick(dateId, checkboxType) {
-        if (!window.appState.dateSelections) {
-            window.appState.dateSelections = {
-                typeA: null,
-                typeB: null
-            };
-        }
-        
-        const selections = window.appState.dateSelections;
-        const dateIdStr = String(dateId);
-        
-        const targetKey = checkboxType === 'a' ? 'typeA' : 'typeB';
-        const oppositeKey = checkboxType === 'a' ? 'typeB' : 'typeA';
-        
-        const currentTargetStr = selections[targetKey] ? String(selections[targetKey]) : null;
-        const currentOppositeStr = selections[oppositeKey] ? String(selections[oppositeKey]) : null;
-        
-        if (checkboxType === 'b' && selections.typeA && String(selections.typeA) === dateIdStr) {
-            const allDates = window.appState.data.dates || [];
-            
-            const newTypeADate = allDates.find(date => {
-                const dateStr = String(date.id);
-                return dateStr !== dateIdStr;
-            });
-            
-            if (newTypeADate) {
-                selections.typeA = newTypeADate.id;
-                
-                if (window.appState.activeDateId && String(window.appState.activeDateId) === dateIdStr) {
-                    window.appState.activeDateId = newTypeADate.id;
-                    if (window.dates) {
-                        window.dates.setActiveDate(newTypeADate.id, true);
-                    }
-                }
-                
-                selections.typeB = dateId;
-                window.appState.save();
-                
-                if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                    window.unifiedListManager.updateDatesList();
-                }
-                
-                console.log(`Тип A автоматически перенесен на дату: ${newTypeADate.name}`);
-                return;
-            } else {
-                console.log('Невозможно выделить тип B: только одна дата в списке');
-                return;
-            }
-        }
-        
-        if (checkboxType === 'a') {
-            if (currentTargetStr === dateIdStr) {
-                console.log('Чекбокс A нельзя снять. Для изменения выберите другую дату.');
-                return;
-            } else {
-                selections.typeA = dateId;
-                
-                if (selections.typeB && String(selections.typeB) === dateIdStr) {
-                    selections.typeB = null;
-                }
-                
-                if (window.dates) {
-                    window.dates.setActiveDate(dateId, true);
-                }
-            }
-        } else if (checkboxType === 'b') {
-            if (currentTargetStr === dateIdStr) {
-                selections.typeB = null;
-            } else {
-                selections.typeB = dateId;
-            }
-        }
-        
-        window.appState.save();
 
-        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
-        }
-    }
-    
-    setupPresetHandlers() {
-        $(document).on('click', '.preset-btn', (e) => {
-            const $btn = $(e.currentTarget);
-            const presetId = $btn.data('preset-id');
-            
-            if (presetId && window.appState) {
-                window.appState.switchPreset(presetId);
-                
-                $('.preset-btn').removeClass('active');
-                $btn.addClass('active');
-                
-                this.recreateAllWavesForPreset();
-                
-                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                    window.unifiedListManager.updateWavesList();
-                }
-                
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    setTimeout(() => {
-                        window.summaryManager.updateSummary();
-                    }, 50);
-                }
-                
-                if (window.waves && window.waves.updateCornerSquareColors) {
-                    window.waves.updateCornerSquareColors();
-                }
-            }
-        });
-        
-        $(document).on('dblclick', '.preset-btn', (e) => {
-            const $btn = $(e.currentTarget);
-            const presetId = $btn.data('preset-id');
-            const currentName = $btn.text();
-            
-            const newName = prompt('Введите новое название пресета:', currentName);
-            if (newName && newName.trim() !== '' && window.appState) {
-                window.appState.renamePreset(presetId, newName);
-                $btn.text(newName.trim());
-            }
-        });
-    }
+	// modules/eventManager.js - handleDateCheckboxClick()
+	handleDateCheckboxClick(dateId, checkboxType) {
+		// Инициализация если нет
+		if (!window.appState.dateSelections) {
+			window.appState.dateSelections = {
+				typeA: null,
+				typeB: null
+			};
+		}
+		
+		const selections = window.appState.dateSelections;
+		const dateIdStr = String(dateId);
+		
+		const targetKey = checkboxType === 'a' ? 'typeA' : 'typeB';
+		const oppositeKey = checkboxType === 'a' ? 'typeB' : 'typeA';
+		
+		// Приводим все к строкам для сравнения
+		const currentTargetStr = selections[targetKey] ? String(selections[targetKey]) : null;
+		const currentOppositeStr = selections[oppositeKey] ? String(selections[oppositeKey]) : null;
+		
+		// ===== ОСОБЫЙ СЛУЧАЙ: выделяем B на дату, которая уже А =====
+		if (checkboxType === 'b' && selections.typeA && String(selections.typeA) === dateIdStr) {
+			// Находим первую другую дату для переноса типа A
+			const allDates = window.appState.data.dates || [];
+			
+			// Ищем первую дату, которая не совпадает с текущей
+			const newTypeADate = allDates.find(date => {
+				const dateStr = String(date.id);
+				return dateStr !== dateIdStr;
+			});
+			
+			if (newTypeADate) {
+				// Переносим тип A на первую найденную дату
+				selections.typeA = newTypeADate.id;
+				
+				// Обновляем активную дату (если была привязана к старой дате A)
+				if (window.appState.activeDateId && String(window.appState.activeDateId) === dateIdStr) {
+					window.appState.activeDateId = newTypeADate.id;
+					if (window.dates) {
+						window.dates.setActiveDate(newTypeADate.id, true);
+					}
+				}
+				
+				// Теперь устанавливаем тип B на выбранную дату
+				selections.typeB = dateId;
+				
+				// Сохраняем состояние
+				window.appState.save();
+				
+				// Обновляем отображение
+				if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+					window.unifiedListManager.updateDatesList();
+				}
+				
+				// Показываем уведомление пользователю
+				console.log(`Тип A автоматически перенесен на дату: ${newTypeADate.name}`);
+				return;
+			} else {
+				// Если нет других дат - отменяем выделение типа B
+				console.log('Невозможно выделить тип B: только одна дата в списке');
+				return;
+			}
+		}
+		
+		// ===== СТАНДАРТНАЯ ЛОГИКА =====
+		
+		// 1. Для чекбокса A - особая логика: нельзя снять, только перенести
+		if (checkboxType === 'a') {
+			// Если кликаем на уже выделенную дату типа A - НИЧЕГО НЕ ДЕЛАЕМ (нельзя снять)
+			if (currentTargetStr === dateIdStr) {
+				// Ничего не делаем - чекбокс A должен остаться отмеченным
+				console.log('Чекбокс A нельзя снять. Для изменения выберите другую дату.');
+				return;
+			}
+			// Иначе - устанавливаем новую дату типа A
+			else {
+				selections.typeA = dateId;
+				
+				// Снимаем тип B с этой даты, если он был
+				if (selections.typeB && String(selections.typeB) === dateIdStr) {
+					selections.typeB = null;
+				}
+				
+				// Активируем дату
+				if (window.dates) {
+					window.dates.setActiveDate(dateId, true);
+				}
+			}
+		}
+		// 2. Для чекбокса B - обычная логика, но с проверкой на конфликт с A
+		else if (checkboxType === 'b') {
+			// Если пытаемся установить B на дату, которая уже A - обработано выше
+			// Если кликаем на уже выделенную дату типа B - снимаем выделение
+			if (currentTargetStr === dateIdStr) {
+				selections.typeB = null;
+			} 
+			// Иначе - устанавливаем новую дату типа B
+			else {
+				selections.typeB = dateId;
+			}
+		}
+		
+		// Сохраняем состояние
+		window.appState.save();
 
-    recreateAllWavesForPreset() {
-        $('.wave-container').remove();
-        if (window.waves) {
-            window.waves.waveContainers = {};
-            window.waves.wavePaths = {};
-        }
-        
-        if (window.appState && window.appState.data && window.appState.data.groups) {
-            window.appState.data.groups.forEach(group => {
-                const checkbox = $(`.wave-group-toggle[data-group-id="${group.id}"]`);
-                if (checkbox.length) {
-                    checkbox.prop('checked', group.enabled === true);
-                }
-            });
-        }
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] === true;
-            const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
-            const shouldShow = isWaveVisible && isGroupEnabled;
-            
-            if (shouldShow) {
-                window.waves.createWaveElement(wave);
-            }
-        });
-        
-        if (window.waves && window.waves.updatePosition) {
-            window.waves.updatePosition();
-        }
-        
-        this.updatePresetButtons();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            setTimeout(() => {
-                window.unifiedListManager.updateWavesList();
-            }, 100);
-        }
-    }
+		// Обновляем отображение
+		if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+			window.unifiedListManager.updateDatesList();
+		}
+	}
 
-    updatePresetButtons() {
-        if (!window.appState || !window.appState.presets) return;
-        
-        const activePresetId = window.appState.presets.activePresetId;
-        $('.preset-btn').removeClass('active');
-        $(`.preset-btn[data-preset-id="${activePresetId}"]`).addClass('active');
-        
-        window.appState.presets.list.forEach(preset => {
-            const $btn = $(`.preset-btn[data-preset-id="${preset.id}"]`);
-            if ($btn.length && $btn.text() !== preset.name) {
-                $btn.text(preset.name);
-            }
-        });
-    }
     
     clearIntersectionResults() {
         const $container = $('#intersectionResults');
