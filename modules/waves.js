@@ -737,12 +737,6 @@ class WavesManager {
     }
     
     onHorizontalWaveLabelClick(waveId) {
-        const confirmHide = confirm('Скрыть колосок?');
-        
-        if (!confirmHide) {
-            return;
-        }
-        
         const waveIdStr = String(waveId);
         const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
         
