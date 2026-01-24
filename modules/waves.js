@@ -20,6 +20,12 @@ class WavesManager {
 		this.updatePosition();
 		this.initialized = true;
 	}
+
+
+
+
+
+	
     
     calculateRequiredPeriods(periodPx) {
         const viewportWidth = window.appState.graphWidth;

@@ -59,6 +59,8 @@ class UIManager {
     
     handleAction(action, element) {
         const actions = {
+			resetWarning: () => this.resetWarning(),
+
             prevDay: () => window.dates.navigateDay(-1),
             nextDay: () => window.dates.navigateDay(1),
             today: () => window.dates.goToToday(),
@@ -107,6 +109,24 @@ class UIManager {
             actions[action]();
         }
     }
+
+	resetWarning() {
+		// Показываем overlay предупреждения
+		const warningOverlay = document.getElementById('warningOverlay');
+		if (warningOverlay) {
+			warningOverlay.classList.remove('hidden');
+			warningOverlay.classList.add('desktop-warning');
+			document.body.style.overflow = 'hidden';
+		}
+		
+		// Опционально: скрываем основной интерфейс
+		document.body.classList.add('ui-hidden');
+		
+		// Показываем угловые квадраты
+		document.querySelectorAll('.corner-square').forEach(square => {
+			square.style.display = 'block';
+		});
+	}
     
     toggleUI() {
         window.appState.uiHidden = !window.appState.uiHidden;

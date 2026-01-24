@@ -456,6 +456,7 @@ class AppCore {
 				if (warningOverlay) {
 					warningOverlay.classList.add('hidden');
 					document.body.style.overflow = 'auto';
+					document.body.classList.remove('ui-hidden');
 				}
 			}
 		});
