@@ -168,6 +168,70 @@ async function finalizeInitialization() {
             }
         }
     }, 1000);
+
+	// Инициализация UI пресетов
+	setTimeout(() => {
+		if (window.appState && window.appState.presets) {
+			// Убедимся, что пустые пресеты правильно инициализированы
+			window.appState.presets.list.forEach(preset => {
+				if (!preset.waveVisibility || Object.keys(preset.waveVisibility).length === 0) {
+					// Инициализируем пустой пресет - все колоски выключены
+					preset.waveVisibility = {};
+					window.appState.data.waves.forEach(wave => {
+						const waveIdStr = String(wave.id);
+						preset.waveVisibility[waveIdStr] = false;
+					});
+					
+					// Группы выключены
+					preset.groupStates = {};
+					window.appState.data.groups.forEach(group => {
+						const groupIdStr = String(group.id);
+						preset.groupStates[groupIdStr] = false;
+					});
+					
+					// Нет жирных колосков
+					preset.waveBold = {};
+					
+					// Нет окрашенных краев
+					preset.waveCornerColor = {};
+					
+					// Настройки UI по умолчанию
+					preset.uiSettings = {
+						uiHidden: false,
+						graphHidden: false,
+						graphBgWhite: true,
+						showStars: true,
+						grayMode: false,
+						graphGrayMode: false,
+						cornerSquaresVisible: true
+					};
+				}
+			});
+			
+			// Сохраняем изменения
+			window.appState.save();
+			
+			// Активируем кнопку активного пресета
+			if (window.eventManager && window.eventManager.updatePresetButtons) {
+				window.eventManager.updatePresetButtons();
+			}
+		}
+	}, 100);
+
+	// В функции finalizeInitialization() добавить:
+	setTimeout(() => {
+		if (window.appState && window.appState.presets) {
+			// Синхронизируем UI состояния групп
+			if (window.appState.syncGroupUIStates) {
+				window.appState.syncGroupUIStates();
+			}
+			
+			// Обновляем UI пресетов
+			if (window.eventManager && window.eventManager.updatePresetButtons) {
+				window.eventManager.updatePresetButtons();
+			}
+		}
+	}, 200);
 }
 
 window.finalizeInitialization = finalizeInitialization;
