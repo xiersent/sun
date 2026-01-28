@@ -1129,7 +1129,7 @@ class WavesManager {
         return window.timeUtils.getDaysBetweenExact(date1, date2);
     }
 
-	// В modules/waves.js добавить:
+
 	findWaveIntersectionPoints(wave1, wave2) {
 		const points = [];
 		
@@ -1148,9 +1148,13 @@ class WavesManager {
 		offset1 += phaseOffsetPixels;
 		offset2 += phaseOffsetPixels;
 		
-		// Дискретный поиск с учетом обеих волн
-		const searchPoints = 2000;
+		// УВЕЛИЧИМ точность и ИЗМЕНИМ логику поиска
+		const searchPoints = 3000; // Увеличили для большей точности
 		const graphWidth = window.appState.graphWidth;
+		const intersectionThreshold = 0.5; // СИЛЬНО уменьшили порог (было 2)
+		
+		let prevDiff = null;
+		let prevSign = null;
 		
 		for (let i = 0; i <= searchPoints; i++) {
 			const x = (i / searchPoints) * graphWidth;
@@ -1164,24 +1168,84 @@ class WavesManager {
 					window.appState.config.amplitude * 
 					Math.sin(2 * Math.PI * (x + offset2) / periodPx2);
 			
-			if (Math.abs(y1 - y2) < 2) {
-				const isDuplicate = points.some(p => Math.abs(p.x - x) < 5);
-				if (!isDuplicate) {
-					points.push({
-						x: x,
-						y: (y1 + y2) / 2,
-						wave1: wave1,
-						wave2: wave2,
-						offset1: offset1,
-						offset2: offset2,
-						periodPx1: periodPx1,
-						periodPx2: periodPx2
-					});
+			const diff = y1 - y2;
+			const currentSign = Math.sign(diff);
+			
+			// Ищем точку, где разница МЕНЯЕТ ЗНАК (пересечение через ноль)
+			if (prevDiff !== null && prevSign !== null) {
+				if (Math.abs(diff) < intersectionThreshold && 
+					(prevSign !== 0 && currentSign !== 0 && prevSign !== currentSign)) {
+					
+					// Нашли потенциальное пересечение - уточним методом бисекции
+					const refinedPoint = this.refineIntersectionPoint(
+						wave1, wave2, x - (graphWidth/searchPoints), x, 
+						offset1, offset2, periodPx1, periodPx2
+					);
+					
+					if (refinedPoint) {
+						const isDuplicate = points.some(p => Math.abs(p.x - refinedPoint.x) < 2);
+						if (!isDuplicate) {
+							points.push(refinedPoint);
+						}
+					}
 				}
 			}
+			
+			prevDiff = diff;
+			prevSign = currentSign;
 		}
 		
 		return points;
+	}
+
+	refineIntersectionPoint(wave1, wave2, x1, x2, offset1, offset2, periodPx1, periodPx2) {
+		const maxIterations = 10;
+		const tolerance = 0.01; // Очень высокая точность
+		
+		let left = x1;
+		let right = x2;
+		
+		for (let i = 0; i < maxIterations; i++) {
+			const mid = (left + right) / 2;
+			
+			const y1 = window.appState.config.graphHeight / 2 - 
+					window.appState.config.amplitude * 
+					Math.sin(2 * Math.PI * (mid + offset1) / periodPx1);
+			
+			const y2 = window.appState.config.graphHeight / 2 - 
+					window.appState.config.amplitude * 
+					Math.sin(2 * Math.PI * (mid + offset2) / periodPx2);
+			
+			const diff = y1 - y2;
+			
+			if (Math.abs(diff) < tolerance) {
+				return {
+					x: mid,
+					y: (y1 + y2) / 2,
+					wave1: wave1,
+					wave2: wave2
+				};
+			}
+			
+			const y1Left = window.appState.config.graphHeight / 2 - 
+						window.appState.config.amplitude * 
+						Math.sin(2 * Math.PI * (left + offset1) / periodPx1);
+			
+			const y2Left = window.appState.config.graphHeight / 2 - 
+						window.appState.config.amplitude * 
+						Math.sin(2 * Math.PI * (left + offset2) / periodPx2);
+			
+			const diffLeft = y1Left - y2Left;
+			
+			if (diffLeft * diff < 0) {
+				right = mid;
+			} else {
+				left = mid;
+			}
+		}
+		
+		// Если не нашли достаточно точное пересечение - игнорируем
+		return null;
 	}
 
 	calculateAllWaveIntersections() {
@@ -1198,7 +1262,10 @@ class WavesManager {
 					visibleWaves[j]
 				);
 				
-				points.forEach(point => {
+				// ДОБАВИМ фильтрацию слишком близких точек
+				const filteredPoints = this.filterClosePoints(points, 5); // 5px минимальное расстояние
+				
+				filteredPoints.forEach(point => {
 					allIntersections.push({
 						...point,
 						time: this.calculateTimeFromXCoordinate(visibleWaves[i], point.x),
@@ -1211,11 +1278,32 @@ class WavesManager {
 		return allIntersections;
 	}
 
+	filterClosePoints(points, minDistance) {
+		if (points.length === 0) return [];
+		
+		const sortedPoints = points.sort((a, b) => a.x - b.x);
+		const filteredPoints = [sortedPoints[0]];
+		
+		for (let i = 1; i < sortedPoints.length; i++) {
+			const lastPoint = filteredPoints[filteredPoints.length - 1];
+			
+			if (Math.abs(sortedPoints[i].x - lastPoint.x) >= minDistance) {
+				filteredPoints.push(sortedPoints[i]);
+			}
+		}
+		
+		return filteredPoints;
+	}
+
 	renderWaveIntersectionPoints() {
 		// Удаляем старые точки
 		this.removeWaveIntersectionPoints();
 		
 		const intersections = this.calculateAllWaveIntersections();
+		
+		// ЕЩЕ ОДНА ФИЛЬТРАЦИЯ: не показывать слишком много точек
+		const maxPointsToShow = 50; // Максимум 50 точек на экране
+		const pointsToShow = intersections.slice(0, maxPointsToShow);
 		
 		const container = document.createElement('div');
 		container.className = 'wave-intersection-points';
@@ -1227,34 +1315,39 @@ class WavesManager {
 		container.style.top = '0';
 		container.style.left = '0';
 		
-		intersections.forEach(point => {
+		pointsToShow.forEach(point => {
 			const pointElement = document.createElement('div');
 			pointElement.className = 'wave-intersection-point';
 			pointElement.dataset.time = point.time.toISOString();
 			pointElement.dataset.wavePair = point.wavePair;
 			pointElement.title = `${point.wavePair}\n${this.formatExtremumTime(point.time)}`;
 			
-			// Стиль точки
+			// Стиль точки - сделаем более заметным для точных пересечений
 			pointElement.style.position = 'absolute';
 			pointElement.style.left = `${point.x}px`;
 			pointElement.style.top = `${point.y}px`;
-			pointElement.style.width = '6px';
-			pointElement.style.height = '6px';
+			pointElement.style.width = '8px';
+			pointElement.style.height = '8px';
 			pointElement.style.borderRadius = '50%';
-			pointElement.style.backgroundColor = '#ff0000'; // Красный для отличия от эквилибриумов
+			pointElement.style.backgroundColor = '#ff0000';
 			pointElement.style.border = '2px solid #fff';
 			pointElement.style.cursor = 'pointer';
 			pointElement.style.pointerEvents = 'auto';
 			pointElement.style.zIndex = '10';
-			pointElement.style.boxShadow = '0 0 3px rgba(0,0,0,0.5)';
+			pointElement.style.boxShadow = '0 0 4px rgba(255,0,0,0.8)';
+			pointElement.style.opacity = '0.9';
 			
 			// При наведении
 			pointElement.addEventListener('mouseenter', (e) => {
-				this.showIntersectionTooltip(e.target, point);
+				e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
+				e.target.style.zIndex = '15';
+				e.target.style.boxShadow = '0 0 8px rgba(255,0,0,1)';
 			});
 			
-			pointElement.addEventListener('mouseleave', () => {
-				this.hideIntersectionTooltip();
+			pointElement.addEventListener('mouseleave', (e) => {
+				e.target.style.transform = 'translate(-50%, -50%)';
+				e.target.style.zIndex = '10';
+				e.target.style.boxShadow = '0 0 4px rgba(255,0,0,0.8)';
 			});
 			
 			// Клик для навигации
