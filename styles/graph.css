@@ -109,7 +109,7 @@
 .graph-container.dark-mode .date-labels{color: #fff;}
 .y-labels{left: 10px; transform: translateY(-50%); color: var(--text-secondary);}
 .graph-container.dark-mode .y-labels{color: #ccc;}
-.center-date-label{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, 0.9); padding: var(--spacing-xs) var(--spacing-sm); z-index: 20; color: var(--text-color); text-align: center; pointer-events: none; font-weight: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; font-size: var(--font-size-md); min-height: auto;}
+.center-date-label{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); user-select: none; background: rgba(255, 255, 255, 0.9); padding: var(--spacing-xs) var(--spacing-sm); z-index: 20; color: var(--text-color); text-align: center; pointer-events: none; font-weight: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; font-size: var(--font-size-md); min-height: auto;}
 .graph-container.dark-mode .center-date-label{background: rgba(0, 0, 0, 0.8); color: #fff;}
 .center-date-time{font-size: var(--font-size-md); color: var(--text-secondary); margin: 2px 0;}
 .graph-container.dark-mode .center-date-time{color: #ccc;}

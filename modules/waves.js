@@ -571,14 +571,20 @@ class WavesManager {
     
 	calculateTimeFromXCoordinate(wave, x) {
 		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		const currentDate = new Date(window.appState.currentDate);
-		const leftDate = new Date(currentDate);
-		leftDate.setDate(leftDate.getDate() - squaresLeft);
-		leftDate.setHours(0, 0, 0, 0);
+		const currentDay = window.appState.currentDay || 0;
 		
-		const daysFromLeft = (x / window.appState.config.squareSize);
+		// Дни относительно центра
+		const daysFromCenter = (x - (window.appState.graphWidth / 2)) / window.appState.config.squareSize;
 		
-		const pointTime = new Date(leftDate.getTime() + (daysFromLeft * 24 * 3600 * 1000));
+		// Целевой день = текущий день + смещение от центра
+		const targetDay = currentDay + daysFromCenter;
+		
+		// Преобразуем дни обратно во время
+		const baseDate = window.appState.baseDate instanceof Date ? 
+			window.appState.baseDate : 
+			new Date(window.appState.baseDate);
+		
+		const pointTime = new Date(baseDate.getTime() + (targetDay * 24 * 3600 * 1000));
 		
 		return pointTime;
 	}
@@ -1131,71 +1137,106 @@ class WavesManager {
 
 
 	findWaveIntersectionPoints(wave1, wave2) {
+		// Используем аналитический метод вместо численного поиска
 		const points = [];
 		
 		const periodPx1 = wave1.period * window.appState.config.squareSize;
 		const periodPx2 = wave2.period * window.appState.config.squareSize;
 		
-		// Смещения для обеих волн
-		const currentDay = window.appState.currentDay || 0;
-		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+		// Получаем уравнения в пиксельных координатах
+		const eq1 = {
+			amplitude: window.appState.config.amplitude,
+			omega: 2 * Math.PI / periodPx1,
+			phi: this.getPixelPhase(wave1)
+		};
 		
-		let offset1 = (currentDay * window.appState.config.squareSize) % periodPx1;
-		let offset2 = (currentDay * window.appState.config.squareSize) % periodPx2;
-		if (offset1 < 0) offset1 = periodPx1 + offset1;
-		if (offset2 < 0) offset2 = periodPx2 + offset2;
+		const eq2 = {
+			amplitude: window.appState.config.amplitude,
+			omega: 2 * Math.PI / periodPx2,
+			phi: this.getPixelPhase(wave2)
+		};
 		
-		offset1 += phaseOffsetPixels;
-		offset2 += phaseOffsetPixels;
-		
-		// УВЕЛИЧИМ точность и ИЗМЕНИМ логику поиска
-		const searchPoints = 3000; // Увеличили для большей точности
-		const graphWidth = window.appState.graphWidth;
-		const intersectionThreshold = 0.5; // СИЛЬНО уменьшили порог (было 2)
-		
-		let prevDiff = null;
-		let prevSign = null;
-		
-		for (let i = 0; i <= searchPoints; i++) {
-			const x = (i / searchPoints) * graphWidth;
+		// Находим пересечения на интервале [0, graphWidth]
+		for (let k = -10; k <= 10; k++) {
+			// Решаем уравнение: A*sin(ω1*x + φ1) = A*sin(ω2*x + φ2)
+			// Это дает два типа решений:
 			
-			// Y с учетом смещений
-			const y1 = window.appState.config.graphHeight / 2 - 
-					window.appState.config.amplitude * 
-					Math.sin(2 * Math.PI * (x + offset1) / periodPx1);
-			
-			const y2 = window.appState.config.graphHeight / 2 - 
-					window.appState.config.amplitude * 
-					Math.sin(2 * Math.PI * (x + offset2) / periodPx2);
-			
-			const diff = y1 - y2;
-			const currentSign = Math.sign(diff);
-			
-			// Ищем точку, где разница МЕНЯЕТ ЗНАК (пересечение через ноль)
-			if (prevDiff !== null && prevSign !== null) {
-				if (Math.abs(diff) < intersectionThreshold && 
-					(prevSign !== 0 && currentSign !== 0 && prevSign !== currentSign)) {
-					
-					// Нашли потенциальное пересечение - уточним методом бисекции
-					const refinedPoint = this.refineIntersectionPoint(
-						wave1, wave2, x - (graphWidth/searchPoints), x, 
-						offset1, offset2, periodPx1, periodPx2
-					);
-					
-					if (refinedPoint) {
-						const isDuplicate = points.some(p => Math.abs(p.x - refinedPoint.x) < 2);
-						if (!isDuplicate) {
-							points.push(refinedPoint);
-						}
-					}
+			// 1) ω1*x + φ1 = ω2*x + φ2 + 2πk
+			if (Math.abs(eq1.omega - eq2.omega) > 1e-12) {
+				const x1 = (eq2.phi - eq1.phi + 2 * Math.PI * k) / (eq1.omega - eq2.omega);
+				if (x1 >= 0 && x1 <= window.appState.graphWidth) {
+					points.push(this.createIntersectionPoint(x1, wave1, wave2));
 				}
 			}
 			
-			prevDiff = diff;
-			prevSign = currentSign;
+			// 2) ω1*x + φ1 = π - (ω2*x + φ2) + 2πk
+			const x2 = (Math.PI - eq1.phi - eq2.phi + 2 * Math.PI * k) / (eq1.omega + eq2.omega);
+			if (x2 >= 0 && x2 <= window.appState.graphWidth) {
+				points.push(this.createIntersectionPoint(x2, wave1, wave2));
+			}
 		}
 		
-		return points;
+		return points.filter(p => p !== null);
+	}
+
+	navigateToPreciseTime(preciseTime) {
+		// Используем точное время с миллисекундами
+		const targetDate = new Date(preciseTime);
+		
+		// Устанавливаем точное время
+		window.appState.currentDate = targetDate;
+		window.appState.currentDay = window.timeUtils.getDaysBetween(
+			window.appState.baseDate, 
+			targetDate
+		);
+		
+		// Обновляем всё с максимальной точностью
+		window.grid.createGrid();
+		window.waves.updatePosition();
+		window.appState.save();
+		
+		// Показываем точное время в центре
+		const milliseconds = targetDate.getMilliseconds();
+		document.getElementById('currentDay').textContent = 
+			window.appState.currentDay.toFixed(5) + 
+			` (${milliseconds}ms)`;
+	}
+
+	getPixelPhase(wave) {
+		const currentDay = window.appState.currentDay || 0;
+		const periodPx = wave.period * window.appState.config.squareSize;
+		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+		
+		const currentOffsetPx = (currentDay * window.appState.config.squareSize) % periodPx;
+		const normalizedOffset = currentOffsetPx < 0 ? periodPx + currentOffsetPx : currentOffsetPx;
+		
+		return 2 * Math.PI * (phaseOffsetPixels + normalizedOffset) / periodPx;
+	}
+
+	createIntersectionPoint(x, wave1, wave2) {
+		const centerY = window.appState.config.graphHeight / 2;
+		const amplitude = window.appState.config.amplitude;
+		const periodPx1 = wave1.period * window.appState.config.squareSize;
+		const periodPx2 = wave2.period * window.appState.config.squareSize;
+		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+		
+		const currentDay = window.appState.currentDay || 0;
+		const offset1 = (currentDay * window.appState.config.squareSize) % periodPx1;
+		const offset2 = (currentDay * window.appState.config.squareSize) % periodPx2;
+		
+		const y1 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset1 + phaseOffsetPixels) / periodPx1);
+		const y2 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset2 + phaseOffsetPixels) / periodPx2);
+		
+		// Проверяем точность пересечения
+		if (Math.abs(y1 - y2) > 0.01) return null; // Слишком большое расхождение
+		
+		return {
+			x: x,
+			y: (y1 + y2) / 2,
+			wave1: wave1,
+			wave2: wave2,
+			time: this.calculateTimeFromXCoordinate(wave1, x)
+		};
 	}
 
 	refineIntersectionPoint(wave1, wave2, x1, x2, offset1, offset2, periodPx1, periodPx2) {
