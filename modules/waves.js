@@ -1289,6 +1289,7 @@ class WavesManager {
 		return null;
 	}
 
+
 	calculateAllWaveIntersections() {
 		const visibleWaves = this.getActiveWaves();
 		const allIntersections = [];
@@ -1307,11 +1308,17 @@ class WavesManager {
 				const filteredPoints = this.filterClosePoints(points, 5); // 5px минимальное расстояние
 				
 				filteredPoints.forEach(point => {
-					allIntersections.push({
-						...point,
-						time: this.calculateTimeFromXCoordinate(visibleWaves[i], point.x),
-						wavePair: `${visibleWaves[i].name} × ${visibleWaves[j].name}`
-					});
+					if (point) {
+						// Вычисляем время пересечения
+						const intersectionTime = this.calculateTimeFromXCoordinate(visibleWaves[i], point.x);
+						
+						// Добавляем в массив
+						allIntersections.push({
+							...point,
+							time: intersectionTime,
+							wavePair: `${visibleWaves[i].name} × ${visibleWaves[j].name}`
+						});
+					}
 				});
 			}
 		}
@@ -1335,6 +1342,7 @@ class WavesManager {
 		
 		return filteredPoints;
 	}
+
 
 	renderWaveIntersectionPoints() {
 		// Удаляем старые точки
@@ -1361,9 +1369,26 @@ class WavesManager {
 			pointElement.className = 'wave-intersection-point';
 			pointElement.dataset.time = point.time.toISOString();
 			pointElement.dataset.wavePair = point.wavePair;
-			pointElement.title = `${point.wavePair}\n${this.formatExtremumTime(point.time)}`;
 			
-			// Стиль точки - сделаем более заметным для точных пересечений
+			// Используем существующий формат времени ЧЧ:ММ:СС
+			const timeStr = this.formatExtremumTime(point.time);
+			
+			// Добавляем время за 2.5 минуты до и после
+			const timeBefore = new Date(point.time.getTime() - 2.5 * 60 * 1000); // -2.5 минуты (150000 мс)
+			const timeAfter = new Date(point.time.getTime() + 2.5 * 60 * 1000);  // +2.5 минуты (150000 мс)
+			
+			const timeBeforeStr = this.formatExtremumTime(timeBefore);
+			const timeAfterStr = this.formatExtremumTime(timeAfter);
+			
+			// Создаем title с дополнительными временами
+			let titleText = `${point.wavePair}\n${timeStr}`;
+			titleText += `\n---`;
+			titleText += `\n${timeBeforeStr} (началось)`;
+			titleText += `\n${timeAfterStr} (закончилось)`;
+			
+			pointElement.title = titleText;
+			
+			// Остальные стили остаются без изменений
 			pointElement.style.position = 'absolute';
 			pointElement.style.left = `${point.x}px`;
 			pointElement.style.top = `${point.y}px`;
@@ -1377,6 +1402,7 @@ class WavesManager {
 			pointElement.style.zIndex = '10';
 			pointElement.style.boxShadow = '0 0 4px rgba(255,0,0,0.8)';
 			pointElement.style.opacity = '0.9';
+			pointElement.style.transform = 'translate(-50%, -50%)';
 			
 			// При наведении
 			pointElement.addEventListener('mouseenter', (e) => {
