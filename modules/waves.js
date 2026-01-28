@@ -287,8 +287,9 @@ class WavesManager {
         });
         
         this.updateAllWaveLabels();
-        
         this.updateVerticalWaveLabelsTime();
+		this.renderWaveIntersectionPoints();
+
     }
     
     updateAllWaveLabels() {
