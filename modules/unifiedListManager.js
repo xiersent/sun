@@ -536,57 +536,64 @@ class UnifiedListManager {
         }
     }
     
-    saveWaveChanges(waveId) {
-        const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
-        if (!wave) {
-            window.appState.editingWaveId = null;
-            this.updateWavesList();
-            return;
-        }
-        
-        const newName = document.getElementById(`editWaveName${waveId}`).value.trim();
-        const newPeriod = parseFloat(document.getElementById(`editWavePeriod${waveId}`).value);
-        const newType = document.getElementById(`editWaveType${waveId}`).value;
-        const newColor = document.getElementById(`editWaveColor${waveId}`).value;
-        
-        if (!newName) {
-            alert('Пожалуйста, введите название колоска');
-            return;
-        }
-        if (!newPeriod || newPeriod < 0.1) {
-            alert('Пожалуйста, введите корректный период (больше 0.1)');
-            return;
-        }
-        
-        wave.name = newName;
-        wave.period = newPeriod;
-        wave.type = newType;
-        wave.color = newColor;
-        
-        if (window.waves.wavePaths && window.waves.wavePaths[waveId]) {
-            window.waves.wavePaths[waveId].style.stroke = newColor;
-            
-            const path = window.waves.wavePaths[waveId];
-            path.classList.remove('solid', 'dashed', 'dotted', 'zigzag', 'dash-dot', 'long-dash');
-            if (newType !== 'solid') {
-                path.classList.add(newType);
-            }
-            
-            path.classList.toggle('bold', window.appState.waveBold[waveId]);
-        }
-        
-        if (window.waves.waveContainers && window.waves.waveContainers[waveId]) {
-            window.waves.waveContainers[waveId].remove();
-        }
-        
-        window.waves.createWaveElement(wave);
-        
-        window.appState.editingWaveId = null;
-        
-        this.updateWavesList();
-        window.waves.updatePosition();
-        window.appState.save();
-    }
+
+	saveWaveChanges(waveId) {
+		const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
+		if (!wave) {
+			window.appState.editingWaveId = null;
+			this.updateWavesList();
+			return;
+		}
+		
+		const newName = document.getElementById(`editWaveName${waveId}`).value.trim();
+		const newPeriod = parseFloat(document.getElementById(`editWavePeriod${waveId}`).value);
+		const newType = document.getElementById(`editWaveType${waveId}`).value;
+		const newColor = document.getElementById(`editWaveColor${waveId}`).value;
+		
+		if (!newName) {
+			alert('Пожалуйста, введите название колоска');
+			return;
+		}
+		if (!newPeriod || newPeriod < 0.1) {
+			alert('Пожалуйста, введите корректный период (больше 0.1)');
+			return;
+		}
+		
+		wave.name = newName;
+		wave.period = newPeriod;
+		wave.type = newType;
+		
+		// Проверяем, изменился ли цвет
+		if (wave.color !== newColor) {
+			wave.color = newColor;
+			// Если пользователь явно меняет цвет - это не стандартный цвет
+			wave.isDefaultColor = false;
+		}
+		
+		if (window.waves.wavePaths && window.waves.wavePaths[waveId]) {
+			window.waves.wavePaths[waveId].style.stroke = newColor;
+			
+			const path = window.waves.wavePaths[waveId];
+			path.classList.remove('solid', 'dashed', 'dotted', 'zigzag', 'dash-dot', 'long-dash');
+			if (newType !== 'solid') {
+				path.classList.add(newType);
+			}
+			
+			path.classList.toggle('bold', window.appState.waveBold[waveId]);
+		}
+		
+		if (window.waves.waveContainers && window.waves.waveContainers[waveId]) {
+			window.waves.waveContainers[waveId].remove();
+		}
+		
+		window.waves.createWaveElement(wave);
+		
+		window.appState.editingWaveId = null;
+		
+		this.updateWavesList();
+		window.waves.updatePosition();
+		window.appState.save();
+	}
     
     saveGroupChanges(groupId) {
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
@@ -611,25 +618,29 @@ class UnifiedListManager {
         window.appState.save();
     }
     
-    changeWaveColor(wave) {
-        const colorInput = document.createElement('input');
-        colorInput.type = 'color';
-        colorInput.value = wave.color;
-        colorInput.addEventListener('change', (e) => {
-            wave.color = e.target.value;
-            
-            if (window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
-                window.waves.wavePaths[wave.id].style.stroke = wave.color;
-            }
-            
-            window.waves.updateCornerSquareColors();
-            
-            window.appState.save();
-            
-            this.updateWavesList();
-        });
-        colorInput.click();
-    }
+	// modules/unifiedListManager.js
+	changeWaveColor(wave) {
+		const colorInput = document.createElement('input');
+		colorInput.type = 'color';
+		colorInput.value = wave.color;
+		colorInput.addEventListener('change', (e) => {
+			const newColor = e.target.value;
+			wave.color = newColor;
+			
+			// Устанавливаем флаг, что пользователь изменил цвет
+			wave.isDefaultColor = false;
+			
+			if (window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
+				window.waves.wavePaths[wave.id].style.stroke = newColor;
+			}
+			
+			window.waves.updateCornerSquareColors();
+			window.appState.save();
+			
+			this.updateWavesList();
+		});
+		colorInput.click();
+	}
     
     updateDatesList() {
         this.renderList('dateListForDates', window.appState.data.dates, 'date');

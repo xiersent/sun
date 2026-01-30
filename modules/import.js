@@ -275,6 +275,25 @@ class ImportExportManager {
                             allSquares.forEach(square => {
                                 square.style.display = window.appState.cornerSquaresVisible ? 'block' : 'none';
                             });
+
+							// После импорта проверяем и фиксируем цвета стандартных волн
+							convertedData.waves.forEach(wave => {
+								const waveIdStr = String(wave.id);
+								const is120Wave = waveIdStr.startsWith('wave-120-');
+								const is31Wave = waveIdStr.startsWith('wave-31-');
+								
+								if (is120Wave || is31Wave) {
+									// Если флаг не установлен - устанавливаем по умолчанию
+									if (wave.isDefaultColor === undefined) {
+										wave.isDefaultColor = true;
+									}
+									
+									// Если стандартный цвет - устанавливаем #C0C0C0
+									if (wave.isDefaultColor === true) {
+										wave.color = '#C0C0C0';
+									}
+								}
+							});
                             
                             document.querySelectorAll('.wave-container').forEach(container => {
                                 container.remove();

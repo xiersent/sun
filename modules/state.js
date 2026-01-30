@@ -77,102 +77,65 @@ class AppState {
         this.load();
     }
     
-    create120Waves() {
-        this.waves120 = [];
-        this.waves120Ids = [];
-        
-        const colorPalette = [
-            '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-            '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
-            '#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00',
-            '#ffff33', '#a65628', '#f781bf', '#999999',
-            '#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854',
-            '#ffd92f', '#e5c494', '#b3b3b3',
-            '#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3',
-            '#fdb462', '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd',
-            '#ccebc5', '#ffed6f',
-            '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99',
-            '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a',
-            '#ffff99', '#b15928',
-            '#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6',
-            '#ffffcc', '#e5d8bd', '#fddaec', '#f2f2f2',
-            '#b3e2cd', '#fdcdac', '#cbd5e8', '#f4cae4', '#e6f5c9',
-            '#fff2ae', '#f1e2cc', '#cccccc',
-            '#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e',
-            '#e6ab02', '#a6761d', '#666666',
-            '#7fc97f', '#beaed4', '#fdc086', '#ffff99', '#386cb0',
-            '#f0027f', '#bf5b17', '#666666'
-        ];
-        
-        const additionalColors = [
-            '#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#34495e',
-            '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#2c3e50',
-            '#f1c40f', '#e67e22', '#e74c3c', '#ecf0f1', '#95a5a6',
-            '#f39c12', '#d35400', '#c0392b', '#bdc3c7', '#7f8c8d',
-            '#55efc4', '#81ecec', '#74b9ff', '#a29bfe', '#dfe6e9',
-            '#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#ffeaa7',
-            '#fab1a0', '#ff7675', '#fd79a8', '#fdcb6e', '#e17055',
-            '#d63031', '#feca57', '#5f27cd', '#54a0ff', '#00d2d3'
-        ];
-        
-        const allColors = [...colorPalette, ...additionalColors];
-        
-        for (let i = 1; i <= 120; i++) {
-            const waveId = `wave-120-${i}`;
-            this.waves120Ids.push(waveId);
-            
-            const wave = {
-                id: waveId,
-                name: `Колосок ${i}`,
-                description: `Период ${i} дней`,
-                period: i,
-                color: allColors[(i - 1) % allColors.length],
-                type: 'dashed',
-                category: '120-waves',
-                visible: false,
-                bold: false,
-                cornerColor: false
-            };
-            
-            this.waves120.push(wave);
-        }
-    }
-    
-    create31Waves() {
-        this.waves31 = [];
-        this.waves31Ids = [];
-        
-        const colors31 = [
-            '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2',
-            '#EF476F', '#1B9AAA', '#FF9A00', '#9B5DE5', '#00BBF9',
-            '#F15BB5', '#00F5D4', '#00BBF9', '#FEE440', '#9B5DE5',
-            '#00F5D4', '#FF9A00', '#06D6A0', '#118AB2', '#EF476F',
-            '#4ECDC4', '#FFD166', '#FF6B6B', '#1B9AAA', '#9B5DE5',
-            '#00BBF9', '#F15BB5', '#00F5D4', '#FEE440', '#06D6A0',
-            '#118AB2'
-        ];
-        
-        for (let i = 1; i <= 31; i++) {
-            const waveId = `wave-31-${i}`;
-            this.waves31Ids.push(waveId);
-            
-            const wave = {
-                id: waveId,
-                name: `Колосок ${i}`,
-                description: `Период ${i} дней`,
-                period: i,
-                color: colors31[(i - 1) % colors31.length],
-                type: 'dotted',
-                category: '31-waves',
-                visible: false,
-                bold: false,
-                cornerColor: false
-            };
-            
-            this.waves31.push(wave);
-        }
-    }
+	// modules/state.js
+	create120Waves() {
+		this.waves120 = [];
+		this.waves120Ids = [];
+		
+		// Упрощенный: все стандартные колоски получают один цвет #C0C0C0
+		const standardColor = '#C0C0C0'; // 192,192,192 - серебристо-серый
+		
+		for (let i = 1; i <= 120; i++) {
+			const waveId = `wave-120-${i}`;
+			this.waves120Ids.push(waveId);
+			
+			const wave = {
+				id: waveId,
+				name: `Колосок ${i}`,
+				description: `Период ${i} дней`,
+				period: i,
+				color: standardColor, // Все получают один стандартный цвет
+				type: 'dashed',
+				category: '120-waves',
+				visible: false,
+				bold: false,
+				cornerColor: false,
+				isDefaultColor: true // Флаг стандартного цвета
+			};
+			
+			this.waves120.push(wave);
+		}
+	}
 
+	create31Waves() {
+		this.waves31 = [];
+		this.waves31Ids = [];
+		
+		// Упрощенный: все стандартные колоски получают один цвет #C0C0C0
+		const standardColor = '#C0C0C0'; // 192,192,192 - серебристо-серый
+		
+		for (let i = 1; i <= 31; i++) {
+			const waveId = `wave-31-${i}`;
+			this.waves31Ids.push(waveId);
+			
+			const wave = {
+				id: waveId,
+				name: `Колосок ${i}`,
+				description: `Период ${i} дней`,
+				period: i,
+				color: standardColor, // Все получают один стандартный цвет
+				type: 'dotted',
+				category: '31-waves',
+				visible: false,
+				bold: false,
+				cornerColor: false,
+				isDefaultColor: true // Флаг стандартного цвета
+			};
+			
+			this.waves31.push(wave);
+		}
+	}
+    
 	save() {
 		if (!(this.baseDate instanceof Date)) {
 			if (typeof this.baseDate === 'number') {
@@ -440,6 +403,10 @@ class AppState {
 						);
 					}
 				}
+
+
+				this.fixStandardWaveColors();
+
 				
 				setTimeout(() => {
 					if (window.dates && window.dates.forceInitialize) {
@@ -499,7 +466,14 @@ class AppState {
 		this.waveCornerColor = {};
 		
 		this.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
+			const waveIdStr = String(wave.id); // Объявляем переменную здесь
+			
+			if (waveIdStr.startsWith('wave-120-') || waveIdStr.startsWith('wave-31-')) {
+				wave.color = '#C0C0C0';
+				wave.isDefaultColor = true;
+			}
+			
+			// Используем уже объявленную переменную waveIdStr
 			this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
 			this.waveBold[waveIdStr] = wave.bold || false;
 			this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
@@ -515,6 +489,67 @@ class AppState {
 			typeB: null
 		};
 		this.data.uiSettings.dateSelections = this.dateSelections;
+	}
+
+	migrateWaveColors() {
+		const standardColor = '#C0C0C0';
+		let migratedCount = 0;
+		
+		this.data.waves.forEach(wave => {
+			const waveIdStr = String(wave.id);
+			const is120Wave = waveIdStr.startsWith('wave-120-');
+			const is31Wave = waveIdStr.startsWith('wave-31-');
+			
+			if (is120Wave || is31Wave) {
+				// Если флаг не установлен, считаем что это стандартный цвет
+				if (wave.isDefaultColor === undefined) {
+					wave.isDefaultColor = true;
+					wave.color = standardColor;
+					migratedCount++;
+				} else if (wave.isDefaultColor === true) {
+					// Если флаг true, но цвет не стандартный - исправляем
+					wave.color = standardColor;
+				}
+			}
+		});
+		
+		if (migratedCount > 0) {
+			this.save();
+		}
+		
+		return migratedCount;
+	}
+
+	fixStandardWaveColors() {
+		const standardColor = '#C0C0C0';
+		
+		this.data.waves.forEach(wave => {
+			const waveIdStr = String(wave.id);
+			
+			// Проверяем, относится ли волна к группам 120 или 31
+			const is120Wave = waveIdStr.startsWith('wave-120-');
+			const is31Wave = waveIdStr.startsWith('wave-31-');
+			
+			if (is120Wave || is31Wave) {
+				// Инициализируем флаг, если его нет
+				if (wave.isDefaultColor === undefined) {
+					wave.isDefaultColor = true;
+				}
+				
+				// Если это стандартный цвет - устанавливаем #C0C0C0
+				if (wave.isDefaultColor === true) {
+					wave.color = standardColor;
+					
+					// Также обновляем в waveVisibility/цветах интерфейса
+					if (window.waves && window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
+						window.waves.wavePaths[wave.id].style.stroke = standardColor;
+					}
+				}
+			}
+		});
+		
+		// Сохраняем изменения
+		this.save();
 	}
 
     convertDatesToTimestamp() {
