@@ -136,6 +136,18 @@ class AppCore {
             mainDateInputTime.value = formatted.time;
         }
     }
+
+	async getPluginDate() {
+		try {
+			const response = await fetch('plugin.txt');
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл не найден)';
+		} catch (error) {
+			return '(ошибка загрузки)';
+		}
+	}
     
     async getVersion() {
         try {
@@ -163,7 +175,6 @@ class AppCore {
 		}
 	}
 
-	// Обновить метод showDesktopWarning():
 	showDesktopWarning(warningOverlay) {
 		warningOverlay.classList.remove('hidden');
 		warningOverlay.classList.add('desktop-warning');
@@ -181,6 +192,7 @@ class AppCore {
 			todayInfoEl.textContent = todayFormatted;
 		}
 		
+		// Загрузка информации о версии
 		const versionInfoEl = document.getElementById('versionInfo');
 		if (versionInfoEl) {
 			versionInfoEl.textContent = 'Загрузка...';
@@ -195,7 +207,7 @@ class AppCore {
 			});
 		}
 		
-		// ДОБАВИТЬ: Загрузка информации о прошивке
+		// Загрузка информации о прошивке
 		const firmwareInfoEl = document.getElementById('firmwareInfo');
 		if (firmwareInfoEl) {
 			firmwareInfoEl.textContent = 'Загрузка...';
@@ -209,9 +221,24 @@ class AppCore {
 				}
 			});
 		}
+		
+		// ЗАГРУЗКА ИНФОРМАЦИИ О ПЛАГИНАХ (НОВОЕ)
+		const pluginInfoEl = document.getElementById('pluginInfo');
+		if (pluginInfoEl) {
+			pluginInfoEl.textContent = 'Загрузка...';
+			this.getPluginDate().then(pluginDate => {
+				if (pluginInfoEl) {
+					pluginInfoEl.textContent = pluginDate || 'неизвестно';
+				}
+			}).catch(error => {
+				if (pluginInfoEl) {
+					pluginInfoEl.textContent = 'неизвестно';
+				}
+			});
+		}
 	}
 
-	// Также обновить метод showMobileWarning():
+
 	showMobileWarning(warningOverlay) {
 		document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
 			el.style.display = 'none';
@@ -262,10 +289,15 @@ class AppCore {
 				versionInfoEl.textContent = 'Только для ПК';
 			}
 			
-			// ДОБАВИТЬ для мобильного предупреждения
 			const firmwareInfoEl = document.getElementById('firmwareInfo');
 			if (firmwareInfoEl) {
 				firmwareInfoEl.textContent = 'Только для ПК';
+			}
+			
+			// ИНФОРМАЦИЯ О ПЛАГИНАХ ДЛЯ МОБИЛЬНОГО (НОВОЕ)
+			const pluginInfoEl = document.getElementById('pluginInfo');
+			if (pluginInfoEl) {
+				pluginInfoEl.textContent = 'Только для ПК';
 			}
 			
 			const retryButton = document.createElement('button');
