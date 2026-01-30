@@ -536,7 +536,6 @@ class UnifiedListManager {
         }
     }
     
-
 	saveWaveChanges(waveId) {
 		const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
 		if (!wave) {
@@ -566,10 +565,13 @@ class UnifiedListManager {
 		// Проверяем, изменился ли цвет
 		if (wave.color !== newColor) {
 			wave.color = newColor;
-			// Если пользователь явно меняет цвет - это не стандартный цвет
-			wave.isDefaultColor = false;
+			// Если пользователь явно меняет цвет - снимаем флаг стандартного цвета
+			if (wave.isDefaultColor !== undefined) {
+				wave.isDefaultColor = false;
+			}
 		}
 		
+		// Обновляем отображение на графике
 		if (window.waves.wavePaths && window.waves.wavePaths[waveId]) {
 			window.waves.wavePaths[waveId].style.stroke = newColor;
 			
@@ -582,6 +584,7 @@ class UnifiedListManager {
 			path.classList.toggle('bold', window.appState.waveBold[waveId]);
 		}
 		
+		// Пересоздаем элемент волны
 		if (window.waves.waveContainers && window.waves.waveContainers[waveId]) {
 			window.waves.waveContainers[waveId].remove();
 		}
@@ -618,27 +621,47 @@ class UnifiedListManager {
         window.appState.save();
     }
     
-	// modules/unifiedListManager.js
 	changeWaveColor(wave) {
 		const colorInput = document.createElement('input');
 		colorInput.type = 'color';
 		colorInput.value = wave.color;
+		
 		colorInput.addEventListener('change', (e) => {
 			const newColor = e.target.value;
+			const oldColor = wave.color;
+			
+			// Обновляем цвет волны
 			wave.color = newColor;
 			
-			// Устанавливаем флаг, что пользователь изменил цвет
-			wave.isDefaultColor = false;
+			// Если это стандартная волна - снимаем флаг стандартного цвета
+			if (wave.isDefaultColor !== undefined) {
+				wave.isDefaultColor = false;
+			}
 			
+			// Обновляем отображение на графике
 			if (window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
 				window.waves.wavePaths[wave.id].style.stroke = newColor;
 			}
 			
-			window.waves.updateCornerSquareColors();
+			// Обновляем превью цвета в интерфейсе
+			document.querySelectorAll(`.wave-color-preview-small[data-id="${wave.id}"]`).forEach(preview => {
+				preview.style.backgroundColor = newColor;
+			});
+			
+			// Обновляем угловые квадраты если нужно
+			if (window.appState.waveCornerColor[wave.id]) {
+				window.waves.updateCornerSquareColors();
+			}
+			
 			window.appState.save();
 			
+			// Обновляем список волн
 			this.updateWavesList();
+			
+			// Показываем уведомление об изменении цвета
+			console.log(`Цвет волны "${wave.name}" изменен с ${oldColor} на ${newColor}`);
 		});
+		
 		colorInput.click();
 	}
     

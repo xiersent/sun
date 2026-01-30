@@ -491,6 +491,39 @@ class AppState {
 		this.data.uiSettings.dateSelections = this.dateSelections;
 	}
 
+	resetDefaultWaveColors() {
+		// Список ID волн, которые должны оставаться стандартными
+		const standardWaveIds = [
+			'wave-120-1', 'wave-120-2', 'wave-120-3', // и т.д.
+			'wave-31-1', 'wave-31-2', 'wave-31-3',    // и т.д.
+		];
+		
+		// Для всех волн в группах "Классическая" и "Экспериментальная"
+		const classicWaves = [24, 28, 33, 38, 25, 365];
+		
+		classicWaves.forEach(waveId => {
+			const wave = this.data.waves.find(w => String(w.id) === String(waveId));
+			if (wave) {
+				// Снимаем флаг стандартного цвета
+				wave.isDefaultColor = false;
+				console.log(`Сброшен флаг стандартного цвета для волны ${wave.name}`);
+			}
+		});
+		
+		this.save();
+		
+		// Принудительно обновляем интерфейс
+		if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+			window.unifiedListManager.updateWavesList();
+		}
+		
+		if (window.waves && window.waves.updatePosition) {
+			window.waves.updatePosition();
+		}
+		
+		return classicWaves.length;
+	}
+
 	migrateWaveColors() {
 		const standardColor = '#C0C0C0';
 		let migratedCount = 0;
