@@ -453,19 +453,24 @@ class AppCore {
             });
         }
         
-        document.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target.matches('[data-action="acceptWarning"]')) {
-                const warningOverlay = document.getElementById('warningOverlay');
-                const warningBox = document.querySelector('.warning-box');
-                if (warningOverlay && warningBox) {
-                    warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
-                    warningBox.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                    document.body.classList.remove('ui-hidden');
-                }
-            }
-        });
+		document.addEventListener('click', (e) => {
+			const target = e.target;
+			if (target.matches('[data-action="acceptWarning"]')) {
+				const warningOverlay = document.getElementById('warningOverlay');
+				const warningBox = document.querySelector('.warning-box');
+				if (warningOverlay && warningBox) {
+					// Удаляем оба класса (desktop и mobile)
+					warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
+					// Скрываем весь оверлей, а не только бокс
+					warningOverlay.classList.add('hidden');
+					warningBox.classList.add('hidden');
+					document.body.style.overflow = 'auto';
+					document.body.classList.remove('ui-hidden');
+				}
+				e.preventDefault();
+				e.stopPropagation();
+			}
+		});
         
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
         if (btnAddCustomWave) {
