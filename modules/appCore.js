@@ -299,7 +299,7 @@ class AppCore {
 			const warningTitle = warningBox.querySelector('.warning-title');
 			if (warningTitle) {
 				warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-				warningTitle.style.color = '#ff0000';
+				warningTitle.style.color = '#000000';
 			}
 		
 			
