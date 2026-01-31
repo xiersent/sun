@@ -198,7 +198,6 @@ class ExtremumTimeManager {
             label.style.color = textColor; // Динамический цвет текста
             label.style.textAlign = 'center';
             label.style.fontWeight = '500';
-            label.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
             
             // Добавляем тень для текста
             if (textColor === '#000000') {

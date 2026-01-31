@@ -507,7 +507,6 @@ class WavesManager {
 		point.style.cursor = 'pointer';
 		point.style.pointerEvents = 'auto';
 		point.style.zIndex = '9';
-		point.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
 		point.style.transition = 'all 0.2s';
 		
 		point.title = `${wave.name} - пересечение с осью`;
@@ -519,14 +518,12 @@ class WavesManager {
 		
 		point.addEventListener('mouseenter', () => {
 			point.style.transform = 'translate(-50%, -50%) scale(1.3)';
-			point.style.zIndex = '10';
-			point.style.boxShadow = `0 0 4px ${waveColor}`;
+			point.style.zIndex = '10';;
 		});
 		
 		point.addEventListener('mouseleave', () => {
 			point.style.transform = 'translate(-50%, -50%)';
 			point.style.zIndex = '9';
-			point.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
 		});
 		
 		container.appendChild(point);
@@ -658,7 +655,7 @@ class WavesManager {
 		labelElement.style.cursor = 'pointer';
 		labelElement.style.fontWeight = '500';
 		labelElement.style.whiteSpace = 'nowrap';
-		labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+
 		
 		// Добавляем тень для текста в зависимости от цвета
 		if (textColor === '#000000') {
@@ -712,13 +709,11 @@ class WavesManager {
 		labelElement.addEventListener('mouseenter', () => {
 			labelElement.style.opacity = '1';
 			labelElement.style.zIndex = '10';
-			labelElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
 		});
 		
 		labelElement.addEventListener('mouseleave', () => {
 			labelElement.style.opacity = '0.7';
 			labelElement.style.zIndex = '1';
-			labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
 		});
 		
 		return labelElement;
@@ -758,7 +753,6 @@ class WavesManager {
 		labelElement.style.letterSpacing = '0.5px';
 		labelElement.style.fontWeight = '500';
 		labelElement.style.whiteSpace = 'nowrap';
-		labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
 		
 		// Добавляем тень для текста в зависимости от цвета
 		if (textColor === '#000000') {
@@ -810,13 +804,12 @@ class WavesManager {
 		labelElement.addEventListener('mouseenter', () => {
 			labelElement.style.opacity = '1';
 			labelElement.style.zIndex = '10';
-			labelElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
 		});
 		
 		labelElement.addEventListener('mouseleave', () => {
 			labelElement.style.opacity = '0.7';
 			labelElement.style.zIndex = '1';
-			labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+
 		});
 		
 		return labelElement;
@@ -1477,7 +1470,6 @@ class WavesManager {
 			pointElement.style.cursor = 'pointer';
 			pointElement.style.pointerEvents = 'auto';
 			pointElement.style.zIndex = '10';
-			pointElement.style.boxShadow = '0 0 4px rgba(255,0,0,0.8)';
 			pointElement.style.opacity = '0.9';
 			pointElement.style.transform = 'translate(-50%, -50%)';
 			
@@ -1485,13 +1477,11 @@ class WavesManager {
 			pointElement.addEventListener('mouseenter', (e) => {
 				e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
 				e.target.style.zIndex = '15';
-				e.target.style.boxShadow = '0 0 8px rgba(255,0,0,1)';
 			});
 			
 			pointElement.addEventListener('mouseleave', (e) => {
 				e.target.style.transform = 'translate(-50%, -50%)';
 				e.target.style.zIndex = '10';
-				e.target.style.boxShadow = '0 0 4px rgba(255,0,0,0.8)';
 			});
 			
 			// Клик для навигации
