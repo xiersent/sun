@@ -31,7 +31,7 @@
 .list-item__actions{display: flex; gap: 3px; flex-shrink: 0;}
 
 /* Формы редактирования */
-.list-item__edit-form{display: none; gap: 8px; width: 100%;}
+.list-item__edit-form{display: none; flex-wrap: wrap; gap: 8px; width: 100%;}
 .list-item__edit-row{display: flex; gap: var(--spacing-xs); align-items: center; width: 100%;}
 .list-item__edit-label{font-weight: 400; flex-shrink: 0; font-size: var(--font-size-sm); color: var(--text-color);}
 .list-item__edit-input{flex: 1; padding: 3px 5px; border: 1px solid var(--clg); min-width: 0; font-size: var(--font-size-sm); height: 25px;}

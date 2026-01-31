@@ -239,22 +239,22 @@ class DatesManager {
 		}, 50);
 	}
     
-    addNote(content) {
-        if (!content.trim()) {
-            alert('Пожалуйста, введите текст записи');
-            return null;
-        }
-        
-        const note = {
-            id: window.appState.generateId(),
-            date: window.appState.currentDate.getTime(),
-            content: content.trim()
-        };
-        
-        window.appState.data.notes.push(note);
-        window.appState.save();
-        return note;
-    }
+	addNote(content) {
+		if (!content.trim()) {
+			alert('Пожалуйста, введите текст записи');
+			return null;
+		}
+		
+		const note = {
+			id: window.appState.generateId(),
+			date: window.appState.currentDate.getTime(), // Уже timestamp
+			content: content.trim()
+		};
+		
+		window.appState.data.notes.push(note);
+		window.appState.save();
+		return note;
+	}
     
     deleteNote(noteId) {
         const noteIdStr = String(noteId);
@@ -268,6 +268,7 @@ class DatesManager {
 		const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000);
 		
 		return window.appState.data.notes.filter(note => {
+			// ИСПРАВИТЬ здесь тоже:
 			const noteDate = window.timeUtils.toLocalDate(note.date);
 			return noteDate >= targetStart && noteDate < targetEnd;
 		});
