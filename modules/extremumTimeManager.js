@@ -198,13 +198,7 @@ class ExtremumTimeManager {
             label.style.color = textColor; // Динамический цвет текста
             label.style.textAlign = 'center';
             label.style.fontWeight = '500';
-            
-            // Добавляем тень для текста
-            if (textColor === '#000000') {
-                label.style.textShadow = '0 1px 0 rgba(255,255,255,0.7)';
-            } else {
-                label.style.textShadow = '0 1px 0 rgba(0,0,0,0.5)';
-            }
+        
             
             // СОЗДАЕМ КЛИКАБЕЛЬНЫЕ ИМЕНА КОЛОСКОВ
             // Уникальные имена с их wave.id

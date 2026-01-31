@@ -657,13 +657,6 @@ class WavesManager {
 		labelElement.style.whiteSpace = 'nowrap';
 
 		
-		// Добавляем тень для текста в зависимости от цвета
-		if (textColor === '#000000') {
-			labelElement.style.textShadow = '0 1px 0 rgba(255,255,255,0.7)';
-		} else {
-			labelElement.style.textShadow = '0 1px 0 rgba(0,0,0,0.5)';
-		}
-		
 		const arrow = document.createElement('div');
 		arrow.className = 'wave-label-arrow';
 		arrow.style.position = 'absolute';
@@ -754,12 +747,6 @@ class WavesManager {
 		labelElement.style.fontWeight = '500';
 		labelElement.style.whiteSpace = 'nowrap';
 		
-		// Добавляем тень для текста в зависимости от цвета
-		if (textColor === '#000000') {
-			labelElement.style.textShadow = '0 1px 0 rgba(255,255,255,0.7)';
-		} else {
-			labelElement.style.textShadow = '0 1px 0 rgba(0,0,0,0.5)';
-		}
 		
 		const text = document.createElement('div');
 		text.className = 'wave-label-text';
