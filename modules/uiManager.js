@@ -110,6 +110,7 @@ class UIManager {
         }
     }
 
+	// modules/uiManager.js - исправленный метод resetWarning()
 	resetWarning() {
 		// Показываем overlay предупреждения
 		const warningOverlay = document.getElementById('warningOverlay');
@@ -119,7 +120,13 @@ class UIManager {
 			document.body.style.overflow = 'hidden';
 		}
 		
-		// Опционально: скрываем основной интерфейс
+		// Показываем плашку с предупреждением
+		const warningBox = document.querySelector('.warning-box');
+		if (warningBox) {
+			warningBox.classList.remove('hidden');
+		}
+		
+		// Скрываем основной интерфейс
 		document.body.classList.add('ui-hidden');
 		
 		// Показываем угловые квадраты
