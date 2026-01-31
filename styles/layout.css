@@ -19,7 +19,7 @@
 .notes-list-container{flex: 1; min-width: 200px;}
 .note-editor-container{flex: 2; min-width: 300px;}
 .warning-overlay{position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--cbg); z-index: var(--z-overlay); display: flex; justify-content: center; align-items: center; flex-direction: column; padding: var(--spacing-lg);}
-.warning-box{background: #fff; padding: var(--spacing-xl); border: 1px solid var(--clg); max-width: 525px; text-align: center;}
+.warning-box{background: #fff; padding: var(--spacing-xl); border: 1px solid var(--clg); max-width: 525px; text-align: center; display: block;}
 
 /* Табы */
 .tab-container{display: flex; flex-direction: column;}

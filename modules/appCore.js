@@ -1,3 +1,4 @@
+// modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -30,20 +31,23 @@ class AppCore {
         try {
             this.setupEventListeners();
             this.updateCSSVariables();
-            
             this.loadParableText();
 
-			if (window.appState && window.appState.graphHidden) {
-				document.body.classList.add('graph-hidden');
-			}
+            if (window.appState && window.appState.graphHidden) {
+                document.body.classList.add('graph-hidden');
+            }
             
+            // Определяем устройство
             const isMobile = this.isMobileDevice();
+            
             if (isMobile) {
-                this.showWarning();
                 document.body.classList.add('mobile-device');
+                // Сразу показываем мобильную версию без задержек
+                this.showMobileWarning();
                 return;
             }
             
+            // Десктопная версия
             if (window.appState.showStars) {
                 document.body.classList.add('stars-mode');
                 document.body.classList.remove('names-mode');
@@ -58,9 +62,11 @@ class AppCore {
             
             await this.initializeAppComponents();
             
-            this.showWarning();
+            // Показываем десктопную плашку
+            this.showDesktopWarning();
             
         } catch (error) {
+            console.error('AppCore init error:', error);
             throw error;
         } finally {
             this.isInitializing = false;
@@ -101,7 +107,6 @@ class AppCore {
         }
         
         this.updateGraphBackground();
-        
         this.setDateTimeInputs();
         
         if (window.dates && window.dates.updateTodayButton) {
@@ -137,114 +142,227 @@ class AppCore {
         }
     }
 
+    async getFirmwareDate() {
+        try {
+            const timestamp = new Date().getTime();
+            const response = await fetch(`firmware.txt?t=${timestamp}`);
+            if (response.ok) {
+                return (await response.text()).trim();
+            }
+            return '(файл не найден)';
+        } catch (error) {
+            return '(ошибка загрузки)';
+        }
+    }
 
-	async getFirmwareDate() {
-		try {
-			// Добавляем параметр для обхода кэша
-			const timestamp = new Date().getTime();
-			const response = await fetch(`firmware.txt?t=${timestamp}`);
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл не найден)';
-		} catch (error) {
-			return '(ошибка загрузки)';
-		}
-	}
+    async getVersion() {
+        try {
+            const timestamp = new Date().getTime();
+            const response = await fetch(`version.txt?t=${timestamp}`);
+            if (response.ok) {
+                return (await response.text()).trim();
+            }
+            return '(файл не найден)';
+        } catch (error) {
+            return '(ошибка загрузки)';
+        }
+    }
 
-	async getVersion() {
-		try {
-			const timestamp = new Date().getTime();
-			const response = await fetch(`version.txt?t=${timestamp}`);
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл не найден)';
-		} catch (error) {
-			return '(ошибка загрузки)';
-		}
-	}
+    async getPluginDate() {
+        try {
+            const timestamp = new Date().getTime();
+            const response = await fetch(`plugin.txt?t=${timestamp}`);
+            if (response.ok) {
+                return (await response.text()).trim();
+            }
+            return '(файл не найден)';
+        } catch (error) {
+            return '(ошибка загрузки)';
+        }
+    }
 
-	async getPluginDate() {
-		try {
-			const timestamp = new Date().getTime();
-			const response = await fetch(`plugin.txt?t=${timestamp}`);
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл не найден)';
-		} catch (error) {
-			return '(ошибка загрузки)';
-		}
-	}
-
-	showDesktopWarning(warningOverlay) {
-		warningOverlay.classList.remove('hidden');
-		warningOverlay.classList.add('desktop-warning');
-		document.body.style.overflow = 'hidden';
-		
-		const browserInfoEl = document.getElementById('browserInfo');
-		if (browserInfoEl) {
-			browserInfoEl.textContent = this.getBrowserInfo();
-		}
-		
-		const todayInfoEl = document.getElementById('todayInfo');
-		if (todayInfoEl) {
-			const today = new Date();
-			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-			todayInfoEl.textContent = todayFormatted;
-		}
-		
-		// Загрузка информации о версии
-		const versionInfoEl = document.getElementById('versionInfo');
-		if (versionInfoEl) {
-			versionInfoEl.textContent = 'Загрузка...';
-			this.getVersion().then(version => {
-				if (versionInfoEl) {
-					versionInfoEl.textContent = version || 'неизвестно';
-				}
-			}).catch(error => {
-				if (versionInfoEl) {
-					versionInfoEl.textContent = 'неизвестно';
-				}
-			});
-		}
-		
-		// Загрузка информации о прошивке
-		const firmwareInfoEl = document.getElementById('firmwareInfo');
-		if (firmwareInfoEl) {
-			firmwareInfoEl.textContent = 'Загрузка...';
-			this.getFirmwareDate().then(firmwareDate => {
-				if (firmwareInfoEl) {
-					firmwareInfoEl.textContent = firmwareDate || 'неизвестно';
-				}
-			}).catch(error => {
-				if (firmwareInfoEl) {
-					firmwareInfoEl.textContent = 'неизвестно';
-				}
-			});
-		}
-		
-		// ЗАГРУЗКА ИНФОРМАЦИИ О ПЛАГИНАХ (НОВОЕ)
-		const pluginInfoEl = document.getElementById('pluginInfo');
-		if (pluginInfoEl) {
-			pluginInfoEl.textContent = 'Загрузка...';
-			this.getPluginDate().then(pluginDate => {
-				if (pluginInfoEl) {
-					pluginInfoEl.textContent = pluginDate || 'неизвестно';
-				}
-			}).catch(error => {
-				if (pluginInfoEl) {
-					pluginInfoEl.textContent = 'неизвестно';
-				}
-			});
-		}
-	}
-
-
-
-
-
+    showDesktopWarning() {
+        const warningOverlay = document.getElementById('warningOverlay');
+        const warningBox = document.querySelector('.warning-box');
+        
+        if (!warningOverlay || !warningBox) return;
+        
+        // Показываем overlay
+        warningOverlay.classList.add('desktop-warning');
+        document.body.style.overflow = 'hidden';
+        
+        // Показываем плашку
+        warningBox.classList.remove('hidden');
+        
+        // Заполняем информацию
+        this.fillWarningInfo(warningBox);
+        
+        // Показываем кнопки притчи
+        const readParableBtn = document.getElementById('readParableBtn');
+        if (readParableBtn) {
+            readParableBtn.style.display = 'inline-block';
+        }
+    }
+    
+    showMobileWarning() {
+        const warningOverlay = document.getElementById('warningOverlay');
+        const warningBox = document.querySelector('.warning-box');
+        
+        if (!warningOverlay || !warningBox) return;
+        
+        // Скрываем основной интерфейс
+        document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Показываем overlay с мобильным стилем
+        warningOverlay.classList.add('mobile-warning-overlay');
+        document.body.style.overflow = 'hidden';
+        
+        // Показываем плашку
+        warningBox.classList.remove('hidden');
+        warningBox.classList.add('mobile-warning-box');
+        
+        // Обновляем содержимое для мобильной версии
+        this.updateMobileWarningContent(warningBox);
+        
+        // Скрываем ненужные кнопки
+        const acceptButtons = warningBox.querySelectorAll('[data-action="acceptWarning"]');
+        acceptButtons.forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
+        const parableButton = document.getElementById('readParableBtn');
+        if (parableButton) {
+            parableButton.style.display = 'none';
+        }
+    }
+    
+    fillWarningInfo(warningBox) {
+        // Заполняем информацию о браузере
+        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = this.getBrowserInfo();
+        }
+        
+        // Заполняем сегодняшнюю дату
+        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        if (todayInfoEl) {
+            const today = new Date();
+            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+            todayInfoEl.textContent = todayFormatted;
+        }
+        
+        // Загружаем информацию о версии, прошивке и плагинах
+        this.loadVersionInfo();
+        this.loadFirmwareInfo();
+        this.loadPluginInfo();
+    }
+    
+    updateMobileWarningContent(warningBox) {
+        const warningTitle = warningBox.querySelector('.warning-title');
+        if (warningTitle) {
+            warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+            warningTitle.style.color = '#000000';
+        }
+        
+        // Заполняем информацию
+        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+        }
+        
+        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        if (todayInfoEl) {
+            const today = new Date();
+            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+            todayInfoEl.textContent = todayFormatted;
+        }
+        
+        // Показываем информацию о системе
+        const warningInfo = warningBox.querySelector('.warning-info');
+        if (warningInfo) {
+            warningInfo.style.display = 'flex';
+        }
+        
+        // Загружаем остальную информацию
+        this.loadVersionInfo();
+        this.loadFirmwareInfo();
+        this.loadPluginInfo();
+        
+        // Добавляем кнопку проверки
+        this.addMobileRetryButton(warningBox);
+    }
+    
+    addMobileRetryButton(warningBox) {
+        // Удаляем старую кнопку, если есть
+        const oldButton = warningBox.querySelector('.mobile-retry-btn');
+        if (oldButton) {
+            oldButton.remove();
+        }
+        
+        const retryButton = document.createElement('button');
+        retryButton.className = 'ui-btn mobile-retry-btn';
+        retryButton.textContent = 'Проверить снова (если вы на компьютере)';
+        retryButton.style.marginTop = '20px';
+        retryButton.style.backgroundColor = '#666';
+        retryButton.style.width = '100%';
+        retryButton.style.padding = '12px';
+        
+        retryButton.addEventListener('click', () => {
+            location.reload();
+        });
+        
+        warningBox.appendChild(retryButton);
+    }
+    
+    loadVersionInfo() {
+        const versionInfoEl = document.getElementById('versionInfo');
+        if (versionInfoEl) {
+            versionInfoEl.textContent = 'Загрузка...';
+            this.getVersion().then(version => {
+                if (versionInfoEl) {
+                    versionInfoEl.textContent = version || 'неизвестно';
+                }
+            }).catch(error => {
+                if (versionInfoEl) {
+                    versionInfoEl.textContent = 'неизвестно';
+                }
+            });
+        }
+    }
+    
+    loadFirmwareInfo() {
+        const firmwareInfoEl = document.getElementById('firmwareInfo');
+        if (firmwareInfoEl) {
+            firmwareInfoEl.textContent = 'Загрузка...';
+            this.getFirmwareDate().then(firmwareDate => {
+                if (firmwareInfoEl) {
+                    firmwareInfoEl.textContent = firmwareDate || 'неизвестно';
+                }
+            }).catch(error => {
+                if (firmwareInfoEl) {
+                    firmwareInfoEl.textContent = 'неизвестно';
+                }
+            });
+        }
+    }
+    
+    loadPluginInfo() {
+        const pluginInfoEl = document.getElementById('pluginInfo');
+        if (pluginInfoEl) {
+            pluginInfoEl.textContent = 'Загрузка...';
+            this.getPluginDate().then(pluginDate => {
+                if (pluginInfoEl) {
+                    pluginInfoEl.textContent = pluginDate || 'неизвестно';
+                }
+            }).catch(error => {
+                if (pluginInfoEl) {
+                    pluginInfoEl.textContent = 'неизвестно';
+                }
+            });
+        }
+    }
     
     isMobileDevice() {
         const userAgent = navigator.userAgent.toLowerCase();
@@ -258,131 +376,6 @@ class AppCore {
         return isMobileUserAgent || isTouchDevice || hasMobileViewport || isTablet;
     }
     
-    showWarning() {
-        const warningOverlay = document.getElementById('warningOverlay') || this.elements.warningOverlay;
-        if (!warningOverlay) return;
-        
-        const isMobile = this.isMobileDevice();
-        
-        if (isMobile) {
-            this.showMobileWarning(warningOverlay);
-            return;
-        }
-        
-        this.showDesktopWarning(warningOverlay);
-    }
-    
-
-	// В методе showMobileWarning класса AppCore
-	showMobileWarning(warningOverlay) {
-		document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
-			el.style.display = 'none';
-		});
-		
-		warningOverlay.classList.remove('hidden');
-		warningOverlay.classList.add('mobile-warning-overlay');
-		
-		const acceptButton = document.getElementById('acceptWarning');
-		if (acceptButton) {
-			acceptButton.style.display = 'none';
-		}
-		
-		const parableButton = document.getElementById('readParableBtn');
-		if (parableButton) {
-			parableButton.style.display = 'none';
-		}
-		
-		const warningBox = warningOverlay.querySelector('.warning-box');
-		if (warningBox) {
-			warningBox.classList.add('mobile-warning-box');
-			
-			const warningTitle = warningBox.querySelector('.warning-title');
-			if (warningTitle) {
-				warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-				warningTitle.style.color = '#000000';
-			}
-		
-			
-			// ВОССТАНАВЛИВАЕМ ОТОБРАЖЕНИЕ ИНФОРМАЦИИ О СИСТЕМЕ
-			const browserInfoEl = document.getElementById('browserInfo');
-			if (browserInfoEl) {
-				browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-			}
-			
-			const todayInfoEl = document.getElementById('todayInfo');
-			if (todayInfoEl) {
-				const today = new Date();
-				const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-				todayInfoEl.textContent = todayFormatted;
-			}
-			
-			const versionInfoEl = document.getElementById('versionInfo');
-			if (versionInfoEl) {
-				versionInfoEl.textContent = 'Загрузка...';
-				this.getVersion().then(version => {
-					if (versionInfoEl) {
-						versionInfoEl.textContent = version || 'неизвестно';
-					}
-				}).catch(error => {
-					if (versionInfoEl) {
-						versionInfoEl.textContent = 'неизвестно';
-					}
-				});
-			}
-			
-			const firmwareInfoEl = document.getElementById('firmwareInfo');
-			if (firmwareInfoEl) {
-				firmwareInfoEl.textContent = 'Загрузка...';
-				this.getFirmwareDate().then(firmwareDate => {
-					if (firmwareInfoEl) {
-						firmwareInfoEl.textContent = firmwareDate || 'неизвестно';
-					}
-				}).catch(error => {
-					if (firmwareInfoEl) {
-						firmwareInfoEl.textContent = 'неизвестно';
-					}
-				});
-			}
-			
-			const pluginInfoEl = document.getElementById('pluginInfo');
-			if (pluginInfoEl) {
-				pluginInfoEl.textContent = 'Загрузка...';
-				this.getPluginDate().then(pluginDate => {
-					if (pluginInfoEl) {
-						pluginInfoEl.textContent = pluginDate || 'неизвестно';
-					}
-				}).catch(error => {
-					if (pluginInfoEl) {
-						pluginInfoEl.textContent = 'неизвестно';
-					}
-				});
-			}
-			
-			// Делаем информацию видимой
-			const warningInfo = warningBox.querySelector('.warning-info');
-			if (warningInfo) {
-				warningInfo.style.display = 'flex'; // Или 'block'
-			}
-			
-			// Обновляем кнопку проверки
-			const retryButton = document.createElement('button');
-			retryButton.className = 'ui-btn mobile-retry-btn';
-			retryButton.textContent = 'Проверить снова (если вы на компьютере)';
-			retryButton.style.marginTop = '20px';
-			retryButton.style.backgroundColor = '#666';
-			retryButton.style.width = '100%';
-			retryButton.style.padding = '12px';
-			
-			retryButton.addEventListener('click', () => {
-				location.reload();
-			});
-			
-			// Добавляем кнопку после информации
-			warningBox.appendChild(retryButton);
-		}
-	}
-
-    
     getMobileDeviceType() {
         const ua = navigator.userAgent.toLowerCase();
         if (ua.includes('iphone')) return 'iPhone';
@@ -392,53 +385,53 @@ class AppCore {
         return 'Мобильное устройство';
     }
     
-	getBrowserInfo() {
-		const ua = navigator.userAgent;
-		
-		// Google Chrome (также детектит Chromium-based браузеры как Chrome)
-		if (ua.includes("Chrome") && !ua.includes("Edg")) {
-			const match = ua.match(/Chrome\/([\d.]+)/);
-			return match ? `Google Chrome ${match[1]}` : "Google Chrome";
-		}
-		
-		// Microsoft Edge (на базе Chromium)
-		if (ua.includes("Edg")) {
-			const match = ua.match(/Edg\/([\d.]+)/);
-			return match ? `Microsoft Edge ${match[1]}` : "Microsoft Edge";
-		}
-		
-		// Firefox
-		if (ua.includes("Firefox")) {
-			const match = ua.match(/Firefox\/([\d.]+)/);
-			return match ? `Mozilla Firefox ${match[1]}` : "Mozilla Firefox";
-		}
-		
-		// Safari (но не Chrome)
-		if (ua.includes("Safari") && !ua.includes("Chrome")) {
-			const match = ua.match(/Version\/([\d.]+)/);
-			return match ? `Apple Safari ${match[1]}` : "Apple Safari";
-		}
-		
-		// Opera
-		if (ua.includes("Opera") || ua.includes("OPR")) {
-			const match = ua.match(/(?:Opera|OPR)\/([\d.]+)/);
-			return match ? `Opera ${match[1]}` : "Opera";
-		}
-		
-		// Internet Explorer
-		if (ua.includes("MSIE") || ua.includes("Trident")) {
-			const match = ua.match(/(?:MSIE |Trident\/.*rv:)([\d.]+)/);
-			return match ? `Internet Explorer ${match[1]}` : "Internet Explorer";
-		}
-		
-		// Brave (также показывается как Chrome, но можно детектить)
-		if (ua.includes("Brave")) {
-			const match = ua.match(/Chrome\/([\d.]+)/);
-			return match ? `Brave ${match[1]}` : "Brave";
-		}
-		
-		return "Неизвестный браузер";
-	}
+    getBrowserInfo() {
+        const ua = navigator.userAgent;
+        
+        // Google Chrome
+        if (ua.includes("Chrome") && !ua.includes("Edg")) {
+            const match = ua.match(/Chrome\/([\d.]+)/);
+            return match ? `Google Chrome ${match[1]}` : "Google Chrome";
+        }
+        
+        // Microsoft Edge
+        if (ua.includes("Edg")) {
+            const match = ua.match(/Edg\/([\d.]+)/);
+            return match ? `Microsoft Edge ${match[1]}` : "Microsoft Edge";
+        }
+        
+        // Firefox
+        if (ua.includes("Firefox")) {
+            const match = ua.match(/Firefox\/([\d.]+)/);
+            return match ? `Mozilla Firefox ${match[1]}` : "Mozilla Firefox";
+        }
+        
+        // Safari
+        if (ua.includes("Safari") && !ua.includes("Chrome")) {
+            const match = ua.match(/Version\/([\d.]+)/);
+            return match ? `Apple Safari ${match[1]}` : "Apple Safari";
+        }
+        
+        // Opera
+        if (ua.includes("Opera") || ua.includes("OPR")) {
+            const match = ua.match(/(?:Opera|OPR)\/([\d.]+)/);
+            return match ? `Opera ${match[1]}` : "Opera";
+        }
+        
+        // Internet Explorer
+        if (ua.includes("MSIE") || ua.includes("Trident")) {
+            const match = ua.match(/(?:MSIE |Trident\/.*rv:)([\d.]+)/);
+            return match ? `Internet Explorer ${match[1]}` : "Internet Explorer";
+        }
+        
+        // Brave
+        if (ua.includes("Brave")) {
+            const match = ua.match(/Chrome\/([\d.]+)/);
+            return match ? `Brave ${match[1]}` : "Brave";
+        }
+        
+        return "Неизвестный браузер";
+    }
     
     updateCSSVariables() {
         document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
@@ -460,17 +453,19 @@ class AppCore {
             });
         }
         
-		document.addEventListener('click', (e) => {
-			const target = e.target;
-			if (target.matches('[data-action="acceptWarning"]')) {
-				const warningOverlay = document.getElementById('warningOverlay');
-				if (warningOverlay) {
-					warningOverlay.classList.add('hidden');
-					document.body.style.overflow = 'auto';
-					document.body.classList.remove('ui-hidden');
-				}
-			}
-		});
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.matches('[data-action="acceptWarning"]')) {
+                const warningOverlay = document.getElementById('warningOverlay');
+                const warningBox = document.querySelector('.warning-box');
+                if (warningOverlay && warningBox) {
+                    warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
+                    warningBox.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                    document.body.classList.remove('ui-hidden');
+                }
+            }
+        });
         
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
         if (btnAddCustomWave) {
@@ -705,7 +700,7 @@ class AppCore {
                 <p>Говорят, когда-то одну девушку обвинили в ведовстве. В качестве наказания её отвезли на островок на озере – клочок каменистой почвы, где не было ни еды, ни укрытий. Её приговорили к мучительной медленной смерти от холода и голода.</p>
                 <p>Вот только не знали в городе, что один юноша, увидев её глаза, прекрасные и сверкающие, подобно луне в летнюю ночь, поклялся ей в вечной любви. Когда ей вынесли приговор – по его мнению, несправедливый – он дал обет уберечь её от гибели. Выжидая удобного дня для совместного побега, он каждую ночь втайне переплывал озеро на лодке с едой и тёплой одеждой. А она каждую ночь вставала у воды и зажигала свечу, чтобы указать ему путь.</p>
                 <p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
-                <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу любимому.</p>
+                <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищют истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу любимому.</p>
             `;
         }
     }
