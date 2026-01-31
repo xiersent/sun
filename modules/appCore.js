@@ -137,9 +137,12 @@ class AppCore {
         }
     }
 
-	async getPluginDate() {
+
+	async getFirmwareDate() {
 		try {
-			const response = await fetch('plugin.txt');
+			// Добавляем параметр для обхода кэша
+			const timestamp = new Date().getTime();
+			const response = await fetch(`firmware.txt?t=${timestamp}`);
 			if (response.ok) {
 				return (await response.text()).trim();
 			}
@@ -148,24 +151,24 @@ class AppCore {
 			return '(ошибка загрузки)';
 		}
 	}
-    
-    async getVersion() {
-        try {
-            const response = await fetch('version.txt');
-            if (response.ok) {
-                return (await response.text()).trim();
-            }
-            return '(файл не найден)';
-        } catch (error) {
-            return '(ошибка загрузки)';
-        }
-    }
 
-
-	// В класс AppCore, после метода getVersion()
-	async getFirmwareDate() {
+	async getVersion() {
 		try {
-			const response = await fetch('firmware.txt');
+			const timestamp = new Date().getTime();
+			const response = await fetch(`version.txt?t=${timestamp}`);
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл не найден)';
+		} catch (error) {
+			return '(ошибка загрузки)';
+		}
+	}
+
+	async getPluginDate() {
+		try {
+			const timestamp = new Date().getTime();
+			const response = await fetch(`plugin.txt?t=${timestamp}`);
 			if (response.ok) {
 				return (await response.text()).trim();
 			}
