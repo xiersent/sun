@@ -239,79 +239,7 @@ class AppCore {
 	}
 
 
-	showMobileWarning(warningOverlay) {
-		document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
-			el.style.display = 'none';
-		});
-		
-		warningOverlay.classList.remove('hidden');
-		warningOverlay.classList.add('mobile-warning-overlay');
-		
-		const acceptButton = document.getElementById('acceptWarning');
-		if (acceptButton) {
-			acceptButton.style.display = 'none';
-		}
-		
-		const parableButton = document.getElementById('readParableBtn');
-		if (parableButton) {
-			parableButton.style.display = 'none';
-		}
-		
-		const warningBox = warningOverlay.querySelector('.warning-box');
-		if (warningBox) {
-			warningBox.classList.add('mobile-warning-box');
-			
-			const warningTitle = warningBox.querySelector('.warning-title');
-			if (warningTitle) {
-				warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-				warningTitle.style.color = '#ff0000';
-			}
-			
-			const warningText = warningBox.querySelector('.warning-text');
-			if (warningText) {
-				warningText.innerHTML = ``;
-			}
-			
-			const browserInfoEl = document.getElementById('browserInfo');
-			if (browserInfoEl) {
-				browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-			}
-			
-			const todayInfoEl = document.getElementById('todayInfo');
-			if (todayInfoEl) {
-				const today = new Date();
-				const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-				todayInfoEl.textContent = todayFormatted;
-			}
-			
-			const versionInfoEl = document.getElementById('versionInfo');
-			if (versionInfoEl) {
-				versionInfoEl.textContent = 'Только для ПК';
-			}
-			
-			const firmwareInfoEl = document.getElementById('firmwareInfo');
-			if (firmwareInfoEl) {
-				firmwareInfoEl.textContent = 'Только для ПК';
-			}
-			
-			// ИНФОРМАЦИЯ О ПЛАГИНАХ ДЛЯ МОБИЛЬНОГО (НОВОЕ)
-			const pluginInfoEl = document.getElementById('pluginInfo');
-			if (pluginInfoEl) {
-				pluginInfoEl.textContent = 'Только для ПК';
-			}
-			
-			const retryButton = document.createElement('button');
-			retryButton.className = 'ui-btn mobile-retry-btn';
-			retryButton.textContent = 'Проверить снова (если вы на компьютере)';
-			retryButton.style.marginTop = '20px';
-			retryButton.style.backgroundColor = '#666';
-			retryButton.addEventListener('click', () => {
-				location.reload();
-			});
-			
-			warningBox.appendChild(retryButton);
-		}
-	}
+
 
 
     
@@ -341,68 +269,116 @@ class AppCore {
         this.showDesktopWarning(warningOverlay);
     }
     
-    showMobileWarning(warningOverlay) {
-        document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
-            el.style.display = 'none';
-        });
-        
-        warningOverlay.classList.remove('hidden');
-        warningOverlay.classList.add('mobile-warning-overlay');
-        
-        const acceptButton = document.getElementById('acceptWarning');
-        if (acceptButton) {
-            acceptButton.style.display = 'none';
-        }
-        
-        const parableButton = document.getElementById('readParableBtn');
-        if (parableButton) {
-            parableButton.style.display = 'none';
-        }
-        
-        const warningBox = warningOverlay.querySelector('.warning-box');
-        if (warningBox) {
-            warningBox.classList.add('mobile-warning-box');
-            
-            const warningTitle = warningBox.querySelector('.warning-title');
-            if (warningTitle) {
-                warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-                warningTitle.style.color = '#ff0000';
-            }
-            
-            const warningText = warningBox.querySelector('.warning-text');
-            if (warningText) {
-                warningText.innerHTML = ``;
-            }
-            
-            const browserInfoEl = document.getElementById('browserInfo');
-            if (browserInfoEl) {
-                browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-            }
-            
-            const todayInfoEl = document.getElementById('todayInfo');
-            if (todayInfoEl) {
-                const today = new Date();
-                const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-                todayInfoEl.textContent = todayFormatted;
-            }
-            
-            const versionInfoEl = document.getElementById('versionInfo');
-            if (versionInfoEl) {
-                versionInfoEl.textContent = 'Только для ПК';
-            }
-            
-            const retryButton = document.createElement('button');
-            retryButton.className = 'ui-btn mobile-retry-btn';
-            retryButton.textContent = 'Проверить снова (если вы на компьютере)';
-            retryButton.style.marginTop = '20px';
-            retryButton.style.backgroundColor = '#666';
-            retryButton.addEventListener('click', () => {
-                location.reload();
-            });
-            
-            warningBox.appendChild(retryButton);
-        }
-    }
+
+	// В методе showMobileWarning класса AppCore
+	showMobileWarning(warningOverlay) {
+		document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
+			el.style.display = 'none';
+		});
+		
+		warningOverlay.classList.remove('hidden');
+		warningOverlay.classList.add('mobile-warning-overlay');
+		
+		const acceptButton = document.getElementById('acceptWarning');
+		if (acceptButton) {
+			acceptButton.style.display = 'none';
+		}
+		
+		const parableButton = document.getElementById('readParableBtn');
+		if (parableButton) {
+			parableButton.style.display = 'none';
+		}
+		
+		const warningBox = warningOverlay.querySelector('.warning-box');
+		if (warningBox) {
+			warningBox.classList.add('mobile-warning-box');
+			
+			const warningTitle = warningBox.querySelector('.warning-title');
+			if (warningTitle) {
+				warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+				warningTitle.style.color = '#ff0000';
+			}
+		
+			
+			// ВОССТАНАВЛИВАЕМ ОТОБРАЖЕНИЕ ИНФОРМАЦИИ О СИСТЕМЕ
+			const browserInfoEl = document.getElementById('browserInfo');
+			if (browserInfoEl) {
+				browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+			}
+			
+			const todayInfoEl = document.getElementById('todayInfo');
+			if (todayInfoEl) {
+				const today = new Date();
+				const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+				todayInfoEl.textContent = todayFormatted;
+			}
+			
+			const versionInfoEl = document.getElementById('versionInfo');
+			if (versionInfoEl) {
+				versionInfoEl.textContent = 'Загрузка...';
+				this.getVersion().then(version => {
+					if (versionInfoEl) {
+						versionInfoEl.textContent = version || 'неизвестно';
+					}
+				}).catch(error => {
+					if (versionInfoEl) {
+						versionInfoEl.textContent = 'неизвестно';
+					}
+				});
+			}
+			
+			const firmwareInfoEl = document.getElementById('firmwareInfo');
+			if (firmwareInfoEl) {
+				firmwareInfoEl.textContent = 'Загрузка...';
+				this.getFirmwareDate().then(firmwareDate => {
+					if (firmwareInfoEl) {
+						firmwareInfoEl.textContent = firmwareDate || 'неизвестно';
+					}
+				}).catch(error => {
+					if (firmwareInfoEl) {
+						firmwareInfoEl.textContent = 'неизвестно';
+					}
+				});
+			}
+			
+			const pluginInfoEl = document.getElementById('pluginInfo');
+			if (pluginInfoEl) {
+				pluginInfoEl.textContent = 'Загрузка...';
+				this.getPluginDate().then(pluginDate => {
+					if (pluginInfoEl) {
+						pluginInfoEl.textContent = pluginDate || 'неизвестно';
+					}
+				}).catch(error => {
+					if (pluginInfoEl) {
+						pluginInfoEl.textContent = 'неизвестно';
+					}
+				});
+			}
+			
+			// Делаем информацию видимой
+			const warningInfo = warningBox.querySelector('.warning-info');
+			if (warningInfo) {
+				warningInfo.style.display = 'flex'; // Или 'block'
+			}
+			
+			// Обновляем кнопку проверки
+			const retryButton = document.createElement('button');
+			retryButton.className = 'ui-btn mobile-retry-btn';
+			retryButton.textContent = 'Проверить снова (если вы на компьютере)';
+			retryButton.style.marginTop = '20px';
+			retryButton.style.backgroundColor = '#666';
+			retryButton.style.width = '100%';
+			retryButton.style.padding = '12px';
+			
+			retryButton.addEventListener('click', () => {
+				location.reload();
+			});
+			
+			// Добавляем кнопку после информации
+			warningBox.appendChild(retryButton);
+		}
+	}
+
     
     getMobileDeviceType() {
         const ua = navigator.userAgent.toLowerCase();
