@@ -643,13 +643,19 @@ class UnifiedListManager {
 				window.waves.wavePaths[wave.id].style.stroke = newColor;
 			}
 			
-			// Обновляем превью цвета в интерфейсе
-			document.querySelectorAll(`.wave-color-preview-small[data-id="${wave.id}"]`).forEach(preview => {
-				preview.style.backgroundColor = newColor;
+			// ИСПРАВЛЕНИЕ: Найти превью по разным типам ID
+			const waveIdStr = String(wave.id);
+			document.querySelectorAll(`.wave-color-preview-small`).forEach(preview => {
+				const previewId = preview.getAttribute('data-id');
+				// Сравниваем и как строки, и как числа
+				if (String(previewId) === waveIdStr || String(previewId) === String(wave.id)) {
+					preview.style.backgroundColor = newColor;
+				}
 			});
 			
 			// Обновляем угловые квадраты если нужно
-			if (window.appState.waveCornerColor[wave.id]) {
+			const waveIdKey = String(wave.id);
+			if (window.appState.waveCornerColor[waveIdKey]) {
 				window.waves.updateCornerSquareColors();
 			}
 			

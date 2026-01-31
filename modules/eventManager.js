@@ -657,23 +657,29 @@ class EventManager {
             return;
         }
         
-        if ($target.hasClass('wave-color-preview-small')) {
-            e.stopPropagation();
-            const waveId = $target.data('id');
-            if (waveId && window.unifiedListManager) {
-                const wave = window.appState.data.waves.find(w => w.id === waveId);
-                if (wave) {
-                    window.unifiedListManager.changeWaveColor(wave);
-                    
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 50);
-                }
-            }
-            return;
-        }
+		// В методе handleClick в блоке для .wave-color-preview-small:
+		if ($target.hasClass('wave-color-preview-small')) {
+			e.stopPropagation();
+			const waveId = $target.data('id');
+			
+			if (waveId && window.unifiedListManager) {
+				// Ищем волну, сравнивая ID как строки
+				const wave = window.appState.data.waves.find(w => {
+					return String(w.id) === String(waveId);
+				});
+				
+				if (wave) {
+					window.unifiedListManager.changeWaveColor(wave);
+					
+					setTimeout(() => {
+						if (window.summaryManager && window.summaryManager.updateSummary) {
+							window.summaryManager.updateSummary();
+						}
+					}, 50);
+				}
+			}
+			return;
+		}
         
         if ($target.hasClass('wave-corner-color-check')) {
             e.stopPropagation();
