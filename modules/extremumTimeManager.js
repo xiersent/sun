@@ -156,6 +156,9 @@ class ExtremumTimeManager {
             // Определяем доминирующий цвет (первый в группе)
             const dominantColor = group.colors[0];
             
+            // Получаем контрастный цвет текста
+            const textColor = this.getContrastTextColor(dominantColor);
+            
             // Рисочка (маркер) - одна на группу
             const marker = document.createElement('div');
             marker.className = 'extremum-marker';
@@ -191,9 +194,18 @@ class ExtremumTimeManager {
             label.style.whiteSpace = 'nowrap';
             label.style.padding = '2px 6px';
             label.style.borderRadius = '3px';
-            label.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            label.style.color = '#fff';
+            label.style.backgroundColor = dominantColor;
+            label.style.color = textColor; // Динамический цвет текста
             label.style.textAlign = 'center';
+            label.style.fontWeight = '500';
+            label.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+            
+            // Добавляем тень для текста
+            if (textColor === '#000000') {
+                label.style.textShadow = '0 1px 0 rgba(255,255,255,0.7)';
+            } else {
+                label.style.textShadow = '0 1px 0 rgba(0,0,0,0.5)';
+            }
             
             // СОЗДАЕМ КЛИКАБЕЛЬНЫЕ ИМЕНА КОЛОСКОВ
             // Уникальные имена с их wave.id
@@ -238,7 +250,7 @@ class ExtremumTimeManager {
                 // Стрелочка вниз
                 arrow.style.bottom = '-6px';
                 arrow.style.borderWidth = '6px 4px 0 4px';
-                arrow.style.borderColor = 'rgba(0, 0, 0, 0.8) transparent transparent transparent';
+                arrow.style.borderColor = `${dominantColor} transparent transparent transparent`;
             } else {
                 // Выноска под рисочкой
                 label.style.top = '100%';
@@ -247,7 +259,7 @@ class ExtremumTimeManager {
                 // Стрелочка вверх
                 arrow.style.top = '-6px';
                 arrow.style.borderWidth = '0 4px 6px 4px';
-                arrow.style.borderColor = 'transparent transparent rgba(0, 0, 0, 0.8) transparent';
+                arrow.style.borderColor = `transparent transparent ${dominantColor} transparent`;
             }
             
             label.appendChild(labelTextElement);
@@ -256,13 +268,13 @@ class ExtremumTimeManager {
             // Для темного режима
             const graphContainer = document.querySelector('.graph-container');
             if (graphContainer && graphContainer.classList.contains('dark-mode')) {
-                label.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                label.style.color = '#000';
+                label.style.backgroundColor = dominantColor;
+                label.style.color = textColor;
                 
                 if (group.position === 'top') {
-                    arrow.style.borderTopColor = 'rgba(255, 255, 255, 0.9)';
+                    arrow.style.borderTopColor = dominantColor;
                 } else {
-                    arrow.style.borderBottomColor = 'rgba(255, 255, 255, 0.9)';
+                    arrow.style.borderBottomColor = dominantColor;
                 }
             }
             
@@ -320,6 +332,32 @@ class ExtremumTimeManager {
             if (label.parentNode) label.parentNode.removeChild(label);
         });
         this.labels = [];
+    }
+
+    getContrastTextColor(backgroundColor) {
+        if (!backgroundColor) return '#000000';
+        
+        let r, g, b;
+        
+        if (backgroundColor.startsWith('#')) {
+            const hex = backgroundColor.slice(1);
+            if (hex.length === 3) {
+                r = parseInt(hex[0] + hex[0], 16);
+                g = parseInt(hex[1] + hex[1], 16);
+                b = parseInt(hex[2] + hex[2], 16);
+            } else if (hex.length === 6) {
+                r = parseInt(hex.slice(0, 2), 16);
+                g = parseInt(hex.slice(2, 4), 16);
+                b = parseInt(hex.slice(4, 6), 16);
+            } else {
+                return '#000000';
+            }
+        } else {
+            return '#000000';
+        }
+        
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5 ? '#000000' : '#ffffff';
     }
 
     updateExtremums() {

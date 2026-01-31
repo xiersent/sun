@@ -291,6 +291,45 @@ class WavesManager {
 		this.renderWaveIntersectionPoints();
 
     }
+
+	getContrastTextColor(backgroundColor) {
+		if (!backgroundColor) return '#000000';
+		
+		let r, g, b;
+		
+		// Конвертируем hex в RGB
+		if (backgroundColor.startsWith('#')) {
+			const hex = backgroundColor.slice(1);
+			if (hex.length === 3) {
+				r = parseInt(hex[0] + hex[0], 16);
+				g = parseInt(hex[1] + hex[1], 16);
+				b = parseInt(hex[2] + hex[2], 16);
+			} else if (hex.length === 6) {
+				r = parseInt(hex.slice(0, 2), 16);
+				g = parseInt(hex.slice(2, 4), 16);
+				b = parseInt(hex.slice(4, 6), 16);
+			} else {
+				return '#000000';
+			}
+		} else if (backgroundColor.startsWith('rgb')) {
+			const match = backgroundColor.match(/(\d+),\s*(\d+),\s*(\d+)/);
+			if (match) {
+				r = parseInt(match[1]);
+				g = parseInt(match[2]);
+				b = parseInt(match[3]);
+			} else {
+				return '#000000';
+			}
+		} else {
+			return '#000000';
+		}
+		
+		// Формула воспринимаемой яркости (W3C рекомендация)
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		
+		// Возвращаем черный для светлых фонов, белый для темных
+		return luminance > 0.5 ? '#000000' : '#ffffff';
+	}
     
     updateAllWaveLabels() {
         this.updateHorizontalWaveLabels();
@@ -446,50 +485,52 @@ class WavesManager {
 		return points.sort((a, b) => a - b);
 	}
     
-    createAxisXPoint(wave, x, container) {
-        const centerY = window.appState.config.graphHeight / 2;
-        
-        const point = document.createElement('div');
-        point.className = 'wave-axis-x-point';
-        point.dataset.waveId = wave.id;
-        point.dataset.x = x;
-        
-        point.style.position = 'absolute';
-        point.style.left = `${x}px`;
-        point.style.top = `${centerY}px`;
-        point.style.transform = 'translate(-50%, -50%)';
-        point.style.width = '6px';
-        point.style.height = '6px';
-        point.style.borderRadius = '50%';
-        point.style.backgroundColor = wave.color;
-        point.style.border = '1px solid #fff';
-        point.style.cursor = 'pointer';
-        point.style.pointerEvents = 'auto';
-        point.style.zIndex = '9';
-        point.style.boxShadow = '0 0 2px rgba(0,0,0,0.3)';
-        point.style.transition = 'all 0.2s';
-        
-        point.title = `${wave.name} - пересечение с осью`;
-        
-        point.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.navigateToAxisXIntersection(wave, x);
-        });
-        
-        point.addEventListener('mouseenter', () => {
-            point.style.transform = 'translate(-50%, -50%) scale(1.3)';
-            point.style.zIndex = '10';
-            point.style.boxShadow = '0 0 4px rgba(0,0,0,0.5)';
-        });
-        
-        point.addEventListener('mouseleave', () => {
-            point.style.transform = 'translate(-50%, -50%)';
-            point.style.zIndex = '9';
-            point.style.boxShadow = '0 0 2px rgba(0,0,0,0.3)';
-        });
-        
-        container.appendChild(point);
-    }
+	createAxisXPoint(wave, x, container) {
+		const centerY = window.appState.config.graphHeight / 2;
+		const waveColor = wave.color || '#666666';
+		const textColor = this.getContrastTextColor(waveColor);
+		
+		const point = document.createElement('div');
+		point.className = 'wave-axis-x-point';
+		point.dataset.waveId = wave.id;
+		point.dataset.x = x;
+		
+		point.style.position = 'absolute';
+		point.style.left = `${x}px`;
+		point.style.top = `${centerY}px`;
+		point.style.transform = 'translate(-50%, -50%)';
+		point.style.width = '6px';
+		point.style.height = '6px';
+		point.style.borderRadius = '50%';
+		point.style.backgroundColor = waveColor;
+		point.style.border = `1px solid ${textColor}`;
+		point.style.cursor = 'pointer';
+		point.style.pointerEvents = 'auto';
+		point.style.zIndex = '9';
+		point.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
+		point.style.transition = 'all 0.2s';
+		
+		point.title = `${wave.name} - пересечение с осью`;
+		
+		point.addEventListener('click', (e) => {
+			e.stopPropagation();
+			this.navigateToAxisXIntersection(wave, x);
+		});
+		
+		point.addEventListener('mouseenter', () => {
+			point.style.transform = 'translate(-50%, -50%) scale(1.3)';
+			point.style.zIndex = '10';
+			point.style.boxShadow = `0 0 4px ${waveColor}`;
+		});
+		
+		point.addEventListener('mouseleave', () => {
+			point.style.transform = 'translate(-50%, -50%)';
+			point.style.zIndex = '9';
+			point.style.boxShadow = '0 0 2px rgba(0,0,0,0.5)';
+		});
+		
+		container.appendChild(point);
+	}
     
 	navigateToAxisXIntersection(wave, x) {
 		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
@@ -589,165 +630,197 @@ class WavesManager {
 		return pointTime;
 	}
     
-    createHorizontalWaveLabel(wave, y, side, container) {
-        const labelId = `${wave.id}-${side}`;
-        const waveColor = wave.color || '#666666';
-        
-        const labelElement = document.createElement('div');
-        labelElement.className = 'wave-label horizontal';
-        labelElement.id = `waveLabel${labelId}`;
-        labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.side = side;
-        labelElement.dataset.labelType = 'horizontal';
-        
-        labelElement.style.position = 'absolute';
-        labelElement.style.top = `${y}px`;
-        labelElement.style.backgroundColor = waveColor;
-        labelElement.style.color = '#fff';
-        labelElement.style.opacity = '0.5';
-        labelElement.style.zIndex = '1';
-        labelElement.style.padding = '2px 6px';
-        labelElement.style.borderRadius = '3px';
-        labelElement.style.fontSize = '11px';
-        labelElement.style.transform = 'translateY(-50%)';
-        labelElement.style.cursor = 'pointer';
-        
-        const arrow = document.createElement('div');
-        arrow.className = 'wave-label-arrow';
-        arrow.style.position = 'absolute';
-        arrow.style.top = '50%';
-        arrow.style.transform = 'translateY(-50%)';
-        arrow.style.width = '0';
-        arrow.style.height = '0';
-        arrow.style.borderStyle = 'solid';
-        arrow.style.zIndex = '1';
-        
-        if (side === 'left') {
-            arrow.style.right = '-6px';
-            arrow.style.borderWidth = '4px 0 4px 6px';
-            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-            labelElement.style.right = '0';
-            labelElement.style.marginRight = '10px';
-        } else {
-            arrow.style.left = '-6px';
-            arrow.style.borderWidth = '4px 6px 4px 0';
-            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-            labelElement.style.left = '0';
-            labelElement.style.marginLeft = '10px';
-        }
-        
-        const text = document.createElement('div');
-        text.className = 'wave-label-text';
-        text.textContent = wave.name;
-        text.title = `${wave.name} (${wave.period} дней)`;
-        text.style.position = 'relative';
-        text.style.zIndex = '2';
-        
-        labelElement.appendChild(text);
-        labelElement.appendChild(arrow);
-        container.appendChild(labelElement);
-        
-        this.waveLabelElements[labelId] = labelElement;
-        
-        labelElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.onHorizontalWaveLabelClick(wave.id);
-        });
-        
-        labelElement.addEventListener('mouseenter', () => {
-            labelElement.style.opacity = '1';
-            labelElement.style.zIndex = '10';
-        });
-        
-        labelElement.addEventListener('mouseleave', () => {
-            labelElement.style.opacity = '0.5';
-            labelElement.style.zIndex = '1';
-        });
-        
-        return labelElement;
-    }
+	createHorizontalWaveLabel(wave, y, side, container) {
+		const labelId = `${wave.id}-${side}`;
+		const waveColor = wave.color || '#666666';
+		
+		// Получаем контрастный цвет текста
+		const textColor = this.getContrastTextColor(waveColor);
+		
+		const labelElement = document.createElement('div');
+		labelElement.className = 'wave-label horizontal';
+		labelElement.id = `waveLabel${labelId}`;
+		labelElement.dataset.waveId = wave.id;
+		labelElement.dataset.side = side;
+		labelElement.dataset.labelType = 'horizontal';
+		
+		labelElement.style.position = 'absolute';
+		labelElement.style.top = `${y}px`;
+		labelElement.style.width = 'auto';
+		labelElement.style.backgroundColor = waveColor;
+		labelElement.style.color = textColor;
+		labelElement.style.opacity = '0.7';
+		labelElement.style.zIndex = '1';
+		labelElement.style.padding = '2px 6px';
+		labelElement.style.borderRadius = '3px';
+		labelElement.style.fontSize = '11px';
+		labelElement.style.transform = 'translateY(-50%)';
+		labelElement.style.cursor = 'pointer';
+		labelElement.style.fontWeight = '500';
+		labelElement.style.whiteSpace = 'nowrap';
+		labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+		
+		// Добавляем тень для текста в зависимости от цвета
+		if (textColor === '#000000') {
+			labelElement.style.textShadow = '0 1px 0 rgba(255,255,255,0.7)';
+		} else {
+			labelElement.style.textShadow = '0 1px 0 rgba(0,0,0,0.5)';
+		}
+		
+		const arrow = document.createElement('div');
+		arrow.className = 'wave-label-arrow';
+		arrow.style.position = 'absolute';
+		arrow.style.top = '50%';
+		arrow.style.transform = 'translateY(-50%)';
+		arrow.style.width = '0';
+		arrow.style.height = '0';
+		arrow.style.borderStyle = 'solid';
+		arrow.style.zIndex = '1';
+		
+		if (side === 'left') {
+			arrow.style.right = '-6px';
+			arrow.style.borderWidth = '4px 0 4px 6px';
+			arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
+			labelElement.style.right = '0';
+			labelElement.style.marginRight = '10px';
+		} else {
+			arrow.style.left = '-6px';
+			arrow.style.borderWidth = '4px 6px 4px 0';
+			arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
+			labelElement.style.left = '0';
+			labelElement.style.marginLeft = '10px';
+		}
+		
+		const text = document.createElement('div');
+		text.className = 'wave-label-text';
+		text.textContent = wave.name;
+		text.title = `${wave.name} (${wave.period} дней)`;
+		text.style.position = 'relative';
+		text.style.zIndex = '2';
+		
+		labelElement.appendChild(text);
+		labelElement.appendChild(arrow);
+		container.appendChild(labelElement);
+		
+		this.waveLabelElements[labelId] = labelElement;
+		
+		labelElement.addEventListener('click', (e) => {
+			e.stopPropagation();
+			this.onHorizontalWaveLabelClick(wave.id);
+		});
+		
+		labelElement.addEventListener('mouseenter', () => {
+			labelElement.style.opacity = '1';
+			labelElement.style.zIndex = '10';
+			labelElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+		});
+		
+		labelElement.addEventListener('mouseleave', () => {
+			labelElement.style.opacity = '0.7';
+			labelElement.style.zIndex = '1';
+			labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+		});
+		
+		return labelElement;
+	}
     
-    createVerticalWaveLabel(wave, x, position, container) {
-        const labelId = `${wave.id}-${position}`;
-        const waveColor = wave.color || '#666666';
-        
-        const extremumTime = this.calculateExtremumTime(wave, position);
-        
-        const timeString = this.formatExtremumTime(extremumTime);
-        
-        const labelElement = document.createElement('div');
-        labelElement.className = 'wave-label vertical';
-        labelElement.id = `waveLabel${labelId}`;
-        labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.position = position;
-        labelElement.dataset.labelType = 'vertical';
-        labelElement.dataset.extremumTime = extremumTime.getTime();
-        
-        labelElement.style.position = 'absolute';
-        labelElement.style.left = `${x}px`;
-        labelElement.style.backgroundColor = waveColor;
-        labelElement.style.color = '#fff';
-        labelElement.style.opacity = '0.5';
-        labelElement.style.zIndex = '1';
-        labelElement.style.padding = '2px 6px';
-        labelElement.style.borderRadius = '3px';
-        labelElement.style.fontSize = '11px';
-        labelElement.style.transform = 'translateX(-50%)';
-        labelElement.style.cursor = 'pointer';
-        labelElement.style.fontFamily = 'monospace';
-        labelElement.style.letterSpacing = '0.5px';
-        
-        const text = document.createElement('div');
-        text.className = 'wave-label-text';
-        text.textContent = timeString;
-        
-        const arrow = document.createElement('div');
-        arrow.className = 'wave-label-arrow';
-        arrow.style.position = 'absolute';
-        arrow.style.width = '0';
-        arrow.style.height = '0';
-        arrow.style.borderStyle = 'solid';
-        arrow.style.zIndex = '1';
-        
-        if (position === 'top') {
-            arrow.style.bottom = '-6px';
-            arrow.style.left = '50%';
-            arrow.style.transform = 'translateX(-50%)';
-            arrow.style.borderWidth = '6px 4px 0 4px';
-            arrow.style.borderColor = `${waveColor} transparent transparent transparent`;
-            labelElement.style.top = '0';
-            labelElement.style.marginTop = '5px';
-        } else {
-            arrow.style.top = '-6px';
-            arrow.style.left = '50%';
-            arrow.style.transform = 'translateX(-50%)';
-            arrow.style.borderWidth = '0 4px 6px 4px';
-            arrow.style.borderColor = `transparent transparent ${waveColor} transparent`;
-            labelElement.style.bottom = '0';
-            labelElement.style.marginBottom = '5px';
-        }
-        
-        labelElement.appendChild(text);
-        labelElement.appendChild(arrow);
-        container.appendChild(labelElement);
-        
-        labelElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.onVerticalWaveLabelClick(labelElement);
-        });
-        
-        labelElement.addEventListener('mouseenter', () => {
-            labelElement.style.opacity = '1';
-            labelElement.style.zIndex = '10';
-        });
-        
-        labelElement.addEventListener('mouseleave', () => {
-            labelElement.style.opacity = '0.5';
-            labelElement.style.zIndex = '1';
-        });
-        
-        return labelElement;
-    }
+	createVerticalWaveLabel(wave, x, position, container) {
+		const labelId = `${wave.id}-${position}`;
+		const waveColor = wave.color || '#666666';
+		
+		// Получаем контрастный цвет текста
+		const textColor = this.getContrastTextColor(waveColor);
+		
+		const extremumTime = this.calculateExtremumTime(wave, position);
+		const timeString = this.formatExtremumTime(extremumTime);
+		
+		const labelElement = document.createElement('div');
+		labelElement.className = 'wave-label vertical';
+		labelElement.id = `waveLabel${labelId}`;
+		labelElement.dataset.waveId = wave.id;
+		labelElement.dataset.position = position;
+		labelElement.dataset.labelType = 'vertical';
+		labelElement.dataset.extremumTime = extremumTime.getTime();
+		
+		labelElement.style.position = 'absolute';
+		labelElement.style.left = `${x}px`;
+		labelElement.style.width = 'auto';
+		labelElement.style.backgroundColor = waveColor;
+		labelElement.style.color = textColor;
+		labelElement.style.opacity = '0.7';
+		labelElement.style.zIndex = '1';
+		labelElement.style.padding = '2px 6px';
+		labelElement.style.borderRadius = '3px';
+		labelElement.style.fontSize = '11px';
+		labelElement.style.transform = 'translateX(-50%)';
+		labelElement.style.cursor = 'pointer';
+		labelElement.style.fontFamily = 'monospace';
+		labelElement.style.letterSpacing = '0.5px';
+		labelElement.style.fontWeight = '500';
+		labelElement.style.whiteSpace = 'nowrap';
+		labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+		
+		// Добавляем тень для текста в зависимости от цвета
+		if (textColor === '#000000') {
+			labelElement.style.textShadow = '0 1px 0 rgba(255,255,255,0.7)';
+		} else {
+			labelElement.style.textShadow = '0 1px 0 rgba(0,0,0,0.5)';
+		}
+		
+		const text = document.createElement('div');
+		text.className = 'wave-label-text';
+		text.textContent = timeString;
+		text.style.textAlign = 'center';
+		
+		const arrow = document.createElement('div');
+		arrow.className = 'wave-label-arrow';
+		arrow.style.position = 'absolute';
+		arrow.style.width = '0';
+		arrow.style.height = '0';
+		arrow.style.borderStyle = 'solid';
+		arrow.style.zIndex = '1';
+		
+		if (position === 'top') {
+			arrow.style.bottom = '-6px';
+			arrow.style.left = '50%';
+			arrow.style.transform = 'translateX(-50%)';
+			arrow.style.borderWidth = '6px 4px 0 4px';
+			arrow.style.borderColor = `${waveColor} transparent transparent transparent`;
+			labelElement.style.top = '0';
+			labelElement.style.marginTop = '5px';
+		} else {
+			arrow.style.top = '-6px';
+			arrow.style.left = '50%';
+			arrow.style.transform = 'translateX(-50%)';
+			arrow.style.borderWidth = '0 4px 6px 4px';
+			arrow.style.borderColor = `transparent transparent ${waveColor} transparent`;
+			labelElement.style.bottom = '0';
+			labelElement.style.marginBottom = '5px';
+		}
+		
+		labelElement.appendChild(text);
+		labelElement.appendChild(arrow);
+		container.appendChild(labelElement);
+		
+		labelElement.addEventListener('click', (e) => {
+			e.stopPropagation();
+			this.onVerticalWaveLabelClick(labelElement);
+		});
+		
+		labelElement.addEventListener('mouseenter', () => {
+			labelElement.style.opacity = '1';
+			labelElement.style.zIndex = '10';
+			labelElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+		});
+		
+		labelElement.addEventListener('mouseleave', () => {
+			labelElement.style.opacity = '0.7';
+			labelElement.style.zIndex = '1';
+			labelElement.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+		});
+		
+		return labelElement;
+	}
     
     onHorizontalWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);
@@ -1228,13 +1301,17 @@ class WavesManager {
 		const y2 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset2 + phaseOffsetPixels) / periodPx2);
 		
 		// Проверяем точность пересечения
-		if (Math.abs(y1 - y2) > 0.01) return null; // Слишком большое расхождение
+		if (Math.abs(y1 - y2) > 0.01) return null;
+		
+		// Выбираем цвет для точки (средний между цветами волн или красный по умолчанию)
+		const pointColor = '#ff0000'; // Красный для точек пересечения
 		
 		return {
 			x: x,
 			y: (y1 + y2) / 2,
 			wave1: wave1,
 			wave2: wave2,
+			color: pointColor,
 			time: this.calculateTimeFromXCoordinate(wave1, x)
 		};
 	}
