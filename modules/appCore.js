@@ -149,7 +149,7 @@ class AppCore {
             if (response.ok) {
                 return (await response.text()).trim();
             }
-            return '(файл не найден)';
+            return '(файл ненайден)';
         } catch (error) {
             return '(ошибка загрузки)';
         }
@@ -162,7 +162,7 @@ class AppCore {
             if (response.ok) {
                 return (await response.text()).trim();
             }
-            return '(файл не найден)';
+            return '(файл ненайден)';
         } catch (error) {
             return '(ошибка загрузки)';
         }
@@ -175,7 +175,7 @@ class AppCore {
             if (response.ok) {
                 return (await response.text()).trim();
             }
-            return '(файл не найден)';
+            return '(файл ненайден)';
         } catch (error) {
             return '(ошибка загрузки)';
         }
@@ -257,6 +257,7 @@ class AppCore {
         this.loadVersionInfo();
         this.loadFirmwareInfo();
         this.loadPluginInfo();
+		this.loadFrameworkInfo();
     }
     
     updateMobileWarningContent(warningBox) {
@@ -289,6 +290,7 @@ class AppCore {
         this.loadVersionInfo();
         this.loadFirmwareInfo();
         this.loadPluginInfo();
+		this.loadFrameworkInfo();
         
         // Добавляем кнопку проверки
         this.addMobileRetryButton(warningBox);
@@ -729,6 +731,35 @@ class AppCore {
             }
         }
     }
+
+	async getFrameworkDate() {
+		try {
+			const timestamp = new Date().getTime();
+			const response = await fetch(`framework.txt?t=${timestamp}`);
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл ненайден)';
+		} catch (error) {
+			return '(ошибка загрузки)';
+		}
+	}
+
+	loadFrameworkInfo() {
+		const frameworkInfoEl = document.getElementById('frameworkInfo');
+		if (frameworkInfoEl) {
+			frameworkInfoEl.textContent = 'Загрузка...';
+			this.getFrameworkDate().then(frameworkDate => {
+				if (frameworkInfoEl) {
+					frameworkInfoEl.textContent = frameworkDate || 'неизвестно';
+				}
+			}).catch(error => {
+				if (frameworkInfoEl) {
+					frameworkInfoEl.textContent = 'неизвестно';
+				}
+			});
+		}
+	}
 }
 
 window.appCore = new AppCore();
