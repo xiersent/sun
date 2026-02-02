@@ -4,6 +4,7 @@ class AppCore {
         this.elements = {};
         this.cacheElements();
         this.isInitializing = false;
+        this.versionStorageKey = 'zaraza_last_versions';
     }
     
     cacheElements() {
@@ -112,6 +113,22 @@ class AppCore {
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
         }
+        
+        // Сохраняем текущие версии после успешной загрузки
+        setTimeout(async () => {
+            try {
+                const currentVersions = {
+                    version: await this.getVersion(),
+                    firmware: await this.getFirmwareDate(),
+                    framework: await this.getFrameworkDate(),
+                    plugin: await this.getPluginDate(),
+                    timestamp: new Date().getTime()
+                };
+                this.saveCurrentVersions(currentVersions);
+            } catch (error) {
+                // Игнорируем ошибки сохранения
+            }
+        }, 1000);
     }
     
     updateGraphBackground() {
@@ -238,6 +255,39 @@ class AppCore {
         }
     }
     
+    // Загружаем сохраненные версии
+    getLastVersions() {
+        try {
+            const saved = localStorage.getItem(this.versionStorageKey);
+            return saved ? JSON.parse(saved) : {};
+        } catch (error) {
+            return {};
+        }
+    }
+    
+    // Сохраняем текущие версии
+    saveCurrentVersions(versions) {
+        try {
+            localStorage.setItem(this.versionStorageKey, JSON.stringify(versions));
+        } catch (error) {
+            // Игнорируем ошибки сохранения
+        }
+    }
+    
+    // Проверяем, изменилась ли версия
+    isVersionChanged(type, currentValue) {
+        const lastVersions = this.getLastVersions();
+        const lastValue = lastVersions[type];
+        
+        // Если нет сохраненной версии - не выделяем
+        if (!lastValue) return false;
+        
+        // Сравниваем строки
+        return currentValue !== lastValue && 
+               currentValue !== '(файл ненайден)' && 
+               currentValue !== '(ошибка загрузки)';
+    }
+    
     fillWarningInfo(warningBox) {
         // Заполняем информацию о браузере
         const browserInfoEl = warningBox.querySelector('#browserInfo');
@@ -257,7 +307,7 @@ class AppCore {
         this.loadVersionInfo();
         this.loadFirmwareInfo();
         this.loadPluginInfo();
-		this.loadFrameworkInfo();
+        this.loadFrameworkInfo();
     }
     
     updateMobileWarningContent(warningBox) {
@@ -290,7 +340,7 @@ class AppCore {
         this.loadVersionInfo();
         this.loadFirmwareInfo();
         this.loadPluginInfo();
-		this.loadFrameworkInfo();
+        this.loadFrameworkInfo();
         
         // Добавляем кнопку проверки
         this.addMobileRetryButton(warningBox);
@@ -324,7 +374,14 @@ class AppCore {
             versionInfoEl.textContent = 'Загрузка...';
             this.getVersion().then(version => {
                 if (versionInfoEl) {
-                    versionInfoEl.textContent = version || 'неизвестно';
+                    const versionText = version || 'неизвестно';
+                    versionInfoEl.textContent = versionText;
+                    
+                    // Проверяем изменения
+                    if (this.isVersionChanged('version', versionText)) {
+                        versionInfoEl.style.fontWeight = '700';
+                        versionInfoEl.style.color = '#000000';
+                    }
                 }
             }).catch(error => {
                 if (versionInfoEl) {
@@ -340,7 +397,14 @@ class AppCore {
             firmwareInfoEl.textContent = 'Загрузка...';
             this.getFirmwareDate().then(firmwareDate => {
                 if (firmwareInfoEl) {
-                    firmwareInfoEl.textContent = firmwareDate || 'неизвестно';
+                    const firmwareText = firmwareDate || 'неизвестно';
+                    firmwareInfoEl.textContent = firmwareText;
+                    
+                    // Проверяем изменения
+                    if (this.isVersionChanged('firmware', firmwareText)) {
+                        firmwareInfoEl.style.fontWeight = '700';
+                        firmwareInfoEl.style.color = '#000000';
+                    }
                 }
             }).catch(error => {
                 if (firmwareInfoEl) {
@@ -356,11 +420,41 @@ class AppCore {
             pluginInfoEl.textContent = 'Загрузка...';
             this.getPluginDate().then(pluginDate => {
                 if (pluginInfoEl) {
-                    pluginInfoEl.textContent = pluginDate || 'неизвестно';
+                    const pluginText = pluginDate || 'неизвестно';
+                    pluginInfoEl.textContent = pluginText;
+                    
+                    // Проверяем изменения
+                    if (this.isVersionChanged('plugin', pluginText)) {
+                        pluginInfoEl.style.fontWeight = '700';
+                        pluginInfoEl.style.color = '#000000';
+                    }
                 }
             }).catch(error => {
                 if (pluginInfoEl) {
                     pluginInfoEl.textContent = 'неизвестно';
+                }
+            });
+        }
+    }
+    
+    loadFrameworkInfo() {
+        const frameworkInfoEl = document.getElementById('frameworkInfo');
+        if (frameworkInfoEl) {
+            frameworkInfoEl.textContent = 'Загрузка...';
+            this.getFrameworkDate().then(frameworkDate => {
+                if (frameworkInfoEl) {
+                    const frameworkText = frameworkDate || 'неизвестно';
+                    frameworkInfoEl.textContent = frameworkText;
+                    
+                    // Проверяем изменения
+                    if (this.isVersionChanged('framework', frameworkText)) {
+                        frameworkInfoEl.style.fontWeight = '700';
+                        frameworkInfoEl.style.color = '#000000';
+                    }
+                }
+            }).catch(error => {
+                if (frameworkInfoEl) {
+                    frameworkInfoEl.textContent = 'неизвестно';
                 }
             });
         }
@@ -455,24 +549,24 @@ class AppCore {
             });
         }
         
-		document.addEventListener('click', (e) => {
-			const target = e.target;
-			if (target.matches('[data-action="acceptWarning"]')) {
-				const warningOverlay = document.getElementById('warningOverlay');
-				const warningBox = document.querySelector('.warning-box');
-				if (warningOverlay && warningBox) {
-					// Удаляем оба класса (desktop и mobile)
-					warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
-					// Скрываем весь оверлей, а не только бокс
-					warningOverlay.classList.add('hidden');
-					warningBox.classList.add('hidden');
-					document.body.style.overflow = 'auto';
-					document.body.classList.remove('ui-hidden');
-				}
-				e.preventDefault();
-				e.stopPropagation();
-			}
-		});
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.matches('[data-action="acceptWarning"]')) {
+                const warningOverlay = document.getElementById('warningOverlay');
+                const warningBox = document.querySelector('.warning-box');
+                if (warningOverlay && warningBox) {
+                    // Удаляем оба класса (desktop и mobile)
+                    warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
+                    // Скрываем весь оверлей, а не только бокс
+                    warningOverlay.classList.add('hidden');
+                    warningBox.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                    document.body.classList.remove('ui-hidden');
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
         
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
         if (btnAddCustomWave) {
@@ -707,7 +801,7 @@ class AppCore {
                 <p>Говорят, когда-то одну девушку обвинили в ведовстве. В качестве наказания её отвезли на островок на озере – клочок каменистой почвы, где не было ни еды, ни укрытий. Её приговорили к мучительной медленной смерти от холода и голода.</p>
                 <p>Вот только не знали в городе, что один юноша, увидев её глаза, прекрасные и сверкающие, подобно луне в летнюю ночь, поклялся ей в вечной любви. Когда ей вынесли приговор – по его мнению, несправедливый – он дал обет уберечь её от гибели. Выжидая удобного дня для совместного побега, он каждую ночь втайне переплывал озеро на лодке с едой и тёплой одеждой. А она каждую ночь вставала у воды и зажигала свечу, чтобы указать ему путь.</p>
                 <p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
-                <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищют истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу любимому.</p>
+                <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу любимому.</p>
             `;
         }
     }
@@ -732,34 +826,18 @@ class AppCore {
         }
     }
 
-	async getFrameworkDate() {
-		try {
-			const timestamp = new Date().getTime();
-			const response = await fetch(`framework.txt?t=${timestamp}`);
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл ненайден)';
-		} catch (error) {
-			return '(ошибка загрузки)';
-		}
-	}
-
-	loadFrameworkInfo() {
-		const frameworkInfoEl = document.getElementById('frameworkInfo');
-		if (frameworkInfoEl) {
-			frameworkInfoEl.textContent = 'Загрузка...';
-			this.getFrameworkDate().then(frameworkDate => {
-				if (frameworkInfoEl) {
-					frameworkInfoEl.textContent = frameworkDate || 'неизвестно';
-				}
-			}).catch(error => {
-				if (frameworkInfoEl) {
-					frameworkInfoEl.textContent = 'неизвестно';
-				}
-			});
-		}
-	}
+    async getFrameworkDate() {
+        try {
+            const timestamp = new Date().getTime();
+            const response = await fetch(`framework.txt?t=${timestamp}`);
+            if (response.ok) {
+                return (await response.text()).trim();
+            }
+            return '(файл ненайден)';
+        } catch (error) {
+            return '(ошибка загрузки)';
+        }
+    }
 }
 
 window.appCore = new AppCore();
