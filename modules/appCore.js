@@ -295,13 +295,19 @@ class AppCore {
             browserInfoEl.textContent = this.getBrowserInfo();
         }
         
-        // Заполняем сегодняшнюю дату
-        const todayInfoEl = warningBox.querySelector('#todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-            todayInfoEl.textContent = todayFormatted;
-        }
+		const todayInfoEl = warningBox.querySelector('#todayInfo');
+		if (todayInfoEl) {
+			const today = new Date();
+			
+			// Форматируем дату
+			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+			
+			// Форматируем время
+			const timeFormatted = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
+			
+			// Объединяем дату и время
+			todayInfoEl.textContent = `${todayFormatted} ${timeFormatted}`;
+		}
         
         // Загружаем информацию о версии, прошивке и плагинах
         this.loadVersionInfo();
