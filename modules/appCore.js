@@ -123,6 +123,7 @@ class AppCore {
                     framework: await this.getFrameworkDate(),
                     plugin: await this.getPluginDate(),
 					ear: await this.getEarDate(),
+					worker: await this.getWorkerDate(),
 					browser: this.getBrowserInfo(),
                     timestamp: new Date().getTime()
                 };
@@ -160,6 +161,19 @@ class AppCore {
             mainDateInputTime.value = formatted.time;
         }
     }
+
+	async getWorkerDate() {
+		try {
+			const timestamp = new Date().getTime();
+			const response = await fetch(`worker.txt?t=${timestamp}`);
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл ненайден)';
+		} catch (error) {
+			return '(ошибка загрузки)';
+		}
+	}
 
     async getFirmwareDate() {
         try {
@@ -343,6 +357,7 @@ class AppCore {
 		this.loadFirmwareInfo();
 		this.loadPluginInfo();
 		this.loadFrameworkInfo();
+		this.loadWorkerInfo();
 		this.loadEarInfo();
 	}
 
@@ -391,6 +406,7 @@ class AppCore {
 		this.loadFirmwareInfo();
 		this.loadPluginInfo();
 		this.loadFrameworkInfo();
+		this.loadWorkerInfo();
 		this.loadEarInfo();
 		
 		// Для остальных полей тоже принудительно выделяем (как на десктопе)
@@ -443,6 +459,30 @@ class AppCore {
         
         warningBox.appendChild(retryButton);
     }
+
+
+	loadWorkerInfo() {
+		const workerInfoEl = document.getElementById('workerInfo');
+		if (workerInfoEl) {
+			workerInfoEl.textContent = 'Загрузка...';
+			this.getWorkerDate().then(workerDate => {
+				if (workerInfoEl) {
+					const workerText = workerDate || 'неизвестно';
+					workerInfoEl.textContent = workerText;
+					
+					// Проверяем изменения
+					if (this.isVersionChanged('worker', workerText)) {
+						workerInfoEl.style.fontWeight = '700';
+						workerInfoEl.style.color = '#000000';
+					}
+				}
+			}).catch(error => {
+				if (workerInfoEl) {
+					workerInfoEl.textContent = 'неизвестно';
+				}
+			});
+		}
+	}
     
     loadVersionInfo() {
         const versionInfoEl = document.getElementById('versionInfo');
