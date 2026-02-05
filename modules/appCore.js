@@ -122,6 +122,7 @@ class AppCore {
                     firmware: await this.getFirmwareDate(),
                     framework: await this.getFrameworkDate(),
                     plugin: await this.getPluginDate(),
+					ear: await this.getEarDate(),
                     timestamp: new Date().getTime()
                 };
                 this.saveCurrentVersions(currentVersions);
@@ -197,6 +198,19 @@ class AppCore {
             return '(ошибка загрузки)';
         }
     }
+
+	async getEarDate() {
+		try {
+			const timestamp = new Date().getTime();
+			const response = await fetch(`ear.txt?t=${timestamp}`);
+			if (response.ok) {
+				return (await response.text()).trim();
+			}
+			return '(файл ненайден)';
+		} catch (error) {
+			return '(ошибка загрузки)';
+		}
+	}
 
     showDesktopWarning() {
         const warningOverlay = document.getElementById('warningOverlay');
@@ -314,33 +328,40 @@ class AppCore {
         this.loadFirmwareInfo();
         this.loadPluginInfo();
         this.loadFrameworkInfo();
+		this.loadEarInfo();
     }
-    
+
 	updateMobileWarningContent(warningBox) {
 		const warningTitle = warningBox.querySelector('.warning-title');
 		if (warningTitle) {
-			warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+			warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
 			warningTitle.style.color = '#000000';
 		}
 		
 		// Заполняем информацию
 		const browserInfoEl = warningBox.querySelector('#browserInfo');
 		if (browserInfoEl) {
-			browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+			browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
 		}
 		
-		// ВАЖНОЕ ИСПРАВЛЕНИЕ: Добавляем отображение времени на мобильной версии
+		// ВАЖНОЕ ИСПРАВЛЕНИЕ: Добавляем отображение времени на мобильной версии
 		const todayInfoEl = warningBox.querySelector('#todayInfo');
 		if (todayInfoEl) {
 			const today = new Date();
+			
+			// Форматируем дату
 			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+			
+			// Форматируем время
 			const timeFormatted = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
 			
-			// Объединяем дату и время как в десктопной версии
+			// Объединяем дату и время КАК НА ДЕСКТОПЕ
 			todayInfoEl.textContent = `${todayFormatted} ${timeFormatted}`;
 			
-			// Убедимся, что элемент виден
-			todayInfoEl.style.display = 'block';
+			// ===== ДОБАВЛЕНО: Выделяем так же как на десктопе =====
+			// На десктопе "сегодня" всегда выделяется, так как время всегда меняется
+			todayInfoEl.style.fontWeight = '700';
+			todayInfoEl.style.color = '#000000';
 		}
 		
 		// Показываем информацию о системе
@@ -349,11 +370,38 @@ class AppCore {
 			warningInfo.style.display = 'flex';
 		}
 		
-		// Загружаем остальную информацию
+		// ==== КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Используем те же методы загрузки ====
+		// которые сами проверяют изменения и выделяют
 		this.loadVersionInfo();
 		this.loadFirmwareInfo();
 		this.loadPluginInfo();
 		this.loadFrameworkInfo();
+		this.loadEarInfo();
+		
+		// Для остальных полей тоже принудительно выделяем (как на десктопе)
+		const fields = ['firmwareInfo', 'frameworkInfo', 'pluginInfo', 'earInfo'];
+		fields.forEach(fieldId => {
+			const fieldEl = warningBox.querySelector(`#${fieldId}`);
+			if (fieldEl) {
+				// Даем время загрузиться, потом обновляем
+				setTimeout(() => {
+					if (fieldEl.textContent && 
+						fieldEl.textContent !== 'Загрузка...' && 
+						fieldEl.textContent !== 'неизвестно' &&
+						!fieldEl.textContent.includes('ошибка') &&
+						!fieldEl.textContent.includes('файл ненайден')) {
+						
+						// Проверяем, было ли изменение (аналогично десктопу)
+						const currentValue = fieldEl.textContent;
+						const lastVersions = this.getLastVersions();
+						
+						// Для мобильных пока просто выделяем все
+						fieldEl.style.fontWeight = '700';
+						fieldEl.style.color = '#000000';
+					}
+				}, 500);
+			}
+		});
 		
 		// Добавляем кнопку проверки
 		this.addMobileRetryButton(warningBox);
@@ -449,6 +497,29 @@ class AppCore {
             });
         }
     }
+
+	loadEarInfo() {
+		const earInfoEl = document.getElementById('earInfo');
+		if (earInfoEl) {
+			earInfoEl.textContent = 'Загрузка...';
+			this.getEarDate().then(earDate => {
+				if (earInfoEl) {
+					const earText = earDate || 'неизвестно';
+					earInfoEl.textContent = earText;
+					
+					// Проверяем изменения
+					if (this.isVersionChanged('ear', earText)) {
+						earInfoEl.style.fontWeight = '700';
+						earInfoEl.style.color = '#000000';
+					}
+				}
+			}).catch(error => {
+				if (earInfoEl) {
+					earInfoEl.textContent = 'неизвестно';
+				}
+			});
+		}
+	}
     
     loadFrameworkInfo() {
         const frameworkInfoEl = document.getElementById('frameworkInfo');
