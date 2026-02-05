@@ -123,6 +123,7 @@ class AppCore {
                     framework: await this.getFrameworkDate(),
                     plugin: await this.getPluginDate(),
 					ear: await this.getEarDate(),
+					browser: this.getBrowserInfo(),
                     timestamp: new Date().getTime()
                 };
                 this.saveCurrentVersions(currentVersions);
@@ -278,15 +279,20 @@ class AppCore {
             return {};
         }
     }
-    
-    // Сохраняем текущие версии
-    saveCurrentVersions(versions) {
-        try {
-            localStorage.setItem(this.versionStorageKey, JSON.stringify(versions));
-        } catch (error) {
-            // Игнорируем ошибки сохранения
-        }
-    }
+		
+	saveCurrentVersions(versions) {
+		try {
+			// Добавляем информацию о браузере
+			const currentVersions = {
+				...versions,
+				browser: this.getBrowserInfo(),
+				timestamp: new Date().getTime()
+			};
+			localStorage.setItem(this.versionStorageKey, JSON.stringify(currentVersions));
+		} catch (error) {
+			// Игнорируем ошибки сохранения
+		}
+	}
     
     // Проверяем, изменилась ли версия
     isVersionChanged(type, currentValue) {
@@ -302,34 +308,43 @@ class AppCore {
                currentValue !== '(ошибка загрузки)';
     }
     
-    fillWarningInfo(warningBox) {
-        // Заполняем информацию о браузере
-        const browserInfoEl = warningBox.querySelector('#browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = this.getBrowserInfo();
-        }
-        
+	fillWarningInfo(warningBox) {
+		// Заполняем информацию о браузере - проверяем изменения
+		const browserInfoEl = warningBox.querySelector('#browserInfo');
+		if (browserInfoEl) {
+			const browserInfo = this.getBrowserInfo();
+			browserInfoEl.textContent = browserInfo;
+			
+			// Проверяем, изменился ли браузер
+			const lastVersions = this.getLastVersions();
+			const lastBrowser = lastVersions.browser;
+			
+			if (lastBrowser && browserInfo !== lastBrowser) {
+				browserInfoEl.style.fontWeight = '700';
+				browserInfoEl.style.color = '#000000';
+			}
+		}
+		
+		// Текущее время - НЕ выделяем жирным
 		const todayInfoEl = warningBox.querySelector('#todayInfo');
 		if (todayInfoEl) {
 			const today = new Date();
-			
-			// Форматируем дату
 			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-			
-			// Форматируем время
 			const timeFormatted = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
-			
-			// Объединяем дату и время
 			todayInfoEl.textContent = `${todayFormatted} ${timeFormatted}`;
+			
+			// ВАЖНО: НЕ выделяем жирным и НЕ проверяем изменения
+			todayInfoEl.style.fontWeight = '400'; // нормальный вес
+			todayInfoEl.style.color = '#666'; // обычный цвет
 		}
-        
-        // Загружаем информацию о версии, прошивке и плагинах
-        this.loadVersionInfo();
-        this.loadFirmwareInfo();
-        this.loadPluginInfo();
-        this.loadFrameworkInfo();
+		
+		// Загружаем остальную информацию
+		this.loadVersionInfo();
+		this.loadFirmwareInfo();
+		this.loadPluginInfo();
+		this.loadFrameworkInfo();
 		this.loadEarInfo();
-    }
+	}
 
 	updateMobileWarningContent(warningBox) {
 		const warningTitle = warningBox.querySelector('.warning-title');
