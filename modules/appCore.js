@@ -316,41 +316,48 @@ class AppCore {
         this.loadFrameworkInfo();
     }
     
-    updateMobileWarningContent(warningBox) {
-        const warningTitle = warningBox.querySelector('.warning-title');
-        if (warningTitle) {
-            warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-            warningTitle.style.color = '#000000';
-        }
-        
-        // Заполняем информацию
-        const browserInfoEl = warningBox.querySelector('#browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-        }
-        
-        const todayInfoEl = warningBox.querySelector('#todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-            todayInfoEl.textContent = todayFormatted;
-        }
-        
-        // Показываем информацию о системе
-        const warningInfo = warningBox.querySelector('.warning-info');
-        if (warningInfo) {
-            warningInfo.style.display = 'flex';
-        }
-        
-        // Загружаем остальную информацию
-        this.loadVersionInfo();
-        this.loadFirmwareInfo();
-        this.loadPluginInfo();
-        this.loadFrameworkInfo();
-        
-        // Добавляем кнопку проверки
-        this.addMobileRetryButton(warningBox);
-    }
+	updateMobileWarningContent(warningBox) {
+		const warningTitle = warningBox.querySelector('.warning-title');
+		if (warningTitle) {
+			warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+			warningTitle.style.color = '#000000';
+		}
+		
+		// Заполняем информацию
+		const browserInfoEl = warningBox.querySelector('#browserInfo');
+		if (browserInfoEl) {
+			browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+		}
+		
+		// ВАЖНОЕ ИСПРАВЛЕНИЕ: Добавляем отображение времени на мобильной версии
+		const todayInfoEl = warningBox.querySelector('#todayInfo');
+		if (todayInfoEl) {
+			const today = new Date();
+			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
+			const timeFormatted = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
+			
+			// Объединяем дату и время как в десктопной версии
+			todayInfoEl.textContent = `${todayFormatted} ${timeFormatted}`;
+			
+			// Убедимся, что элемент виден
+			todayInfoEl.style.display = 'block';
+		}
+		
+		// Показываем информацию о системе
+		const warningInfo = warningBox.querySelector('.warning-info');
+		if (warningInfo) {
+			warningInfo.style.display = 'flex';
+		}
+		
+		// Загружаем остальную информацию
+		this.loadVersionInfo();
+		this.loadFirmwareInfo();
+		this.loadPluginInfo();
+		this.loadFrameworkInfo();
+		
+		// Добавляем кнопку проверки
+		this.addMobileRetryButton(warningBox);
+	}
     
     addMobileRetryButton(warningBox) {
         // Удаляем старую кнопку, если есть
