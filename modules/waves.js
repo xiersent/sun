@@ -113,7 +113,7 @@ class WavesManager {
         container.style.height = '100%';
         container.style.position = 'absolute';
         container.style.top = '0';
-        container.style.left = `-${containerWidth / 2}px`;
+        container.style.left = '0';
         
         container.dataset.totalPeriods = totalPeriods;
         container.dataset.periodPx = periodPx;
