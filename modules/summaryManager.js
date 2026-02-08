@@ -6,6 +6,7 @@ class SummaryManager {
         this.currentGroup = 'all';
         this.currentState = -5;
         this.tolerance = 0.5;
+        this.includePastWaves = false; // ← ДОБАВЛЕНО: флаг для включения прошедших волн
         
         this.isUpdating = false;
         this.lastUpdateTime = 0;
@@ -54,6 +55,15 @@ class SummaryManager {
             stateSelect.addEventListener('change', (e) => {
                 this.currentState = parseFloat(e.target.value);
                 this.saveSelections();
+                this.updateSummary();
+            });
+        }
+        
+        // ← ДОБАВЛЕНО: обработчик для галочки "включая прошедшие волны"
+        const includePastCheckbox = document.getElementById('includePastWaves');
+        if (includePastCheckbox) {
+            includePastCheckbox.addEventListener('change', (e) => {
+                this.includePastWaves = e.target.checked;
                 this.updateSummary();
             });
         }
@@ -242,13 +252,16 @@ class SummaryManager {
             const difference = Math.abs(waveState - this.currentState);
             
             if (difference <= this.tolerance) {
-                results.push({
-                    wave: wave,
-                    phase: phase,
-                    state: waveState,
-                    difference: difference,
-                    closeness: this.getClosenessLevel(difference)
-                });
+                // ← ДОБАВЛЕНО: проверка, нужно ли фильтровать по временному периоду
+                if (this.includePastWaves || this.isWaveInPresentOrFuture(wave, normalizedPhase)) {
+                    results.push({
+                        wave: wave,
+                        phase: phase,
+                        state: waveState,
+                        difference: difference,
+                        closeness: this.getClosenessLevel(difference)
+                    });
+                }
             }
         });
         
@@ -257,23 +270,50 @@ class SummaryManager {
         return results;
     }
     
-	getClosenessLevel(difference) {
-		// Если разница очень маленькая (точное попадание)
-		if (difference < 0.001) {
-			// Определяем метку в зависимости от целевого состояния
-			if (this.currentState === 0) {
-				return 'Эквилибриум';
-			} else if (this.currentState === -5 || this.currentState === 5) {
-				return 'Экстремум';
-			}
-		}
-		
-		// Старая логика для остальных случаев
-		if (difference < 0.1) return 'очень близко';
-		if (difference < 0.3) return 'близко';
-		if (difference < 0.5) return 'довольно близко';
-		return 'рядом';
-	}
+    // ← ДОБАВЛЕН НОВЫЙ МЕТОД: проверка, находится ли волна в настоящем/будущем
+    isWaveInPresentOrFuture(wave, normalizedPhaseRadians) {
+        // normalizedPhaseRadians: от 0 до 2π
+        // Преобразуем в обычную фазу 0-1
+        const phase = normalizedPhaseRadians / (2 * Math.PI);
+        
+        const state = this.currentState;
+        
+        // Для состояния 0 (пересечение оси): настоящее/будущее - первая половина цикла
+        if (Math.abs(state) < 0.1) {
+            return phase <= 0.5; // [0, 0.5]
+        }
+        
+        // Для состояния +5 (верхний экстремум): настоящее/будущее - первая четверть цикла
+        if (state > 4.5) {
+            return phase <= 0.25; // [0, 0.25]
+        }
+        
+        // Для состояния -5 (нижний экстремум): настоящее/будущее - первые три четверти цикла
+        if (state < -4.5) {
+            return phase <= 0.75; // [0, 0.75]
+        }
+        
+        // Для промежуточных состояний считаем, что это настоящее/будущее
+        return true;
+    }
+    
+    getClosenessLevel(difference) {
+        // Если разница очень маленькая (точное попадание)
+        if (difference < 0.001) {
+            // Определяем метку в зависимости от целевого состояния
+            if (this.currentState === 0) {
+                return 'Эквилибриум';
+            } else if (this.currentState === -5 || this.currentState === 5) {
+                return 'Экстремум';
+            }
+        }
+        
+        // Старая логика для остальных случаев
+        if (difference < 0.1) return 'очень близко';
+        if (difference < 0.3) return 'близко';
+        if (difference < 0.5) return 'довольно близко';
+        return 'рядом';
+    }
     
     updateResults(stateWaves) {
         const resultsElement = this.elements.summaryResults;
