@@ -127,43 +127,45 @@
                     
                     <!-- Контент табов -->
 
-                    <!-- В блоке #summary-tab -->
-                    <div class="tab-content" id="summary-tab">
-                        <div class="panel-section summary-panel" id="summaryPanel">
-                            <div class="summary-header">
-                                <h3>Сводная информация о колосках</h3>
-                            </div>
-                            
-                            <div class="summary-controls">
-                                <div class="summary-select-row">
-                                    <div class="summary-select-group">
-                                        <select class="summary-select" id="summaryGroupSelect">
-                                            <option value="all">Все доступные группы с колосками</option>
-                                            <!-- Опции будут добавлены через JavaScript -->
-                                        </select>
-                                        <select class="summary-select" id="summaryStateSelect">
-                                            <!-- Опции будут добавлены динамически -->
-                                        </select>
-                                        <!-- Кнопки-дублеры -->
-                                        <div class="summary-duplicate-buttons">
-                                            <button class="ui-btn" data-action="today">Сегодня</button>
-                                            <button class="ui-btn" data-action="now">Сейчас</button>
-                                        </div>
+					<!-- В блоке #summary-tab -->
+					<div class="tab-content" id="summary-tab">
+						<div class="panel-section summary-panel" id="summaryPanel">
+							<div class="summary-header">
+								<h3>Сводная информация о колосках</h3>
+							</div>
+							
+							<div class="summary-controls">
+								<div class="summary-select-row">
+									<div class="summary-select-group">
+										<select class="summary-select" id="summaryGroupSelect">
+											<option value="all">Все доступные группы с колосками</option>
+											<!-- Опции будут добавлены через JavaScript -->
+										</select>
+										<select class="summary-select" id="summaryStateSelect">
+											<!-- Опции будут добавлены динамически -->
+										</select>
+										<!-- Кнопки-дублеры -->
+										<div class="summary-duplicate-buttons">
+											<button class="ui-btn" data-action="today">Сегодня</button>
+											<button class="ui-btn" data-action="now">Сейчас</button>
+										</div>
+										<!-- ИСПРАВЛЕНО: Добавляем обработчик onchange для немедленного обновления -->
 										<label class="intersection-form-label" style="margin-left: 10px;">
-											<input type="checkbox" id="includePastWaves" unchecked>
+											<input type="checkbox" id="includePastWaves" 
+												onchange="if (window.summaryManager) window.summaryManager.updateSummary()">
 											Учитывать прошедшие
 										</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="summary-results-container">
-                                <div class="summary-results" id="summaryResults">
-                                    <!-- Результаты будут заполнены через JavaScript -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+									</div>
+								</div>
+							</div>
+							
+							<div class="summary-results-container">
+								<div class="summary-results" id="summaryResults">
+									<!-- Результаты будут заполнены через JavaScript -->
+								</div>
+							</div>
+						</div>
+					</div>
                     
                     <div class="tab-content" id="intersections-tab">
                         <div class="panel-section" id="analysis-panel">

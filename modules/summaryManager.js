@@ -6,7 +6,7 @@ class SummaryManager {
         this.currentGroup = 'all';
         this.currentState = -5;
         this.tolerance = 0.5;
-        this.includePastWaves = false; // ← ДОБАВЛЕНО: флаг для включения прошедших волн
+        this.includePastWaves = false;
         
         this.isUpdating = false;
         this.lastUpdateTime = 0;
@@ -35,7 +35,7 @@ class SummaryManager {
         this.populateGroupSelect();
         this.setupStateSelect();
         this.restoreSelections();
-        this.updateSummary();
+        this.updateSummary(); // ВЫЗЫВАЕМ ОБНОВЛЕНИЕ ПРИ ИНИЦИАЛИЗАЦИИ
         this.setupStateObservers();
     }
     
@@ -59,12 +59,13 @@ class SummaryManager {
             });
         }
         
-        // ← ДОБАВЛЕНО: обработчик для галочки "включая прошедшие волны"
         const includePastCheckbox = document.getElementById('includePastWaves');
         if (includePastCheckbox) {
+            // УСТАНАВЛИВАЕМ ОБРАБОТЧИК СОБЫТИЯ
             includePastCheckbox.addEventListener('change', (e) => {
                 this.includePastWaves = e.target.checked;
-                this.updateSummary();
+                this.saveSelections(); // СОХРАНЯЕМ СОСТОЯНИЕ
+                this.updateSummary(); // НЕМЕДЛЕННО ОБНОВЛЯЕМ
             });
         }
     }
@@ -91,6 +92,7 @@ class SummaryManager {
     restoreSelections() {
         const savedGroup = localStorage.getItem('summarySelectedGroup');
         const savedState = localStorage.getItem('summarySelectedState');
+        const savedIncludePast = localStorage.getItem('summaryIncludePastWaves');
         
         if (savedGroup) {
             this.currentGroup = savedGroup;
@@ -107,11 +109,21 @@ class SummaryManager {
                 stateSelect.value = savedState;
             }
         }
+        
+        // ВОССТАНАВЛИВАЕМ СОСТОЯНИЕ ЧЕКБОКСА
+        if (savedIncludePast !== null) {
+            this.includePastWaves = savedIncludePast === 'true';
+            const includePastCheckbox = document.getElementById('includePastWaves');
+            if (includePastCheckbox) {
+                includePastCheckbox.checked = this.includePastWaves;
+            }
+        }
     }
     
     saveSelections() {
         localStorage.setItem('summarySelectedGroup', this.currentGroup);
         localStorage.setItem('summarySelectedState', this.currentState.toString());
+        localStorage.setItem('summaryIncludePastWaves', this.includePastWaves.toString());
     }
     
     setupStateObservers() {
@@ -204,6 +216,7 @@ class SummaryManager {
             this.updateResults(stateWaves);
             
         } catch (error) {
+            console.error('Error updating summary:', error);
         } finally {
             this.isUpdating = false;
         }
@@ -244,22 +257,23 @@ class SummaryManager {
             if (!wave.period || wave.period <= 0) return;
             
             const phase = (currentDay % wave.period);
-            
             const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
-            
             const waveState = (Math.sin(normalizedPhase) * 5);
-            
             const difference = Math.abs(waveState - this.currentState);
             
             if (difference <= this.tolerance) {
-                // ← ДОБАВЛЕНО: проверка, нужно ли фильтровать по временному периоду
-                if (this.includePastWaves || this.isWaveInPresentOrFuture(wave, normalizedPhase)) {
+                const isPresentOrFuture = this.isWaveInPresentOrFuture(wave, normalizedPhase);
+                const isPastWave = !isPresentOrFuture;
+                
+                // Проверяем фильтр
+                if (this.includePastWaves || !isPastWave) {
                     results.push({
                         wave: wave,
                         phase: phase,
                         state: waveState,
                         difference: difference,
-                        closeness: this.getClosenessLevel(difference)
+                        closeness: this.getClosenessLevel(difference),
+                        isPastWave: isPastWave
                     });
                 }
             }
@@ -270,37 +284,27 @@ class SummaryManager {
         return results;
     }
     
-    // ← ДОБАВЛЕН НОВЫЙ МЕТОД: проверка, находится ли волна в настоящем/будущем
     isWaveInPresentOrFuture(wave, normalizedPhaseRadians) {
-        // normalizedPhaseRadians: от 0 до 2π
-        // Преобразуем в обычную фазу 0-1
         const phase = normalizedPhaseRadians / (2 * Math.PI);
-        
         const state = this.currentState;
         
-        // Для состояния 0 (пересечение оси): настоящее/будущее - первая половина цикла
         if (Math.abs(state) < 0.1) {
-            return phase <= 0.5; // [0, 0.5]
+            return phase <= 0.5;
         }
         
-        // Для состояния +5 (верхний экстремум): настоящее/будущее - первая четверть цикла
         if (state > 4.5) {
-            return phase <= 0.25; // [0, 0.25]
+            return phase <= 0.25;
         }
         
-        // Для состояния -5 (нижний экстремум): настоящее/будущее - первые три четверти цикла
         if (state < -4.5) {
-            return phase <= 0.75; // [0, 0.75]
+            return phase <= 0.75;
         }
         
-        // Для промежуточных состояний считаем, что это настоящее/будущее
         return true;
     }
     
     getClosenessLevel(difference) {
-        // Если разница очень маленькая (точное попадание)
         if (difference < 0.001) {
-            // Определяем метку в зависимости от целевого состояния
             if (this.currentState === 0) {
                 return 'Эквилибриум';
             } else if (this.currentState === -5 || this.currentState === 5) {
@@ -308,51 +312,144 @@ class SummaryManager {
             }
         }
         
-        // Старая логика для остальных случаев
         if (difference < 0.1) return 'очень близко';
         if (difference < 0.3) return 'близко';
         if (difference < 0.5) return 'довольно близко';
         return 'рядом';
     }
     
-    updateResults(stateWaves) {
-        const resultsElement = this.elements.summaryResults;
-        if (!resultsElement) return;
+
+updateResults(stateWaves) {
+    const resultsElement = this.elements.summaryResults;
+    if (!resultsElement) return;
+    
+    if (stateWaves.length === 0) {
+        resultsElement.innerHTML = '<div class="summary-empty">Нет колосков в выбранном состоянии</div>';
+        return;
+    }
+    
+    const resultsHTML = stateWaves.map((item, index) => {
+        const closenessClass = this.getClosenessClass(item.difference);
+        const stateValue = item.state.toFixed(2);
         
-        if (stateWaves.length === 0) {
-            resultsElement.innerHTML = '<div class="summary-empty">Нет колосков в выбранном состоянии</div>';
-            return;
-        }
+        const pastWaveMarker = item.isPastWave ? '<span style="color: #666; font-style: italic;"> (прошедшая)</span>' : '';
         
-        const resultsHTML = stateWaves.map((item, index) => {
-            const closenessClass = this.getClosenessClass(item.difference);
-            const stateValue = item.state.toFixed(2);
-            
-            return `
-                <div class="summary-item ${closenessClass}">
-                    <div class="summary-item-info">
-                        <div class="summary-item-name">
-                            <span class="summary-item-index">${index + 1}.</span>
-                            ${item.wave.name} (${item.wave.period} дней)
-                        </div>
-                        <div class="summary-item-details">
-                            <span class="summary-item-state">Состояние: ${stateValue}</span>
-                            <span class="summary-item-difference">Разница: ${item.difference.toFixed(2)}</span>
-                            <span class="summary-item-closeness">${item.closeness}</span>
-                        </div>
+        return `
+            <div class="summary-item ${closenessClass}">
+                <div class="summary-item-info">
+                    <div class="summary-item-name">
+                        <span class="summary-item-index">${index + 1}.</span>
+                        ${item.wave.name} (${item.wave.period} дней)${pastWaveMarker}
                     </div>
-                    <div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
-                    <div class="summary-item-actions">
-                        <button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
-                            Показать на визоре
-                        </button>
+                    <div class="summary-item-details">
+                        <span class="summary-item-state">Состояние: ${stateValue}</span>
+                        <span class="summary-item-difference">Разница: ${item.difference.toFixed(2)}</span>
+                        <span class="summary-item-closeness">${item.closeness}</span>
                     </div>
                 </div>
-            `;
-        }).join('');
+                <div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
+                <div class="summary-item-actions">
+                    <button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
+                        Показать на визоре
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    resultsElement.innerHTML = resultsHTML;
+    
+    // Исправленный обработчик событий для кнопок
+    setTimeout(() => {
+        document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+            // Удаляем старый обработчик, если он есть
+            btn.replaceWith(btn.cloneNode(true));
+        });
         
-        resultsElement.innerHTML = resultsHTML;
-    }
+        // Добавляем новые обработчики
+        document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const waveId = btn.dataset.waveId;
+                if (!waveId) return;
+                
+                // ИСПРАВЛЕНО: Правильный селектор для поиска чекбокса
+                const waveIdStr = String(waveId);
+                
+                // Ищем чекбокс в списке волн
+                let checkbox = null;
+                
+                // Сначала ищем в основном списке волн
+                checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveIdStr}"]`);
+                
+                // Если не нашли в основном списке, ищем в группах
+                if (!checkbox) {
+                    checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveIdStr}"]`);
+                }
+                
+                if (checkbox) {
+                    // Переключаем состояние
+                    const isChecked = checkbox.checked;
+                    checkbox.checked = !isChecked;
+                    
+                    // Создаем и запускаем событие change
+                    const changeEvent = new Event('change', {
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    checkbox.dispatchEvent(changeEvent);
+                    
+                    // Также создаем событие click для полноты
+                    const clickEvent = new Event('click', {
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    checkbox.dispatchEvent(clickEvent);
+                    
+                    // Если есть обработчик change, вызываем его напрямую
+                    if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+                        const $checkbox = $(checkbox);
+                        window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
+                    }
+                    
+                    // Визуальная обратная связь
+                    const waveName = btn.closest('.summary-item')?.querySelector('.summary-item-name')?.textContent || 'Колосок';
+                    console.log(`Колосок "${waveName}" ${!isChecked ? 'показан' : 'скрыт'} на визоре`);
+                } else {
+                    // Если чекбокс не найден, используем прямое изменение состояния
+                    if (window.appState && window.appState.waveVisibility) {
+                        const waveIdStr = String(waveId);
+                        const currentState = window.appState.waveVisibility[waveIdStr];
+                        window.appState.waveVisibility[waveIdStr] = currentState === false;
+                        window.appState.save();
+                        
+                        // Обновляем отображение
+                        if (window.waves && window.waves.updatePosition) {
+                            setTimeout(() => {
+                                window.waves.updatePosition();
+                            }, 100);
+                        }
+                        
+                        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                            setTimeout(() => {
+                                window.unifiedListManager.updateWavesList();
+                            }, 100);
+                        }
+                        
+                        // Обновляем сводку
+                        setTimeout(() => {
+                            this.updateSummary();
+                        }, 150);
+                        
+                        console.log(`Колосок ID ${waveId} ${currentState === false ? 'показан' : 'скрыт'} на визоре (прямое управление)`);
+                    }
+                }
+            });
+        });
+    }, 100);
+}
     
     getClosenessClass(difference) {
         if (difference < 0.001) return 'summary-item-exact';
