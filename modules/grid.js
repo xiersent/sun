@@ -174,38 +174,43 @@ class GridManager {
 		}
 	}
     
-	createYAxisLabels() {
-		if (!this.staticElementsContainer) return;
-		
-		const zeroLabel = document.createElement('div');
-		zeroLabel.className = 'labels y-labels';
-		zeroLabel.style.position = 'absolute';
-		zeroLabel.style.top = '50%';
-		zeroLabel.style.transform = 'translateY(-50%)';
-		zeroLabel.style.left = '10px';
-		zeroLabel.textContent = '0';
-		this.staticElementsContainer.appendChild(zeroLabel);
-		
-		for (let i = 1; i <= 4; i++) {
-			const labelTop = document.createElement('div');
-			labelTop.className = 'labels y-labels';
-			labelTop.style.position = 'absolute';
-			labelTop.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
-			labelTop.style.transform = 'translateY(-50%)';
-			labelTop.style.left = '10px';
-			labelTop.textContent = i + 1;
-			this.staticElementsContainer.appendChild(labelTop);
-			
-			const labelBottom = document.createElement('div');
-			labelBottom.className = 'labels y-labels';
-			labelBottom.style.position = 'absolute';
-			labelBottom.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
-			labelBottom.style.transform = 'translateY(-50%)';
-			labelBottom.style.left = '10px';
-			labelBottom.textContent = -(i + 1);
-			this.staticElementsContainer.appendChild(labelBottom);
-		}
-	}
+createYAxisLabels() {
+    if (!this.staticElementsContainer) return;
+    
+    // Центр (0)
+    const zeroLabel = document.createElement('div');
+    zeroLabel.className = 'labels y-labels';
+    zeroLabel.style.position = 'absolute';
+    zeroLabel.style.top = '50%';
+    zeroLabel.style.transform = 'translateY(-50%)';
+    zeroLabel.style.left = '10px';
+    zeroLabel.textContent = '0';
+    this.staticElementsContainer.appendChild(zeroLabel);
+    
+    // Положительные значения (1-5)
+    for (let i = 1; i <= 5; i++) {
+        const labelTop = document.createElement('div');
+        labelTop.className = 'labels y-labels';
+        labelTop.style.position = 'absolute';
+        labelTop.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
+        labelTop.style.transform = 'translateY(-50%)';
+        labelTop.style.left = '10px';
+        labelTop.textContent = i; // 1, 2, 3, 4, 5
+        this.staticElementsContainer.appendChild(labelTop);
+    }
+    
+    // Отрицательные значения (-1 до -5)
+    for (let i = 1; i <= 5; i++) {
+        const labelBottom = document.createElement('div');
+        labelBottom.className = 'labels y-labels';
+        labelBottom.style.position = 'absolute';
+        labelBottom.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
+        labelBottom.style.transform = 'translateY(-50%)';
+        labelBottom.style.left = '10px';
+        labelBottom.textContent = -i; // -1, -2, -3, -4, -5
+        this.staticElementsContainer.appendChild(labelBottom);
+    }
+}
     
     clearGrid() {
         const oldContainer = document.querySelector('.grid-absolute-container');
