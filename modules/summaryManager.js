@@ -257,13 +257,23 @@ class SummaryManager {
         return results;
     }
     
-    getClosenessLevel(difference) {
-        if (difference < 0.001) return 'Экстремум';
-        if (difference < 0.1) return 'очень близко';
-        if (difference < 0.3) return 'близко';
-        if (difference < 0.5) return 'довольно близко';
-        return 'рядом';
-    }
+	getClosenessLevel(difference) {
+		// Если разница очень маленькая (точное попадание)
+		if (difference < 0.001) {
+			// Определяем метку в зависимости от целевого состояния
+			if (this.currentState === 0) {
+				return 'Эквилибриум';
+			} else if (this.currentState === -5 || this.currentState === 5) {
+				return 'Экстремум';
+			}
+		}
+		
+		// Старая логика для остальных случаев
+		if (difference < 0.1) return 'очень близко';
+		if (difference < 0.3) return 'близко';
+		if (difference < 0.5) return 'довольно близко';
+		return 'рядом';
+	}
     
     updateResults(stateWaves) {
         const resultsElement = this.elements.summaryResults;
