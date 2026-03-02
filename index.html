@@ -22,15 +22,18 @@
             <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
             <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
 
-			<div class="warning-info">
-				<div class="warning-info-item"><strong>Браузер:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="browserInfo">Загрузка...</span></div>
-				<div class="warning-info-item"><strong>Беног от:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="frameworkInfo">...</span></div>
-				<div class="warning-info-item"><strong><span style="transform: scaleX(-1); display: inline-block; font-weight: bold;">?</span>0<span style="transform: scaleX(1); display: inline-block; font-weight: bold;">?</span>:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="earInfo">...</span></div>
-				<div class="warning-info-item"><strong>Прошивка от:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="firmwareInfo">...</span></div>
-				<div class="warning-info-item"><strong>Воркер от:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="workerInfo">...</span></div>
-				<div class="warning-info-item"><strong>Плагины от:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="pluginInfo">...</span></div>
-				<div class="warning-info-item"><strong>Обновления от:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="versionInfo">Загрузка...</span></div>
-				<div class="warning-info-item"><strong>Сейчас:</strong><span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span><span id="todayInfo" style="font-weight: normal !important; color: #666 !important;">Загрузка...</span></div>
+			<div class="warning-info" id="dynamicVersionContainer">
+				<div class="warning-info-item">
+					<strong>Браузер:</strong>
+					<span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
+					<span id="browserInfo">Загрузка...</span>
+				</div>
+				<!-- Сюда будут динамически добавляться элементы из versions.json -->
+				<div class="warning-info-item">
+					<strong>Сейчас:</strong>
+					<span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
+					<span id="todayInfo">Загрузка...</span>
+				</div>
 			</div>
 
 			<div class="parable-btn-wrapper">

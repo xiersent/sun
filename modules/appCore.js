@@ -1,4 +1,4 @@
-// modules/appCore.js
+
 class AppCore {
     constructor() {
         this.elements = {};
@@ -16,7 +16,8 @@ class AppCore {
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
             'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
             'summaryStateSelect', 'summaryResults',
-            'readParableBtn', 'parableModal', 'parableContent', 'closeParableBtn'
+            'readParableBtn', 'parableModal', 'parableContent', 'closeParableBtn',
+            'dynamicVersionContainer'
         ];
         
         ids.forEach(id => {
@@ -43,7 +44,6 @@ class AppCore {
             
             if (isMobile) {
                 document.body.classList.add('mobile-device');
-                // Сразу показываем мобильную версию без задержек
                 this.showMobileWarning();
                 return;
             }
@@ -117,17 +117,8 @@ class AppCore {
         // Сохраняем текущие версии после успешной загрузки
         setTimeout(async () => {
             try {
-                const currentVersions = {
-                    version: await this.getVersion(),
-                    firmware: await this.getFirmwareDate(),
-                    framework: await this.getFrameworkDate(),
-                    plugin: await this.getPluginDate(),
-					ear: await this.getEarDate(),
-					worker: await this.getWorkerDate(),
-					browser: this.getBrowserInfo(),
-                    timestamp: new Date().getTime()
-                };
-                this.saveCurrentVersions(currentVersions);
+                const versions = await this.loadVersions();
+                this.saveCurrentVersions(versions);
             } catch (error) {
                 // Игнорируем ошибки сохранения
             }
@@ -162,70 +153,20 @@ class AppCore {
         }
     }
 
-	async getWorkerDate() {
-		try {
-			const timestamp = new Date().getTime();
-			const response = await fetch(`worker.txt?t=${timestamp}`);
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл ненайден)';
-		} catch (error) {
-			return '(ошибка загрузки)';
-		}
-	}
-
-    async getFirmwareDate() {
+    // НОВЫЙ МЕТОД: Загрузка всех версий из одного JSON файла
+    async loadVersions() {
         try {
             const timestamp = new Date().getTime();
-            const response = await fetch(`firmware.txt?t=${timestamp}`);
+            const response = await fetch(`versions.json?t=${timestamp}`);
             if (response.ok) {
-                return (await response.text()).trim();
+                return await response.json();
             }
-            return '(файл ненайден)';
+            return [];
         } catch (error) {
-            return '(ошибка загрузки)';
+            console.error('Error loading versions:', error);
+            return [];
         }
     }
-
-    async getVersion() {
-        try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(`version.txt?t=${timestamp}`);
-            if (response.ok) {
-                return (await response.text()).trim();
-            }
-            return '(файл ненайден)';
-        } catch (error) {
-            return '(ошибка загрузки)';
-        }
-    }
-
-    async getPluginDate() {
-        try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(`plugin.txt?t=${timestamp}`);
-            if (response.ok) {
-                return (await response.text()).trim();
-            }
-            return '(файл ненайден)';
-        } catch (error) {
-            return '(ошибка загрузки)';
-        }
-    }
-
-	async getEarDate() {
-		try {
-			const timestamp = new Date().getTime();
-			const response = await fetch(`ear.txt?t=${timestamp}`);
-			if (response.ok) {
-				return (await response.text()).trim();
-			}
-			return '(файл ненайден)';
-		} catch (error) {
-			return '(ошибка загрузки)';
-		}
-	}
 
     showDesktopWarning() {
         const warningOverlay = document.getElementById('warningOverlay');
@@ -293,153 +234,210 @@ class AppCore {
             return {};
         }
     }
-		
-	saveCurrentVersions(versions) {
-		try {
-			// Добавляем информацию о браузере
-			const currentVersions = {
-				...versions,
-				browser: this.getBrowserInfo(),
-				timestamp: new Date().getTime()
-			};
-			localStorage.setItem(this.versionStorageKey, JSON.stringify(currentVersions));
-		} catch (error) {
-			// Игнорируем ошибки сохранения
-		}
-	}
+    
+    // ОБНОВЛЕННЫЙ МЕТОД: Сохранение версий
+    saveCurrentVersions(versions) {
+        try {
+            const versionsObj = {
+                timestamp: new Date().getTime(),
+                browser: this.getBrowserInfo()
+            };
+            
+            versions.forEach(entry => {
+                versionsObj[entry.id] = entry.content;
+            });
+            
+            localStorage.setItem(this.versionStorageKey, JSON.stringify(versionsObj));
+        } catch (error) {
+            // Игнорируем ошибки сохранения
+        }
+    }
     
     // Проверяем, изменилась ли версия
-    isVersionChanged(type, currentValue) {
+    isVersionChanged(id, currentValue) {
         const lastVersions = this.getLastVersions();
-        const lastValue = lastVersions[type];
+        const lastValue = lastVersions[id];
         
         // Если нет сохраненной версии - не выделяем
         if (!lastValue) return false;
         
         // Сравниваем строки
         return currentValue !== lastValue && 
-               currentValue !== '(файл ненайден)' && 
-               currentValue !== '(ошибка загрузки)';
+               currentValue !== 'неизвестно' && 
+               !currentValue.includes('ошибка');
     }
     
-	fillWarningInfo(warningBox) {
-		// Заполняем информацию о браузере - проверяем изменения
-		const browserInfoEl = warningBox.querySelector('#browserInfo');
-		if (browserInfoEl) {
-			const browserInfo = this.getBrowserInfo();
-			browserInfoEl.textContent = browserInfo;
-			
-			// Проверяем, изменился ли браузер
-			const lastVersions = this.getLastVersions();
-			const lastBrowser = lastVersions.browser;
-			
-			if (lastBrowser && browserInfo !== lastBrowser) {
-				browserInfoEl.style.fontWeight = '700';
-				browserInfoEl.style.color = '#000000';
-			}
-		}
-		
-		// Текущее время - НЕ выделяем жирным
-		const todayInfoEl = warningBox.querySelector('#todayInfo');
-		if (todayInfoEl) {
-			const today = new Date();
-			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-			const timeFormatted = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
-			todayInfoEl.textContent = `${todayFormatted} ${timeFormatted}`;
-			
-			// ВАЖНО: НЕ выделяем жирным и НЕ проверяем изменения
-			todayInfoEl.style.fontWeight = '400'; // нормальный вес
-			todayInfoEl.style.color = '#666'; // обычный цвет
-		}
-		
-		// Загружаем остальную информацию
-		this.loadVersionInfo();
-		this.loadFirmwareInfo();
-		this.loadPluginInfo();
-		this.loadFrameworkInfo();
-		this.loadWorkerInfo();
-		this.loadEarInfo();
-	}
+    // ОБНОВЛЕННЫЙ МЕТОД: Заполнение информации в предупреждении
+    async fillWarningInfo(warningBox) {
+        // Информация о браузере
+        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        if (browserInfoEl) {
+            const browserInfo = this.getBrowserInfo();
+            browserInfoEl.textContent = browserInfo;
+            
+            // Проверяем изменения браузера
+            const lastVersions = this.getLastVersions();
+            if (lastVersions.browser && browserInfo !== lastVersions.browser) {
+                browserInfoEl.style.fontWeight = '700';
+                browserInfoEl.style.color = '#000000';
+            }
+        }
 
-	updateMobileWarningContent(warningBox) {
-		const warningTitle = warningBox.querySelector('.warning-title');
-		if (warningTitle) {
-			warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-			warningTitle.style.color = '#000000';
-		}
-		
-		// Заполняем информацию
-		const browserInfoEl = warningBox.querySelector('#browserInfo');
-		if (browserInfoEl) {
-			browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-		}
-		
-		// ВАЖНОЕ ИСПРАВЛЕНИЕ: Добавляем отображение времени на мобильной версии
-		const todayInfoEl = warningBox.querySelector('#todayInfo');
-		if (todayInfoEl) {
-			const today = new Date();
-			
-			// Форматируем дату
-			const todayFormatted = `${today.getDate().toString().padStart(2, '0')}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getFullYear()}`;
-			
-			// Форматируем время
-			const timeFormatted = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}:${today.getSeconds().toString().padStart(2, '0')}`;
-			
-			// Объединяем дату и время КАК НА ДЕСКТОПЕ
-			todayInfoEl.textContent = `${todayFormatted} ${timeFormatted}`;
-			
-			// ===== ДОБАВЛЕНО: Выделяем так же как на десктопе =====
-			// На десктопе "сегодня" всегда выделяется, так как время всегда меняется
-			todayInfoEl.style.fontWeight = '700';
-			todayInfoEl.style.color = '#000000';
-		}
-		
-		// Показываем информацию о системе
-		const warningInfo = warningBox.querySelector('.warning-info');
-		if (warningInfo) {
-			warningInfo.style.display = 'flex';
-		}
-		
-		// ==== КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Используем те же методы загрузки ====
-		// которые сами проверяют изменения и выделяют
-		this.loadVersionInfo();
-		this.loadFirmwareInfo();
-		this.loadPluginInfo();
-		this.loadFrameworkInfo();
-		this.loadWorkerInfo();
-		this.loadEarInfo();
-		
-		// Для остальных полей тоже принудительно выделяем (как на десктопе)
-		const fields = ['firmwareInfo', 'frameworkInfo', 'pluginInfo', 'earInfo'];
-		fields.forEach(fieldId => {
-			const fieldEl = warningBox.querySelector(`#${fieldId}`);
-			if (fieldEl) {
-				// Даем время загрузиться, потом обновляем
-				setTimeout(() => {
-					if (fieldEl.textContent && 
-						fieldEl.textContent !== 'Загрузка...' && 
-						fieldEl.textContent !== 'неизвестно' &&
-						!fieldEl.textContent.includes('ошибка') &&
-						!fieldEl.textContent.includes('файл ненайден')) {
-						
-						// Проверяем, было ли изменение (аналогично десктопу)
-						const currentValue = fieldEl.textContent;
-						const lastVersions = this.getLastVersions();
-						
-						// Для мобильных пока просто выделяем все
-						fieldEl.style.fontWeight = '700';
-						fieldEl.style.color = '#000000';
-					}
-				}, 500);
-			}
-		});
-		
-		// Добавляем кнопку проверки
-		this.addMobileRetryButton(warningBox);
-	}
+        // Текущее время
+        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        if (todayInfoEl) {
+            const today = new Date();
+            todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
+            todayInfoEl.style.fontWeight = '400';
+            todayInfoEl.style.color = '#666';
+        }
+
+        // Загружаем версии из JSON
+        const versions = await this.loadVersions();
+        
+        // Получаем контейнер для динамических элементов
+        const container = warningBox.querySelector('#dynamicVersionContainer');
+        if (!container) return;
+
+        // Находим элемент "Сейчас" (последний дочерний элемент)
+        const items = container.querySelectorAll('.warning-info-item');
+        const todayItem = items[items.length - 1];
+        const browserItem = items[0];
+        
+        // Удаляем все старые динамические элементы (все кроме браузера и "сейчас")
+        for (let i = items.length - 1; i >= 0; i--) {
+            if (items[i] !== todayItem && items[i] !== browserItem) {
+                items[i].remove();
+            }
+        }
+
+        // Создаем элементы для каждой записи из JSON
+        versions.forEach(entry => {
+            const item = document.createElement('div');
+            item.className = 'warning-info-item';
+            item.dataset.versionId = entry.id;
+            
+            const titleSpan = document.createElement('strong');
+            titleSpan.textContent = entry.title;
+            
+            const separatorSpan = document.createElement('span');
+            separatorSpan.style.flex = '1';
+            separatorSpan.style.borderBottom = '1px dotted';
+            separatorSpan.style.alignSelf = 'stretch';
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'version-value';
+            
+            // Автоматически определяем многострочность по наличию \n
+            if (entry.content && entry.content.includes('\n')) {
+                valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
+                valueSpan.style.whiteSpace = 'pre-wrap';
+                valueSpan.style.textAlign = 'left';
+            } else {
+                valueSpan.textContent = entry.content || 'неизвестно';
+            }
+            
+            // Проверяем изменения
+            if (this.isVersionChanged(entry.id, entry.content)) {
+                valueSpan.style.fontWeight = '700';
+                valueSpan.style.color = '#000000';
+            }
+            
+            item.appendChild(titleSpan);
+            item.appendChild(separatorSpan);
+            item.appendChild(valueSpan);
+            
+            // Вставляем перед элементом "Сейчас"
+            container.insertBefore(item, todayItem);
+        });
+
+        // Сохраняем версии для будущих проверок
+        this.saveCurrentVersions(versions);
+    }
+
+    updateMobileWarningContent(warningBox) {
+        const warningTitle = warningBox.querySelector('.warning-title');
+        if (warningTitle) {
+            warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
+            warningTitle.style.color = '#000000';
+        }
+        
+        // Заполняем информацию
+        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
+        }
+        
+        // Текущее время
+        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        if (todayInfoEl) {
+            const today = new Date();
+            todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
+            todayInfoEl.style.fontWeight = '700';
+            todayInfoEl.style.color = '#000000';
+        }
+        
+        // Показываем информацию о системе
+        const warningInfo = warningBox.querySelector('.warning-info');
+        if (warningInfo) {
+            warningInfo.style.display = 'flex';
+        }
+        
+        // Загружаем версии для мобильной версии
+        this.loadVersions().then(versions => {
+            const container = warningBox.querySelector('#dynamicVersionContainer');
+            if (!container) return;
+            
+            const items = container.querySelectorAll('.warning-info-item');
+            const todayItem = items[items.length - 1];
+            const browserItem = items[0];
+            
+            // Удаляем старые динамические элементы
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (items[i] !== todayItem && items[i] !== browserItem) {
+                    items[i].remove();
+                }
+            }
+            
+            // Добавляем новые элементы
+            versions.forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'warning-info-item';
+                
+                const titleSpan = document.createElement('strong');
+                titleSpan.textContent = entry.title;
+                
+                const separatorSpan = document.createElement('span');
+                separatorSpan.style.flex = '1';
+                separatorSpan.style.borderBottom = '1px dotted';
+                separatorSpan.style.alignSelf = 'stretch';
+                
+                const valueSpan = document.createElement('span');
+                
+                if (entry.content && entry.content.includes('\n')) {
+                    valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
+                    valueSpan.style.whiteSpace = 'pre-wrap';
+                } else {
+                    valueSpan.textContent = entry.content || 'неизвестно';
+                }
+                
+                // На мобильных выделяем все поля жирным
+                valueSpan.style.fontWeight = '700';
+                valueSpan.style.color = '#000000';
+                
+                item.appendChild(titleSpan);
+                item.appendChild(separatorSpan);
+                item.appendChild(valueSpan);
+                
+                container.insertBefore(item, todayItem);
+            });
+        });
+        
+        // Добавляем кнопку проверки
+        this.addMobileRetryButton(warningBox);
+    }
     
     addMobileRetryButton(warningBox) {
-        // Удаляем старую кнопку, если есть
         const oldButton = warningBox.querySelector('.mobile-retry-btn');
         if (oldButton) {
             oldButton.remove();
@@ -458,145 +456,6 @@ class AppCore {
         });
         
         warningBox.appendChild(retryButton);
-    }
-
-
-	loadWorkerInfo() {
-		const workerInfoEl = document.getElementById('workerInfo');
-		if (workerInfoEl) {
-			workerInfoEl.textContent = 'Загрузка...';
-			this.getWorkerDate().then(workerDate => {
-				if (workerInfoEl) {
-					const workerText = workerDate || 'неизвестно';
-					workerInfoEl.textContent = workerText;
-					
-					// Проверяем изменения
-					if (this.isVersionChanged('worker', workerText)) {
-						workerInfoEl.style.fontWeight = '700';
-						workerInfoEl.style.color = '#000000';
-					}
-				}
-			}).catch(error => {
-				if (workerInfoEl) {
-					workerInfoEl.textContent = 'неизвестно';
-				}
-			});
-		}
-	}
-    
-    loadVersionInfo() {
-        const versionInfoEl = document.getElementById('versionInfo');
-        if (versionInfoEl) {
-            versionInfoEl.textContent = 'Загрузка...';
-            this.getVersion().then(version => {
-                if (versionInfoEl) {
-                    const versionText = version || 'неизвестно';
-                    versionInfoEl.textContent = versionText;
-                    
-                    // Проверяем изменения
-                    if (this.isVersionChanged('version', versionText)) {
-                        versionInfoEl.style.fontWeight = '700';
-                        versionInfoEl.style.color = '#000000';
-                    }
-                }
-            }).catch(error => {
-                if (versionInfoEl) {
-                    versionInfoEl.textContent = 'неизвестно';
-                }
-            });
-        }
-    }
-    
-    loadFirmwareInfo() {
-        const firmwareInfoEl = document.getElementById('firmwareInfo');
-        if (firmwareInfoEl) {
-            firmwareInfoEl.textContent = 'Загрузка...';
-            this.getFirmwareDate().then(firmwareDate => {
-                if (firmwareInfoEl) {
-                    const firmwareText = firmwareDate || 'неизвестно';
-                    firmwareInfoEl.textContent = firmwareText;
-                    
-                    // Проверяем изменения
-                    if (this.isVersionChanged('firmware', firmwareText)) {
-                        firmwareInfoEl.style.fontWeight = '700';
-                        firmwareInfoEl.style.color = '#000000';
-                    }
-                }
-            }).catch(error => {
-                if (firmwareInfoEl) {
-                    firmwareInfoEl.textContent = 'неизвестно';
-                }
-            });
-        }
-    }
-    
-    loadPluginInfo() {
-        const pluginInfoEl = document.getElementById('pluginInfo');
-        if (pluginInfoEl) {
-            pluginInfoEl.textContent = 'Загрузка...';
-            this.getPluginDate().then(pluginDate => {
-                if (pluginInfoEl) {
-                    const pluginText = pluginDate || 'неизвестно';
-                    pluginInfoEl.textContent = pluginText;
-                    
-                    // Проверяем изменения
-                    if (this.isVersionChanged('plugin', pluginText)) {
-                        pluginInfoEl.style.fontWeight = '700';
-                        pluginInfoEl.style.color = '#000000';
-                    }
-                }
-            }).catch(error => {
-                if (pluginInfoEl) {
-                    pluginInfoEl.textContent = 'неизвестно';
-                }
-            });
-        }
-    }
-
-	loadEarInfo() {
-		const earInfoEl = document.getElementById('earInfo');
-		if (earInfoEl) {
-			earInfoEl.textContent = 'Загрузка...';
-			this.getEarDate().then(earDate => {
-				if (earInfoEl) {
-					const earText = earDate || 'неизвестно';
-					earInfoEl.textContent = earText;
-					
-					// Проверяем изменения
-					if (this.isVersionChanged('ear', earText)) {
-						earInfoEl.style.fontWeight = '700';
-						earInfoEl.style.color = '#000000';
-					}
-				}
-			}).catch(error => {
-				if (earInfoEl) {
-					earInfoEl.textContent = 'неизвестно';
-				}
-			});
-		}
-	}
-    
-    loadFrameworkInfo() {
-        const frameworkInfoEl = document.getElementById('frameworkInfo');
-        if (frameworkInfoEl) {
-            frameworkInfoEl.textContent = 'Загрузка...';
-            this.getFrameworkDate().then(frameworkDate => {
-                if (frameworkInfoEl) {
-                    const frameworkText = frameworkDate || 'неизвестно';
-                    frameworkInfoEl.textContent = frameworkText;
-                    
-                    // Проверяем изменения
-                    if (this.isVersionChanged('framework', frameworkText)) {
-                        frameworkInfoEl.style.fontWeight = '700';
-                        frameworkInfoEl.style.color = '#000000';
-                    }
-                }
-            }).catch(error => {
-                if (frameworkInfoEl) {
-                    frameworkInfoEl.textContent = 'неизвестно';
-                }
-            });
-        }
     }
     
     isMobileDevice() {
@@ -694,9 +553,7 @@ class AppCore {
                 const warningOverlay = document.getElementById('warningOverlay');
                 const warningBox = document.querySelector('.warning-box');
                 if (warningOverlay && warningBox) {
-                    // Удаляем оба класса (desktop и mobile)
                     warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
-                    // Скрываем весь оверлей, а не только бокс
                     warningOverlay.classList.add('hidden');
                     warningBox.classList.add('hidden');
                     document.body.style.overflow = 'auto';
@@ -821,7 +678,7 @@ class AppCore {
                         if (window.importExport && window.importExport.showDBImportStatus) {
                             window.importExport.showDBImportStatus(`Ошибка загрузки базы: ${error.message}`, 'error');
                         }
-                        document.getElementById('dbImportTextarea').value = `❌ ОШИБКА ЗАГРРУЗКИ БАЗЫ ДАННЫХ\n\nФайл: ${file.name}\nОшибка: ${error.message}`;
+                        document.getElementById('dbImportTextarea').value = `❌ ОШИБКА ЗАГРУЗКИ БАЗЫ ДАННЫХ\n\nФайл: ${file.name}\nОшибка: ${error.message}`;
                     }
                 }
             });
@@ -962,19 +819,6 @@ class AppCore {
             } else {
                 document.body.style.overflow = 'hidden';
             }
-        }
-    }
-
-    async getFrameworkDate() {
-        try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(`framework.txt?t=${timestamp}`);
-            if (response.ok) {
-                return (await response.text()).trim();
-            }
-            return '(файл ненайден)';
-        } catch (error) {
-            return '(ошибка загрузки)';
         }
     }
 }
