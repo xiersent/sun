@@ -113,3 +113,39 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 
 /* Заблокированные чекбоксы видимости */
 .wave-visibility-check:disabled{opacity: 0.5; cursor: not-allowed;}
+
+/* styles/components.css - добавить в конец файла */
+
+/* Скрытая кнопка выбора цвета на слове "любимому" */
+.color-picker-trigger {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    border-bottom: none !important;
+    text-decoration: none !important;
+    color: inherit !important;
+    background: transparent;
+}
+
+.color-picker-trigger:hover {
+    opacity: 0.8;
+}
+
+.hidden-color-picker {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Убедимся, что слово выглядит как обычный текст */
+.parable-modal-content .color-picker-trigger,
+.parable-modal-content .color-picker-trigger:hover {
+    border-bottom: none !important;
+    text-decoration: none !important;
+    background: transparent !important;
+}
