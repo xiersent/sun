@@ -1,4 +1,4 @@
-
+// modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -153,7 +153,7 @@ class AppCore {
         }
     }
 
-    // НОВЫЙ МЕТОД: Загрузка всех версий из одного JSON файла
+    // Загрузка всех версий из одного JSON файла
     async loadVersions() {
         try {
             const timestamp = new Date().getTime();
@@ -235,12 +235,13 @@ class AppCore {
         }
     }
     
-    // ОБНОВЛЕННЫЙ МЕТОД: Сохранение версий
+    // Сохранение версий
     saveCurrentVersions(versions) {
         try {
             const versionsObj = {
                 timestamp: new Date().getTime(),
-                browser: this.getBrowserInfo()
+                browser: this.getBrowserInfo(),
+                os: this.getOSInfo()
             };
             
             versions.forEach(entry => {
@@ -253,34 +254,55 @@ class AppCore {
         }
     }
     
-    // Проверяем, изменилась ли версия
-    isVersionChanged(id, currentValue) {
-        const lastVersions = this.getLastVersions();
-        const lastValue = lastVersions[id];
-        
-        // Если нет сохраненной версии - не выделяем
-        if (!lastValue) return false;
-        
-        // Сравниваем строки
-        return currentValue !== lastValue && 
-               currentValue !== 'неизвестно' && 
-               !currentValue.includes('ошибка');
-    }
-    
-    // ОБНОВЛЕННЫЙ МЕТОД: Заполнение информации в предупреждении
+    // Заполнение информации в предупреждении - БЕЗ ПОДСВЕТКИ
     async fillWarningInfo(warningBox) {
         // Информация о браузере
         const browserInfoEl = warningBox.querySelector('#browserInfo');
         if (browserInfoEl) {
-            const browserInfo = this.getBrowserInfo();
-            browserInfoEl.textContent = browserInfo;
+            browserInfoEl.textContent = this.getBrowserInfo();
+        }
+
+        // Информация об ОС
+        const osInfoEl = document.createElement('div');
+        osInfoEl.className = 'warning-info-item';
+        osInfoEl.id = 'osInfoItem';
+        
+        const osTitleSpan = document.createElement('strong');
+        osTitleSpan.textContent = 'Операционная система:';
+        
+        const osSeparatorSpan = document.createElement('span');
+        osSeparatorSpan.style.flex = '1';
+        osSeparatorSpan.style.borderBottom = '1px dotted';
+        osSeparatorSpan.style.alignSelf = 'stretch';
+        
+        const osValueSpan = document.createElement('span');
+        osValueSpan.id = 'osInfo';
+        osValueSpan.textContent = this.getOSInfo();
+        
+        osInfoEl.appendChild(osTitleSpan);
+        osInfoEl.appendChild(osSeparatorSpan);
+        osInfoEl.appendChild(osValueSpan);
+
+        // Информация об архитектуре
+        const archInfo = this.getArchitecture();
+        if (archInfo) {
+            const archEl = document.createElement('div');
+            archEl.className = 'warning-info-item';
             
-            // Проверяем изменения браузера
-            const lastVersions = this.getLastVersions();
-            if (lastVersions.browser && browserInfo !== lastVersions.browser) {
-                browserInfoEl.style.fontWeight = '700';
-                browserInfoEl.style.color = '#000000';
-            }
+            const archTitleSpan = document.createElement('strong');
+            archTitleSpan.textContent = 'Архитектура:';
+            
+            const archSeparatorSpan = document.createElement('span');
+            archSeparatorSpan.style.flex = '1';
+            archSeparatorSpan.style.borderBottom = '1px dotted';
+            archSeparatorSpan.style.alignSelf = 'stretch';
+            
+            const archValueSpan = document.createElement('span');
+            archValueSpan.textContent = archInfo;
+            
+            archEl.appendChild(archTitleSpan);
+            archEl.appendChild(archSeparatorSpan);
+            archEl.appendChild(archValueSpan);
         }
 
         // Текущее время
@@ -288,8 +310,6 @@ class AppCore {
         if (todayInfoEl) {
             const today = new Date();
             todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
-            todayInfoEl.style.fontWeight = '400';
-            todayInfoEl.style.color = '#666';
         }
 
         // Загружаем версии из JSON
@@ -309,6 +329,11 @@ class AppCore {
             if (items[i] !== todayItem && items[i] !== browserItem) {
                 items[i].remove();
             }
+        }
+
+        // Вставляем информацию об ОС после браузера
+        if (browserItem) {
+            container.insertBefore(osInfoEl, browserItem.nextSibling);
         }
 
         // Создаем элементы для каждой записи из JSON
@@ -337,12 +362,6 @@ class AppCore {
                 valueSpan.textContent = entry.content || 'неизвестно';
             }
             
-            // Проверяем изменения
-            if (this.isVersionChanged(entry.id, entry.content)) {
-                valueSpan.style.fontWeight = '700';
-                valueSpan.style.color = '#000000';
-            }
-            
             item.appendChild(titleSpan);
             item.appendChild(separatorSpan);
             item.appendChild(valueSpan);
@@ -355,11 +374,11 @@ class AppCore {
         this.saveCurrentVersions(versions);
     }
 
+    // Мобильная версия - БЕЗ ПОДСВЕТКИ
     updateMobileWarningContent(warningBox) {
         const warningTitle = warningBox.querySelector('.warning-title');
         if (warningTitle) {
             warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
-            warningTitle.style.color = '#000000';
         }
         
         // Заполняем информацию
@@ -368,19 +387,42 @@ class AppCore {
             browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
         }
         
+        // Информация об ОС для мобильных
+        const osInfoEl = document.createElement('div');
+        osInfoEl.className = 'warning-info-item';
+        
+        const osTitleSpan = document.createElement('strong');
+        osTitleSpan.textContent = 'Операционная система:';
+        
+        const osSeparatorSpan = document.createElement('span');
+        osSeparatorSpan.style.flex = '1';
+        osSeparatorSpan.style.borderBottom = '1px dotted';
+        osSeparatorSpan.style.alignSelf = 'stretch';
+        
+        const osValueSpan = document.createElement('span');
+        osValueSpan.textContent = this.getOSInfo();
+        
+        osInfoEl.appendChild(osTitleSpan);
+        osInfoEl.appendChild(osSeparatorSpan);
+        osInfoEl.appendChild(osValueSpan);
+        
         // Текущее время
         const todayInfoEl = warningBox.querySelector('#todayInfo');
         if (todayInfoEl) {
             const today = new Date();
             todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
-            todayInfoEl.style.fontWeight = '700';
-            todayInfoEl.style.color = '#000000';
         }
         
         // Показываем информацию о системе
         const warningInfo = warningBox.querySelector('.warning-info');
         if (warningInfo) {
             warningInfo.style.display = 'flex';
+            
+            // Вставляем ОС после браузера
+            const browserItem = warningBox.querySelector('#browserInfo')?.closest('.warning-info-item');
+            if (browserItem) {
+                browserItem.parentNode.insertBefore(osInfoEl, browserItem.nextSibling);
+            }
         }
         
         // Загружаем версии для мобильной версии
@@ -420,10 +462,6 @@ class AppCore {
                 } else {
                     valueSpan.textContent = entry.content || 'неизвестно';
                 }
-                
-                // На мобильных выделяем все поля жирным
-                valueSpan.style.fontWeight = '700';
-                valueSpan.style.color = '#000000';
                 
                 item.appendChild(titleSpan);
                 item.appendChild(separatorSpan);
@@ -525,6 +563,281 @@ class AppCore {
         }
         
         return "Неизвестный браузер";
+    }
+
+    // Детальное определение ОС
+    getOSInfo() {
+        const ua = navigator.userAgent.toLowerCase();
+        const platform = navigator.platform?.toLowerCase() || '';
+        
+        // === WINDOWS ===
+        if (ua.includes('windows nt')) {
+            const versionMap = {
+                '11.0': 'Windows 11',
+                '10.0': 'Windows 10',
+                '6.3': 'Windows 8.1',
+                '6.2': 'Windows 8',
+                '6.1': 'Windows 7',
+                '6.0': 'Windows Vista',
+                '5.2': 'Windows Server 2003/XP x64',
+                '5.1': 'Windows XP',
+                '5.0': 'Windows 2000'
+            };
+            
+            const match = ua.match(/windows nt ([\d.]+)/);
+            if (match) {
+                const version = match[1];
+                const edition = this.getWindowsEdition(ua);
+                return versionMap[version] 
+                    ? `${versionMap[version]} ${edition}` 
+                    : `Windows ${version} ${edition}`;
+            }
+            
+            if (ua.includes('wow64') || ua.includes('win64')) {
+                return `Windows (${ua.includes('arm') ? 'ARM' : 'x64'})`;
+            }
+            return 'Windows';
+        }
+        
+        // === macOS ===
+        if (ua.includes('mac os x') || ua.includes('macintosh')) {
+            const match = ua.match(/mac os x ([\d_]+)/);
+            if (match) {
+                const version = match[1].replace(/_/g, '.');
+                return this.getMacOSVersion(version);
+            }
+            
+            if (ua.includes('macintosh; arm')) {
+                return 'macOS (Apple Silicon)';
+            }
+            return 'macOS';
+        }
+        
+        // === LINUX ===
+        if (ua.includes('linux')) {
+            return this.getLinuxDistro(ua, platform);
+        }
+        
+        // === iOS ===
+        if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
+            return this.getIOsVersion(ua);
+        }
+        
+        // === Android ===
+        if (ua.includes('android')) {
+            return this.getAndroidVersion(ua);
+        }
+        
+        // === Chrome OS ===
+        if (ua.includes('cros') || ua.includes('chrome os')) {
+            const match = ua.match(/chrome\/([\d.]+)/);
+            if (match) {
+                return `Chrome OS (версия ${match[1]})`;
+            }
+            return 'Chrome OS';
+        }
+        
+        return 'Неизвестная ОС';
+    }
+
+    // Определение редакции Windows
+    getWindowsEdition(ua) {
+        if (ua.includes('wow64') || ua.includes('win64')) {
+            return '(64-bit)';
+        }
+        if (ua.includes('win32') || ua.includes('wow32')) {
+            return '(32-bit)';
+        }
+        if (ua.includes('arm')) {
+            return '(ARM)';
+        }
+        return '';
+    }
+
+    // Детальная версия macOS
+    getMacOSVersion(version) {
+        const [major, minor] = version.split('.').map(Number);
+        
+        const macVersions = {
+            '15.0': 'macOS Sequoia 15.0',
+            '14.0': 'macOS Sonoma 14.0',
+            '13.0': 'macOS Ventura 13.0',
+            '12.0': 'macOS Monterey 12.0',
+            '11.0': 'macOS Big Sur 11.0',
+            '10.15': 'macOS Catalina 10.15',
+            '10.14': 'macOS Mojave 10.14',
+            '10.13': 'macOS High Sierra 10.13',
+            '10.12': 'macOS Sierra 10.12',
+            '10.11': 'OS X El Capitan 10.11',
+            '10.10': 'OS X Yosemite 10.10',
+            '10.9': 'OS X Mavericks 10.9',
+            '10.8': 'OS X Mountain Lion 10.8',
+            '10.7': 'OS X Lion 10.7',
+            '10.6': 'Mac OS X Snow Leopard 10.6'
+        };
+        
+        for (const [ver, name] of Object.entries(macVersions)) {
+            if (version.startsWith(ver)) {
+                return name;
+            }
+        }
+        
+        const arch = this.isAppleSilicon() ? 'Apple Silicon' : 'Intel';
+        return `macOS ${version} (${arch})`;
+    }
+
+    // Проверка Apple Silicon
+    isAppleSilicon() {
+        const ua = navigator.userAgent.toLowerCase();
+        return ua.includes('macintosh; arm');
+    }
+
+    // Детектор Linux дистрибутивов
+    getLinuxDistro(ua, platform) {
+        const distros = [
+            { pattern: 'ubuntu', name: 'Ubuntu' },
+            { pattern: 'debian', name: 'Debian' },
+            { pattern: 'fedora', name: 'Fedora' },
+            { pattern: 'centos', name: 'CentOS' },
+            { pattern: 'red hat', name: 'Red Hat' },
+            { pattern: 'arch', name: 'Arch Linux' },
+            { pattern: 'manjaro', name: 'Manjaro' },
+            { pattern: 'opensuse', name: 'openSUSE' },
+            { pattern: 'mint', name: 'Linux Mint' },
+            { pattern: 'kali', name: 'Kali Linux' },
+            { pattern: 'alpine', name: 'Alpine Linux' },
+            { pattern: 'gentoo', name: 'Gentoo' },
+            { pattern: 'slackware', name: 'Slackware' },
+            { pattern: 'mx linux', name: 'MX Linux' },
+            { pattern: 'elementary', name: 'elementary OS' },
+            { pattern: 'zorin', name: 'Zorin OS' },
+            { pattern: 'pop!_os', name: 'Pop!_OS' },
+            { pattern: 'raspbian', name: 'Raspbian' }
+        ];
+        
+        for (const distro of distros) {
+            if (ua.includes(distro.pattern)) {
+                return distro.name;
+            }
+        }
+        
+        // Определяем архитектуру
+        if (platform.includes('x86_64') || platform.includes('x64')) {
+            return 'Linux (64-bit)';
+        }
+        if (platform.includes('i686') || platform.includes('i386')) {
+            return 'Linux (32-bit)';
+        }
+        if (platform.includes('arm')) {
+            return 'Linux (ARM)';
+        }
+        
+        return 'Linux (неизвестный дистрибутив)';
+    }
+
+    // Детальная версия iOS
+    getIOsVersion(ua) {
+        const match = ua.match(/os ([\d_]+) like mac os x/);
+        const device = this.getIOsDevice(ua);
+        
+        if (match) {
+            const version = match[1].replace(/_/g, '.');
+            const [major, minor] = version.split('.').map(Number);
+            
+            if (major === 17) return `iOS 17.${minor || 0} (${device})`;
+            if (major === 16) return `iOS 16.${minor || 0} (${device})`;
+            if (major === 15) return `iOS 15.${minor || 0} (${device})`;
+            if (major === 14) return `iOS 14.${minor || 0} (${device})`;
+            if (major === 13) return `iOS 13.${minor || 0} (${device})`;
+            if (major === 12) return `iOS 12.${minor || 0} (${device})`;
+            
+            return `iOS ${version} (${device})`;
+        }
+        return `iOS (${device})`;
+    }
+
+    // Определение устройства iOS
+    getIOsDevice(ua) {
+        if (ua.includes('iphone')) return 'iPhone';
+        if (ua.includes('ipad')) {
+            if (ua.includes('ipad pro')) return 'iPad Pro';
+            if (ua.includes('ipad air')) return 'iPad Air';
+            if (ua.includes('ipad mini')) return 'iPad mini';
+            return 'iPad';
+        }
+        if (ua.includes('ipod')) return 'iPod touch';
+        return 'iOS устройство';
+    }
+
+    // Детальная версия Android
+    getAndroidVersion(ua) {
+        const match = ua.match(/android ([\d.]+)/);
+        if (match) {
+            const version = match[1];
+            const [major, minor] = version.split('.').map(Number);
+            
+            const androidNames = {
+                '15': 'Android 15 (Vanilla Ice Cream)',
+                '14': 'Android 14 (Upside Down Cake)',
+                '13': 'Android 13 (Tiramisu)',
+                '12': 'Android 12 (Snow Cone)',
+                '11': 'Android 11 (Red Velvet Cake)',
+                '10': 'Android 10 (Queen Cake)',
+                '9': 'Android 9 Pie',
+                '8': 'Android 8 Oreo',
+                '7': 'Android 7 Nougat',
+                '6': 'Android 6 Marshmallow',
+                '5': 'Android 5 Lollipop'
+            };
+            
+            const device = this.getAndroidDevice(ua);
+            const versionName = androidNames[major] || `Android ${major}`;
+            
+            return `${versionName}.${minor || 0} (${device})`;
+        }
+        return `Android (${this.getAndroidDevice(ua)})`;
+    }
+
+    // Определение устройства Android
+    getAndroidDevice(ua) {
+        if (ua.includes('samsung') || ua.includes('sm-')) return 'Samsung';
+        if (ua.includes('xiaomi') || ua.includes('mi ')) return 'Xiaomi';
+        if (ua.includes('huawei')) return 'Huawei';
+        if (ua.includes('honor')) return 'Honor';
+        if (ua.includes('oppo')) return 'OPPO';
+        if (ua.includes('vivo')) return 'vivo';
+        if (ua.includes('oneplus')) return 'OnePlus';
+        if (ua.includes('google') || ua.includes('pixel')) return 'Google Pixel';
+        if (ua.includes('sony')) return 'Sony';
+        if (ua.includes('lg')) return 'LG';
+        if (ua.includes('motorola') || ua.includes('moto')) return 'Motorola';
+        if (ua.includes('nokia')) return 'Nokia';
+        if (ua.includes('asus')) return 'ASUS';
+        if (ua.includes('lenovo')) return 'Lenovo';
+        if (ua.includes('htc')) return 'HTC';
+        
+        return 'Android устройство';
+    }
+
+    // Определение архитектуры
+    getArchitecture() {
+        const ua = navigator.userAgent.toLowerCase();
+        if (ua.includes('x64') || ua.includes('x86_64') || ua.includes('win64')) {
+            return '64-bit (x64)';
+        }
+        if (ua.includes('arm64') || ua.includes('aarch64')) {
+            return '64-bit (ARM)';
+        }
+        if (ua.includes('arm')) {
+            return 'ARM';
+        }
+        if (ua.includes('wow64')) {
+            return '32-bit on 64-bit (WoW64)';
+        }
+        if (ua.includes('i686') || ua.includes('i386')) {
+            return '32-bit (x86)';
+        }
+        return 'Неизвестно';
     }
     
     updateCSSVariables() {
@@ -785,54 +1098,54 @@ class AppCore {
         });
     }
     
-	loadParableText() {
-		const parableContent = this.elements.parableContent;
-		if (!parableContent) return;
-		
-		// Вставляем кнопку выбора цвета на слово "любимому"
-		parableContent.innerHTML = `
-			<p>Говорят, когда-то одну девушку обвинили в ведовстве. В качестве наказания её отвезли на островок на озере – клочок каменистой почвы, где не было ни еды, ни укрытий. Её приговорили к мучительной медленной смерти от холода и голода.</p>
-			<p>Вот только не знали в городе, что один юноша, увидев её глаза, прекрасные и сверкающие, подобно луне в летнюю ночь, поклялся ей в вечной любви. Когда ей вынесли приговор – по его мнению, несправедливый – он дал обет уберечь её от гибели. Выжидая удобного дня для совместного побега, он каждую ночь втайне переплывал озеро на лодке с едой и тёплой одеждой. А она каждую ночь вставала у воды и зажигала свечу, чтобы указать ему путь.</p>
-			<p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
-			<p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу <span class="color-picker-trigger" style="cursor: pointer; position: relative; display: inline-block; border-bottom: none;">любимому<input type="color" class="hidden-color-picker" value="#ff0000" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer;"></span>.</p>
-		`;
-		
-		// Добавляем обработчик для выбора цвета
-		setTimeout(() => {
-			const colorPicker = document.querySelector('.color-picker-trigger input[type="color"]');
-			if (colorPicker) {
-				colorPicker.addEventListener('change', (e) => {
-					e.stopPropagation();
-					const selectedColor = e.target.value;
-					
-					// Окрашиваем все угловые квадратики в выбранный цвет
-					document.querySelectorAll('.corner-square').forEach(square => {
-						square.style.backgroundColor = selectedColor;
-					});
-					
-					// Закрываем модальное окно притчи
-					this.hideParableModal();
-					
-					// Закрываем плашку предупреждения
-					const warningOverlay = document.getElementById('warningOverlay');
-					const warningBox = document.querySelector('.warning-box');
-					if (warningOverlay && warningBox) {
-						warningOverlay.classList.add('hidden');
-						warningBox.classList.add('hidden');
-						document.body.style.overflow = 'auto';
-						document.body.classList.remove('ui-hidden');
-					}
-					
-					console.log(`Квадратики окрашены в цвет: ${selectedColor}`);
-				});
-				
-				// Предотвращаем всплытие клика на родительский span
-				colorPicker.addEventListener('click', (e) => {
-					e.stopPropagation();
-				});
-			}
-		}, 100);
-	}
+    loadParableText() {
+        const parableContent = this.elements.parableContent;
+        if (!parableContent) return;
+        
+        // Вставляем кнопку выбора цвета на слово "любимому"
+        parableContent.innerHTML = `
+            <p>Говорят, когда-то одну девушку обвинили в ведовстве. В качестве наказания её отвезли на островок на озере – клочок каменистой почвы, где не было ни еды, ни укрытий. Её приговорили к мучительной медленной смерти от холода и голода.</p>
+            <p>Вот только не знали в городе, что один юноша, увидев её глаза, прекрасные и сверкающие, подобно луне в летнюю ночь, поклялся ей в вечной любви. Когда ей вынесли приговор – по его мнению, несправедливый – он дал обет уберечь её от гибели. Выжидая удобного дня для совместного побега, он каждую ночь втайне переплывал озеро на лодке с едой и тёплой одеждой. А она каждую ночь вставала у воды и зажигала свечу, чтобы указать ему путь.</p>
+            <p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
+            <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу <span class="color-picker-trigger" style="cursor: pointer; position: relative; display: inline-block; border-bottom: none;">любимому<input type="color" class="hidden-color-picker" value="#ff0000" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer;"></span>.</p>
+        `;
+        
+        // Добавляем обработчик для выбора цвета
+        setTimeout(() => {
+            const colorPicker = document.querySelector('.color-picker-trigger input[type="color"]');
+            if (colorPicker) {
+                colorPicker.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    const selectedColor = e.target.value;
+                    
+                    // Окрашиваем все угловые квадратики в выбранный цвет
+                    document.querySelectorAll('.corner-square').forEach(square => {
+                        square.style.backgroundColor = selectedColor;
+                    });
+                    
+                    // Закрываем модальное окно притчи
+                    this.hideParableModal();
+                    
+                    // Закрываем плашку предупреждения
+                    const warningOverlay = document.getElementById('warningOverlay');
+                    const warningBox = document.querySelector('.warning-box');
+                    if (warningOverlay && warningBox) {
+                        warningOverlay.classList.add('hidden');
+                        warningBox.classList.add('hidden');
+                        document.body.style.overflow = 'auto';
+                        document.body.classList.remove('ui-hidden');
+                    }
+                    
+                    console.log(`Квадратики окрашены в цвет: ${selectedColor}`);
+                });
+                
+                // Предотвращаем всплытие клика на родительский span
+                colorPicker.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        }, 100);
+    }
     
     showParableModal() {
         const parableModal = this.elements.parableModal;
