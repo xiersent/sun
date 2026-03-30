@@ -7,7 +7,7 @@
 	{
 		"id": "plugin",
 		"title": "Плагины от:",
-		"content": "25.03.2026 RL 07:5-:--"
+		"content": "30.03.2026 BT00 07:10:--"
 	},
 	{
 		"id": "pluger",
@@ -27,12 +27,12 @@
 	{
 		"id": "taker-hater",
 		"title": "Такер(хейтер) от:",
-		"content": "22.03.2026 R 07:32:00, R 20:06:00"
+		"content": "29.03.2026 R"
 	},
 	{
 		"id": "taker-frozer",
 		"title": "Такер(фрозер) от:",
-		"content": "21:15:00"
+		"content": "--:--:--"
 	},
 	{
 		"id": "taker-frozer",
