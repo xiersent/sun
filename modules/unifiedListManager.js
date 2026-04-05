@@ -675,19 +675,23 @@ class UnifiedListManager {
         this.renderList('dateListForDates', window.appState.data.dates, 'date');
     }
     
-    updateWavesList() {
-        const container = document.getElementById('wavesList');
-        if (!container) {
-            return;
-        }
-        
-        const allGroups = window.appState.data.groups.map((group, index) => {
-            const groupData = this.prepareGroupData(group, index);
-            return groupData;
-        });
-        
-        this.renderList('wavesList', allGroups, 'group');
-    }
+
+	updateWavesList() {
+		const container = document.getElementById('wavesList');
+		if (!container) {
+			return;
+		}
+		
+		// Фильтруем группы: показываем только те, у которых нет флага hidden
+		const visibleGroups = window.appState.data.groups.filter(group => !group.hidden);
+		
+		const allGroups = visibleGroups.map((group, index) => {
+			const groupData = this.prepareGroupData(group, index);
+			return groupData;
+		});
+		
+		this.renderList('wavesList', allGroups, 'group');
+	}
     
     updateIntersectionResults(intersections) {
         this.renderList('intersectionResults', intersections, 'intersection');

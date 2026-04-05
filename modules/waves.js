@@ -1,4 +1,4 @@
-// modules/waves.js - ОБНОВЛЕННЫЙ (с точками пересечения с осью X)
+// modules/waves.js - ПОЛНЫЙ ОБНОВЛЕННЫЙ ФАЙЛ
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -11,21 +11,15 @@ class WavesManager {
         this.updateInterval = 50;
     }
     
-	init() {
-		if (this.initialized) {
-			return;
-		}
-		
-		this.createVisibleWaveElements();
-		this.updatePosition();
-		this.initialized = true;
-	}
-
-
-
-
-
-	
+    init() {
+        if (this.initialized) {
+            return;
+        }
+        
+        this.createVisibleWaveElements();
+        this.updatePosition();
+        this.initialized = true;
+    }
     
     calculateRequiredPeriods(periodPx) {
         const viewportWidth = window.appState.graphWidth;
@@ -238,104 +232,154 @@ class WavesManager {
         });
     }
     
-    updatePosition() {
-        if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
-            window.timeBarManager.updateTimeIndicator();
-        }
+    // ========== НОВЫЕ МЕТОДЫ ДЛЯ ПОДСВЕТКИ ЭКСТРЕМУМОВ ==========
+    
+    calculateWaveStateAtDay(wave, currentDay) {
+        if (!wave.period || wave.period <= 0) return 0;
         
-        if (window.grid && window.grid.updateGridOffset) {
-            window.grid.updateGridOffset();
-        }
+        const phase = (currentDay % wave.period);
+        const normalizedPhase = (phase / wave.period) * 2 * Math.PI;
+        const waveState = Math.sin(normalizedPhase) * 5;
         
-        if (window.appState.currentDay === undefined || 
-            window.appState.currentDay === null ||
-            isNaN(window.appState.currentDay)) {
-            window.appState.currentDay = 0;
-        }
-        
-        const currentDay = window.appState.currentDay || 0;
-        
-        window.appState.data.waves.forEach(wave => {
-            const wavePeriodPixels = window.appState.periods[wave.id] || 
-                                   (wave.period * window.appState.config.squareSize);
-            
-            if (!wavePeriodPixels || wavePeriodPixels <= 0) {
-                return;
-            }
-            
-            let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-            
-            if (currentPositionPx < 0) {
-                currentPositionPx = wavePeriodPixels + currentPositionPx;
-            }
-            
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
-            
-            const container = this.waveContainers[wave.id];
-            if (container) {
-                container.style.transition = 'none';
-                container.style.transform = `translateX(${-currentPositionPx}px)`;
-                container.style.display = shouldShow ? 'block' : 'none';
-                
-                const path = this.wavePaths[wave.id];
-                if (path) {
-                    path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
-                }
-            }
-        });
-        
-        this.updateAllWaveLabels();
-        this.updateVerticalWaveLabelsTime();
-		this.renderWaveIntersectionPoints();
-
+        return waveState;
     }
+    
+    setWaveStrokeColor(waveId, isExtremum) {
+        const path = this.wavePaths[waveId];
+        if (!path) return;
+        
+        const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
+        if (!wave) return;
+        
+        if (isExtremum) {
+            path.style.stroke = '#ff0000';
+        } else {
+            path.style.stroke = wave.color;
+        }
+    }
+    
 
-	getContrastTextColor(backgroundColor) {
-		if (!backgroundColor) return '#000000';
-		
-		let r, g, b;
-		
-		// Конвертируем hex в RGB
-		if (backgroundColor.startsWith('#')) {
-			const hex = backgroundColor.slice(1);
-			if (hex.length === 3) {
-				r = parseInt(hex[0] + hex[0], 16);
-				g = parseInt(hex[1] + hex[1], 16);
-				b = parseInt(hex[2] + hex[2], 16);
-			} else if (hex.length === 6) {
-				r = parseInt(hex.slice(0, 2), 16);
-				g = parseInt(hex.slice(2, 4), 16);
-				b = parseInt(hex.slice(4, 6), 16);
-			} else {
-				return '#000000';
-			}
-		} else if (backgroundColor.startsWith('rgb')) {
-			const match = backgroundColor.match(/(\d+),\s*(\d+),\s*(\d+)/);
-			if (match) {
-				r = parseInt(match[1]);
-				g = parseInt(match[2]);
-				b = parseInt(match[3]);
-			} else {
-				return '#000000';
-			}
-		} else {
-			return '#000000';
+	updatePosition() {
+		if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
+			window.timeBarManager.updateTimeIndicator();
 		}
 		
-		// Формула воспринимаемой яркости (W3C рекомендация)
-		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		if (window.grid && window.grid.updateGridOffset) {
+			window.grid.updateGridOffset();
+		}
 		
-		// Возвращаем черный для светлых фонов, белый для темных
-		return luminance > 0.5 ? '#000000' : '#ffffff';
+		const currentDay = window.appState.currentDay || 0;
+		
+		window.appState.data.waves.forEach(wave => {
+			const waveIdStr = String(wave.id);
+			const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+			const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+			
+			// ЛОГИКА ПОДСВЕТКИ ЭКСТРЕМУМОВ
+			let isExtremum = false;
+			if (shouldShow) {
+				const state = this.calculateWaveStateAtDay(wave, currentDay);
+				isExtremum = (state >= 4 || state <= -4);
+				this.setWaveStrokeColor(wave.id, isExtremum);
+			} else {
+				this.setWaveStrokeColor(wave.id, false);
+			}
+			
+			// ОБНОВЛЕНИЕ ЦВЕТА ВЫНОСОК
+			this.updateWaveLabelsColor(wave.id, isExtremum);
+			
+			const wavePeriodPixels = window.appState.periods[wave.id] || 
+								(wave.period * window.appState.config.squareSize);
+			
+			if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+				return;
+			}
+			
+			let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+			if (currentPositionPx < 0) {
+				currentPositionPx = wavePeriodPixels + currentPositionPx;
+			}
+			
+			const container = this.waveContainers[wave.id];
+			if (container) {
+				container.style.transition = 'none';
+				container.style.transform = `translateX(${-currentPositionPx}px)`;
+				container.style.display = shouldShow ? 'block' : 'none';
+				
+				const path = this.wavePaths[wave.id];
+				if (path) {
+					path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+				}
+			}
+		});
+		
+		this.updateAllWaveLabels();
+		this.updateVerticalWaveLabelsTime();
+		this.renderWaveIntersectionPoints();
 	}
+
+
+	updateWaveLabelsColor(waveId, isExtremum) {
+		const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
+		if (!wave) return;
+		
+		const color = isExtremum ? '#ff0000' : wave.color;
+		const textColor = this.getContrastTextColor(color);
+		
+		// Обновляем горизонтальные выноски (левые и правые)
+		const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
+		const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
+		
+		if (leftLabel) {
+			leftLabel.style.backgroundColor = color;
+			leftLabel.style.color = textColor;
+			const arrow = leftLabel.querySelector('.wave-label-arrow');
+			if (arrow) {
+				if (leftLabel.classList.contains('left') || leftLabel.dataset.side === 'left') {
+					arrow.style.borderColor = `transparent transparent transparent ${color}`;
+				}
+			}
+		}
+		
+		if (rightLabel) {
+			rightLabel.style.backgroundColor = color;
+			rightLabel.style.color = textColor;
+			const arrow = rightLabel.querySelector('.wave-label-arrow');
+			if (arrow) {
+				if (rightLabel.classList.contains('right') || rightLabel.dataset.side === 'right') {
+					arrow.style.borderColor = `transparent ${color} transparent transparent`;
+				}
+			}
+		}
+		
+		// Обновляем вертикальные выноски (верхние и нижние)
+		const topLabel = document.getElementById(`waveLabel${waveId}-top`);
+		const bottomLabel = document.getElementById(`waveLabel${waveId}-bottom`);
+		
+		if (topLabel) {
+			topLabel.style.backgroundColor = color;
+			topLabel.style.color = textColor;
+			const arrow = topLabel.querySelector('.wave-label-arrow');
+			if (arrow) {
+				arrow.style.borderColor = `${color} transparent transparent transparent`;
+			}
+		}
+		
+		if (bottomLabel) {
+			bottomLabel.style.backgroundColor = color;
+			bottomLabel.style.color = textColor;
+			const arrow = bottomLabel.querySelector('.wave-label-arrow');
+			if (arrow) {
+				arrow.style.borderColor = `transparent transparent ${color} transparent`;
+			}
+		}
+	}
+    
     
     updateAllWaveLabels() {
         this.updateHorizontalWaveLabels();
         this.updateVerticalWaveLabels();
         this.updateAxisXIntersectionPoints();
-		//this.renderWaveIntersectionPoints();
     }
     
     updateHorizontalWaveLabels() {
@@ -449,193 +493,200 @@ class WavesManager {
         });
     }
     
-	findAxisXIntersectionPoints(wave) {
-		const points = [];
-		const wavePeriodPixels = window.appState.periods[wave.id] || 
-							(wave.period * window.appState.config.squareSize);
-		
-		if (!wavePeriodPixels) return points;
-		
-		const currentDay = window.appState.currentDay || 0;
-		let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-		if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
-		
-		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-		
-		const intersectionPhases = [0.0, 0.5];
-		
-		for (let n = -3; n <= 3; n++) {
-			intersectionPhases.forEach(phase => {
-				const x = ((phase + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
-				
-				const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
-				
-				if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
-					const isDuplicate = points.some(existing => 
-						Math.abs(existing - normalizedX) < 2
-					);
-					
-					if (!isDuplicate) {
-						points.push(normalizedX);
-					}
-				}
-			});
-		}
-		
-		return points.sort((a, b) => a - b);
-	}
+    findAxisXIntersectionPoints(wave) {
+        const points = [];
+        const wavePeriodPixels = window.appState.periods[wave.id] || 
+                            (wave.period * window.appState.config.squareSize);
+        
+        if (!wavePeriodPixels) return points;
+        
+        const currentDay = window.appState.currentDay || 0;
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+        
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        
+        const intersectionPhases = [0.0, 0.5];
+        
+        for (let n = -3; n <= 3; n++) {
+            intersectionPhases.forEach(phase => {
+                const x = ((phase + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
+                
+                const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
+                
+                if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
+                    const isDuplicate = points.some(existing => 
+                        Math.abs(existing - normalizedX) < 2
+                    );
+                    
+                    if (!isDuplicate) {
+                        points.push(normalizedX);
+                    }
+                }
+            });
+        }
+        
+        return points.sort((a, b) => a - b);
+    }
     
-	createAxisXPoint(wave, x, container) {
-		const centerY = window.appState.config.graphHeight / 2;
-		const waveColor = wave.color || '#666666';
-		const textColor = this.getContrastTextColor(waveColor);
-		
-		const point = document.createElement('div');
-		point.className = 'wave-axis-x-point';
-		point.dataset.waveId = wave.id;
-		point.dataset.x = x;
-		
-		point.style.position = 'absolute';
-		point.style.left = `${x}px`;
-		point.style.top = `${centerY}px`;
-		point.style.transform = 'translate(-50%, -50%)';
-		point.style.width = '6px';
-		point.style.height = '6px';
-		point.style.borderRadius = '50%';
-		point.style.backgroundColor = waveColor;
-		point.style.border = `1px solid ${textColor}`;
-		point.style.cursor = 'pointer';
-		point.style.pointerEvents = 'auto';
-		point.style.zIndex = '9';
-		point.style.transition = 'all 0.2s';
-		
-		point.title = `${wave.name} - пересечение с осью`;
-		
-		point.addEventListener('click', (e) => {
-			e.stopPropagation();
-			this.navigateToAxisXIntersection(wave, x);
-		});
-		
-		point.addEventListener('mouseenter', () => {
-			point.style.transform = 'translate(-50%, -50%) scale(1.3)';
-			point.style.zIndex = '10';;
-		});
-		
-		point.addEventListener('mouseleave', () => {
-			point.style.transform = 'translate(-50%, -50%)';
-			point.style.zIndex = '9';
-		});
-		
-		container.appendChild(point);
-	}
+    createAxisXPoint(wave, x, container) {
+        const centerY = window.appState.config.graphHeight / 2;
+        const waveColor = wave.color || '#666666';
+        const textColor = this.getContrastTextColor(waveColor);
+        
+        const point = document.createElement('div');
+        point.className = 'wave-axis-x-point';
+        point.dataset.waveId = wave.id;
+        point.dataset.x = x;
+        
+        point.style.position = 'absolute';
+        point.style.left = `${x}px`;
+        point.style.top = `${centerY}px`;
+        point.style.transform = 'translate(-50%, -50%)';
+        point.style.width = '6px';
+        point.style.height = '6px';
+        point.style.borderRadius = '50%';
+        point.style.backgroundColor = waveColor;
+        point.style.border = `1px solid ${textColor}`;
+        point.style.cursor = 'pointer';
+        point.style.pointerEvents = 'auto';
+        point.style.zIndex = '9';
+        point.style.transition = 'all 0.2s';
+        
+        point.title = `${wave.name} - пересечение с осью`;
+        
+        point.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.navigateToAxisXIntersection(wave, x);
+        });
+        
+        point.addEventListener('mouseenter', () => {
+            point.style.transform = 'translate(-50%, -50%) scale(1.3)';
+            point.style.zIndex = '10';
+        });
+        
+        point.addEventListener('mouseleave', () => {
+            point.style.transform = 'translate(-50%, -50%)';
+            point.style.zIndex = '9';
+        });
+        
+        container.appendChild(point);
+    }
     
-	navigateToAxisXIntersection(wave, x) {
-		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		const currentDate = new Date(window.appState.currentDate);
-		const leftDate = new Date(currentDate);
-		leftDate.setDate(leftDate.getDate() - squaresLeft);
-		leftDate.setHours(0, 0, 0, 0);
-		
-		const wavePeriodPixels = window.appState.periods[wave.id] || 
-							(wave.period * window.appState.config.squareSize);
-		
-		const currentDay = window.appState.currentDay || 0;
-		let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-		if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
-		
-		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-		
-		const relativePosition = x + currentOffsetPx + phaseOffsetPixels;
-		
-		const phaseInPeriod = (relativePosition % wavePeriodPixels) / wavePeriodPixels;
-		
-		let targetPhase;
-		const distanceToZero = Math.min(
-			Math.abs(phaseInPeriod - 0.0),
-			Math.abs(phaseInPeriod - 1.0)
-		);
-		const distanceToHalf = Math.abs(phaseInPeriod - 0.5);
-		
-		if (distanceToZero < distanceToHalf) {
-			targetPhase = 0.0;
-		} else {
-			targetPhase = 0.5;
-		}
-		
-		const phaseAtLeft = this.getPhaseAtTime(wave, leftDate);
-		
-		let phaseDiff = targetPhase - phaseAtLeft;
-		if (phaseDiff < 0) {
-			phaseDiff += 1.0;
-		}
-		
-		const daysToIntersection = phaseDiff * wave.period;
-		
-		const intersectionTime = new Date(leftDate.getTime() + (daysToIntersection * 24 * 3600 * 1000));
-		
-		if (window.dates && window.dates.setDate) {
-			window.dates.setDate(intersectionTime, true);
-		}
-	}
+    navigateToAxisXIntersection(wave, x) {
+        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+        const currentDate = new Date(window.appState.currentDate);
+        const leftDate = new Date(currentDate);
+        leftDate.setDate(leftDate.getDate() - squaresLeft);
+        leftDate.setHours(0, 0, 0, 0);
+        
+        const wavePeriodPixels = window.appState.periods[wave.id] || 
+                            (wave.period * window.appState.config.squareSize);
+        
+        const currentDay = window.appState.currentDay || 0;
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+        
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        
+        const relativePosition = x + currentOffsetPx + phaseOffsetPixels;
+        
+        const phaseInPeriod = (relativePosition % wavePeriodPixels) / wavePeriodPixels;
+        
+        let targetPhase;
+        const distanceToZero = Math.min(
+            Math.abs(phaseInPeriod - 0.0),
+            Math.abs(phaseInPeriod - 1.0)
+        );
+        const distanceToHalf = Math.abs(phaseInPeriod - 0.5);
+        
+        if (distanceToZero < distanceToHalf) {
+            targetPhase = 0.0;
+        } else {
+            targetPhase = 0.5;
+        }
+        
+        const phaseAtLeft = this.getPhaseAtTime(wave, leftDate);
+        
+        let phaseDiff = targetPhase - phaseAtLeft;
+        if (phaseDiff < 0) {
+            phaseDiff += 1.0;
+        }
+        
+        const daysToIntersection = phaseDiff * wave.period;
+        
+        const intersectionTime = new Date(leftDate.getTime() + (daysToIntersection * 24 * 3600 * 1000));
+        
+        if (window.dates && window.dates.setDate) {
+            window.dates.setDate(intersectionTime, true);
+        }
+    }
+    
+    calculateTimeFromXCoordinate(wave, x) {
+        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+        const currentDay = window.appState.currentDay || 0;
+        
+        const daysFromCenter = (x - (window.appState.graphWidth / 2)) / window.appState.config.squareSize;
+        
+        const targetDay = currentDay + daysFromCenter;
+        
+        const baseDate = window.appState.baseDate instanceof Date ? 
+            window.appState.baseDate : 
+            new Date(window.appState.baseDate);
+        
+        const pointTime = new Date(baseDate.getTime() + (targetDay * 24 * 3600 * 1000));
+        
+        return pointTime;
+    }
+    
+    getPhaseAtTime(wave, time) {
+        const daysFromBase = window.timeUtils.getDaysBetween(window.appState.baseDate, time);
+        
+        const phase = (daysFromBase % wave.period) / wave.period;
+        
+        return phase < 0 ? phase + 1 : phase;
+    }
+    
+    getContrastTextColor(backgroundColor) {
+        if (!backgroundColor) return '#000000';
+        
+        let r, g, b;
+        
+        if (backgroundColor.startsWith('#')) {
+            const hex = backgroundColor.slice(1);
+            if (hex.length === 3) {
+                r = parseInt(hex[0] + hex[0], 16);
+                g = parseInt(hex[1] + hex[1], 16);
+                b = parseInt(hex[2] + hex[2], 16);
+            } else if (hex.length === 6) {
+                r = parseInt(hex.slice(0, 2), 16);
+                g = parseInt(hex.slice(2, 4), 16);
+                b = parseInt(hex.slice(4, 6), 16);
+            } else {
+                return '#000000';
+            }
+        } else {
+            return '#000000';
+        }
+        
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5 ? '#000000' : '#ffffff';
+    }
+    
 
-	calculateTimeFromIntersection(point) {
-		// Аналогично методу navigateToAxisXIntersection
-		
-		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		const currentDate = new Date(window.appState.currentDate);
-		const leftDate = new Date(currentDate);
-		leftDate.setDate(leftDate.getDate() - squaresLeft);
-		leftDate.setHours(0, 0, 0, 0);
-		
-		// X координата в пикселях от левого края
-		const pixelPosition = point.x;
-		
-		// Дни от левого края
-		const daysFromLeft = pixelPosition / window.appState.config.squareSize;
-		
-		// Время пересечения
-		const intersectionTime = new Date(leftDate.getTime() + (daysFromLeft * 24 * 3600 * 1000));
-		
-		return intersectionTime;
-	}
-
-	getPhaseAtTime(wave, time) {
-		const daysFromBase = window.timeUtils.getDaysBetween(window.appState.baseDate, time);
-		
-		const phase = (daysFromBase % wave.period) / wave.period;
-		
-		return phase < 0 ? phase + 1 : phase;
-	}
-    
-	calculateTimeFromXCoordinate(wave, x) {
-		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		const currentDay = window.appState.currentDay || 0;
-		
-		// Дни относительно центра
-		const daysFromCenter = (x - (window.appState.graphWidth / 2)) / window.appState.config.squareSize;
-		
-		// Целевой день = текущий день + смещение от центра
-		const targetDay = currentDay + daysFromCenter;
-		
-		// Преобразуем дни обратно во время
-		const baseDate = window.appState.baseDate instanceof Date ? 
-			window.appState.baseDate : 
-			new Date(window.appState.baseDate);
-		
-		const pointTime = new Date(baseDate.getTime() + (targetDay * 24 * 3600 * 1000));
-		
-		return pointTime;
-	}
-    
+	
 	createHorizontalWaveLabel(wave, y, side, container) {
 		const labelId = `${wave.id}-${side}`;
-		const waveColor = wave.color || '#666666';
+		const currentDay = window.appState.currentDay || 0;
+		const state = this.calculateWaveStateAtDay(wave, currentDay);
+		const isExtremum = (state >= 4 || state <= -4);
 		
-		// Получаем контрастный цвет текста
+		// Выбираем цвет: красный для экстремума, иначе цвет волны
+		const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
 		const textColor = this.getContrastTextColor(waveColor);
 		
 		const labelElement = document.createElement('div');
-		labelElement.className = 'wave-label horizontal';
+		labelElement.className = `wave-label horizontal ${side}`;
 		labelElement.id = `waveLabel${labelId}`;
 		labelElement.dataset.waveId = wave.id;
 		labelElement.dataset.side = side;
@@ -655,7 +706,6 @@ class WavesManager {
 		labelElement.style.cursor = 'pointer';
 		labelElement.style.fontWeight = '500';
 		labelElement.style.whiteSpace = 'nowrap';
-
 		
 		const arrow = document.createElement('div');
 		arrow.className = 'wave-label-arrow';
@@ -711,19 +761,23 @@ class WavesManager {
 		
 		return labelElement;
 	}
-    
+
+
 	createVerticalWaveLabel(wave, x, position, container) {
 		const labelId = `${wave.id}-${position}`;
-		const waveColor = wave.color || '#666666';
+		const currentDay = window.appState.currentDay || 0;
+		const state = this.calculateWaveStateAtDay(wave, currentDay);
+		const isExtremum = (state >= 4 || state <= -4);
 		
-		// Получаем контрастный цвет текста
+		// Выбираем цвет: красный для экстремума, иначе цвет волны
+		const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
 		const textColor = this.getContrastTextColor(waveColor);
 		
 		const extremumTime = this.calculateExtremumTime(wave, position);
 		const timeString = this.formatExtremumTime(extremumTime);
 		
 		const labelElement = document.createElement('div');
-		labelElement.className = 'wave-label vertical';
+		labelElement.className = `wave-label vertical ${position}`;
 		labelElement.id = `waveLabel${labelId}`;
 		labelElement.dataset.waveId = wave.id;
 		labelElement.dataset.position = position;
@@ -746,7 +800,6 @@ class WavesManager {
 		labelElement.style.letterSpacing = '0.5px';
 		labelElement.style.fontWeight = '500';
 		labelElement.style.whiteSpace = 'nowrap';
-		
 		
 		const text = document.createElement('div');
 		text.className = 'wave-label-text';
@@ -796,11 +849,11 @@ class WavesManager {
 		labelElement.addEventListener('mouseleave', () => {
 			labelElement.style.opacity = '0.7';
 			labelElement.style.zIndex = '1';
-
 		});
 		
 		return labelElement;
 	}
+
     
     onHorizontalWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);
@@ -824,64 +877,64 @@ class WavesManager {
         this.navigateToExtremumTime(extremumTime);
     }
     
-	navigateToExtremumTime(timestamp) {
-		const extremumDate = new Date(timestamp);
-		
-		if (window.dates && window.dates.setDate) {
-			window.dates.setDate(extremumDate, true);
-		}
-	}
+    navigateToExtremumTime(timestamp) {
+        const extremumDate = new Date(timestamp);
+        
+        if (window.dates && window.dates.setDate) {
+            window.dates.setDate(extremumDate, true);
+        }
+    }
     
-	calculateExtremumTime(wave, position) {
-		const periodPx = window.appState.periods[wave.id] || 
-						(wave.period * window.appState.config.squareSize);
-		
-		if (!periodPx) {
-			return new Date();
-		}
-		
-		const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
-		
-		const baseDate = window.appState.baseDate;
-		
-		const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-		
-		const currentDate = new Date(window.appState.currentDate);
-		
-		const leftDate = new Date(currentDate);
-		leftDate.setDate(leftDate.getDate() - squaresLeft);
-		leftDate.setHours(0, 0, 0, 0);
-		
-		const normalizedBaseDate = new Date(baseDate);
-		normalizedBaseDate.setHours(0, 0, 0, 0);
-		
-		const daysFromBaseToLeft = window.timeUtils.getDaysBetween(normalizedBaseDate, leftDate);
-		
-		const wholeDaysFromBaseToLeft = Math.floor(daysFromBaseToLeft);
-		
-		const phaseAtLeft = (wholeDaysFromBaseToLeft % wave.period) / wave.period;
-		
-		const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
-		
-		let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
-		if (phaseDiff < 0) {
-			phaseDiff += 1.0;
-		}
-		
-		const daysToExtremumFromLeft = phaseDiff * wave.period;
-		
-		const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
-		
-		const rightDate = new Date(leftDate);
-		rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
-		
-		if (extremumTime >= leftDate && extremumTime <= rightDate) {
-			return extremumTime;
-		}
-		
-		const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
-		return nextExtremumTime;
-	}
+    calculateExtremumTime(wave, position) {
+        const periodPx = window.appState.periods[wave.id] || 
+                        (wave.period * window.appState.config.squareSize);
+        
+        if (!periodPx) {
+            return new Date();
+        }
+        
+        const extremumPhaseFraction = position === 'top' ? 0.25 : 0.75;
+        
+        const baseDate = window.appState.baseDate;
+        
+        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
+        
+        const currentDate = new Date(window.appState.currentDate);
+        
+        const leftDate = new Date(currentDate);
+        leftDate.setDate(leftDate.getDate() - squaresLeft);
+        leftDate.setHours(0, 0, 0, 0);
+        
+        const normalizedBaseDate = new Date(baseDate);
+        normalizedBaseDate.setHours(0, 0, 0, 0);
+        
+        const daysFromBaseToLeft = window.timeUtils.getDaysBetween(normalizedBaseDate, leftDate);
+        
+        const wholeDaysFromBaseToLeft = Math.floor(daysFromBaseToLeft);
+        
+        const phaseAtLeft = (wholeDaysFromBaseToLeft % wave.period) / wave.period;
+        
+        const normalizedPhaseAtLeft = phaseAtLeft < 0 ? phaseAtLeft + 1 : phaseAtLeft;
+        
+        let phaseDiff = extremumPhaseFraction - normalizedPhaseAtLeft;
+        if (phaseDiff < 0) {
+            phaseDiff += 1.0;
+        }
+        
+        const daysToExtremumFromLeft = phaseDiff * wave.period;
+        
+        const extremumTime = new Date(leftDate.getTime() + (daysToExtremumFromLeft * 24 * 3600 * 1000));
+        
+        const rightDate = new Date(leftDate);
+        rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
+        
+        if (extremumTime >= leftDate && extremumTime <= rightDate) {
+            return extremumTime;
+        }
+        
+        const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
+        return nextExtremumTime;
+    }
     
     formatExtremumTime(date) {
         const hours = date.getHours().toString().padStart(2, '0');
@@ -1066,7 +1119,6 @@ class WavesManager {
         delete window.appState.waveVisibility[waveIdStr];
         delete window.appState.waveBold[waveIdStr];
         delete window.appState.waveCornerColor[waveIdStr];
-        delete window.appState.waveOriginalColors[waveIdStr];
         delete window.appState.periods[waveIdStr];
         
         const waveContainer = this.waveContainers[waveIdStr];
@@ -1187,327 +1239,291 @@ class WavesManager {
         
         return window.timeUtils.getDaysBetweenExact(date1, date2);
     }
-
-
-	findWaveIntersectionPoints(wave1, wave2) {
-		// Используем аналитический метод вместо численного поиска
-		const points = [];
-		
-		const periodPx1 = wave1.period * window.appState.config.squareSize;
-		const periodPx2 = wave2.period * window.appState.config.squareSize;
-		
-		// Получаем уравнения в пиксельных координатах
-		const eq1 = {
-			amplitude: window.appState.config.amplitude,
-			omega: 2 * Math.PI / periodPx1,
-			phi: this.getPixelPhase(wave1)
-		};
-		
-		const eq2 = {
-			amplitude: window.appState.config.amplitude,
-			omega: 2 * Math.PI / periodPx2,
-			phi: this.getPixelPhase(wave2)
-		};
-		
-		// Находим пересечения на интервале [0, graphWidth]
-		for (let k = -10; k <= 10; k++) {
-			// Решаем уравнение: A*sin(ω1*x + φ1) = A*sin(ω2*x + φ2)
-			// Это дает два типа решений:
-			
-			// 1) ω1*x + φ1 = ω2*x + φ2 + 2πk
-			if (Math.abs(eq1.omega - eq2.omega) > 1e-12) {
-				const x1 = (eq2.phi - eq1.phi + 2 * Math.PI * k) / (eq1.omega - eq2.omega);
-				if (x1 >= 0 && x1 <= window.appState.graphWidth) {
-					points.push(this.createIntersectionPoint(x1, wave1, wave2));
-				}
-			}
-			
-			// 2) ω1*x + φ1 = π - (ω2*x + φ2) + 2πk
-			const x2 = (Math.PI - eq1.phi - eq2.phi + 2 * Math.PI * k) / (eq1.omega + eq2.omega);
-			if (x2 >= 0 && x2 <= window.appState.graphWidth) {
-				points.push(this.createIntersectionPoint(x2, wave1, wave2));
-			}
-		}
-		
-		return points.filter(p => p !== null);
-	}
-
-	navigateToPreciseTime(preciseTime) {
-		// Используем точное время с миллисекундами
-		const targetDate = new Date(preciseTime);
-		
-		// Устанавливаем точное время
-		window.appState.currentDate = targetDate;
-		window.appState.currentDay = window.timeUtils.getDaysBetween(
-			window.appState.baseDate, 
-			targetDate
-		);
-		
-		// Обновляем всё с максимальной точностью
-		window.grid.createGrid();
-		window.waves.updatePosition();
-		window.appState.save();
-		
-		// Показываем точное время в центре
-		const milliseconds = targetDate.getMilliseconds();
-		document.getElementById('currentDay').textContent = 
-			window.appState.currentDay.toFixed(5) + 
-			` (${milliseconds}ms)`;
-	}
-
-	getPixelPhase(wave) {
-		const currentDay = window.appState.currentDay || 0;
-		const periodPx = wave.period * window.appState.config.squareSize;
-		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-		
-		const currentOffsetPx = (currentDay * window.appState.config.squareSize) % periodPx;
-		const normalizedOffset = currentOffsetPx < 0 ? periodPx + currentOffsetPx : currentOffsetPx;
-		
-		return 2 * Math.PI * (phaseOffsetPixels + normalizedOffset) / periodPx;
-	}
-
-	createIntersectionPoint(x, wave1, wave2) {
-		const centerY = window.appState.config.graphHeight / 2;
-		const amplitude = window.appState.config.amplitude;
-		const periodPx1 = wave1.period * window.appState.config.squareSize;
-		const periodPx2 = wave2.period * window.appState.config.squareSize;
-		const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-		
-		const currentDay = window.appState.currentDay || 0;
-		const offset1 = (currentDay * window.appState.config.squareSize) % periodPx1;
-		const offset2 = (currentDay * window.appState.config.squareSize) % periodPx2;
-		
-		const y1 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset1 + phaseOffsetPixels) / periodPx1);
-		const y2 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset2 + phaseOffsetPixels) / periodPx2);
-		
-		// Проверяем точность пересечения
-		if (Math.abs(y1 - y2) > 0.01) return null;
-		
-		// Выбираем цвет для точки (средний между цветами волн или красный по умолчанию)
-		const pointColor = '#ff0000'; // Красный для точек пересечения
-		
-		return {
-			x: x,
-			y: (y1 + y2) / 2,
-			wave1: wave1,
-			wave2: wave2,
-			color: pointColor,
-			time: this.calculateTimeFromXCoordinate(wave1, x)
-		};
-	}
-
-	refineIntersectionPoint(wave1, wave2, x1, x2, offset1, offset2, periodPx1, periodPx2) {
-		const maxIterations = 10;
-		const tolerance = 0.01; // Очень высокая точность
-		
-		let left = x1;
-		let right = x2;
-		
-		for (let i = 0; i < maxIterations; i++) {
-			const mid = (left + right) / 2;
-			
-			const y1 = window.appState.config.graphHeight / 2 - 
-					window.appState.config.amplitude * 
-					Math.sin(2 * Math.PI * (mid + offset1) / periodPx1);
-			
-			const y2 = window.appState.config.graphHeight / 2 - 
-					window.appState.config.amplitude * 
-					Math.sin(2 * Math.PI * (mid + offset2) / periodPx2);
-			
-			const diff = y1 - y2;
-			
-			if (Math.abs(diff) < tolerance) {
-				return {
-					x: mid,
-					y: (y1 + y2) / 2,
-					wave1: wave1,
-					wave2: wave2
-				};
-			}
-			
-			const y1Left = window.appState.config.graphHeight / 2 - 
-						window.appState.config.amplitude * 
-						Math.sin(2 * Math.PI * (left + offset1) / periodPx1);
-			
-			const y2Left = window.appState.config.graphHeight / 2 - 
-						window.appState.config.amplitude * 
-						Math.sin(2 * Math.PI * (left + offset2) / periodPx2);
-			
-			const diffLeft = y1Left - y2Left;
-			
-			if (diffLeft * diff < 0) {
-				right = mid;
-			} else {
-				left = mid;
-			}
-		}
-		
-		// Если не нашли достаточно точное пересечение - игнорируем
-		return null;
-	}
-
-
-	calculateAllWaveIntersections() {
-		const visibleWaves = this.getActiveWaves();
-		const allIntersections = [];
-		
-		if (visibleWaves.length < 2) return allIntersections;
-		
-		// Проверяем каждую пару волн
-		for (let i = 0; i < visibleWaves.length; i++) {
-			for (let j = i + 1; j < visibleWaves.length; j++) {
-				const points = this.findWaveIntersectionPoints(
-					visibleWaves[i], 
-					visibleWaves[j]
-				);
-				
-				// ДОБАВИМ фильтрацию слишком близких точек
-				const filteredPoints = this.filterClosePoints(points, 5); // 5px минимальное расстояние
-				
-				filteredPoints.forEach(point => {
-					if (point) {
-						// Вычисляем время пересечения
-						const intersectionTime = this.calculateTimeFromXCoordinate(visibleWaves[i], point.x);
-						
-						// Добавляем в массив
-						allIntersections.push({
-							...point,
-							time: intersectionTime,
-							wavePair: `${visibleWaves[i].name} × ${visibleWaves[j].name}`
-						});
-					}
-				});
-			}
-		}
-		
-		return allIntersections;
-	}
-
-	filterClosePoints(points, minDistance) {
-		if (points.length === 0) return [];
-		
-		const sortedPoints = points.sort((a, b) => a.x - b.x);
-		const filteredPoints = [sortedPoints[0]];
-		
-		for (let i = 1; i < sortedPoints.length; i++) {
-			const lastPoint = filteredPoints[filteredPoints.length - 1];
-			
-			if (Math.abs(sortedPoints[i].x - lastPoint.x) >= minDistance) {
-				filteredPoints.push(sortedPoints[i]);
-			}
-		}
-		
-		return filteredPoints;
-	}
-
-
-	renderWaveIntersectionPoints() {
-		// Удаляем старые точки
-		this.removeWaveIntersectionPoints();
-		
-		const intersections = this.calculateAllWaveIntersections();
-		
-		// ЕЩЕ ОДНА ФИЛЬТРАЦИЯ: не показывать слишком много точек
-		const maxPointsToShow = 50; // Максимум 50 точек на экране
-		const pointsToShow = intersections.slice(0, maxPointsToShow);
-		
-		const container = document.createElement('div');
-		container.className = 'wave-intersection-points';
-		container.style.position = 'absolute';
-		container.style.width = '100%';
-		container.style.height = '100%';
-		container.style.pointerEvents = 'none';
-		container.style.zIndex = '9';
-		container.style.top = '0';
-		container.style.left = '0';
-		
-		pointsToShow.forEach(point => {
-			const pointElement = document.createElement('div');
-			pointElement.className = 'wave-intersection-point';
-			pointElement.dataset.time = point.time.toISOString();
-			pointElement.dataset.wavePair = point.wavePair;
-			
-			// Используем существующий формат времени ЧЧ:ММ:СС
-			const timeStr = this.formatExtremumTime(point.time);
-			
-			// Добавляем время за 2.5 минуты до и после
-			const timeBefore = new Date(point.time.getTime() - 2.5 * 60 * 1000); // -2.5 минуты (150000 мс)
-			const timeAfter = new Date(point.time.getTime() + 2.5 * 60 * 1000);  // +2.5 минуты (150000 мс)
-			
-			const timeBeforeStr = this.formatExtremumTime(timeBefore);
-			const timeAfterStr = this.formatExtremumTime(timeAfter);
-			
-			// Создаем title с дополнительными временами
-			let titleText = `${point.wavePair}\n${timeStr}`;
-			titleText += `\n---`;
-			titleText += `\n${timeBeforeStr} (началось)`;
-			titleText += `\n${timeAfterStr} (закончилось)`;
-			
-			pointElement.title = titleText;
-			
-			// Остальные стили остаются без изменений
-			pointElement.style.position = 'absolute';
-			pointElement.style.left = `${point.x}px`;
-			pointElement.style.top = `${point.y}px`;
-			pointElement.style.width = '8px';
-			pointElement.style.height = '8px';
-			pointElement.style.borderRadius = '50%';
-			pointElement.style.backgroundColor = '#ff0000';
-			pointElement.style.border = '2px solid #fff';
-			pointElement.style.cursor = 'pointer';
-			pointElement.style.pointerEvents = 'auto';
-			pointElement.style.zIndex = '10';
-			pointElement.style.opacity = '0.9';
-			pointElement.style.transform = 'translate(-50%, -50%)';
-			
-			// При наведении
-			pointElement.addEventListener('mouseenter', (e) => {
-				e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
-				e.target.style.zIndex = '15';
-			});
-			
-			pointElement.addEventListener('mouseleave', (e) => {
-				e.target.style.transform = 'translate(-50%, -50%)';
-				e.target.style.zIndex = '10';
-			});
-			
-			// Клик для навигации
-			pointElement.addEventListener('click', (e) => {
-				e.stopPropagation();
-				this.navigateToIntersectionTime(point.time);
-			});
-			
-			container.appendChild(pointElement);
-		});
-		
-		const graphElement = document.getElementById('graphElement');
-		if (graphElement) {
-			graphElement.appendChild(container);
-		}
-		
-		return container;
-	}
-
-	removeWaveIntersectionPoints() {
-		document.querySelectorAll('.wave-intersection-points').forEach(el => el.remove());
-	}
-
-	showIntersectionTooltip(element, point) {
-		// Показываем просто title атрибут без сложного позиционирования
-		element.title = `${point.wave1.name} × ${point.wave2.name}\n${this.formatExtremumTime(point.time)}`;
-		
-		// Или вообще убрать тултип, использовать только title
-	}
-
-	hideIntersectionTooltip() {
-		document.querySelectorAll('.intersection-tooltip').forEach(el => el.remove());
-	}
-
-	navigateToIntersectionTime(time) {
-		if (window.dates && window.dates.setDate) {
-			window.dates.setDate(time, true);
-		}
-	}
+    
+    findWaveIntersectionPoints(wave1, wave2) {
+        const points = [];
+        
+        const periodPx1 = wave1.period * window.appState.config.squareSize;
+        const periodPx2 = wave2.period * window.appState.config.squareSize;
+        
+        const eq1 = {
+            amplitude: window.appState.config.amplitude,
+            omega: 2 * Math.PI / periodPx1,
+            phi: this.getPixelPhase(wave1)
+        };
+        
+        const eq2 = {
+            amplitude: window.appState.config.amplitude,
+            omega: 2 * Math.PI / periodPx2,
+            phi: this.getPixelPhase(wave2)
+        };
+        
+        for (let k = -10; k <= 10; k++) {
+            if (Math.abs(eq1.omega - eq2.omega) > 1e-12) {
+                const x1 = (eq2.phi - eq1.phi + 2 * Math.PI * k) / (eq1.omega - eq2.omega);
+                if (x1 >= 0 && x1 <= window.appState.graphWidth) {
+                    points.push(this.createIntersectionPoint(x1, wave1, wave2));
+                }
+            }
+            
+            const x2 = (Math.PI - eq1.phi - eq2.phi + 2 * Math.PI * k) / (eq1.omega + eq2.omega);
+            if (x2 >= 0 && x2 <= window.appState.graphWidth) {
+                points.push(this.createIntersectionPoint(x2, wave1, wave2));
+            }
+        }
+        
+        return points.filter(p => p !== null);
+    }
+    
+    navigateToPreciseTime(preciseTime) {
+        const targetDate = new Date(preciseTime);
+        
+        window.appState.currentDate = targetDate;
+        window.appState.currentDay = window.timeUtils.getDaysBetween(
+            window.appState.baseDate, 
+            targetDate
+        );
+        
+        window.grid.createGrid();
+        window.waves.updatePosition();
+        window.appState.save();
+        
+        const milliseconds = targetDate.getMilliseconds();
+        document.getElementById('currentDay').textContent = 
+            window.appState.currentDay.toFixed(5) + 
+            ` (${milliseconds}ms)`;
+    }
+    
+    getPixelPhase(wave) {
+        const currentDay = window.appState.currentDay || 0;
+        const periodPx = wave.period * window.appState.config.squareSize;
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        
+        const currentOffsetPx = (currentDay * window.appState.config.squareSize) % periodPx;
+        const normalizedOffset = currentOffsetPx < 0 ? periodPx + currentOffsetPx : currentOffsetPx;
+        
+        return 2 * Math.PI * (phaseOffsetPixels + normalizedOffset) / periodPx;
+    }
+    
+    createIntersectionPoint(x, wave1, wave2) {
+        const centerY = window.appState.config.graphHeight / 2;
+        const amplitude = window.appState.config.amplitude;
+        const periodPx1 = wave1.period * window.appState.config.squareSize;
+        const periodPx2 = wave2.period * window.appState.config.squareSize;
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        
+        const currentDay = window.appState.currentDay || 0;
+        const offset1 = (currentDay * window.appState.config.squareSize) % periodPx1;
+        const offset2 = (currentDay * window.appState.config.squareSize) % periodPx2;
+        
+        const y1 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset1 + phaseOffsetPixels) / periodPx1);
+        const y2 = centerY - amplitude * Math.sin(2 * Math.PI * (x + offset2 + phaseOffsetPixels) / periodPx2);
+        
+        if (Math.abs(y1 - y2) > 0.01) return null;
+        
+        return {
+            x: x,
+            y: (y1 + y2) / 2,
+            wave1: wave1,
+            wave2: wave2,
+            time: this.calculateTimeFromXCoordinate(wave1, x)
+        };
+    }
+    
+    refineIntersectionPoint(wave1, wave2, x1, x2, offset1, offset2, periodPx1, periodPx2) {
+        const maxIterations = 10;
+        const tolerance = 0.01;
+        
+        let left = x1;
+        let right = x2;
+        
+        for (let i = 0; i < maxIterations; i++) {
+            const mid = (left + right) / 2;
+            
+            const y1 = window.appState.config.graphHeight / 2 - 
+                    window.appState.config.amplitude * 
+                    Math.sin(2 * Math.PI * (mid + offset1) / periodPx1);
+            
+            const y2 = window.appState.config.graphHeight / 2 - 
+                    window.appState.config.amplitude * 
+                    Math.sin(2 * Math.PI * (mid + offset2) / periodPx2);
+            
+            const diff = y1 - y2;
+            
+            if (Math.abs(diff) < tolerance) {
+                return {
+                    x: mid,
+                    y: (y1 + y2) / 2,
+                    wave1: wave1,
+                    wave2: wave2
+                };
+            }
+            
+            const y1Left = window.appState.config.graphHeight / 2 - 
+                        window.appState.config.amplitude * 
+                        Math.sin(2 * Math.PI * (left + offset1) / periodPx1);
+            
+            const y2Left = window.appState.config.graphHeight / 2 - 
+                        window.appState.config.amplitude * 
+                        Math.sin(2 * Math.PI * (left + offset2) / periodPx2);
+            
+            const diffLeft = y1Left - y2Left;
+            
+            if (diffLeft * diff < 0) {
+                right = mid;
+            } else {
+                left = mid;
+            }
+        }
+        
+        return null;
+    }
+    
+    calculateAllWaveIntersections() {
+        const visibleWaves = this.getActiveWaves();
+        const allIntersections = [];
+        
+        if (visibleWaves.length < 2) return allIntersections;
+        
+        for (let i = 0; i < visibleWaves.length; i++) {
+            for (let j = i + 1; j < visibleWaves.length; j++) {
+                const points = this.findWaveIntersectionPoints(
+                    visibleWaves[i], 
+                    visibleWaves[j]
+                );
+                
+                const filteredPoints = this.filterClosePoints(points, 5);
+                
+                filteredPoints.forEach(point => {
+                    if (point) {
+                        const intersectionTime = this.calculateTimeFromXCoordinate(visibleWaves[i], point.x);
+                        
+                        allIntersections.push({
+                            ...point,
+                            time: intersectionTime,
+                            wavePair: `${visibleWaves[i].name} × ${visibleWaves[j].name}`
+                        });
+                    }
+                });
+            }
+        }
+        
+        return allIntersections;
+    }
+    
+    filterClosePoints(points, minDistance) {
+        if (points.length === 0) return [];
+        
+        const sortedPoints = points.sort((a, b) => a.x - b.x);
+        const filteredPoints = [sortedPoints[0]];
+        
+        for (let i = 1; i < sortedPoints.length; i++) {
+            const lastPoint = filteredPoints[filteredPoints.length - 1];
+            
+            if (Math.abs(sortedPoints[i].x - lastPoint.x) >= minDistance) {
+                filteredPoints.push(sortedPoints[i]);
+            }
+        }
+        
+        return filteredPoints;
+    }
+    
+    renderWaveIntersectionPoints() {
+        this.removeWaveIntersectionPoints();
+        
+        const intersections = this.calculateAllWaveIntersections();
+        
+        const maxPointsToShow = 50;
+        const pointsToShow = intersections.slice(0, maxPointsToShow);
+        
+        const container = document.createElement('div');
+        container.className = 'wave-intersection-points';
+        container.style.position = 'absolute';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.zIndex = '9';
+        container.style.top = '0';
+        container.style.left = '0';
+        
+        pointsToShow.forEach(point => {
+            const pointElement = document.createElement('div');
+            pointElement.className = 'wave-intersection-point';
+            pointElement.dataset.time = point.time.toISOString();
+            pointElement.dataset.wavePair = point.wavePair;
+            
+            const timeStr = this.formatExtremumTime(point.time);
+            
+            const timeBefore = new Date(point.time.getTime() - 2.5 * 60 * 1000);
+            const timeAfter = new Date(point.time.getTime() + 2.5 * 60 * 1000);
+            
+            const timeBeforeStr = this.formatExtremumTime(timeBefore);
+            const timeAfterStr = this.formatExtremumTime(timeAfter);
+            
+            let titleText = `${point.wavePair}\n${timeStr}`;
+            titleText += `\n---`;
+            titleText += `\n${timeBeforeStr} (началось)`;
+            titleText += `\n${timeAfterStr} (закончилось)`;
+            
+            pointElement.title = titleText;
+            
+            pointElement.style.position = 'absolute';
+            pointElement.style.left = `${point.x}px`;
+            pointElement.style.top = `${point.y}px`;
+            pointElement.style.width = '8px';
+            pointElement.style.height = '8px';
+            pointElement.style.borderRadius = '50%';
+            pointElement.style.backgroundColor = '#ff0000';
+            pointElement.style.border = '2px solid #fff';
+            pointElement.style.cursor = 'pointer';
+            pointElement.style.pointerEvents = 'auto';
+            pointElement.style.zIndex = '10';
+            pointElement.style.opacity = '0.9';
+            pointElement.style.transform = 'translate(-50%, -50%)';
+            
+            pointElement.addEventListener('mouseenter', (e) => {
+                e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                e.target.style.zIndex = '15';
+            });
+            
+            pointElement.addEventListener('mouseleave', (e) => {
+                e.target.style.transform = 'translate(-50%, -50%)';
+                e.target.style.zIndex = '10';
+            });
+            
+            pointElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.navigateToIntersectionTime(point.time);
+            });
+            
+            container.appendChild(pointElement);
+        });
+        
+        const graphElement = document.getElementById('graphElement');
+        if (graphElement) {
+            graphElement.appendChild(container);
+        }
+        
+        return container;
+    }
+    
+    removeWaveIntersectionPoints() {
+        document.querySelectorAll('.wave-intersection-points').forEach(el => el.remove());
+    }
+    
+    showIntersectionTooltip(element, point) {
+        element.title = `${point.wave1.name} × ${point.wave2.name}\n${this.formatExtremumTime(point.time)}`;
+    }
+    
+    hideIntersectionTooltip() {
+        document.querySelectorAll('.intersection-tooltip').forEach(el => el.remove());
+    }
+    
+    navigateToIntersectionTime(time) {
+        if (window.dates && window.dates.setDate) {
+            window.dates.setDate(time, true);
+        }
+    }
 }
 
 window.waves = new WavesManager();

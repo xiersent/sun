@@ -175,13 +175,44 @@ class AppState {
 		localStorage.setItem('appData', JSON.stringify(this.data));
 	}
     
+
 	load() {
 		const saved = localStorage.getItem('appData');
 		if (saved) {
 			try {
 				const data = JSON.parse(saved);
-				this.data = data;
 				
+				// ===== МИГРАЦИЯ: ОТКЛЮЧАЕМ И СКРЫВАЕМ КЛАССИЧЕСКУЮ ГРУППУ =====
+				if (data.groups) {
+					const classicGroup = data.groups.find(g => g.id === 'classic-group');
+					if (classicGroup) {
+						// 1. Отключаем группу (волны в ней не отображаются)
+						classicGroup.enabled = false;
+						
+						// 2. Добавляем флаг скрытия от пользователя
+						classicGroup.hidden = true;
+						
+						// 3. Сворачиваем группу
+						classicGroup.expanded = false;
+						
+						// 4. Скрываем все волны в этой группе
+						if (classicGroup.waves && Array.isArray(classicGroup.waves)) {
+							classicGroup.waves.forEach(waveId => {
+								const waveIdStr = String(waveId);
+								if (data.uiSettings && data.uiSettings.waveVisibility) {
+									data.uiSettings.waveVisibility[waveIdStr] = false;
+								}
+							});
+						}
+						
+						// Сохраняем изменения
+						localStorage.setItem('appData', JSON.stringify(data));
+						console.log('Миграция: классическая группа отключена и скрыта');
+					}
+				}
+				// ===== КОНЕЦ МИГРАЦИИ =====
+				
+				this.data = data;
 				this.convertDatesToTimestamp();
 				
 				const has120Waves = this.data.waves.some(w => {
@@ -379,7 +410,6 @@ class AppState {
 					}
 				});
 				
-				// ДОБАВЛЕНО: загрузка состояний выделения дат
 				if (data.uiSettings.dateSelections) {
 					this.dateSelections = data.uiSettings.dateSelections;
 				} else {
@@ -403,10 +433,8 @@ class AppState {
 						);
 					}
 				}
-
-
+				
 				this.fixStandardWaveColors();
-
 				
 				setTimeout(() => {
 					if (window.dates && window.dates.forceInitialize) {
