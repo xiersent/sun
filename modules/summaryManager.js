@@ -204,23 +204,65 @@ class SummaryManager {
         });
     }
     
-    updateSummary() {
-        if (this.isUpdating) return;
-        
-        try {
-            this.isUpdating = true;
-            
-            const waves = this.getWavesForSelectedGroup();
-            const stateWaves = this.filterWavesByState(waves);
-            
-            this.updateResults(stateWaves);
-            
-        } catch (error) {
-            console.error('Error updating summary:', error);
-        } finally {
-            this.isUpdating = false;
-        }
-    }
+
+	// modules/summaryManager.js - возвращаем сортировку по близости (как было)
+
+	updateSummary() {
+		if (this.isUpdating) return;
+		
+		try {
+			this.isUpdating = true;
+			
+			const waves = this.getWavesForSelectedGroup();
+			const stateWaves = this.filterWavesByState(waves);
+			
+			// НЕ ДОБАВЛЯЕМ СОРТИРОВКУ - оставляем как было (сортировка по близости уже в filterWavesByState)
+			
+			this.updateResults(stateWaves);
+			
+		} catch (error) {
+			console.error('Error updating summary:', error);
+		} finally {
+			this.isUpdating = false;
+		}
+	}
+
+	filterWavesByState(waves) {
+		if (!waves.length) return [];
+		
+		const results = [];
+		const currentDay = window.appState.currentDay || 0;
+		
+		waves.forEach(wave => {
+			if (!wave.period || wave.period <= 0) return;
+			
+			const phase = (currentDay % wave.period);
+			const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
+			const waveState = (Math.sin(normalizedPhase) * 5);
+			const difference = Math.abs(waveState - this.currentState);
+			
+			if (difference <= this.tolerance) {
+				const isPresentOrFuture = this.isWaveInPresentOrFuture(wave, normalizedPhase);
+				const isPastWave = !isPresentOrFuture;
+				
+				if (this.includePastWaves || !isPastWave) {
+					results.push({
+						wave: wave,
+						phase: phase,
+						state: waveState,
+						difference: difference,
+						closeness: this.getClosenessLevel(difference),
+						isPastWave: isPastWave
+					});
+				}
+			}
+		});
+		
+		// ОСТАВЛЯЕМ СОРТИРОВКУ ПО БЛИЗОСТИ (как было)
+		results.sort((a, b) => a.difference - b.difference);
+		
+		return results;
+	}
     
     getWavesForSelectedGroup() {
         if (!window.appState || !window.appState.data) return [];
@@ -247,42 +289,6 @@ class SummaryManager {
         return waves;
     }
     
-    filterWavesByState(waves) {
-        if (!waves.length) return [];
-        
-        const results = [];
-        const currentDay = window.appState.currentDay || 0;
-        
-        waves.forEach(wave => {
-            if (!wave.period || wave.period <= 0) return;
-            
-            const phase = (currentDay % wave.period);
-            const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
-            const waveState = (Math.sin(normalizedPhase) * 5);
-            const difference = Math.abs(waveState - this.currentState);
-            
-            if (difference <= this.tolerance) {
-                const isPresentOrFuture = this.isWaveInPresentOrFuture(wave, normalizedPhase);
-                const isPastWave = !isPresentOrFuture;
-                
-                // Проверяем фильтр
-                if (this.includePastWaves || !isPastWave) {
-                    results.push({
-                        wave: wave,
-                        phase: phase,
-                        state: waveState,
-                        difference: difference,
-                        closeness: this.getClosenessLevel(difference),
-                        isPastWave: isPastWave
-                    });
-                }
-            }
-        });
-        
-        results.sort((a, b) => a.difference - b.difference);
-        
-        return results;
-    }
     
     isWaveInPresentOrFuture(wave, normalizedPhaseRadians) {
         const phase = normalizedPhaseRadians / (2 * Math.PI);
@@ -319,137 +325,116 @@ class SummaryManager {
     }
     
 
-updateResults(stateWaves) {
-    const resultsElement = this.elements.summaryResults;
-    if (!resultsElement) return;
-    
-    if (stateWaves.length === 0) {
-        resultsElement.innerHTML = '<div class="summary-empty">Нет сигналов в выбранном состоянии</div>';
-        return;
-    }
-    
-    const resultsHTML = stateWaves.map((item, index) => {
-        const closenessClass = this.getClosenessClass(item.difference);
-        const stateValue = item.state.toFixed(2);
-        
-        const pastWaveMarker = item.isPastWave ? '<span style="color: #666; font-style: italic;"> (прошедшая)</span>' : '';
-        
-        return `
-            <div class="summary-item ${closenessClass}">
-                <div class="summary-item-info">
-                    <div class="summary-item-name">
-                        <span class="summary-item-index">${index + 1}.</span>
-                        ${item.wave.name} (${item.wave.period} дней)${pastWaveMarker}
-                    </div>
-                    <div class="summary-item-details">
-                        <span class="summary-item-state">Состояние: ${stateValue}</span>
-                        <span class="summary-item-difference">Разница: ${item.difference.toFixed(2)}</span>
-                        <span class="summary-item-closeness">${item.closeness}</span>
-                    </div>
-                </div>
-                <div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
-                <div class="summary-item-actions">
-                    <button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
-                        Показать на визоре
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    resultsElement.innerHTML = resultsHTML;
-    
-    // Исправленный обработчик событий для кнопок
-    setTimeout(() => {
-        document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
-            // Удаляем старый обработчик, если он есть
-            btn.replaceWith(btn.cloneNode(true));
-        });
-        
-        // Добавляем новые обработчики
-        document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const waveId = btn.dataset.waveId;
-                if (!waveId) return;
-                
-                // ИСПРАВЛЕНО: Правильный селектор для поиска чекбокса
-                const waveIdStr = String(waveId);
-                
-                // Ищем чекбокс в списке волн
-                let checkbox = null;
-                
-                // Сначала ищем в основном списке волн
-                checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveIdStr}"]`);
-                
-                // Если не нашли в основном списке, ищем в группах
-                if (!checkbox) {
-                    checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveIdStr}"]`);
-                }
-                
-                if (checkbox) {
-                    // Переключаем состояние
-                    const isChecked = checkbox.checked;
-                    checkbox.checked = !isChecked;
-                    
-                    // Создаем и запускаем событие change
-                    const changeEvent = new Event('change', {
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    checkbox.dispatchEvent(changeEvent);
-                    
-                    // Также создаем событие click для полноты
-                    const clickEvent = new Event('click', {
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    checkbox.dispatchEvent(clickEvent);
-                    
-                    // Если есть обработчик change, вызываем его напрямую
-                    if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
-                        const $checkbox = $(checkbox);
-                        window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
-                    }
-                    
-                    // Визуальная обратная связь
-                    const waveName = btn.closest('.summary-item')?.querySelector('.summary-item-name')?.textContent || 'Сигнал';
-                    console.log(`Сигнал "${waveName}" ${!isChecked ? 'показан' : 'скрыт'} на визоре`);
-                } else {
-                    // Если чекбокс не найден, используем прямое изменение состояния
-                    if (window.appState && window.appState.waveVisibility) {
-                        const waveIdStr = String(waveId);
-                        const currentState = window.appState.waveVisibility[waveIdStr];
-                        window.appState.waveVisibility[waveIdStr] = currentState === false;
-                        window.appState.save();
-                        
-                        // Обновляем отображение
-                        if (window.waves && window.waves.updatePosition) {
-                            setTimeout(() => {
-                                window.waves.updatePosition();
-                            }, 100);
-                        }
-                        
-                        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                            setTimeout(() => {
-                                window.unifiedListManager.updateWavesList();
-                            }, 100);
-                        }
-                        
-                        // Обновляем сводку
-                        setTimeout(() => {
-                            this.updateSummary();
-                        }, 150);
-                        
-                        console.log(`Сигнал ID ${waveId} ${currentState === false ? 'показан' : 'скрыт'} на визоре (прямое управление)`);
-                    }
-                }
-            });
-        });
-    }, 100);
-}
+	updateResults(stateWaves) {
+		const resultsElement = this.elements.summaryResults;
+		if (!resultsElement) return;
+		
+		if (stateWaves.length === 0) {
+			resultsElement.innerHTML = '<div class="summary-empty">Нет сигналов в выбранном состоянии</div>';
+			return;
+		}
+		
+		const resultsHTML = stateWaves.map((item, index) => {
+			const closenessClass = this.getClosenessClass(item.difference);
+			const stateValue = item.state.toFixed(2);
+			
+			const pastWaveMarker = item.isPastWave ? '<span style="color: #666; font-style: italic;"> (прошедшая)</span>' : '';
+			
+			return `
+				<div class="summary-item ${closenessClass}">
+					<div class="summary-item-info">
+						<div class="summary-item-name">
+							<span class="summary-item-index">${index + 1}.</span>
+							${item.wave.name} (${item.wave.period} дней)${pastWaveMarker}
+						</div>
+						<div class="summary-item-details">
+							<span class="summary-item-state">Состояние: ${stateValue}</span>
+							<span class="summary-item-difference">Разница: ${item.difference.toFixed(2)}</span>
+							<span class="summary-item-closeness">${item.closeness}</span>
+						</div>
+					</div>
+					<div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
+					<div class="summary-item-actions">
+						<button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
+							Показать на визоре
+						</button>
+					</div>
+				</div>
+			`;
+		}).join('');
+		
+		resultsElement.innerHTML = resultsHTML;
+		
+		// Добавляем обработчики для кнопок - БЕЗ ОБНОВЛЕНИЯ ТЕКСТА
+		setTimeout(() => {
+			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+				// Удаляем старый обработчик, если он есть
+				btn.replaceWith(btn.cloneNode(true));
+			});
+			
+			// Добавляем новые обработчики
+			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					
+					const waveId = btn.dataset.waveId;
+					if (!waveId) return;
+					
+					// Ищем чекбокс в списке волн
+					let checkbox = null;
+					checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+					
+					if (!checkbox) {
+						checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
+					}
+					
+					if (checkbox) {
+						// Переключаем состояние
+						const isChecked = checkbox.checked;
+						checkbox.checked = !isChecked;
+						
+						// Создаем и запускаем событие change
+						const changeEvent = new Event('change', {
+							bubbles: true,
+							cancelable: true
+						});
+						checkbox.dispatchEvent(changeEvent);
+						
+						// Вызываем обработчик
+						if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+							const $checkbox = $(checkbox);
+							window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
+						}
+						
+						// ❌ НЕТ обновления текста кнопки!
+					} else {
+						// Прямое изменение состояния, если чекбокс не найден
+						if (window.appState && window.appState.waveVisibility) {
+							const waveIdStr = String(waveId);
+							const currentState = window.appState.waveVisibility[waveIdStr];
+							window.appState.waveVisibility[waveIdStr] = currentState === false;
+							window.appState.save();
+							
+							if (window.waves && window.waves.updatePosition) {
+								setTimeout(() => {
+									window.waves.updatePosition();
+								}, 100);
+							}
+							
+							if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+								setTimeout(() => {
+									window.unifiedListManager.updateWavesList();
+								}, 100);
+							}
+						}
+					}
+				});
+			});
+		}, 100);
+	}
+
+
     
     getClosenessClass(difference) {
         if (difference < 0.001) return 'summary-item-exact';

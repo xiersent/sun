@@ -1,4 +1,5 @@
-// modules/uiManager.js - ОБНОВЛЕННЫЙ
+// modules/uiManager.js
+// modules/uiManager.js - ОБНОВЛЕННЫЙ (без notes)
 class UIManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
@@ -59,8 +60,7 @@ class UIManager {
     
     handleAction(action, element) {
         const actions = {
-			resetWarning: () => this.resetWarning(),
-
+            resetWarning: () => this.resetWarning(),
             prevDay: () => window.dates.navigateDay(-1),
             nextDay: () => window.dates.navigateDay(1),
             today: () => window.dates.goToToday(),
@@ -76,7 +76,7 @@ class UIManager {
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
             toggleWaveLabels: () => this.toggleWaveLabels(),
-			toggleWaveIntersections: () => this.toggleWaveIntersections(),
+            toggleWaveIntersections: () => this.toggleWaveIntersections(),
             toggleExtremes: () => this.toggleExtremes(),
             toggleEquilibrium: () => this.toggleEquilibrium(),
             toggleBg: () => this.toggleBackground(),
@@ -101,7 +101,6 @@ class UIManager {
             exportDates: () => window.importExport.exportDates(),
             exportWaves: () => window.importExport.exportWaves(),
             importAll: () => document.getElementById('importAllFile').click(),
-            importDB: () => document.getElementById('importDBFile').click(),
             resetAll: () => this.resetAll()
         };
         
@@ -110,30 +109,25 @@ class UIManager {
         }
     }
 
-	// modules/uiManager.js - исправленный метод resetWarning()
-	resetWarning() {
-		// Показываем overlay предупреждения
-		const warningOverlay = document.getElementById('warningOverlay');
-		if (warningOverlay) {
-			warningOverlay.classList.remove('hidden');
-			warningOverlay.classList.add('desktop-warning');
-			document.body.style.overflow = 'hidden';
-		}
-		
-		// Показываем плашку с предупреждением
-		const warningBox = document.querySelector('.warning-box');
-		if (warningBox) {
-			warningBox.classList.remove('hidden');
-		}
-		
-		// Скрываем основной интерфейс
-		document.body.classList.add('ui-hidden');
-		
-		// Показываем угловые квадраты
-		document.querySelectorAll('.corner-square').forEach(square => {
-			square.style.display = 'block';
-		});
-	}
+    resetWarning() {
+        const warningOverlay = document.getElementById('warningOverlay');
+        if (warningOverlay) {
+            warningOverlay.classList.remove('hidden');
+            warningOverlay.classList.add('desktop-warning');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        const warningBox = document.querySelector('.warning-box');
+        if (warningBox) {
+            warningBox.classList.remove('hidden');
+        }
+        
+        document.body.classList.add('ui-hidden');
+        
+        document.querySelectorAll('.corner-square').forEach(square => {
+            square.style.display = 'block';
+        });
+    }
     
     toggleUI() {
         window.appState.uiHidden = !window.appState.uiHidden;
@@ -344,45 +338,43 @@ class UIManager {
         window.appState.save();
     }
     
-	toggleGraphGrayMode() {
-		window.appState.graphGrayMode = !window.appState.graphGrayMode;
-		
-		if (window.appState.graphGrayMode) {
-			document.body.classList.add('graph-gray-mode');
-		} else {
-			document.body.classList.remove('graph-gray-mode');
-		}
-		
-		// Сохраняем класс на graphContainer для обратной совместимости
-		const graphContainer = document.getElementById('graphContainer');
-		if (graphContainer) {
-			if (window.appState.graphGrayMode) {
-				graphContainer.classList.add('graph-gray-mode');
-			} else {
-				graphContainer.classList.remove('graph-gray-mode');
-			}
-		}
-	}
+    toggleGraphGrayMode() {
+        window.appState.graphGrayMode = !window.appState.graphGrayMode;
+        
+        if (window.appState.graphGrayMode) {
+            document.body.classList.add('graph-gray-mode');
+        } else {
+            document.body.classList.remove('graph-gray-mode');
+        }
+        
+        const graphContainer = document.getElementById('graphContainer');
+        if (graphContainer) {
+            if (window.appState.graphGrayMode) {
+                graphContainer.classList.add('graph-gray-mode');
+            } else {
+                graphContainer.classList.remove('graph-gray-mode');
+            }
+        }
+    }
 
-	// В modules/uiManager.js добавить:
-	toggleWaveIntersections() {
-		const container = document.querySelector('.wave-intersection-points');
-		if (container) {
-			const isHidden = container.classList.contains('hidden');
-			if (isHidden) {
-				container.classList.remove('hidden');
-				if (window.waves && window.waves.renderWaveIntersectionPoints) {
-					window.waves.renderWaveIntersectionPoints();
-				}
-			} else {
-				container.classList.add('hidden');
-			}
-		} else {
-			if (window.waves && window.waves.renderWaveIntersectionPoints) {
-				window.waves.renderWaveIntersectionPoints();
-			}
-		}
-	}
+    toggleWaveIntersections() {
+        const container = document.querySelector('.wave-intersection-points');
+        if (container) {
+            const isHidden = container.classList.contains('hidden');
+            if (isHidden) {
+                container.classList.remove('hidden');
+                if (window.waves && window.waves.renderWaveIntersectionPoints) {
+                    window.waves.renderWaveIntersectionPoints();
+                }
+            } else {
+                container.classList.add('hidden');
+            }
+        } else {
+            if (window.waves && window.waves.renderWaveIntersectionPoints) {
+                window.waves.renderWaveIntersectionPoints();
+            }
+        }
+    }
     
     toggleStars() {
         window.appState.showStars = !window.appState.showStars;
@@ -425,7 +417,6 @@ class UIManager {
     updateUI() {
         window.dataManager.updateDateList();
         window.dataManager.updateWavesGroups();
-        window.dataManager.updateNotesList();
         
         this.updateDateTimeInputs();
         
@@ -435,7 +426,6 @@ class UIManager {
         
         window.waves.updatePosition();
         window.grid.updateCenterDate();
-        window.grid.updateGridNotesHighlight();
     }
     
     clearWaveForm() {
@@ -446,33 +436,32 @@ class UIManager {
     }
     
 
-	handleTabClick(tabButton) {
-		const tabId = tabButton.dataset.tab;
-		
-		if (this.activeTab === tabId) {
-			this.deactivateTab(tabButton);
-			this.activeTab = null;
-		} else {
-			if (this.activeTab) {
-				const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
-				if (prevTabButton) {
-					this.deactivateTab(prevTabButton);
-				}
-			}
-			
-			this.activateTab(tabButton);
-			this.activeTab = tabId;
-		}
-		
-		localStorage.setItem('activeTab', this.activeTab);
-		
-		// ОБНОВЛЕНО: используем stateIntersectionManager
-		if (tabId === 'intersections' && window.stateIntersectionManager) {
-			setTimeout(() => {
-				window.stateIntersectionManager.updateIntersections();
-			}, 100);
-		}
-	}
+    handleTabClick(tabButton) {
+        const tabId = tabButton.dataset.tab;
+        
+        if (this.activeTab === tabId) {
+            this.deactivateTab(tabButton);
+            this.activeTab = null;
+        } else {
+            if (this.activeTab) {
+                const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
+                if (prevTabButton) {
+                    this.deactivateTab(prevTabButton);
+                }
+            }
+            
+            this.activateTab(tabButton);
+            this.activeTab = tabId;
+        }
+        
+        localStorage.setItem('activeTab', this.activeTab);
+        
+        if (tabId === 'intersections' && window.stateIntersectionManager) {
+            setTimeout(() => {
+                window.stateIntersectionManager.updateIntersections();
+            }, 100);
+        }
+    }
     
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
@@ -490,10 +479,6 @@ class UIManager {
         const tabContent = document.querySelector(`#${tabId}-tab`);
         if (tabContent) {
             tabContent.classList.add('active');
-        }
-        
-        if (tabId === 'intersections' && window.intersectionManager) {
-            window.intersectionManager.updateForCurrentDate();
         }
     }
     
@@ -531,26 +516,8 @@ class UIManager {
         }
     }
     
-    randomizePanelOrder() {
-        const controlPanel = document.querySelector('.control-panel');
-        if (!controlPanel) return;
-        
-        const panels = Array.from(controlPanel.querySelectorAll('.panel-section'));
-        for (let i = panels.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [panels[i], panels[j]] = [panels[j], panels[i]];
-        }
-        
-        panels.forEach(panel => controlPanel.appendChild(panel));
-    }
-    
     scrollToDBImport() {
-        const dbImportSection = document.querySelector('.db-import-section');
-        if (dbImportSection) {
-            dbImportSection.scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
+        // Метод оставлен пустым, так как вкладка удалена
     }
     
     toggleGroup(groupId) {

@@ -1,3 +1,4 @@
+// modules/dates.js
 class DatesManager {
     constructor() {
         this.elements = {};
@@ -8,8 +9,8 @@ class DatesManager {
         const ids = [
             'dateInput', 'dateNameInput', 'btnAddDate', 'dateListForDates',
             'mainDateInputDate', 'mainDateInputTime', 'btnSetDate', 'currentDay', 'btnPrevDay',
-            'btnNextDay', 'btnToday', 'btnNow', 'noteInput', 'btnAddNote',
-            'notesList', 'customWaveName', 'customWavePeriod', 'customWaveType',
+            'btnNextDay', 'btnToday', 'btnNow',
+            'customWaveName', 'customWavePeriod', 'customWaveType',
             'customWaveColor', 'btnAddCustomWave', 'newGroupName', 'btnAddGroup'
         ];
         
@@ -127,152 +128,111 @@ class DatesManager {
         }
     }
     
-	setActiveDate(dateId, useExactTime = false) {
-		console.log('=== SET ACTIVE DATE ===', dateId);
-		
-		const oldActiveId = window.appState.activeDateId;
-		window.appState.activeDateId = dateId;
-		
-		// СИНХРОНИЗАЦИЯ: При активации даты выделяем ее как тип A
-		if (!window.appState.dateSelections) {
-			window.appState.dateSelections = {
-				typeA: null,
-				typeB: null
-			};
-		}
-		
-		// Устанавливаем эту дату как тип A
-		window.appState.dateSelections.typeA = dateId;
-		window.appState.dateSelections.typeB = null; // Снимаем тип B
-		
-		console.log('setActiveDate - selected type A:', dateId);
-		
-		const dateIdStr = String(dateId);
-		const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
-		
-		if (!dateObj) {
-			const now = new Date();
-			window.appState.baseDate = new Date(
-				now.getFullYear(),
-				now.getMonth(),
-				now.getDate(),
-				0, 0, 0, 0
-			).getTime();
-		} else {
-			try {
-				const selectedDate = new Date(dateObj.date);
-				const startOfDay = new Date(
-					selectedDate.getFullYear(),
-					selectedDate.getMonth(),
-					selectedDate.getDate(),
-					0, 0, 0, 0
-				);
-				
-				window.appState.baseDate = startOfDay.getTime();
-			} catch (error) {
-				const now = new Date();
-				window.appState.baseDate = new Date(
-					now.getFullYear(),
-					now.getMonth(),
-					now.getDate(),
-					0, 0, 0, 0
-				).getTime();
-			}
-		}
-		
-		this.recalculateCurrentDay(useExactTime);
-		
-		this.updateCurrentDayElement();
-		
-		if (window.dataManager && window.dataManager.updateDateList) {
-			window.dataManager.updateDateList();
-		}
-		
-		if (oldActiveId !== dateId) {
-			document.querySelectorAll('.wave-container').forEach(c => c.remove());
-			if (window.waves) {
-				window.waves.waveContainers = {};
-				window.waves.wavePaths = {};
-			}
-			
-			if (window.waves && window.waves.createVisibleWaveElements) {
-				window.waves.createVisibleWaveElements();
-			}
-		}
-		
-		if (window.waves) {
-			window.waves.updatePosition();
-			window.waves.updateCornerSquareColors();
-		}
+    setActiveDate(dateId, useExactTime = false) {
+        const oldActiveId = window.appState.activeDateId;
+        window.appState.activeDateId = dateId;
+        
+        // СИНХРОНИЗАЦИЯ: При активации даты выделяем ее как тип A
+        if (!window.appState.dateSelections) {
+            window.appState.dateSelections = {
+                typeA: null,
+                typeB: null
+            };
+        }
+        
+        // Устанавливаем эту дату как тип A
+        window.appState.dateSelections.typeA = dateId;
+        window.appState.dateSelections.typeB = null;
+        
+        const dateIdStr = String(dateId);
+        const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
+        
+        if (!dateObj) {
+            const now = new Date();
+            window.appState.baseDate = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                0, 0, 0, 0
+            ).getTime();
+        } else {
+            try {
+                const selectedDate = new Date(dateObj.date);
+                const startOfDay = new Date(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth(),
+                    selectedDate.getDate(),
+                    0, 0, 0, 0
+                );
+                
+                window.appState.baseDate = startOfDay.getTime();
+            } catch (error) {
+                const now = new Date();
+                window.appState.baseDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                    0, 0, 0, 0
+                ).getTime();
+            }
+        }
+        
+        this.recalculateCurrentDay(useExactTime);
+        
+        this.updateCurrentDayElement();
+        
+        if (window.dataManager && window.dataManager.updateDateList) {
+            window.dataManager.updateDateList();
+        }
+        
+        if (oldActiveId !== dateId) {
+            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            if (window.waves) {
+                window.waves.waveContainers = {};
+                window.waves.wavePaths = {};
+            }
+            
+            if (window.waves && window.waves.createVisibleWaveElements) {
+                window.waves.createVisibleWaveElements();
+            }
+        }
+        
+        if (window.waves) {
+            window.waves.updatePosition();
+            window.waves.updateCornerSquareColors();
+        }
 
-		if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
-			window.extremumTimeManager.updateExtremums();
-		}
-		
-		if (window.grid) {
-			if (window.grid.createGrid) {
-				window.grid.createGrid();
-			}
-			if (window.grid.updateCenterDate) {
-				window.grid.updateCenterDate();
-				window.grid.updateGridNotesHighlight();
-			}
-		}
-		
-		window.appState.save();
-		
-		this.updateTodayButton();
-		
-		if (window.summaryManager && window.summaryManager.updateSummary) {
-			setTimeout(() => {
-				window.summaryManager.updateSummary();
-			}, 50);
-		}
-		
-		this.updateDateTimeInputs();
-		
-		// В конце метода добавляем обновление отображения дат
-		setTimeout(() => {
-			if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-				window.unifiedListManager.updateDatesList();
-			}
-		}, 50);
-	}
-    
-	addNote(content) {
-		if (!content.trim()) {
-			alert('Пожалуйста, введите текст записи');
-			return null;
-		}
-		
-		const note = {
-			id: window.appState.generateId(),
-			date: window.appState.currentDate.getTime(), // Уже timestamp
-			content: content.trim()
-		};
-		
-		window.appState.data.notes.push(note);
-		window.appState.save();
-		return note;
-	}
-    
-    deleteNote(noteId) {
-        const noteIdStr = String(noteId);
-        window.appState.data.notes = window.appState.data.notes.filter(n => String(n.id) !== noteIdStr);
+        if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+            window.extremumTimeManager.updateExtremums();
+        }
+        
+        if (window.grid) {
+            if (window.grid.createGrid) {
+                window.grid.createGrid();
+            }
+            if (window.grid.updateCenterDate) {
+                window.grid.updateCenterDate();
+            }
+        }
+        
         window.appState.save();
+        
+        this.updateTodayButton();
+        
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        this.updateDateTimeInputs();
+        
+        setTimeout(() => {
+            if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                window.unifiedListManager.updateDatesList();
+            }
+        }, 50);
     }
-    
-	getNotesForDate(date) {
-		const targetDate = window.timeUtils.toLocalDate(date);
-		const targetStart = window.timeUtils.getStartOfDay(targetDate);
-		const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000);
-		
-		return window.appState.data.notes.filter(note => {
-			// ИСПРАВИТЬ здесь тоже:
-			const noteDate = window.timeUtils.toLocalDate(note.date);
-			return noteDate >= targetStart && noteDate < targetEnd;
-		});
-	}
     
     addGroup(name) {
         if (!name.trim()) {
@@ -322,135 +282,129 @@ class DatesManager {
     }
     
 
-	// В dates.js - метод navigateDay (уже есть, просто проверьте)
-	navigateDay(delta) {
-		const newDate = new Date(window.appState.currentDate);
-		newDate.setDate(newDate.getDate() + delta);
-		
-		window.appState.currentDate = window.timeUtils ? 
-			window.timeUtils.toLocalDate(newDate) : 
-			newDate;
-		
-		this.recalculateCurrentDay(false);
-		window.waves.updatePosition();
-		window.grid.createGrid();
-		window.grid.updateCenterDate();
-		window.grid.updateGridNotesHighlight();
-		window.appState.save();
-		
-		this.updateTodayButton();
-		
-		if (window.summaryManager && window.summaryManager.updateSummary) {
-			setTimeout(() => {
-				window.summaryManager.updateSummary();
-			}, 50);
-		}
-		
-		// ДОБАВИТЬ ЭТОТ БЛОК
-		if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-			setTimeout(() => {
-				window.stateIntersectionManager.updateIntersections();
-			}, 50);
-		}
-		
-		this.updateDateTimeInputs();
-	}
+    navigateDay(delta) {
+        const newDate = new Date(window.appState.currentDate);
+        newDate.setDate(newDate.getDate() + delta);
+        
+        window.appState.currentDate = window.timeUtils ? 
+            window.timeUtils.toLocalDate(newDate) : 
+            newDate;
+        
+        this.recalculateCurrentDay(false);
+        window.waves.updatePosition();
+        window.grid.createGrid();
+        window.grid.updateCenterDate();
+        window.appState.save();
+        
+        this.updateTodayButton();
+        
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+            setTimeout(() => {
+                window.stateIntersectionManager.updateIntersections();
+            }, 50);
+        }
+        
+        this.updateDateTimeInputs();
+    }
 
-	// В dates.js - метод setDate
-	setDate(newDate, useExactTime = true) {
-		window.appState.isProgrammaticDateChange = true;
-		
-		if (newDate instanceof Date) {
-			window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
-		} else if (typeof newDate === 'number') {
-			window.appState.currentDate = new Date(newDate);
-		} else {
-			window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
-		}
-		
-		this.recalculateCurrentDay(useExactTime);
-		
-		window.waves.updatePosition();
-		window.grid.createGrid();
-		window.grid.updateCenterDate();
-		window.grid.updateGridNotesHighlight();
-		window.appState.save();
-		
-		this.updateTodayButton();
-		
-		if (window.summaryManager && window.summaryManager.updateSummary) {
-			setTimeout(() => {
-				window.summaryManager.updateSummary();
-			}, 50);
-		}
-		
-		// ДОБАВИТЬ ЭТОТ БЛОК
-		if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-			setTimeout(() => {
-				window.stateIntersectionManager.updateIntersections();
-			}, 50);
-		}
-		
-		this.updateDateTimeInputs();
-		
-		setTimeout(() => {
-			window.appState.isProgrammaticDateChange = false;
-		}, 100);
-	}
+    setDate(newDate, useExactTime = true) {
+        window.appState.isProgrammaticDateChange = true;
+        
+        if (newDate instanceof Date) {
+            window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
+        } else if (typeof newDate === 'number') {
+            window.appState.currentDate = new Date(newDate);
+        } else {
+            window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
+        }
+        
+        this.recalculateCurrentDay(useExactTime);
+        
+        window.waves.updatePosition();
+        window.grid.createGrid();
+        window.grid.updateCenterDate();
+        window.appState.save();
+        
+        this.updateTodayButton();
+        
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            setTimeout(() => {
+                window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+            setTimeout(() => {
+                window.stateIntersectionManager.updateIntersections();
+            }, 50);
+        }
+        
+        this.updateDateTimeInputs();
+        
+        setTimeout(() => {
+            window.appState.isProgrammaticDateChange = false;
+        }, 100);
+    }
 
     
-	recalculateCurrentDay(useExactTime = false) {
-		const currentDate = window.appState.currentDate;
-		
-		let baseDate;
-		if (typeof window.appState.baseDate === 'number') {
-			baseDate = new Date(window.appState.baseDate);
-		} else {
-			baseDate = new Date(window.appState.baseDate);
-		}
-		
-		const utcCurrent = Date.UTC(
-			currentDate.getFullYear(),
-			currentDate.getMonth(),
-			currentDate.getDate()
-		);
-		
-		const utcBase = Date.UTC(
-			baseDate.getFullYear(),
-			baseDate.getMonth(),
-			baseDate.getDate()
-		);
-		
-		const diffMsStart = utcCurrent - utcBase;
-		const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
-		
-		const hours = currentDate.getHours();
-		const minutes = currentDate.getMinutes();
-		const seconds = currentDate.getSeconds();
-		const milliseconds = currentDate.getMilliseconds();
-		
-		const timeOfDayFraction = (
-			(hours * 60 * 60 * 1000) +
-			(minutes * 60 * 1000) +
-			(seconds * 1000) +
-			milliseconds
-		) / (24 * 60 * 60 * 1000);
-		
-		let daysDiff;
-		if (useExactTime) {
-			daysDiff = Math.floor(daysStart) + timeOfDayFraction;
-		} else {
-			daysDiff = Math.round(daysStart);
-		}
-		
-		window.appState.currentDay = daysDiff;
-		window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
-		
-		this.updateCurrentDayElement();
-		window.appState.save();
-		
-		return window.appState.currentDay;
-	}
+    recalculateCurrentDay(useExactTime = false) {
+        const currentDate = window.appState.currentDate;
+        
+        let baseDate;
+        if (typeof window.appState.baseDate === 'number') {
+            baseDate = new Date(window.appState.baseDate);
+        } else {
+            baseDate = new Date(window.appState.baseDate);
+        }
+        
+        const utcCurrent = Date.UTC(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            currentDate.getDate()
+        );
+        
+        const utcBase = Date.UTC(
+            baseDate.getFullYear(),
+            baseDate.getMonth(),
+            baseDate.getDate()
+        );
+        
+        const diffMsStart = utcCurrent - utcBase;
+        const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
+        
+        const hours = currentDate.getHours();
+        const minutes = currentDate.getMinutes();
+        const seconds = currentDate.getSeconds();
+        const milliseconds = currentDate.getMilliseconds();
+        
+        const timeOfDayFraction = (
+            (hours * 60 * 60 * 1000) +
+            (minutes * 60 * 1000) +
+            (seconds * 1000) +
+            milliseconds
+        ) / (24 * 60 * 60 * 1000);
+        
+        let daysDiff;
+        if (useExactTime) {
+            daysDiff = Math.floor(daysStart) + timeOfDayFraction;
+        } else {
+            daysDiff = Math.round(daysStart);
+        }
+        
+        window.appState.currentDay = daysDiff;
+        window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
+        
+        this.updateCurrentDayElement();
+        window.appState.save();
+        
+        return window.appState.currentDay;
+    }
     
     goToToday() {
         const todayStart = window.timeUtils.getStartOfDay(new Date());
@@ -534,11 +488,6 @@ class DatesManager {
             window.uiManager.updateDateTimeInputs();
         }
     }
-    
-    debugDateInfo() {
-    }
-    
-
     
     getCurrentDate() {
         return window.timeUtils.now();

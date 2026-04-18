@@ -1,4 +1,5 @@
-// modules/init.js - ОБНОВЛЕННЫЙ
+// modules/init.js
+// modules/init.js - ОБНОВЛЕННЫЙ (без notes)
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {
@@ -16,21 +17,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.dom = window.dom || new DOM();
         
 
-		const managers = [
-			{ name: 'dates', class: DatesManager },
-			{ name: 'appCore', class: AppCore },
-			{ name: 'waves', class: WavesManager },
-			{ name: 'grid', class: GridManager },
-			{ name: 'uiManager', class: UIManager },
-			{ name: 'dataManager', class: DataManager },
-			{ name: 'unifiedListManager', class: UnifiedListManager },
-			{ name: 'importExport', class: ImportExportManager },
-			{ name: 'stateIntersectionManager', class: StateIntersectionManager }, // НОВЫЙ
-			{ name: 'summaryManager', class: SummaryManager },
-			{ name: 'eventManager', class: EventManager },
-			{ name: 'timeBarManager' },
-			{ name: 'extremumTimeManager', class: ExtremumTimeManager }
-		];
+        const managers = [
+            { name: 'dates', class: DatesManager },
+            { name: 'appCore', class: AppCore },
+            { name: 'waves', class: WavesManager },
+            { name: 'grid', class: GridManager },
+            { name: 'uiManager', class: UIManager },
+            { name: 'dataManager', class: DataManager },
+            { name: 'unifiedListManager', class: UnifiedListManager },
+            { name: 'importExport', class: ImportExportManager },
+            { name: 'stateIntersectionManager', class: StateIntersectionManager },
+            { name: 'summaryManager', class: SummaryManager },
+            { name: 'eventManager', class: EventManager },
+            { name: 'timeBarManager' },
+            { name: 'extremumTimeManager', class: ExtremumTimeManager }
+        ];
         
         for (const manager of managers) {
             if (!window[manager.name] && manager.class) {
@@ -39,13 +40,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
-            window.unifiedListManager.initTemplates().catch(err => {
-            });
+            window.unifiedListManager.initTemplates().catch(err => {});
         }
         
         if (window.appCore && window.appCore.init) {
             await window.appCore.init();
-        } else {
         }
         
         if (window.timeBarManager && window.timeBarManager.init) {
@@ -92,17 +91,11 @@ async function finalizeInitialization() {
     if (window.dataManager) {
         await window.dataManager.updateDateList();
         await window.dataManager.updateWavesGroups();
-        if (window.dataManager.updateNotesList) {
-            window.dataManager.updateNotesList();
-        }
     }
     
     if (window.grid) {
         if (window.grid.updateCenterDate) {
             window.grid.updateCenterDate();
-        }
-        if (window.grid.updateGridNotesHighlight) {
-            window.grid.updateGridNotesHighlight();
         }
     }
     
@@ -132,21 +125,18 @@ async function finalizeInitialization() {
         window.uiManager.restoreTabState();
     }
 
-    // АВТОМАТИЧЕСКАЯ ИНИЦИАЛИЗАЦИЯ ЭКСТРЕМУМОВ
     if (window.extremumTimeManager && window.extremumTimeManager.init) {
         setTimeout(() => {
             window.extremumTimeManager.init();
         }, 500);
     }
     
-    // ===== ИНИЦИАЛИЗАЦИЯ НОВОГО МЕНЕДЖЕРА ПЕРЕСЕЧЕНИЙ =====
     if (window.stateIntersectionManager && window.stateIntersectionManager.refresh) {
         setTimeout(() => {
             window.stateIntersectionManager.refresh();
         }, 600);
     }
     
-    // ===== СИНХРОНИЗАЦИЯ DATE SELECTIONS =====
     setTimeout(() => {
         if (window.appState && window.appState.activeDateId) {
             if (!window.appState.dateSelections) {
@@ -161,8 +151,6 @@ async function finalizeInitialization() {
                 String(window.appState.dateSelections.typeA) : null;
             
             if (currentTypeAStr !== activeDateIdStr) {
-                console.log('Initializing dateSelections - syncing active date:', 
-                    window.appState.activeDateId);
                 window.appState.dateSelections.typeA = window.appState.activeDateId;
                 window.appState.dateSelections.typeB = null;
                 window.appState.save();

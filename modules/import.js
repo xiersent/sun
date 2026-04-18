@@ -1,4 +1,5 @@
 // modules/import.js
+// modules/import.js - Упрощенная версия (только импорт/экспорт JSON)
 class ImportExportManager {
     constructor() {
         this.SQL = null;
@@ -60,7 +61,6 @@ class ImportExportManager {
     exportDates() {
         const dataToSave = {
             dates: window.appState.data.dates,
-            notes: window.appState.data.notes,
             exportDate: new Date().getTime(),
             version: '1.0',
             type: 'dates-only'
@@ -121,7 +121,7 @@ class ImportExportManager {
                     if (isFullExport) {
                         message = 'Импортировать ВСЕ данные? Текущие данные будут заменены.';
                     } else if (isDatesOnly) {
-                        message = 'Импортировать даты и заметки? Существующие даты и заметки будут заменены.';
+                        message = 'Импортировать даты? Существующие даты будут заменены.';
                     } else if (isWavesOnly) {
                         message = 'Импортировать сигналы и группы? Существующие сигналы и группы будут заменены.';
                     }
@@ -300,8 +300,6 @@ class ImportExportManager {
                             
                             window.dataManager.updateDateList();
                             window.dataManager.updateWavesGroups();
-                            window.dataManager.updateNotesList();
-                            window.grid.updateGridNotesHighlight();
                             window.grid.updateCenterDate();
                             window.waves.updatePosition();
                             window.waves.updateCornerSquareColors();
@@ -311,7 +309,6 @@ class ImportExportManager {
                             
                         } else if (isDatesOnly) {
                             window.appState.data.dates = convertedData.dates || [];
-                            window.appState.data.notes = convertedData.notes || [];
                             
                             if (window.appState.data.dates.length > 0 && !window.appState.data.dates.find(d => d.id === window.appState.activeDateId)) {
                                 window.appState.activeDateId = window.appState.data.dates[0].id;
@@ -322,12 +319,10 @@ class ImportExportManager {
                             }
                             
                             window.dataManager.updateDateList();
-                            window.dataManager.updateNotesList();
-                            window.grid.updateGridNotesHighlight();
                             window.grid.updateCenterDate();
                             window.appState.save();
                             
-                            alert('Даты и заметки успешно импортированы!');
+                            alert('Даты успешно импортированы!');
                             
                         } else if (isWavesOnly) {
                             window.appState.data.waves = convertedData.waves || [];
@@ -395,275 +390,15 @@ class ImportExportManager {
         });
     }
     
-    async importDB(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    await this.initSQL();
-                    
-                    if (!this.SQL) {
-                        throw new Error('SQL.js не загружен');
-                    }
-                    
-                    const uint8Array = new Uint8Array(e.target.result);
-                    this.currentDB = new this.SQL.Database(uint8Array);
-                    window.appState.currentDB = this.currentDB;
-                    
-                    let result = '=== УСПЕШНАЯ ЗАГРРУЗКА БАЗЫ ДАННЫХ ===\n\n';
-                    result += `Файл: ${file.name}\n`;
-                    result += `Размер: ${file.size} байт\n`;
-                    
-                    const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'";
-                    const tablesResult = this.currentDB.exec(tablesQuery);
-                    
-                    if (tablesResult.length) {
-                        const tables = tablesResult[0].values.map(row => row[0]);
-                        result += `Обнаружено таблиц: ${tables.length}\n`;
-                        result += `Таблицы: ${tables.join(', ')}\n\n`;
-                        result += 'Используйте кнопку "Анализировать DB" для детального анализа структуры базы.\n';
-                        result += 'Используйте кнопку "Мигрировать в заметки" для преобразования данных в заметки.';
-                        
-                        this.dbImportData = {
-                            tables: tables,
-                            stats: {},
-                            totalRecords: 0
-                        };
-                        window.appState.dbImportData = this.dbImportData;
-                    } else {
-                        result += 'В базе данных не найдено пользовательских таблиц.';
-                    }
-                    
-                    resolve(result);
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            
-            reader.onerror = function(error) {
-                reject(new Error(`Ошибка чтения файла: ${error.target.error.name}`));
-            };
-            
-            try {
-                reader.readAsArrayBuffer(file);
-            } catch (readError) {
-                reject(new Error(`Ошибка запуска чтения файла: ${readError.message}`));
-            }
-        });
-    }
-    
-    async analyzeDB() {
-        if (!this.currentDB) {
-            throw new Error('Сначала загрузите DB файл через кнопку "Импорт заметок Metaslip"');
-        }
-        
-        let result = '=== АНАЛИЗ БАЗЫ ДАННЫХ SQLite ===\n\n';
-        
-        const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'";
-        const tablesResult = this.currentDB.exec(tablesQuery);
-        
-        if (!tablesResult.length) {
-            throw new Error('В базе данных не найдено таблиц');
-        }
-        
-        const tables = tablesResult[0].values.map(row => row[0]);
-        result += `Найдено таблиц: ${tables.length}\n`;
-        result += `Таблицы: ${tables.join(', ')}\n\n`;
-        
-        result += '=== СТРУКТУРА ТАБЛИЦ ===\n\n';
-        
-        let totalRecords = 0;
-        
-        tables.forEach((tableName, index) => {
-            result += `--- ${tableName} ---\n`;
-            
-            const schemaQuery = `PRAGMA table_info("${tableName}")`;
-            const schemaResult = this.currentDB.exec(schemaQuery);
-            
-            if (schemaResult.length) {
-                const columns = schemaResult[0].values.map(row => ({
-                    name: row[1],
-                    type: row[2],
-                    notnull: row[3],
-                    defaultValue: row[4],
-                    pk: row[5]
-                }));
-                
-                result += `Колонки: ${columns.map(col => col.name).join(', ')}\n`;
-                
-                const countQuery = `SELECT COUNT(*) as count FROM "${tableName}"`;
-                const countResult = this.currentDB.exec(countQuery);
-                const recordCount = countResult.length ? countResult[0].values[0][0] : 0;
-                totalRecords += recordCount;
-                result += `Записей: ${recordCount}\n`;
-                
-                if (this.dbImportData) {
-                    this.dbImportData.stats[tableName] = {
-                        columns: columns.length,
-                        records: recordCount
-                    };
-                }
-                
-                const sampleQuery = `SELECT * FROM "${tableName}" LIMIT 2`;
-                const sampleResult = this.currentDB.exec(sampleQuery);
-                
-                if (sampleResult.length && sampleResult[0].values.length > 0) {
-                    result += `Пример данных:\n`;
-                    sampleResult[0].values.forEach((row, rowIndex) => {
-                        result += `  ${rowIndex + 1}. ${JSON.stringify(row)}\n`;
-                    });
-                }
-                result += '\n';
-            }
-        });
-        
-        result += '=== СТАТИСТИКА ===\n\n';
-        result += `Всего таблиц: ${tables.length}\n`;
-        result += `Всего записей: ${totalRecords}\n\n`;
-        
-        Object.entries(this.dbImportData?.stats || {}).forEach(([tableName, stats]) => {
-            result += `${tableName}: ${stats.records} записей, ${stats.columns} колонок\n`;
-        });
-        
-        result += '\n=== ВОЗМОЖНОСТИ МИГРАЦИИ ===\n\n';
-        
-        if (tables.includes('meta_card_rows')) {
-            result += '✓ Обнаружены карточки (meta_card_rows) - можно мигрировать в заметки\n';
-        }
-        if (tables.includes('reference_rows')) {
-            result += '✓ Обнаружены ссылки между карточками (reference_rows)\n';
-        }
-        if (tables.includes('edge_rows')) {
-            result += '✓ Обнаружены иерархические связи (edge_rows)\n';
-        }
-        if (tables.includes('tag_rows') || tables.includes('meta_card_tag_rows')) {
-            result += '✓ Обнаружены теги\n';
-        }
-        
-        if (this.dbImportData) {
-            this.dbImportData.totalRecords = totalRecords;
-            this.dbImportData.tables = tables;
-        }
-        
-        return result;
-    }
-    
-    migrateDBToNotes() {
-        if (!this.currentDB) {
-            throw new Error('Сначала загрузите и проанализируйте DB файл');
-        }
-        
-        let migrationReport = '=== МИГРАЦИЯ ДАННЫХ ИЗ БАЗЫ В ЗАМЕТКИ ===\n\n';
-        let notesCreated = 0;
-        let entitiesProcessed = 0;
-        
-        const tables = this.dbImportData?.tables || [];
-        
-        if (tables.includes('meta_card_rows')) {
-            const cardsQuery = `SELECT * FROM meta_card_rows`;
-            const cardsResult = this.currentDB.exec(cardsQuery);
-            
-            if (cardsResult.length) {
-                const columnNames = cardsResult[0].columns;
-                const cards = cardsResult[0].values.map(row => {
-                    const card = {};
-                    columnNames.forEach((colName, index) => {
-                        card[colName] = row[index];
-                    });
-                    return card;
-                });
-                
-                migrationReport += `Найдено карточек: ${cards.length}\n\n`;
-                
-                cards.forEach((card, index) => {
-                    try {
-                        const existingNote = window.appState.data.notes.find(note => {
-                            const noteDate = new Date(note.date);
-                            const cardDate = new Date(card.created_at * 1000);
-                            return noteDate.getTime() === cardDate.getTime() && note.content.includes(card.id || '');
-                        });
-                        
-                        if (existingNote) {
-                            return;
-                        }
-                        
-                        const noteDate = new Date(card.created_at * 1000 || Date.now());
-                        const noteContent = this.createNoteFromCard(card);
-                        
-                        const newNote = {
-                            id: window.appState.generateId(),
-                            date: noteDate.getTime(),
-                            content: noteContent
-                        };
-                        
-                        window.appState.data.notes.push(newNote);
-                        notesCreated++;
-                        entitiesProcessed++;
-                    } catch (error) {
-                        migrationReport += `Ошибка обработки карточки ${card.id}: ${error.message}\n`;
-                    }
-                });
-                
-                migrationReport += `Создано заметок из карточек: ${notesCreated}\n`;
-            }
-        }
-        
-        window.appState.save();
-        migrationReport += `\n=== ИТОГИ МИГРАЦИИ ===\n\n`;
-        migrationReport += `Всего обработано сущностей: ${entitiesProcessed}\n`;
-        migrationReport += `Создано новых заметок: ${notesCreated}\n`;
-        migrationReport += `Общее количество заметки: ${window.appState.data.notes.length}\n`;
-        
-        if (notesCreated > 0) {
-            migrationReport += `\nЗаметки успешно созданы и привязаны к соответствующим датам.\n`;
-            migrationReport += `Используйте навигацию по графику для просмотра импортированных данных.\n`;
-        }
-        
-        return migrationReport;
-    }
-    
-    createNoteFromCard(card) {
-        let timeString = '';
-        if (card.created_at) {
-            const date = window.timeUtils ? 
-                window.timeUtils.toLocalDate(card.created_at * 1000) : 
-                new Date(card.created_at * 1000);
-            
-            timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-        }
-        
-        let content = '';
-        if (card.title && card.title !== 'Без названия') {
-            content += `${timeString} ${window.dom.formatDate(new Date(card.created_at * 1000))} (${window.dom.getWeekdayName(new Date(card.created_at * 1000))}) | ${card.title}`;
-        } else {
-            content += `${timeString} ${window.dom.formatDate(new Date(card.created_at * 1000))} (${window.dom.getWeekdayName(new Date(card.created_at * 1000))})`;
-        }
-        
-        if (card.content) {
-            content += ` | ${card.content}`;
-        }
-        
-        let metadata = `МЕТАДАННЫЕ:\n`;
-        metadata += `ID: ${card.id}\n`;
-        metadata += `Создана: ${new Date(card.created_at * 1000).toLocaleString()}\n`;
-        metadata += `Обновлена: ${new Date(card.updated_at * 1000).toLocaleString()}\n`;
-        
-        if (card.sync_status !== undefined) {
-            metadata += `Статус синхронизации: ${card.sync_status}\n`;
-        }
-        
-        metadata += `\n---\nИмпортировано из базы данных: ${new Date().toLocaleString()}`;
-        
-        content += `\n\n<button class="spoiler-toggle" onclick="window.uiManager.toggleSpoiler(this)">Показать метаданные</button>\n<div class="spoiler-content">${metadata}</div>`;
-        
-        return content;
-    }
-    
     clearImportResults() {
-        document.getElementById('dbImportTextarea').value = '';
-        document.getElementById('dbImportProgress').style.display = 'none';
-        document.getElementById('dbImportProgressBar').style.width = '0%';
-        document.getElementById('dbImportStatus').innerHTML = '';
+        const textarea = document.getElementById('dbImportTextarea');
+        if (textarea) textarea.value = '';
+        const progress = document.getElementById('dbImportProgress');
+        if (progress) progress.style.display = 'none';
+        const progressBar = document.getElementById('dbImportProgressBar');
+        if (progressBar) progressBar.style.width = '0%';
+        const status = document.getElementById('dbImportStatus');
+        if (status) status.innerHTML = '';
     }
     
     updateDBImportProgress(percent, message = '') {

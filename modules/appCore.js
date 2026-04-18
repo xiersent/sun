@@ -1,4 +1,5 @@
 // modules/appCore.js
+// modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -11,7 +12,7 @@ class AppCore {
         const ids = [
             'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
             'graphContainer', 'graphElement', 'centerDateLabel',
-            'dateListForDates', 'wavesList', 'notesList', 'noteInput',
+            'dateListForDates', 'wavesList',
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
             'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
@@ -100,10 +101,6 @@ class AppCore {
             
             if (window.dataManager.updateWavesGroups) {
                 await window.dataManager.updateWavesGroups();
-            }
-            
-            if (window.dataManager.updateNotesList) {
-                window.dataManager.updateNotesList();
             }
         }
         
@@ -923,25 +920,7 @@ class AppCore {
             });
         }
         
-        const btnAddNote = document.getElementById('btnAddNote');
-        if (btnAddNote) {
-            btnAddNote.addEventListener('click', () => {
-                const content = document.getElementById('noteInput').value;
-                if (content) {
-                    if (window.dates && window.dates.addNote) {
-                        window.dates.addNote(content);
-                    }
-                    
-                    if (window.dataManager && window.dataManager.updateNotesList) {
-                        window.dataManager.updateNotesList();
-                        document.getElementById('noteInput').value = '';
-                    }
-                }
-            });
-        }
-        
         const importAllFile = document.getElementById('importAllFile');
-        const importDBFile = document.getElementById('importDBFile');
         
         if (importAllFile) {
             importAllFile.addEventListener('change', (e) => {
@@ -960,117 +939,6 @@ class AppCore {
                             alert('Ошибка импорта: ' + err.message);
                         });
                     }
-                }
-            });
-        }
-        
-        if (importDBFile) {
-            importDBFile.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    try {
-                        document.getElementById('dbImportProgress').style.display = 'block';
-                        
-                        if (window.importExport && window.importExport.updateDBImportProgress) {
-                            window.importExport.updateDBImportProgress(30, 'Загрузка базы данных...');
-                        }
-                        
-                        if (window.importExport && window.importExport.importDB) {
-                            const result = await window.importExport.importDB(file);
-                            document.getElementById('dbImportTextarea').value = result;
-                            
-                            if (window.importExport && window.importExport.updateDBImportProgress) {
-                                window.importExport.updateDBImportProgress(100, 'База данных загружена!');
-                            }
-                            
-                            if (window.importExport && window.importExport.showDBImportStatus) {
-                                window.importExport.showDBImportStatus('База данных успешно загружена!', 'success');
-                            }
-                        }
-                    } catch (error) {
-                        if (window.importExport && window.importExport.showDBImportStatus) {
-                            window.importExport.showDBImportStatus(`Ошибка загрузки базы: ${error.message}`, 'error');
-                        }
-                        document.getElementById('dbImportTextarea').value = `❌ ОШИБКА ЗАГРУЗКИ БАЗЫ ДАННЫХ\n\nФайл: ${file.name}\nОшибка: ${error.message}`;
-                    }
-                }
-            });
-        }
-        
-        const btnAnalyzeDB = document.getElementById('btnAnalyzeDB');
-        if (btnAnalyzeDB) {
-            btnAnalyzeDB.addEventListener('click', async () => {
-                try {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus('Анализ структуры базы данных...', 'info');
-                    }
-                    
-                    document.getElementById('dbImportProgress').style.display = 'block';
-                    
-                    if (window.importExport && window.importExport.updateDBImportProgress) {
-                        window.importExport.updateDBImportProgress(10);
-                    }
-                    
-                    if (window.importExport && window.importExport.analyzeDB) {
-                        const result = await window.importExport.analyzeDB();
-                        document.getElementById('dbImportTextarea').value = result;
-                        
-                        if (window.importExport && window.importExport.updateDBImportProgress) {
-                            window.importExport.updateDBImportProgress(100, 'Анализ завершен!');
-                        }
-                        
-                        if (window.importExport && window.importExport.showDBImportStatus) {
-                            window.importExport.showDBImportStatus('Анализ базы данных завершен успешно!', 'success');
-                        }
-                    }
-                } catch (error) {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus(`Ошибка анализа: ${error.message}`, 'error');
-                    }
-                    document.getElementById('dbImportTextarea').value = `ОШИБКА АНАЛИЗА:\n\n${error.message}`;
-                }
-            });
-        }
-        
-        const btnMigrateToNotes = document.getElementById('btnMigrateToNotes');
-        if (btnMigrateToNotes) {
-            btnMigrateToNotes.addEventListener('click', () => {
-                try {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus('Начало миграции данных...', 'info');
-                    }
-                    
-                    document.getElementById('dbImportProgress').style.display = 'block';
-                    
-                    if (window.importExport && window.importExport.updateDBImportProgress) {
-                        window.importExport.updateDBImportProgress(10);
-                    }
-                    
-                    if (window.importExport && window.importExport.migrateDBToNotes) {
-                        const result = window.importExport.migrateDBToNotes();
-                        document.getElementById('dbImportTextarea').value = result;
-                        
-                        if (window.importExport && window.importExport.updateDBImportProgress) {
-                            window.importExport.updateDBImportProgress(100, 'Миграция завершена!');
-                        }
-                        
-                        if (window.importExport && window.importExport.showDBImportStatus) {
-                            window.importExport.showDBImportStatus('Миграция завершена успешно!', 'success');
-                        }
-                        
-                        if (window.dataManager && window.dataManager.updateNotesList) {
-                            window.dataManager.updateNotesList();
-                        }
-                        
-                        if (window.grid && window.grid.updateGridNotesHighlight) {
-                            window.grid.updateGridNotesHighlight();
-                        }
-                    }
-                } catch (error) {
-                    if (window.importExport && window.importExport.showDBImportStatus) {
-                        window.importExport.showDBImportStatus(`Ошибка миграции: ${error.message}`, 'error');
-                    }
-                    document.getElementById('dbImportTextarea').value = `ОШИБКА МИГРАЦИИ:\n\n${error.message}`;
                 }
             });
         }

@@ -1,3 +1,4 @@
+// modules/autoSaveHandler.js
 class AutoSaveHandler {
     constructor() {
         this.debounceTimers = new Map();

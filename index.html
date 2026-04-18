@@ -125,18 +125,8 @@
             <div class="panel-section tabs-section" id="tabs-section">
                 <div class="tab-container">
                     <div class="tab-buttons">
-                        <button class="tab-button" data-tab="summary">
-                            Состояния (рабочая)
-                        </button>
-                        <button class="tab-button" data-tab="intersections">
-                            Пересечения (в разработке)
-                        </button>
-                        <button class="tab-button" data-tab="notes">
-                            Записи (вроде работало)
-                        </button>
-                        <button class="tab-button" data-tab="db-import">
-                            Импорт базы данных (вроде работало)
-                        </button>
+                        <button class="tab-button" data-tab="summary">Состояния (рабочая)</button>
+                        <button class="tab-button" data-tab="intersections">Пересечения (в разработке)</button>
                     </div>
                     
                     <div class="tab-content" id="summary-tab">
@@ -222,45 +212,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-content" id="notes-tab">
-                        <div class="panel-section" id="notes-panel">
-                            <div class="summary-header">
-                                <h3>Записи</h3>
-                            </div>
-                            <div class="notes-panel-layout">
-                                <div class="notes-list-container">
-                                    <div class="list-container" id="notesList"></div>
-                                </div>
-                                <div class="note-editor-container">
-                                    <div class="notes-section">
-                                        <textarea id="noteInput" placeholder="Введите запись для текущей даты..."></textarea>
-                                        <button id="btnAddNote" class="ui-btn">Добавить запись</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-content" id="db-import-tab">
-                        <div class="panel-section db-import-section">
-                            <div class="summary-header">
-                                <h3>Импорт базы данных</h3>
-                            </div>
-                            <div class="db-import-controls">
-                                <button class="ui-btn" data-action="importDB">Импорт заметок Metaslip</button>
-                                <input type="file" id="importDBFile" accept=".db" style="display:none">
-                                <button class="ui-btn" id="btnAnalyzeDB">Анализировать DB</button>
-                                <button class="ui-btn" id="btnMigrateToNotes">Мигрировать в заметки</button>
-                                <button class="ui-btn" id="btnClearImportResults">Очистить</button>
-                            </div>
-                            <div class="db-import-progress" id="dbImportProgress" style="display:none">
-                                <div class="db-import-progress-bar" id="dbImportProgressBar" style="width:0%"></div>
-                            </div>
-                            <div id="dbImportStatus"></div>
-                            <textarea class="db-import-textarea" id="dbImportTextarea" placeholder="Результат импорта DB файла появится здесь..."></textarea>
                         </div>
                     </div>
                 </div>

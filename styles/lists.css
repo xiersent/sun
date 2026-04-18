@@ -289,3 +289,7 @@
 .graph-container.dark-mode + .summary-panel .list-item--date.selected-type-b {
     background-color: #FFF4E5;
 }
+
+.group-enabled-count {
+    cursor: pointer;
+}
