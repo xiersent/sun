@@ -22,30 +22,30 @@
             <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
             <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
 
-			<div class="warning-info" id="dynamicVersionContainer">
-				<div class="warning-info-item">
-					<strong>Браузер:</strong>
-					<span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
-					<span id="browserInfo">Загрузка...</span>
-				</div>
-				<div class="warning-info-item">
-					<strong>Сейчас:</strong>
-					<span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
-					<span id="todayInfo">Загрузка...</span>
-				</div>
-			</div>
+            <div class="warning-info" id="dynamicVersionContainer">
+                <div class="warning-info-item">
+                    <strong>Браузер:</strong>
+                    <span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
+                    <span id="browserInfo">Загрузка...</span>
+                </div>
+                <div class="warning-info-item">
+                    <strong>Сейчас:</strong>
+                    <span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
+                    <span id="todayInfo">Загрузка...</span>
+                </div>
+            </div>
 
-			<div style="height: 32px; display: flex; justify-content: center; margin-top: 20px; max-width: 100%; overflow: hidden;">
-				<div style="width: 216px;">
-					<iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1H21QKJ99G9.260410&" width="330" height="50" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
-				</div>
-			</div>
+            <div style="height: 32px; display: flex; justify-content: center; margin-top: 20px; max-width: 100%; overflow: hidden;">
+                <div style="width: 216px;">
+                    <iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1H21QKJ99G9.260410&" width="330" height="50" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
+                </div>
+            </div>
 
-			<div class="parable-btn-wrapper">
-				<button data-action="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
-				<button id="readParableBtn" class="ui-btn parable-btn">Программа</button>
-				<button data-action="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
-			</div>
+            <div class="parable-btn-wrapper">
+                <button data-action="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+                <button id="readParableBtn" class="ui-btn parable-btn">Программа</button>
+                <button data-action="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+            </div>
 
         </div>
         
@@ -94,21 +94,33 @@
                 </div>
                 <div class="transform-row">
                     <button class="ui-btn" data-action="toggleUI">Переключить UI</button>
-					<button class="ui-btn" data-action="toggleGraph">Визор</button>
+                    <button class="ui-btn" data-action="toggleGraph">Визор</button>
                     <button class="ui-btn" data-action="toggleSquares">Квадратики</button>
                     <button class="ui-btn" data-action="toggleGrayMode">Обесцветить</button>
                     <button class="ui-btn" data-action="toggleStars">Звездочки</button>
                     <button class="ui-btn" data-action="exportDates">Экспорт дат</button>
-                    <button class="ui-btn" data-action="exportWaves">Экспорт колосков</button>
+                    <button class="ui-btn" data-action="exportWaves">Экспорт сигналов</button>
                     <button class="ui-btn" data-action="exportAll">Экспорт всего</button>
                     <button class="ui-btn" data-action="importAll">Импорт</button>
                     <input type="file" id="importAllFile" accept=".json" style="display:none">
                     <button class="ui-btn" data-action="resetAll">Сброс всего</button>
                 </div>
                 <div class="corner-controls">
-					<button class="ui-btn" data-action="resetWarning">Передумать</button>
+                    <button class="ui-btn" data-action="resetWarning">Передумать</button>
                 </div>
             </div>
+
+
+            <div class="time-bar-container" id="timeBarContainer">
+                <div class="time-bar">
+                    <div class="time-scale" id="timeScale"></div>
+                    <div class="time-indicator" id="timeIndicator">
+                        <div class="time-indicator-label"></div>
+                    </div>
+                    <div class="time-labels" id="timeLabels"></div>
+                </div>
+            </div>
+
 
             <div class="panel-section tabs-section" id="tabs-section">
                 <div class="tab-container">
@@ -128,90 +140,90 @@
                     </div>
                     
                     <div class="tab-content" id="summary-tab">
-						<div class="panel-section summary-panel" id="summaryPanel">
-							<div class="summary-header">
-								<h3>Сводная информация о колосках</h3>
-							</div>
-							
-							<div class="summary-controls">
-								<div class="summary-select-row">
-									<div class="summary-select-group">
-										<select class="summary-select" id="summaryGroupSelect">
-											<option value="all">Все доступные группы с колосками</option>
-										</select>
-										<select class="summary-select" id="summaryStateSelect"></select>
-										<div class="summary-duplicate-buttons">
-											<button class="ui-btn" data-action="today">Сегодня</button>
-											<button class="ui-btn" data-action="now">Сейчас</button>
-										</div>
-										<label class="intersection-form-label" style="margin-left: 10px;">
-											<input type="checkbox" id="includePastWaves" 
-												onchange="if (window.summaryManager) window.summaryManager.updateSummary()">
-											Учитывать прошедшие
-										</label>
-									</div>
-								</div>
-							</div>
-							
-							<div class="summary-results-container">
-								<div class="summary-results" id="summaryResults"></div>
-							</div>
-						</div>
-					</div>
+                        <div class="panel-section summary-panel" id="summaryPanel">
+                            <div class="summary-header">
+                                <h3>Сводная информация о сигналах</h3>
+                            </div>
+                            
+                            <div class="summary-controls">
+                                <div class="summary-select-row">
+                                    <div class="summary-select-group">
+                                        <select class="summary-select" id="summaryGroupSelect">
+                                            <option value="all">Все доступные группы с сигналами</option>
+                                        </select>
+                                        <select class="summary-select" id="summaryStateSelect"></select>
+                                        <div class="summary-duplicate-buttons">
+                                            <button class="ui-btn" data-action="today">Сегодня</button>
+                                            <button class="ui-btn" data-action="now">Сейчас</button>
+                                        </div>
+                                        <label class="intersection-form-label" style="margin-left: 10px;">
+                                            <input type="checkbox" id="includePastWaves" 
+                                                onchange="if (window.summaryManager) window.summaryManager.updateSummary()">
+                                            Учитывать прошедшие
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-results-container">
+                                <div class="summary-results" id="summaryResults"></div>
+                            </div>
+                        </div>
+                    </div>
                     
-					<div class="tab-content" id="intersections-tab">
-						<div class="panel-section" id="intersectionPanel">
-							<div class="summary-header">
-								<h3>Колоски, близкие по состоянию к выбранному</h3>
-							</div>
-							
-							<div class="intersection-selected-info" id="intersectionSelectedInfo">
-								<div class="selected-wave-info no-selection">
-									<div class="selected-wave-header">
-										<span class="selected-wave-icon">⚠️</span>
-										<span class="selected-wave-name">Колосок не выбран</span>
-									</div>
-									<div class="selected-wave-details">
-										<div class="selected-wave-detail">
-											Используйте чекбокс <strong>"Окрасить края"</strong> у любого колоска в списке волн
-										</div>
-									</div>
-								</div>
-							</div>
-							
-							<div class="summary-controls">
-								<div class="intersection-form">
-									<div class="intersection-form-row">
-										<div class="intersection-select-group">
-											<select class="summary-select" id="intersectionGroupSelect">
-												<option value="all">Все доступные группы с колосками</option>
-											</select>
-										</div>
-										
-										<button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
-											Сбросить выбор колоска
-										</button>
-									</div>
-								</div>
-							</div>
-							
-							<div class="intersection-stats" id="intersectionStats" style="display:none"></div>
-							
-							<div class="summary-results-container">
-								<div class="summary-results" id="intersectionResults">
-									<div class="list-empty">
-										<div style="text-align: center; padding: 20px;">
-											<div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
-											<div>Выберите колосок для анализа</div>
-											<div style="font-size: 11px; color: #666; margin-top: 8px;">
-												Отметьте чекбокс <strong>"Окрасить края"</strong> у любого колоска в списке волн
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+                    <div class="tab-content" id="intersections-tab">
+                        <div class="panel-section" id="intersectionPanel">
+                            <div class="summary-header">
+                                <h3>Сигналы, близкие по состоянию к выбранному</h3>
+                            </div>
+                            
+                            <div class="intersection-selected-info" id="intersectionSelectedInfo">
+                                <div class="selected-wave-info no-selection">
+                                    <div class="selected-wave-header">
+                                        <span class="selected-wave-icon">⚠️</span>
+                                        <span class="selected-wave-name">Сигнал не выбран</span>
+                                    </div>
+                                    <div class="selected-wave-details">
+                                        <div class="selected-wave-detail">
+                                            Используйте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-controls">
+                                <div class="intersection-form">
+                                    <div class="intersection-form-row">
+                                        <div class="intersection-select-group">
+                                            <select class="summary-select" id="intersectionGroupSelect">
+                                                <option value="all">Все доступные группы с сигналами</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
+                                            Сбросить выбор сигнала
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="intersection-stats" id="intersectionStats" style="display:none"></div>
+                            
+                            <div class="summary-results-container">
+                                <div class="summary-results" id="intersectionResults">
+                                    <div class="list-empty">
+                                        <div style="text-align: center; padding: 20px;">
+                                            <div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
+                                            <div>Выберите сигнал для анализа</div>
+                                            <div style="font-size: 11px; color: #666; margin-top: 8px;">
+                                                Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="tab-content" id="notes-tab">
                         <div class="panel-section" id="notes-panel">
@@ -254,22 +266,12 @@
                 </div>
             </div>
 
-            <div class="time-bar-container" id="timeBarContainer">
-                <div class="time-bar">
-                    <div class="time-scale" id="timeScale"></div>
-                    <div class="time-indicator" id="timeIndicator">
-                        <div class="time-indicator-label"></div>
-                    </div>
-                    <div class="time-labels" id="timeLabels"></div>
-                </div>
-            </div>
-
             <div class="panel-section buttons-panel">
                 <div class="top-controls">
                     <button class="ui-btn" data-action="toggleWaveLabels">Выноски</button>
                     <button class="ui-btn" data-action="toggleExtremes">Экстремумы</button>
                     <button class="ui-btn" data-action="toggleEquilibrium">Эквилибриумы</button>
-					<button class="ui-btn" data-action="toggleWaveIntersections">Пересечения</button>
+                    <button class="ui-btn" data-action="toggleWaveIntersections">Пересечения</button>
                     <button class="ui-btn" data-action="toggleGraphGrayMode">Цвет</button>
                     <button class="ui-btn" data-action="toggleBg">Фон</button>
                     <button class="ui-btn" data-action="flipH">↔</button>
@@ -313,7 +315,6 @@
                 </div>
             </div>
 
-			<div class="panel-section hidden">Пересечения колосков в данный момент отображаются верно на визуализоаторе, но отображаемое время при наведении и переход к пересечению покачто работает некорректно.</div>
 
             <div class="main-controls-panel">
                 <div class="control-panel">
@@ -332,7 +333,7 @@
                                 <button class="add-group-btn ui-btn" id="btnAddGroup">Добавить группу</button>
                             </div>
                             <div class="wave-inputs-row">
-                                <input type="text" class="form-input" id="customWaveName" placeholder="Название колоска" style="flex:2">
+                                <input type="text" class="form-input" id="customWaveName" placeholder="Название сигнала" style="flex:2">
                                 <input type="number" class="form-input" id="customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
                                 <select class="form-input" id="customWaveType">
                                     <option value="solid">Сплошная</option>
@@ -343,7 +344,7 @@
                                     <option value="long-dash">Длинный штрих</option>
                                 </select>
                                 <input type="color" class="color-input" id="customWaveColor" value="#666666" title="Выберить цвет">
-                                <button id="btnAddCustomWave" class="ui-btn">Добавить колосок</button>
+                                <button id="btnAddCustomWave" class="ui-btn">Добавить сигнал</button>
                             </div>
                         </div>
                         <div class="waves-list-container">

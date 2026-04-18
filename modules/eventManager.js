@@ -737,7 +737,7 @@ class EventManager {
                     const group = window.appState.data.groups.find(g => g.id === groupId);
                     const groupName = group ? group.name : 'Неизвестная группа';
                     
-                    const shouldEnableGroup = confirm(`Группа "${groupName}" отключена. Включить её для отображения колоска?`);
+                    const shouldEnableGroup = confirm(`Группа "${groupName}" отключена. Включить её для отображения сигнал?`);
                     
                     if (shouldEnableGroup) {
                         if (group) {

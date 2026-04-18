@@ -1,3 +1,4 @@
+<!-- templates/wave-item.ejs -->
 <div class="list-item list-item--wave <%= data.editing ? 'list-item--editing' : '' %>"
     data-id="<%= data.id %>"
     data-type="wave"
@@ -8,18 +9,13 @@
     data-index="<%= data.index %>"
     data-wave-id="<%= data.id %>">
     
-    <!-- Добавлен атрибут data-parent-group-id для фильтрации drag -->
-    
-    <!-- ДОБАВЛЕНО: ручка для перетаскивания -->
     <div class="list-item__drag-handle wave-drag-handle">⋮⋮</div>
     
     <div class="list-item__content">
-        <!-- Остальное без изменений -->
         <div class="list-item__normal-view">
             <div class="list-item__row">
                 <div class="list-item__left">
                     <div class="wave-controls-inline">
-                        <!-- Чекбокс видимости - ВСЕГДА доступен -->
                         <input type="checkbox" class="wave-visibility-check" 
                                <%= data.visible ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
@@ -35,11 +31,10 @@
                              data-id="<%= String(data.id) %>" 
                              title="Изменить цвет"></div>
                         
-                        <!-- Чекбокс окраски краев -->
                         <input type="checkbox" class="wave-corner-color-check" 
                                <%= data.cornerColor ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
-                               title="Окрасить края в цвет колоска">
+                               title="Окрасить края в цвет сигнала">
                     </div>
                     <div class="list-item__title-container">
                         <div class="list-item__title">
@@ -51,7 +46,7 @@
                 
                 <div class="list-item__right">
                     <div class="list-item__value">
-                        <%= data.description || 'Колосок' %>
+                        <%= data.description || 'Сигнал' %>
                     </div>
                     <div class="list-item__actions">
                         <button class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="wave">

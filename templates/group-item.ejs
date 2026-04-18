@@ -1,3 +1,4 @@
+<!-- templates/group-item.ejs -->
 <div class="list-item list-item--group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
     data-id="<%= data.id %>"
     data-type="group"
@@ -7,18 +8,16 @@
     <div class="list-item__drag-handle">⋮⋮</div>
     
     <div class="list-item__content">
-        <!-- Нормальный вид (как у дат) -->
+        <!-- Нормальный вид -->
         <div class="list-item__normal-view">
             <div class="list-item__row">
                 <div class="list-item__left">
                     <div class="list-item__title-container">
-                        <!-- Чекбокс включения/выключения группы -->
                         <input type="checkbox" class="wave-group-toggle" 
                                <%= data.enabled ? 'checked' : '' %> 
                                data-group-id="<%= data.id %>" 
                                title="Включить/выключить группу">
                         
-                        <!-- Название группы -->
                         <div class="list-item__title">
                             <%= data.name %>
                         </div>
@@ -29,33 +28,30 @@
                     <div class="list-item__value">
                         <span class="group-stats">
                             <% if (data.enabledCount > 0) { %>
-                                <span class="group-enabled-count" title="Включено колосков">
+                                <span class="group-enabled-count" title="Включено сигналов">
                                     Включено: <%= data.enabledCount %>
                                 </span>
-                                <span class="group-total-count" title="Всего колосков">
-                                    Колосков: <%= data.waveCount %>
+                                <span class="group-total-count" title="Всего сигналов">
+                                    Сигналов: <%= data.waveCount %>
                                 </span>
                             <% } else { %>
                                 <span class="group-total-count">
-                                    Колосков: <%= data.waveCount %>
+                                    Сигналов: <%= data.waveCount %>
                                 </span>
                             <% } %>
                         </span>
                     </div>
                     <div class="list-item__actions">
-                        <!-- Кнопка Свернуть/Развернуть -->
                         <button class="ui-btn expand-collapse-btn" 
                                 data-id="<%= data.id %>" 
                                 data-type="group">
                             <%= data.expanded ? 'Свернуть' : 'Развернуть' %>
                         </button>
-                        <!-- Кнопка Изменить -->
                         <button class="ui-btn edit-btn" 
                                 data-id="<%= data.id %>" 
                                 data-type="group">
                             <%= data.editing ? 'Редактирование...' : 'Изменить' %>
                         </button>
-                        <!-- Кнопка Уничтожить -->
                         <button class="ui-btn delete-date-btn" 
                                 data-id="<%= data.id %>" 
                                 data-type="group">
@@ -77,14 +73,14 @@
             </div>
         </div>
         
-        <!-- Дочерние элементы (волны) -->
+        <!-- Дочерние элементы (волны/сигналы) -->
         <div class="group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
             <% if (data.children && data.children.length > 0) { %>
                 <!-- Дочерние элементы будут добавлены JavaScript -->
             <% } else { %>
                 <div class="no-waves-message">
                     <span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">
-                        Нет колосков в этой группе
+                        Нет сигналов в этой группе
                     </span>
                 </div>
             <% } %>

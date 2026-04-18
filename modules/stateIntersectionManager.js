@@ -1,5 +1,5 @@
 // modules/stateIntersectionManager.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
-// Показывает пересечения ВЫБРАННОГО колоска со всеми остальными
+// Показывает пересечения ВЫБРАННОГО сигнала со всеми остальными
 
 class StateIntersectionManager {
     constructor() {
@@ -57,7 +57,7 @@ class StateIntersectionManager {
     }
     
     setupWaveSelectionObserver() {
-        // Наблюдаем за изменениями выбранного колоска (через "Окрасить края")
+        // Наблюдаем за изменениями выбранного сигнала (через "Окрасить края")
         const checkInterval = setInterval(() => {
             const currentSelectedId = this.getSelectedWaveId();
             if (currentSelectedId !== this.selectedWaveId) {
@@ -170,7 +170,7 @@ class StateIntersectionManager {
     }
     
     /**
-     * НАХОЖДЕНИЕ ПЕРЕСЕЧЕНИЙ ВЫБРАННОГО КОЛОСКА СО ВСЕМИ ОСТАЛЬНЫМИ
+     * НАХОЖДЕНИЕ ПЕРЕСЕЧЕНИЙ ВЫБРАННОГО СИГНАЛА СО ВСЕМИ ОСТАЛЬНЫМИ
      */
     findIntersectionsWithSelectedWave(selectedWave, otherWaves, date) {
         const allIntersections = [];
@@ -193,7 +193,7 @@ class StateIntersectionManager {
         };
         
         for (const otherWave of otherWaves) {
-            // Пропускаем сам выбранный колосок
+            // Пропускаем сам выбранный сигнал
             if (String(otherWave.id) === String(selectedWave.id)) continue;
             
             const T1 = selectedWave.period;
@@ -279,7 +279,7 @@ class StateIntersectionManager {
         try {
             this.isUpdating = true;
             
-            // Проверяем, выбран ли колосок
+            // Проверяем, выбран ли сигнал
             if (!this.selectedWaveId) {
                 this.showNoWaveSelectedMessage();
                 return;
@@ -295,13 +295,13 @@ class StateIntersectionManager {
             const allWaves = this.getAllWavesFromSelectedGroup();
             
             if (allWaves.length < 2) {
-                this.showNoIntersectionsMessage('Недостаточно волн для поиска пересечений');
+                this.showNoIntersectionsMessage('Недостаточно сигналов для поиска пересечений');
                 return;
             }
             
             const currentDate = window.appState.currentDate || new Date();
             
-            // Находим пересечения выбранного колоска со всеми остальными
+            // Находим пересечения выбранного сигнала со всеми остальными
             const intersections = this.findIntersectionsWithSelectedWave(
                 selectedWave, 
                 allWaves, 
@@ -325,118 +325,118 @@ class StateIntersectionManager {
     
 
 
-	displayResults(intersections, selectedWave, currentDate) {
-		const container = this.elements.intersectionResults;
-		const stats = this.elements.intersectionStats;
-		const selectedInfo = this.elements.intersectionSelectedInfo;
-		
-		if (!container) return;
-		
-		// Обновляем информацию о выбранном колоске
-		if (selectedInfo) {
-			const dateStr = currentDate.toLocaleDateString('ru-RU');
-			selectedInfo.innerHTML = `
-				<div class="selected-wave-info">
-					<div class="selected-wave-header">
-						<span class="selected-wave-icon">🎯</span>
-						<span class="selected-wave-name" style="color: ${selectedWave.color || '#666'}">
-							${this.escapeHtml(selectedWave.name)}
-						</span>
-						<span class="wave-period-badge">${selectedWave.period} дней</span>
-					</div>
-					<div class="selected-wave-details">
-						<div class="selected-wave-detail">
-							<span class="detail-label">Дата анализа:</span>
-							<span class="detail-value">${dateStr}</span>
-						</div>
-						<div class="selected-wave-detail">
-							<span class="detail-label">Найдено пересечений:</span>
-							<span class="detail-value">${intersections.length}</span>
-						</div>
-					</div>
-				</div>
-			`;
-		}
-		
-		if (intersections.length === 0) {
-			container.innerHTML = `
-				<div class="list-empty">
-					<div style="text-align: center; padding: 20px;">
-						<div style="font-size: 32px; margin-bottom: 10px;">📊</div>
-						<div>Нет пересечений колоска <strong>${this.escapeHtml(selectedWave.name)}</strong> в выбранный день</div>
-					</div>
-				</div>
-			`;
-			if (stats) stats.style.display = 'none';
-			return;
-		}
-		
-		if (stats) {
-			stats.style.display = 'none';
-		}
-		
-		// Используем единый класс summary-item
-		const resultsHTML = intersections.map((inter, index) => {
-			const wave = inter.wave2;
-			const waveIdStr = String(wave.id);
-			const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
-			
-			return `
-				<div class="summary-item">
-					<div class="summary-item-info">
-						<div class="summary-item-name">
-							<span class="summary-item-index">${index + 1}.</span>
-							<span style="color: ${wave.color || '#666'}">
-								${this.escapeHtml(wave.name)}
-							</span>
-							<span class="wave-period-badge">${wave.period} дней</span>
-						</div>
-						<div class="summary-item-details">
-							<span class="summary-item-state">🕐 ${this.formatTime(inter.time)}</span>
-							<span class="summary-item-difference">Значение: ${inter.value.toFixed(3)}</span>
-						</div>
-					</div>
-					<div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
-					<div class="summary-item-actions">
-						<button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
-							${isVisible ? 'Скрыть с визора' : 'Показать на визоре'}
-						</button>
-					</div>
-				</div>
-			`;
-		}).join('');
-		
-		container.innerHTML = resultsHTML;
-		
-		// Добавляем обработчики для кнопок
-		setTimeout(() => {
-			container.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
-				btn.addEventListener('click', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					const waveId = btn.dataset.waveId;
-					
-					if (waveId) {
-						const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-						if (checkbox) {
-							const isChecked = checkbox.checked;
-							checkbox.checked = !isChecked;
-							
-							const changeEvent = new Event('change', { bubbles: true, cancelable: true });
-							checkbox.dispatchEvent(changeEvent);
-							
-							if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
-								const $checkbox = $(checkbox);
-								window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
-							}
-							
-							btn.textContent = !isChecked ? 'Скрыть с визора' : 'Показать на визоре';
-						}
-					}
-				});
-			});
-		}, 100);
-	}
+    displayResults(intersections, selectedWave, currentDate) {
+        const container = this.elements.intersectionResults;
+        const stats = this.elements.intersectionStats;
+        const selectedInfo = this.elements.intersectionSelectedInfo;
+        
+        if (!container) return;
+        
+        // Обновляем информацию о выбранном сигнале
+        if (selectedInfo) {
+            const dateStr = currentDate.toLocaleDateString('ru-RU');
+            selectedInfo.innerHTML = `
+                <div class="selected-wave-info">
+                    <div class="selected-wave-header">
+                        <span class="selected-wave-icon">🎯</span>
+                        <span class="selected-wave-name" style="color: ${selectedWave.color || '#666'}">
+                            ${this.escapeHtml(selectedWave.name)}
+                        </span>
+                        <span class="wave-period-badge">${selectedWave.period} дней</span>
+                    </div>
+                    <div class="selected-wave-details">
+                        <div class="selected-wave-detail">
+                            <span class="detail-label">Дата анализа:</span>
+                            <span class="detail-value">${dateStr}</span>
+                        </div>
+                        <div class="selected-wave-detail">
+                            <span class="detail-label">Найдено пересечений:</span>
+                            <span class="detail-value">${intersections.length}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (intersections.length === 0) {
+            container.innerHTML = `
+                <div class="list-empty">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+                        <div>Нет пересечений сигнала <strong>${this.escapeHtml(selectedWave.name)}</strong> в выбранный день</div>
+                    </div>
+                </div>
+            `;
+            if (stats) stats.style.display = 'none';
+            return;
+        }
+        
+        if (stats) {
+            stats.style.display = 'none';
+        }
+        
+        // Используем единый класс summary-item
+        const resultsHTML = intersections.map((inter, index) => {
+            const wave = inter.wave2;
+            const waveIdStr = String(wave.id);
+            const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            
+            return `
+                <div class="summary-item">
+                    <div class="summary-item-info">
+                        <div class="summary-item-name">
+                            <span class="summary-item-index">${index + 1}.</span>
+                            <span style="color: ${wave.color || '#666'}">
+                                ${this.escapeHtml(wave.name)}
+                            </span>
+                            <span class="wave-period-badge">${wave.period} дней</span>
+                        </div>
+                        <div class="summary-item-details">
+                            <span class="summary-item-state">🕐 ${this.formatTime(inter.time)}</span>
+                            <span class="summary-item-difference">Значение: ${inter.value.toFixed(3)}</span>
+                        </div>
+                    </div>
+                    <div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
+                    <div class="summary-item-actions">
+                        <button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
+                            ${isVisible ? 'Скрыть с визора' : 'Показать на визоре'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = resultsHTML;
+        
+        // Добавляем обработчики для кнопок
+        setTimeout(() => {
+            container.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const waveId = btn.dataset.waveId;
+                    
+                    if (waveId) {
+                        const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+                        if (checkbox) {
+                            const isChecked = checkbox.checked;
+                            checkbox.checked = !isChecked;
+                            
+                            const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+                            checkbox.dispatchEvent(changeEvent);
+                            
+                            if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+                                const $checkbox = $(checkbox);
+                                window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
+                            }
+                            
+                            btn.textContent = !isChecked ? 'Скрыть с визора' : 'Показать на визоре';
+                        }
+                    }
+                });
+            });
+        }, 100);
+    }
 
     showNoWaveSelectedMessage() {
         const container = this.elements.intersectionResults;
@@ -448,11 +448,11 @@ class StateIntersectionManager {
                 <div class="selected-wave-info no-selection">
                     <div class="selected-wave-header">
                         <span class="selected-wave-icon">⚠️</span>
-                        <span class="selected-wave-name">Колосок не выбран</span>
+                        <span class="selected-wave-name">Сигнал не выбран</span>
                     </div>
                     <div class="selected-wave-details">
                         <div class="selected-wave-detail">
-                            Отметьте чекбокс <strong>"Окрасить края"</strong> у любого колоска в списке волн
+                            Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
                         </div>
                     </div>
                 </div>
@@ -464,9 +464,9 @@ class StateIntersectionManager {
                 <div class="list-empty">
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
-                        <div>Выберите колосок для анализа пересечений</div>
+                        <div>Выберите сигнал для анализа пересечений</div>
                         <div style="font-size: 11px; color: #666; margin-top: 8px;">
-                            Отметьте чекбокс <strong>"Окрасить края"</strong> у любого колоска в списке волн
+                            Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
                         </div>
                     </div>
                 </div>

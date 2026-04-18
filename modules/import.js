@@ -1,3 +1,4 @@
+// modules/import.js
 class ImportExportManager {
     constructor() {
         this.SQL = null;
@@ -16,14 +17,14 @@ class ImportExportManager {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }
     
-	convertImportedDatesToTimestamp(data) {
-		data.dates.forEach(date => {
-			if (date.date && !this.isTimestamp(date.date)) {
-				const dateObj = window.timeUtils.parseStringToLocal(date.date);
-				date.date = dateObj.getTime();
-			}
-		});
-	}
+    convertImportedDatesToTimestamp(data) {
+        data.dates.forEach(date => {
+            if (date.date && !this.isTimestamp(date.date)) {
+                const dateObj = window.timeUtils.parseStringToLocal(date.date);
+                date.date = dateObj.getTime();
+            }
+        });
+    }
     
     exportAll() {
         const dataToSave = {
@@ -45,9 +46,7 @@ class ImportExportManager {
         dataToSave.version = '1.0';
         
         const dataStr = JSON.stringify(dataToSave, null, 2);
-        const dataBlob = new Blob([dataStr], {
-            type: 'application/json'
-        });
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
@@ -68,9 +67,7 @@ class ImportExportManager {
         };
         
         const dataStr = JSON.stringify(dataToSave, null, 2);
-        const dataBlob = new Blob([dataStr], {
-            type: 'application/json'
-        });
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
@@ -91,13 +88,11 @@ class ImportExportManager {
         };
         
         const dataStr = JSON.stringify(dataToSave, null, 2);
-        const dataBlob = new Blob([dataStr], {
-            type: 'application/json'
-        });
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${window.dom.formatDate(new Date())}_waves.json`;
+        link.download = `${window.dom.formatDate(new Date())}_signals.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -111,14 +106,14 @@ class ImportExportManager {
                 try {
                     const data = JSON.parse(event.target.result);
                     
-					const convertedData = data;
+                    const convertedData = data;
                     
                     const isFullExport = convertedData.waves && convertedData.groups && convertedData.dates;
                     const isDatesOnly = convertedData.type === 'dates-only' || (convertedData.dates && !convertedData.waves);
                     const isWavesOnly = convertedData.type === 'waves-only' || (convertedData.waves && !convertedData.dates);
                     
                     if (!isFullExport && !isDatesOnly && !isWavesOnly) {
-                        throw new Error('Неверный формат файла. Ожидается полный экспорт, экспорт дат или экспорт колосков.');
+                        throw new Error('Неверный формат файла. Ожидается полный экспорт, экспорт дат или экспорт сигналов.');
                     }
                     
                     let message = '';
@@ -128,7 +123,7 @@ class ImportExportManager {
                     } else if (isDatesOnly) {
                         message = 'Импортировать даты и заметки? Существующие даты и заметки будут заменены.';
                     } else if (isWavesOnly) {
-                        message = 'Импортировать колоски и группы? Существующие колоски и группы будут заменены.';
+                        message = 'Импортировать сигналы и группы? Существующие сигналы и группы будут заменены.';
                     }
                     
                     if (confirm(message)) {
@@ -174,7 +169,7 @@ class ImportExportManager {
                                 if (!convertedData.groups.some(g => g.id === '31-waves-group')) {
                                     convertedData.groups.push({
                                         id: '31-waves-group',
-                                        name: '31 колосок',
+                                        name: '31 прутик',
                                         enabled: false,
                                         waves: waves31Ids,
                                         styleEnabled: true,
@@ -193,7 +188,7 @@ class ImportExportManager {
                                     const match = waveIdStr.match(/wave-31-(\d+)/);
                                     if (match) {
                                         const num = parseInt(match[1]);
-                                        wave.name = `Колосок ${num}`;
+                                        wave.name = `Прутик ${num}`;
                                         wave.description = `Период ${num} дней`;
                                     }
                                 }
@@ -275,25 +270,22 @@ class ImportExportManager {
                             allSquares.forEach(square => {
                                 square.style.display = window.appState.cornerSquaresVisible ? 'block' : 'none';
                             });
-
-							// После импорта проверяем и фиксируем цвета стандартных волн
-							convertedData.waves.forEach(wave => {
-								const waveIdStr = String(wave.id);
-								const is120Wave = waveIdStr.startsWith('wave-120-');
-								const is31Wave = waveIdStr.startsWith('wave-31-');
-								
-								if (is120Wave || is31Wave) {
-									// Если флаг не установлен - устанавливаем по умолчанию
-									if (wave.isDefaultColor === undefined) {
-										wave.isDefaultColor = true;
-									}
-									
-									// Если стандартный цвет - устанавливаем #C0C0C0
-									if (wave.isDefaultColor === true) {
-										wave.color = '#C0C0C0';
-									}
-								}
-							});
+                            
+                            convertedData.waves.forEach(wave => {
+                                const waveIdStr = String(wave.id);
+                                const is120Wave = waveIdStr.startsWith('wave-120-');
+                                const is31Wave = waveIdStr.startsWith('wave-31-');
+                                
+                                if (is120Wave || is31Wave) {
+                                    if (wave.isDefaultColor === undefined) {
+                                        wave.isDefaultColor = true;
+                                    }
+                                    
+                                    if (wave.isDefaultColor === true) {
+                                        wave.color = '#C0C0C0';
+                                    }
+                                }
+                            });
                             
                             document.querySelectorAll('.wave-container').forEach(container => {
                                 container.remove();
@@ -357,7 +349,7 @@ class ImportExportManager {
                                     const match = waveIdStr.match(/wave-31-(\d+)/);
                                     if (match) {
                                         const num = parseInt(match[1]);
-                                        wave.name = `Колосок ${num}`;
+                                        wave.name = `Прутик ${num}`;
                                         wave.description = `Период ${num} дней`;
                                     }
                                 }
@@ -389,7 +381,7 @@ class ImportExportManager {
                             window.waves.updateCornerSquareColors();
                             window.appState.save();
                             
-                            alert('Колоски и группы успешно импортированы!');
+                            alert('Сигналы и группы успешно импортированы!');
                         }
                         
                         resolve();
@@ -631,14 +623,14 @@ class ImportExportManager {
     }
     
     createNoteFromCard(card) {
-		let timeString = '';
-		if (card.created_at) {
-			const date = window.timeUtils ? 
-				window.timeUtils.toLocalDate(card.created_at * 1000) : 
-				new Date(card.created_at * 1000);
-			
-			timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-		}
+        let timeString = '';
+        if (card.created_at) {
+            const date = window.timeUtils ? 
+                window.timeUtils.toLocalDate(card.created_at * 1000) : 
+                new Date(card.created_at * 1000);
+            
+            timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
         
         let content = '';
         if (card.title && card.title !== 'Без названия') {

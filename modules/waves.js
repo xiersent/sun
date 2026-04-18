@@ -259,121 +259,121 @@ class WavesManager {
     }
     
 
-	updatePosition() {
-		if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
-			window.timeBarManager.updateTimeIndicator();
-		}
-		
-		if (window.grid && window.grid.updateGridOffset) {
-			window.grid.updateGridOffset();
-		}
-		
-		const currentDay = window.appState.currentDay || 0;
-		
-		window.appState.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
-			const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-			const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
-			
-			// ЛОГИКА ПОДСВЕТКИ ЭКСТРЕМУМОВ
-			let isExtremum = false;
-			if (shouldShow) {
-				const state = this.calculateWaveStateAtDay(wave, currentDay);
-				isExtremum = (state >= 4 || state <= -4);
-				this.setWaveStrokeColor(wave.id, isExtremum);
-			} else {
-				this.setWaveStrokeColor(wave.id, false);
-			}
-			
-			// ОБНОВЛЕНИЕ ЦВЕТА ВЫНОСОК
-			this.updateWaveLabelsColor(wave.id, isExtremum);
-			
-			const wavePeriodPixels = window.appState.periods[wave.id] || 
-								(wave.period * window.appState.config.squareSize);
-			
-			if (!wavePeriodPixels || wavePeriodPixels <= 0) {
-				return;
-			}
-			
-			let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-			if (currentPositionPx < 0) {
-				currentPositionPx = wavePeriodPixels + currentPositionPx;
-			}
-			
-			const container = this.waveContainers[wave.id];
-			if (container) {
-				container.style.transition = 'none';
-				container.style.transform = `translateX(${-currentPositionPx}px)`;
-				container.style.display = shouldShow ? 'block' : 'none';
-				
-				const path = this.wavePaths[wave.id];
-				if (path) {
-					path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
-				}
-			}
-		});
-		
-		this.updateAllWaveLabels();
-		this.updateVerticalWaveLabelsTime();
-		this.renderWaveIntersectionPoints();
-	}
+    updatePosition() {
+        if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
+            window.timeBarManager.updateTimeIndicator();
+        }
+        
+        if (window.grid && window.grid.updateGridOffset) {
+            window.grid.updateGridOffset();
+        }
+        
+        const currentDay = window.appState.currentDay || 0;
+        
+        window.appState.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            
+            // ЛОГИКА ПОДСВЕТКИ ЭКСТРЕМУМОВ
+            let isExtremum = false;
+            if (shouldShow) {
+                const state = this.calculateWaveStateAtDay(wave, currentDay);
+                isExtremum = (state >= 4 || state <= -4);
+                this.setWaveStrokeColor(wave.id, isExtremum);
+            } else {
+                this.setWaveStrokeColor(wave.id, false);
+            }
+            
+            // ОБНОВЛЕНИЕ ЦВЕТА ВЫНОСОК
+            this.updateWaveLabelsColor(wave.id, isExtremum);
+            
+            const wavePeriodPixels = window.appState.periods[wave.id] || 
+                                (wave.period * window.appState.config.squareSize);
+            
+            if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+                return;
+            }
+            
+            let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+            if (currentPositionPx < 0) {
+                currentPositionPx = wavePeriodPixels + currentPositionPx;
+            }
+            
+            const container = this.waveContainers[wave.id];
+            if (container) {
+                container.style.transition = 'none';
+                container.style.transform = `translateX(${-currentPositionPx}px)`;
+                container.style.display = shouldShow ? 'block' : 'none';
+                
+                const path = this.wavePaths[wave.id];
+                if (path) {
+                    path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+                }
+            }
+        });
+        
+        this.updateAllWaveLabels();
+        this.updateVerticalWaveLabelsTime();
+        this.renderWaveIntersectionPoints();
+    }
 
 
-	updateWaveLabelsColor(waveId, isExtremum) {
-		const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
-		if (!wave) return;
-		
-		const color = isExtremum ? '#ff0000' : wave.color;
-		const textColor = this.getContrastTextColor(color);
-		
-		// Обновляем горизонтальные выноски (левые и правые)
-		const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
-		const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
-		
-		if (leftLabel) {
-			leftLabel.style.backgroundColor = color;
-			leftLabel.style.color = textColor;
-			const arrow = leftLabel.querySelector('.wave-label-arrow');
-			if (arrow) {
-				if (leftLabel.classList.contains('left') || leftLabel.dataset.side === 'left') {
-					arrow.style.borderColor = `transparent transparent transparent ${color}`;
-				}
-			}
-		}
-		
-		if (rightLabel) {
-			rightLabel.style.backgroundColor = color;
-			rightLabel.style.color = textColor;
-			const arrow = rightLabel.querySelector('.wave-label-arrow');
-			if (arrow) {
-				if (rightLabel.classList.contains('right') || rightLabel.dataset.side === 'right') {
-					arrow.style.borderColor = `transparent ${color} transparent transparent`;
-				}
-			}
-		}
-		
-		// Обновляем вертикальные выноски (верхние и нижние)
-		const topLabel = document.getElementById(`waveLabel${waveId}-top`);
-		const bottomLabel = document.getElementById(`waveLabel${waveId}-bottom`);
-		
-		if (topLabel) {
-			topLabel.style.backgroundColor = color;
-			topLabel.style.color = textColor;
-			const arrow = topLabel.querySelector('.wave-label-arrow');
-			if (arrow) {
-				arrow.style.borderColor = `${color} transparent transparent transparent`;
-			}
-		}
-		
-		if (bottomLabel) {
-			bottomLabel.style.backgroundColor = color;
-			bottomLabel.style.color = textColor;
-			const arrow = bottomLabel.querySelector('.wave-label-arrow');
-			if (arrow) {
-				arrow.style.borderColor = `transparent transparent ${color} transparent`;
-			}
-		}
-	}
+    updateWaveLabelsColor(waveId, isExtremum) {
+        const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
+        if (!wave) return;
+        
+        const color = isExtremum ? '#ff0000' : wave.color;
+        const textColor = this.getContrastTextColor(color);
+        
+        // Обновляем горизонтальные выноски (левые и правые)
+        const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
+        const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
+        
+        if (leftLabel) {
+            leftLabel.style.backgroundColor = color;
+            leftLabel.style.color = textColor;
+            const arrow = leftLabel.querySelector('.wave-label-arrow');
+            if (arrow) {
+                if (leftLabel.classList.contains('left') || leftLabel.dataset.side === 'left') {
+                    arrow.style.borderColor = `transparent transparent transparent ${color}`;
+                }
+            }
+        }
+        
+        if (rightLabel) {
+            rightLabel.style.backgroundColor = color;
+            rightLabel.style.color = textColor;
+            const arrow = rightLabel.querySelector('.wave-label-arrow');
+            if (arrow) {
+                if (rightLabel.classList.contains('right') || rightLabel.dataset.side === 'right') {
+                    arrow.style.borderColor = `transparent ${color} transparent transparent`;
+                }
+            }
+        }
+        
+        // Обновляем вертикальные выноски (верхние и нижние)
+        const topLabel = document.getElementById(`waveLabel${waveId}-top`);
+        const bottomLabel = document.getElementById(`waveLabel${waveId}-bottom`);
+        
+        if (topLabel) {
+            topLabel.style.backgroundColor = color;
+            topLabel.style.color = textColor;
+            const arrow = topLabel.querySelector('.wave-label-arrow');
+            if (arrow) {
+                arrow.style.borderColor = `${color} transparent transparent transparent`;
+            }
+        }
+        
+        if (bottomLabel) {
+            bottomLabel.style.backgroundColor = color;
+            bottomLabel.style.color = textColor;
+            const arrow = bottomLabel.querySelector('.wave-label-arrow');
+            if (arrow) {
+                arrow.style.borderColor = `transparent transparent ${color} transparent`;
+            }
+        }
+    }
     
     
     updateAllWaveLabels() {
@@ -674,185 +674,185 @@ class WavesManager {
     }
     
 
-	
-	createHorizontalWaveLabel(wave, y, side, container) {
-		const labelId = `${wave.id}-${side}`;
-		const currentDay = window.appState.currentDay || 0;
-		const state = this.calculateWaveStateAtDay(wave, currentDay);
-		const isExtremum = (state >= 4 || state <= -4);
-		
-		// Выбираем цвет: красный для экстремума, иначе цвет волны
-		const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
-		const textColor = this.getContrastTextColor(waveColor);
-		
-		const labelElement = document.createElement('div');
-		labelElement.className = `wave-label horizontal ${side}`;
-		labelElement.id = `waveLabel${labelId}`;
-		labelElement.dataset.waveId = wave.id;
-		labelElement.dataset.side = side;
-		labelElement.dataset.labelType = 'horizontal';
-		
-		labelElement.style.position = 'absolute';
-		labelElement.style.top = `${y}px`;
-		labelElement.style.width = 'auto';
-		labelElement.style.backgroundColor = waveColor;
-		labelElement.style.color = textColor;
-		labelElement.style.opacity = '0.7';
-		labelElement.style.zIndex = '1';
-		labelElement.style.padding = '2px 6px';
-		labelElement.style.borderRadius = '3px';
-		labelElement.style.fontSize = '11px';
-		labelElement.style.transform = 'translateY(-50%)';
-		labelElement.style.cursor = 'pointer';
-		labelElement.style.fontWeight = '500';
-		labelElement.style.whiteSpace = 'nowrap';
-		
-		const arrow = document.createElement('div');
-		arrow.className = 'wave-label-arrow';
-		arrow.style.position = 'absolute';
-		arrow.style.top = '50%';
-		arrow.style.transform = 'translateY(-50%)';
-		arrow.style.width = '0';
-		arrow.style.height = '0';
-		arrow.style.borderStyle = 'solid';
-		arrow.style.zIndex = '1';
-		
-		if (side === 'left') {
-			arrow.style.right = '-6px';
-			arrow.style.borderWidth = '4px 0 4px 6px';
-			arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-			labelElement.style.right = '0';
-			labelElement.style.marginRight = '10px';
-		} else {
-			arrow.style.left = '-6px';
-			arrow.style.borderWidth = '4px 6px 4px 0';
-			arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-			labelElement.style.left = '0';
-			labelElement.style.marginLeft = '10px';
-		}
-		
-		const text = document.createElement('div');
-		text.className = 'wave-label-text';
-		text.textContent = wave.name;
-		text.title = `${wave.name} (${wave.period} дней)`;
-		text.style.position = 'relative';
-		text.style.zIndex = '2';
-		
-		labelElement.appendChild(text);
-		labelElement.appendChild(arrow);
-		container.appendChild(labelElement);
-		
-		this.waveLabelElements[labelId] = labelElement;
-		
-		labelElement.addEventListener('click', (e) => {
-			e.stopPropagation();
-			this.onHorizontalWaveLabelClick(wave.id);
-		});
-		
-		labelElement.addEventListener('mouseenter', () => {
-			labelElement.style.opacity = '1';
-			labelElement.style.zIndex = '10';
-		});
-		
-		labelElement.addEventListener('mouseleave', () => {
-			labelElement.style.opacity = '0.7';
-			labelElement.style.zIndex = '1';
-		});
-		
-		return labelElement;
-	}
+    
+    createHorizontalWaveLabel(wave, y, side, container) {
+        const labelId = `${wave.id}-${side}`;
+        const currentDay = window.appState.currentDay || 0;
+        const state = this.calculateWaveStateAtDay(wave, currentDay);
+        const isExtremum = (state >= 4 || state <= -4);
+        
+        // Выбираем цвет: красный для экстремума, иначе цвет волны
+        const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
+        const textColor = this.getContrastTextColor(waveColor);
+        
+        const labelElement = document.createElement('div');
+        labelElement.className = `wave-label horizontal ${side}`;
+        labelElement.id = `waveLabel${labelId}`;
+        labelElement.dataset.waveId = wave.id;
+        labelElement.dataset.side = side;
+        labelElement.dataset.labelType = 'horizontal';
+        
+        labelElement.style.position = 'absolute';
+        labelElement.style.top = `${y}px`;
+        labelElement.style.width = 'auto';
+        labelElement.style.backgroundColor = waveColor;
+        labelElement.style.color = textColor;
+        labelElement.style.opacity = '0.7';
+        labelElement.style.zIndex = '1';
+        labelElement.style.padding = '2px 6px';
+        labelElement.style.borderRadius = '3px';
+        labelElement.style.fontSize = '11px';
+        labelElement.style.transform = 'translateY(-50%)';
+        labelElement.style.cursor = 'pointer';
+        labelElement.style.fontWeight = '500';
+        labelElement.style.whiteSpace = 'nowrap';
+        
+        const arrow = document.createElement('div');
+        arrow.className = 'wave-label-arrow';
+        arrow.style.position = 'absolute';
+        arrow.style.top = '50%';
+        arrow.style.transform = 'translateY(-50%)';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        
+        if (side === 'left') {
+            arrow.style.right = '-6px';
+            arrow.style.borderWidth = '4px 0 4px 6px';
+            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
+            labelElement.style.right = '0';
+            labelElement.style.marginRight = '10px';
+        } else {
+            arrow.style.left = '-6px';
+            arrow.style.borderWidth = '4px 6px 4px 0';
+            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
+            labelElement.style.left = '0';
+            labelElement.style.marginLeft = '10px';
+        }
+        
+        const text = document.createElement('div');
+        text.className = 'wave-label-text';
+        text.textContent = wave.name;
+        text.title = `${wave.name} (${wave.period} дней)`;
+        text.style.position = 'relative';
+        text.style.zIndex = '2';
+        
+        labelElement.appendChild(text);
+        labelElement.appendChild(arrow);
+        container.appendChild(labelElement);
+        
+        this.waveLabelElements[labelId] = labelElement;
+        
+        labelElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onHorizontalWaveLabelClick(wave.id);
+        });
+        
+        labelElement.addEventListener('mouseenter', () => {
+            labelElement.style.opacity = '1';
+            labelElement.style.zIndex = '10';
+        });
+        
+        labelElement.addEventListener('mouseleave', () => {
+            labelElement.style.opacity = '0.7';
+            labelElement.style.zIndex = '1';
+        });
+        
+        return labelElement;
+    }
 
 
-	createVerticalWaveLabel(wave, x, position, container) {
-		const labelId = `${wave.id}-${position}`;
-		const currentDay = window.appState.currentDay || 0;
-		const state = this.calculateWaveStateAtDay(wave, currentDay);
-		const isExtremum = (state >= 4 || state <= -4);
-		
-		// Выбираем цвет: красный для экстремума, иначе цвет волны
-		const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
-		const textColor = this.getContrastTextColor(waveColor);
-		
-		const extremumTime = this.calculateExtremumTime(wave, position);
-		const timeString = this.formatExtremumTime(extremumTime);
-		
-		const labelElement = document.createElement('div');
-		labelElement.className = `wave-label vertical ${position}`;
-		labelElement.id = `waveLabel${labelId}`;
-		labelElement.dataset.waveId = wave.id;
-		labelElement.dataset.position = position;
-		labelElement.dataset.labelType = 'vertical';
-		labelElement.dataset.extremumTime = extremumTime.getTime();
-		
-		labelElement.style.position = 'absolute';
-		labelElement.style.left = `${x}px`;
-		labelElement.style.width = 'auto';
-		labelElement.style.backgroundColor = waveColor;
-		labelElement.style.color = textColor;
-		labelElement.style.opacity = '0.7';
-		labelElement.style.zIndex = '1';
-		labelElement.style.padding = '2px 6px';
-		labelElement.style.borderRadius = '3px';
-		labelElement.style.fontSize = '11px';
-		labelElement.style.transform = 'translateX(-50%)';
-		labelElement.style.cursor = 'pointer';
-		labelElement.style.fontFamily = 'monospace';
-		labelElement.style.letterSpacing = '0.5px';
-		labelElement.style.fontWeight = '500';
-		labelElement.style.whiteSpace = 'nowrap';
-		
-		const text = document.createElement('div');
-		text.className = 'wave-label-text';
-		text.textContent = timeString;
-		text.style.textAlign = 'center';
-		
-		const arrow = document.createElement('div');
-		arrow.className = 'wave-label-arrow';
-		arrow.style.position = 'absolute';
-		arrow.style.width = '0';
-		arrow.style.height = '0';
-		arrow.style.borderStyle = 'solid';
-		arrow.style.zIndex = '1';
-		
-		if (position === 'top') {
-			arrow.style.bottom = '-6px';
-			arrow.style.left = '50%';
-			arrow.style.transform = 'translateX(-50%)';
-			arrow.style.borderWidth = '6px 4px 0 4px';
-			arrow.style.borderColor = `${waveColor} transparent transparent transparent`;
-			labelElement.style.top = '0';
-			labelElement.style.marginTop = '5px';
-		} else {
-			arrow.style.top = '-6px';
-			arrow.style.left = '50%';
-			arrow.style.transform = 'translateX(-50%)';
-			arrow.style.borderWidth = '0 4px 6px 4px';
-			arrow.style.borderColor = `transparent transparent ${waveColor} transparent`;
-			labelElement.style.bottom = '0';
-			labelElement.style.marginBottom = '5px';
-		}
-		
-		labelElement.appendChild(text);
-		labelElement.appendChild(arrow);
-		container.appendChild(labelElement);
-		
-		labelElement.addEventListener('click', (e) => {
-			e.stopPropagation();
-			this.onVerticalWaveLabelClick(labelElement);
-		});
-		
-		labelElement.addEventListener('mouseenter', () => {
-			labelElement.style.opacity = '1';
-			labelElement.style.zIndex = '10';
-		});
-		
-		labelElement.addEventListener('mouseleave', () => {
-			labelElement.style.opacity = '0.7';
-			labelElement.style.zIndex = '1';
-		});
-		
-		return labelElement;
-	}
+    createVerticalWaveLabel(wave, x, position, container) {
+        const labelId = `${wave.id}-${position}`;
+        const currentDay = window.appState.currentDay || 0;
+        const state = this.calculateWaveStateAtDay(wave, currentDay);
+        const isExtremum = (state >= 4 || state <= -4);
+        
+        // Выбираем цвет: красный для экстремума, иначе цвет волны
+        const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
+        const textColor = this.getContrastTextColor(waveColor);
+        
+        const extremumTime = this.calculateExtremumTime(wave, position);
+        const timeString = this.formatExtremumTime(extremumTime);
+        
+        const labelElement = document.createElement('div');
+        labelElement.className = `wave-label vertical ${position}`;
+        labelElement.id = `waveLabel${labelId}`;
+        labelElement.dataset.waveId = wave.id;
+        labelElement.dataset.position = position;
+        labelElement.dataset.labelType = 'vertical';
+        labelElement.dataset.extremumTime = extremumTime.getTime();
+        
+        labelElement.style.position = 'absolute';
+        labelElement.style.left = `${x}px`;
+        labelElement.style.width = 'auto';
+        labelElement.style.backgroundColor = waveColor;
+        labelElement.style.color = textColor;
+        labelElement.style.opacity = '0.7';
+        labelElement.style.zIndex = '1';
+        labelElement.style.padding = '2px 6px';
+        labelElement.style.borderRadius = '3px';
+        labelElement.style.fontSize = '11px';
+        labelElement.style.transform = 'translateX(-50%)';
+        labelElement.style.cursor = 'pointer';
+        labelElement.style.fontFamily = 'monospace';
+        labelElement.style.letterSpacing = '0.5px';
+        labelElement.style.fontWeight = '500';
+        labelElement.style.whiteSpace = 'nowrap';
+        
+        const text = document.createElement('div');
+        text.className = 'wave-label-text';
+        text.textContent = timeString;
+        text.style.textAlign = 'center';
+        
+        const arrow = document.createElement('div');
+        arrow.className = 'wave-label-arrow';
+        arrow.style.position = 'absolute';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        
+        if (position === 'top') {
+            arrow.style.bottom = '-6px';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%)';
+            arrow.style.borderWidth = '6px 4px 0 4px';
+            arrow.style.borderColor = `${waveColor} transparent transparent transparent`;
+            labelElement.style.top = '0';
+            labelElement.style.marginTop = '5px';
+        } else {
+            arrow.style.top = '-6px';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%)';
+            arrow.style.borderWidth = '0 4px 6px 4px';
+            arrow.style.borderColor = `transparent transparent ${waveColor} transparent`;
+            labelElement.style.bottom = '0';
+            labelElement.style.marginBottom = '5px';
+        }
+        
+        labelElement.appendChild(text);
+        labelElement.appendChild(arrow);
+        container.appendChild(labelElement);
+        
+        labelElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.onVerticalWaveLabelClick(labelElement);
+        });
+        
+        labelElement.addEventListener('mouseenter', () => {
+            labelElement.style.opacity = '1';
+            labelElement.style.zIndex = '10';
+        });
+        
+        labelElement.addEventListener('mouseleave', () => {
+            labelElement.style.opacity = '0.7';
+            labelElement.style.zIndex = '1';
+        });
+        
+        return labelElement;
+    }
 
     
     onHorizontalWaveLabelClick(waveId) {
@@ -1062,7 +1062,7 @@ class WavesManager {
     
     addCustomWave(name, period, type, color) {
         if (!name || !period) {
-            alert('Пожалуйста, введите название и период');
+            alert('Пожалуйста, введите название и период сигнала');
             return null;
         }
         
@@ -1099,7 +1099,7 @@ class WavesManager {
     }
     
     deleteWave(waveId) {
-        if (!confirm('Уничтожить этот колосок?')) return;
+        if (!confirm('Уничтожить этот сигнал?')) return;
         
         const waveIdStr = String(waveId);
         

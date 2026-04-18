@@ -324,7 +324,7 @@ updateResults(stateWaves) {
     if (!resultsElement) return;
     
     if (stateWaves.length === 0) {
-        resultsElement.innerHTML = '<div class="summary-empty">Нет колосков в выбранном состоянии</div>';
+        resultsElement.innerHTML = '<div class="summary-empty">Нет сигналов в выбранном состоянии</div>';
         return;
     }
     
@@ -415,8 +415,8 @@ updateResults(stateWaves) {
                     }
                     
                     // Визуальная обратная связь
-                    const waveName = btn.closest('.summary-item')?.querySelector('.summary-item-name')?.textContent || 'Колосок';
-                    console.log(`Колосок "${waveName}" ${!isChecked ? 'показан' : 'скрыт'} на визоре`);
+                    const waveName = btn.closest('.summary-item')?.querySelector('.summary-item-name')?.textContent || 'Сигнал';
+                    console.log(`Сигнал "${waveName}" ${!isChecked ? 'показан' : 'скрыт'} на визоре`);
                 } else {
                     // Если чекбокс не найден, используем прямое изменение состояния
                     if (window.appState && window.appState.waveVisibility) {
@@ -443,7 +443,7 @@ updateResults(stateWaves) {
                             this.updateSummary();
                         }, 150);
                         
-                        console.log(`Колосок ID ${waveId} ${currentState === false ? 'показан' : 'скрыт'} на визоре (прямое управление)`);
+                        console.log(`Сигнал ID ${waveId} ${currentState === false ? 'показан' : 'скрыт'} на визоре (прямое управление)`);
                     }
                 }
             });

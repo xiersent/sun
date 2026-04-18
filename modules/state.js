@@ -33,7 +33,13 @@ class AppState {
                 { id: 33, name: '33 синесть', description: 'Интеллектуальный ритм', period: 33, color: '#0000FF', type: 'solid', category: 'classic', visible: true, bold: false, cornerColor: false },
                 { id: 38, name: '38 фиолетовость', description: 'Интуитивный ритм', period: 38, color: '#800080', type: 'solid', category: 'classic', visible: true, bold: false, cornerColor: false },
                 { id: 25, name: '25 черность', description: 'Экспериментальный ритм', period: 25, color: '#000000', type: 'solid', category: 'experimental', visible: true, bold: false, cornerColor: false },
-                { id: 365, name: 'Текущий год', description: 'Ритм текущего года', period: 365.25, color: '#FFA500', type: 'solid', category: 'experimental', visible: true, bold: false, cornerColor: false }
+                { id: 365, name: 'Текущий год', description: 'Ритм текущего года', period: 365.25, color: '#FFA500', type: 'solid', category: 'experimental', visible: true, bold: false, cornerColor: false },
+                // НОВЫЕ ТИПЫ ГОДОВ
+                { id: 3652422, name: 'Тропический год', description: 'Астрономический (весеннее равноденствие)', period: 365.2422, color: '#FF6B35', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
+                { id: 3652425, name: 'Григорианский год', description: 'Календарный (средний за 400 лет)', period: 365.2425, color: '#4CAF50', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
+                { id: 36525636, name: 'Сидерический год', description: 'Относительно звёзд', period: 365.25636, color: '#9C27B0', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
+                { id: 36525964, name: 'Аномалистический год', description: 'От перигелия до перигелия', period: 365.25964, color: '#FF9800', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
+                { id: 36524167, name: 'Драконический год', description: 'Относительно узлов Луны', period: 365.24167, color: '#E91E63', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false }
             ]),
             dates: [
                 { 
@@ -45,10 +51,10 @@ class AppState {
             notes: [],
             groups: [
                 { id: 'default-group', name: 'Стандартная', enabled: false, waves: [], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: true },
-                { id: 'classic-group', name: 'Классическая', enabled: false, waves: [24, 28, 33, 38], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false },
-                { id: 'experimental-group', name: 'Экспериментальная', enabled: false, waves: [25, 365], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false },
+                { id: 'classic-group', name: 'Классическая', enabled: false, waves: [24, 28, 33, 38], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false, hidden: true },
+                { id: 'experimental-group', name: 'Экспериментальная', enabled: false, waves: [25, 365, 3652422, 3652425, 36525636, 36525964, 36524167], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false },
                 { id: '120-waves-group', name: '120 колосков', enabled: false, waves: this.waves120Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dashed', expanded: false },
-                { id: '31-waves-group', name: '31 колосок', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false }
+                { id: '31-waves-group', name: '31 прутик', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false }
             ],
             uiSettings: {
                 currentDate: Date.now(),
@@ -66,10 +72,9 @@ class AppState {
                 waveVisibility: {},
                 waveBold: {},
                 waveCornerColor: {},
-                // ДОБАВЛЕНО: состояния выделения дат
                 dateSelections: {
-                    typeA: null,  // ID даты с выделением типа A
-                    typeB: null   // ID даты с выделением типа B
+                    typeA: null,
+                    typeB: null
                 }
             }
         };
@@ -77,103 +82,99 @@ class AppState {
         this.load();
     }
     
-	// modules/state.js
-	create120Waves() {
-		this.waves120 = [];
-		this.waves120Ids = [];
-		
-		// Упрощенный: все стандартные колоски получают один цвет #C0C0C0
-		const standardColor = '#C0C0C0'; // 192,192,192 - серебристо-серый
-		
-		for (let i = 1; i <= 120; i++) {
-			const waveId = `wave-120-${i}`;
-			this.waves120Ids.push(waveId);
-			
-			const wave = {
-				id: waveId,
-				name: `Колосок ${i}`,
-				description: `Период ${i} дней`,
-				period: i,
-				color: standardColor, // Все получают один стандартный цвет
-				type: 'dashed',
-				category: '120-waves',
-				visible: false,
-				bold: false,
-				cornerColor: false,
-				isDefaultColor: true // Флаг стандартного цвета
-			};
-			
-			this.waves120.push(wave);
-		}
-	}
-
-	create31Waves() {
-		this.waves31 = [];
-		this.waves31Ids = [];
-		
-		// Упрощенный: все стандартные колоски получают один цвет #C0C0C0
-		const standardColor = '#C0C0C0'; // 192,192,192 - серебристо-серый
-		
-		for (let i = 1; i <= 31; i++) {
-			const waveId = `wave-31-${i}`;
-			this.waves31Ids.push(waveId);
-			
-			const wave = {
-				id: waveId,
-				name: `Колосок ${i}`,
-				description: `Период ${i} дней`,
-				period: i,
-				color: standardColor, // Все получают один стандартный цвет
-				type: 'dotted',
-				category: '31-waves',
-				visible: false,
-				bold: false,
-				cornerColor: false,
-				isDefaultColor: true // Флаг стандартного цвета
-			};
-			
-			this.waves31.push(wave);
-		}
-	}
+    create120Waves() {
+        this.waves120 = [];
+        this.waves120Ids = [];
+        
+        const standardColor = '#C0C0C0';
+        
+        for (let i = 1; i <= 120; i++) {
+            const waveId = `wave-120-${i}`;
+            this.waves120Ids.push(waveId);
+            
+            const wave = {
+                id: waveId,
+                name: `Колосок ${i}`,
+                description: `Период ${i} дней`,
+                period: i,
+                color: standardColor,
+                type: 'dashed',
+                category: '120-waves',
+                visible: false,
+                bold: false,
+                cornerColor: false,
+                isDefaultColor: true
+            };
+            
+            this.waves120.push(wave);
+        }
+    }
     
-	save() {
-		if (!(this.baseDate instanceof Date)) {
-			if (typeof this.baseDate === 'number') {
-				this.baseDate = new Date(this.baseDate);
-			} else {
-				const now = new Date();
-				this.baseDate = new Date(
-					now.getFullYear(),
-					now.getMonth(),
-					now.getDate(),
-					0, 0, 0, 0
-				);
-			}
-		}
-		
-		this.data.uiSettings.currentDate = this.currentDate.getTime();
-		this.data.uiSettings.baseDate = this.baseDate.getTime();
-		
-		this.data.uiSettings.currentDay = this.currentDay;
-		this.data.uiSettings.transform = this.transform;
-		this.data.uiSettings.uiHidden = this.uiHidden;
-		this.data.uiSettings.graphHidden = this.graphHidden;
-		this.data.uiSettings.graphBgWhite = this.graphBgWhite;
-		this.data.uiSettings.showStars = this.showStars;
-		this.data.uiSettings.grayMode = this.grayMode;
-		this.data.uiSettings.graphGrayMode = this.graphGrayMode;
-		this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
-		this.data.uiSettings.activeDateId = this.activeDateId;
-		
-		this.data.uiSettings.waveVisibility = this.waveVisibility;
-		this.data.uiSettings.waveBold = this.waveBold;
-		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
-		
-		// ДОБАВЛЕНО: сохранение состояний выделения дат
-		this.data.uiSettings.dateSelections = this.dateSelections;
+    create31Waves() {
+        this.waves31 = [];
+        this.waves31Ids = [];
+        
+        const standardColor = '#C0C0C0';
+        
+        for (let i = 1; i <= 31; i++) {
+            const waveId = `wave-31-${i}`;
+            this.waves31Ids.push(waveId);
+            
+            const wave = {
+                id: waveId,
+                name: `Прутик ${i}`,
+                description: `Период ${i} дней`,
+                period: i,
+                color: standardColor,
+                type: 'dotted',
+                category: '31-waves',
+                visible: false,
+                bold: false,
+                cornerColor: false,
+                isDefaultColor: true
+            };
+            
+            this.waves31.push(wave);
+        }
+    }
+    
+    save() {
+        if (!(this.baseDate instanceof Date)) {
+            if (typeof this.baseDate === 'number') {
+                this.baseDate = new Date(this.baseDate);
+            } else {
+                const now = new Date();
+                this.baseDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                    0, 0, 0, 0
+                );
+            }
+        }
+        
+        this.data.uiSettings.currentDate = this.currentDate.getTime();
+        this.data.uiSettings.baseDate = this.baseDate.getTime();
+        
+        this.data.uiSettings.currentDay = this.currentDay;
+        this.data.uiSettings.transform = this.transform;
+        this.data.uiSettings.uiHidden = this.uiHidden;
+        this.data.uiSettings.graphHidden = this.graphHidden;
+        this.data.uiSettings.graphBgWhite = this.graphBgWhite;
+        this.data.uiSettings.showStars = this.showStars;
+        this.data.uiSettings.grayMode = this.grayMode;
+        this.data.uiSettings.graphGrayMode = this.graphGrayMode;
+        this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
+        this.data.uiSettings.activeDateId = this.activeDateId;
+        
+        this.data.uiSettings.waveVisibility = this.waveVisibility;
+        this.data.uiSettings.waveBold = this.waveBold;
+        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+        
+        this.data.uiSettings.dateSelections = this.dateSelections;
 
-		localStorage.setItem('appData', JSON.stringify(this.data));
-	}
+        localStorage.setItem('appData', JSON.stringify(this.data));
+    }
     
 
 	load() {
@@ -182,20 +183,24 @@ class AppState {
 			try {
 				const data = JSON.parse(saved);
 				
-				// ===== МИГРАЦИЯ: ОТКЛЮЧАЕМ И СКРЫВАЕМ КЛАССИЧЕСКУЮ ГРУППУ =====
+				// ===== МИГРАЦИЯ 1: переименование группы "31 колосок" в "31 прутик" =====
+				if (data.groups) {
+					const old31Group = data.groups.find(g => g.id === '31-waves-group' && g.name === '31 колосок');
+					if (old31Group) {
+						old31Group.name = '31 прутик';
+						console.log('Миграция: группа "31 колосок" переименована в "31 прутик"');
+					}
+				}
+				// ===== КОНЕЦ МИГРАЦИИ 1 =====
+				
+				// ===== МИГРАЦИЯ 2: отключаем и скрываем классическую группу =====
 				if (data.groups) {
 					const classicGroup = data.groups.find(g => g.id === 'classic-group');
 					if (classicGroup) {
-						// 1. Отключаем группу (волны в ней не отображаются)
 						classicGroup.enabled = false;
-						
-						// 2. Добавляем флаг скрытия от пользователя
 						classicGroup.hidden = true;
-						
-						// 3. Сворачиваем группу
 						classicGroup.expanded = false;
 						
-						// 4. Скрываем все волны в этой группе
 						if (classicGroup.waves && Array.isArray(classicGroup.waves)) {
 							classicGroup.waves.forEach(waveId => {
 								const waveIdStr = String(waveId);
@@ -205,12 +210,10 @@ class AppState {
 							});
 						}
 						
-						// Сохраняем изменения
 						localStorage.setItem('appData', JSON.stringify(data));
-						console.log('Миграция: классическая группа отключена и скрыта');
 					}
 				}
-				// ===== КОНЕЦ МИГРАЦИИ =====
+				// ===== КОНЕЦ МИГРАЦИИ 2 =====
 				
 				this.data = data;
 				this.convertDatesToTimestamp();
@@ -250,7 +253,7 @@ class AppState {
 					if (!this.data.groups.some(g => g.id === '31-waves-group')) {
 						this.data.groups.push({
 							id: '31-waves-group',
-							name: '31 колосок',
+							name: '31 прутик',
 							enabled: true,
 							waves: this.waves31Ids,
 							styleEnabled: true,
@@ -272,7 +275,7 @@ class AppState {
 						const match = waveIdStr.match(/wave-31-(\d+)/);
 						if (match) {
 							const num = parseInt(match[1]);
-							wave.name = `Колосок ${num}`;
+							wave.name = `Прутик ${num}`;
 							wave.description = `Период ${num} дней`;
 						}
 					}
@@ -450,169 +453,152 @@ class AppState {
 		}
 	}
 
-	reset() {
-		this.data = JSON.parse(JSON.stringify(this.initialData));
-		
-		this.currentDate = new Date();
-		
-		const now = new Date();
-		this.baseDate = new Date(
-			now.getFullYear(),
-			now.getMonth(),
-			now.getDate(),
-			0, 0, 0, 0
-		);
-		
-		this.currentDay = 0;
-		this.virtualPosition = 0;
-		this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
-		this.transform = { scaleX: 1, scaleY: 1, rotation: 0 };
-		this.uiHidden = false;
-		this.graphHidden = false;
-		this.graphBgWhite = true;
-		this.showStars = true;
-		this.grayMode = false;
-		this.graphGrayMode = false;
-		this.cornerSquaresVisible = true;
-		this.activeDateId = 's25';
-		
-		this.editingDateId = null;
-		this.editingWaveId = null;
-		this.editingGroupId = null;
-		
-		this.isProgrammaticDateChange = false;
-		this.SQL = null;
-		this.currentDB = null;
-		this.dbImportData = null;
-		this.intersectionWaves = [];
-		this.intersectionResults = [];
-		this.waveOriginalColors = {};
-		this.periods = {};
-		
-		this.waveVisibility = {};
-		this.waveBold = {};
-		this.waveCornerColor = {};
-		
-		this.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id); // Объявляем переменную здесь
-			
-			if (waveIdStr.startsWith('wave-120-') || waveIdStr.startsWith('wave-31-')) {
-				wave.color = '#C0C0C0';
-				wave.isDefaultColor = true;
-			}
-			
-			// Используем уже объявленную переменную waveIdStr
-			this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
-			this.waveBold[waveIdStr] = wave.bold || false;
-			this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
-		});
-		
-		this.data.uiSettings.waveVisibility = this.waveVisibility;
-		this.data.uiSettings.waveBold = this.waveBold;
-		this.data.uiSettings.waveCornerColor = this.waveCornerColor;
-		
-		// ДОБАВЛЕНО: сброс состояний выделения дат
-		this.dateSelections = {
-			typeA: null,
-			typeB: null
-		};
-		this.data.uiSettings.dateSelections = this.dateSelections;
-	}
 
-	resetDefaultWaveColors() {
-		// Список ID волн, которые должны оставаться стандартными
-		const standardWaveIds = [
-			'wave-120-1', 'wave-120-2', 'wave-120-3', // и т.д.
-			'wave-31-1', 'wave-31-2', 'wave-31-3',    // и т.д.
-		];
-		
-		// Для всех волн в группах "Классическая" и "Экспериментальная"
-		const classicWaves = [24, 28, 33, 38, 25, 365];
-		
-		classicWaves.forEach(waveId => {
-			const wave = this.data.waves.find(w => String(w.id) === String(waveId));
-			if (wave) {
-				// Снимаем флаг стандартного цвета
-				wave.isDefaultColor = false;
-				console.log(`Сброшен флаг стандартного цвета для волны ${wave.name}`);
-			}
-		});
-		
-		this.save();
-		
-		// Принудительно обновляем интерфейс
-		if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-			window.unifiedListManager.updateWavesList();
-		}
-		
-		if (window.waves && window.waves.updatePosition) {
-			window.waves.updatePosition();
-		}
-		
-		return classicWaves.length;
-	}
-
-	migrateWaveColors() {
-		const standardColor = '#C0C0C0';
-		let migratedCount = 0;
-		
-		this.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
-			const is120Wave = waveIdStr.startsWith('wave-120-');
-			const is31Wave = waveIdStr.startsWith('wave-31-');
-			
-			if (is120Wave || is31Wave) {
-				// Если флаг не установлен, считаем что это стандартный цвет
-				if (wave.isDefaultColor === undefined) {
-					wave.isDefaultColor = true;
-					wave.color = standardColor;
-					migratedCount++;
-				} else if (wave.isDefaultColor === true) {
-					// Если флаг true, но цвет не стандартный - исправляем
-					wave.color = standardColor;
-				}
-			}
-		});
-		
-		if (migratedCount > 0) {
-			this.save();
-		}
-		
-		return migratedCount;
-	}
-
-	fixStandardWaveColors() {
-		const standardColor = '#C0C0C0';
-		
-		this.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
-			
-			// Проверяем, относится ли волна к группам 120 или 31
-			const is120Wave = waveIdStr.startsWith('wave-120-');
-			const is31Wave = waveIdStr.startsWith('wave-31-');
-			
-			if (is120Wave || is31Wave) {
-				// Инициализируем флаг, если его нет
-				if (wave.isDefaultColor === undefined) {
-					wave.isDefaultColor = true;
-				}
-				
-				// Если это стандартный цвет - устанавливаем #C0C0C0
-				if (wave.isDefaultColor === true) {
-					wave.color = standardColor;
-					
-					// Также обновляем в waveVisibility/цветах интерфейса
-					if (window.waves && window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
-						window.waves.wavePaths[wave.id].style.stroke = standardColor;
-					}
-				}
-			}
-		});
-		
-		// Сохраняем изменения
-		this.save();
-	}
-
+    
+    reset() {
+        this.data = JSON.parse(JSON.stringify(this.initialData));
+        
+        this.currentDate = new Date();
+        
+        const now = new Date();
+        this.baseDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            0, 0, 0, 0
+        );
+        
+        this.currentDay = 0;
+        this.virtualPosition = 0;
+        this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
+        this.transform = { scaleX: 1, scaleY: 1, rotation: 0 };
+        this.uiHidden = false;
+        this.graphHidden = false;
+        this.graphBgWhite = true;
+        this.showStars = true;
+        this.grayMode = false;
+        this.graphGrayMode = false;
+        this.cornerSquaresVisible = true;
+        this.activeDateId = 's25';
+        
+        this.editingDateId = null;
+        this.editingWaveId = null;
+        this.editingGroupId = null;
+        
+        this.isProgrammaticDateChange = false;
+        this.SQL = null;
+        this.currentDB = null;
+        this.dbImportData = null;
+        this.intersectionWaves = [];
+        this.intersectionResults = [];
+        this.waveOriginalColors = {};
+        this.periods = {};
+        
+        this.waveVisibility = {};
+        this.waveBold = {};
+        this.waveCornerColor = {};
+        
+        this.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            
+            if (waveIdStr.startsWith('wave-120-') || waveIdStr.startsWith('wave-31-')) {
+                wave.color = '#C0C0C0';
+                wave.isDefaultColor = true;
+            }
+            
+            this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
+            this.waveBold[waveIdStr] = wave.bold || false;
+            this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
+        });
+        
+        this.data.uiSettings.waveVisibility = this.waveVisibility;
+        this.data.uiSettings.waveBold = this.waveBold;
+        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
+        
+        this.dateSelections = {
+            typeA: null,
+            typeB: null
+        };
+        this.data.uiSettings.dateSelections = this.dateSelections;
+    }
+    
+    resetDefaultWaveColors() {
+        const classicWaves = [24, 28, 33, 38, 25, 365];
+        
+        classicWaves.forEach(waveId => {
+            const wave = this.data.waves.find(w => String(w.id) === String(waveId));
+            if (wave) {
+                wave.isDefaultColor = false;
+            }
+        });
+        
+        this.save();
+        
+        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+            window.unifiedListManager.updateWavesList();
+        }
+        
+        if (window.waves && window.waves.updatePosition) {
+            window.waves.updatePosition();
+        }
+        
+        return classicWaves.length;
+    }
+    
+    migrateWaveColors() {
+        const standardColor = '#C0C0C0';
+        let migratedCount = 0;
+        
+        this.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            const is120Wave = waveIdStr.startsWith('wave-120-');
+            const is31Wave = waveIdStr.startsWith('wave-31-');
+            
+            if (is120Wave || is31Wave) {
+                if (wave.isDefaultColor === undefined) {
+                    wave.isDefaultColor = true;
+                    wave.color = standardColor;
+                    migratedCount++;
+                } else if (wave.isDefaultColor === true) {
+                    wave.color = standardColor;
+                }
+            }
+        });
+        
+        if (migratedCount > 0) {
+            this.save();
+        }
+        
+        return migratedCount;
+    }
+    
+    fixStandardWaveColors() {
+        const standardColor = '#C0C0C0';
+        
+        this.data.waves.forEach(wave => {
+            const waveIdStr = String(wave.id);
+            
+            const is120Wave = waveIdStr.startsWith('wave-120-');
+            const is31Wave = waveIdStr.startsWith('wave-31-');
+            
+            if (is120Wave || is31Wave) {
+                if (wave.isDefaultColor === undefined) {
+                    wave.isDefaultColor = true;
+                }
+                
+                if (wave.isDefaultColor === true) {
+                    wave.color = standardColor;
+                    
+                    if (window.waves && window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
+                        window.waves.wavePaths[wave.id].style.stroke = standardColor;
+                    }
+                }
+            }
+        });
+        
+        this.save();
+    }
+    
     convertDatesToTimestamp() {
         this.data.dates.forEach(date => {
             if (date.date && !this.isTimestamp(date.date)) {
@@ -621,8 +607,7 @@ class AppState {
                     if (!isNaN(dateObj.getTime())) {
                         date.date = dateObj.getTime();
                     }
-                } catch (e) {
-                }
+                } catch (e) {}
             }
         });
         
@@ -633,8 +618,7 @@ class AppState {
                     if (!isNaN(dateObj.getTime())) {
                         note.date = dateObj.getTime();
                     }
-                } catch (e) {
-                }
+                } catch (e) {}
             }
         });
         
@@ -645,12 +629,11 @@ class AppState {
                     if (!isNaN(dateObj.getTime())) {
                         this.data.uiSettings[key] = dateObj.getTime();
                     }
-                } catch (e) {
-                }
+                } catch (e) {}
             }
         });
     }
-
+    
     isTimestamp(value) {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }

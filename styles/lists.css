@@ -51,7 +51,7 @@
 .list-item--date:hover{background-color: #f5f5f5;}
 .list-item--date.active{background-color: #e6f2ff;}
 
-/* Типы элементов - волна */
+/* Типы элементов - сигнал (было: волна) */
 .list-item--wave{cursor: default;}
 .list-item--wave:hover{background-color: #f5f5f5;}
 .list-item--wave .wave-controls-inline{display: flex; align-items: center; gap: 4px; margin-right: 8px;}
@@ -267,9 +267,9 @@
 
 .list-item--date .date-selection-checks {
     pointer-events: auto;
-	display: flex;
-	align-items: center;
-	gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* Стили выделения строк дат */
