@@ -138,180 +138,115 @@ class ExtremumTimeManager {
         return groups;
     }
 
-    renderMarkers(groupedExtremums) {
-        // Очищаем старые маркеры и выноски
-        this.clearAll();
-        
-        if (!this.timeBarContainer || !groupedExtremums.length) return;
-        
-        const dayMs = 24 * 60 * 60 * 1000;
-        
-        groupedExtremums.forEach(group => {
-            const dayStart = new Date(group.time);
-            dayStart.setHours(0, 0, 0, 0);
-            const timeFromMidnight = group.time.getTime() - dayStart.getTime();
-            const positionPercent = (timeFromMidnight / dayMs) * 100;
-            const clampedPercent = Math.max(0, Math.min(100, positionPercent));
-            
-            // Определяем доминирующий цвет (первый в группе)
-            const dominantColor = group.colors[0];
-            
-            // Получаем контрастный цвет текста
-            const textColor = this.getContrastTextColor(dominantColor);
-            
-            // Рисочка (маркер) - одна на группу
-            const marker = document.createElement('div');
-            marker.className = 'extremum-marker';
-            marker.style.position = 'absolute';
-            marker.style.left = `${clampedPercent}%`;
-            marker.style.width = '1px';
-            marker.style.height = '15px';
-            marker.style.opacity = '0.7';
-            marker.style.zIndex = '8';
-            
-            if (group.position === 'top') {
-                marker.style.top = '0';
-            } else {
-                marker.style.bottom = '0';
-            }
-            
-            marker.style.backgroundColor = dominantColor;
-            
-            // Выноска с ПЕРЕЧИСЛЕНИЕМ колосков (кликабельными именами)
-            const label = document.createElement('div');
-            label.className = 'extremum-label';
-            label.dataset.waveId = group.waves[0].id;
-            label.dataset.position = group.position;
-            label.dataset.time = group.time.toISOString();
-            
-            label.style.position = 'absolute';
-            label.style.left = `${clampedPercent}%`;
-            label.style.transform = 'translateX(-50%)';
-            label.style.zIndex = '9';
-            label.style.pointerEvents = 'none';
-            label.style.fontSize = '10px';
-            label.style.fontFamily = 'var(--font-family)';
-            label.style.whiteSpace = 'nowrap';
-            label.style.padding = '2px 6px';
-            label.style.borderRadius = '3px';
-            label.style.backgroundColor = dominantColor;
-            label.style.color = textColor; // Динамический цвет текста
-            label.style.textAlign = 'center';
-            label.style.fontWeight = '500';
-        
-            
-            // СОЗДАЕМ КЛИКАБЕЛЬНЫЕ ИМЕНА КОЛОСКОВ
-            // Уникальные имена с их wave.id
-            const waveNameMap = new Map();
-            group.waves.forEach(wave => {
-                waveNameMap.set(wave.name, wave.id);
-            });
-            
-            const uniqueNames = Array.from(waveNameMap.keys());
-            const waveIds = Array.from(waveNameMap.values());
-            
-            // Создаем HTML с кликабельными span элементами
-            const labelHTML = uniqueNames.map((name, index) => {
-                const waveId = waveIds[index];
-                return `<span class="extremum-wave-name" data-wave-id="${waveId}" style="cursor: pointer;">${name}</span>`;
-            }).join(', ');
-            
-            // Создаем внутреннюю структуру выноски
-            const labelTextElement = document.createElement('div');
-            labelTextElement.className = 'extremum-label-text';
-            labelTextElement.style.textAlign = 'center';
-            labelTextElement.style.fontWeight = '400';
-            labelTextElement.innerHTML = labelHTML;
-            
-            // Стрелочка
-            const arrow = document.createElement('div');
-            arrow.className = 'extremum-label-arrow';
-            arrow.style.position = 'absolute';
-            arrow.style.width = '0';
-            arrow.style.height = '0';
-            arrow.style.borderStyle = 'solid';
-            arrow.style.zIndex = '1';
-            arrow.style.left = '50%';
-            arrow.style.transform = 'translateX(-50%)';
-            
-            // Позиционируем выноску в зависимости от положения маркера
-            if (group.position === 'top') {
-                // Выноска над рисочкой
-                label.style.bottom = '100%';
-                label.style.marginBottom = '5px';
-                
-                // Стрелочка вниз
-                arrow.style.bottom = '-6px';
-                arrow.style.borderWidth = '6px 4px 0 4px';
-                arrow.style.borderColor = `${dominantColor} transparent transparent transparent`;
-            } else {
-                // Выноска под рисочкой
-                label.style.top = '100%';
-                label.style.marginTop = '5px';
-                
-                // Стрелочка вверх
-                arrow.style.top = '-6px';
-                arrow.style.borderWidth = '0 4px 6px 4px';
-                arrow.style.borderColor = `transparent transparent ${dominantColor} transparent`;
-            }
-            
-            label.appendChild(labelTextElement);
-            label.appendChild(arrow);
-            
-            // Для темного режима
-            const graphContainer = document.querySelector('.graph-container');
-            if (graphContainer && graphContainer.classList.contains('dark-mode')) {
-                label.style.backgroundColor = dominantColor;
-                label.style.color = textColor;
-                
-                if (group.position === 'top') {
-                    arrow.style.borderTopColor = dominantColor;
-                } else {
-                    arrow.style.borderBottomColor = dominantColor;
-                }
-            }
-            
-            // Добавляем в контейнер временной шкалы
-            this.timeBarContainer.appendChild(marker);
-            this.timeBarContainer.appendChild(label);
-            
-            this.markers.push(marker);
-            this.labels.push(label);
-            
-            // Добавляем обработчики кликов на имена колосков
-            setTimeout(() => {
-                labelTextElement.querySelectorAll('.extremum-wave-name').forEach(span => {
-                    span.style.pointerEvents = 'auto';
-                    span.style.cursor = 'pointer';
-                    
-                    // Добавляем hover эффект
-                    span.addEventListener('mouseenter', () => {
-                        span.style.opacity = '0.8';
-                    });
-                    
-                    span.addEventListener('mouseleave', () => {
-                        span.style.opacity = '1';
-                    });
-                    
-                    // Обработчик клика для переключения видимости
-                    span.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const waveId = span.dataset.waveId;
-                        if (waveId) {
-                            // Найти соответствующий чекбокс видимости
-                            const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-                            if (checkbox) {
-                                // Эмулируем клик - существующая логика всё обработает
-                                checkbox.click();
-                            }
-                        }
-                    });
-                });
-            }, 10);
-        });
-    }
+	renderMarkers(groupedExtremums) {
+		// Очищаем старые маркеры и выноски
+		this.clearAll();
+		
+		if (!this.timeBarContainer || !groupedExtremums.length) return;
+		
+		const dayMs = 24 * 60 * 60 * 1000;
+		
+		groupedExtremums.forEach(group => {
+			const dayStart = new Date(group.time);
+			dayStart.setHours(0, 0, 0, 0);
+			const timeFromMidnight = group.time.getTime() - dayStart.getTime();
+			const positionPercent = (timeFromMidnight / dayMs) * 100;
+			const clampedPercent = Math.max(0, Math.min(100, positionPercent));
+			
+			// Определяем доминирующий цвет (первый в группе)
+			const dominantColor = group.colors[0];
+			
+			// Рисочка (маркер) - одна на группу
+			const marker = document.createElement('div');
+			marker.className = 'extremum-marker';
+			marker.style.position = 'absolute';
+			marker.style.left = `${clampedPercent}%`;
+			marker.style.backgroundColor = dominantColor;
+			
+			if (group.position === 'top') {
+				marker.classList.add('extremum-marker-top');
+			} else {
+				marker.classList.add('extremum-marker-bottom');
+			}
+			
+			// Выноска - все стили в CSS
+			const label = document.createElement('div');
+			label.className = 'extremum-label';
+			label.dataset.waveId = group.waves[0].id;
+			label.dataset.position = group.position;
+			label.dataset.time = group.time.toISOString();
+			
+			// Только позиционирование и цвет фона (цвет зависит от волны)
+			label.style.left = `${clampedPercent}%`;
+			label.style.backgroundColor = dominantColor;
+			
+			if (group.position === 'top') {
+				label.classList.add('extremum-label-top');
+			} else {
+				label.classList.add('extremum-label-bottom');
+			}
+			
+			// СОЗДАЕМ КЛИКАБЕЛЬНЫЕ ИМЕНА КОЛОСКОВ
+			const waveNameMap = new Map();
+			group.waves.forEach(wave => {
+				waveNameMap.set(wave.name, wave.id);
+			});
+			
+			const uniqueNames = Array.from(waveNameMap.keys());
+			const waveIds = Array.from(waveNameMap.values());
+			
+			// Создаем HTML с кликабельными span элементами
+			const labelHTML = uniqueNames.map((name, index) => {
+				const waveId = waveIds[index];
+				return `<span class="extremum-wave-name" data-wave-id="${waveId}">${name}</span>`;
+			}).join(', ');
+			
+			// Создаем внутреннюю структуру выноски
+			const labelTextElement = document.createElement('div');
+			labelTextElement.className = 'extremum-label-text';
+			labelTextElement.innerHTML = labelHTML;
+			
+			// Стрелочка
+			const arrow = document.createElement('div');
+			arrow.className = 'extremum-label-arrow';
+			
+			label.appendChild(labelTextElement);
+			label.appendChild(arrow);
+			
+			// Добавляем в контейнер временной шкалы
+			this.timeBarContainer.appendChild(marker);
+			this.timeBarContainer.appendChild(label);
+			
+			this.markers.push(marker);
+			this.labels.push(label);
+			
+			// Добавляем обработчики кликов на имена колосков
+			setTimeout(() => {
+				labelTextElement.querySelectorAll('.extremum-wave-name').forEach(span => {
+					span.addEventListener('mouseenter', () => {
+						span.style.opacity = '0.8';
+					});
+					
+					span.addEventListener('mouseleave', () => {
+						span.style.opacity = '1';
+					});
+					
+					span.addEventListener('click', (e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						
+						const waveId = span.dataset.waveId;
+						if (waveId) {
+							const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+							if (checkbox) {
+								checkbox.click();
+							}
+						}
+					});
+				});
+			}, 10);
+		});
+	}
 
     clearAll() {
         // Очищаем маркеры
