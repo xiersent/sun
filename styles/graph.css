@@ -155,24 +155,19 @@ body.graph-gray-mode .wave-axis-x-point {
     white-space: nowrap;
     padding: 2px 6px;
     border-radius: 3px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    background-color: rgb(192, 192, 192);
+    color: #000;
     z-index: 9;
     pointer-events: none;
     transform: translateX(-50%);
 }
 
-/* Стили для кликабельных имен колосков в выносках */
-.extremum-wave-name {
-    cursor: pointer;
-    text-decoration-style: dotted;
-    text-underline-offset: 2px;
+.extremum-label:hover {
+	border-color: #000;
+    z-index: 20;
     pointer-events: auto;
 }
 
-.extremum-wave-name:hover {
-    opacity: 0.8;
-}
 
 /* Для темного режима */
 .graph-container.dark-mode + .time-bar-container .extremum-label {
@@ -264,24 +259,6 @@ body.graph-gray-mode .wave-axis-x-point {
     margin-top: 5px;
 }
 
-/* Текст внутри выноски */
-.extremum-label-text {
-    text-align: center;
-    font-weight: 400;
-    position: relative;
-    z-index: 2;
-}
-
-/* Кликабельные имена колосков */
-.extremum-wave-name {
-    cursor: pointer;
-    pointer-events: auto;
-}
-
-.extremum-wave-name:hover {
-    opacity: 0.7;
-    text-decoration: underline;
-}
 
 /* Стрелочка выноски */
 .extremum-label-arrow {
@@ -308,12 +285,6 @@ body.graph-gray-mode .wave-axis-x-point {
     border-color: transparent transparent inherit transparent;
 }
 
-/* УВЕЛИЧЕНИЕ ПРИ ХОВЕРЕ */
-.extremum-label:hover {
-    transform: translateX(-50%) scale(1.2);
-    z-index: 20;
-    pointer-events: auto !important;
-}
 
 /* Маркеры (риски) */
 .extremum-marker {
@@ -372,24 +343,6 @@ body.graph-gray-mode .wave-axis-x-point {
     margin-top: 5px;
 }
 
-/* Текст внутри выноски */
-.extremum-label-text {
-    text-align: center;
-    font-weight: 400;
-    position: relative;
-    z-index: 2;
-}
-
-/* Кликабельные имена колосков */
-.extremum-wave-name {
-    cursor: pointer;
-    pointer-events: auto;
-}
-
-.extremum-wave-name:hover {
-    opacity: 0.7;
-    text-decoration: underline;
-}
 
 /* Стрелочка выноски */
 .extremum-label-arrow {
@@ -416,12 +369,6 @@ body.graph-gray-mode .wave-axis-x-point {
     border-color: transparent transparent inherit transparent;
 }
 
-/* УВЕЛИЧЕНИЕ ПРИ ХОВЕРЕ */
-.extremum-label:hover {
-    transform: translateX(-50%) scale(1.2);
-    z-index: 20;
-    pointer-events: auto !important;
-}
 
 /* Маркеры (риски) */
 .extremum-marker {
@@ -476,11 +423,6 @@ body.graph-gray-mode .wave-axis-x-point {
     margin-top: 5px;
 }
 
-/* Текст */
-.extremum-label-text {
-    text-align: center;
-    font-weight: 400;
-}
 
 /* Кликабельные имена */
 .extremum-wave-name {
@@ -511,14 +453,87 @@ body.graph-gray-mode .wave-axis-x-point {
     border-color: transparent transparent inherit transparent;
 }
 
-/* УВЕЛИЧЕНИЕ ПРИ ХОВЕРЕ (мгновенно, без плавности) */
-.extremum-label:hover {
-    transform: translateX(-50%) scale(1.2);
-    z-index: 20;
-    pointer-events: auto;
-}
 
 /* Маркеры */
+.extremum-marker {
+    position: absolute;
+    width: 1px;
+    height: 15px;
+    opacity: 0.7;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.extremum-marker-top {
+    top: 0;
+}
+
+.extremum-marker-bottom {
+    bottom: 0;
+}
+
+/* Выноски экстремумов - черный фон */
+.extremum-label {
+    position: absolute;
+    background-color: rgb(192, 192, 192);
+    color: #ffffff;
+    font-size: 10px;
+    font-family: var(--font-family);
+    white-space: nowrap;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-align: center;
+    font-weight: 500;
+    z-index: 9;
+    pointer-events: none;
+    transform: translateX(-50%);
+	border: 1px solid rgb(192, 192, 192);
+}
+
+/* Позиционирование */
+.extremum-label-top {
+    bottom: 100%;
+    margin-bottom: 5px;
+}
+
+.extremum-label-bottom {
+    top: 100%;
+    margin-top: 5px;
+}
+
+/* Текст */
+.extremum-label-text {
+    text-align: center;
+    font-weight: 400;
+    color: #000;
+}
+
+
+
+/* Стрелочка - черная */
+.extremum-label-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    z-index: 1;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.extremum-label-top .extremum-label-arrow {
+    bottom: -6px;
+    border-width: 6px 4px 0 4px;
+    border-color: rgb(192, 192, 192) transparent transparent transparent;
+}
+
+.extremum-label-bottom .extremum-label-arrow {
+    top: -6px;
+    border-width: 0 4px 6px 4px;
+    border-color: transparent transparent rgb(192, 192, 192) transparent;
+}
+
+/* Маркеры (риски) */
 .extremum-marker {
     position: absolute;
     width: 1px;
