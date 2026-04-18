@@ -1,5 +1,4 @@
 // modules/appCore.js
-// modules/appCore.js
 class AppCore {
     constructor() {
         this.elements = {};
@@ -17,7 +16,7 @@ class AppCore {
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
             'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
             'summaryStateSelect', 'summaryResults',
-            'readParableBtn', 'parableModal', 'parableContent', 'closeParableBtn',
+            'colorPickerBtn', 'hiddenColorPicker',  // НОВЫЕ элементы
             'dynamicVersionContainer'
         ];
         
@@ -34,7 +33,6 @@ class AppCore {
         try {
             this.setupEventListeners();
             this.updateCSSVariables();
-            this.loadParableText();
 
             if (window.appState && window.appState.graphHidden) {
                 document.body.classList.add('graph-hidden');
@@ -180,12 +178,6 @@ class AppCore {
         
         // Заполняем информацию
         this.fillWarningInfo(warningBox);
-        
-        // Показываем кнопки притчи
-        const readParableBtn = document.getElementById('readParableBtn');
-        if (readParableBtn) {
-            readParableBtn.style.display = 'inline-block';
-        }
     }
     
     showMobileWarning() {
@@ -216,9 +208,9 @@ class AppCore {
             btn.style.display = 'none';
         });
         
-        const parableButton = document.getElementById('readParableBtn');
-        if (parableButton) {
-            parableButton.style.display = 'none';
+        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        if (colorPickerBtn) {
+            colorPickerBtn.style.display = 'none';
         }
     }
     
@@ -251,127 +243,151 @@ class AppCore {
         }
     }
     
-    // Заполнение информации в предупреждении - БЕЗ ПОДСВЕТКИ
-    async fillWarningInfo(warningBox) {
-        // Информация о браузере
-        const browserInfoEl = warningBox.querySelector('#browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = this.getBrowserInfo();
-        }
+	// Заполнение информации в предупреждении - ИСПРАВЛЕННАЯ ВЕРСИЯ
+	async fillWarningInfo(warningBox) {
+		// Информация о браузере
+		const browserInfoEl = warningBox.querySelector('#browserInfo');
+		if (browserInfoEl) {
+			browserInfoEl.textContent = this.getBrowserInfo();
+		}
 
-        // Информация об ОС
-        const osInfoEl = document.createElement('div');
-        osInfoEl.className = 'warning-info-item';
-        osInfoEl.id = 'osInfoItem';
-        
-        const osTitleSpan = document.createElement('strong');
-        osTitleSpan.textContent = 'Операционная система:';
-        
-        const osSeparatorSpan = document.createElement('span');
-        osSeparatorSpan.style.flex = '1';
-        osSeparatorSpan.style.borderBottom = '1px dotted';
-        osSeparatorSpan.style.alignSelf = 'stretch';
-        
-        const osValueSpan = document.createElement('span');
-        osValueSpan.id = 'osInfo';
-        osValueSpan.textContent = this.getOSInfo();
-        
-        osInfoEl.appendChild(osTitleSpan);
-        osInfoEl.appendChild(osSeparatorSpan);
-        osInfoEl.appendChild(osValueSpan);
+		// Информация об ОС
+		const osInfoEl = document.createElement('div');
+		osInfoEl.className = 'warning-info-item';
+		osInfoEl.id = 'osInfoItem';
+		
+		const osTitleSpan = document.createElement('strong');
+		osTitleSpan.textContent = 'Операционная система:';
+		
+		const osSeparatorSpan = document.createElement('span');
+		osSeparatorSpan.style.flex = '1';
+		osSeparatorSpan.style.borderBottom = '1px dotted';
+		osSeparatorSpan.style.alignSelf = 'stretch';
+		
+		const osValueSpan = document.createElement('span');
+		osValueSpan.id = 'osInfo';
+		osValueSpan.textContent = this.getOSInfo();
+		
+		osInfoEl.appendChild(osTitleSpan);
+		osInfoEl.appendChild(osSeparatorSpan);
+		osInfoEl.appendChild(osValueSpan);
 
-        // Информация об архитектуре
-        const archInfo = this.getArchitecture();
-        if (archInfo) {
-            const archEl = document.createElement('div');
-            archEl.className = 'warning-info-item';
-            
-            const archTitleSpan = document.createElement('strong');
-            archTitleSpan.textContent = 'Архитектура:';
-            
-            const archSeparatorSpan = document.createElement('span');
-            archSeparatorSpan.style.flex = '1';
-            archSeparatorSpan.style.borderBottom = '1px dotted';
-            archSeparatorSpan.style.alignSelf = 'stretch';
-            
-            const archValueSpan = document.createElement('span');
-            archValueSpan.textContent = archInfo;
-            
-            archEl.appendChild(archTitleSpan);
-            archEl.appendChild(archSeparatorSpan);
-            archEl.appendChild(archValueSpan);
-        }
+		// Информация об архитектуре
+		const archInfo = this.getArchitecture();
+		let archEl = null;
+		if (archInfo) {
+			archEl = document.createElement('div');
+			archEl.className = 'warning-info-item';
+			
+			const archTitleSpan = document.createElement('strong');
+			archTitleSpan.textContent = 'Архитектура:';
+			
+			const archSeparatorSpan = document.createElement('span');
+			archSeparatorSpan.style.flex = '1';
+			archSeparatorSpan.style.borderBottom = '1px dotted';
+			archSeparatorSpan.style.alignSelf = 'stretch';
+			
+			const archValueSpan = document.createElement('span');
+			archValueSpan.textContent = archInfo;
+			
+			archEl.appendChild(archTitleSpan);
+			archEl.appendChild(archSeparatorSpan);
+			archEl.appendChild(archValueSpan);
+		}
 
-        // Текущее время
-        const todayInfoEl = warningBox.querySelector('#todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
-        }
+		// Текущее время
+		const todayInfoEl = warningBox.querySelector('#todayInfo');
+		if (todayInfoEl) {
+			const today = new Date();
+			todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
+		}
 
-        // Загружаем версии из JSON
-        const versions = await this.loadVersions();
-        
-        // Получаем контейнер для динамических элементов
-        const container = warningBox.querySelector('#dynamicVersionContainer');
-        if (!container) return;
+		// Загружаем версии из JSON
+		const versions = await this.loadVersions();
+		
+		// Получаем контейнер для динамических элементов
+		const container = warningBox.querySelector('#dynamicVersionContainer');
+		if (!container) return;
 
-        // Находим элемент "Сейчас" (последний дочерний элемент)
-        const items = container.querySelectorAll('.warning-info-item');
-        const todayItem = items[items.length - 1];
-        const browserItem = items[0];
-        
-        // Удаляем все старые динамические элементы (все кроме браузера и "сейчас")
-        for (let i = items.length - 1; i >= 0; i--) {
-            if (items[i] !== todayItem && items[i] !== browserItem) {
-                items[i].remove();
-            }
-        }
+		// Находим элемент "Сейчас" (последний дочерний элемент)
+		const items = container.querySelectorAll('.warning-info-item');
+		const todayItem = items[items.length - 1];
+		const browserItem = items[0];
+		
+		// Удаляем все старые динамические элементы (все кроме браузера и "сейчас")
+		for (let i = items.length - 1; i >= 0; i--) {
+			if (items[i] !== todayItem && items[i] !== browserItem) {
+				items[i].remove();
+			}
+		}
 
-        // Вставляем информацию об ОС после браузера
-        if (browserItem) {
-            container.insertBefore(osInfoEl, browserItem.nextSibling);
-        }
+		// Вставляем информацию об ОС после браузера (если есть где вставлять)
+		if (browserItem && browserItem.parentNode === container) {
+			// Проверяем, не вставлен ли уже элемент ОС
+			if (!document.getElementById('osInfoItem')) {
+				container.insertBefore(osInfoEl, browserItem.nextSibling);
+			}
+		} else if (!browserItem) {
+			// Если нет браузера, просто добавляем в начало
+			if (!document.getElementById('osInfoItem')) {
+				container.insertBefore(osInfoEl, container.firstChild);
+			}
+		}
 
-        // Создаем элементы для каждой записи из JSON
-        versions.forEach(entry => {
-            const item = document.createElement('div');
-            item.className = 'warning-info-item';
-            item.dataset.versionId = entry.id;
-            
-            const titleSpan = document.createElement('strong');
-            titleSpan.textContent = entry.title;
-            
-            const separatorSpan = document.createElement('span');
-            separatorSpan.style.flex = '1';
-            separatorSpan.style.borderBottom = '1px dotted';
-            separatorSpan.style.alignSelf = 'stretch';
-            
-            const valueSpan = document.createElement('span');
-            valueSpan.className = 'version-value';
-            
-            // Автоматически определяем многострочность по наличию \n
-            if (entry.content && entry.content.includes('\n')) {
-                valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
-                valueSpan.style.whiteSpace = 'pre-wrap';
-                valueSpan.style.textAlign = 'left';
-            } else {
-                valueSpan.textContent = entry.content || 'неизвестно';
-            }
-            
-            item.appendChild(titleSpan);
-            item.appendChild(separatorSpan);
-            item.appendChild(valueSpan);
-            
-            // Вставляем перед элементом "Сейчас"
-            container.insertBefore(item, todayItem);
-        });
+		// Вставляем информацию об архитектуре после ОС
+		if (archEl && !document.getElementById('archInfoItem')) {
+			archEl.id = 'archInfoItem';
+			const osItem = document.getElementById('osInfoItem');
+			if (osItem && osItem.parentNode === container) {
+				container.insertBefore(archEl, osItem.nextSibling);
+			} else if (browserItem && browserItem.parentNode === container) {
+				container.insertBefore(archEl, browserItem.nextSibling);
+			}
+		}
 
-        // Сохраняем версии для будущих проверок
-        this.saveCurrentVersions(versions);
-    }
+		// Создаем элементы для каждой записи из JSON
+		versions.forEach(entry => {
+			const item = document.createElement('div');
+			item.className = 'warning-info-item';
+			item.dataset.versionId = entry.id;
+			
+			const titleSpan = document.createElement('strong');
+			titleSpan.textContent = entry.title;
+			
+			const separatorSpan = document.createElement('span');
+			separatorSpan.style.flex = '1';
+			separatorSpan.style.borderBottom = '1px dotted';
+			separatorSpan.style.alignSelf = 'stretch';
+			
+			const valueSpan = document.createElement('span');
+			valueSpan.className = 'version-value';
+			
+			// Автоматически определяем многострочность по наличию \n
+			if (entry.content && entry.content.includes('\n')) {
+				valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
+				valueSpan.style.whiteSpace = 'pre-wrap';
+				valueSpan.style.textAlign = 'left';
+			} else {
+				valueSpan.textContent = entry.content || 'неизвестно';
+			}
+			
+			item.appendChild(titleSpan);
+			item.appendChild(separatorSpan);
+			item.appendChild(valueSpan);
+			
+			// Вставляем перед элементом "Сейчас"
+			if (todayItem && todayItem.parentNode === container) {
+				container.insertBefore(item, todayItem);
+			} else {
+				container.appendChild(item);
+			}
+		});
 
-    // Мобильная версия - БЕЗ ПОДСВЕТКИ
+		// Сохраняем версии для будущих проверок
+		this.saveCurrentVersions(versions);
+	}
+
+    // Мобильная версия
     updateMobileWarningContent(warningBox) {
         const warningTitle = warningBox.querySelector('.warning-title');
         if (warningTitle) {
@@ -843,17 +859,40 @@ class AppCore {
     }
     
     setupEventListeners() {
-        const readParableBtn = document.getElementById('readParableBtn');
-        if (readParableBtn) {
-            readParableBtn.addEventListener('click', () => {
-                this.showParableModal();
+        // НОВЫЙ обработчик для кнопки "Программа"
+        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        if (colorPickerBtn) {
+            colorPickerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+                if (hiddenColorPicker) {
+                    hiddenColorPicker.click();
+                }
             });
         }
         
-        const closeParableBtn = document.getElementById('closeParableBtn');
-        if (closeParableBtn) {
-            closeParableBtn.addEventListener('click', () => {
-                this.hideParableModal();
+        // НОВЫЙ обработчик для скрытого выбора цвета
+        const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+        if (hiddenColorPicker) {
+            hiddenColorPicker.addEventListener('change', (e) => {
+                const selectedColor = e.target.value;
+                
+                // Окрашиваем все угловые квадратики в выбранный цвет
+                document.querySelectorAll('.corner-square').forEach(square => {
+                    square.style.backgroundColor = selectedColor;
+                });
+                
+                // Закрываем плашку предупреждения
+                const warningOverlay = document.getElementById('warningOverlay');
+                const warningBox = document.querySelector('.warning-box');
+                if (warningOverlay && warningBox) {
+                    warningOverlay.classList.add('hidden');
+                    warningBox.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                    document.body.classList.remove('ui-hidden');
+                }
+                
+                console.log(`Квадратики окрашены в цвет: ${selectedColor}`);
             });
         }
         
@@ -957,82 +996,8 @@ class AppCore {
                         window.dates.navigateDay(1); 
                     }
                     break;
-                case 'Escape':
-                    if (this.elements.parableModal && !this.elements.parableModal.classList.contains('hidden')) {
-                        this.hideParableModal();
-                    }
-                    break;
             }
         });
-    }
-    
-    loadParableText() {
-        const parableContent = this.elements.parableContent;
-        if (!parableContent) return;
-        
-        // Вставляем кнопку выбора цвета на слово "любимому"
-        parableContent.innerHTML = `
-            <p>Говорят, когда-то одну девушку обвинили в ведовстве. В качестве наказания её отвезли на островок на озере – клочок каменистой почвы, где не было ни еды, ни укрытий. Её приговорили к мучительной медленной смерти от холода и голода.</p>
-            <p>Вот только не знали в городе, что один юноша, увидев её глаза, прекрасные и сверкающие, подобно луне в летнюю ночь, поклялся ей в вечной любви. Когда ей вынесли приговор – по его мнению, несправедливый – он дал обет уберечь её от гибели. Выжидая удобного дня для совместного побега, он каждую ночь втайне переплывал озеро на лодке с едой и тёплой одеждой. А она каждую ночь вставала у воды и зажигала свечу, чтобы указать ему путь.</p>
-            <p>Как-то раз, в поразительно ясную ночь, когда на небе не было ни облачка, юноша, как всегда, отчалил от берега. Он внимательно вглядывался в темноту, выискивая огонёк, который приведёт его к любимой. Однако в ту ночь луна светила до того ярко, что затмила бы собой любую свечу. Отражение луны в воде сбило юношу с пути. Он грёб, грёб и грёб к свету, всё надеясь, что вот-вот доплывёт. Иллюзорный отсвет луны до того заворожил его, что он не замечал ни ноющих рук, ни сбившегося дыхания... Когда лодка перевернулась, он был уже так измотан греблей, так ослабли его руки, что до берега он не добрался. Он упокоился в озере.</p>
-            <p>Оставшись одна, девушка всё же не теряла надежды. Каждую ночь она выходила к воде и зажигала свечу. Говорят, и по сей день те, кто ищут истинную любовь, видят на озере свечу Светоносной девы, что надеется указать дорогу <span class="color-picker-trigger" style="cursor: pointer; position: relative; display: inline-block; border-bottom: none; font-weight: bold;">любимому<input type="color" class="hidden-color-picker" value="#ff0000" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer;"></span>.</p>
-        `;
-        
-        // Добавляем обработчик для выбора цвета
-        setTimeout(() => {
-            const colorPicker = document.querySelector('.color-picker-trigger input[type="color"]');
-            if (colorPicker) {
-                colorPicker.addEventListener('change', (e) => {
-                    e.stopPropagation();
-                    const selectedColor = e.target.value;
-                    
-                    // Окрашиваем все угловые квадратики в выбранный цвет
-                    document.querySelectorAll('.corner-square').forEach(square => {
-                        square.style.backgroundColor = selectedColor;
-                    });
-                    
-                    // Закрываем модальное окно притчи
-                    this.hideParableModal();
-                    
-                    // Закрываем плашку предупреждения
-                    const warningOverlay = document.getElementById('warningOverlay');
-                    const warningBox = document.querySelector('.warning-box');
-                    if (warningOverlay && warningBox) {
-                        warningOverlay.classList.add('hidden');
-                        warningBox.classList.add('hidden');
-                        document.body.style.overflow = 'auto';
-                        document.body.classList.remove('ui-hidden');
-                    }
-                    
-                    console.log(`Квадратики окрашены в цвет: ${selectedColor}`);
-                });
-                
-                // Предотвращаем всплытие клика на родительский span
-                colorPicker.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
-        }, 100);
-    }
-    
-    showParableModal() {
-        const parableModal = this.elements.parableModal;
-        if (parableModal) {
-            parableModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-    
-    hideParableModal() {
-        const parableModal = this.elements.parableModal;
-        if (parableModal) {
-            parableModal.classList.add('hidden');
-            if (this.elements.warningOverlay.classList.contains('hidden')) {
-                document.body.style.overflow = 'auto';
-            } else {
-                document.body.style.overflow = 'hidden';
-            }
-        }
     }
 }
 

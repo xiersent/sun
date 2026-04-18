@@ -50,12 +50,12 @@ class AppState {
             ],
             notes: [],
             groups: [
-                { id: 'default-group', name: 'Стандартная', enabled: false, waves: [], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: true },
-                { id: 'classic-group', name: 'Классическая', enabled: false, waves: [24, 28, 33, 38], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false, hidden: true },
-                { id: 'experimental-group', name: 'Экспериментальная', enabled: false, waves: [25, 365, 3652422, 3652425, 36525636, 36525964, 36524167], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false },
-                { id: '120-waves-group', name: '120 колосков', enabled: false, waves: this.waves120Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dashed', expanded: false },
-                { id: '31-waves-group', name: '31 прутик', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false },
-                { id: '1000-roads-group', name: '1000 дорог', enabled: false, waves: this.waves1000Ids, styleEnabled: true, styleBold: false, styleColor: '#C0C0C0', styleColorEnabled: true, styleType: 'long-dash', expanded: false }
+                { id: 'default-group', name: 'Стандартная', enabled: false, waves: [], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: true, hidden: false },
+                { id: 'classic-group', name: 'Классическая', enabled: false, waves: [24, 28, 33, 38], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false, hidden: false },
+                { id: 'experimental-group', name: 'Экспериментальная', enabled: false, waves: [25, 365, 3652422, 3652425, 36525636, 36525964, 36524167], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false, hidden: false },
+                { id: '120-waves-group', name: '120 колосков', enabled: false, waves: this.waves120Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dashed', expanded: false, hidden: false },
+                { id: '31-waves-group', name: '31 прутик', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false, hidden: false },
+                { id: '1000-roads-group', name: '1000 дорог', enabled: false, waves: this.waves1000Ids, styleEnabled: true, styleBold: false, styleColor: '#C0C0C0', styleColorEnabled: true, styleType: 'long-dash', expanded: false, hidden: false }
             ],
             uiSettings: {
                 currentDate: Date.now(),
@@ -219,8 +219,6 @@ class AppState {
                 if (window.MigrationsManager) {
                     const migrations = new window.MigrationsManager(this);
                     migrations.runAllMigrations();
-                } else {
-                    this.runLegacyMigrations();
                 }
                 // ===== КОНЕЦ МИГРАЦИЙ =====
                 
@@ -421,128 +419,7 @@ class AppState {
         }
     }
     
-    runLegacyMigrations() {
-        // Миграция 1
-        if (this.data.groups) {
-            const old31Group = this.data.groups.find(g => g.id === '31-waves-group' && g.name === '31 колосок');
-            if (old31Group) old31Group.name = '31 прутик';
-        }
-        
-        // Миграция 2
-        const classicGroup = this.data.groups.find(g => g.id === 'classic-group');
-        if (classicGroup) {
-            classicGroup.enabled = false;
-            classicGroup.hidden = true;
-            classicGroup.expanded = false;
-        }
-        
-        // Миграция 3: добавление 120 колосков
-        const has120Waves = this.data.waves.some(w => String(w.id).startsWith('wave-120-'));
-        if (!has120Waves && this.waves120) {
-            this.data.waves = this.data.waves.concat(this.waves120);
-            if (!this.data.groups.some(g => g.id === '120-waves-group')) {
-                this.data.groups.push({
-                    id: '120-waves-group', name: '120 колосков', enabled: true,
-                    waves: this.waves120Ids, styleEnabled: true, styleType: 'dashed',
-                    styleBold: false, styleColor: '#666666', styleColorEnabled: false, expanded: false
-                });
-            }
-        }
-        
-        // Миграция 4: добавление 31 прутика
-        const has31Waves = this.data.waves.some(w => String(w.id).startsWith('wave-31-'));
-        if (!has31Waves && this.waves31) {
-            this.data.waves = this.data.waves.concat(this.waves31);
-            if (!this.data.groups.some(g => g.id === '31-waves-group')) {
-                this.data.groups.push({
-                    id: '31-waves-group', name: '31 прутик', enabled: true,
-                    waves: this.waves31Ids, styleEnabled: true, styleType: 'dotted',
-                    styleBold: false, styleColor: '#666666', styleColorEnabled: false, expanded: false
-                });
-            }
-        }
-        
-        // Миграция 5: добавление 1000 дорог
-        const has1000Waves = this.data.waves.some(w => String(w.id).startsWith('wave-1000-'));
-        if (!has1000Waves && this.waves1000) {
-            this.data.waves = this.data.waves.concat(this.waves1000);
-            if (!this.data.groups.some(g => g.id === '1000-roads-group')) {
-                this.data.groups.push({
-                    id: '1000-roads-group', name: '1000 дорог', enabled: false,
-                    waves: this.waves1000Ids, styleEnabled: true, styleType: 'long-dash',
-                    styleBold: false, styleColor: '#C0C0C0', styleColorEnabled: true, expanded: false
-                });
-            }
-        }
-        
-        // Миграция 6: переименование
-        const rootsGroup = this.data.groups.find(g => g.id === '1000-roots-group');
-        if (rootsGroup && rootsGroup.name === '1000 корешков') {
-            rootsGroup.id = '1000-roads-group';
-            rootsGroup.name = '1000 дорог';
-        }
-        
-        this.data.waves.forEach(wave => {
-            if (wave.name && wave.name.startsWith('Корешок')) {
-                const match = wave.name.match(/\d+/);
-                if (match) wave.name = `Дорога ${match[0]}`;
-            }
-        });
-        
-        // Миграция 7: добавление астрономических годов
-        const experimentalGroup = this.data.groups.find(g => g.id === 'experimental-group');
-        if (experimentalGroup) {
-            const years = [
-                { id: 3652422, name: 'Тропический год', period: 365.2422, color: '#FF6B35', type: 'dashed' },
-                { id: 3652425, name: 'Григорианский год', period: 365.2425, color: '#4CAF50', type: 'dashed' },
-                { id: 36525636, name: 'Сидерический год', period: 365.25636, color: '#9C27B0', type: 'dashed' },
-                { id: 36525964, name: 'Аномалистический год', period: 365.25964, color: '#FF9800', type: 'dashed' },
-                { id: 36524167, name: 'Драконический год', period: 365.24167, color: '#E91E63', type: 'dashed' }
-            ];
-            
-            years.forEach(year => {
-                if (!this.data.waves.some(w => w.id === year.id)) {
-                    this.data.waves.push({ ...year, category: 'experimental', visible: false, bold: false, cornerColor: false });
-                    if (!experimentalGroup.waves.includes(year.id)) {
-                        experimentalGroup.waves.push(year.id);
-                    }
-                }
-            });
-        }
-        
-        // Миграция 8: удаление 25 черность
-        const expGroup = this.data.groups.find(g => g.id === 'experimental-group');
-        if (expGroup && expGroup.waves) {
-            const idx = expGroup.waves.indexOf(25);
-            if (idx !== -1) expGroup.waves.splice(idx, 1);
-        }
-        
-        // Миграция 9: обновление категории
-        this.data.waves.forEach(wave => {
-            if (String(wave.id).startsWith('wave-1000-') && wave.category === '1000-roots') {
-                wave.category = '1000-roads';
-            }
-        });
 
-		// Миграция 11: переименование дорог в трёхзначный формат
-		this.data.waves.forEach(wave => {
-			const waveIdStr = String(wave.id);
-			if (waveIdStr.startsWith('wave-1000-')) {
-				const match = waveIdStr.match(/wave-1000-(\d+)/);
-				if (match) {
-					const num = parseInt(match[1]);
-					const threeDigitNum = num.toString().padStart(3, '0');
-					const expectedName = `Дорога ${threeDigitNum}`;
-					if (wave.name !== expectedName) {
-						wave.name = expectedName;
-					}
-				}
-			}
-		});
-        
-        this.save();
-    }
-    
     reset() {
         this.data = JSON.parse(JSON.stringify(this.initialData));
         

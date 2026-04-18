@@ -1,4 +1,4 @@
-/* optimized3/styles/components.css */
+/* optimized3/styles/components.css - ОБНОВЛЕННЫЙ (без модального окна притчи) */
 
 [data-action="acceptWarning"]{display: none;}
 
@@ -14,7 +14,7 @@ button:hover{filter: brightness(0.9);}
 .mobile-warning-box .parable-btn-wrapper{display: none;}
 .mobile-warning-box .warning-actions{display: none;}
 
-/* Кнопка притчи */
+/* Кнопка программы */
 .parable-btn{background-color: #4a6fa5; color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
 .parable-btn:hover{filter: brightness(0.9); background-color: #3a5a8a;}
 .small-button{padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
@@ -30,20 +30,6 @@ button:hover{filter: brightness(0.9);}
 
 /* Контейнер для кнопок предупреждения */
 .warning-actions{display: flex; gap: var(--spacing-sm); justify-content: center; margin-top: var(--spacing-md);}
-
-/* Модальное окно притчи */
-.parable-modal{position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 700px; background: #fff; z-index: var(--z-overlay) + 1; display: flex; flex-direction: column; overflow: hidden;}
-.parable-modal-header{display: flex; justify-content: space-between; align-items: center; padding: 30px; padding-bottom: 0;}
-.parable-modal-title{margin: 0; font-size: var(--font-size-lg); font-weight: 600;}
-.parable-modal-close{background: #fff; color: var(--cp); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0 10px;}
-.parable-modal-close:hover{background: #f0f0f0;}
-.parable-modal-content{overflow-y: auto; flex: 1; font-size: 19px; line-height: 1.6; font-family: serif; padding: 30px;}
-.parable-modal-content p{margin: 0;}
-.parable-modal-content p+p{margin-top: 10px;}
-.parable-modal-content p:last-child{margin-bottom: 0;}
-
-/* Темная тема для модального окна при темном фоне */
-body.gray-mode .parable-modal{background: #f5f5f5;}
 
 /* Стили для мобильного предупреждения */
 .mobile-warning-overlay{background: #f0f0f0; padding: 20px; overflow-y: auto;}
@@ -113,39 +99,3 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 
 /* Заблокированные чекбоксы видимости */
 .wave-visibility-check:disabled{opacity: 0.5; cursor: not-allowed;}
-
-/* styles/components.css - добавить в конец файла */
-
-/* Скрытая кнопка выбора цвета на слове "любимому" */
-.color-picker-trigger {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-    border-bottom: none !important;
-    text-decoration: none !important;
-    color: inherit !important;
-    background: transparent;
-}
-
-.color-picker-trigger:hover {
-    opacity: 0.8;
-}
-
-.hidden-color-picker {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    cursor: pointer;
-    z-index: 10;
-}
-
-/* Убедимся, что слово выглядит как обычный текст */
-.parable-modal-content .color-picker-trigger,
-.parable-modal-content .color-picker-trigger:hover {
-    border-bottom: none !important;
-    text-decoration: none !important;
-    background: transparent !important;
-}

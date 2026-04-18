@@ -390,18 +390,42 @@ class UIManager {
         window.appState.save();
     }
     
-    resetAll() {
-        if (!confirm('Сбросить ВСЕ настройки интерфейса к значениям по умолчанию?')) {
-            return;
-        }
-        
-        if (!confirm('ВНИМАНИЕ: Это действие нельзя отменить. Все данные будут удалены. Продолжить?')) {
-            return;
-        }
-        
-        localStorage.clear();
-        window.location.reload();
-    }
+
+	resetAll() {
+		if (!confirm('Сбросить ВСЕ настройки интерфейса к значениям по умолчанию?')) {
+			return;
+		}
+		
+		if (!confirm('ВНИМАНИЕ: Это действие нельзя отменить. Все данные будут удалены. Продолжить?')) {
+			return;
+		}
+		
+		// 1. Сначала очищаем localStorage
+		localStorage.clear();
+		
+		// 2. Очищаем sessionStorage
+		try {
+			sessionStorage.clear();
+		} catch(e) {}
+		
+		// 3. Очищаем данные в памяти правильно
+		if (window.appState && window.appState.data) {
+			window.appState.data.dates = [];
+			window.appState.data.waves = [];
+			window.appState.data.groups = [];
+			window.appState.data.notes = [];
+			window.appState.activeDateId = null;
+			window.appState.currentDate = new Date();
+			window.appState.baseDate = new Date();
+			window.appState.currentDay = 0;
+			
+			// Сохраняем пустое состояние
+			window.appState.save();
+		}
+		
+		// 4. Перезагружаем страницу
+		window.location.reload();
+	}
     
     updateDateTimeInputs() {
         const dateInput = document.getElementById('mainDateInputDate');
