@@ -445,26 +445,34 @@ class UIManager {
         document.getElementById('customWaveColor').value = '#666666';
     }
     
-    handleTabClick(tabButton) {
-        const tabId = tabButton.dataset.tab;
-        
-        if (this.activeTab === tabId) {
-            this.deactivateTab(tabButton);
-            this.activeTab = null;
-        } else {
-            if (this.activeTab) {
-                const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
-                if (prevTabButton) {
-                    this.deactivateTab(prevTabButton);
-                }
-            }
-            
-            this.activateTab(tabButton);
-            this.activeTab = tabId;
-        }
-        
-        localStorage.setItem('activeTab', this.activeTab);
-    }
+
+	handleTabClick(tabButton) {
+		const tabId = tabButton.dataset.tab;
+		
+		if (this.activeTab === tabId) {
+			this.deactivateTab(tabButton);
+			this.activeTab = null;
+		} else {
+			if (this.activeTab) {
+				const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
+				if (prevTabButton) {
+					this.deactivateTab(prevTabButton);
+				}
+			}
+			
+			this.activateTab(tabButton);
+			this.activeTab = tabId;
+		}
+		
+		localStorage.setItem('activeTab', this.activeTab);
+		
+		// ОБНОВЛЕНО: используем stateIntersectionManager
+		if (tabId === 'intersections' && window.stateIntersectionManager) {
+			setTimeout(() => {
+				window.stateIntersectionManager.updateIntersections();
+			}, 100);
+		}
+	}
     
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;

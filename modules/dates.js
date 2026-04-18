@@ -321,7 +321,8 @@ class DatesManager {
         return true;
     }
     
-	// modules/dates.js - navigateDay()
+
+	// В dates.js - метод navigateDay (уже есть, просто проверьте)
 	navigateDay(delta) {
 		const newDate = new Date(window.appState.currentDate);
 		newDate.setDate(newDate.getDate() + delta);
@@ -345,8 +346,58 @@ class DatesManager {
 			}, 50);
 		}
 		
+		// ДОБАВИТЬ ЭТОТ БЛОК
+		if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+			setTimeout(() => {
+				window.stateIntersectionManager.updateIntersections();
+			}, 50);
+		}
+		
 		this.updateDateTimeInputs();
 	}
+
+	// В dates.js - метод setDate
+	setDate(newDate, useExactTime = true) {
+		window.appState.isProgrammaticDateChange = true;
+		
+		if (newDate instanceof Date) {
+			window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
+		} else if (typeof newDate === 'number') {
+			window.appState.currentDate = new Date(newDate);
+		} else {
+			window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
+		}
+		
+		this.recalculateCurrentDay(useExactTime);
+		
+		window.waves.updatePosition();
+		window.grid.createGrid();
+		window.grid.updateCenterDate();
+		window.grid.updateGridNotesHighlight();
+		window.appState.save();
+		
+		this.updateTodayButton();
+		
+		if (window.summaryManager && window.summaryManager.updateSummary) {
+			setTimeout(() => {
+				window.summaryManager.updateSummary();
+			}, 50);
+		}
+		
+		// ДОБАВИТЬ ЭТОТ БЛОК
+		if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+			setTimeout(() => {
+				window.stateIntersectionManager.updateIntersections();
+			}, 50);
+		}
+		
+		this.updateDateTimeInputs();
+		
+		setTimeout(() => {
+			window.appState.isProgrammaticDateChange = false;
+		}, 100);
+	}
+
     
 	recalculateCurrentDay(useExactTime = false) {
 		const currentDate = window.appState.currentDate;
@@ -487,40 +538,7 @@ class DatesManager {
     debugDateInfo() {
     }
     
-	// modules/dates.js - setDate()
-	setDate(newDate, useExactTime = true) {
-		window.appState.isProgrammaticDateChange = true;
-		
-		if (newDate instanceof Date) {
-			window.appState.currentDate = window.timeUtils.toLocalDate(newDate);
-		} else if (typeof newDate === 'number') {
-			window.appState.currentDate = new Date(newDate);
-		} else {
-			window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
-		}
-		
-		this.recalculateCurrentDay(useExactTime);
-		
-		window.waves.updatePosition();
-		window.grid.createGrid();
-		window.grid.updateCenterDate();
-		window.grid.updateGridNotesHighlight();
-		window.appState.save();
-		
-		this.updateTodayButton();
-		
-		if (window.summaryManager && window.summaryManager.updateSummary) {
-			setTimeout(() => {
-				window.summaryManager.updateSummary();
-			}, 50);
-		}
-		
-		this.updateDateTimeInputs();
-		
-		setTimeout(() => {
-			window.appState.isProgrammaticDateChange = false;
-		}, 100);
-	}
+
     
     getCurrentDate() {
         return window.timeUtils.now();

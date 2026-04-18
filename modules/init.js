@@ -1,4 +1,4 @@
-// modules/init.js
+// modules/init.js - ОБНОВЛЕННЫЙ
 document.addEventListener('DOMContentLoaded', async () => {
     const graphElement = document.getElementById('graphElement');
     if (!graphElement) {
@@ -15,20 +15,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.timeUtils = window.timeUtils || new TimeUtils();
         window.dom = window.dom || new DOM();
         
-        const managers = [
-            { name: 'dates', class: DatesManager },
-            { name: 'appCore', class: AppCore },
-            { name: 'waves', class: WavesManager },
-            { name: 'grid', class: GridManager },
-            { name: 'uiManager', class: UIManager },
-            { name: 'dataManager', class: DataManager },
-            { name: 'unifiedListManager', class: UnifiedListManager },
-            { name: 'importExport', class: ImportExportManager },
-            { name: 'intersectionManager', class: WaveIntersectionManager },
-            { name: 'summaryManager', class: SummaryManager },
-            { name: 'eventManager', class: EventManager },
-            { name: 'timeBarManager' }
-        ];
+
+		const managers = [
+			{ name: 'dates', class: DatesManager },
+			{ name: 'appCore', class: AppCore },
+			{ name: 'waves', class: WavesManager },
+			{ name: 'grid', class: GridManager },
+			{ name: 'uiManager', class: UIManager },
+			{ name: 'dataManager', class: DataManager },
+			{ name: 'unifiedListManager', class: UnifiedListManager },
+			{ name: 'importExport', class: ImportExportManager },
+			{ name: 'stateIntersectionManager', class: StateIntersectionManager }, // НОВЫЙ
+			{ name: 'summaryManager', class: SummaryManager },
+			{ name: 'eventManager', class: EventManager },
+			{ name: 'timeBarManager' },
+			{ name: 'extremumTimeManager', class: ExtremumTimeManager }
+		];
         
         for (const manager of managers) {
             if (!window[manager.name] && manager.class) {
@@ -137,10 +139,16 @@ async function finalizeInitialization() {
         }, 500);
     }
     
+    // ===== ИНИЦИАЛИЗАЦИЯ НОВОГО МЕНЕДЖЕРА ПЕРЕСЕЧЕНИЙ =====
+    if (window.stateIntersectionManager && window.stateIntersectionManager.refresh) {
+        setTimeout(() => {
+            window.stateIntersectionManager.refresh();
+        }, 600);
+    }
+    
     // ===== СИНХРОНИЗАЦИЯ DATE SELECTIONS =====
     setTimeout(() => {
         if (window.appState && window.appState.activeDateId) {
-            // Инициализируем dateSelections если нет
             if (!window.appState.dateSelections) {
                 window.appState.dateSelections = {
                     typeA: null,
@@ -148,7 +156,6 @@ async function finalizeInitialization() {
                 };
             }
             
-            // Синхронизируем активную дату с typeA
             const activeDateIdStr = String(window.appState.activeDateId);
             const currentTypeAStr = window.appState.dateSelections.typeA ? 
                 String(window.appState.dateSelections.typeA) : null;

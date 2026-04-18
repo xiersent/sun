@@ -176,61 +176,66 @@
 						</div>
 					</div>
                     
-                    <div class="tab-content" id="intersections-tab">
-                        <div class="panel-section" id="analysis-panel">
-                            <div class="summary-header">
-                                <h3>Пересечения колосков за день</h3>
-                            </div>
-                            
-                            <div class="intersection-controls">
-                                <div class="intersection-form">
-                                    <!-- Верхний ряд: чекбокс и дата -->
-                                    <div class="intersection-form-row">
-                                        <label class="intersection-form-label">
-                                            <input type="checkbox" id="onlyActiveWaves" checked>
-                                            Только активные колоски
-                                        </label>
-                                        
-                                        <div class="intersection-date-group">
-                                            <label class="intersection-form-label">Дата анализа:</label>
-                                            <input type="date" class="intersection-form-input" id="intersectionDate">
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Второй ряд: кнопки управления -->
-                                    <div class="intersection-form-row">
-                                        <div class="intersection-form-actions">
-                                            <button id="btnCalculateIntersections" class="ui-btn">
-                                                Рассчитать за день
-                                            </button>
-                                            
-                                            <button id="btnUpdateForCurrentDate" class="ui-btn">
-                                                Для текущей даты
-                                            </button>
-                                            
-                                            <button id="btnClearIntersections" class="ui-btn">
-                                                Очистить
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Статистика -->
-                            <div class="intersection-stats" id="intersectionStats" style="display:none">
-                                <!-- Будет заполняться динамически -->
-                            </div>
-                            
-                            <!-- Результаты -->
-                            <div class="intersection-results-container">
-                                <div class="intersection-results" id="intersectionResults">
-                                    <div class="list-empty">
-                                        Нет рассчитанных пересечений. Нажмите "Рассчитать за день"
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+					<div class="tab-content" id="intersections-tab">
+						<div class="panel-section" id="intersectionPanel">
+							<div class="summary-header">
+								<h3>Колоски, близкие по состоянию к выбранному</h3>
+								<div class="intersection-description">
+									Показывает колоски, у которых значение синусоиды в текущий день отличается не более чем на ±1.0
+								</div>
+							</div>
+							
+							<!-- Блок информации о выбранном колоске -->
+							<div class="intersection-selected-info" id="intersectionSelectedInfo">
+								<div class="selected-wave-info no-selection">
+									<div class="selected-wave-header">
+										<span class="selected-wave-icon">⚠️</span>
+										<span class="selected-wave-name">Колосок не выбран</span>
+									</div>
+									<div class="selected-wave-details">
+										<div class="selected-wave-detail">
+											Используйте чекбокс <strong>"Окрасить края"</strong> у любого колоска в списке волн
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Элементы управления -->
+							<div class="intersection-controls">
+								<div class="intersection-form">
+									<div class="intersection-form-row">
+										<div class="intersection-select-group">
+											<select class="intersection-select" id="intersectionGroupSelect">
+												<option value="all">Все доступные группы с колосками</option>
+											</select>
+										</div>
+										
+										<button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
+											Сбросить выбор колоска
+										</button>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Статистика -->
+							<div class="intersection-stats" id="intersectionStats" style="display:none"></div>
+							
+							<!-- Результаты -->
+							<div class="intersection-results-container">
+								<div class="intersection-results" id="intersectionResults">
+									<div class="list-empty">
+										<div style="text-align: center; padding: 20px;">
+											<div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
+											<div>Выберите колосок для анализа</div>
+											<div style="font-size: 11px; color: #666; margin-top: 8px;">
+												Отметьте чекбокс <strong>"Окрасить края"</strong> у любого колоска в списке волн
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
                     
                     <div class="tab-content" id="notes-tab">
                         <div class="panel-section" id="notes-panel">
@@ -381,27 +386,41 @@
         </div>
     </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js"></script>
 
-    <script src="modules/timeUtils.js"></script>
-    <script src="modules/state.js"></script>
-    <script src="modules/dom.js"></script>
-    <script src="modules/appCore.js"></script>
-    <script src="modules/dataManager.js"></script>
-    <script src="modules/intersectionManager.js"></script>
-    <script src="modules/uiManager.js"></script>
-    <script src="modules/dates.js"></script>
-    <script src="modules/waves.js"></script>
-    <script src="modules/grid.js"></script>
-    <script src="modules/import.js"></script>
-    <script src="modules/unifiedListManager.js"></script>
-    <script src="modules/eventManager.js"></script>
-    <script src="modules/summaryManager.js"></script>
-    <script src="modules/timeBarManager.js"></script>
+
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js"></script>
+
+	<script src="modules/timeUtils.js"></script>
+	<script src="modules/state.js"></script>
+	<script src="modules/dom.js"></script>
+	<script src="modules/appCore.js"></script>
+	<script src="modules/autoSaveHandler.js"></script>
+	<script src="modules/dataManager.js"></script>
+	<script src="modules/dateDebug.js"></script>
+	<script src="modules/dates.js"></script>
+	<script src="modules/debug.js"></script>
+	<script src="modules/debugState.js"></script>
+	<script src="modules/eventManager.js"></script>
 	<script src="modules/extremumTimeManager.js"></script>
-    <script src="modules/init.js"></script>
+	<script src="modules/grid.js"></script>
+	<script src="modules/import.js"></script>
+	<script src="modules/preciseIntersectionManager.js"></script>
+	<script src="modules/state.js"></script>
+	<script src="modules/stateIntersectionManager.js"></script>
+	<script src="modules/stateManager.js"></script>
+	<script src="modules/summaryManager.js"></script>
+	<script src="modules/templates.js"></script>
+	<script src="modules/timeBarManager.js"></script>
+	<script src="modules/timeUtils.js"></script>
+	<script src="modules/uiManager.js"></script>
+	<script src="modules/unifiedListManager.js"></script>
+	<script src="modules/wavePeriodIntersectionManager.js"></script>
+	<script src="modules/waves.js"></script>
+	<script src="modules/init.js"></script>
+
+
 
 </body>
 </html>
