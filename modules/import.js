@@ -1,5 +1,4 @@
 // modules/import.js
-// modules/import.js - Упрощенная версия (только импорт/экспорт JSON)
 class ImportExportManager {
     constructor() {
         this.SQL = null;
@@ -182,6 +181,35 @@ class ImportExportManager {
                                 }
                             }
                             
+                            // ===== МИГРАЦИЯ ДЛЯ 1000 ДОРОГ =====
+                            const has1000Waves = convertedData.waves.some(w => {
+                                const waveIdStr = String(w.id);
+                                return waveIdStr.startsWith('wave-1000-');
+                            });
+                            
+                            if (!has1000Waves) {
+                                const waves1000 = window.appState.waves1000 || [];
+                                const waves1000Ids = window.appState.waves1000Ids || [];
+                                
+                                convertedData.waves = convertedData.waves.concat(waves1000);
+                                
+                                if (!convertedData.groups.some(g => g.id === '1000-roads-group')) {
+                                    convertedData.groups.push({
+                                        id: '1000-roads-group',
+                                        name: '1000 дорог',
+                                        enabled: false,
+                                        waves: waves1000Ids,
+                                        styleEnabled: true,
+                                        styleBold: false,
+                                        styleColor: '#C0C0C0',
+                                        styleColorEnabled: true,
+                                        styleType: 'long-dash',
+                                        expanded: false
+                                    });
+                                }
+                            }
+                            // ===== КОНЕЦ МИГРАЦИИ =====
+                            
                             convertedData.waves.forEach(wave => {
                                 const waveIdStr = String(wave.id);
                                 if (waveIdStr.startsWith('wave-31-')) {
@@ -189,6 +217,14 @@ class ImportExportManager {
                                     if (match) {
                                         const num = parseInt(match[1]);
                                         wave.name = `Прутик ${num}`;
+                                        wave.description = `Период ${num} дней`;
+                                    }
+                                }
+                                if (waveIdStr.startsWith('wave-1000-')) {
+                                    const match = waveIdStr.match(/wave-1000-(\d+)/);
+                                    if (match) {
+                                        const num = parseInt(match[1]);
+                                        wave.name = `Дорога ${num}`;
                                         wave.description = `Период ${num} дней`;
                                     }
                                 }
@@ -275,8 +311,9 @@ class ImportExportManager {
                                 const waveIdStr = String(wave.id);
                                 const is120Wave = waveIdStr.startsWith('wave-120-');
                                 const is31Wave = waveIdStr.startsWith('wave-31-');
+                                const is1000Wave = waveIdStr.startsWith('wave-1000-');
                                 
-                                if (is120Wave || is31Wave) {
+                                if (is120Wave || is31Wave || is1000Wave) {
                                     if (wave.isDefaultColor === undefined) {
                                         wave.isDefaultColor = true;
                                     }
@@ -328,7 +365,7 @@ class ImportExportManager {
                             window.appState.data.waves = convertedData.waves || [];
                             window.appState.data.groups = convertedData.groups || [];
                             
-                            const standardGroups = ['classic-group', 'experimental-group', '120-waves-group', '31-waves-group', 'default-group'];
+                            const standardGroups = ['classic-group', 'experimental-group', '120-waves-group', '31-waves-group', '1000-roads-group', 'default-group'];
                             standardGroups.forEach(groupId => {
                                 if (!window.appState.data.groups.find(g => g.id === groupId)) {
                                     const defaultGroup = window.appState.initialData.groups.find(g => g.id === groupId);
@@ -345,6 +382,14 @@ class ImportExportManager {
                                     if (match) {
                                         const num = parseInt(match[1]);
                                         wave.name = `Прутик ${num}`;
+                                        wave.description = `Период ${num} дней`;
+                                    }
+                                }
+                                if (waveIdStr.startsWith('wave-1000-')) {
+                                    const match = waveIdStr.match(/wave-1000-(\d+)/);
+                                    if (match) {
+                                        const num = parseInt(match[1]);
+                                        wave.name = `Дорога ${num}`;
                                         wave.description = `Период ${num} дней`;
                                     }
                                 }
