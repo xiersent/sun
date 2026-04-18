@@ -1,10 +1,12 @@
-// modules/appCore.js
+// modules/appCore.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
 class AppCore {
     constructor() {
         this.elements = {};
         this.cacheElements();
         this.isInitializing = false;
         this.versionStorageKey = 'zaraza_last_versions';
+        this.defaultCornerColor = '#ff0000'; // Красный по умолчанию
+        this.hasSelectedColor = false; // Флаг, был ли выбран цвет
     }
     
     cacheElements() {
@@ -16,7 +18,7 @@ class AppCore {
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
             'warningBox', 'currentDay', 'summaryPanel', 'summaryGroupSelect',
             'summaryStateSelect', 'summaryResults',
-            'colorPickerBtn', 'hiddenColorPicker',  // НОВЫЕ элементы
+            'colorPickerBtn', 'hiddenColorPicker',
             'dynamicVersionContainer'
         ];
         
@@ -38,7 +40,6 @@ class AppCore {
                 document.body.classList.add('graph-hidden');
             }
             
-            // Определяем устройство
             const isMobile = this.isMobileDevice();
             
             if (isMobile) {
@@ -47,7 +48,6 @@ class AppCore {
                 return;
             }
             
-            // Десктопная версия
             if (window.appState.showStars) {
                 document.body.classList.add('stars-mode');
                 document.body.classList.remove('names-mode');
@@ -62,7 +62,7 @@ class AppCore {
             
             await this.initializeAppComponents();
             
-            // Показываем десктопную плашку
+            // Показываем предупреждение при загрузке
             this.showDesktopWarning();
             
         } catch (error) {
@@ -109,15 +109,56 @@ class AppCore {
             window.dates.updateTodayButton();
         }
         
-        // Сохраняем текущие версии после успешной загрузки
+        // Восстанавливаем сохраненный цвет квадратиков
+        this.restoreCornerColor();
+        
         setTimeout(async () => {
             try {
                 const versions = await this.loadVersions();
                 this.saveCurrentVersions(versions);
-            } catch (error) {
-                // Игнорируем ошибки сохранения
-            }
+            } catch (error) {}
         }, 1000);
+    }
+    
+    // Сохраняет цвет квадратиков в localStorage
+    saveCornerColor(color) {
+        localStorage.setItem('corner_square_color', color);
+        this.hasSelectedColor = true;
+    }
+    
+    // Восстанавливает цвет квадратиков из localStorage
+    restoreCornerColor() {
+        const savedColor = localStorage.getItem('corner_square_color');
+        if (savedColor && savedColor !== this.defaultCornerColor) {
+            document.querySelectorAll('.corner-square').forEach(square => {
+                square.style.backgroundColor = savedColor;
+            });
+            this.hasSelectedColor = true;
+        } else {
+            this.hasSelectedColor = false;
+        }
+    }
+    
+    // Сбрасывает цвет квадратиков в красный
+    resetCornerColor() {
+        document.querySelectorAll('.corner-square').forEach(square => {
+            square.style.backgroundColor = this.defaultCornerColor;
+        });
+        localStorage.removeItem('corner_square_color');
+        this.hasSelectedColor = false;
+    }
+    
+    // Закрывает предупреждение
+    closeWarning() {
+        const warningOverlay = document.getElementById('warningOverlay');
+        const warningBox = document.querySelector('.warning-box');
+        if (warningOverlay && warningBox) {
+            warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
+            warningOverlay.classList.add('hidden');
+            warningBox.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.body.classList.remove('ui-hidden');
+        }
     }
     
     updateGraphBackground() {
@@ -148,7 +189,6 @@ class AppCore {
         }
     }
 
-    // Загрузка всех версий из одного JSON файла
     async loadVersions() {
         try {
             const timestamp = new Date().getTime();
@@ -169,7 +209,8 @@ class AppCore {
         
         if (!warningOverlay || !warningBox) return;
         
-        // Показываем overlay
+        // Всегда показываем предупреждение
+        warningOverlay.classList.remove('hidden');
         warningOverlay.classList.add('desktop-warning');
         document.body.style.overflow = 'hidden';
         
@@ -186,23 +227,18 @@ class AppCore {
         
         if (!warningOverlay || !warningBox) return;
         
-        // Скрываем основной интерфейс
         document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
             el.style.display = 'none';
         });
         
-        // Показываем overlay с мобильным стилем
         warningOverlay.classList.add('mobile-warning-overlay');
         document.body.style.overflow = 'hidden';
         
-        // Показываем плашку
         warningBox.classList.remove('hidden');
         warningBox.classList.add('mobile-warning-box');
         
-        // Обновляем содержимое для мобильной версии
         this.updateMobileWarningContent(warningBox);
         
-        // Скрываем ненужные кнопки
         const acceptButtons = warningBox.querySelectorAll('[data-action="acceptWarning"]');
         acceptButtons.forEach(btn => {
             btn.style.display = 'none';
@@ -214,7 +250,6 @@ class AppCore {
         }
     }
     
-    // Загружаем сохраненные версии
     getLastVersions() {
         try {
             const saved = localStorage.getItem(this.versionStorageKey);
@@ -224,7 +259,6 @@ class AppCore {
         }
     }
     
-    // Сохранение версий
     saveCurrentVersions(versions) {
         try {
             const versionsObj = {
@@ -238,169 +272,147 @@ class AppCore {
             });
             
             localStorage.setItem(this.versionStorageKey, JSON.stringify(versionsObj));
-        } catch (error) {
-            // Игнорируем ошибки сохранения
-        }
+        } catch (error) {}
     }
     
-	// Заполнение информации в предупреждении - ИСПРАВЛЕННАЯ ВЕРСИЯ
-	async fillWarningInfo(warningBox) {
-		// Информация о браузере
-		const browserInfoEl = warningBox.querySelector('#browserInfo');
-		if (browserInfoEl) {
-			browserInfoEl.textContent = this.getBrowserInfo();
-		}
+    async fillWarningInfo(warningBox) {
+        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        if (browserInfoEl) {
+            browserInfoEl.textContent = this.getBrowserInfo();
+        }
 
-		// Информация об ОС
-		const osInfoEl = document.createElement('div');
-		osInfoEl.className = 'warning-info-item';
-		osInfoEl.id = 'osInfoItem';
-		
-		const osTitleSpan = document.createElement('strong');
-		osTitleSpan.textContent = 'Операционная система:';
-		
-		const osSeparatorSpan = document.createElement('span');
-		osSeparatorSpan.style.flex = '1';
-		osSeparatorSpan.style.borderBottom = '1px dotted';
-		osSeparatorSpan.style.alignSelf = 'stretch';
-		
-		const osValueSpan = document.createElement('span');
-		osValueSpan.id = 'osInfo';
-		osValueSpan.textContent = this.getOSInfo();
-		
-		osInfoEl.appendChild(osTitleSpan);
-		osInfoEl.appendChild(osSeparatorSpan);
-		osInfoEl.appendChild(osValueSpan);
+        const osInfoEl = document.createElement('div');
+        osInfoEl.className = 'warning-info-item';
+        osInfoEl.id = 'osInfoItem';
+        
+        const osTitleSpan = document.createElement('strong');
+        osTitleSpan.textContent = 'Операционная система:';
+        
+        const osSeparatorSpan = document.createElement('span');
+        osSeparatorSpan.style.flex = '1';
+        osSeparatorSpan.style.borderBottom = '1px dotted';
+        osSeparatorSpan.style.alignSelf = 'stretch';
+        
+        const osValueSpan = document.createElement('span');
+        osValueSpan.id = 'osInfo';
+        osValueSpan.textContent = this.getOSInfo();
+        
+        osInfoEl.appendChild(osTitleSpan);
+        osInfoEl.appendChild(osSeparatorSpan);
+        osInfoEl.appendChild(osValueSpan);
 
-		// Информация об архитектуре
-		const archInfo = this.getArchitecture();
-		let archEl = null;
-		if (archInfo) {
-			archEl = document.createElement('div');
-			archEl.className = 'warning-info-item';
-			
-			const archTitleSpan = document.createElement('strong');
-			archTitleSpan.textContent = 'Архитектура:';
-			
-			const archSeparatorSpan = document.createElement('span');
-			archSeparatorSpan.style.flex = '1';
-			archSeparatorSpan.style.borderBottom = '1px dotted';
-			archSeparatorSpan.style.alignSelf = 'stretch';
-			
-			const archValueSpan = document.createElement('span');
-			archValueSpan.textContent = archInfo;
-			
-			archEl.appendChild(archTitleSpan);
-			archEl.appendChild(archSeparatorSpan);
-			archEl.appendChild(archValueSpan);
-		}
+        const archInfo = this.getArchitecture();
+        let archEl = null;
+        if (archInfo) {
+            archEl = document.createElement('div');
+            archEl.className = 'warning-info-item';
+            archEl.id = 'archInfoItem';
+            
+            const archTitleSpan = document.createElement('strong');
+            archTitleSpan.textContent = 'Архитектура:';
+            
+            const archSeparatorSpan = document.createElement('span');
+            archSeparatorSpan.style.flex = '1';
+            archSeparatorSpan.style.borderBottom = '1px dotted';
+            archSeparatorSpan.style.alignSelf = 'stretch';
+            
+            const archValueSpan = document.createElement('span');
+            archValueSpan.textContent = archInfo;
+            
+            archEl.appendChild(archTitleSpan);
+            archEl.appendChild(archSeparatorSpan);
+            archEl.appendChild(archValueSpan);
+        }
 
-		// Текущее время
-		const todayInfoEl = warningBox.querySelector('#todayInfo');
-		if (todayInfoEl) {
-			const today = new Date();
-			todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
-		}
+        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        if (todayInfoEl) {
+            const today = new Date();
+            todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
+        }
 
-		// Загружаем версии из JSON
-		const versions = await this.loadVersions();
-		
-		// Получаем контейнер для динамических элементов
-		const container = warningBox.querySelector('#dynamicVersionContainer');
-		if (!container) return;
+        const versions = await this.loadVersions();
+        
+        const container = warningBox.querySelector('#dynamicVersionContainer');
+        if (!container) return;
 
-		// Находим элемент "Сейчас" (последний дочерний элемент)
-		const items = container.querySelectorAll('.warning-info-item');
-		const todayItem = items[items.length - 1];
-		const browserItem = items[0];
-		
-		// Удаляем все старые динамические элементы (все кроме браузера и "сейчас")
-		for (let i = items.length - 1; i >= 0; i--) {
-			if (items[i] !== todayItem && items[i] !== browserItem) {
-				items[i].remove();
-			}
-		}
+        const items = container.querySelectorAll('.warning-info-item');
+        const todayItem = items[items.length - 1];
+        const browserItem = items[0];
+        
+        for (let i = items.length - 1; i >= 0; i--) {
+            if (items[i] !== todayItem && items[i] !== browserItem) {
+                items[i].remove();
+            }
+        }
 
-		// Вставляем информацию об ОС после браузера (если есть где вставлять)
-		if (browserItem && browserItem.parentNode === container) {
-			// Проверяем, не вставлен ли уже элемент ОС
-			if (!document.getElementById('osInfoItem')) {
-				container.insertBefore(osInfoEl, browserItem.nextSibling);
-			}
-		} else if (!browserItem) {
-			// Если нет браузера, просто добавляем в начало
-			if (!document.getElementById('osInfoItem')) {
-				container.insertBefore(osInfoEl, container.firstChild);
-			}
-		}
+        if (browserItem && browserItem.parentNode === container) {
+            if (!document.getElementById('osInfoItem')) {
+                container.insertBefore(osInfoEl, browserItem.nextSibling);
+            }
+        } else if (!browserItem) {
+            if (!document.getElementById('osInfoItem')) {
+                container.insertBefore(osInfoEl, container.firstChild);
+            }
+        }
 
-		// Вставляем информацию об архитектуре после ОС
-		if (archEl && !document.getElementById('archInfoItem')) {
-			archEl.id = 'archInfoItem';
-			const osItem = document.getElementById('osInfoItem');
-			if (osItem && osItem.parentNode === container) {
-				container.insertBefore(archEl, osItem.nextSibling);
-			} else if (browserItem && browserItem.parentNode === container) {
-				container.insertBefore(archEl, browserItem.nextSibling);
-			}
-		}
+        if (archEl && !document.getElementById('archInfoItem')) {
+            const osItem = document.getElementById('osInfoItem');
+            if (osItem && osItem.parentNode === container) {
+                container.insertBefore(archEl, osItem.nextSibling);
+            } else if (browserItem && browserItem.parentNode === container) {
+                container.insertBefore(archEl, browserItem.nextSibling);
+            }
+        }
 
-		// Создаем элементы для каждой записи из JSON
-		versions.forEach(entry => {
-			const item = document.createElement('div');
-			item.className = 'warning-info-item';
-			item.dataset.versionId = entry.id;
-			
-			const titleSpan = document.createElement('strong');
-			titleSpan.textContent = entry.title;
-			
-			const separatorSpan = document.createElement('span');
-			separatorSpan.style.flex = '1';
-			separatorSpan.style.borderBottom = '1px dotted';
-			separatorSpan.style.alignSelf = 'stretch';
-			
-			const valueSpan = document.createElement('span');
-			valueSpan.className = 'version-value';
-			
-			// Автоматически определяем многострочность по наличию \n
-			if (entry.content && entry.content.includes('\n')) {
-				valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
-				valueSpan.style.whiteSpace = 'pre-wrap';
-				valueSpan.style.textAlign = 'left';
-			} else {
-				valueSpan.textContent = entry.content || 'неизвестно';
-			}
-			
-			item.appendChild(titleSpan);
-			item.appendChild(separatorSpan);
-			item.appendChild(valueSpan);
-			
-			// Вставляем перед элементом "Сейчас"
-			if (todayItem && todayItem.parentNode === container) {
-				container.insertBefore(item, todayItem);
-			} else {
-				container.appendChild(item);
-			}
-		});
+        versions.forEach(entry => {
+            const item = document.createElement('div');
+            item.className = 'warning-info-item';
+            item.dataset.versionId = entry.id;
+            
+            const titleSpan = document.createElement('strong');
+            titleSpan.textContent = entry.title;
+            
+            const separatorSpan = document.createElement('span');
+            separatorSpan.style.flex = '1';
+            separatorSpan.style.borderBottom = '1px dotted';
+            separatorSpan.style.alignSelf = 'stretch';
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'version-value';
+            
+            if (entry.content && entry.content.includes('\n')) {
+                valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
+                valueSpan.style.whiteSpace = 'pre-wrap';
+                valueSpan.style.textAlign = 'left';
+            } else {
+                valueSpan.textContent = entry.content || 'неизвестно';
+            }
+            
+            item.appendChild(titleSpan);
+            item.appendChild(separatorSpan);
+            item.appendChild(valueSpan);
+            
+            if (todayItem && todayItem.parentNode === container) {
+                container.insertBefore(item, todayItem);
+            } else {
+                container.appendChild(item);
+            }
+        });
 
-		// Сохраняем версии для будущих проверок
-		this.saveCurrentVersions(versions);
-	}
+        this.saveCurrentVersions(versions);
+    }
 
-    // Мобильная версия
     updateMobileWarningContent(warningBox) {
         const warningTitle = warningBox.querySelector('.warning-title');
         if (warningTitle) {
             warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
         }
         
-        // Заполняем информацию
         const browserInfoEl = warningBox.querySelector('#browserInfo');
         if (browserInfoEl) {
             browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
         }
         
-        // Информация об ОС для мобильных
         const osInfoEl = document.createElement('div');
         osInfoEl.className = 'warning-info-item';
         
@@ -419,26 +431,22 @@ class AppCore {
         osInfoEl.appendChild(osSeparatorSpan);
         osInfoEl.appendChild(osValueSpan);
         
-        // Текущее время
         const todayInfoEl = warningBox.querySelector('#todayInfo');
         if (todayInfoEl) {
             const today = new Date();
             todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
         }
         
-        // Показываем информацию о системе
         const warningInfo = warningBox.querySelector('.warning-info');
         if (warningInfo) {
             warningInfo.style.display = 'flex';
             
-            // Вставляем ОС после браузера
             const browserItem = warningBox.querySelector('#browserInfo')?.closest('.warning-info-item');
             if (browserItem) {
                 browserItem.parentNode.insertBefore(osInfoEl, browserItem.nextSibling);
             }
         }
         
-        // Загружаем версии для мобильной версии
         this.loadVersions().then(versions => {
             const container = warningBox.querySelector('#dynamicVersionContainer');
             if (!container) return;
@@ -447,14 +455,12 @@ class AppCore {
             const todayItem = items[items.length - 1];
             const browserItem = items[0];
             
-            // Удаляем старые динамические элементы
             for (let i = items.length - 1; i >= 0; i--) {
                 if (items[i] !== todayItem && items[i] !== browserItem) {
                     items[i].remove();
                 }
             }
             
-            // Добавляем новые элементы
             versions.forEach(entry => {
                 const item = document.createElement('div');
                 item.className = 'warning-info-item';
@@ -484,7 +490,6 @@ class AppCore {
             });
         });
         
-        // Добавляем кнопку проверки
         this.addMobileRetryButton(warningBox);
     }
     
@@ -533,43 +538,36 @@ class AppCore {
     getBrowserInfo() {
         const ua = navigator.userAgent;
         
-        // Google Chrome
         if (ua.includes("Chrome") && !ua.includes("Edg")) {
             const match = ua.match(/Chrome\/([\d.]+)/);
             return match ? `Google Chrome ${match[1]}` : "Google Chrome";
         }
         
-        // Microsoft Edge
         if (ua.includes("Edg")) {
             const match = ua.match(/Edg\/([\d.]+)/);
             return match ? `Microsoft Edge ${match[1]}` : "Microsoft Edge";
         }
         
-        // Firefox
         if (ua.includes("Firefox")) {
             const match = ua.match(/Firefox\/([\d.]+)/);
             return match ? `Mozilla Firefox ${match[1]}` : "Mozilla Firefox";
         }
         
-        // Safari
         if (ua.includes("Safari") && !ua.includes("Chrome")) {
             const match = ua.match(/Version\/([\d.]+)/);
             return match ? `Apple Safari ${match[1]}` : "Apple Safari";
         }
         
-        // Opera
         if (ua.includes("Opera") || ua.includes("OPR")) {
             const match = ua.match(/(?:Opera|OPR)\/([\d.]+)/);
             return match ? `Opera ${match[1]}` : "Opera";
         }
         
-        // Internet Explorer
         if (ua.includes("MSIE") || ua.includes("Trident")) {
             const match = ua.match(/(?:MSIE |Trident\/.*rv:)([\d.]+)/);
             return match ? `Internet Explorer ${match[1]}` : "Internet Explorer";
         }
         
-        // Brave
         if (ua.includes("Brave")) {
             const match = ua.match(/Chrome\/([\d.]+)/);
             return match ? `Brave ${match[1]}` : "Brave";
@@ -578,12 +576,10 @@ class AppCore {
         return "Неизвестный браузер";
     }
 
-    // Детальное определение ОС
     getOSInfo() {
         const ua = navigator.userAgent.toLowerCase();
         const platform = navigator.platform?.toLowerCase() || '';
         
-        // === WINDOWS ===
         if (ua.includes('windows nt')) {
             const versionMap = {
                 '11.0': 'Windows 11',
@@ -612,7 +608,6 @@ class AppCore {
             return 'Windows';
         }
         
-        // === macOS ===
         if (ua.includes('mac os x') || ua.includes('macintosh')) {
             const match = ua.match(/mac os x ([\d_]+)/);
             if (match) {
@@ -626,22 +621,18 @@ class AppCore {
             return 'macOS';
         }
         
-        // === LINUX ===
         if (ua.includes('linux')) {
             return this.getLinuxDistro(ua, platform);
         }
         
-        // === iOS ===
         if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
             return this.getIOsVersion(ua);
         }
         
-        // === Android ===
         if (ua.includes('android')) {
             return this.getAndroidVersion(ua);
         }
         
-        // === Chrome OS ===
         if (ua.includes('cros') || ua.includes('chrome os')) {
             const match = ua.match(/chrome\/([\d.]+)/);
             if (match) {
@@ -653,7 +644,6 @@ class AppCore {
         return 'Неизвестная ОС';
     }
 
-    // Определение редакции Windows
     getWindowsEdition(ua) {
         if (ua.includes('wow64') || ua.includes('win64')) {
             return '(64-bit)';
@@ -667,7 +657,6 @@ class AppCore {
         return '';
     }
 
-    // Детальная версия macOS
     getMacOSVersion(version) {
         const [major, minor] = version.split('.').map(Number);
         
@@ -699,13 +688,11 @@ class AppCore {
         return `macOS ${version} (${arch})`;
     }
 
-    // Проверка Apple Silicon
     isAppleSilicon() {
         const ua = navigator.userAgent.toLowerCase();
         return ua.includes('macintosh; arm');
     }
 
-    // Детектор Linux дистрибутивов
     getLinuxDistro(ua, platform) {
         const distros = [
             { pattern: 'ubuntu', name: 'Ubuntu' },
@@ -734,7 +721,6 @@ class AppCore {
             }
         }
         
-        // Определяем архитектуру
         if (platform.includes('x86_64') || platform.includes('x64')) {
             return 'Linux (64-bit)';
         }
@@ -748,7 +734,6 @@ class AppCore {
         return 'Linux (неизвестный дистрибутив)';
     }
 
-    // Детальная версия iOS
     getIOsVersion(ua) {
         const match = ua.match(/os ([\d_]+) like mac os x/);
         const device = this.getIOsDevice(ua);
@@ -769,7 +754,6 @@ class AppCore {
         return `iOS (${device})`;
     }
 
-    // Определение устройства iOS
     getIOsDevice(ua) {
         if (ua.includes('iphone')) return 'iPhone';
         if (ua.includes('ipad')) {
@@ -782,7 +766,6 @@ class AppCore {
         return 'iOS устройство';
     }
 
-    // Детальная версия Android
     getAndroidVersion(ua) {
         const match = ua.match(/android ([\d.]+)/);
         if (match) {
@@ -811,7 +794,6 @@ class AppCore {
         return `Android (${this.getAndroidDevice(ua)})`;
     }
 
-    // Определение устройства Android
     getAndroidDevice(ua) {
         if (ua.includes('samsung') || ua.includes('sm-')) return 'Samsung';
         if (ua.includes('xiaomi') || ua.includes('mi ')) return 'Xiaomi';
@@ -832,7 +814,6 @@ class AppCore {
         return 'Android устройство';
     }
 
-    // Определение архитектуры
     getArchitecture() {
         const ua = navigator.userAgent.toLowerCase();
         if (ua.includes('x64') || ua.includes('x86_64') || ua.includes('win64')) {
@@ -859,22 +840,36 @@ class AppCore {
     }
     
     setupEventListeners() {
-        // НОВЫЙ обработчик для кнопки "Программа"
+        // Обработчик для кнопки "Программа"
         const colorPickerBtn = document.getElementById('colorPickerBtn');
         if (colorPickerBtn) {
-            colorPickerBtn.addEventListener('click', (e) => {
+            const newBtn = colorPickerBtn.cloneNode(true);
+            colorPickerBtn.parentNode.replaceChild(newBtn, colorPickerBtn);
+            
+            newBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const hiddenColorPicker = document.getElementById('hiddenColorPicker');
-                if (hiddenColorPicker) {
-                    hiddenColorPicker.click();
+                e.stopPropagation();
+                
+                // Если цвет уже был выбран (не красный по умолчанию) - просто закрываем предупреждение
+                if (this.hasSelectedColor) {
+                    this.closeWarning();
+                } else {
+                    // Если цвет не выбран - открываем выбор цвета
+                    const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+                    if (hiddenColorPicker) {
+                        hiddenColorPicker.click();
+                    }
                 }
             });
         }
         
-        // НОВЫЙ обработчик для скрытого выбора цвета
+        // Обработчик для скрытого выбора цвета
         const hiddenColorPicker = document.getElementById('hiddenColorPicker');
         if (hiddenColorPicker) {
-            hiddenColorPicker.addEventListener('change', (e) => {
+            const newPicker = hiddenColorPicker.cloneNode(true);
+            hiddenColorPicker.parentNode.replaceChild(newPicker, hiddenColorPicker);
+            
+            newPicker.addEventListener('change', (e) => {
                 const selectedColor = e.target.value;
                 
                 // Окрашиваем все угловые квадратики в выбранный цвет
@@ -882,36 +877,50 @@ class AppCore {
                     square.style.backgroundColor = selectedColor;
                 });
                 
-                // Закрываем плашку предупреждения
-                const warningOverlay = document.getElementById('warningOverlay');
-                const warningBox = document.querySelector('.warning-box');
-                if (warningOverlay && warningBox) {
-                    warningOverlay.classList.add('hidden');
-                    warningBox.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                    document.body.classList.remove('ui-hidden');
-                }
+                // Сохраняем цвет
+                this.saveCornerColor(selectedColor);
+                
+                // Закрываем предупреждение
+                this.closeWarning();
                 
                 console.log(`Квадратики окрашены в цвет: ${selectedColor}`);
             });
         }
         
+        // Обработчик для кнопок "Согласиться и продолжить"
         document.addEventListener('click', (e) => {
             const target = e.target;
             if (target.matches('[data-action="acceptWarning"]')) {
-                const warningOverlay = document.getElementById('warningOverlay');
-                const warningBox = document.querySelector('.warning-box');
-                if (warningOverlay && warningBox) {
-                    warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
-                    warningOverlay.classList.add('hidden');
-                    warningBox.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                    document.body.classList.remove('ui-hidden');
-                }
+                this.closeWarning();
                 e.preventDefault();
                 e.stopPropagation();
             }
         });
+        
+        // Обработчик для кнопки "Передумать" (сбрасывает цвет)
+        const resetWarningBtn = document.querySelector('[data-action="resetWarning"]');
+        if (resetWarningBtn) {
+            const newBtn = resetWarningBtn.cloneNode(true);
+            resetWarningBtn.parentNode.replaceChild(newBtn, resetWarningBtn);
+            
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Сбрасываем цвет квадратиков в красный
+                this.resetCornerColor();
+                
+                // Показываем предупреждение снова
+                const warningOverlay = document.getElementById('warningOverlay');
+                const warningBox = document.querySelector('.warning-box');
+                if (warningOverlay && warningBox) {
+                    warningOverlay.classList.remove('hidden');
+                    warningOverlay.classList.add('desktop-warning');
+                    warningBox.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        }
         
         const btnAddCustomWave = document.getElementById('btnAddCustomWave');
         if (btnAddCustomWave) {
