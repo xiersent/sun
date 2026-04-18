@@ -28,7 +28,6 @@
 					<span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
 					<span id="browserInfo">Загрузка...</span>
 				</div>
-				<!-- Сюда будут динамически добавляться элементы из versions.json -->
 				<div class="warning-info-item">
 					<strong>Сейчас:</strong>
 					<span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
@@ -38,7 +37,7 @@
 
 			<div style="height: 32px; display: flex; justify-content: center; margin-top: 20px; max-width: 100%; overflow: hidden;">
 				<div style="width: 216px;">
-					<iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1H21QKJ99G9.260410&" width="330" height="50" frameborder="0" allowtransparency="true" scrolling="no"></iframe>​
+					<iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1H21QKJ99G9.260410&" width="330" height="50" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
 				</div>
 			</div>
 
@@ -50,19 +49,15 @@
 
         </div>
         
-        <!-- Модальное окно притчи (изначально скрыто) -->
         <div class="parable-modal hidden" id="parableModal">
             <div class="parable-modal-header">
                 <h2 class="parable-modal-title">Притча о Светоносной деве</h2>
                 <button class="ui-btn parable-modal-close" id="closeParableBtn">× Закрыть</button>
             </div>
-            <div class="parable-modal-content" id="parableContent">
-                <!-- Содержимое будет вставлено из JavaScript -->
-            </div>
+            <div class="parable-modal-content" id="parableContent"></div>
         </div>
     </div>
     
-    <!-- Угловые квадраты -->
     <div class="corner-square tl" data-action="toggleUI"></div>
     <div class="corner-square tr" data-action="toggleUI"></div>
     <div class="corner-square bl" data-action="toggleUI"></div>
@@ -95,7 +90,6 @@
                     <button class="ui-btn" data-action="toggleTop">Верхние</button>
                     <button class="ui-btn" data-action="toggleBottom">Нижние</button>
                     <button class="ui-btn" data-action="toggleAllSquares">Все</button>
-                    <!-- ПЕРЕИМЕНОВАНО: Сброс углов -> Сброс цвета краев -->
                     <button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
                 </div>
                 <div class="transform-row">
@@ -118,7 +112,6 @@
 
             <div class="panel-section tabs-section" id="tabs-section">
                 <div class="tab-container">
-                    <!-- Кнопки табов -->
                     <div class="tab-buttons">
                         <button class="tab-button" data-tab="summary">
                             Состояния (рабочая)
@@ -134,10 +127,7 @@
                         </button>
                     </div>
                     
-                    <!-- Контент табов -->
-
-					<!-- В блоке #summary-tab -->
-					<div class="tab-content" id="summary-tab">
+                    <div class="tab-content" id="summary-tab">
 						<div class="panel-section summary-panel" id="summaryPanel">
 							<div class="summary-header">
 								<h3>Сводная информация о колосках</h3>
@@ -148,17 +138,12 @@
 									<div class="summary-select-group">
 										<select class="summary-select" id="summaryGroupSelect">
 											<option value="all">Все доступные группы с колосками</option>
-											<!-- Опции будут добавлены через JavaScript -->
 										</select>
-										<select class="summary-select" id="summaryStateSelect">
-											<!-- Опции будут добавлены динамически -->
-										</select>
-										<!-- Кнопки-дублеры -->
+										<select class="summary-select" id="summaryStateSelect"></select>
 										<div class="summary-duplicate-buttons">
 											<button class="ui-btn" data-action="today">Сегодня</button>
 											<button class="ui-btn" data-action="now">Сейчас</button>
 										</div>
-										<!-- ИСПРАВЛЕНО: Добавляем обработчик onchange для немедленного обновления -->
 										<label class="intersection-form-label" style="margin-left: 10px;">
 											<input type="checkbox" id="includePastWaves" 
 												onchange="if (window.summaryManager) window.summaryManager.updateSummary()">
@@ -169,9 +154,7 @@
 							</div>
 							
 							<div class="summary-results-container">
-								<div class="summary-results" id="summaryResults">
-									<!-- Результаты будут заполнены через JavaScript -->
-								</div>
+								<div class="summary-results" id="summaryResults"></div>
 							</div>
 						</div>
 					</div>
@@ -180,12 +163,8 @@
 						<div class="panel-section" id="intersectionPanel">
 							<div class="summary-header">
 								<h3>Колоски, близкие по состоянию к выбранному</h3>
-								<div class="intersection-description">
-									Показывает колоски, у которых значение синусоиды в текущий день отличается не более чем на ±1.0
-								</div>
 							</div>
 							
-							<!-- Блок информации о выбранном колоске -->
 							<div class="intersection-selected-info" id="intersectionSelectedInfo">
 								<div class="selected-wave-info no-selection">
 									<div class="selected-wave-header">
@@ -200,12 +179,11 @@
 								</div>
 							</div>
 							
-							<!-- Элементы управления -->
-							<div class="intersection-controls">
+							<div class="summary-controls">
 								<div class="intersection-form">
 									<div class="intersection-form-row">
 										<div class="intersection-select-group">
-											<select class="intersection-select" id="intersectionGroupSelect">
+											<select class="summary-select" id="intersectionGroupSelect">
 												<option value="all">Все доступные группы с колосками</option>
 											</select>
 										</div>
@@ -217,12 +195,10 @@
 								</div>
 							</div>
 							
-							<!-- Статистика -->
 							<div class="intersection-stats" id="intersectionStats" style="display:none"></div>
 							
-							<!-- Результаты -->
-							<div class="intersection-results-container">
-								<div class="intersection-results" id="intersectionResults">
+							<div class="summary-results-container">
+								<div class="summary-results" id="intersectionResults">
 									<div class="list-empty">
 										<div style="text-align: center; padding: 20px;">
 											<div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
@@ -278,7 +254,6 @@
                 </div>
             </div>
 
-            <!-- Контейнер временной полосы -->
             <div class="time-bar-container" id="timeBarContainer">
                 <div class="time-bar">
                     <div class="time-scale" id="timeScale"></div>
@@ -289,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- ОБНОВЛЕНО: Добавлена кнопка "Экстремумы" в разметку -->
             <div class="panel-section buttons-panel">
                 <div class="top-controls">
                     <button class="ui-btn" data-action="toggleWaveLabels">Выноски</button>
@@ -309,7 +283,6 @@
                     <button id="btnToday" class="ui-btn" data-action="today">Сегодня</button>
                     <button id="btnNow" class="ui-btn" data-action="now">Сейчас</button>
                     
-                    <!-- ИЗМЕНЕНО: Раздельные поля для даты и времени -->
                     <div class="date-time-input-group" style="display: flex; gap: 4px; flex: 1; min-width: 0;">
                         <input type="date" class="date-input" id="mainDateInputDate" 
                             title="Выберите дату" style="flex: 1;">
@@ -330,12 +303,10 @@
                         <div class="zoom-overlay" id="zoomOverlay"></div>
                     </div>
                 </div>
-                <!-- ГОРИЗОНТАЛЬНЫЕ ВЫНОСКИ (слева и справа) -->
                 <div class="wave-labels-container" id="waveLabelsContainer">
                     <div class="wave-labels-side wave-labels-left"></div>
                     <div class="wave-labels-side wave-labels-right"></div>
                 </div>
-                <!-- ВЕРТИКАЛЬНЫЕ ВЫНОСКИ (сверху и снизу) -->
                 <div class="wave-labels-vertical-container" id="waveLabelsVerticalContainer">
                     <div class="wave-labels-side wave-labels-top"></div>
                     <div class="wave-labels-side wave-labels-bottom"></div>
@@ -355,7 +326,6 @@
                         <div class="list-container" id="dateListForDates"></div>
                     </div>
                     <div class="panel-section" id="waves-panel">
-                        <!-- УПРОЩЕННАЯ ВЕРСИЯ: только форма добавления волн -->
                         <div class="add-custom-wave-form compact">
                             <div class="add-group-form">
                                 <input type="text" class="add-group-input" id="newGroupName" placeholder="Название новой группы" style="flex: 1">
@@ -386,41 +356,35 @@
         </div>
     </div>
     
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js"></script>
 
-
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js"></script>
-
-	<script src="modules/timeUtils.js"></script>
-	<script src="modules/state.js"></script>
-	<script src="modules/dom.js"></script>
-	<script src="modules/appCore.js"></script>
-	<script src="modules/autoSaveHandler.js"></script>
-	<script src="modules/dataManager.js"></script>
-	<script src="modules/dateDebug.js"></script>
-	<script src="modules/dates.js"></script>
-	<script src="modules/debug.js"></script>
-	<script src="modules/debugState.js"></script>
-	<script src="modules/eventManager.js"></script>
-	<script src="modules/extremumTimeManager.js"></script>
-	<script src="modules/grid.js"></script>
-	<script src="modules/import.js"></script>
-	<script src="modules/preciseIntersectionManager.js"></script>
-	<script src="modules/state.js"></script>
-	<script src="modules/stateIntersectionManager.js"></script>
-	<script src="modules/stateManager.js"></script>
-	<script src="modules/summaryManager.js"></script>
-	<script src="modules/templates.js"></script>
-	<script src="modules/timeBarManager.js"></script>
-	<script src="modules/timeUtils.js"></script>
-	<script src="modules/uiManager.js"></script>
-	<script src="modules/unifiedListManager.js"></script>
-	<script src="modules/wavePeriodIntersectionManager.js"></script>
-	<script src="modules/waves.js"></script>
-	<script src="modules/init.js"></script>
-
-
+    <script src="modules/timeUtils.js"></script>
+    <script src="modules/state.js"></script>
+    <script src="modules/dom.js"></script>
+    <script src="modules/appCore.js"></script>
+    <script src="modules/autoSaveHandler.js"></script>
+    <script src="modules/dataManager.js"></script>
+    <script src="modules/dateDebug.js"></script>
+    <script src="modules/dates.js"></script>
+    <script src="modules/debug.js"></script>
+    <script src="modules/debugState.js"></script>
+    <script src="modules/eventManager.js"></script>
+    <script src="modules/extremumTimeManager.js"></script>
+    <script src="modules/grid.js"></script>
+    <script src="modules/import.js"></script>
+    <script src="modules/preciseIntersectionManager.js"></script>
+    <script src="modules/stateIntersectionManager.js"></script>
+    <script src="modules/stateManager.js"></script>
+    <script src="modules/summaryManager.js"></script>
+    <script src="modules/templates.js"></script>
+    <script src="modules/timeBarManager.js"></script>
+    <script src="modules/uiManager.js"></script>
+    <script src="modules/unifiedListManager.js"></script>
+    <script src="modules/wavePeriodIntersectionManager.js"></script>
+    <script src="modules/waves.js"></script>
+    <script src="modules/init.js"></script>
 
 </body>
 </html>

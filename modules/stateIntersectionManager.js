@@ -323,6 +323,8 @@ class StateIntersectionManager {
         return window.appState.data.waves.find(w => String(w.id) === String(waveId));
     }
     
+
+
 	displayResults(intersections, selectedWave, currentDate) {
 		const container = this.elements.intersectionResults;
 		const stats = this.elements.intersectionStats;
@@ -373,29 +375,29 @@ class StateIntersectionManager {
 			stats.style.display = 'none';
 		}
 		
-		// ТОЧНО КАК В ПЕРВОЙ ВКЛАДКЕ - простой список
+		// Используем единый класс summary-item
 		const resultsHTML = intersections.map((inter, index) => {
 			const wave = inter.wave2;
 			const waveIdStr = String(wave.id);
 			const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
 			
 			return `
-				<div class="intersection-result-item">
-					<div class="intersection-result-info">
-						<div class="intersection-result-name">
-							<span class="intersection-result-index">${index + 1}.</span>
-							<span class="wave-name" style="color: ${wave.color || '#666'}">
+				<div class="summary-item">
+					<div class="summary-item-info">
+						<div class="summary-item-name">
+							<span class="summary-item-index">${index + 1}.</span>
+							<span style="color: ${wave.color || '#666'}">
 								${this.escapeHtml(wave.name)}
 							</span>
 							<span class="wave-period-badge">${wave.period} дней</span>
 						</div>
-						<div class="intersection-result-details">
-							<span class="intersection-result-time">🕐 ${this.formatTime(inter.time)}</span>
-							<span class="intersection-result-value">Значение: ${inter.value.toFixed(3)}</span>
+						<div class="summary-item-details">
+							<span class="summary-item-state">🕐 ${this.formatTime(inter.time)}</span>
+							<span class="summary-item-difference">Значение: ${inter.value.toFixed(3)}</span>
 						</div>
 					</div>
-					<div class="intersection-result-color" style="background-color: ${wave.color || '#666'}"></div>
-					<div class="intersection-result-actions">
+					<div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
+					<div class="summary-item-actions">
 						<button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
 							${isVisible ? 'Скрыть с визора' : 'Показать на визоре'}
 						</button>

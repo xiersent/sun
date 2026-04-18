@@ -1,57 +1,408 @@
-/* styles/summary.css - ОБНОВЛЕННЫЙ */
+/* styles/summary.css - ОБНОВЛЕННЫЙ с поддержкой пересечений */
+
 /* Панель сводной информации */
-.summary-panel{width: var(--gw); margin-top: 0; padding: var(--spacing-md); background: #fff; border: 1px solid var(--clg);}
-.summary-header{margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--clg);}
-.summary-header h3{margin: 0; font-size: var(--font-size-lg); font-weight: 600; color: var(--text-color);}
+.summary-panel {
+    width: var(--gw);
+    margin-top: 0;
+    padding: var(--spacing-md);
+    background: #fff;
+    border: 1px solid var(--clg);
+}
+
+.summary-header {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--clg);
+}
+
+.summary-header h3 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-color);
+}
 
 /* Контролы сводки */
-.summary-controls{margin-bottom: var(--spacing-md);}
-.summary-select-row{display: flex; gap: var(--spacing-lg); margin-bottom: var(--spacing-md); align-items: center; flex-wrap: wrap;}
-.summary-select-group{display: flex; align-items: center; gap: var(--spacing-xs); min-width: 200px;}
-.summary-label{font-weight: 400; color: var(--text-color); font-size: var(--font-size-sm); white-space: nowrap;}
-.summary-select{flex: 1; padding: var(--spacing-xs); border: 1px solid var(--clg); font-size: var(--font-size-sm); height: 25px;}
+.summary-controls {
+    margin-bottom: var(--spacing-md);
+}
+
+.summary-select-row {
+    display: flex;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.summary-select-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    min-width: 200px;
+}
+
+.summary-label {
+    font-weight: 400;
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.summary-select {
+    flex: 1;
+    padding: var(--spacing-xs);
+    border: 1px solid var(--clg);
+    font-size: var(--font-size-sm);
+    height: 25px;
+}
 
 /* Кнопки-дублеры */
-.summary-duplicate-buttons{display: flex; gap: var(--spacing-xs);}
-.summary-duplicate-buttons .ui-btn{height: 25px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); white-space: nowrap;}
+.summary-duplicate-buttons {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.summary-duplicate-buttons .ui-btn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
 
 /* Контейнер результатов */
-.summary-results-container{max-height: 276px; min-height: 276px; overflow-y: scroll; border: 1px solid var(--clg);}
-.summary-results{display: flex; flex-direction: column;}
-.summary-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
+.summary-results-container {
+    max-height: 400px;
+    min-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--clg);
+    background: #fff;
+}
 
-/* Элемент результата */
-.summary-item{display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-sm); outline: 1px solid #eee; background: #fff; gap: var(--spacing-sm);}
-.summary-item:hover{background-color: #f5f5f5;}
-.summary-item-info{flex: 1; min-width: 0;}
-.summary-item-name{font-weight: 600; color: var(--text-color); margin-bottom: var(--spacing-xs); display: flex; align-items: center; gap: var(--spacing-xs);}
-.summary-item-index{color: var(--text-secondary); font-size: var(--font-size-sm); font-weight: 400;}
-.summary-item-details{display: flex; gap: var(--spacing-md); font-size: var(--font-size-sm); color: var(--text-secondary); flex-wrap: wrap;}
-.summary-item-state{font-weight: 500; color: var(--text-color);}
-.summary-item-difference{color: #666;}
-.summary-item-closeness{padding: 1px 6px; border-radius: 3px; font-size: var(--font-size-xs); font-weight: 500; outline: 1px solid #000;}
+.summary-results {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-empty {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    font-size: var(--font-size-sm);
+}
+
+/* Элемент результата (общий для сводки и пересечений) */
+.summary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid #eee;
+    background: #fff;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.summary-item:hover {
+    background-color: #f5f5f5;
+}
+
+.summary-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.summary-item-name {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.summary-item-index {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+}
+
+.summary-item-details {
+    display: flex;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.summary-item-state {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.summary-item-difference {
+    color: #666;
+}
+
+.summary-item-closeness {
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    outline: 1px solid #000;
+}
 
 /* Кнопки действий */
-.summary-item-actions{display: flex; gap: var(--spacing-xs); flex-shrink: 0;}
-.summary-item-actions .ui-btn{height: 25px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); white-space: nowrap;}
-.summary-item-color{width: 25px; height: 25px; flex-shrink: 0;}
+.summary-item-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-shrink: 0;
+}
+
+.summary-item-actions .ui-btn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.summary-item-color {
+    width: 25px;
+    height: 25px;
+    flex-shrink: 0;
+    border-radius: 3px;
+}
 
 /* Классы близости */
-.summary-item-exact .summary-item-closeness{color: black;}
-.summary-item-very-close .summary-item-closeness{color: black;}
-.summary-item-close .summary-item-closeness{color: black;}
-.summary-item-fairly-close .summary-item-closeness{color: black;}
-.summary-item-nearby .summary-item-closeness{color: black;}
+.summary-item-exact .summary-item-closeness {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
 
-/* Адаптация для темного режима графика */
-.graph-container.dark-mode + .summary-panel{background: #1a1a1a; border-color: #444; color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-header h3{color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-label{color: #ccc;}
-.graph-container.dark-mode + .summary-panel .summary-select{background: #333; border-color: #555; color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-results-container{background: #2a2a2a; border-color: #444;}
-.graph-container.dark-mode + .summary-panel .summary-item{background: #1a1a1a; border-color: #333;}
-.graph-container.dark-mode + .summary-panel .summary-item:hover{background-color: #2a2a2a;}
-.graph-container.dark-mode + .summary-panel .summary-item-name{color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-item-index{color: #aaa;}
-.graph-container.dark-mode + .summary-panel .summary-item-state{color: #ddd;}
-.graph-container.dark-mode + .summary-panel .summary-item-difference{color: #999;}
+.summary-item-very-close .summary-item-closeness {
+    background: #4CAF50;
+    color: white;
+}
+
+.summary-item-close .summary-item-closeness {
+    background: #8BC34A;
+    color: black;
+}
+
+.summary-item-fairly-close .summary-item-closeness {
+    background: #FFC107;
+    color: black;
+}
+
+.summary-item-nearby .summary-item-closeness {
+    background: #FF9800;
+    color: black;
+}
+
+/* ===== СПЕЦИАЛЬНЫЕ СТИЛИ ДЛЯ ПЕРЕСЕЧЕНИЙ ===== */
+
+/* Информация о выбранном колоске */
+.intersection-selected-info {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: #f0f7ff;
+    border-radius: var(--border-radius);
+    border-left: 3px solid #2196F3;
+}
+
+.selected-wave-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.selected-wave-info.no-selection {
+    background: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.selected-wave-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.selected-wave-icon {
+    font-size: 20px;
+}
+
+.selected-wave-name {
+    font-weight: 600;
+    font-size: var(--font-size-md);
+}
+
+.selected-wave-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xs);
+}
+
+.selected-wave-detail {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.detail-label {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.detail-value.extremum {
+    color: #ff0000;
+    font-weight: 700;
+}
+
+.detail-value.equilibrium {
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+/* Кнопка сброса выбора */
+#btnClearWaveSelection {
+    margin-left: auto;
+}
+
+/* Форма пересечений */
+.intersection-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.intersection-form-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.intersection-select-group {
+    min-width: 250px;
+}
+
+.intersection-form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Статистика пересечений */
+.intersection-stats {
+    margin: var(--spacing-sm) 0;
+    padding: var(--spacing-md);
+    background: #e9f7ef;
+    border: 1px solid #c3e6cb;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    color: #155724;
+}
+
+.intersection-stats strong {
+    font-weight: 600;
+    color: #0c4121;
+}
+
+/* Бейджи волн */
+.wave-period-badge {
+    background: #e0e0e0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+/* Пустое состояние */
+.list-empty {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    font-size: var(--font-size-sm);
+}
+
+/* ===== ТЕМНЫЙ РЕЖИМ ===== */
+
+.graph-container.dark-mode + .summary-panel {
+    background: #1a1a1a;
+    border-color: #444;
+    color: #fff;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-header h3 {
+    color: #fff;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-label {
+    color: #ccc;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-select {
+    background: #333;
+    border-color: #555;
+    color: #fff;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-results-container {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-item {
+    background: #1a1a1a;
+    border-color: #333;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-item:hover {
+    background-color: #2a2a2a;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-item-name {
+    color: #fff;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-item-index {
+    color: #aaa;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-item-state {
+    color: #ddd;
+}
+
+.graph-container.dark-mode + .summary-panel .summary-item-difference {
+    color: #999;
+}
+
+.graph-container.dark-mode + .intersection-selected-info {
+    background: #1a2a3a;
+    border-left-color: #64B5F6;
+}
+
+.graph-container.dark-mode + .intersection-selected-info .selected-wave-info.no-selection {
+    background: #2a2a1a;
+    border-left-color: #FFB74D;
+}
+
+.graph-container.dark-mode + .intersection-stats {
+    background: #1a2a1a;
+    border-color: #2a4a2a;
+    color: #aaffaa;
+}
