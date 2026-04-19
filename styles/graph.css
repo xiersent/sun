@@ -67,7 +67,7 @@
 
 /* Стрелки для вертикальных выносок */
 .wave-labels-vertical-container .wave-label-arrow{left: 50%; transform: translateX(-50%);}
-.wave-labels-top .wave-label-arrow{bottom: -6px; border-width: 6px 4px 0 4px; border-color: inherit transparent transparent transparent;}
+.wave-labels-top .wave-label-arrow{bottom: -6px; border-width: 6px 4px 0 4px; border-color: transparent transparent transparent transparent;}
 .wave-labels-bottom .wave-label-arrow{top: -6px; border-width: 0 4px 6px 4px; border-color: transparent transparent inherit transparent;}
 
 /* Темный режим графика */
@@ -275,7 +275,7 @@ body.graph-gray-mode .wave-axis-x-point {
 .extremum-label-top .extremum-label-arrow {
     bottom: -6px;
     border-width: 6px 4px 0 4px;
-    border-color: inherit transparent transparent transparent;
+    border-color: transparent transparent transparent transparent;
 }
 
 /* Стрелочка для нижней выноски (указывает вверх) */
@@ -359,7 +359,7 @@ body.graph-gray-mode .wave-axis-x-point {
 .extremum-label-top .extremum-label-arrow {
     bottom: -6px;
     border-width: 6px 4px 0 4px;
-    border-color: inherit transparent transparent transparent;
+    border-color: transparent transparent transparent transparent;
 }
 
 /* Стрелочка для нижней выноски (указывает вверх) */
@@ -444,13 +444,13 @@ body.graph-gray-mode .wave-axis-x-point {
 .extremum-label-top .extremum-label-arrow {
     bottom: -6px;
     border-width: 6px 4px 0 4px;
-    border-color: inherit transparent transparent transparent;
+    border-color: transparent transparent transparent transparent;
 }
 
 .extremum-label-bottom .extremum-label-arrow {
     top: -6px;
     border-width: 0 4px 6px 4px;
-    border-color: transparent transparent inherit transparent;
+    border-color: transparent transparent transparent transparent;
 }
 
 

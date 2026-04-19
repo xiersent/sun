@@ -1,4 +1,4 @@
-// modules/state.js
+// modules/state.js - ОЧИЩЕННЫЙ (без начальных данных)
 class AppState {
     constructor() {
         this.config = {
@@ -16,50 +16,20 @@ class AppState {
             maxRenderPoints: 3000
         };
         
-        this.create120Waves();
-        this.create31Waves();
-        this.create1000Waves();
+        // Создаём пустые массивы для волн (они будут заполнены миграцией)
+        this.createEmptyWavesArrays();
         
-        const s25LocalDate = new Date(1990, 0, 25, 0, 0, 0, 0);
-        
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        
+        // ПУСТЫЕ НАЧАЛЬНЫЕ ДАННЫЕ (без волн, групп и дат)
         this.initialData = {
             version: "1.0",
             created: "2024-01-01",
-            waves: this.waves120.concat(this.waves31).concat(this.waves1000).concat([
-                { id: 24, name: '24 красность', description: 'Физический ритм', period: 24, color: '#FF0000', type: 'solid', category: 'classic', visible: true, bold: false, cornerColor: false },
-                { id: 28, name: '28 зеленость', description: 'Эмоциональный ритм', period: 28, color: '#008000', type: 'solid', category: 'classic', visible: true, bold: false, cornerColor: false },
-                { id: 33, name: '33 синесть', description: 'Интеллектуальный ритм', period: 33, color: '#0000FF', type: 'solid', category: 'classic', visible: true, bold: false, cornerColor: false },
-                { id: 38, name: '38 фиолетовость', description: 'Интуитивный ритм', period: 38, color: '#800080', type: 'solid', category: 'classic', visible: true, bold: false, cornerColor: false },
-                { id: 25, name: '25 черность', description: 'Экспериментальный ритм', period: 25, color: '#000000', type: 'solid', category: 'experimental', visible: true, bold: false, cornerColor: false },
-                { id: 365, name: 'Текущий год', description: 'Ритм текущего года', period: 365.25, color: '#FFA500', type: 'solid', category: 'experimental', visible: true, bold: false, cornerColor: false },
-                { id: 3652422, name: 'Тропический год', description: 'Астрономический (весеннее равноденствие)', period: 365.2422, color: '#FF6B35', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
-                { id: 3652425, name: 'Григорианский год', description: 'Календарный (средний за 400 лет)', period: 365.2425, color: '#4CAF50', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
-                { id: 36525636, name: 'Сидерический год', description: 'Относительно звёзд', period: 365.25636, color: '#9C27B0', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
-                { id: 36525964, name: 'Аномалистический год', description: 'От перигелия до перигелия', period: 365.25964, color: '#FF9800', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false },
-                { id: 36524167, name: 'Драконический год', description: 'Относительно узлов Луны', period: 365.24167, color: '#E91E63', type: 'dashed', category: 'experimental', visible: false, bold: false, cornerColor: false }
-            ]),
-            dates: [
-                { 
-                    id: 's25', 
-                    date: s25LocalDate.getTime(),
-                    name: 's25' 
-                }
-            ],
+            waves: [],  // ПУСТО - заполнится миграцией
+            dates: [],  // ПУСТО - заполнится миграцией
             notes: [],
-            groups: [
-                { id: 'default-group', name: 'Стандартная', enabled: false, waves: [], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: true, hidden: false },
-                { id: 'classic-group', name: 'Классическая', enabled: false, waves: [24, 28, 33, 38], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false, hidden: false },
-                { id: 'experimental-group', name: 'Экспериментальная', enabled: false, waves: [25, 365, 3652422, 3652425, 36525636, 36525964, 36524167], styleEnabled: false, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'solid', expanded: false, hidden: false },
-                { id: '120-waves-group', name: '120 колосков', enabled: false, waves: this.waves120Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dashed', expanded: false, hidden: false },
-                { id: '31-waves-group', name: '31 прутик', enabled: false, waves: this.waves31Ids, styleEnabled: true, styleBold: false, styleColor: '#666666', styleColorEnabled: false, styleType: 'dotted', expanded: false, hidden: false },
-                { id: '1000-roads-group', name: '1000 дорог', enabled: false, waves: this.waves1000Ids, styleEnabled: true, styleBold: false, styleColor: '#C0C0C0', styleColorEnabled: true, styleType: 'long-dash', expanded: false, hidden: false }
-            ],
+            groups: [],  // ПУСТО - заполнится миграцией
             uiSettings: {
                 currentDate: Date.now(),
-                baseDate: todayStart.getTime(),
+                baseDate: this.getTodayStartTimestamp(),
                 currentDay: 0,
                 transform: { scaleX: 1, scaleY: 1, rotation: 0 },
                 uiHidden: false,
@@ -69,7 +39,7 @@ class AppState {
                 grayMode: false,
                 graphGrayMode: false,
                 cornerSquaresVisible: true,
-                activeDateId: 's25',
+                activeDateId: null,
                 waveVisibility: {},
                 waveBold: {},
                 waveCornerColor: {},
@@ -83,91 +53,25 @@ class AppState {
         this.load();
     }
     
-    create120Waves() {
+    getTodayStartTimestamp() {
+        const now = new Date();
+        return new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            0, 0, 0, 0
+        ).getTime();
+    }
+    
+    createEmptyWavesArrays() {
+        // Пустые массивы - миграция заполнит их
         this.waves120 = [];
         this.waves120Ids = [];
-        
-        const standardColor = '#C0C0C0';
-        
-        for (let i = 1; i <= 120; i++) {
-            const waveId = `wave-120-${i}`;
-            this.waves120Ids.push(waveId);
-            
-            const wave = {
-                id: waveId,
-                name: `Колосок ${i}`,
-                description: `Период ${i} дней`,
-                period: i,
-                color: standardColor,
-                type: 'dashed',
-                category: '120-waves',
-                visible: false,
-                bold: false,
-                cornerColor: false,
-                isDefaultColor: true
-            };
-            
-            this.waves120.push(wave);
-        }
-    }
-    
-    create31Waves() {
         this.waves31 = [];
         this.waves31Ids = [];
-        
-        const standardColor = '#C0C0C0';
-        
-        for (let i = 1; i <= 31; i++) {
-            const waveId = `wave-31-${i}`;
-            this.waves31Ids.push(waveId);
-            
-            const wave = {
-                id: waveId,
-                name: `Прутик ${i}`,
-                description: `Период ${i} дней`,
-                period: i,
-                color: standardColor,
-                type: 'dotted',
-                category: '31-waves',
-                visible: false,
-                bold: false,
-                cornerColor: false,
-                isDefaultColor: true
-            };
-            
-            this.waves31.push(wave);
-        }
+        this.waves1000 = [];
+        this.waves1000Ids = [];
     }
-    
-	create1000Waves() {
-		this.waves1000 = [];
-		this.waves1000Ids = [];
-		
-		const standardColor = '#C0C0C0';
-		
-		for (let i = 1; i <= 1000; i++) {
-			const waveId = `wave-1000-${i}`;
-			this.waves1000Ids.push(waveId);
-			
-			const threeDigitNum = i.toString().padStart(3, '0');  // <-- НОВОЕ
-			
-			const wave = {
-				id: waveId,
-				name: `Дорога ${threeDigitNum}`,  // <-- ИЗМЕНЕНО
-				description: `Период ${i} дней`,
-				period: i,
-				color: standardColor,
-				type: 'long-dash',
-				category: '1000-roads',
-				visible: false,
-				bold: false,
-				cornerColor: false,
-				isDefaultColor: true
-			};
-			
-			this.waves1000.push(wave);
-		}
-	}
     
     save() {
         if (!(this.baseDate instanceof Date)) {
@@ -222,28 +126,11 @@ class AppState {
                 }
                 // ===== КОНЕЦ МИГРАЦИЙ =====
                 
+                // Преобразование ID волн (числовые → строковые)
                 this.data.waves.forEach(wave => {
                     const waveIdStr = String(wave.id);
                     if (typeof wave.id === 'number') {
                         wave.id = waveIdStr;
-                    }
-                    if (waveIdStr.startsWith('wave-31-')) {
-                        const match = waveIdStr.match(/wave-31-(\d+)/);
-                        if (match) {
-                            const num = parseInt(match[1]);
-                            wave.name = `Прутик ${num}`;
-                            wave.description = `Период ${num} дней`;
-                        }
-                    }
-                    if (waveIdStr.startsWith('wave-1000-')) {
-                        const match = waveIdStr.match(/wave-1000-(\d+)/);
-                        if (match) {
-                            const num = parseInt(match[1]);
-                            if (!wave.name || wave.name.startsWith('Корешок')) {
-                                wave.name = `Дорога ${num}`;
-                            }
-                            wave.description = `Период ${num} дней`;
-                        }
                     }
                 });
                 
@@ -292,7 +179,7 @@ class AppState {
                     this.currentDay = 0;
                 }
                 
-                this.transform = data.uiSettings.transform;
+                this.transform = data.uiSettings.transform || { scaleX: 1, scaleY: 1, rotation: 0 };
                 this.uiHidden = data.uiSettings.uiHidden || false;
                 this.graphHidden = data.uiSettings.graphHidden || false;
                 this.graphBgWhite = data.uiSettings.graphBgWhite !== undefined ? data.uiSettings.graphBgWhite : true;
@@ -403,8 +290,6 @@ class AppState {
                     }
                 }
                 
-                this.fixStandardWaveColors();
-                
                 setTimeout(() => {
                     if (window.dates && window.dates.forceInitialize) {
                         window.dates.forceInitialize();
@@ -412,6 +297,7 @@ class AppState {
                 }, 100);
                 
             } catch (e) {
+                console.error('Error loading state:', e);
                 this.reset();
             }
         } else {
@@ -419,20 +305,20 @@ class AppState {
         }
     }
     
-
     reset() {
+        // Копируем пустые начальные данные
         this.data = JSON.parse(JSON.stringify(this.initialData));
         
-        this.currentDate = new Date();
-        
         const now = new Date();
-        this.baseDate = new Date(
+        const todayStart = new Date(
             now.getFullYear(),
             now.getMonth(),
             now.getDate(),
             0, 0, 0, 0
         );
         
+        this.currentDate = new Date();
+        this.baseDate = todayStart;
         this.currentDay = 0;
         this.virtualPosition = 0;
         this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
@@ -444,7 +330,7 @@ class AppState {
         this.grayMode = false;
         this.graphGrayMode = false;
         this.cornerSquaresVisible = true;
-        this.activeDateId = 's25';
+        this.activeDateId = null;
         
         this.editingDateId = null;
         this.editingWaveId = null;
@@ -463,142 +349,55 @@ class AppState {
         this.waveBold = {};
         this.waveCornerColor = {};
         
-        this.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            
-            if (waveIdStr.startsWith('wave-120-') || waveIdStr.startsWith('wave-31-') || waveIdStr.startsWith('wave-1000-')) {
-                wave.color = '#C0C0C0';
-                wave.isDefaultColor = true;
-            }
-            
-            this.waveVisibility[waveIdStr] = wave.visible !== undefined ? wave.visible : true;
-            this.waveBold[waveIdStr] = wave.bold || false;
-            this.waveCornerColor[waveIdStr] = wave.cornerColor || false;
-        });
-        
-        this.data.uiSettings.waveVisibility = this.waveVisibility;
-        this.data.uiSettings.waveBold = this.waveBold;
-        this.data.uiSettings.waveCornerColor = this.waveCornerColor;
-        
         this.dateSelections = {
             typeA: null,
             typeB: null
         };
         this.data.uiSettings.dateSelections = this.dateSelections;
-    }
-    
-    resetDefaultWaveColors() {
-        const classicWaves = [24, 28, 33, 38, 25, 365];
         
-        classicWaves.forEach(waveId => {
-            const wave = this.data.waves.find(w => String(w.id) === String(waveId));
-            if (wave) {
-                wave.isDefaultColor = false;
-            }
-        });
-        
-        this.save();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
-        
-        if (window.waves && window.waves.updatePosition) {
-            window.waves.updatePosition();
-        }
-        
-        return classicWaves.length;
-    }
-    
-    migrateWaveColors() {
-        const standardColor = '#C0C0C0';
-        let migratedCount = 0;
-        
-        this.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const is120Wave = waveIdStr.startsWith('wave-120-');
-            const is31Wave = waveIdStr.startsWith('wave-31-');
-            const is1000Wave = waveIdStr.startsWith('wave-1000-');
-            
-            if (is120Wave || is31Wave || is1000Wave) {
-                if (wave.isDefaultColor === undefined) {
-                    wave.isDefaultColor = true;
-                    wave.color = standardColor;
-                    migratedCount++;
-                } else if (wave.isDefaultColor === true) {
-                    wave.color = standardColor;
-                }
-            }
-        });
-        
-        if (migratedCount > 0) {
-            this.save();
-        }
-        
-        return migratedCount;
-    }
-    
-    fixStandardWaveColors() {
-        const standardColor = '#C0C0C0';
-        
-        this.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            
-            const is120Wave = waveIdStr.startsWith('wave-120-');
-            const is31Wave = waveIdStr.startsWith('wave-31-');
-            const is1000Wave = waveIdStr.startsWith('wave-1000-');
-            
-            if (is120Wave || is31Wave || is1000Wave) {
-                if (wave.isDefaultColor === undefined) {
-                    wave.isDefaultColor = true;
-                }
-                
-                if (wave.isDefaultColor === true) {
-                    wave.color = standardColor;
-                    
-                    if (window.waves && window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
-                        window.waves.wavePaths[wave.id].style.stroke = standardColor;
-                    }
-                }
-            }
-        });
-        
+        // Сохраняем пустое состояние
         this.save();
     }
     
     convertDatesToTimestamp() {
-        this.data.dates.forEach(date => {
-            if (date.date && !this.isTimestamp(date.date)) {
-                try {
-                    const dateObj = new Date(date.date);
-                    if (!isNaN(dateObj.getTime())) {
-                        date.date = dateObj.getTime();
-                    }
-                } catch (e) {}
-            }
-        });
+        if (this.data.dates) {
+            this.data.dates.forEach(date => {
+                if (date.date && !this.isTimestamp(date.date)) {
+                    try {
+                        const dateObj = new Date(date.date);
+                        if (!isNaN(dateObj.getTime())) {
+                            date.date = dateObj.getTime();
+                        }
+                    } catch (e) {}
+                }
+            });
+        }
         
-        this.data.notes.forEach(note => {
-            if (note.date && !this.isTimestamp(note.date)) {
-                try {
-                    const dateObj = new Date(note.date);
-                    if (!isNaN(dateObj.getTime())) {
-                        note.date = dateObj.getTime();
-                    }
-                } catch (e) {}
-            }
-        });
+        if (this.data.notes) {
+            this.data.notes.forEach(note => {
+                if (note.date && !this.isTimestamp(note.date)) {
+                    try {
+                        const dateObj = new Date(note.date);
+                        if (!isNaN(dateObj.getTime())) {
+                            note.date = dateObj.getTime();
+                        }
+                    } catch (e) {}
+                }
+            });
+        }
         
-        ['currentDate', 'baseDate'].forEach(key => {
-            if (this.data.uiSettings[key] && !this.isTimestamp(this.data.uiSettings[key])) {
-                try {
-                    const dateObj = new Date(this.data.uiSettings[key]);
-                    if (!isNaN(dateObj.getTime())) {
-                        this.data.uiSettings[key] = dateObj.getTime();
-                    }
-                } catch (e) {}
-            }
-        });
+        if (this.data.uiSettings) {
+            ['currentDate', 'baseDate'].forEach(key => {
+                if (this.data.uiSettings[key] && !this.isTimestamp(this.data.uiSettings[key])) {
+                    try {
+                        const dateObj = new Date(this.data.uiSettings[key]);
+                        if (!isNaN(dateObj.getTime())) {
+                            this.data.uiSettings[key] = dateObj.getTime();
+                        }
+                    } catch (e) {}
+                }
+            });
+        }
     }
     
     isTimestamp(value) {
