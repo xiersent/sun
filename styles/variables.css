@@ -1,4 +1,5 @@
-:root {
+/* styles/variables.css */
+:root{
     --bs: 10px;
     --sq: 50px;
     --gh: 500px;
@@ -20,30 +21,22 @@
     --success-color: #4CAF50;
     --warning-color: #FFC107;
     --info-color: #2196F3;
-    
-    /* ИСПРАВЛЕНО: Добавлены переменные для цветов линий сетки */
     --grid-line-light: #eee;
     --grid-line-dark: #444;
     --grid-line-hover-light: #ccc;
     --grid-line-hover-dark: #888;
-    
-    /* Размеры */
     --border-radius: 3px;
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 15px;
     --spacing-lg: 20px;
     --spacing-xl: 40px;
-    
-    /* Шрифты */
     --font-family: Tahoma, sans-serif;
     --font-size-xs: 10px;
     --font-size-sm: 11px;
     --font-size-md: 13px;
     --font-size-lg: 16px;
     --font-size-xl: 18px;
-    
-    /* Z-index слои */
     --z-corner: 1000;
     --z-waves: 3;
     --z-grid: 5;

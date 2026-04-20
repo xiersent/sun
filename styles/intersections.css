@@ -1,322 +1,58 @@
-/* styles/intersections.css - обновленные стили */
-
-/* Контейнер информации о выбранном колоске */
-.intersection-selected-info {
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: #f0f7ff;
-    border-radius: var(--border-radius);
-    border-left: 3px solid #2196F3;
-}
-
-.selected-wave-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.selected-wave-info.no-selection {
-    background: #fff3cd;
-    border-left-color: #ffc107;
-}
-
-.selected-wave-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.selected-wave-icon {
-    font-size: 20px;
-}
-
-.selected-wave-name {
-    font-weight: 600;
-    font-size: var(--font-size-md);
-}
-
-.selected-wave-details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xs);
-}
-
-.selected-wave-detail {
-    display: flex;
-    align-items: baseline;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
-}
-
-.detail-label {
-    color: var(--text-secondary);
-    font-weight: 400;
-}
-
-.detail-value {
-    font-weight: 600;
-    color: var(--text-color);
-}
-
-.detail-value.extremum {
-    color: #ff0000;
-    font-weight: 700;
-}
-
-.detail-value.equilibrium {
-    color: #4CAF50;
-    font-weight: 700;
-}
-
-/* Элементы управления */
-.intersection-controls {
-    margin-bottom: var(--spacing-md);
-}
-
-.intersection-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.intersection-form-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-
-.intersection-select {
-    width: 100%;
-    padding: var(--spacing-xs);
-    border: 1px solid var(--clg);
-    font-size: var(--font-size-sm);
-    height: 25px;
-    background: #fff;
-}
-
-.intersection-form-label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-/* Результаты поиска */
-.intersection-results-container {
-    max-height: 400px;
-    min-height: 200px;
-    overflow-y: auto;
-    border: 1px solid var(--clg);
-    background: #fff;
-}
-
-.intersection-results {
-    display: flex;
-    flex-direction: column;
-}
-
-.intersection-result-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-sm);
-    border-bottom: 1px solid #eee;
-    background: #fff;
-    gap: var(--spacing-sm);
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.intersection-result-item:hover {
-    background-color: #f5f5f5;
-}
-
-.intersection-result-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.intersection-result-name {
-    font-weight: 600;
-    margin-bottom: var(--spacing-xs);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
-}
-
-.intersection-result-index {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: 400;
-}
-
-.wave-name {
-    font-weight: 600;
-}
-
-.wave-period-badge {
-    background: #e0e0e0;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 400;
-}
-
-.past-wave-marker {
-    color: #999;
-    font-style: italic;
-    font-size: 10px;
-}
-
-.intersection-result-details {
-    display: flex;
-    gap: var(--spacing-md);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    flex-wrap: wrap;
-}
-
-.intersection-result-state {
-    font-weight: 500;
-    color: var(--text-color);
-}
-
-.intersection-result-difference {
-    color: #666;
-}
-
-.intersection-result-closeness {
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 500;
-}
-
-/* Классы близости */
-.intersection-result-closeness.intersection-item-exact {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.intersection-result-closeness.intersection-item-very-close {
-    background: #4CAF50;
-    color: white;
-}
-
-.intersection-result-closeness.intersection-item-close {
-    background: #8BC34A;
-    color: black;
-}
-
-.intersection-result-closeness.intersection-item-fairly-close {
-    background: #FFC107;
-    color: black;
-}
-
-.intersection-result-closeness.intersection-item-nearby {
-    background: #FF9800;
-    color: black;
-}
-
-.intersection-result-closeness.intersection-item-within-tolerance {
-    background: #f44336;
-    color: white;
-}
-
-/* Цветовой индикатор */
-.intersection-result-color {
-    width: 25px;
-    height: 25px;
-    flex-shrink: 0;
-    border-radius: 3px;
-}
-
-/* Кнопки действий */
-.intersection-result-actions {
-    display: flex;
-    gap: var(--spacing-xs);
-    flex-shrink: 0;
-}
-
-.intersection-result-actions .ui-btn {
-    height: 25px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
-}
-
-/* Статистика */
-.intersection-stats {
-    margin: var(--spacing-sm) 0;
-    padding: var(--spacing-md);
-    background: #e9f7ef;
-    border: 1px solid #c3e6cb;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-}
-
-.intersection-stats-content {
-    line-height: 1.5;
-}
-
-/* Пустое состояние */
-.list-empty {
-    padding: var(--spacing-lg);
-    text-align: center;
-    color: #999;
-    font-style: italic;
-    font-size: var(--font-size-sm);
-}
+/* styles/intersections.css - ПОЛНЫЙ (все стили пересечений, которые были в 3 файлах, объединены) */
+.intersection-selected-info{margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: #f0f7ff; border-radius: var(--border-radius); border-left: 3px solid #2196F3;}
+.selected-wave-info{display: flex; flex-direction: column; gap: var(--spacing-sm);}
+.selected-wave-info.no-selection{background: #fff3cd; border-left-color: #ffc107;}
+.selected-wave-header{display: flex; align-items: center; gap: var(--spacing-sm);}
+.selected-wave-icon{font-size: 20px;}
+.selected-wave-name{font-weight: 600; font-size: var(--font-size-md);}
+.selected-wave-details{display: flex; flex-wrap: wrap; gap: var(--spacing-md); margin-top: var(--spacing-xs);}
+.selected-wave-detail{display: flex; align-items: baseline; gap: var(--spacing-xs); font-size: var(--font-size-sm);}
+.detail-label{color: var(--text-secondary); font-weight: 400;}
+.detail-value{font-weight: 600; color: var(--text-color);}
+.detail-value.extremum{color: #ff0000; font-weight: 700;}
+.detail-value.equilibrium{color: #4CAF50; font-weight: 700;}
+.intersection-controls{margin-bottom: var(--spacing-md);}
+.intersection-form{display: flex; flex-direction: column; gap: var(--spacing-md);}
+.intersection-form-row{display: flex; align-items: center; flex-wrap: wrap;}
+.intersection-select{width: 100%; padding: var(--spacing-xs); border: 1px solid var(--clg); font-size: var(--font-size-sm); height: 25px; background: #fff;}
+.intersection-form-label{display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); cursor: pointer; white-space: nowrap;}
+.intersection-results-container{max-height: 400px; min-height: 200px; overflow-y: auto; border: 1px solid var(--clg); background: #fff;}
+.intersection-results{display: flex; flex-direction: column;}
+.intersection-result-item{display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-sm); border-bottom: 1px solid #eee; background: #fff; gap: var(--spacing-sm); cursor: pointer; transition: background-color 0.2s;}
+.intersection-result-item:hover{background-color: #f5f5f5;}
+.intersection-result-info{flex: 1; min-width: 0;}
+.intersection-result-name{font-weight: 600; margin-bottom: var(--spacing-xs); display: flex; align-items: center; gap: var(--spacing-xs); flex-wrap: wrap;}
+.intersection-result-index{color: var(--text-secondary); font-size: var(--font-size-sm); font-weight: 400;}
+.wave-name{font-weight: 600;}
+.wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 400;}
+.past-wave-marker{color: #999; font-style: italic; font-size: 10px;}
+.intersection-result-details{display: flex; gap: var(--spacing-md); font-size: var(--font-size-sm); color: var(--text-secondary); flex-wrap: wrap;}
+.intersection-result-state{font-weight: 500; color: var(--text-color);}
+.intersection-result-difference{color: #666;}
+.intersection-result-closeness{padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 500;}
+.intersection-result-closeness.intersection-item-exact{background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;}
+.intersection-result-closeness.intersection-item-very-close{background: #4CAF50; color: white;}
+.intersection-result-closeness.intersection-item-close{background: #8BC34A; color: black;}
+.intersection-result-closeness.intersection-item-fairly-close{background: #FFC107; color: black;}
+.intersection-result-closeness.intersection-item-nearby{background: #FF9800; color: black;}
+.intersection-result-closeness.intersection-item-within-tolerance{background: #f44336; color: white;}
+.intersection-result-color{width: 25px; height: 25px; flex-shrink: 0; border-radius: 3px;}
+.intersection-result-actions{display: flex; gap: var(--spacing-xs); flex-shrink: 0;}
+.intersection-result-actions .ui-btn{height: 25px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); white-space: nowrap;}
+.intersection-stats{margin: var(--spacing-sm) 0; padding: var(--spacing-md); background: #e9f7ef; border: 1px solid #c3e6cb; border-radius: var(--border-radius); font-size: var(--font-size-sm); line-height: 1.4; color: #155724;}
+.intersection-stats strong{font-weight: 600; color: #0c4121;}
+.intersection-stats-content{line-height: 1.5;}
+.list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
+#btnClearWaveSelection{margin-left: auto;}
 
 /* Темный режим */
-.graph-container.dark-mode + .intersection-selected-info {
-    background: #1a2a3a;
-    border-left-color: #64B5F6;
-}
-
-.graph-container.dark-mode + .intersection-selected-info .selected-wave-info.no-selection {
-    background: #2a2a1a;
-    border-left-color: #FFB74D;
-}
-
-.graph-container.dark-mode + .intersection-results-container {
-    background: #2a2a2a;
-    border-color: #444;
-}
-
-.graph-container.dark-mode + .intersection-results-container .intersection-result-item {
-    background: #1a1a1a;
-    border-color: #333;
-}
-
-.graph-container.dark-mode + .intersection-results-container .intersection-result-item:hover {
-    background-color: #2a2a2a;
-}
-
-.graph-container.dark-mode + .intersection-results-container .wave-name {
-    color: #ddd;
-}
-
-.graph-container.dark-mode + .intersection-results-container .wave-period-badge {
-    background: #444;
-    color: #ddd;
-}
-
-.graph-container.dark-mode + .intersection-results-container .intersection-result-state {
-    color: #ddd;
-}
-
-.graph-container.dark-mode + .intersection-results-container .intersection-result-difference {
-    color: #aaa;
-}
-
-.graph-container.dark-mode + .intersection-stats {
-    background: #1a2a1a;
-    border-color: #2a4a2a;
-    color: #aaffaa;
-}
+.graph-container.dark-mode + .intersection-selected-info{background: #1a2a3a; border-left-color: #64B5F6;}
+.graph-container.dark-mode + .intersection-selected-info .selected-wave-info.no-selection{background: #2a2a1a; border-left-color: #FFB74D;}
+.graph-container.dark-mode + .intersection-results-container{background: #2a2a2a; border-color: #444;}
+.graph-container.dark-mode + .intersection-results-container .intersection-result-item{background: #1a1a1a; border-color: #333;}
+.graph-container.dark-mode + .intersection-results-container .intersection-result-item:hover{background-color: #2a2a2a;}
+.graph-container.dark-mode + .intersection-results-container .wave-name{color: #ddd;}
+.graph-container.dark-mode + .intersection-results-container .wave-period-badge{background: #444; color: #ddd;}
+.graph-container.dark-mode + .intersection-results-container .intersection-result-state{color: #ddd;}
+.graph-container.dark-mode + .intersection-results-container .intersection-result-difference{color: #aaa;}
+.graph-container.dark-mode + .intersection-stats{background: #1a2a1a; border-color: #2a4a2a; color: #aaffaa;}

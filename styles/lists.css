@@ -1,4 +1,4 @@
-/* optimized3/styles/lists.css */
+/* styles/lists.css */
 /* Контейнер списка */
 .list-container{border: 1px solid var(--clg); background: #fff; display: flex; flex-direction: column; overflow-y: scroll;}
 .list-container--scrollable{overflow-y: auto; max-height: 400px;}
@@ -10,34 +10,22 @@
 .list-item--draggable{cursor: move;}
 .list-item__drag-handle{cursor: move; color: #999; padding: 2px; flex-shrink: 0; user-select: none;}
 .list-item__drag-handle:hover{color: var(--text-color);}
-
-/* Состояния drag & drop */
 .list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
 .list-item--drag-over{background-color: #e6f2ff; border-top: 2px solid var(--cp);}
-
-/* Основное содержимое */
 .list-item__content{flex: 1; min-width: 0; display: flex; flex-direction: column;}
 .list-item__row{display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-sm); width: 100%;}
-
-/* Левая часть элемента */
 .list-item__left{display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;}
 .list-item__title-container{display: flex; align-items: center; gap: var(--spacing-xs); min-width: 0; flex: 1;}
 .list-item__title{font-weight: 400; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color);}
 .list-item__icon{color: var(--text-secondary); font-size: var(--font-size-lg); flex-shrink: 0;}
-
-/* Правая часть элемента */
 .list-item__right{display: flex; gap: 8px; align-items: center; flex-shrink: 0;}
 .list-item__value{color: var(--text-secondary); white-space: nowrap; font-size: var(--font-size-sm);}
 .list-item__actions{display: flex; gap: 3px; flex-shrink: 0;}
-
-/* Формы редактирования */
 .list-item__edit-form{display: none; flex-wrap: wrap; gap: 8px; width: 100%;}
 .list-item__edit-row{display: flex; gap: var(--spacing-xs); align-items: center; width: 100%;}
 .list-item__edit-label{font-weight: 400; flex-shrink: 0; font-size: var(--font-size-sm); color: var(--text-color);}
 .list-item__edit-input{flex: 1; padding: 3px 5px; border: 1px solid var(--clg); min-width: 0; font-size: var(--font-size-sm); height: 25px;}
 .list-item__edit-actions{display: flex; gap: var(--spacing-xs); align-items: center; justify-content: flex-end;}
-
-/* Состояние редактирования */
 .list-item--editing .list-item__normal-view{display: none;}
 .list-item--editing .list-item__edit-form{display: flex;}
 .list-item--group.list-item--editing .group-children .list-item--wave .list-item__normal-view{display: flex !important;}
@@ -46,20 +34,16 @@
 .list-item--wave.list-item--editing .list-item__edit-form{display: flex;}
 .list-item--editing .list-item__drag-handle{opacity: 0.3; cursor: default;}
 
-/* Типы элементов - дата */
+/* Типы элементов */
 .list-item--date{cursor: pointer;}
 .list-item--date:hover{background-color: #f5f5f5;}
 .list-item--date.active{background-color: #e6f2ff;}
-
-/* Типы элементов - сигнал (было: волна) */
 .list-item--wave{cursor: default;}
 .list-item--wave:hover{background-color: #f5f5f5;}
 .list-item--wave .wave-controls-inline{display: flex; align-items: center; gap: 4px; margin-right: 8px;}
 .list-item--wave .wave-corner-color-check{margin-left: 2px; margin-right: 2px; flex-shrink: 0;}
 .list-item--wave .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); margin-left: 8px; flex-shrink: 0;}
 .list-item--wave .wave-color-preview-small{width: 12px; height: 12px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; flex-shrink: 0;}
-
-/* Типы элементов - группа */
 .list-item--group{cursor: default;}
 .list-item--group:not(.list-item--expanded):hover{background-color: #f5f5f5;}
 .list-item--group.list-item--expanded{background-color: inherit;}
@@ -76,220 +60,57 @@
 .group-children .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-left: 6px;}
 .group-children .wave-color-preview-small{width: 12px; height: 12px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer;}
 .group-children .wave-corner-color-check{margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
-
-/* Типы элементов - заметка */
 .list-item--note{cursor: default; flex-direction: column; align-items: flex-start; padding: var(--spacing-md);}
 .list-item--note:hover{background-color: #fff;}
 .list-item--note .note-content-wrapper{width: 100%; margin-bottom: 8px;}
 .list-item--note .note-time{font-weight: 700; color: var(--text-color); margin-bottom: 3px;}
 .list-item--note .note-text{color: var(--text-secondary); line-height: 1.4; margin-bottom: var(--spacing-xs);}
-
-/* Типы элементов - пересечение */
 .list-item--intersection.exact-match{background-color: #e6f7e6;}
 .list-item--intersection.close-match{background-color: #fffbe6;}
 .list-item--intersection .intersection-info{flex: 1;}
 .list-item--intersection .intersection-period{font-weight: 700; color: var(--text-color);}
 .list-item--intersection .intersection-match-type{font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 2px;}
 .list-item--intersection .intersection-controls{display: flex; gap: var(--spacing-xs); align-items: center; flex-shrink: 0;}
-
-/* Пустой список */
 .list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
-
-/* Ошибка */
 .list-error{padding: var(--spacing-sm); text-align: center; color: var(--danger-color); font-size: var(--font-size-sm); background: #f8d7da; border: 1px solid #f5c6cb;}
 
-/* Стили для статистики группы */
+/* Группы */
 .group-stats{font-size: var(--font-size-sm); white-space: nowrap; display: flex; gap: 8px;}
-.group-enabled-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
+.group-enabled-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8; cursor: pointer;}
 .group-total-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
-
-/* Для темного режима графика */
 .graph-container.dark-mode .group-enabled-count{color: #4CAF50;}
-
-/* Стили для drag & drop групп */
 .list-item--group.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
 .list-item--group.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 .list-item--group.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 .list-item--group:not(.list-item--editing) .list-item__drag-handle{cursor: move;}
 .list-item--group.list-item--editing .list-item__drag-handle{opacity: 0.3; cursor: default;}
-
-/* Дополнительные стили для индикатора вставки */
 .drop-indicator{position: absolute; left: 0; right: 0; height: 2px; background-color: #666; z-index: 100; pointer-events: none;}
-.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
-.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 .list-item:first-child{overflow: hidden;}
 .list-item:last-child{overflow: hidden;}
 
-/* styles/lists.css - ДОБАВЛЕНО */
-/* Стили для drag & drop волн внутри групп */
-.group-children .list-item--wave.list-item--dragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-}
+/* Drag & drop волн внутри групп */
+.group-children .list-item--wave.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+.group-children .list-item--wave.list-item--drag-over-top{border-top: 2px solid var(--cp);}
+.group-children .list-item--wave.list-item--drag-over-bottom{border-bottom: 2px solid var(--cp);}
+.group-children .list-item--wave.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
+.group-children .list-item--wave.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
+.wave-drag-handle{color: #999; cursor: move; padding: 2px; flex-shrink: 0; user-select: none; margin-right: 4px;}
+.wave-drag-handle:hover{color: var(--text-color);}
+.list-item--wave.list-item--editing .wave-drag-handle{opacity: 0.3; cursor: default;}
 
-.group-children .list-item--wave.list-item--drag-over-top {
-    border-top: 2px solid var(--cp);
-}
-
-.group-children .list-item--wave.list-item--drag-over-bottom {
-    border-bottom: 2px solid var(--cp);
-}
-
-/* Индикаторы вставки для волн */
-.group-children .list-item--wave.list-item--drag-over-top::before {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 10px;
-    height: 10px;
-    background: var(--cp);
-    transform: rotate(45deg);
-    z-index: 10;
-}
-
-.group-children .list-item--wave.list-item--drag-over-bottom::after {
-    content: '';
-    position: absolute;
-    left: -5px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: var(--cp);
-    transform: rotate(45deg);
-    z-index: 10;
-}
-
-/* Ручка для перетаскивания волн */
-.wave-drag-handle {
-    color: #999;
-    cursor: move;
-    padding: 2px;
-    flex-shrink: 0;
-    user-select: none;
-    margin-right: 4px;
-}
-
-.wave-drag-handle:hover {
-    color: var(--text-color);
-}
-
-.list-item--wave.list-item--editing .wave-drag-handle {
-    opacity: 0.3;
-    cursor: default;
-}
-
-/* Стили для всех чекбоксов */
-.date-checkbox,
-.wave-group-toggle,
-.wave-visibility-check,
-.wave-bold-check,
-.wave-corner-color-check {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    margin: 0;
-    flex-shrink: 0;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    position: relative;
-    background-color: white;
-}
-
-/* Отдельные цвета для чекбоксов A и B в датах */
-.date-checkbox[data-type="a"]:checked {
-    background-color: #2196F3; /* Синий для типа A */
-}
-
-.date-checkbox[data-type="b"]:checked {
-    background-color: #FF9800; /* Оранжевый для типа B */
-}
-
-/* Все остальные чекбоксы (группы, волны) - синие как A */
-.wave-group-toggle:checked,
-.wave-visibility-check:checked,
-.wave-bold-check:checked,
-.wave-corner-color-check:checked {
-    background-color: #2196F3; /* Синий как у checkbox-a */
-}
-
-/* Галочка для всех чекбоксов */
-.date-checkbox:checked::after,
-.wave-group-toggle:checked::after,
-.wave-visibility-check:checked::after,
-.wave-bold-check:checked::after,
-.wave-corner-color-check:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-}
-
-.date-checkbox:checked,
-.wave-group-toggle:checked,
-.wave-visibility-check:checked,
-.wave-bold-check:checked,
-.wave-corner-color-check:checked {
-    border-color: transparent;
-}
-
-/* Для темного режима */
-.graph-container.dark-mode + .summary-panel .date-checkbox,
-.graph-container.dark-mode + .summary-panel .wave-group-toggle,
-.graph-container.dark-mode + .summary-panel .wave-visibility-check,
-.graph-container.dark-mode + .summary-panel .wave-bold-check,
-.graph-container.dark-mode + .summary-panel .wave-corner-color-check {
-    background-color: #333;
-    border-color: #555;
-}
-
-.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="a"]:checked {
-    background-color: #64B5F6; /* Более светлый синий для темного режима */
-}
-
-.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="b"]:checked {
-    background-color: #FFB74D; /* Более светлый оранжевый для темного режима */
-}
-
-.graph-container.dark-mode + .summary-panel .wave-group-toggle:checked,
-.graph-container.dark-mode + .summary-panel .wave-visibility-check:checked,
-.graph-container.dark-mode + .summary-panel .wave-bold-check:checked,
-.graph-container.dark-mode + .summary-panel .wave-corner-color-check:checked {
-    background-color: #64B5F6; /* Синий как у checkbox-a для темного режима */
-}
-
-.list-item--date .date-selection-checks {
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Стили выделения строк дат */
-.list-item--date.selected-type-a {
-    background-color: #E8F4FE; /* Светло-синий фон для типа A */
-}
-
-.list-item--date.selected-type-b {
-    background-color: #FFF4E5; /* Светло-оранжевый фон для типа B */
-}
-
-/* Для темного режима */
-.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-a {
-    background-color: #E8F4FE;
-}
-
-.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-b {
-    background-color: #FFF4E5;
-}
-
-.group-enabled-count {
-    cursor: pointer;
-}
+/* Чекбоксы */
+.date-checkbox, .wave-group-toggle, .wave-visibility-check, .wave-bold-check, .wave-corner-color-check{-webkit-appearance: none; appearance: none; width: 14px; height: 14px; cursor: pointer; margin: 0; flex-shrink: 0; border: 1px solid #ccc; border-radius: 2px; position: relative; background-color: white;}
+.date-checkbox[data-type="a"]:checked{background-color: #2196F3;}
+.date-checkbox[data-type="b"]:checked{background-color: #FF9800;}
+.wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{background-color: #2196F3;}
+.date-checkbox:checked::after, .wave-group-toggle:checked::after, .wave-visibility-check:checked::after, .wave-bold-check:checked::after, .wave-corner-color-check:checked::after{content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold;}
+.date-checkbox:checked, .wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{border-color: transparent;}
+.graph-container.dark-mode + .summary-panel .date-checkbox, .graph-container.dark-mode + .summary-panel .wave-group-toggle, .graph-container.dark-mode + .summary-panel .wave-visibility-check, .graph-container.dark-mode + .summary-panel .wave-bold-check, .graph-container.dark-mode + .summary-panel .wave-corner-color-check{background-color: #333; border-color: #555;}
+.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="a"]:checked{background-color: #64B5F6;}
+.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="b"]:checked{background-color: #FFB74D;}
+.graph-container.dark-mode + .summary-panel .wave-group-toggle:checked, .graph-container.dark-mode + .summary-panel .wave-visibility-check:checked, .graph-container.dark-mode + .summary-panel .wave-bold-check:checked, .graph-container.dark-mode + .summary-panel .wave-corner-color-check:checked{background-color: #64B5F6;}
+.list-item--date .date-selection-checks{pointer-events: auto; display: flex; align-items: center; gap: 6px;}
+.list-item--date.selected-type-a{background-color: #E8F4FE;}
+.list-item--date.selected-type-b{background-color: #FFF4E5;}
+.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-a{background-color: #E8F4FE;}
+.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-b{background-color: #FFF4E5;}

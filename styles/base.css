@@ -1,7 +1,7 @@
-/* optimized3/styles/base.css */
+/* styles/base.css */
 /* Базовые сбросы */
 *{box-sizing: border-box;}
-body{display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: var(--spacing-xl); background-color: var(--cbg); font-family: var(--font-family); font-size: var(--font-size-md); font-weight: 400; overflow-y: scroll !important; overflow-x: auto;}
+body{display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: var(--spacing-xl); background-color: var(--cbg); font-family: var(--font-family); font-size: var(--font-size-md); font-weight: 400; overflow-y: scroll; overflow-x: auto;}
 
 /* Утилиты для скрытия */
 .hidden{display: none !important;}
@@ -44,167 +44,45 @@ body.graph-hidden .graph-section{display: none !important;}
 .container{display: flex; flex-direction: column; gap: var(--spacing-lg); max-width: 1200px; width: 100%;}
 
 /* Контейнер временной полосы */
-.time-bar-container {
-    width: var(--gw);
-    height: 60px;
-    background-color: #fff;
-    outline: 1px solid var(--clg);
-    position: relative;
-    user-select: none;
-	margin: 21px 0;
-}
+.time-bar-container{width: var(--gw); height: 60px; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: var(--spacing-md) 0;}
 
 /* Темный режим для временной полосы */
-.graph-container.dark-mode + .time-bar-container {
-    background-color: #000;
-    border-color: #444;
-}
+.graph-container.dark-mode + .time-bar-container{background-color: #000; border-color: #444;}
 
 /* Графическая серая полоса */
-.graph-container.graph-gray-mode + .time-bar-container {
-    filter: grayscale(1);
-}
+.graph-container.graph-gray-mode + .time-bar-container{filter: grayscale(1);}
 
 /* Полоса времени */
-.time-bar {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
+.time-bar{position: relative; width: 100%; height: 100%;}
 
 /* Шкала времени */
-.time-scale {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-}
+.time-scale{position: absolute; width: 100%; height: 100%; display: flex;}
 
 /* Маркер часа */
-.hour-marker {
-    flex: 1;
-    border-left: 1px solid var(--clg);
-    position: relative;
-    cursor: pointer;
-}
-
-.hour-marker:first-child {
-    border-left: none;
-}
-
-.hour-marker:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.graph-container.dark-mode + .time-bar-container .hour-marker:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+.hour-marker{flex: 1; border-left: 1px solid var(--clg); position: relative; cursor: pointer;}
+.hour-marker:first-child{border-left: none;}
+.hour-marker:hover{background-color: rgba(0, 0, 0, 0.05);}
+.graph-container.dark-mode + .time-bar-container .hour-marker:hover{background-color: rgba(255, 255, 255, 0.1);}
 
 /* Подписи часов */
-.hour-label {
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    white-space: nowrap;
-    font-weight: 400;
-    font-family: var(--font-family);
-}
+.hour-label{position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: var(--font-size-xs); color: var(--text-secondary); white-space: nowrap; font-weight: 400; font-family: var(--font-family);}
 
 /* Полчаса - тонкая линия */
-.half-hour-marker {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 1px;
-    height: 30%;
-    background-color: rgba(0, 0, 0, 0.15);
-    transform: translateY(-50%);
-    pointer-events: none;
-}
+.half-hour-marker{position: absolute; top: 50%; left: 0; width: 1px; height: 30%; background-color: rgba(0, 0, 0, 0.15); transform: translateY(-50%); pointer-events: none;}
+.graph-container.dark-mode + .time-bar-container .half-hour-marker{background-color: rgba(255, 255, 255, 0.2);}
 
-.graph-container.dark-mode + .time-bar-container .half-hour-marker {
-    background-color: rgba(255, 255, 255, 0.2);
-}
+/* Индикатор времени */
+.time-indicator{position: absolute; top: 0; width: 2px; height: 100%; background-color: transparent; z-index: 10; pointer-events: none; transform: translateX(-50%);}
+.time-indicator::before, .time-indicator::after{display: none;}
 
-/* Обновляем стили для time-indicator в styles/components.css */
-.time-indicator {
-    position: absolute;
-    top: 0;
-    width: 2px;
-    height: 100%;
-    background-color: transparent;
-    z-index: 10;
-    pointer-events: none;
-    transform: translateX(-50%); /* ДОБАВЛЕНО: центрирование по ширине */
-}
+/* Выноска с текущим временем */
+.time-indicator-label{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--danger-color); color: white; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); white-space: nowrap; font-weight: 600; font-family: monospace; z-index: 11;}
+.time-indicator-label::before, .time-indicator-label::after{content: ''; position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;}
+.time-indicator-label::before{top: -4px; border-bottom: 4px solid var(--danger-color);}
+.time-indicator-label::after{bottom: -4px; border-top: 4px solid var(--danger-color);}
 
-/* Убираем риски (кружки) сверху и снизу */
-.time-indicator::before,
-.time-indicator::after {
-    display: none;
-}
-
-/* Выноска с текущим временем - теперь посередине полосы */
-.time-indicator-label {
-    position: absolute;
-    top: 50%; /* Посередине полосы */
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: var(--danger-color);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
-    font-weight: 600;
-    font-family: monospace;
-    z-index: 11;
-}
-
-/* Стрелочки сверху и снизу у выноски */
-.time-indicator-label::before,
-.time-indicator-label::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-}
-
-/* Стрелочка сверху */
-.time-indicator-label::before {
-    top: -4px;
-    border-bottom: 4px solid var(--danger-color);
-}
-
-/* Стрелочка снизу */
-.time-indicator-label::after {
-    bottom: -4px;
-    border-top: 4px solid var(--danger-color);
-}
-
-/* Дополнительные стили для графического соответствия */
-.time-bar-container .hour-label {
-    font-size: 10px;
-}
-
-/* Стили для кликабельных часов */
-.hour-marker.clickable {
-    cursor: pointer;
-}
-
-/* Полночь особый маркер */
-.hour-marker.midnight {
-    border-left-color: var(--danger-color);
-}
-
-.hour-marker.midnight .hour-label {
-    color: var(--danger-color);
-    font-weight: 700;
-}
+/* Дополнительные стили */
+.time-bar-container .hour-label{font-size: 10px;}
+.hour-marker.clickable{cursor: pointer;}
+.hour-marker.midnight{border-left-color: var(--danger-color);}
+.hour-marker.midnight .hour-label{color: var(--danger-color); font-weight: 700;}
