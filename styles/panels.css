@@ -85,7 +85,7 @@
 /* Контейнер управления */
 .intersection-controls{margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: #f9f9f9; border: 1px solid var(--clg); border-radius: var(--border-radius);}
 .intersection-form{display: flex; flex-direction: column; gap: var(--spacing-sm);}
-.intersection-form-row{display: flex; align-items: center; gap: var(--spacing-lg); flex-wrap: wrap;}
+.intersection-form-row{display: flex; align-items: center; flex-wrap: wrap;}
 .intersection-form-label{display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--text-color); cursor: pointer;}
 .intersection-form-label input[type="checkbox"]{margin: 0; width: 14px; height: 14px;}
 .intersection-date-group{display: flex; align-items: center; gap: var(--spacing-sm);}

@@ -83,13 +83,9 @@
 .intersection-form-row {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
     flex-wrap: wrap;
 }
 
-.intersection-select-group {
-    min-width: 250px;
-}
 
 .intersection-select {
     width: 100%;

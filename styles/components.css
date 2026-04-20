@@ -3,7 +3,7 @@
 [data-action="acceptWarning"]{display: none;}
 
 /* Кнопки */
-button{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-weight: 400; height: 25px; font-family: var(--font-family);}
+button{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-weight: 400; font-family: var(--font-family);}
 button:hover{filter: brightness(0.9);}
 .ui-btn{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 
@@ -17,7 +17,7 @@ button:hover{filter: brightness(0.9);}
 /* Кнопка программы */
 .parable-btn{background-color: #4a6fa5; color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
 .parable-btn:hover{filter: brightness(0.9); background-color: #3a5a8a;}
-.small-button{padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
+.small-button{padding: var(--spacing-xs) var(--spacing-sm);}
 .transform-btn{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 .delete-date-btn, .edit-btn, .delete-group-btn{background-color: var(--cp); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm);}
 .save-btn, .cancel-btn{background-color: var(--cp); padding: 3px 8px; font-size: var(--font-size-sm);}

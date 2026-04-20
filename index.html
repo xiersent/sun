@@ -121,8 +121,8 @@
             <div class="panel-section tabs-section" id="tabs-section">
                 <div class="tab-container">
                     <div class="tab-buttons">
-                        <button class="tab-button" data-tab="summary">Состояния (рабочая)</button>
-                        <button class="tab-button" data-tab="intersections">Пересечения (в разработке)</button>
+                        <button class="tab-button" data-tab="summary">Состояния</button>
+                        <button class="tab-button" data-tab="intersections">Пересечения</button>
                     </div>
                     
                     <div class="tab-content" id="summary-tab">
@@ -179,17 +179,25 @@
                             
                             <div class="summary-controls">
                                 <div class="intersection-form">
-                                    <div class="intersection-form-row">
-                                        <div class="intersection-select-group">
-                                            <select class="summary-select" id="intersectionGroupSelect">
-                                                <option value="all">Все доступные группы с сигналами</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
-                                            Сбросить выбор сигнала
-                                        </button>
-                                    </div>
+									<div class="intersection-form-row">
+										<div class="intersection-select-group">
+											<select class="summary-select" id="intersectionGroupSelect">
+												<option value="all">Все доступные группы с сигналами</option>
+											</select>
+										</div>
+										
+										<!-- НОВЫЙ СЕЛЕКТ СОРТИРОВКИ -->
+										<div class="intersection-select-group">
+											<select class="summary-select" id="intersectionSortSelect">
+												<option value="period-desc">Сортировка: по периоду ↓ (большие сначала)</option>
+												<option value="time-asc">Сортировка: по времени ↑ (ранние сначала)</option>
+											</select>
+										</div>
+										
+										<button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
+											Сбросить выбор сигнала
+										</button>
+									</div>
                                 </div>
                             </div>
                             

@@ -1,4 +1,4 @@
-// modules/stateIntersectionManager.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
+// modules/stateIntersectionManager.js - ИСПРАВЛЕННАЯ ВЕРСИЯ С СОРТИРОВКОЙ
 // Показывает пересечения ВЫБРАННОГО сигнала со всеми остальными
 
 class StateIntersectionManager {
@@ -10,6 +10,7 @@ class StateIntersectionManager {
         this.isUpdating = false;
         this.updateDebounceDelay = 100;
         this.updateTimeout = null;
+        this.currentSortMode = 'period-desc'; // 'period-desc' или 'time-asc'
         
         this.init();
     }
@@ -18,6 +19,7 @@ class StateIntersectionManager {
         const ids = [
             'intersectionPanel',
             'intersectionGroupSelect',
+            'intersectionSortSelect',  // ДОБАВЛЕНО
             'intersectionResults',
             'intersectionSelectedInfo',
             'intersectionStats'
@@ -33,6 +35,7 @@ class StateIntersectionManager {
         this.setupEventListeners();
         this.populateGroupSelect();
         this.restoreGroupSelection();
+        this.restoreSortSelection();  // ДОБАВЛЕНО
         this.setupWaveSelectionObserver();
         this.setupDateObservers();
         this.updateIntersections();
@@ -45,6 +48,16 @@ class StateIntersectionManager {
             groupSelect.addEventListener('change', () => {
                 this.saveGroupSelection();
                 this.updateIntersections();
+            });
+        }
+        
+        // ДОБАВЛЕНО: Обработчик для селекта сортировки
+        const sortSelect = this.elements.intersectionSortSelect;
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                this.currentSortMode = e.target.value;
+                this.saveSortSelection();
+                this.displayResults(this.lastIntersections, this.lastSelectedWave, this.lastCurrentDate);
             });
         }
         
@@ -147,13 +160,27 @@ class StateIntersectionManager {
         }
     }
     
+    // ДОБАВЛЕНО: Сохранение/восстановление выбранной сортировки
+    restoreSortSelection() {
+        const savedSort = localStorage.getItem('intersectionSelectedSort');
+        if (savedSort && this.elements.intersectionSortSelect) {
+            this.currentSortMode = savedSort;
+            this.elements.intersectionSortSelect.value = savedSort;
+        }
+    }
+    
+    saveSortSelection() {
+        if (this.elements.intersectionSortSelect) {
+            localStorage.setItem('intersectionSelectedSort', this.currentSortMode);
+        }
+    }
+    
     getAllWavesFromSelectedGroup() {
         if (!window.appState || !window.appState.data) return [];
         
         const groupId = this.elements.intersectionGroupSelect?.value;
         
         if (!groupId || groupId === 'all') {
-            // Возвращаем ВСЕ волны, включая те, что в отключенных группах
             return window.appState.data.waves;
         }
         
@@ -169,9 +196,6 @@ class StateIntersectionManager {
         return waves;
     }
     
-    /**
-     * НАХОЖДЕНИЕ ПЕРЕСЕЧЕНИЙ ВЫБРАННОГО СИГНАЛА СО ВСЕМИ ОСТАЛЬНЫМИ
-     */
     findIntersectionsWithSelectedWave(selectedWave, otherWaves, date) {
         const allIntersections = [];
         
@@ -184,7 +208,6 @@ class StateIntersectionManager {
             window.appState.baseDate : 
             new Date(window.appState.baseDate);
         
-        // Функция для вычисления значения волны
         const getWaveValue = (wave, timeMs) => {
             const daysFromBase = (timeMs - baseDate.getTime()) / (1000 * 60 * 60 * 24);
             const phase = (daysFromBase % wave.period) / wave.period;
@@ -193,13 +216,11 @@ class StateIntersectionManager {
         };
         
         for (const otherWave of otherWaves) {
-            // Пропускаем сам выбранный сигнал
             if (String(otherWave.id) === String(selectedWave.id)) continue;
             
             const T1 = selectedWave.period;
             const T2 = otherWave.period;
             
-            // Фазы в начале дня
             const daysToStart = (dayStart.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24);
             const phase1 = (daysToStart % T1) / T1;
             const phase2 = (daysToStart % T2) / T2;
@@ -210,7 +231,7 @@ class StateIntersectionManager {
             const omega1 = 2 * Math.PI / T1;
             const omega2 = 2 * Math.PI / T2;
             
-            // Первое семейство решений: ω1*t + φ1 = ω2*t + φ2 + 2πk
+            // Первое семейство решений
             if (Math.abs(omega1 - omega2) > 1e-10) {
                 for (let k = -10; k <= 10; k++) {
                     const t = (phi2 - phi1 + 2 * Math.PI * k) / (omega1 - omega2);
@@ -232,7 +253,7 @@ class StateIntersectionManager {
                 }
             }
             
-            // Второе семейство решений: ω1*t + φ1 = π - (ω2*t + φ2) + 2πk
+            // Второе семейство решений
             for (let k = -10; k <= 10; k++) {
                 const t = (Math.PI - phi1 - phi2 + 2 * Math.PI * k) / (omega1 + omega2);
                 const timeMs = dayStart.getTime() + t * 24 * 60 * 60 * 1000;
@@ -279,7 +300,6 @@ class StateIntersectionManager {
         try {
             this.isUpdating = true;
             
-            // Проверяем, выбран ли сигнал
             if (!this.selectedWaveId) {
                 this.showNoWaveSelectedMessage();
                 return;
@@ -291,7 +311,6 @@ class StateIntersectionManager {
                 return;
             }
             
-            // Получаем все волны для анализа (включая отключенные)
             const allWaves = this.getAllWavesFromSelectedGroup();
             
             if (allWaves.length < 2) {
@@ -301,12 +320,16 @@ class StateIntersectionManager {
             
             const currentDate = window.appState.currentDate || new Date();
             
-            // Находим пересечения выбранного сигнала со всеми остальными
             const intersections = this.findIntersectionsWithSelectedWave(
                 selectedWave, 
                 allWaves, 
                 currentDate
             );
+            
+            // Сохраняем для использования при смене сортировки
+            this.lastIntersections = intersections;
+            this.lastSelectedWave = selectedWave;
+            this.lastCurrentDate = currentDate;
             
             this.displayResults(intersections, selectedWave, currentDate);
             
@@ -323,159 +346,169 @@ class StateIntersectionManager {
         return window.appState.data.waves.find(w => String(w.id) === String(waveId));
     }
     
-
-
-	displayResults(intersections, selectedWave, currentDate) {
-		const container = this.elements.intersectionResults;
-		const stats = this.elements.intersectionStats;
-		const selectedInfo = this.elements.intersectionSelectedInfo;
-		
-		if (!container) return;
-		
-		// Обновляем информацию о выбранном сигнале
-		if (selectedInfo) {
-			const dateStr = currentDate.toLocaleDateString('ru-RU');
-			selectedInfo.innerHTML = `
-				<div class="selected-wave-info">
-					<div class="selected-wave-header">
-						<span class="selected-wave-icon">🎯</span>
-						<span class="selected-wave-name" style="color: ${selectedWave.color || '#666'}">
-							${this.escapeHtml(selectedWave.name)}
-						</span>
-						<span class="wave-period-badge">${selectedWave.period} дней</span>
-					</div>
-					<div class="selected-wave-details">
-						<div class="selected-wave-detail">
-							<span class="detail-label">Дата анализа:</span>
-							<span class="detail-value">${dateStr}</span>
-						</div>
-						<div class="selected-wave-detail">
-							<span class="detail-label">Найдено пересечений:</span>
-							<span class="detail-value">${intersections.length}</span>
-						</div>
-					</div>
-				</div>
-			`;
-		}
-		
-		if (intersections.length === 0) {
-			container.innerHTML = `
-				<div class="list-empty">
-					<div style="text-align: center; padding: 20px;">
-						<div style="font-size: 32px; margin-bottom: 10px;">📊</div>
-						<div>Нет пересечений сигнала <strong>${this.escapeHtml(selectedWave.name)}</strong> в выбранный день</div>
-					</div>
-				</div>
-			`;
-			if (stats) stats.style.display = 'none';
-			return;
-		}
-		
-		if (stats) {
-			stats.style.display = 'none';
-		}
-		
-		// ИСПРАВЛЕНИЕ: Сортируем пересечения по убыванию периода (от большего к меньшему)
-		const sortedIntersections = [...intersections].sort((a, b) => {
-			// Период второго сигнала (wave2) в пересечении
-			const periodA = a.wave2.period;
-			const periodB = b.wave2.period;
-			return periodB - periodA; // По убыванию
-		});
-		
-		// Используем единый класс summary-item - текст кнопки ВСЕГДА "Показать на визоре"
-		const resultsHTML = sortedIntersections.map((inter, index) => {
-			const wave = inter.wave2;
-			const waveIdStr = String(wave.id);
-			
-			return `
-				<div class="summary-item">
-					<div class="summary-item-info">
-						<div class="summary-item-name">
-							<span class="summary-item-index">${index + 1}.</span>
-							<span style="color: ${wave.color || '#666'}">
-								${this.escapeHtml(wave.name)}
-							</span>
-							<span class="wave-period-badge">${wave.period} дней</span>
-						</div>
-						<div class="summary-item-details">
-							<span class="summary-item-state">🕐 ${this.formatTime(inter.time)}</span>
-							<span class="summary-item-difference">Значение: ${inter.value.toFixed(3)}</span>
-						</div>
-					</div>
-					<div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
-					<div class="summary-item-actions">
-						<button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
-							Показать на визоре
-						</button>
-					</div>
-				</div>
-			`;
-		}).join('');
-		
-		container.innerHTML = resultsHTML;
-		
-		// Добавляем обработчики для кнопок
-		setTimeout(() => {
-			container.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
-				btn.replaceWith(btn.cloneNode(true));
-			});
-			
-			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
-				btn.addEventListener('click', (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					
-					const waveId = btn.dataset.waveId;
-					if (!waveId) return;
-					
-					let checkbox = null;
-					checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-					
-					if (!checkbox) {
-						checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
-					}
-					
-					if (checkbox) {
-						const isChecked = checkbox.checked;
-						checkbox.checked = !isChecked;
-						
-						const changeEvent = new Event('change', {
-							bubbles: true,
-							cancelable: true
-						});
-						checkbox.dispatchEvent(changeEvent);
-						
-						if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
-							const $checkbox = $(checkbox);
-							window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
-						}
-					} else {
-						if (window.appState && window.appState.waveVisibility) {
-							const waveIdStr = String(waveId);
-							const currentState = window.appState.waveVisibility[waveIdStr];
-							window.appState.waveVisibility[waveIdStr] = currentState === false;
-							window.appState.save();
-							
-							if (window.waves && window.waves.updatePosition) {
-								setTimeout(() => {
-									window.waves.updatePosition();
-								}, 100);
-							}
-							
-							if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-								setTimeout(() => {
-									window.unifiedListManager.updateWavesList();
-								}, 100);
-							}
-						}
-					}
-				});
-			});
-		}, 100);
-	}
-
-
+    // ОБНОВЛЕНО: Сортировка результатов по выбранному режиму
+    sortIntersections(intersections) {
+        if (this.currentSortMode === 'time-asc') {
+            // Сортировка по времени от наименьшего к наибольшему
+            return [...intersections].sort((a, b) => a.time.getTime() - b.time.getTime());
+        } else {
+            // Сортировка по периоду от большего к меньшему (по умолчанию)
+            return [...intersections].sort((a, b) => {
+                const periodA = a.wave2.period;
+                const periodB = b.wave2.period;
+                return periodB - periodA;
+            });
+        }
+    }
+    
+    displayResults(intersections, selectedWave, currentDate) {
+        const container = this.elements.intersectionResults;
+        const stats = this.elements.intersectionStats;
+        const selectedInfo = this.elements.intersectionSelectedInfo;
+        
+        if (!container) return;
+        
+        // Обновляем информацию о выбранном сигнале
+        if (selectedInfo) {
+            const dateStr = currentDate.toLocaleDateString('ru-RU');
+            selectedInfo.innerHTML = `
+                <div class="selected-wave-info">
+                    <div class="selected-wave-header">
+                        <span class="selected-wave-icon">🎯</span>
+                        <span class="selected-wave-name" style="color: ${selectedWave.color || '#666'}">
+                            ${this.escapeHtml(selectedWave.name)}
+                        </span>
+                        <span class="wave-period-badge">${selectedWave.period} дней</span>
+                    </div>
+                    <div class="selected-wave-details">
+                        <div class="selected-wave-detail">
+                            <span class="detail-label">Дата анализа:</span>
+                            <span class="detail-value">${dateStr}</span>
+                        </div>
+                        <div class="selected-wave-detail">
+                            <span class="detail-label">Найдено пересечений:</span>
+                            <span class="detail-value">${intersections.length}</span>
+                        </div>
+                        <div class="selected-wave-detail">
+                            <span class="detail-label">Сортировка:</span>
+                            <span class="detail-value">${this.currentSortMode === 'time-asc' ? 'по времени ↑' : 'по периоду ↓'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (intersections.length === 0) {
+            container.innerHTML = `
+                <div class="list-empty">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+                        <div>Нет пересечений сигнала <strong>${this.escapeHtml(selectedWave.name)}</strong> в выбранный день</div>
+                    </div>
+                </div>
+            `;
+            if (stats) stats.style.display = 'none';
+            return;
+        }
+        
+        if (stats) {
+            stats.style.display = 'none';
+        }
+        
+        // ПРИМЕНЯЕМ СОРТИРОВКУ
+        const sortedIntersections = this.sortIntersections(intersections);
+        
+        const resultsHTML = sortedIntersections.map((inter, index) => {
+            const wave = inter.wave2;
+            const timeStr = this.formatTime(inter.time);
+            
+            return `
+                <div class="summary-item">
+                    <div class="summary-item-info">
+                        <div class="summary-item-name">
+                            <span class="summary-item-index">${index + 1}.</span>
+                            <span style="color: ${wave.color || '#666'}">
+                                ${this.escapeHtml(wave.name)}
+                            </span>
+                            <span class="wave-period-badge">${wave.period} дней</span>
+                        </div>
+                        <div class="summary-item-details">
+                            <span class="summary-item-state">🕐 ${timeStr}</span>
+                            <span class="summary-item-difference">Значение: ${inter.value.toFixed(3)}</span>
+                        </div>
+                    </div>
+                    <div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
+                    <div class="summary-item-actions">
+                        <button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
+                            Показать на визоре
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = resultsHTML;
+        
+        // Добавляем обработчики для кнопок
+        setTimeout(() => {
+            container.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+                btn.replaceWith(btn.cloneNode(true));
+            });
+            
+            document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const waveId = btn.dataset.waveId;
+                    if (!waveId) return;
+                    
+                    let checkbox = null;
+                    checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+                    
+                    if (!checkbox) {
+                        checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
+                    }
+                    
+                    if (checkbox) {
+                        const isChecked = checkbox.checked;
+                        checkbox.checked = !isChecked;
+                        
+                        const changeEvent = new Event('change', {
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        checkbox.dispatchEvent(changeEvent);
+                        
+                        if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+                            const $checkbox = $(checkbox);
+                            window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
+                        }
+                    } else {
+                        if (window.appState && window.appState.waveVisibility) {
+                            const waveIdStr = String(waveId);
+                            const currentState = window.appState.waveVisibility[waveIdStr];
+                            window.appState.waveVisibility[waveIdStr] = currentState === false;
+                            window.appState.save();
+                            
+                            if (window.waves && window.waves.updatePosition) {
+                                setTimeout(() => {
+                                    window.waves.updatePosition();
+                                }, 100);
+                            }
+                            
+                            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                setTimeout(() => {
+                                    window.unifiedListManager.updateWavesList();
+                                }, 100);
+                            }
+                        }
+                    }
+                });
+            });
+        }, 100);
+    }
+    
     showNoWaveSelectedMessage() {
         const container = this.elements.intersectionResults;
         const stats = this.elements.intersectionStats;
