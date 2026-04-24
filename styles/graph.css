@@ -1,4 +1,6 @@
 /* styles/graph.css - ОБЪЕДИНЕН (4 блока extremum → 1 с учетом порядка 1→2→3→4) */
+/* Обёртка: ширина как у графика, чтобы выноски (position:absolute; left: x px) совпадали с координатами волн/пересечений */
+.graph-viewport{position: relative; width: var(--gw); align-self: center; flex-shrink: 0;}
 /* Graph container */
 .graph-container{position: relative; width: var(--gw); height: var(--gh); background-color: #fff; outline: 1px solid var(--clg); overflow: hidden;}
 .graph-container.graph-gray-mode{filter: grayscale(1);}

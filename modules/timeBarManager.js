@@ -6,7 +6,8 @@ class TimeBarManager {
         this.timeIndicator = null;
         this.timeLabels = null;
         this.indicatorLabel = null;
-        this.updateInterval = null;
+        this._tickRaf = null;
+        this._lastIndicatorSecond = -1;
         this.isInitialized = false;
         this.currentDate = null;
     }
@@ -48,10 +49,12 @@ class TimeBarManager {
         container.innerHTML = timeBarHTML;
         
         const graphSection = document.querySelector('.graph-section');
+        const graphViewport = document.querySelector('.graph-viewport');
         const graphContainer = document.querySelector('.graph-container');
+        const insertBeforeEl = graphViewport || graphContainer;
         
-        if (graphContainer && graphSection) {
-            graphSection.insertBefore(container, graphContainer);
+        if (insertBeforeEl && graphSection) {
+            graphSection.insertBefore(container, insertBeforeEl);
             
             this.container = container;
             this.timeScale = document.getElementById('timeScale');
@@ -218,10 +221,20 @@ class TimeBarManager {
     }
     
     setupUpdates() {
-        this.updateInterval = setInterval(() => {
-            this.updateTimeIndicator();
-        }, 1000);
-        
+        const tick = () => {
+            if (window.appState && this.isCurrentDateToday()) {
+                this.updateTimeIndicator();
+            } else {
+                const sec = new Date().getSeconds();
+                if (sec !== this._lastIndicatorSecond) {
+                    this._lastIndicatorSecond = sec;
+                    this.updateTimeIndicator();
+                }
+            }
+            this._tickRaf = requestAnimationFrame(tick);
+        };
+        this._tickRaf = requestAnimationFrame(tick);
+
         this.setupModeObservers();
         this.setupDateChangeObserver();
     }
@@ -255,9 +268,9 @@ class TimeBarManager {
                     this._currentDate = value;
                     
                     if (window.timeBarManager) {
-                        setTimeout(() => {
+                        queueMicrotask(() => {
                             window.timeBarManager.updateTimeIndicator();
-                        }, 100);
+                        });
                     }
                 }
             });
@@ -267,9 +280,9 @@ class TimeBarManager {
     }
     
     destroy() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
+        if (this._tickRaf != null) {
+            cancelAnimationFrame(this._tickRaf);
+            this._tickRaf = null;
         }
         
         if (this.container && this.container.parentNode) {

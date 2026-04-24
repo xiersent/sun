@@ -51,7 +51,7 @@ class AppState {
             }
         };
         
-        this._saveDebounceTimer = null;
+        this._saveDebounceRaf = null;
         this._loadInProgress = null;
         // Полная загрузка (localStorage + миграции) — только из init.js с await;
         // до DOMContentLoaded MigrationsManager ещё не подключён.
@@ -118,20 +118,20 @@ class AppState {
         localStorage.setItem('appData', JSON.stringify(this.data));
     }
     
-    saveDebounced(delayMs = 200) {
-        if (this._saveDebounceTimer) {
-            clearTimeout(this._saveDebounceTimer);
+    saveDebounced() {
+        if (this._saveDebounceRaf != null) {
+            cancelAnimationFrame(this._saveDebounceRaf);
         }
-        this._saveDebounceTimer = setTimeout(() => {
-            this._saveDebounceTimer = null;
+        this._saveDebounceRaf = requestAnimationFrame(() => {
+            this._saveDebounceRaf = null;
             this.save();
-        }, delayMs);
+        });
     }
-    
+
     flushPendingSave() {
-        if (this._saveDebounceTimer) {
-            clearTimeout(this._saveDebounceTimer);
-            this._saveDebounceTimer = null;
+        if (this._saveDebounceRaf != null) {
+            cancelAnimationFrame(this._saveDebounceRaf);
+            this._saveDebounceRaf = null;
             this.save();
         }
     }
@@ -339,11 +339,11 @@ class AppState {
                     }
                 }
                 
-                setTimeout(() => {
+                queueMicrotask(() => {
                     if (window.dates && window.dates.forceInitialize) {
                         window.dates.forceInitialize();
                     }
-                }, 100);
+                });
                 
             } catch (e) {
                 __lp && __lp.mark('appState_load_impl_error', { message: e && e.message });

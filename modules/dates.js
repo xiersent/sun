@@ -294,18 +294,14 @@ class DatesManager {
         this.updateTodayButton();
         
         if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
+            window.summaryManager.updateSummary();
         }
-        
+
         this.updateDateTimeInputs();
-        
-        setTimeout(() => {
-            if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                window.unifiedListManager.updateDatesList();
-            }
-        }, 50);
+
+        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+            window.unifiedListManager.updateDatesList();
+        }
     }
     
     addGroup(name) {
@@ -424,17 +420,13 @@ class DatesManager {
         this.updateTodayButton();
         
         if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
+            window.summaryManager.updateSummary();
         }
-        
+
         if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-            setTimeout(() => {
-                window.stateIntersectionManager.updateIntersections();
-            }, 50);
+            window.stateIntersectionManager.updateIntersections();
         }
-        
+
         this.updateDateTimeInputs();
     }
 
@@ -459,22 +451,18 @@ class DatesManager {
         this.updateTodayButton();
         
         if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
+            window.summaryManager.updateSummary();
         }
-        
+
         if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-            setTimeout(() => {
-                window.stateIntersectionManager.updateIntersections();
-            }, 50);
+            window.stateIntersectionManager.updateIntersections();
         }
-        
+
         this.updateDateTimeInputs();
-        
-        setTimeout(() => {
+
+        queueMicrotask(() => {
             window.appState.isProgrammaticDateChange = false;
-        }, 100);
+        });
     }
 
     
@@ -547,22 +535,18 @@ class DatesManager {
         window.appState.save();
         
         this.updateTodayButton();
-        
+
         if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
+            window.summaryManager.updateSummary();
         }
-        
+
         if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-            setTimeout(() => {
-                window.stateIntersectionManager.updateIntersections();
-            }, 50);
+            window.stateIntersectionManager.updateIntersections();
         }
-        
+
         this.updateDateTimeInputs();
     }
-    
+
     goToNow() {
         window.appState.currentDate = new Date();
         
@@ -574,22 +558,18 @@ class DatesManager {
         window.appState.save();
         
         this.updateTodayButton();
-        
+
         if (window.summaryManager && window.summaryManager.updateSummary) {
-            setTimeout(() => {
-                window.summaryManager.updateSummary();
-            }, 50);
+            window.summaryManager.updateSummary();
         }
-        
+
         if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-            setTimeout(() => {
-                window.stateIntersectionManager.updateIntersections();
-            }, 50);
+            window.stateIntersectionManager.updateIntersections();
         }
-        
+
         this.updateDateTimeInputs();
     }
-    
+
     setDateFromInputs() {
         const dateValue = this.elements.mainDateInputDate?.value;
         const timeValue = this.elements.mainDateInputTime?.value;
@@ -607,21 +587,17 @@ class DatesManager {
             window.appState.save();
             
             this.updateTodayButton();
-            
+
             if (window.summaryManager && window.summaryManager.updateSummary) {
-                setTimeout(() => {
-                    window.summaryManager.updateSummary();
-                }, 50);
+                window.summaryManager.updateSummary();
             }
-            
+
             if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
-                setTimeout(() => {
-                    window.stateIntersectionManager.updateIntersections();
-                }, 50);
+                window.stateIntersectionManager.updateIntersections();
             }
         }
     }
-    
+
     setDateFromInput() {
         this.setDateFromInputs();
     }

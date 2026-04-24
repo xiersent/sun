@@ -156,45 +156,38 @@ async function finalizeInitialization() {
     }
 
     if (window.extremumTimeManager && window.extremumTimeManager.init) {
-        setTimeout(() => {
-            __lp && __lp.mark('deferred_extremumTimeManager_init');
-            window.extremumTimeManager.init();
-        }, 500);
+        __lp && __lp.mark('finalize_extremumTimeManager_init');
+        window.extremumTimeManager.init();
+    }
+
+    if (window.appState && window.appState.activeDateId) {
+        if (!window.appState.dateSelections) {
+            window.appState.dateSelections = {
+                typeA: null,
+                typeB: null
+            };
+        }
+
+        const activeDateIdStr = String(window.appState.activeDateId);
+        const currentTypeAStr = window.appState.dateSelections.typeA
+            ? String(window.appState.dateSelections.typeA)
+            : null;
+
+        if (currentTypeAStr !== activeDateIdStr) {
+            window.appState.dateSelections.typeA = window.appState.activeDateId;
+            window.appState.dateSelections.typeB = null;
+            window.appState.save();
+
+            if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                window.unifiedListManager.updateDatesList();
+            }
+        }
     }
 
     if (window.stateIntersectionManager && window.stateIntersectionManager.refresh) {
-        setTimeout(() => {
-            __lp && __lp.mark('deferred_stateIntersection_refresh');
-            window.stateIntersectionManager.refresh();
-        }, 600);
+        __lp && __lp.mark('finalize_stateIntersection_refresh');
+        window.stateIntersectionManager.refresh();
     }
-    
-    setTimeout(() => {
-        if (window.appState && window.appState.activeDateId) {
-            if (!window.appState.dateSelections) {
-                window.appState.dateSelections = {
-                    typeA: null,
-                    typeB: null
-                };
-            }
-            
-            const activeDateIdStr = String(window.appState.activeDateId);
-            const currentTypeAStr = window.appState.dateSelections.typeA ? 
-                String(window.appState.dateSelections.typeA) : null;
-            
-            if (currentTypeAStr !== activeDateIdStr) {
-                window.appState.dateSelections.typeA = window.appState.activeDateId;
-                window.appState.dateSelections.typeB = null;
-                window.appState.save();
-                
-                if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                    setTimeout(() => {
-                        window.unifiedListManager.updateDatesList();
-                    }, 100);
-                }
-            }
-        }
-    }, 1000);
 }
 
 window.finalizeInitialization = finalizeInitialization;

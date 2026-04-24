@@ -9,9 +9,7 @@ class SummaryManager {
         this.includePastWaves = false;
         
         this.isUpdating = false;
-        this.lastUpdateTime = 0;
-        this.updateDebounceDelay = 100;
-        this.updateTimeout = null;
+        this._summaryUpdateRaf = null;
         
         this.init();
     }
@@ -169,21 +167,13 @@ class SummaryManager {
     }
     
     debouncedUpdate() {
-        const now = Date.now();
-        
-        if (this.updateTimeout) {
-            clearTimeout(this.updateTimeout);
+        if (this._summaryUpdateRaf != null) {
+            cancelAnimationFrame(this._summaryUpdateRaf);
         }
-        
-        if (now - this.lastUpdateTime < this.updateDebounceDelay) {
-            this.updateTimeout = setTimeout(() => {
-                this.updateSummary();
-                this.lastUpdateTime = Date.now();
-            }, this.updateDebounceDelay);
-        } else {
+        this._summaryUpdateRaf = requestAnimationFrame(() => {
+            this._summaryUpdateRaf = null;
             this.updateSummary();
-            this.lastUpdateTime = now;
-        }
+        });
     }
     
     populateGroupSelect() {
@@ -364,65 +354,54 @@ class SummaryManager {
 		}).join('');
 		
 		resultsElement.innerHTML = resultsHTML;
-		
-		setTimeout(() => {
+
+		queueMicrotask(() => {
 			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
-				// Удаляем старый обработчик, если он есть
 				btn.replaceWith(btn.cloneNode(true));
 			});
-			
-			// Добавляем новые обработчики
+
 			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
 				btn.addEventListener('click', (e) => {
 					e.preventDefault();
 					e.stopPropagation();
-					
+
 					const waveId = btn.dataset.waveId;
 					if (!waveId) return;
-					
-					// Ищем чекбокс в списке волн
+
 					let checkbox = null;
 					checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-					
+
 					if (!checkbox) {
 						checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
 					}
-					
+
 					if (checkbox) {
-						// Переключаем состояние
 						const isChecked = checkbox.checked;
 						checkbox.checked = !isChecked;
-						
-						// Создаем и запускаем событие change
+
 						const changeEvent = new Event('change', {
 							bubbles: true,
 							cancelable: true
 						});
 						checkbox.dispatchEvent(changeEvent);
-						
-						// Вызываем обработчик
+
 						if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
 							const $checkbox = $(checkbox);
 							window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
 						}
 					} else {
-						// Прямое изменение состояния, если чекбокс не найден
 						if (window.appState && window.appState.waveVisibility) {
 							const waveIdStr = String(waveId);
 							const currentState = window.appState.waveVisibility[waveIdStr];
 							window.appState.waveVisibility[waveIdStr] = currentState === false;
 							window.appState.save();
-							
+
 							if (window.waves && window.waves.updatePosition) {
-								setTimeout(() => {
-									window.waves.updatePosition();
-								}, 100);
+								window.waves.updatePosition();
 							}
-							
+
 							if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-								setTimeout(() => {
-									window.unifiedListManager.updateWavesList();
-								}, 100);
+								window.unifiedListManager.updateWavesList();
 							}
 						}
 					}
@@ -431,7 +410,7 @@ class SummaryManager {
 					}
 				});
 			});
-		}, 100);
+		});
 	}
 
 

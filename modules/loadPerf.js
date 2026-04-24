@@ -83,6 +83,8 @@
     document.addEventListener('readystatechange', onReadyState);
     onReadyState();
 
+    let paintPerfObserver = null;
+
     global.addEventListener('load', function onWindowLoad() {
         mark('window_load');
         if (perf && perf.timing) {
@@ -95,23 +97,24 @@
                 domInteractive: t.domInteractive ? t.domInteractive - t.navigationStart : null
             });
         }
+        try {
+            if (paintPerfObserver) {
+                paintPerfObserver.disconnect();
+                paintPerfObserver = null;
+            }
+        } catch (e2) { /* ignore */ }
     });
 
     if (global.PerformanceObserver) {
         try {
-            const po = new PerformanceObserver(function (list) {
+            paintPerfObserver = new PerformanceObserver(function (list) {
                 for (const e of list.getEntries()) {
                     if (e.name === 'first-contentful-paint' || e.name === 'first-paint') {
                         mark('paint_' + e.name.replace(/-/g, '_'), { startTime: Math.round(e.startTime * 1000) / 1000 });
                     }
                 }
             });
-            po.observe({ type: 'paint', buffered: true });
-            global.setTimeout(function () {
-                try {
-                    po.disconnect();
-                } catch (e2) { /* ignore */ }
-            }, 15000);
+            paintPerfObserver.observe({ type: 'paint', buffered: true });
         } catch (e) { /* ignore */ }
     }
 })(typeof window !== 'undefined' ? window : this);

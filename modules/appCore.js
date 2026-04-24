@@ -136,13 +136,13 @@ class AppCore {
 
         // Восстанавливаем сохраненный цвет квадратиков
         this.restoreCornerColor();
-        
-        setTimeout(async () => {
+
+        queueMicrotask(async () => {
             try {
                 const versions = await this.loadVersions();
                 this.saveCurrentVersions(versions);
             } catch (error) {}
-        }, 1000);
+        });
     }
     
     // Сохраняет цвет квадратиков в localStorage

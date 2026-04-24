@@ -1,23 +1,17 @@
 // modules/autoSaveHandler.js
 class AutoSaveHandler {
     constructor() {
-        this.debounceTimers = new Map();
-        this.debounceDelay = 1000;
-        this.autoSaveInterval = null;
+        this._saveRaf = null;
         this.isInitialized = false;
-        
+
         this.init();
     }
-    
+
     init() {
         if (this.isInitialized) return;
-        
+
         this.setupEventListeners();
-        
-        this.autoSaveInterval = setInterval(() => {
-            this.autoSave();
-        }, 30000);
-        
+
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 this.forceSave();
@@ -67,17 +61,14 @@ class AutoSaveHandler {
         });
     }
     
-    debouncedSave(key = 'default') {
-        if (this.debounceTimers.has(key)) {
-            clearTimeout(this.debounceTimers.get(key));
+    debouncedSave() {
+        if (this._saveRaf != null) {
+            cancelAnimationFrame(this._saveRaf);
         }
-        
-        const timer = setTimeout(() => {
+        this._saveRaf = requestAnimationFrame(() => {
+            this._saveRaf = null;
             this.save();
-            this.debounceTimers.delete(key);
-        }, this.debounceDelay);
-        
-        this.debounceTimers.set(key, timer);
+        });
     }
     
     save() {
@@ -93,21 +84,18 @@ class AutoSaveHandler {
     }
     
     forceSave() {
-        this.debounceTimers.forEach(timer => clearTimeout(timer));
-        this.debounceTimers.clear();
-        
+        if (this._saveRaf != null) {
+            cancelAnimationFrame(this._saveRaf);
+            this._saveRaf = null;
+        }
         this.save();
     }
-    
+
     destroy() {
-        this.debounceTimers.forEach(timer => clearTimeout(timer));
-        this.debounceTimers.clear();
-        
-        if (this.autoSaveInterval) {
-            clearInterval(this.autoSaveInterval);
-            this.autoSaveInterval = null;
+        if (this._saveRaf != null) {
+            cancelAnimationFrame(this._saveRaf);
+            this._saveRaf = null;
         }
-        
         this.isInitialized = false;
     }
 }

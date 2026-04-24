@@ -8,8 +8,8 @@ class StateIntersectionManager {
         
         this.selectedWaveId = null;
         this.isUpdating = false;
-        this.updateDebounceDelay = 100;
-        this.updateTimeout = null;
+        this._intersectionUpdateRaf = null;
+        this._onWaveCornerSelectionChanged = this._onWaveCornerSelectionChanged.bind(this);
         this.currentSortMode = 'period-desc'; // 'period-desc' или 'time-asc'
         
         this.init();
@@ -38,6 +38,7 @@ class StateIntersectionManager {
         this.restoreSortSelection();  // ДОБАВЛЕНО
         this.setupWaveSelectionObserver();
         this.setupDateObservers();
+        this.selectedWaveId = this.getSelectedWaveId();
         this.updateIntersections();
     }
     
@@ -70,18 +71,18 @@ class StateIntersectionManager {
     }
     
     setupWaveSelectionObserver() {
-        // Наблюдаем за изменениями выбранного сигнала (через "Окрасить края")
-        const checkInterval = setInterval(() => {
-            const currentSelectedId = this.getSelectedWaveId();
-            if (currentSelectedId !== this.selectedWaveId) {
-                this.selectedWaveId = currentSelectedId;
-                this.updateIntersections();
-            }
-        }, 500);
-        
+        window.addEventListener('zaraza:waveCornerSelectionChanged', this._onWaveCornerSelectionChanged);
         window.addEventListener('beforeunload', () => {
-            clearInterval(checkInterval);
+            window.removeEventListener('zaraza:waveCornerSelectionChanged', this._onWaveCornerSelectionChanged);
         });
+    }
+
+    _onWaveCornerSelectionChanged() {
+        const currentSelectedId = this.getSelectedWaveId();
+        if (currentSelectedId !== this.selectedWaveId) {
+            this.selectedWaveId = currentSelectedId;
+            this.updateIntersections();
+        }
     }
     
     getSelectedWaveId() {
@@ -123,13 +124,13 @@ class StateIntersectionManager {
     }
     
     debouncedUpdate() {
-        if (this.updateTimeout) {
-            clearTimeout(this.updateTimeout);
+        if (this._intersectionUpdateRaf != null) {
+            cancelAnimationFrame(this._intersectionUpdateRaf);
         }
-        
-        this.updateTimeout = setTimeout(() => {
+        this._intersectionUpdateRaf = requestAnimationFrame(() => {
+            this._intersectionUpdateRaf = null;
             this.updateIntersections();
-        }, this.updateDebounceDelay);
+        });
     }
     
     populateGroupSelect() {
@@ -449,38 +450,37 @@ class StateIntersectionManager {
         }).join('');
         
         container.innerHTML = resultsHTML;
-        
-        // Добавляем обработчики для кнопок
-        setTimeout(() => {
+
+        queueMicrotask(() => {
             container.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
                 btn.replaceWith(btn.cloneNode(true));
             });
-            
+
             document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    
+
                     const waveId = btn.dataset.waveId;
                     if (!waveId) return;
-                    
+
                     let checkbox = null;
                     checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-                    
+
                     if (!checkbox) {
                         checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
                     }
-                    
+
                     if (checkbox) {
                         const isChecked = checkbox.checked;
                         checkbox.checked = !isChecked;
-                        
+
                         const changeEvent = new Event('change', {
                             bubbles: true,
                             cancelable: true
                         });
                         checkbox.dispatchEvent(changeEvent);
-                        
+
                         if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
                             const $checkbox = $(checkbox);
                             window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
@@ -491,17 +491,13 @@ class StateIntersectionManager {
                             const currentState = window.appState.waveVisibility[waveIdStr];
                             window.appState.waveVisibility[waveIdStr] = currentState === false;
                             window.appState.save();
-                            
+
                             if (window.waves && window.waves.updatePosition) {
-                                setTimeout(() => {
-                                    window.waves.updatePosition();
-                                }, 100);
+                                window.waves.updatePosition();
                             }
-                            
+
                             if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                                setTimeout(() => {
-                                    window.unifiedListManager.updateWavesList();
-                                }, 100);
+                                window.unifiedListManager.updateWavesList();
                             }
                         }
                     }
@@ -510,7 +506,7 @@ class StateIntersectionManager {
                     }
                 });
             });
-        }, 100);
+        });
     }
     
     showNoWaveSelectedMessage() {

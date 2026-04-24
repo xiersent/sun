@@ -1047,11 +1047,9 @@ class EventManager {
                         window.unifiedListManager.updateDatesList();
                     }
                     
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 100);
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
                 }
             }
         });
@@ -1146,14 +1144,14 @@ class EventManager {
         if ($target.is('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate') || 
             $target.closest('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate').length) {
             e.preventDefault();
-            
-            setTimeout(() => {
+
+            queueMicrotask(() => {
                 if (window.summaryManager && window.summaryManager.updateSummary) {
                     window.summaryManager.updateSummary();
                 }
-            }, 100);
+            });
         }
-        
+
         const $actionBtn = $target.closest('[data-action]');
         if ($actionBtn.length) {
             e.preventDefault();
@@ -1324,16 +1322,14 @@ class EventManager {
                 window.appState.waveBold[waveId] = $target.prop('checked');
                 window.appState.save();
                 if (window.waves) window.waves.updatePosition();
-                
-                setTimeout(() => {
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
-                }, 50);
+
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    window.summaryManager.updateSummary();
+                }
             }
             return;
         }
-        
+
         if ($target.hasClass('wave-color-preview-small')) {
             e.stopPropagation();
             const waveId = $target.data('id');
@@ -1342,33 +1338,29 @@ class EventManager {
                 const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
                 if (wave) {
                     window.unifiedListManager.changeWaveColor(wave);
-                    
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 50);
+
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
                 }
             }
             return;
         }
-        
+
         if ($target.hasClass('wave-corner-color-check')) {
             e.stopPropagation();
             const waveId = $target.data('id');
             
             if (waveId && window.waves) {
                 window.waves.setWaveCornerColor(waveId, $target.prop('checked'));
-                
-                setTimeout(() => {
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
-                }, 50);
+
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    window.summaryManager.updateSummary();
+                }
             }
             return;
         }
-        
+
         if ($target.hasClass('wave-group-toggle')) {
             e.stopPropagation();
             const groupId = $target.data('groupId');
@@ -1430,24 +1422,24 @@ class EventManager {
 								this.askedGroups.delete(groupId);
 							}
 							
-							setTimeout(() => {
+							requestAnimationFrame(() => {
 								if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
 									window.unifiedListManager.updateWavesList();
 								}
-								
+
 								this.recreateAllWaveElements();
-								
+
 								this.updateGroupStatsForWave(waveId, true);
-								
+
 								if (window.summaryManager && window.summaryManager.debouncedUpdate) {
 									window.summaryManager.debouncedUpdate();
 								}
-								
+
 								$checkbox.prop('checked', true);
 								if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 									window.dom.refreshShowOnVizorButtonLabels();
 								}
-							}, 100);
+							});
 						}
 						if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 							window.dom.refreshShowOnVizorButtonLabels();
@@ -1516,38 +1508,38 @@ class EventManager {
                     this.askedGroups.delete(groupId);
                 }
                 
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     $('.wave-container').remove();
                     if (window.waves) {
                         window.waves.waveContainers = {};
                         window.waves.wavePaths = {};
                     }
-                    
+
                     window.appState.data.waves.forEach(wave => {
                         const waveIdStr = String(wave.id);
                         const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
                         const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
                         const shouldShow = isWaveVisible && isGroupEnabled;
-                        
+
                         if (shouldShow) {
                             window.waves.createWaveElement(wave);
                         }
                     });
-                    
+
                     if (window.waves.updatePosition) {
                         window.waves.updatePosition();
                     }
-                    
+
                     window.unifiedListManager.updateWavesList();
-                    
+
                     if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
                     }
-                    
+
                     if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
                         window.dom.refreshShowOnVizorButtonLabels();
                     }
-                }, 100);
+                });
             }
         }
     }
@@ -1576,16 +1568,14 @@ class EventManager {
                         window.unifiedListManager.updateGroupStats('default-group');
                     }
                     
-                    setTimeout(() => {
-                        if (window.summaryManager && window.summaryManager.updateSummary) {
-                            window.summaryManager.updateSummary();
-                        }
-                    }, 50);
+                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                        window.summaryManager.updateSummary();
+                    }
                 }
             }
             return;
         }
-        
+
         if ($target.is('#btnPrevDay') || $target.closest('#btnPrevDay').length) {
             e.preventDefault();
             if (window.dates) window.dates.navigateDay(-1);
@@ -1612,15 +1602,13 @@ class EventManager {
                 if (window.dataManager) window.dataManager.updateWavesGroups();
                 $('#newGroupName').val('');
                 
-                setTimeout(() => {
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
-                }, 50);
+                if (window.summaryManager && window.summaryManager.updateSummary) {
+                    window.summaryManager.updateSummary();
+                }
             }
             return;
         }
-        
+
         if ($target.is('[data-action="importAll"]')) {
             e.preventDefault();
             $('#importAllFile').click();

@@ -355,12 +355,10 @@ class UnifiedListManager {
         
         if (!this.templatesLoaded) {
             container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
-            
-            setTimeout(() => {
-                this.initTemplates().then(() => {
-                    this.renderList(containerId, items, itemType);
-                });
-            }, 100);
+
+            void this.initTemplates().then(() => {
+                this.renderList(containerId, items, itemType);
+            });
             return;
         }
         

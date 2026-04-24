@@ -10,10 +10,17 @@ class ExtremumTimeManager {
     init() {
         this.timeBarContainer = document.querySelector('.time-scale');
         if (!this.timeBarContainer) {
-            setTimeout(() => this.init(), 100);
+            requestAnimationFrame(() => {
+                this.timeBarContainer = document.querySelector('.time-scale');
+                if (!this.timeBarContainer) {
+                    return;
+                }
+                this.updateExtremums();
+                this.setupDateChangeObserver();
+            });
             return;
         }
-        
+
         this.updateExtremums();
         this.setupDateChangeObserver();
     }
@@ -209,7 +216,7 @@ class ExtremumTimeManager {
 			this.labels.push(label);
 			
 			// Обработчики кликов
-			setTimeout(() => {
+			queueMicrotask(() => {
 				labelTextElement.querySelectorAll('.extremum-wave-name').forEach(span => {
 					span.addEventListener('click', (e) => {
 						e.preventDefault();
@@ -221,7 +228,7 @@ class ExtremumTimeManager {
 						}
 					});
 				});
-			}, 10);
+			});
 		});
 	}
 
@@ -281,11 +288,11 @@ class ExtremumTimeManager {
             get() { return this._currentDate; },
             set(value) {
                 this._currentDate = value;
-                setTimeout(() => {
+                queueMicrotask(() => {
                     if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
                         window.extremumTimeManager.updateExtremums();
                     }
-                }, 50);
+                });
             }
         });
         

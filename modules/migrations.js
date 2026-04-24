@@ -56,7 +56,7 @@ class MigrationsManager {
             const script = document.createElement('script');
             script.src = url;
             script.onload = () => {
-                setTimeout(resolve, 50);
+                queueMicrotask(resolve);
             };
             script.onerror = () => {
                 reject(new Error(`Failed to load script: ${url}`));

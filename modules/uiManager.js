@@ -190,13 +190,13 @@ class UIManager {
         } else {
             if (window.waves && window.waves.updateAxisXIntersectionPoints) {
                 window.waves.updateAxisXIntersectionPoints();
-                
-                setTimeout(() => {
+
+                requestAnimationFrame(() => {
                     const newContainer = document.querySelector('.wave-axis-x-points');
                     if (newContainer) {
                         newContainer.classList.remove('hidden');
                     }
-                }, 100);
+                });
             }
         }
     }
@@ -258,8 +258,10 @@ class UIManager {
         document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
             checkbox.checked = false;
         });
-        
+
         window.appState.save();
+
+        window.dispatchEvent(new CustomEvent('zaraza:waveCornerSelectionChanged'));
     }
     
     updateCornerSquareColors() {
@@ -465,9 +467,9 @@ class UIManager {
         localStorage.setItem('activeTab', this.activeTab);
         
         if (tabId === 'intersections' && window.stateIntersectionManager) {
-            setTimeout(() => {
+            queueMicrotask(() => {
                 window.stateIntersectionManager.updateIntersections();
-            }, 100);
+            });
         }
     }
     

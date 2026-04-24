@@ -109,9 +109,7 @@ class GridManager {
             line.classList.add('active');
             
             if (window.summaryManager && window.summaryManager.updateSummary) {
-                setTimeout(() => {
-                    window.summaryManager.updateSummary();
-                }, 50);
+                window.summaryManager.updateSummary();
             }
         });
     }
@@ -304,7 +302,7 @@ class GridManager {
         this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach(el => el.remove());
         
         const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
-        for (let i = -halfSquaresX; i <= halfSquaresX + 1; i++) {
+        for (let i = -halfSquaresX + 1; i <= halfSquaresX; i++) {
             this.createDateLabel(i);
         }
     }

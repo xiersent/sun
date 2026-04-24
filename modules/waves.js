@@ -1240,6 +1240,8 @@ class WavesManager {
         if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
             window.unifiedListManager.updateWavesList();
         }
+
+        window.dispatchEvent(new CustomEvent('zaraza:waveCornerSelectionChanged'));
     }
     
     getAllWavesInGroup(group) {
