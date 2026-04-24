@@ -9,8 +9,37 @@ class UnifiedListManager {
         this.debug = false;
         this.templateCache = {};
         this.templatesLoaded = false;
+        /** Кэш ejs.compile — ускоряет повторные renderList */
+        this._ejsRenderers = {};
         
         this.templatesLoadPromise = null;
+    }
+
+    invalidateEjsRenderers() {
+        this._ejsRenderers = {};
+    }
+
+    /**
+     * Возвращает скомпилированный шаблон (быстрее, чем ejs.render со строкой на каждый вызов).
+     */
+    ensureEjsRenderer(templateId) {
+        if (this._ejsRenderers[templateId]) {
+            return this._ejsRenderers[templateId];
+        }
+        const text = this.getTemplate(templateId);
+        if (typeof ejs === 'undefined' || !ejs.compile) {
+            this._ejsRenderers[templateId] = (locals) => ejs.render(text, locals);
+            return this._ejsRenderers[templateId];
+        }
+        try {
+            this._ejsRenderers[templateId] = ejs.compile(text, {
+                filename: templateId,
+                strict: false
+            });
+        } catch (_) {
+            this._ejsRenderers[templateId] = (locals) => ejs.render(text, locals);
+        }
+        return this._ejsRenderers[templateId];
     }
     
     initTemplates() {
@@ -270,6 +299,8 @@ class UnifiedListManager {
     }
     
     renderList(containerId, items, itemType) {
+        const __perfT0 = typeof performance !== 'undefined' ? performance.now() : 0;
+        try {
         const container = document.getElementById(containerId);
         if (!container) {
             return;
@@ -317,6 +348,9 @@ class UnifiedListManager {
         }
         
         if (itemType === 'group') {
+            const renderGroup = this.ensureEjsRenderer('group-item-template');
+            const renderWave = this.ensureEjsRenderer('wave-item-template');
+            const frag = document.createDocumentFragment();
             items.forEach((groupData, index) => {
                 try {
                     if (groupData.waveCount === undefined) {
@@ -326,7 +360,7 @@ class UnifiedListManager {
                         groupData.enabledCount = 0;
                     }
                     
-                    const renderedGroup = ejs.render(templateText, { data: groupData });
+                    const renderedGroup = renderGroup({ data: groupData });
                     
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = renderedGroup;
@@ -335,26 +369,20 @@ class UnifiedListManager {
                     const childrenContainer = groupElement.querySelector('.group-children');
                     
                     if (childrenContainer && groupData.children && groupData.children.length > 0) {
-                        childrenContainer.innerHTML = '';
-                        
-                        groupData.children.forEach((childData, childIndex) => {
+                        const waveHtmlParts = [];
+                        for (let ci = 0; ci < groupData.children.length; ci++) {
+                            const childData = groupData.children[ci];
                             try {
                                 childData.type = 'wave';
-                                const waveTemplateText = this.getTemplate('wave-item-template');
-                                const renderedChild = ejs.render(waveTemplateText, { data: childData });
-                                
-                                const childTempDiv = document.createElement('div');
-                                childTempDiv.innerHTML = renderedChild;
-                                const childElement = childTempDiv.firstElementChild;
-                                
-                                childrenContainer.appendChild(childElement);
+                                waveHtmlParts.push(renderWave({ data: childData }));
                             } catch (error) {
-                                const errorDiv = document.createElement('div');
-                                errorDiv.className = 'list-error';
-                                errorDiv.textContent = `Ошибка рендеринга: ${error.message}`;
-                                childrenContainer.appendChild(errorDiv);
+                                const safeMsg = String(error.message).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                                waveHtmlParts.push(
+                                    `<div class="list-error">Ошибка рендеринга: ${safeMsg}</div>`
+                                );
                             }
-                        });
+                        }
+                        childrenContainer.innerHTML = waveHtmlParts.join('');
                         
                         if (groupData.expanded) {
                             childrenContainer.style.display = 'block';
@@ -365,21 +393,23 @@ class UnifiedListManager {
                         }
                     }
                     
-                    container.appendChild(groupElement);
+                    frag.appendChild(groupElement);
                     
                 } catch (error) {
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'list-error';
                     errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
-                    container.appendChild(errorDiv);
+                    frag.appendChild(errorDiv);
                 }
             });
+            container.appendChild(frag);
         } else if (itemType === 'intersection') {
+            const renderTpl = this.ensureEjsRenderer(templateId);
             const renderedItems = [];
             items.forEach((item, index) => {
                 try {
                     const data = this.prepareIntersectionData(item, index);
-                    const rendered = ejs.render(templateText, { data });
+                    const rendered = renderTpl({ data });
                     renderedItems.push(rendered);
                 } catch (error) {
                     renderedItems.push(`<div class="list-error">Ошибка рендеринга пересечения</div>`);
@@ -388,13 +418,14 @@ class UnifiedListManager {
             
             container.innerHTML = renderedItems.join('');
         } else {
+            const renderTpl = this.ensureEjsRenderer(templateId);
             const renderedItems = [];
             items.forEach((item, index) => {
                 try {
                     const data = this.templates[itemType] ? this.templates[itemType](item, index) : item;
                     data.type = data.type || itemType;
                     
-                    const rendered = ejs.render(templateText, { data });
+                    const rendered = renderTpl({ data });
                     renderedItems.push(rendered);
                 } catch (error) {
                     renderedItems.push(`<div class="list-error">Ошибка рендеринга элемента: ${error.message}</div>`);
@@ -402,6 +433,16 @@ class UnifiedListManager {
             });
             
             container.innerHTML = renderedItems.join('');
+        }
+        } finally {
+            if (typeof window.sunPerfLog === 'function' && window.__SUN_PERF_LOG !== false) {
+                window.sunPerfLog('unifiedListManager', 'renderList', {
+                    containerId,
+                    itemType,
+                    itemCount: items ? items.length : 0,
+                    durationMs: Number((performance.now() - __perfT0).toFixed(2))
+                });
+            }
         }
     }
     
@@ -747,6 +788,7 @@ class UnifiedListManager {
     }
     
     async reloadTemplates() {
+        this.invalidateEjsRenderers();
         this.templatesLoaded = false;
         this.templatesLoadPromise = null;
         await this.initTemplates();

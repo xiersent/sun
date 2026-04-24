@@ -1,4 +1,23 @@
 // modules/eventManager.js
+/** Профилирование UI: логи в консоль с префиксом [SunPerf]. Отключить: window.__SUN_PERF_LOG = false */
+(function initSunPerfLog() {
+    if (typeof window.sunPerfLog === 'function') return;
+    window.sunPerfLog = function sunPerfLog(scope, action, detail) {
+        if (window.__SUN_PERF_LOG === false) return;
+        const row = {
+            scope,
+            action,
+            tMs: typeof performance !== 'undefined' ? Number(performance.now().toFixed(2)) : null
+        };
+        if (detail != null && typeof detail === 'object' && !Array.isArray(detail)) {
+            Object.assign(row, detail);
+        } else if (detail !== undefined) {
+            row.data = detail;
+        }
+        console.log('[SunPerf]', row);
+    };
+})();
+
 class EventManager {
     constructor() {
         this.askedGroups = new Set();
@@ -7,6 +26,8 @@ class EventManager {
         this._dragOverListItemEl = null;
         this._waveDragOverItemEl = null;
         this._groupChildrenDropEl = null;
+        this._wavesUiRefreshScheduled = null;
+        this._datesUiRefreshScheduled = null;
         this.$ = window.jQuery;
         this.setupGlobalHandlers();
         this.setupDateChangeObservers();
@@ -48,6 +69,7 @@ class EventManager {
 		$(document).on('click', '.group-enabled-count', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
+			window.sunPerfLog('eventManager', 'click.groupEnabledCount', { target: 'group-stats' });
 			
 			// Находим родительскую группу
 			const $groupItem = $(e.target).closest('.list-item--group');
@@ -109,6 +131,11 @@ class EventManager {
         e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(this.waveDragPayload));
         
         $item.addClass('list-item--dragging');
+        window.sunPerfLog('eventManager', 'wave.dragstart', {
+            waveId: waveId,
+            groupId: groupId,
+            index: index
+        });
     }
 
     getWaveDragDataFromDropEvent(e) {
@@ -246,6 +273,11 @@ class EventManager {
         const targetGroup = window.appState.data.groups.find(g => String(g.id) === String(targetGroupId));
         const insertAtEnd = (targetGroup && targetGroup.waves) ? targetGroup.waves.length : 0;
 
+        window.sunPerfLog('eventManager', 'wave.drop.emptyZone', {
+            fromGroup: dragData.groupId,
+            toGroup: targetGroupId,
+            fromIndex: dragData.index
+        });
         this.moveWaveBetweenGroups(
             dragData.groupId,
             targetGroupId,
@@ -296,9 +328,17 @@ class EventManager {
         
         if (String(dragData.groupId) === String(targetGroupId) &&
             dragData.index === targetIndex) {
+            window.sunPerfLog('eventManager', 'wave.drop.skipNoop', { targetGroupId, targetIndex });
             return;
         }
 
+        window.sunPerfLog('eventManager', 'wave.drop.onRow', {
+            fromGroup: dragData.groupId,
+            toGroup: targetGroupId,
+            fromIndex: dragData.index,
+            targetIndex,
+            insertBefore
+        });
         this.moveWaveBetweenGroups(
             dragData.groupId,
             targetGroupId,
@@ -324,6 +364,7 @@ class EventManager {
     }
 
     handleWaveDragEnd(e) {
+        window.sunPerfLog('eventManager', 'wave.dragend', {});
         this.isDraggingWave = false;
         this.waveDragPayload = null;
         this.clearWaveDnDVisualState();
@@ -331,6 +372,88 @@ class EventManager {
         if (src) {
             src.classList.remove('list-item--dragging');
         }
+    }
+
+    /**
+     * Перестроение списка групп/волн и сохранение после изменения только порядка.
+     * Сводку не трогаем: она сортирует сигналы по близости фазы, не по порядку в группе.
+     */
+    scheduleWavesListRefreshAndSave() {
+        const coalesced = this._wavesUiRefreshScheduled !== null;
+        if (this._wavesUiRefreshScheduled !== null) {
+            cancelAnimationFrame(this._wavesUiRefreshScheduled);
+        }
+        window.sunPerfLog('eventManager', 'scheduleWavesListRefreshAndSave.queue', { coalesced });
+        this._wavesUiRefreshScheduled = requestAnimationFrame(() => {
+            this._wavesUiRefreshScheduled = null;
+            const tFrame = typeof performance !== 'undefined' ? performance.now() : 0;
+            let msList = 0;
+            let msSelect = 0;
+            let msSave = 0;
+            try {
+                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.unifiedListManager.updateWavesList();
+                    msList = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+                if (window.summaryManager && typeof window.summaryManager.populateGroupSelect === 'function') {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    const prev = window.summaryManager.currentGroup;
+                    window.summaryManager.populateGroupSelect();
+                    const sel = window.summaryManager.elements.summaryGroupSelect;
+                    if (sel && prev != null && [...sel.options].some(o => String(o.value) === String(prev))) {
+                        sel.value = String(prev);
+                    }
+                    msSelect = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+            } finally {
+                if (window.appState && typeof window.appState.save === 'function') {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.appState.save();
+                    msSave = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+            }
+            const total = typeof performance !== 'undefined' ? Number((performance.now() - tFrame).toFixed(2)) : 0;
+            window.sunPerfLog('eventManager', 'scheduleWavesListRefreshAndSave.done', {
+                msUpdateWavesList: msList,
+                msPopulateGroupSelect: msSelect,
+                msSave: msSave,
+                msTotalRaf: total
+            });
+        });
+    }
+
+    scheduleDateListRefreshAndSave() {
+        const coalesced = this._datesUiRefreshScheduled !== null;
+        if (this._datesUiRefreshScheduled !== null) {
+            cancelAnimationFrame(this._datesUiRefreshScheduled);
+        }
+        window.sunPerfLog('eventManager', 'scheduleDateListRefreshAndSave.queue', { coalesced });
+        this._datesUiRefreshScheduled = requestAnimationFrame(() => {
+            this._datesUiRefreshScheduled = null;
+            const tFrame = typeof performance !== 'undefined' ? performance.now() : 0;
+            let msList = 0;
+            let msSave = 0;
+            try {
+                if (window.dataManager && window.dataManager.updateDateList) {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.dataManager.updateDateList();
+                    msList = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+            } finally {
+                if (window.appState && typeof window.appState.save === 'function') {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.appState.save();
+                    msSave = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+            }
+            const total = typeof performance !== 'undefined' ? Number((performance.now() - tFrame).toFixed(2)) : 0;
+            window.sunPerfLog('eventManager', 'scheduleDateListRefreshAndSave.done', {
+                msUpdateDateList: msList,
+                msSave,
+                msTotalRaf: total
+            });
+        });
     }
     
     reorderWaveInGroup(groupId, sourceIndex, targetIndex, insertBefore) {
@@ -348,18 +471,15 @@ class EventManager {
         let newIndex = this.calculateNewIndex(sourceIndex, targetIndex, insertBefore);
         waves.splice(newIndex, 0, waveId);
         group.waves = waves;
-        
-        window.appState.save();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
-        
-        setTimeout(() => {
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
-        }, 50);
+
+        window.sunPerfLog('eventManager', 'reorderWaveInGroup', {
+            groupId,
+            sourceIndex,
+            targetIndex,
+            insertBefore,
+            newIndex
+        });
+        this.scheduleWavesListRefreshAndSave();
     }
 
     /**
@@ -403,17 +523,13 @@ class EventManager {
         targetWaves.splice(insertAt, 0, waveId);
         targetGroup.waves = targetWaves;
 
-        window.appState.save();
-
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
-
-        setTimeout(() => {
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
-        }, 50);
+        window.sunPerfLog('eventManager', 'moveWaveBetweenGroups.crossGroup', {
+            from: sourceGroupId,
+            to: targetGroupId,
+            insertAt,
+            emptyOrGapDrop: opts.emptyOrGapDrop
+        });
+        this.scheduleWavesListRefreshAndSave();
     }
     
     calculateNewIndex(sourceIndex, targetIndex, insertBefore) {
@@ -470,6 +586,7 @@ class EventManager {
         }));
         
         $item.addClass('list-item--dragging');
+        window.sunPerfLog('eventManager', 'dragstart', { type, id, index });
     }
     
     handleDragOver(e) {
@@ -566,8 +683,16 @@ class EventManager {
             }
             
             if (dragData.type === 'date') {
+                window.sunPerfLog('eventManager', 'drop.date', { fromIndex: dragData.index, targetIndex, insertBefore });
                 this.handleDateDrop(dragData, targetIndex, insertBefore);
             } else if (dragData.type === 'group') {
+                window.sunPerfLog('eventManager', 'drop.group', {
+                    fromId: dragData.id,
+                    targetId,
+                    fromIndex: dragData.index,
+                    targetIndex,
+                    insertBefore
+                });
                 this.handleGroupDrop(dragData, targetIndex, insertBefore, targetId);
             }
             
@@ -579,15 +704,12 @@ class EventManager {
         const [movedItem] = window.appState.data.dates.splice(dragData.index, 1);
         let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
         window.appState.data.dates.splice(newIndex, 0, movedItem);
-        window.appState.save();
-        
-        if (window.dataManager) window.dataManager.updateDateList();
-        
-        setTimeout(() => {
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
-        }, 50);
+        window.sunPerfLog('eventManager', 'handleDateDrop.applied', {
+            fromIndex: dragData.index,
+            newIndex,
+            dateId: movedItem && movedItem.id
+        });
+        this.scheduleDateListRefreshAndSave();
     }
     
     handleGroupDrop(dragData, targetIndex, insertBefore, targetId) {
@@ -609,17 +731,13 @@ class EventManager {
         const [movedItem] = groups.splice(fromIdx, 1);
         let newIndex = this.calculateNewIndex(fromIdx, toIdx, insertBefore);
         groups.splice(newIndex, 0, movedItem);
-        window.appState.save();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
-        
-        setTimeout(() => {
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
-        }, 50);
+        window.sunPerfLog('eventManager', 'handleGroupDrop.applied', {
+            fromIdx,
+            toIdx,
+            newIndex,
+            groupId: movedItem && movedItem.id
+        });
+        this.scheduleWavesListRefreshAndSave();
     }
     
     handleDragLeave(e) {
@@ -657,6 +775,7 @@ class EventManager {
         }
         this.clearWaveDnDVisualState();
         $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
+        window.sunPerfLog('eventManager', 'dragend.groupOrDate', { targetTag: t.tagName });
     }
     
     setupDateChangeObservers() {
