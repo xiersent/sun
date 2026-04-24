@@ -37,12 +37,12 @@ class ImportExportManager {
         dataToSave.uiSettings.transform = window.appState.transform;
         dataToSave.uiSettings.uiHidden = window.appState.uiHidden;
         dataToSave.uiSettings.graphHidden = window.appState.graphHidden;
-        dataToSave.uiSettings.graphBgWhite = window.appState.graphBgWhite;
         dataToSave.uiSettings.showStars = window.appState.showStars;
         dataToSave.uiSettings.grayMode = window.appState.grayMode;
         dataToSave.uiSettings.graphGrayMode = window.appState.graphGrayMode;
         dataToSave.uiSettings.cornerSquaresVisible = window.appState.cornerSquaresVisible;
         dataToSave.uiSettings.waveIntersectionsVisible = window.appState.waveIntersectionsVisible;
+        delete dataToSave.uiSettings.graphBgWhite;
         dataToSave.exportDate = new Date().getTime();
         dataToSave.version = '1.0';
         
@@ -283,7 +283,6 @@ class ImportExportManager {
                             window.appState.transform = convertedData.uiSettings.transform;
                             window.appState.uiHidden = convertedData.uiSettings.uiHidden || false;
                             window.appState.graphHidden = convertedData.uiSettings.graphHidden || false;
-                            window.appState.graphBgWhite = convertedData.uiSettings.graphBgWhite !== undefined ? convertedData.uiSettings.graphBgWhite : true;
                             window.appState.showStars = convertedData.uiSettings.showStars !== undefined ? convertedData.uiSettings.showStars : true;
                             window.appState.grayMode = convertedData.uiSettings.grayMode || false;
                             window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
@@ -318,7 +317,8 @@ class ImportExportManager {
                             
                             const graphContainer = document.getElementById('graphContainer');
                             if (graphContainer) {
-                                graphContainer.style.backgroundColor = window.appState.graphBgWhite ? '#fff' : '#000';
+                                graphContainer.classList.remove('dark-mode');
+                                graphContainer.style.backgroundColor = '';
                             }
                             
                             const allSquares = document.querySelectorAll('.corner-square');

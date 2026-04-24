@@ -207,11 +207,7 @@ class TimeBarManager {
         const graphContainer = document.querySelector('.graph-container');
         
         if (graphContainer) {
-            if (graphContainer.classList.contains('dark-mode')) {
-                this.container.style.backgroundColor = '#000';
-            } else {
-                this.container.style.backgroundColor = '#fff';
-            }
+            this.container.style.backgroundColor = '#fff';
             
             if (graphContainer.classList.contains('graph-gray-mode')) {
                 this.container.style.filter = 'grayscale(1)';

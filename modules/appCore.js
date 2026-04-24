@@ -164,12 +164,7 @@ class AppCore {
     updateGraphBackground() {
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
-            if (!window.appState.graphBgWhite) {
-                graphContainer.classList.add('dark-mode');
-            } else {
-                graphContainer.classList.remove('dark-mode');
-            }
-            
+            graphContainer.classList.remove('dark-mode');
             if (window.appState.graphGrayMode) {
                 graphContainer.classList.add('graph-gray-mode');
             } else {

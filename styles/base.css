@@ -46,9 +46,6 @@ body.graph-hidden .graph-section{display: none !important;}
 /* Контейнер временной полосы */
 .time-bar-container{width: var(--gw); height: 60px; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: var(--spacing-md) 0;}
 
-/* Темный режим для временной полосы */
-.graph-container.dark-mode + .time-bar-container{background-color: #000; border-color: #444;}
-
 /* Графическая серая полоса */
 .graph-container.graph-gray-mode + .time-bar-container{filter: grayscale(1);}
 
@@ -62,14 +59,12 @@ body.graph-hidden .graph-section{display: none !important;}
 .hour-marker{flex: 1; border-left: 1px solid var(--clg); position: relative; cursor: pointer;}
 .hour-marker:first-child{border-left: none;}
 .hour-marker:hover{background-color: rgba(0, 0, 0, 0.05);}
-.graph-container.dark-mode + .time-bar-container .hour-marker:hover{background-color: rgba(255, 255, 255, 0.1);}
 
 /* Подписи часов */
 .hour-label{position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: var(--font-size-xs); color: var(--text-secondary); white-space: nowrap; font-weight: 400; font-family: var(--font-family);}
 
 /* Полчаса - тонкая линия */
 .half-hour-marker{position: absolute; top: 50%; left: 0; width: 1px; height: 30%; background-color: rgba(0, 0, 0, 0.15); transform: translateY(-50%); pointer-events: none;}
-.graph-container.dark-mode + .time-bar-container .half-hour-marker{background-color: rgba(255, 255, 255, 0.2);}
 
 /* Индикатор времени */
 .time-indicator{position: absolute; top: 0; width: 2px; height: 100%; background-color: transparent; z-index: 10; pointer-events: none; transform: translateX(-50%);}

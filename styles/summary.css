@@ -30,16 +30,3 @@
 .summary-item-fairly-close .summary-item-closeness{background: #FFC107; color: black;}
 .summary-item-nearby .summary-item-closeness{background: #FF9800; color: black;}
 .wave-period-badge{background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 400;}
-
-/* Темный режим */
-.graph-container.dark-mode + .summary-panel{background: #1a1a1a; border-color: #444; color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-header h3{color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-label{color: #ccc;}
-.graph-container.dark-mode + .summary-panel .summary-select{background: #333; border-color: #555; color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-results-container{background: #2a2a2a; border-color: #444;}
-.graph-container.dark-mode + .summary-panel .summary-item{background: #1a1a1a; border-color: #333;}
-.graph-container.dark-mode + .summary-panel .summary-item:hover{background-color: #2a2a2a;}
-.graph-container.dark-mode + .summary-panel .summary-item-name{color: #fff;}
-.graph-container.dark-mode + .summary-panel .summary-item-index{color: #aaa;}
-.graph-container.dark-mode + .summary-panel .summary-item-state{color: #ddd;}
-.graph-container.dark-mode + .summary-panel .summary-item-difference{color: #999;}

@@ -78,7 +78,6 @@
 .group-stats{font-size: var(--font-size-sm); white-space: nowrap; display: flex; gap: 8px;}
 .group-enabled-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8; cursor: pointer;}
 .group-total-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
-.graph-container.dark-mode .group-enabled-count{color: #4CAF50;}
 .list-item--group.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
 .list-item--group.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 .list-item--group.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
@@ -124,12 +123,6 @@
 .wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{background-color: #2196F3;}
 .date-checkbox:checked::after, .wave-group-toggle:checked::after, .wave-visibility-check:checked::after, .wave-bold-check:checked::after, .wave-corner-color-check:checked::after{content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold;}
 .date-checkbox:checked, .wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{border-color: transparent;}
-.graph-container.dark-mode + .summary-panel .date-checkbox, .graph-container.dark-mode + .summary-panel .wave-group-toggle, .graph-container.dark-mode + .summary-panel .wave-visibility-check, .graph-container.dark-mode + .summary-panel .wave-bold-check, .graph-container.dark-mode + .summary-panel .wave-corner-color-check{background-color: #333; border-color: #555;}
-.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="a"]:checked{background-color: #64B5F6;}
-.graph-container.dark-mode + .summary-panel .date-checkbox[data-type="b"]:checked{background-color: #FFB74D;}
-.graph-container.dark-mode + .summary-panel .wave-group-toggle:checked, .graph-container.dark-mode + .summary-panel .wave-visibility-check:checked, .graph-container.dark-mode + .summary-panel .wave-bold-check:checked, .graph-container.dark-mode + .summary-panel .wave-corner-color-check:checked{background-color: #64B5F6;}
 .list-item--date .date-selection-checks{pointer-events: auto; display: flex; align-items: center; gap: 6px;}
 .list-item--date.selected-type-a{background-color: #E8F4FE;}
 .list-item--date.selected-type-b{background-color: #FFF4E5;}
-.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-a{background-color: #E8F4FE;}
-.graph-container.dark-mode + .summary-panel .list-item--date.selected-type-b{background-color: #FFF4E5;}

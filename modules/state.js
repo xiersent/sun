@@ -35,7 +35,6 @@ class AppState {
                 transform: { scaleX: 1, scaleY: 1, rotation: 0 },
                 uiHidden: false,
                 graphHidden: false,
-                graphBgWhite: true,
                 showStars: true,
                 grayMode: false,
                 graphGrayMode: false,
@@ -101,7 +100,6 @@ class AppState {
         this.data.uiSettings.transform = this.transform;
         this.data.uiSettings.uiHidden = this.uiHidden;
         this.data.uiSettings.graphHidden = this.graphHidden;
-        this.data.uiSettings.graphBgWhite = this.graphBgWhite;
         this.data.uiSettings.showStars = this.showStars;
         this.data.uiSettings.grayMode = this.grayMode;
         this.data.uiSettings.graphGrayMode = this.graphGrayMode;
@@ -114,6 +112,8 @@ class AppState {
         
         this.data.uiSettings.dateSelections = this.dateSelections;
         this.data.uiSettings.waveIntersectionsVisible = this.waveIntersectionsVisible;
+
+        delete this.data.uiSettings.graphBgWhite;
 
         localStorage.setItem('appData', JSON.stringify(this.data));
     }
@@ -219,7 +219,6 @@ class AppState {
                 this.transform = data.uiSettings.transform || { scaleX: 1, scaleY: 1, rotation: 0 };
                 this.uiHidden = data.uiSettings.uiHidden || false;
                 this.graphHidden = data.uiSettings.graphHidden || false;
-                this.graphBgWhite = data.uiSettings.graphBgWhite !== undefined ? data.uiSettings.graphBgWhite : true;
                 this.showStars = data.uiSettings.showStars !== undefined ? data.uiSettings.showStars : true;
                 this.grayMode = data.uiSettings.grayMode || false;
                 this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
@@ -369,7 +368,6 @@ class AppState {
         this.transform = { scaleX: 1, scaleY: 1, rotation: 0 };
         this.uiHidden = false;
         this.graphHidden = false;
-        this.graphBgWhite = true;
         this.showStars = true;
         this.grayMode = false;
         this.graphGrayMode = false;

@@ -79,7 +79,6 @@ class UIManager {
             toggleWaveIntersections: () => this.toggleWaveIntersections(),
             toggleExtremes: () => this.toggleExtremes(),
             toggleEquilibrium: () => this.toggleEquilibrium(),
-            toggleBg: () => this.toggleBackground(),
             toggleSquares: () => this.toggleSquares(),
             toggleGrayMode: () => this.toggleGrayMode(),
             toggleGraphGrayMode: () => this.toggleGraphGrayMode(),
@@ -316,16 +315,6 @@ class UIManager {
             document.body.classList.remove('graph-hidden');
         }
         window.appState.save();
-    }
-    
-    toggleBackground() {
-        const graphContainer = document.getElementById('graphContainer');
-        if (graphContainer) {
-            graphContainer.classList.toggle('dark-mode');
-            
-            window.appState.graphBgWhite = !graphContainer.classList.contains('dark-mode');
-            window.appState.save();
-        }
     }
     
     toggleGrayMode() {
