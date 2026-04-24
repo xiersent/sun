@@ -149,17 +149,28 @@ class AppState {
     }
 
     async _loadImpl() {
+        const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
+        __lp && __lp.mark('appState_load_impl_start');
+
         const saved = localStorage.getItem('appData');
+        __lp && __lp.mark('appState_localStorage_read', { hasSaved: !!saved, bytes: saved ? saved.length : 0 });
+
         if (saved) {
             try {
                 const data = JSON.parse(saved);
+                __lp && __lp.mark('appState_json_parse_done');
+
                 this.data = data;
                 this.convertDatesToTimestamp();
-                
+
                 // ===== ЗАПУСК МИГРАЦИЙ (async: динамическая подгрузка migrations/*.js) =====
                 if (window.MigrationsManager) {
+                    __lp && __lp.phaseStart('appState_migrations');
                     const migrations = new window.MigrationsManager(this);
                     await migrations.runAllMigrations();
+                    __lp && __lp.phaseEnd('appState_migrations');
+                } else {
+                    __lp && __lp.mark('appState_migrations_skipped', { reason: 'no MigrationsManager' });
                 }
                 // ===== КОНЕЦ МИГРАЦИЙ =====
                 
@@ -335,12 +346,16 @@ class AppState {
                 }, 100);
                 
             } catch (e) {
+                __lp && __lp.mark('appState_load_impl_error', { message: e && e.message });
                 console.error('Error loading state:', e);
                 this.reset();
             }
         } else {
+            __lp && __lp.mark('appState_no_saved_reset');
             this.reset();
         }
+
+        __lp && __lp.mark('appState_load_impl_done');
     }
     
     /**

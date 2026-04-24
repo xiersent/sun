@@ -7,6 +7,8 @@ class AppCore {
         this.versionStorageKey = 'zaraza_last_versions';
         this.defaultCornerColor = '#ff0000'; // Красный по умолчанию
         this.hasSelectedColor = false; // Флаг, был ли выбран цвет
+        /** true после initializeAppComponents (десктоп); для init.js — не дублировать списки в finalize */
+        this._listsHydratedOnInit = false;
     }
     
     cacheElements() {
@@ -31,7 +33,10 @@ class AppCore {
     async init() {
         if (this.isInitializing) return;
         this.isInitializing = true;
-        
+
+        const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
+        __lp && __lp.mark('appCore_init_enter');
+
         try {
             this.setupEventListeners();
             this.updateCSSVariables();
@@ -39,15 +44,17 @@ class AppCore {
             if (window.appState && window.appState.graphHidden) {
                 document.body.classList.add('graph-hidden');
             }
-            
+
             const isMobile = this.isMobileDevice();
-            
+
             if (isMobile) {
+                __lp && __lp.mark('appCore_init_mobile_early_exit');
+                this._listsHydratedOnInit = false;
                 document.body.classList.add('mobile-device');
                 this.showMobileWarning();
                 return;
             }
-            
+
             if (window.appState.showStars) {
                 document.body.classList.add('stars-mode');
                 document.body.classList.remove('names-mode');
@@ -55,17 +62,21 @@ class AppCore {
                 document.body.classList.remove('stars-mode');
                 document.body.classList.add('names-mode');
             }
-            
+
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
             window.appState.currentDate = startOfDay;
-            
+
+            __lp && __lp.phaseStart('appCore_initializeAppComponents');
             await this.initializeAppComponents();
-            
+            __lp && __lp.phaseEnd('appCore_initializeAppComponents');
+            this._listsHydratedOnInit = true;
+
             // Показываем предупреждение при загрузке
             this.showDesktopWarning();
-            
+            __lp && __lp.mark('appCore_init_done');
         } catch (error) {
+            __lp && __lp.mark('appCore_init_error', { message: error && error.message });
             console.error('AppCore init error:', error);
             throw error;
         } finally {
@@ -74,41 +85,55 @@ class AppCore {
     }
     
     async initializeAppComponents() {
+        const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
+
         if (window.unifiedListManager && window.unifiedListManager.initTemplates) {
+            __lp && __lp.phaseStart('appCore_initTemplates');
             try {
                 await window.unifiedListManager.initTemplates();
             } catch (error) {}
+            __lp && __lp.phaseEnd('appCore_initTemplates');
         }
-        
+
         if (window.waves && window.waves.init) {
+            __lp && __lp.phaseStart('appCore_waves_init');
             await window.waves.init();
+            __lp && __lp.phaseEnd('appCore_waves_init');
         }
-        
+
         if (window.grid && window.grid.createGrid) {
+            __lp && __lp.phaseStart('appCore_createGrid');
             window.grid.createGrid();
+            __lp && __lp.phaseEnd('appCore_createGrid');
         }
-        
+
         if (window.summaryManager && window.summaryManager.init) {
+            __lp && __lp.phaseStart('appCore_summaryManager_init');
             window.summaryManager.init();
+            __lp && __lp.phaseEnd('appCore_summaryManager_init');
         }
-        
+
         if (window.dataManager) {
             if (window.dataManager.updateDateList) {
+                __lp && __lp.phaseStart('appCore_dataManager_updateDateList');
                 await window.dataManager.updateDateList();
+                __lp && __lp.phaseEnd('appCore_dataManager_updateDateList');
             }
-            
+
             if (window.dataManager.updateWavesGroups) {
+                __lp && __lp.phaseStart('appCore_dataManager_updateWavesGroups');
                 await window.dataManager.updateWavesGroups();
+                __lp && __lp.phaseEnd('appCore_dataManager_updateWavesGroups');
             }
         }
-        
+
         this.updateGraphBackground();
         this.setDateTimeInputs();
-        
+
         if (window.dates && window.dates.updateTodayButton) {
             window.dates.updateTodayButton();
         }
-        
+
         // Восстанавливаем сохраненный цвет квадратиков
         this.restoreCornerColor();
         
