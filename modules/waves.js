@@ -273,7 +273,8 @@ class WavesManager {
     }
     
 
-    updatePosition() {
+    // opts.forceWaveLabels — сразу пересобрать боковые выноски (обход throttle 50 мс).
+    updatePosition(opts = {}) {
         const enabledWaveIds = new Set();
         for (const group of window.appState.data.groups) {
             if (group.enabled && group.waves) {
@@ -336,7 +337,7 @@ class WavesManager {
                 }
             });
             
-            this.updateAllWaveLabels();
+            this.updateAllWaveLabels(opts);
             this.updateVerticalWaveLabelsTime();
             this.renderWaveIntersectionPoints();
         } finally {
@@ -395,16 +396,16 @@ class WavesManager {
     }
     
     
-    updateAllWaveLabels() {
-        this.updateHorizontalWaveLabels();
+    updateAllWaveLabels(opts = {}) {
+        this.updateHorizontalWaveLabels(opts);
         this.updateVerticalWaveLabels();
         this.updateAxisXIntersectionPoints();
     }
     
-    updateHorizontalWaveLabels() {
+    updateHorizontalWaveLabels(opts = {}) {
         const now = Date.now();
         
-        if (now - this.lastUpdateTime < this.updateInterval) {
+        if (!opts.forceWaveLabels && now - this.lastUpdateTime < this.updateInterval) {
             return;
         }
         
@@ -845,13 +846,15 @@ class WavesManager {
         const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
         
         window.appState.waveVisibility[waveIdStr] = !isCurrentlyVisible;
-        window.appState.save();
         
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
+        this.updatePosition({ forceWaveLabels: true });
+        window.appState.saveDebounced();
         
-        this.updatePosition();
+        requestAnimationFrame(() => {
+            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                window.unifiedListManager.updateWavesList();
+            }
+        });
     }
     
     onVerticalWaveLabelClick(labelElement) {

@@ -1479,7 +1479,7 @@ class EventManager {
 			}
 			
 			if (window.waves && window.waves.updatePosition) {
-				window.waves.updatePosition();
+				window.waves.updatePosition({ forceWaveLabels: true });
 			}
 			
 			this.updateGroupStatsForWave(waveId, isChecked);
