@@ -181,20 +181,22 @@ class WavesManager {
         const step = totalWidth / points;
         
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        const centerY = window.appState.config.graphHeight / 2;
+        const amplitude = window.appState.config.amplitude;
         
         const waveSvg = waveContainer.querySelector('.wave');
         if (waveSvg) {
             waveSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${window.appState.config.graphHeight}`);
         }
         
-        let pathData = `M0,${window.appState.config.graphHeight / 2} `;
+        // M(0,y) по той же формуле, что и остальные точки — иначе излом при ненулевом phaseOffset.
+        const y0 = centerY - amplitude * Math.sin(2 * Math.PI * (0 + phaseOffsetPixels) / periodPx);
+        let pathData = `M0,${y0} `;
         
         for (let i = 1; i <= points; i++) {
             const x = i * step;
             
-            const y = window.appState.config.graphHeight / 2 - 
-                     window.appState.config.amplitude * 
-                     Math.sin(2 * Math.PI * (x + phaseOffsetPixels) / periodPx);
+            const y = centerY - amplitude * Math.sin(2 * Math.PI * (x + phaseOffsetPixels) / periodPx);
             
             pathData += `L${x},${y} `;
         }
@@ -339,15 +341,16 @@ class WavesManager {
 
 
     updateWaveLabelsColor(waveId, isExtremum) {
-        const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
+        const waveIdStr = String(waveId);
+        const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
         if (!wave) return;
         
         const color = isExtremum ? '#ff0000' : wave.color;
         const textColor = this.getContrastTextColor(color);
         
         // Обновляем горизонтальные выноски (левые и правые)
-        const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
-        const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
+        const leftLabel = document.getElementById(`waveLabel${waveIdStr}-left`);
+        const rightLabel = document.getElementById(`waveLabel${waveIdStr}-right`);
         
         if (leftLabel) {
             leftLabel.style.backgroundColor = color;
@@ -371,27 +374,19 @@ class WavesManager {
             }
         }
         
-        // Обновляем вертикальные выноски (верхние и нижние)
-        const topLabel = document.getElementById(`waveLabel${waveId}-top`);
-        const bottomLabel = document.getElementById(`waveLabel${waveId}-bottom`);
-        
-        if (topLabel) {
-            topLabel.style.backgroundColor = color;
-            topLabel.style.color = textColor;
-            const arrow = topLabel.querySelector('.wave-label-arrow');
-            if (arrow) {
+        // Обновляем вертикальные выноски (все экземпляры по волне)
+        document.querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"]`).forEach(label => {
+            label.style.backgroundColor = color;
+            label.style.color = textColor;
+            const arrow = label.querySelector('.wave-label-arrow');
+            if (!arrow) return;
+            const pos = label.dataset.position;
+            if (pos === 'top') {
                 arrow.style.borderColor = `${color} transparent transparent transparent`;
-            }
-        }
-        
-        if (bottomLabel) {
-            bottomLabel.style.backgroundColor = color;
-            bottomLabel.style.color = textColor;
-            const arrow = bottomLabel.querySelector('.wave-label-arrow');
-            if (arrow) {
+            } else if (pos === 'bottom') {
                 arrow.style.borderColor = `transparent transparent ${color} transparent`;
             }
-        }
+        });
     }
     
     
@@ -458,16 +453,15 @@ class WavesManager {
             
             if (!shouldShow) return;
             
-            const topX = this.findWaveXAtY(wave, 0);
-            const bottomX = this.findWaveXAtY(wave, window.appState.config.graphHeight);
+            const topXs = this.findAllExtremumXs(wave, 'top');
+            topXs.forEach((topX, idx) => {
+                this.createVerticalWaveLabel(wave, topX, 'top', topContainer, idx);
+            });
             
-            if (topX !== null && topX >= 0 && topX <= window.appState.graphWidth) {
-                this.createVerticalWaveLabel(wave, topX, 'top', topContainer);
-            }
-            
-            if (bottomX !== null && bottomX >= 0 && bottomX <= window.appState.graphWidth) {
-                this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer);
-            }
+            const bottomXs = this.findAllExtremumXs(wave, 'bottom');
+            bottomXs.forEach((bottomX, idx) => {
+                this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer, idx);
+            });
         });
     }
     
@@ -513,39 +507,43 @@ class WavesManager {
     }
     
     findAxisXIntersectionPoints(wave) {
-        const points = [];
-        const wavePeriodPixels = window.appState.periods[wave.id] || 
-                            (wave.period * window.appState.config.squareSize);
+        const wavePeriodPixels = window.appState.periods[wave.id] ||
+            (wave.period * window.appState.config.squareSize);
         
-        if (!wavePeriodPixels) return points;
+        if (!wavePeriodPixels) return [];
         
         const currentDay = window.appState.currentDay || 0;
         let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
         if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
         
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        const graphW = window.appState.graphWidth;
         
-        const intersectionPhases = [0.0, 0.5];
+        // y = centerY ⟺ sin(2π(relX+ph)/P) = 0 ⟺ (relX+ph)/P = k/2, k ∈ ℤ
+        // relX = x + currentOffsetPx
+        const halfPeriod = wavePeriodPixels / 2;
+        const base = -phaseOffsetPixels - currentOffsetPx;
         
-        for (let n = -3; n <= 3; n++) {
-            intersectionPhases.forEach(phase => {
-                const x = ((phase + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
-                
-                const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
-                
-                if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
-                    const isDuplicate = points.some(existing => 
-                        Math.abs(existing - normalizedX) < 2
-                    );
-                    
-                    if (!isDuplicate) {
-                        points.push(normalizedX);
-                    }
-                }
-            });
+        const kMin = Math.floor((0 - base) / halfPeriod) - 1;
+        const kMax = Math.ceil((graphW - base) / halfPeriod) + 1;
+        
+        const points = [];
+        for (let k = kMin; k <= kMax; k++) {
+            const x = k * halfPeriod + base;
+            if (x >= -1e-6 && x <= graphW + 1e-6) {
+                points.push(Math.min(graphW, Math.max(0, x)));
+            }
         }
         
-        return points.sort((a, b) => a - b);
+        points.sort((a, b) => a - b);
+        const uniq = [];
+        for (const px of points) {
+            if (uniq.length && Math.abs(px - uniq[uniq.length - 1]) < 2) {
+                continue;
+            }
+            uniq.push(px);
+        }
+        return uniq;
     }
     
     createAxisXPoint(wave, x, container) {
@@ -593,49 +591,9 @@ class WavesManager {
     }
     
     navigateToAxisXIntersection(wave, x) {
-        const squaresLeft = Math.floor(window.appState.config.gridSquaresX / 2);
-        const currentDate = new Date(window.appState.currentDate);
-        const leftDate = new Date(currentDate);
-        leftDate.setDate(leftDate.getDate() - squaresLeft);
-        leftDate.setHours(0, 0, 0, 0);
-        
-        const wavePeriodPixels = window.appState.periods[wave.id] || 
-                            (wave.period * window.appState.config.squareSize);
-        
-        const currentDay = window.appState.currentDay || 0;
-        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-        if (currentOffsetPx < 0) currentOffsetPx = wavePeriodPixels + currentOffsetPx;
-        
-        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-        
-        const relativePosition = x + currentOffsetPx + phaseOffsetPixels;
-        
-        const phaseInPeriod = (relativePosition % wavePeriodPixels) / wavePeriodPixels;
-        
-        let targetPhase;
-        const distanceToZero = Math.min(
-            Math.abs(phaseInPeriod - 0.0),
-            Math.abs(phaseInPeriod - 1.0)
-        );
-        const distanceToHalf = Math.abs(phaseInPeriod - 0.5);
-        
-        if (distanceToZero < distanceToHalf) {
-            targetPhase = 0.0;
-        } else {
-            targetPhase = 0.5;
-        }
-        
-        const phaseAtLeft = this.getPhaseAtTime(wave, leftDate);
-        
-        let phaseDiff = targetPhase - phaseAtLeft;
-        if (phaseDiff < 0) {
-            phaseDiff += 1.0;
-        }
-        
-        const daysToIntersection = phaseDiff * wave.period;
-        
-        const intersectionTime = new Date(leftDate.getTime() + (daysToIntersection * 24 * 3600 * 1000));
-        
+        // Время календаря в столбце x текущего визора; совпадает с фазой точки эквилибриума по этой x
+        // (старая логика через phaseInPeriod и «первое» пересечение от leftDate ломалась при нескольких нулях на экране)
+        const intersectionTime = this.calculateTimeFromXCoordinate(wave, x);
         if (window.dates && window.dates.setDate) {
             window.dates.setDate(intersectionTime, true);
         }
@@ -782,8 +740,8 @@ class WavesManager {
     }
 
 
-    createVerticalWaveLabel(wave, x, position, container) {
-        const labelId = `${wave.id}-${position}`;
+    createVerticalWaveLabel(wave, x, position, container, index = 0) {
+        const labelId = `${wave.id}-${position}-${index}`;
         const currentDay = window.appState.currentDay || 0;
         const state = this.calculateWaveStateAtDay(wave, currentDay);
         const isExtremum = (state >= 4 || state <= -4);
@@ -792,7 +750,7 @@ class WavesManager {
         const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
         const textColor = this.getContrastTextColor(waveColor);
         
-        const extremumTime = this.calculateExtremumTime(wave, position);
+        const extremumTime = this.calculateTimeFromXCoordinate(wave, x);
         const timeString = this.formatExtremumTime(extremumTime);
         
         const labelElement = document.createElement('div');
@@ -801,6 +759,7 @@ class WavesManager {
         labelElement.dataset.waveId = wave.id;
         labelElement.dataset.position = position;
         labelElement.dataset.labelType = 'vertical';
+        labelElement.dataset.refX = String(x);
         labelElement.dataset.extremumTime = extremumTime.getTime();
         
         labelElement.style.position = 'absolute';
@@ -966,18 +925,21 @@ class WavesManager {
     updateVerticalWaveLabelsTime() {
         document.querySelectorAll('.wave-label.vertical').forEach(label => {
             const waveId = label.dataset.waveId;
-            const position = label.dataset.position;
+            const refX = label.dataset.refX;
             
             const wave = window.appState.data.waves.find(w => String(w.id) === waveId);
             if (!wave) return;
             
-            const extremumTime = this.calculateExtremumTime(wave, position);
+            const extremumTime = refX !== undefined && refX !== ''
+                ? this.calculateTimeFromXCoordinate(wave, parseFloat(refX, 10))
+                : this.calculateExtremumTime(wave, label.dataset.position);
             const timeString = this.formatExtremumTime(extremumTime);
             
             const textElement = label.querySelector('.wave-label-text');
             if (textElement) {
                 textElement.textContent = timeString;
             }
+            label.dataset.extremumTime = String(extremumTime.getTime());
         });
     }
     
@@ -1010,28 +972,89 @@ class WavesManager {
         return y;
     }
     
-    findWaveXAtY(wave, targetY) {
-        const wavePeriodPixels = window.appState.periods[wave.id] || 
-                               (wave.period * window.appState.config.squareSize);
+    /**
+     * Все горизонтальные координаты экстремумов (верх/низ синусоиды) в пределах видимой ширины графа.
+     * Раньше использовался один X ближе к центру — при малом периоде остальные пики не получали выносок.
+     */
+    findAllExtremumXs(wave, position) {
+        const wavePeriodPixels = window.appState.periods[wave.id] ||
+            (wave.period * window.appState.config.squareSize);
         
         if (!wavePeriodPixels || wavePeriodPixels <= 0) {
-            return null;
+            return [];
+        }
+        
+        const amplitude = window.appState.config.amplitude;
+        if (amplitude <= 0) {
+            return [];
+        }
+        
+        const currentDay = window.appState.currentDay || 0;
+        let currentOffsetPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+        if (currentOffsetPx < 0) {
+            currentOffsetPx = wavePeriodPixels + currentOffsetPx;
+        }
+        
+        const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        const graphW = window.appState.graphWidth;
+        
+        // Вершина: sin=1 → фаза 1/4 цикла; впадина: sin=-1 → 3/4 цикла (как в calculateExtremumTime)
+        const quarter = position === 'top' ? 0.25 : 0.75;
+        const base = quarter * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx;
+        
+        const mMin = Math.floor((0 - base) / wavePeriodPixels) - 1;
+        const mMax = Math.ceil((graphW - base) / wavePeriodPixels) + 1;
+        
+        const points = [];
+        for (let m = mMin; m <= mMax; m++) {
+            const x = base + m * wavePeriodPixels;
+            if (x >= -1e-6 && x <= graphW + 1e-6) {
+                points.push(Math.min(graphW, Math.max(0, x)));
+            }
+        }
+        
+        points.sort((a, b) => a - b);
+        const uniq = [];
+        for (const px of points) {
+            if (uniq.length && Math.abs(px - uniq[uniq.length - 1]) < 2) {
+                continue;
+            }
+            uniq.push(px);
+        }
+        return uniq;
+    }
+    
+    /** Одна точка пересечения волны с горизонталью targetY, ближайшая к центру графа (для совместимости). */
+    findWaveXAtY(wave, targetY) {
+        const all = this.findAllWaveXAtY(wave, targetY);
+        if (!all.length) return null;
+        const cx = window.appState.graphWidth / 2;
+        return all.reduce((best, x) =>
+            (Math.abs(x - cx) < Math.abs(best - cx) ? x : best), all[0]);
+    }
+    
+    findAllWaveXAtY(wave, targetY) {
+        const wavePeriodPixels = window.appState.periods[wave.id] ||
+            (wave.period * window.appState.config.squareSize);
+        
+        if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+            return [];
         }
         
         const centerY = window.appState.config.graphHeight / 2;
         const amplitude = window.appState.config.amplitude;
         
-        if (Math.abs(targetY - centerY) > amplitude) {
-            return null;
+        if (Math.abs(targetY - centerY) > amplitude + 1e-9) {
+            return [];
         }
         
         const sinValue = (centerY - targetY) / amplitude;
         
-        if (Math.abs(sinValue) > 1) {
-            return null;
+        if (Math.abs(sinValue) > 1 + 1e-9) {
+            return [];
         }
         
-        const theta = Math.asin(sinValue);
+        const theta = Math.asin(Math.max(-1, Math.min(1, sinValue)));
         
         const solutions = [theta, Math.PI - theta];
         
@@ -1043,27 +1066,24 @@ class WavesManager {
         }
         
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
+        const graphW = window.appState.graphWidth;
         
-        let bestX = null;
-        let minDistance = Infinity;
-        
+        const points = [];
         solutions.forEach(solution => {
-            for (let n = -2; n <= 2; n++) {
+            for (let n = -20; n <= 20; n++) {
                 const x = ((solution / (2 * Math.PI) + n) * wavePeriodPixels - phaseOffsetPixels - currentOffsetPx);
-                
                 const normalizedX = ((x % wavePeriodPixels) + wavePeriodPixels) % wavePeriodPixels;
                 
-                if (normalizedX >= 0 && normalizedX <= window.appState.graphWidth) {
-                    const distance = Math.abs(normalizedX - window.appState.graphWidth / 2);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        bestX = normalizedX;
+                if (normalizedX >= 0 && normalizedX <= graphW) {
+                    const dup = points.some(existing => Math.abs(existing - normalizedX) < 2);
+                    if (!dup) {
+                        points.push(normalizedX);
                     }
                 }
             }
         });
         
-        return bestX;
+        return points.sort((a, b) => a - b);
     }
     
     createVisibleWaveElementsForActiveDate() {
@@ -1147,20 +1167,21 @@ class WavesManager {
             delete this.wavePaths[waveIdStr];
         }
         
-        const leftLabel = document.getElementById(`waveLabel${waveId}-left`);
-        const rightLabel = document.getElementById(`waveLabel${waveId}-right`);
-        const topLabel = document.getElementById(`waveLabel${waveId}-top`);
-        const bottomLabel = document.getElementById(`waveLabel${waveId}-bottom`);
+        const leftLabel = document.getElementById(`waveLabel${waveIdStr}-left`);
+        const rightLabel = document.getElementById(`waveLabel${waveIdStr}-right`);
         
         if (leftLabel) leftLabel.remove();
         if (rightLabel) rightLabel.remove();
-        if (topLabel) topLabel.remove();
-        if (bottomLabel) bottomLabel.remove();
         
-        delete this.waveLabelElements[`${waveId}-left`];
-        delete this.waveLabelElements[`${waveId}-right`];
-        delete this.waveLabelElements[`${waveId}-top`];
-        delete this.waveLabelElements[`${waveId}-bottom`];
+        document.querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"]`).forEach(el => el.remove());
+        
+        delete this.waveLabelElements[`${waveIdStr}-left`];
+        delete this.waveLabelElements[`${waveIdStr}-right`];
+        Object.keys(this.waveLabelElements).forEach(key => {
+            if (key.startsWith(`${waveIdStr}-top`) || key.startsWith(`${waveIdStr}-bottom`)) {
+                delete this.waveLabelElements[key];
+            }
+        });
         
         this.updatePosition();
         window.grid.updateGridNotesHighlight();
