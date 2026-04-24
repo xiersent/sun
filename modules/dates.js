@@ -429,6 +429,12 @@ class DatesManager {
             }, 50);
         }
         
+        if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+            setTimeout(() => {
+                window.stateIntersectionManager.updateIntersections();
+            }, 50);
+        }
+        
         this.updateDateTimeInputs();
     }
     
@@ -447,6 +453,12 @@ class DatesManager {
         if (window.summaryManager && window.summaryManager.updateSummary) {
             setTimeout(() => {
                 window.summaryManager.updateSummary();
+            }, 50);
+        }
+        
+        if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+            setTimeout(() => {
+                window.stateIntersectionManager.updateIntersections();
             }, 50);
         }
         
@@ -474,6 +486,12 @@ class DatesManager {
             if (window.summaryManager && window.summaryManager.updateSummary) {
                 setTimeout(() => {
                     window.summaryManager.updateSummary();
+                }, 50);
+            }
+            
+            if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+                setTimeout(() => {
+                    window.stateIntersectionManager.updateIntersections();
                 }, 50);
             }
         }

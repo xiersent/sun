@@ -110,8 +110,9 @@ class StateIntersectionManager {
         Object.defineProperty(window.appState, 'currentDay', {
             get() { return this._currentDay; },
             set(value) {
+                const prev = this._currentDay;
                 this._currentDay = value;
-                if (Math.abs(value - (this._currentDay || 0)) > 0.001) {
+                if (Math.abs(value - (prev ?? 0)) > 0.001) {
                     if (window.stateIntersectionManager && !this.isProgrammaticDateChange) {
                         window.stateIntersectionManager.debouncedUpdate();
                     }
