@@ -53,7 +53,7 @@ class UnifiedListManager {
         
         this.templatesLoadPromise = new Promise(async (resolve, reject) => {
             try {
-                const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template', 'intersection-item-template'];
+                const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template', 'person-group-item-template', 'intersection-item-template'];
                 let loadedCount = 0;
                 
                 const loadPromises = templateIds.map(async (templateId) => {
@@ -116,6 +116,11 @@ class UnifiedListManager {
     </div>
 </div>`;
         
+        this.templateCache['person-group-item-template'] = `
+<div class="list-item list-item--person-group" style="background:#ffe6e6;border:2px solid red;">
+    <div class="list-item__content"><div style="color:red;padding:10px;">Шаблон person-group-item.ejs не загружен</div></div>
+</div>`;
+        
         this.templateCache['intersection-item-template'] = `
 <div class="intersection-item" style="background:#ffe6e6;border:2px solid red;">
     <div style="color:red;padding:10px;">
@@ -151,9 +156,7 @@ class UnifiedListManager {
     
 
 
-    prepareDateData(dateObj, index) {
-        const dateObjDate = new Date(dateObj.date);
-        
+    prepareDateData(dateObj, index, personGroupId) {
         const currentTimestamp = window.appState.currentDate instanceof Date ? 
             window.appState.currentDate.getTime() : 
             window.appState.currentDate;
@@ -171,6 +174,7 @@ class UnifiedListManager {
             id: dateObj.id,
             name: dateObj.name,
             type: 'date',
+            personGroupId: personGroupId != null ? personGroupId : null,
             formattedDate: window.dom.formatDate(dateObj.date),
             dateForInput: window.dom.formatDateForInput(dateObj.date),
             yearsFromCurrent: yearsFromCurrent,
@@ -181,6 +185,49 @@ class UnifiedListManager {
             selectedTypeA: isSelectedTypeA,
             selectedTypeB: isSelectedTypeB,
             selectionType: isSelectedTypeA ? 'a' : (isSelectedTypeB ? 'b' : null)
+        };
+    }
+
+    preparePersonGroupData(groupData, index) {
+        const original = window.appState.data.personGroups.find(
+            g => String(g.id) === String(groupData.id)
+        );
+        if (!original) {
+            return {
+                ...groupData,
+                dateCount: 0,
+                children: [],
+                expanded: false,
+                editing: false,
+                index
+            };
+        }
+        const existingDates = [];
+        if (original.dates && Array.isArray(original.dates)) {
+            original.dates.forEach((dateId, di) => {
+                const dateIdStr = String(dateId);
+                const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
+                if (dateObj) {
+                    existingDates.push(dateObj);
+                }
+            });
+        }
+        const childrenData = existingDates.map((dateObj, di) =>
+            this.prepareDateData(dateObj, di, original.id)
+        );
+        const editingPersonGroupIdStr = window.appState.editingPersonGroupId
+            ? String(window.appState.editingPersonGroupId)
+            : null;
+        const groupIdStr = String(original.id);
+        return {
+            id: original.id,
+            name: original.name,
+            type: 'personGroup',
+            dateCount: childrenData.length,
+            expanded: original.expanded !== undefined ? original.expanded : true,
+            children: childrenData,
+            index,
+            editing: editingPersonGroupIdStr === groupIdStr
         };
     }
     
@@ -332,6 +379,7 @@ class UnifiedListManager {
             case 'date': templateId = 'date-item-template'; break;
             case 'wave': templateId = 'wave-item-template'; break;
             case 'group': templateId = 'group-item-template'; break;
+            case 'personGroup': templateId = 'person-group-item-template'; break;
             case 'intersection': templateId = 'intersection-item-template'; break;
             default: templateId = 'date-item-template';
         }
@@ -403,6 +451,50 @@ class UnifiedListManager {
                 }
             });
             container.appendChild(frag);
+        } else if (itemType === 'personGroup') {
+            const renderPersonGroup = this.ensureEjsRenderer('person-group-item-template');
+            const renderDate = this.ensureEjsRenderer('date-item-template');
+            const frag = document.createDocumentFragment();
+            items.forEach((groupData, index) => {
+                try {
+                    if (groupData.dateCount === undefined) {
+                        groupData.dateCount = groupData.children ? groupData.children.length : 0;
+                    }
+                    const renderedGroup = renderPersonGroup({ data: groupData });
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = renderedGroup;
+                    const groupElement = tempDiv.firstElementChild;
+                    const childrenContainer = groupElement.querySelector('.person-group-children');
+                    if (childrenContainer && groupData.children && groupData.children.length > 0) {
+                        const parts = [];
+                        for (let ci = 0; ci < groupData.children.length; ci++) {
+                            const childData = groupData.children[ci];
+                            try {
+                                childData.type = 'date';
+                                parts.push(renderDate({ data: childData }));
+                            } catch (error) {
+                                const safeMsg = String(error.message).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                                parts.push(`<div class="list-error">Ошибка: ${safeMsg}</div>`);
+                            }
+                        }
+                        childrenContainer.innerHTML = parts.join('');
+                        if (groupData.expanded) {
+                            childrenContainer.style.display = 'block';
+                            groupElement.classList.add('list-item--expanded');
+                        } else {
+                            childrenContainer.style.display = 'none';
+                            groupElement.classList.remove('list-item--expanded');
+                        }
+                    }
+                    frag.appendChild(groupElement);
+                } catch (error) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'list-error';
+                    errorDiv.textContent = `Ошибка рендеринга группы персон: ${error.message}`;
+                    frag.appendChild(errorDiv);
+                }
+            });
+            container.appendChild(frag);
         } else if (itemType === 'intersection') {
             const renderTpl = this.ensureEjsRenderer(templateId);
             const renderedItems = [];
@@ -451,6 +543,7 @@ class UnifiedListManager {
             date: 'Нет сохраненных дат',
             wave: 'Нет сигналов',
             group: 'Нет групп сигналов',
+            personGroup: 'Нет групп персон',
             note: 'Нет сохраненных записей',
             intersection: 'Нет совпадений'
         };
@@ -484,6 +577,11 @@ class UnifiedListManager {
             
             window.appState.editingGroupId = editingGroupIdStr === idStr ? null : id;
             this.updateWavesList();
+        } else if (type === 'personGroup') {
+            const idStr = String(id);
+            const cur = window.appState.editingPersonGroupId ? String(window.appState.editingPersonGroupId) : null;
+            window.appState.editingPersonGroupId = cur === idStr ? null : id;
+            this.updateDatesList();
         }
     }
     
@@ -497,6 +595,10 @@ class UnifiedListManager {
         } else if (type === 'group') {
             window.dates.deleteGroup(id);
             this.updateWavesList();
+        } else if (type === 'personGroup') {
+            if (window.dates.deletePersonGroup(id)) {
+                this.updateDatesList();
+            }
         }
     }
     
@@ -507,6 +609,8 @@ class UnifiedListManager {
             this.saveWaveChanges(String(id));
         } else if (type === 'group') {
             this.saveGroupChanges(id);
+        } else if (type === 'personGroup') {
+            this.savePersonGroupChanges(id);
         }
     }
     
@@ -520,6 +624,9 @@ class UnifiedListManager {
         } else if (type === 'group') {
             window.appState.editingGroupId = null;
             this.updateWavesList();
+        } else if (type === 'personGroup') {
+            window.appState.editingPersonGroupId = null;
+            this.updateDatesList();
         }
     }
     
@@ -663,6 +770,25 @@ class UnifiedListManager {
         this.updateWavesList();
         window.appState.save();
     }
+
+    savePersonGroupChanges(groupId) {
+        const group = window.appState.data.personGroups.find(g => String(g.id) === String(groupId));
+        if (!group) {
+            window.appState.editingPersonGroupId = null;
+            this.updateDatesList();
+            return;
+        }
+        const el = document.getElementById(`editPersonGroupName${groupId}`);
+        const newName = el ? el.value.trim() : '';
+        if (!newName) {
+            alert('Пожалуйста, введите название группы');
+            return;
+        }
+        group.name = newName;
+        window.appState.editingPersonGroupId = null;
+        this.updateDatesList();
+        window.appState.save();
+    }
     
     changeWaveColor(wave) {
         const colorInput = document.createElement('input');
@@ -715,7 +841,12 @@ class UnifiedListManager {
     }
     
     updateDatesList() {
-        this.renderList('dateListForDates', window.appState.data.dates, 'date');
+        if (window.dates && window.dates.syncPersonGroupsLayout) {
+            window.dates.syncPersonGroupsLayout();
+        }
+        const pg = window.appState.data.personGroups || [];
+        const allGroups = pg.map((g, idx) => this.preparePersonGroupData(g, idx));
+        this.renderList('dateListForDates', allGroups, 'personGroup');
     }
     
 

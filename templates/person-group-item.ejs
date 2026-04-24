@@ -1,0 +1,73 @@
+<!-- templates/person-group-item.ejs — группа персон (только порядок и сворачивание) -->
+<div class="list-item list-item--person-group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
+    data-id="<%= data.id %>"
+    data-type="personGroup"
+    draggable="false"
+    data-index="<%= data.index %>">
+    
+    <div class="list-item__drag-handle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
+    
+    <div class="list-item__content">
+        <div class="list-item__normal-view">
+            <div class="list-item__row">
+                <div class="list-item__left">
+                    <div class="list-item__title-container">
+                        <div class="list-item__title">
+                            <%= data.name %>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="list-item__right">
+                    <div class="list-item__value">
+                        <span class="group-stats">
+                            <span class="group-total-count" title="Персон в группе">
+                                Персон: <%= data.dateCount %>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="list-item__actions">
+                        <button class="ui-btn expand-collapse-btn person-group-expand-btn" 
+                                data-id="<%= data.id %>" 
+                                data-type="personGroup">
+                            <%= data.expanded ? 'Свернуть' : 'Развернуть' %>
+                        </button>
+                        <button class="ui-btn edit-btn" 
+                                data-id="<%= data.id %>" 
+                                data-type="personGroup">
+                            <%= data.editing ? 'Редактирование...' : 'Изменить' %>
+                        </button>
+                        <% if (data.id !== 'default-person-group') { %>
+                        <button class="ui-btn delete-date-btn" 
+                                data-id="<%= data.id %>" 
+                                data-type="personGroup">
+                            Уничтожить
+                        </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="list-item__edit-form">
+            <div class="list-item__edit-row">
+                <input type="text" placeholder="Название группы" class="list-item__edit-input" id="editPersonGroupName<%= data.id %>" value="<%= data.name %>">
+            </div>
+            <div class="list-item__edit-actions">
+                <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup">Сохранить</button>
+                <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup">Отмена</button>
+            </div>
+        </div>
+        
+        <div class="group-children person-group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
+            <% if (data.children && data.children.length > 0) { %>
+            <% } else { %>
+                <div class="no-waves-message">
+                    <span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">
+                        Нет персон в этой группе
+                    </span>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

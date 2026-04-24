@@ -407,6 +407,7 @@ class UIManager {
 			window.appState.data.dates = [];
 			window.appState.data.waves = [];
 			window.appState.data.groups = [];
+			window.appState.data.personGroups = [];
 			window.appState.data.notes = [];
 			window.appState.activeDateId = null;
 			window.appState.currentDate = new Date();

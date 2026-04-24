@@ -5,7 +5,12 @@ class DataManager {
     }
     
     async updateDateList() {
-        await window.unifiedListManager.renderListWithWait('dateListForDates', window.appState.data.dates, 'date');
+        if (!window.unifiedListManager.templatesLoaded) {
+            await window.unifiedListManager.initTemplates().catch(() => {});
+        }
+        if (window.unifiedListManager.updateDatesList) {
+            window.unifiedListManager.updateDatesList();
+        }
     }
     
     async updateWavesGroups() {

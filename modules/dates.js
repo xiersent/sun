@@ -11,7 +11,8 @@ class DatesManager {
             'mainDateInputDate', 'mainDateInputTime', 'btnSetDate', 'currentDay', 'btnPrevDay',
             'btnNextDay', 'btnToday', 'btnNow',
             'customWaveName', 'customWavePeriod', 'customWaveType',
-            'customWaveColor', 'btnAddCustomWave', 'newGroupName', 'btnAddGroup'
+            'customWaveColor', 'btnAddCustomWave', 'newGroupName', 'btnAddGroup',
+            'newPersonGroupName', 'btnAddPersonGroup'
         ];
         
         ids.forEach(id => {
@@ -55,6 +56,72 @@ class DatesManager {
         }
     }
     
+    ensurePersonGroupsShape() {
+        const data = window.appState.data;
+        if (!Array.isArray(data.personGroups)) {
+            data.personGroups = [];
+        }
+    }
+
+    /**
+     * Синхронизация: каждая дата в ровно одной группе; лишние id в группах убираются; «осиротевшие» даты — в группу по умолчанию.
+     */
+    syncPersonGroupsLayout() {
+        this.ensurePersonGroupsShape();
+        const data = window.appState.data;
+        const dates = data.dates || [];
+        if (dates.length === 0) {
+            data.personGroups = [];
+            return;
+        }
+        if (data.personGroups.length === 0) {
+            data.personGroups = [{
+                id: 'default-person-group',
+                name: 'По умолчанию',
+                dates: dates.map(d => d.id),
+                expanded: true
+            }];
+            return;
+        }
+        let defaultG = data.personGroups.find(g => String(g.id) === 'default-person-group');
+        if (!defaultG) {
+            defaultG = data.personGroups[0];
+        }
+        const validDateIds = new Set(dates.map(d => String(d.id)));
+        data.personGroups.forEach(g => {
+            g.dates = (g.dates || []).filter(id => validDateIds.has(String(id)));
+        });
+        const assigned = new Set();
+        data.personGroups.forEach(g => {
+            (g.dates || []).forEach(id => assigned.add(String(id)));
+        });
+        dates.forEach(d => {
+            const idStr = String(d.id);
+            if (!assigned.has(idStr)) {
+                if (!defaultG.dates) defaultG.dates = [];
+                defaultG.dates.push(d.id);
+                assigned.add(idStr);
+            }
+        });
+    }
+
+    addDateIdToPersonGroup(groupId, dateId) {
+        this.ensurePersonGroupsShape();
+        const data = window.appState.data;
+        let g = data.personGroups.find(gr => String(gr.id) === String(groupId));
+        if (!g) {
+            g = data.personGroups.find(gr => String(gr.id) === 'default-person-group') || data.personGroups[0];
+        }
+        if (!g) return;
+        if (!g.dates) g.dates = [];
+        const idStr = String(dateId);
+        data.personGroups.forEach(gr => {
+            if (!gr.dates) return;
+            gr.dates = gr.dates.filter(id => String(id) !== idStr);
+        });
+        g.dates.push(dateId);
+    }
+
     addDate(dateValue, name) {
         let timestamp;
         
@@ -74,6 +141,7 @@ class DatesManager {
         };
         
         window.appState.data.dates.push(newDate);
+        this.syncPersonGroupsLayout();
         window.appState.save();
         
         if (this.elements.dateNameInput) {
@@ -93,6 +161,12 @@ class DatesManager {
         if (dateIndex === -1) return;
         
         window.appState.data.dates.splice(dateIndex, 1);
+
+        this.ensurePersonGroupsShape();
+        window.appState.data.personGroups.forEach(g => {
+            if (!g.dates) return;
+            g.dates = g.dates.filter(id => String(id) !== dateIdStr);
+        });
         
         if (String(window.appState.editingDateId) === dateIdStr) {
             window.appState.editingDateId = null;
@@ -256,6 +330,57 @@ class DatesManager {
         window.appState.data.groups.push(group);
         window.appState.save();
         return group;
+    }
+
+    addPersonGroup(name) {
+        if (!name || !name.trim()) {
+            alert('Пожалуйста, введите название группы');
+            return null;
+        }
+        this.ensurePersonGroupsShape();
+        const group = {
+            id: window.appState.generateId(),
+            name: name.trim(),
+            dates: [],
+            expanded: true
+        };
+        window.appState.data.personGroups.push(group);
+        window.appState.save();
+        return group;
+    }
+
+    deletePersonGroup(groupId) {
+        const groupIdStr = String(groupId);
+        if (groupIdStr === 'default-person-group') {
+            alert('Группу по умолчанию нельзя уничтожить.');
+            return false;
+        }
+        if (!confirm('Уничтожить группу персон? Персоны будут перенесены в группу по умолчанию.')) {
+            return false;
+        }
+        this.ensurePersonGroupsShape();
+        const data = window.appState.data;
+        const group = data.personGroups.find(g => String(g.id) === groupIdStr);
+        if (!group) return false;
+        let defaultG = data.personGroups.find(g => String(g.id) === 'default-person-group');
+        if (!defaultG) {
+            defaultG = data.personGroups.find(g => String(g.id) !== groupIdStr) || null;
+        }
+        if (defaultG && String(defaultG.id) !== groupIdStr && group.dates && group.dates.length > 0) {
+            if (!defaultG.dates) defaultG.dates = [];
+            group.dates.forEach(dateId => {
+                const idStr = String(dateId);
+                if (!defaultG.dates.some(did => String(did) === idStr)) {
+                    defaultG.dates.push(dateId);
+                }
+            });
+        }
+        data.personGroups = data.personGroups.filter(g => String(g.id) !== groupIdStr);
+        if (String(window.appState.editingPersonGroupId) === groupIdStr) {
+            window.appState.editingPersonGroupId = null;
+        }
+        window.appState.save();
+        return true;
     }
     
     deleteGroup(groupId) {

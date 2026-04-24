@@ -61,6 +61,7 @@ class ImportExportManager {
     exportDates() {
         const dataToSave = {
             dates: window.appState.data.dates,
+            personGroups: window.appState.data.personGroups || [],
             exportDate: new Date().getTime(),
             version: '1.0',
             type: 'dates-only'
@@ -232,6 +233,22 @@ class ImportExportManager {
                             });
                             
                             window.appState.data = convertedData;
+
+                            if (!window.appState.data.personGroups || !window.appState.data.personGroups.length) {
+                                if (window.appState.data.dates && window.appState.data.dates.length) {
+                                    window.appState.data.personGroups = [{
+                                        id: 'default-person-group',
+                                        name: 'По умолчанию',
+                                        dates: window.appState.data.dates.map(d => d.id),
+                                        expanded: true
+                                    }];
+                                } else {
+                                    window.appState.data.personGroups = [];
+                                }
+                            }
+                            if (window.dates && window.dates.syncPersonGroupsLayout) {
+                                window.dates.syncPersonGroupsLayout();
+                            }
                             
                             window.appState.waveVisibility = {};
                             window.appState.waveBold = {};
@@ -348,6 +365,21 @@ class ImportExportManager {
                             
                         } else if (isDatesOnly) {
                             window.appState.data.dates = convertedData.dates || [];
+                            if (convertedData.personGroups && convertedData.personGroups.length) {
+                                window.appState.data.personGroups = convertedData.personGroups;
+                            } else if (window.appState.data.dates.length > 0) {
+                                window.appState.data.personGroups = [{
+                                    id: 'default-person-group',
+                                    name: 'По умолчанию',
+                                    dates: window.appState.data.dates.map(d => d.id),
+                                    expanded: true
+                                }];
+                            } else {
+                                window.appState.data.personGroups = [];
+                            }
+                            if (window.dates && window.dates.syncPersonGroupsLayout) {
+                                window.dates.syncPersonGroupsLayout();
+                            }
                             
                             if (window.appState.data.dates.length > 0 && !window.appState.data.dates.find(d => d.id === window.appState.activeDateId)) {
                                 window.appState.activeDateId = window.appState.data.dates[0].id;

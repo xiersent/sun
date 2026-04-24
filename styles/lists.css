@@ -84,6 +84,24 @@
 .list-item--group.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 .list-item--group:not(.list-item--editing) .list-item__drag-handle{cursor: move;}
 .list-item--group.list-item--editing .list-item__drag-handle{opacity: 0.3; cursor: default;}
+.list-item--person-group{cursor: default;}
+.list-item--person-group:not(.list-item--expanded):hover{background-color: #f5f5f5;}
+.list-item--person-group.list-item--expanded{background-color: inherit;}
+.list-item--person-group:not(.list-item--editing) .list-item__drag-handle{cursor: move;}
+.list-item--person-group.list-item--editing .list-item__drag-handle{opacity: 0.3; cursor: default;}
+.list-item--person-group.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+.list-item--person-group.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+.list-item--person-group.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+.person-group-children{margin-top: var(--spacing-sm); max-height: 361px; overflow-y: scroll; border: 1px solid var(--clg);}
+.person-group-children .list-item--date{background: #fafafa;}
+.person-group-children .list-item--date:hover{background: #f0f0f0;}
+.person-group-children .list-item--date.list-item--drag-over-top{border-top: 2px solid var(--cp);}
+.person-group-children .list-item--date.list-item--drag-over-bottom{border-bottom: 2px solid var(--cp);}
+.list-item--person-group.list-item--editing .person-group-children .list-item--date .list-item__normal-view{display: flex !important;}
+.list-item--person-group.list-item--editing .person-group-children .list-item--date .list-item__edit-form{display: none !important;}
+.date-drag-handle{color: #999; cursor: move; padding: 2px; flex-shrink: 0; user-select: none; margin-right: 4px;}
+.date-drag-handle:hover{color: var(--text-color);}
+.list-item--date.list-item--editing .date-drag-handle{opacity: 0.3; cursor: default;}
 .drop-indicator{position: absolute; left: 0; right: 0; height: 2px; background-color: #666; z-index: 100; pointer-events: none;}
 .list-item:first-child{overflow: hidden;}
 .list-item:last-child{overflow: hidden;}

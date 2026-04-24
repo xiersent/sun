@@ -967,6 +967,23 @@ class AppCore {
                 }
             });
         }
+
+        const btnAddPersonGroup = document.getElementById('btnAddPersonGroup');
+        if (btnAddPersonGroup) {
+            btnAddPersonGroup.addEventListener('click', () => {
+                const input = document.getElementById('newPersonGroupName');
+                const name = input ? input.value : '';
+                if (window.dates && window.dates.addPersonGroup) {
+                    const g = window.dates.addPersonGroup(name || '');
+                    if (g && input) {
+                        input.value = '';
+                    }
+                }
+                if (window.dataManager && window.dataManager.updateDateList) {
+                    window.dataManager.updateDateList();
+                }
+            });
+        }
         
         const importAllFile = document.getElementById('importAllFile');
         

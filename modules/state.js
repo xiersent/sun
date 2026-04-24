@@ -25,6 +25,7 @@ class AppState {
             created: "2024-01-01",
             waves: [],  // ПУСТО - заполнится миграцией
             dates: [],  // ПУСТО - заполнится миграцией
+            personGroups: [], // группы персон (порядок id в dates[]); заполняется миграцией 002
             notes: [],
             groups: [],  // ПУСТО - заполнится миграцией
             uiSettings: {
@@ -52,8 +53,10 @@ class AppState {
         };
         
         this._saveDebounceTimer = null;
-        
-        this.load();
+        this._loadInProgress = null;
+        // Полная загрузка (localStorage + миграции) — только из init.js с await;
+        // до DOMContentLoaded MigrationsManager ещё не подключён.
+        this.applyMemoryDefaultsFromReset({ skipSave: true });
     }
     
     getTodayStartTimestamp() {
@@ -133,7 +136,19 @@ class AppState {
         }
     }
     
-    load() {
+    async load() {
+        if (this._loadInProgress) {
+            return this._loadInProgress;
+        }
+        this._loadInProgress = this._loadImpl();
+        try {
+            await this._loadInProgress;
+        } finally {
+            this._loadInProgress = null;
+        }
+    }
+
+    async _loadImpl() {
         const saved = localStorage.getItem('appData');
         if (saved) {
             try {
@@ -141,10 +156,10 @@ class AppState {
                 this.data = data;
                 this.convertDatesToTimestamp();
                 
-                // ===== ЗАПУСК МИГРАЦИЙ =====
+                // ===== ЗАПУСК МИГРАЦИЙ (async: динамическая подгрузка migrations/*.js) =====
                 if (window.MigrationsManager) {
                     const migrations = new window.MigrationsManager(this);
-                    migrations.runAllMigrations();
+                    await migrations.runAllMigrations();
                 }
                 // ===== КОНЕЦ МИГРАЦИЙ =====
                 
@@ -214,6 +229,7 @@ class AppState {
                 this.editingDateId = null;
                 this.editingWaveId = null;
                 this.editingGroupId = null;
+                this.editingPersonGroupId = null;
                 
                 if (data.uiSettings.activeDateId) {
                     this.activeDateId = data.uiSettings.activeDateId;
@@ -328,7 +344,12 @@ class AppState {
         }
     }
     
-    reset() {
+    /**
+     * Сброс полей в памяти как в reset(); по умолчанию пишет в localStorage.
+     * @param {{ skipSave?: boolean }} [opts]
+     */
+    applyMemoryDefaultsFromReset(opts = {}) {
+        const skipSave = !!opts.skipSave;
         // Копируем пустые начальные данные
         this.data = JSON.parse(JSON.stringify(this.initialData));
         
@@ -359,6 +380,7 @@ class AppState {
         this.editingDateId = null;
         this.editingWaveId = null;
         this.editingGroupId = null;
+        this.editingPersonGroupId = null;
         
         this.isProgrammaticDateChange = false;
         this.SQL = null;
@@ -379,8 +401,13 @@ class AppState {
         };
         this.data.uiSettings.dateSelections = this.dateSelections;
         
-        // Сохраняем пустое состояние
-        this.save();
+        if (!skipSave) {
+            this.save();
+        }
+    }
+
+    reset() {
+        this.applyMemoryDefaultsFromReset({ skipSave: false });
     }
     
     convertDatesToTimestamp() {

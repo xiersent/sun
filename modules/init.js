@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     try {
-        window.appState.load();
+        await window.appState.load();
         
         window.timeUtils = window.timeUtils || new TimeUtils();
         window.dom = window.dom || new DOM();
@@ -62,6 +62,7 @@ async function finalizeInitialization() {
         window.appState.editingDateId = null;
         window.appState.editingWaveId = null;
         window.appState.editingGroupId = null;
+        window.appState.editingPersonGroupId = null;
     }
     
     const now = new Date();

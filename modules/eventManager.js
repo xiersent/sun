@@ -28,6 +28,9 @@ class EventManager {
         this._groupChildrenDropEl = null;
         this._wavesUiRefreshScheduled = null;
         this._datesUiRefreshScheduled = null;
+        this.isDraggingPersonDate = false;
+        this._personDateDragOverItemEl = null;
+        this._personGroupChildrenDropEl = null;
         this.$ = window.jQuery;
         this.setupGlobalHandlers();
         this.setupDateChangeObservers();
@@ -41,11 +44,11 @@ class EventManager {
         });
 
         $(document)
-            .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing)', this.handleDragStart.bind(this))
+            .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing) > .list-item__drag-handle.date-drag-handle', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
             .on('dragleave', '.list-item--date[data-type="date"]', this.handleDragLeave.bind(this))
             .on('drop', '.list-item--date[data-type="date"]', this.handleDrop.bind(this))
-            .on('dragend', '.list-item--date[data-type="date"]', this.handleDragEnd.bind(this));
+            .on('dragend', '.list-item--date .date-drag-handle', this.handleDragEnd.bind(this));
         
         $(document)
             .on('dragstart', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragStart.bind(this))
@@ -53,6 +56,13 @@ class EventManager {
             .on('dragleave', '.list-item--group[data-type="group"]', this.handleDragLeave.bind(this))
             .on('drop', '.list-item--group[data-type="group"]', this.handleDrop.bind(this))
             .on('dragend', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragEnd.bind(this));
+
+        $(document)
+            .on('dragstart', '.list-item--person-group[data-type="personGroup"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragStart.bind(this))
+            .on('dragover', '.list-item--person-group[data-type="personGroup"]', this.handleDragOver.bind(this))
+            .on('dragleave', '.list-item--person-group[data-type="personGroup"]', this.handleDragLeave.bind(this))
+            .on('drop', '.list-item--person-group[data-type="personGroup"]', this.handleDrop.bind(this))
+            .on('dragend', '.list-item--person-group[data-type="personGroup"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragEnd.bind(this));
             
         $(document)
             .on('dragover', '.group-children', this.handleGroupChildrenDragOver.bind(this))
@@ -65,6 +75,11 @@ class EventManager {
             .on('dragleave', '.group-children .list-item--wave', this.handleWaveDragLeave.bind(this))
             .on('drop', '.group-children .list-item--wave', this.handleWaveDrop.bind(this))
             .on('dragend', '.group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle', this.handleWaveDragEnd.bind(this));
+
+        $(document)
+            .on('dragover', '.person-group-children', this.handlePersonGroupChildrenDragOver.bind(this))
+            .on('dragleave', '.person-group-children', this.handlePersonGroupChildrenDragLeave.bind(this))
+            .on('drop', '.person-group-children', this.handlePersonGroupChildrenDateDrop.bind(this));
 
 		$(document).on('click', '.group-enabled-count', (e) => {
 			e.preventDefault();
@@ -116,6 +131,7 @@ class EventManager {
             return;
         }
 
+        this.isDraggingPersonDate = false;
         this._waveDragOverItemEl = null;
         this._groupChildrenDropEl = null;
         this.isDraggingWave = true;
@@ -153,6 +169,9 @@ class EventManager {
     }
     
     handleWaveDragOver(e) {
+        if (this.isDraggingPersonDate) {
+            return;
+        }
         if (!this.isDraggingWave || !this.waveDragPayload || this.waveDragPayload.type !== 'wave') {
             return;
         }
@@ -209,6 +228,9 @@ class EventManager {
     }
 
     handleGroupChildrenDragOver(e) {
+        if (this.isDraggingPersonDate) {
+            return;
+        }
         if (!this.isDraggingWave || !this.waveDragPayload || this.waveDragPayload.type !== 'wave') {
             return;
         }
@@ -246,6 +268,9 @@ class EventManager {
     }
 
     handleGroupChildrenWaveDrop(e) {
+        if (this.isDraggingPersonDate) {
+            return;
+        }
         if (!this.isDraggingWave) {
             return;
         }
@@ -303,6 +328,9 @@ class EventManager {
     }
     
     handleWaveDrop(e) {
+        if (this.isDraggingPersonDate) {
+            return;
+        }
         if (!this.isDraggingWave) {
             return;
         }
@@ -361,6 +389,92 @@ class EventManager {
             this._groupChildrenDropEl.classList.remove('group-children--drag-over');
             this._groupChildrenDropEl = null;
         }
+    }
+
+    clearPersonDateDnDVisualState() {
+        if (this._personDateDragOverItemEl) {
+            this._personDateDragOverItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+            this._personDateDragOverItemEl = null;
+        }
+        if (this._personGroupChildrenDropEl) {
+            this._personGroupChildrenDropEl.classList.remove('group-children--drag-over');
+            this._personGroupChildrenDropEl = null;
+        }
+    }
+
+    handlePersonGroupChildrenDragOver(e) {
+        if (!this.isDraggingPersonDate) {
+            return;
+        }
+        if ($(e.target).closest('.list-item--date').length) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        if (this._personDateDragOverItemEl) {
+            this._personDateDragOverItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+            this._personDateDragOverItemEl = null;
+        }
+        const gc = e.currentTarget;
+        if (this._personGroupChildrenDropEl && this._personGroupChildrenDropEl !== gc) {
+            this._personGroupChildrenDropEl.classList.remove('group-children--drag-over');
+        }
+        this._personGroupChildrenDropEl = gc;
+        gc.classList.add('group-children--drag-over');
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+    }
+
+    handlePersonGroupChildrenDragLeave(e) {
+        const $gc = $(e.currentTarget);
+        const related = e.originalEvent.relatedTarget;
+        if (related && $gc[0].contains(related)) {
+            return;
+        }
+        $gc.removeClass('group-children--drag-over');
+    }
+
+    handlePersonGroupChildrenDateDrop(e) {
+        if (!this.isDraggingPersonDate) {
+            return;
+        }
+        if ($(e.target).closest('.list-item--date').length) {
+            return;
+        }
+        let dragData;
+        try {
+            dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
+        } catch (_) {
+            return;
+        }
+        if (!dragData || dragData.type !== 'date') {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        this.clearPersonDateDnDVisualState();
+        const $gc = $(e.currentTarget);
+        const $group = $gc.closest('.list-item--person-group');
+        const targetGroupId = $group.data('id');
+        if (!targetGroupId) {
+            return;
+        }
+        let sourceGroupId = dragData.personGroupId || this.findPersonGroupIdForDate(dragData.id);
+        const targetGroup = (window.appState.data.personGroups || []).find(g => String(g.id) === String(targetGroupId));
+        const insertAtEnd = (targetGroup && targetGroup.dates) ? targetGroup.dates.length : 0;
+        this.moveDateBetweenPersonGroups(
+            sourceGroupId,
+            targetGroupId,
+            dragData.index,
+            insertAtEnd,
+            false,
+            { emptyOrGapDrop: true }
+        );
     }
 
     handleWaveDragEnd(e) {
@@ -560,7 +674,7 @@ class EventManager {
             }
         } catch (error) {}
         
-        const $item = $(e.currentTarget).closest('.list-item--group, .list-item--date');
+        const $item = $(e.currentTarget).closest('.list-item--group, .list-item--date, .list-item--person-group');
         if (!$item.length) {
             e.preventDefault();
             return;
@@ -574,16 +688,25 @@ class EventManager {
             return;
         }
 
-        if (type === 'group' || type === 'date') {
+        if (type === 'group' || type === 'date' || type === 'personGroup') {
             this.isDraggingWave = false;
             this.waveDragPayload = null;
         }
+
+        this.isDraggingPersonDate = type === 'date';
         
-        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+        const payload = {
             type: type,
             id: id,
             index: index
-        }));
+        };
+        if (type === 'date') {
+            const pgId = $item.data('personGroupId');
+            if (pgId != null && pgId !== '') {
+                payload.personGroupId = pgId;
+            }
+        }
+        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(payload));
         
         $item.addClass('list-item--dragging');
         window.sunPerfLog('eventManager', 'dragstart', { type, id, index });
@@ -677,14 +800,16 @@ class EventManager {
             if (dragData.type === 'group' && String(dragData.id) === String(targetId)) {
                 return;
             }
-            
-            if (dragData.type !== 'group' && dragData.index === targetIndex) {
+            if (dragData.type === 'personGroup' && String(dragData.id) === String(targetId)) {
+                return;
+            }
+            if (dragData.type === 'date' && String(dragData.id) === String(targetId)) {
                 return;
             }
             
             if (dragData.type === 'date') {
                 window.sunPerfLog('eventManager', 'drop.date', { fromIndex: dragData.index, targetIndex, insertBefore });
-                this.handleDateDrop(dragData, targetIndex, insertBefore);
+                this.handleDateDrop(dragData, targetIndex, insertBefore, $item);
             } else if (dragData.type === 'group') {
                 window.sunPerfLog('eventManager', 'drop.group', {
                     fromId: dragData.id,
@@ -694,22 +819,103 @@ class EventManager {
                     insertBefore
                 });
                 this.handleGroupDrop(dragData, targetIndex, insertBefore, targetId);
+            } else if (dragData.type === 'personGroup') {
+                window.sunPerfLog('eventManager', 'drop.personGroup', {
+                    fromId: dragData.id,
+                    targetId,
+                    fromIndex: dragData.index,
+                    targetIndex,
+                    insertBefore
+                });
+                this.handlePersonGroupDrop(dragData, targetIndex, insertBefore, targetId);
             }
             
         } catch (error) {
         }
     }
 
-    handleDateDrop(dragData, targetIndex, insertBefore) {
-        const [movedItem] = window.appState.data.dates.splice(dragData.index, 1);
-        let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
-        window.appState.data.dates.splice(newIndex, 0, movedItem);
-        window.sunPerfLog('eventManager', 'handleDateDrop.applied', {
-            fromIndex: dragData.index,
-            newIndex,
-            dateId: movedItem && movedItem.id
-        });
+    findPersonGroupIdForDate(dateId) {
+        const idStr = String(dateId);
+        const groups = window.appState.data.personGroups || [];
+        for (const g of groups) {
+            if (!g.dates) continue;
+            if (g.dates.some(did => String(did) === idStr)) {
+                return g.id;
+            }
+        }
+        const def = groups.find(gr => String(gr.id) === 'default-person-group');
+        return def ? def.id : (groups[0] && groups[0].id);
+    }
+
+    moveDateBetweenPersonGroups(sourceGroupId, targetGroupId, sourceIndex, targetIndex, insertBefore, opts = {}) {
+        const { emptyOrGapDrop = false } = opts;
+        const groups = window.appState.data.personGroups || [];
+        const sourceGroup = groups.find(g => String(g.id) === String(sourceGroupId));
+        const targetGroup = groups.find(g => String(g.id) === String(targetGroupId));
+        if (!sourceGroup || !targetGroup ||
+            !Array.isArray(sourceGroup.dates) || !Array.isArray(targetGroup.dates)) {
+            return;
+        }
+        const sourceDates = [...sourceGroup.dates];
+        const dateId = sourceDates[sourceIndex];
+        if (dateId === undefined) return;
+        const sameGroup = String(sourceGroupId) === String(targetGroupId);
+        if (sameGroup) {
+            this.reorderDateInPersonGroup(sourceGroupId, sourceIndex, targetIndex, insertBefore);
+            return;
+        }
+        sourceDates.splice(sourceIndex, 1);
+        sourceGroup.dates = sourceDates;
+        const targetDates = [...targetGroup.dates];
+        let insertAt;
+        if (emptyOrGapDrop || targetDates.length === 0) {
+            insertAt = targetDates.length;
+        } else {
+            insertAt = insertBefore ? targetIndex : targetIndex + 1;
+            if (insertAt < 0) insertAt = 0;
+            if (insertAt > targetDates.length) insertAt = targetDates.length;
+        }
+        targetDates.splice(insertAt, 0, dateId);
+        targetGroup.dates = targetDates;
         this.scheduleDateListRefreshAndSave();
+    }
+
+    reorderDateInPersonGroup(groupId, sourceIndex, targetIndex, insertBefore) {
+        const group = (window.appState.data.personGroups || []).find(g => String(g.id) === String(groupId));
+        if (!group || !Array.isArray(group.dates)) return;
+        const dates = [...group.dates];
+        const dateId = dates[sourceIndex];
+        if (dateId === undefined) return;
+        dates.splice(sourceIndex, 1);
+        const newIndex = this.calculateNewIndex(sourceIndex, targetIndex, insertBefore);
+        dates.splice(newIndex, 0, dateId);
+        group.dates = dates;
+        this.scheduleDateListRefreshAndSave();
+    }
+
+    handleDateDrop(dragData, targetIndex, insertBefore, $targetItem) {
+        let sourceGroupId = dragData.personGroupId;
+        if (!sourceGroupId) {
+            sourceGroupId = this.findPersonGroupIdForDate(dragData.id);
+        }
+        let targetGroupId = $targetItem.data('personGroupId');
+        if (!targetGroupId) {
+            const $pg = $targetItem.closest('.list-item--person-group');
+            if ($pg.length) {
+                targetGroupId = $pg.data('id');
+            }
+        }
+        if (!targetGroupId) {
+            targetGroupId = sourceGroupId;
+        }
+        this.moveDateBetweenPersonGroups(
+            sourceGroupId,
+            targetGroupId,
+            dragData.index,
+            targetIndex,
+            insertBefore,
+            { emptyOrGapDrop: false }
+        );
     }
     
     handleGroupDrop(dragData, targetIndex, insertBefore, targetId) {
@@ -739,6 +945,26 @@ class EventManager {
         });
         this.scheduleWavesListRefreshAndSave();
     }
+
+    handlePersonGroupDrop(dragData, targetIndex, insertBefore, targetId) {
+        const groups = window.appState.data.personGroups || [];
+        let fromIdx = Number(dragData.index);
+        if (!Number.isInteger(fromIdx) || fromIdx < 0 || fromIdx >= groups.length ||
+            String(groups[fromIdx].id) !== String(dragData.id)) {
+            fromIdx = groups.findIndex(g => String(g.id) === String(dragData.id));
+        }
+        if (fromIdx < 0) return;
+        let toIdx = Number(targetIndex);
+        if (!Number.isInteger(toIdx) || toIdx < 0 || toIdx >= groups.length ||
+            String(groups[toIdx].id) !== String(targetId)) {
+            toIdx = groups.findIndex(g => String(g.id) === String(targetId));
+        }
+        if (toIdx < 0) return;
+        const [movedItem] = groups.splice(fromIdx, 1);
+        let newIndex = this.calculateNewIndex(fromIdx, toIdx, insertBefore);
+        groups.splice(newIndex, 0, movedItem);
+        this.scheduleDateListRefreshAndSave();
+    }
     
     handleDragLeave(e) {
         const $item = $(e.currentTarget);
@@ -760,12 +986,14 @@ class EventManager {
         if (t.closest('.list-item--wave')) {
             return;
         }
-        const $row = $(t).closest('.list-item--group[data-type="group"], .list-item--date[data-type="date"]');
+        const $row = $(t).closest('.list-item--group[data-type="group"], .list-item--date[data-type="date"], .list-item--person-group[data-type="personGroup"]');
         if (!$row.length) {
             return;
         }
         this.isDraggingWave = false;
         this.waveDragPayload = null;
+        this.isDraggingPersonDate = false;
+        this.clearPersonDateDnDVisualState();
         if (this._dragOverListItemEl) {
             this._dragOverListItemEl.classList.remove(
                 'list-item--drag-over-top',
@@ -787,7 +1015,7 @@ class EventManager {
                 return;
             }
             
-            if ($target.is('button, input, textarea, select, .list-item__drag-handle, .delete-date-btn, .edit-btn')) {
+            if ($target.is('button, input, textarea, select, .list-item__drag-handle, .date-drag-handle, .delete-date-btn, .edit-btn')) {
                 return;
             }
             
@@ -966,25 +1194,46 @@ class EventManager {
             e.preventDefault();
             e.stopPropagation();
             const id = $expandBtn.data('id');
+            const btnType = $expandBtn.data('type');
             
             if (id && window.unifiedListManager) {
-                const group = window.appState.data.groups.find(g => g.id === id);
-                if (group) {
-                    group.expanded = !group.expanded;
-                    window.appState.save();
-                    
-                    const groupElement = document.querySelector(`.list-item--group[data-id="${id}"]`);
-                    if (groupElement) {
-                        groupElement.classList.toggle('list-item--expanded');
-                        
-                        const childrenContainer = groupElement.querySelector('.group-children');
-                        if (childrenContainer) {
-                            childrenContainer.style.display = group.expanded ? 'block' : 'none';
+                if (btnType === 'personGroup') {
+                    const group = (window.appState.data.personGroups || []).find(g => String(g.id) === String(id));
+                    if (group) {
+                        group.expanded = !group.expanded;
+                        window.appState.save();
+                        const groupElement = document.querySelector(`.list-item--person-group[data-id="${id}"]`);
+                        if (groupElement) {
+                            groupElement.classList.toggle('list-item--expanded');
+                            const childrenContainer = groupElement.querySelector('.person-group-children');
+                            if (childrenContainer) {
+                                childrenContainer.style.display = group.expanded ? 'block' : 'none';
+                            }
+                            const expandBtn = groupElement.querySelector('.expand-collapse-btn');
+                            if (expandBtn) {
+                                expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+                            }
                         }
+                    }
+                } else {
+                    const group = window.appState.data.groups.find(g => g.id === id);
+                    if (group) {
+                        group.expanded = !group.expanded;
+                        window.appState.save();
                         
-                        const expandBtn = groupElement.querySelector('.expand-collapse-btn');
-                        if (expandBtn) {
-                            expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+                        const groupElement = document.querySelector(`.list-item--group[data-id="${id}"]`);
+                        if (groupElement) {
+                            groupElement.classList.toggle('list-item--expanded');
+                            
+                            const childrenContainer = groupElement.querySelector('.group-children');
+                            if (childrenContainer) {
+                                childrenContainer.style.display = group.expanded ? 'block' : 'none';
+                            }
+                            
+                            const expandBtn = groupElement.querySelector('.expand-collapse-btn');
+                            if (expandBtn) {
+                                expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+                            }
                         }
                     }
                 }

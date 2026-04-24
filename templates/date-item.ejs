@@ -6,10 +6,11 @@
     <%= data.selectedTypeB ? 'selected-type-b' : '' %>"
     data-id="<%= data.id %>"
     data-type="date"
-    draggable="<%= !data.editing %>"
+    data-person-group-id="<%= data.personGroupId || '' %>"
+    draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="list-item__drag-handle">⋮⋮</div>
+    <div class="list-item__drag-handle date-drag-handle" draggable="<%= !data.editing %>" title="Перетащить персону">⋮⋮</div>
     
     <div class="list-item__content">
         <!-- Нормальный вид -->
