@@ -42,6 +42,7 @@ class ImportExportManager {
         dataToSave.uiSettings.graphGrayMode = window.appState.graphGrayMode;
         dataToSave.uiSettings.cornerSquaresVisible = window.appState.cornerSquaresVisible;
         dataToSave.uiSettings.waveIntersectionsVisible = window.appState.waveIntersectionsVisible;
+        dataToSave.uiSettings.extremumWaveColorHighlight = window.appState.extremumWaveColorHighlight;
         delete dataToSave.uiSettings.graphBgWhite;
         dataToSave.exportDate = new Date().getTime();
         dataToSave.version = '1.0';
@@ -288,6 +289,7 @@ class ImportExportManager {
                             window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
                             window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
                             window.appState.waveIntersectionsVisible = convertedData.uiSettings.waveIntersectionsVisible !== undefined ? convertedData.uiSettings.waveIntersectionsVisible : true;
+                            window.appState.extremumWaveColorHighlight = convertedData.uiSettings.extremumWaveColorHighlight !== undefined ? convertedData.uiSettings.extremumWaveColorHighlight : true;
                             
                             if (window.appState.uiHidden) {
                                 document.body.classList.add('ui-hidden');
@@ -359,6 +361,9 @@ class ImportExportManager {
                             window.grid.updateCenterDate();
                             window.waves.updatePosition();
                             window.waves.updateCornerSquareColors();
+                            if (window.uiManager && window.uiManager.syncExtremumWaveColorHighlightButton) {
+                                window.uiManager.syncExtremumWaveColorHighlightButton();
+                            }
                             window.appState.save();
                             
                             alert('Все данные успешно импортированы!');

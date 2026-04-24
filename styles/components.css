@@ -5,6 +5,7 @@
 button{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-weight: 400; font-family: var(--font-family);}
 button:hover{filter: brightness(0.9);}
 .ui-btn{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
+.ui-btn.ui-btn-toggle-off{opacity: 0.55;}
 #acceptWarning.ui-btn{background-color: var(--cp); color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
 #acceptWarning.ui-btn:hover{filter: brightness(0.9); background-color: var(--cp);}
 .parable-btn-wrapper{margin-top: var(--spacing-lg); display: flex; justify-content: center; gap: 8px;}

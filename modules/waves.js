@@ -254,6 +254,10 @@ class WavesManager {
         return waveState;
     }
     
+    isExtremumHighlightEnabled() {
+        return window.appState && window.appState.extremumWaveColorHighlight !== false;
+    }
+    
     setWaveStrokeColor(waveId, isExtremum) {
         const path = this.wavePaths[waveId];
         if (!path) return;
@@ -299,7 +303,8 @@ class WavesManager {
                 let isExtremum = false;
                 if (shouldShow) {
                     const state = this.calculateWaveStateAtDay(wave, currentDay);
-                    isExtremum = (state >= 4 || state <= -4);
+                    const atExtremum = (state >= 4 || state <= -4);
+                    isExtremum = this.isExtremumHighlightEnabled() && atExtremum;
                     this.setWaveStrokeColor(wave.id, isExtremum);
                     this.updateWaveLabelsColor(wave.id, isExtremum);
                 } else {
@@ -656,7 +661,8 @@ class WavesManager {
         const labelId = `${wave.id}-${side}`;
         const currentDay = window.appState.currentDay || 0;
         const state = this.calculateWaveStateAtDay(wave, currentDay);
-        const isExtremum = (state >= 4 || state <= -4);
+        const atExtremum = (state >= 4 || state <= -4);
+        const isExtremum = this.isExtremumHighlightEnabled() && atExtremum;
         
         // Выбираем цвет: красный для экстремума, иначе цвет волны
         const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
@@ -744,7 +750,8 @@ class WavesManager {
         const labelId = `${wave.id}-${position}-${index}`;
         const currentDay = window.appState.currentDay || 0;
         const state = this.calculateWaveStateAtDay(wave, currentDay);
-        const isExtremum = (state >= 4 || state <= -4);
+        const atExtremum = (state >= 4 || state <= -4);
+        const isExtremum = this.isExtremumHighlightEnabled() && atExtremum;
         
         // Выбираем цвет: красный для экстремума, иначе цвет волны
         const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');

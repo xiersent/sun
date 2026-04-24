@@ -155,6 +155,10 @@ async function finalizeInitialization() {
         window.uiManager.restoreTabState();
     }
 
+    if (window.uiManager && window.uiManager.syncExtremumWaveColorHighlightButton) {
+        window.uiManager.syncExtremumWaveColorHighlightButton();
+    }
+
     if (window.extremumTimeManager && window.extremumTimeManager.init) {
         __lp && __lp.mark('finalize_extremumTimeManager_init');
         window.extremumTimeManager.init();

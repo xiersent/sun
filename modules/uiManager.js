@@ -77,6 +77,7 @@ class UIManager {
             toggleGraph: () => this.toggleGraph(),
             toggleWaveLabels: () => this.toggleWaveLabels(),
             toggleWaveIntersections: () => this.toggleWaveIntersections(),
+            toggleExtremumWaveColors: () => this.toggleExtremumWaveColors(),
             toggleExtremes: () => this.toggleExtremes(),
             toggleEquilibrium: () => this.toggleEquilibrium(),
             toggleSquares: () => this.toggleSquares(),
@@ -140,6 +141,27 @@ class UIManager {
             if (window.timeBarManager && window.timeBarManager.container) {
                 window.timeBarManager.container.style.display = 'block';
             }
+        }
+        window.appState.save();
+    }
+    
+    syncExtremumWaveColorHighlightButton() {
+        const btn = document.getElementById('btnExtremumWaveColorHighlight');
+        if (!btn) return;
+        const on = window.appState.extremumWaveColorHighlight !== false;
+        btn.classList.toggle('ui-btn-toggle-off', !on);
+        btn.title = on
+            ? 'Окраска волн и выносок при экстремумах включена'
+            : 'Окраска волн и выносок при экстремумах выключена';
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    
+    toggleExtremumWaveColors() {
+        const next = !(window.appState.extremumWaveColorHighlight !== false);
+        window.appState.extremumWaveColorHighlight = next;
+        this.syncExtremumWaveColorHighlightButton();
+        if (window.waves && window.waves.updatePosition) {
+            window.waves.updatePosition();
         }
         window.appState.save();
     }
