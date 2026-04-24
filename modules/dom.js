@@ -182,6 +182,29 @@ class DOM {
         const date = new Date(timestamp);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
     }
+
+    /** Волна рисуется на визоре: видимость включена и группа сигнала активна */
+    isWaveShownOnVizor(waveId) {
+        if (!window.appState || !window.appState.waveVisibility) return false;
+        const waveIdStr = String(waveId);
+        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+        if (!isWaveVisible) return false;
+        if (window.waves && typeof window.waves.isWaveGroupEnabled === 'function') {
+            return window.waves.isWaveGroupEnabled(waveId);
+        }
+        return isWaveVisible;
+    }
+
+    getWaveVizorToggleButtonLabel(waveId) {
+        return this.isWaveShownOnVizor(waveId) ? 'Скрыть волну' : 'Показать волну';
+    }
+
+    refreshShowOnVizorButtonLabels() {
+        document.querySelectorAll('.show-on-vizor-btn[data-wave-id]').forEach(btn => {
+            const id = btn.dataset.waveId;
+            if (id) btn.textContent = this.getWaveVizorToggleButtonLabel(id);
+        });
+    }
 }
 
 window.dom = new DOM();

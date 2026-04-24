@@ -356,7 +356,7 @@ class SummaryManager {
 					<div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
 					<div class="summary-item-actions">
 						<button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
-							Показать на визоре
+							${window.dom ? window.dom.getWaveVizorToggleButtonLabel(item.wave.id) : 'Показать волну'}
 						</button>
 					</div>
 				</div>
@@ -365,7 +365,6 @@ class SummaryManager {
 		
 		resultsElement.innerHTML = resultsHTML;
 		
-		// Добавляем обработчики для кнопок - БЕЗ ОБНОВЛЕНИЯ ТЕКСТА
 		setTimeout(() => {
 			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
 				// Удаляем старый обработчик, если он есть
@@ -406,8 +405,6 @@ class SummaryManager {
 							const $checkbox = $(checkbox);
 							window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
 						}
-						
-						// ❌ НЕТ обновления текста кнопки!
 					} else {
 						// Прямое изменение состояния, если чекбокс не найден
 						if (window.appState && window.appState.waveVisibility) {
@@ -428,6 +425,9 @@ class SummaryManager {
 								}, 100);
 							}
 						}
+					}
+					if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+						window.dom.refreshShowOnVizorButtonLabels();
 					}
 				});
 			});

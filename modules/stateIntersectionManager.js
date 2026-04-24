@@ -441,7 +441,7 @@ class StateIntersectionManager {
                     <div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
                     <div class="summary-item-actions">
                         <button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
-                            Показать на визоре
+                            ${window.dom ? window.dom.getWaveVizorToggleButtonLabel(wave.id) : 'Показать волну'}
                         </button>
                     </div>
                 </div>
@@ -504,6 +504,9 @@ class StateIntersectionManager {
                                 }, 100);
                             }
                         }
+                    }
+                    if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+                        window.dom.refreshShowOnVizorButtonLabels();
                     }
                 });
             });

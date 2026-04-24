@@ -1444,7 +1444,13 @@ class EventManager {
 								}
 								
 								$checkbox.prop('checked', true);
+								if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+									window.dom.refreshShowOnVizorButtonLabels();
+								}
 							}, 100);
+						}
+						if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+							window.dom.refreshShowOnVizorButtonLabels();
 						}
 						return;
 					} else {
@@ -1455,6 +1461,9 @@ class EventManager {
 						// НЕ добавляем в askedGroups
 						// this.askedGroups.add(groupId); // УДАЛЯЕМ ЭТУ СТРОКУ
 						
+						if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+							window.dom.refreshShowOnVizorButtonLabels();
+						}
 						return;
 					}
 				}
@@ -1485,6 +1494,10 @@ class EventManager {
 			
 			if (window.summaryManager && window.summaryManager.debouncedUpdate) {
 				window.summaryManager.debouncedUpdate();
+			}
+			
+			if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+				window.dom.refreshShowOnVizorButtonLabels();
 			}
 		}
 	}
@@ -1529,6 +1542,10 @@ class EventManager {
                     
                     if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
+                    }
+                    
+                    if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+                        window.dom.refreshShowOnVizorButtonLabels();
                     }
                 }, 100);
             }
