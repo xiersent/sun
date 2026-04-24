@@ -19,6 +19,24 @@ class UnifiedListManager {
         this._ejsRenderers = {};
     }
 
+    /** O(1) доступ к волнам/группам при сборке списков с большим числом сигналов */
+    buildWaveListLookups() {
+        const waveById = new Map();
+        for (let i = 0; i < window.appState.data.waves.length; i++) {
+            const w = window.appState.data.waves[i];
+            waveById.set(String(w.id), w);
+        }
+        const groupById = new Map();
+        const groupIndexById = new Map();
+        for (let i = 0; i < window.appState.data.groups.length; i++) {
+            const g = window.appState.data.groups[i];
+            const idStr = String(g.id);
+            groupById.set(idStr, g);
+            groupIndexById.set(idStr, i);
+        }
+        return { waveById, groupById, groupIndexById };
+    }
+
     /**
      * Возвращает скомпилированный шаблон (быстрее, чем ejs.render со строкой на каждый вызов).
      */
@@ -232,10 +250,12 @@ class UnifiedListManager {
     }
     
     // В unifiedListManager.js - в методе prepareGroupData ДОБАВИТЬ
-    prepareGroupData(groupData, index) {
-        const originalGroup = window.appState.data.groups.find(
-            g => String(g.id) === String(groupData.id)
-        );
+    prepareGroupData(groupData, index, lookups) {
+        const idStr = String(groupData.id);
+        const originalGroup =
+            lookups && lookups.groupById && lookups.groupById.get(idStr)
+                ? lookups.groupById.get(idStr)
+                : window.appState.data.groups.find(g => String(g.id) === idStr);
         
         if (!originalGroup) {
             return {
@@ -255,10 +275,10 @@ class UnifiedListManager {
         if (originalGroup.waves && Array.isArray(originalGroup.waves)) {
             originalGroup.waves.forEach((waveId, waveIndex) => {
                 const waveIdStr = String(waveId);
-                const wave = window.appState.data.waves.find(w => {
-                    const wIdStr = String(w.id);
-                    return wIdStr === waveIdStr;
-                });
+                const wave =
+                    lookups && lookups.waveById && lookups.waveById.get(waveIdStr)
+                        ? lookups.waveById.get(waveIdStr)
+                        : window.appState.data.waves.find(w => String(w.id) === waveIdStr);
                 
                 if (wave) {
                     existingWaves.push(wave);
@@ -396,7 +416,8 @@ class UnifiedListManager {
         if (itemType === 'group') {
             const renderGroup = this.ensureEjsRenderer('group-item-template');
             const renderWave = this.ensureEjsRenderer('wave-item-template');
-            const frag = document.createDocumentFragment();
+            const WAVE_SENTINEL = '<!--ZARAZA_WAVE_CHILDREN-->';
+            const htmlChunks = [];
             items.forEach((groupData, index) => {
                 try {
                     if (groupData.waveCount === undefined) {
@@ -406,15 +427,9 @@ class UnifiedListManager {
                         groupData.enabledCount = 0;
                     }
                     
-                    const renderedGroup = renderGroup({ data: groupData });
+                    let renderedGroup = renderGroup({ data: groupData });
                     
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = renderedGroup;
-                    const groupElement = tempDiv.firstElementChild;
-                    
-                    const childrenContainer = groupElement.querySelector('.group-children');
-                    
-                    if (childrenContainer && groupData.children && groupData.children.length > 0) {
+                    if (groupData.children && groupData.children.length > 0) {
                         const waveHtmlParts = [];
                         for (let ci = 0; ci < groupData.children.length; ci++) {
                             const childData = groupData.children[ci];
@@ -428,27 +443,38 @@ class UnifiedListManager {
                                 );
                             }
                         }
-                        childrenContainer.innerHTML = waveHtmlParts.join('');
-                        
-                        if (groupData.expanded) {
-                            childrenContainer.style.display = 'block';
-                            groupElement.classList.add('list-item--expanded');
+                        const wavesHtml = waveHtmlParts.join('');
+                        if (renderedGroup.indexOf(WAVE_SENTINEL) !== -1) {
+                            renderedGroup = renderedGroup.split(WAVE_SENTINEL).join(wavesHtml);
                         } else {
-                            childrenContainer.style.display = 'none';
-                            groupElement.classList.remove('list-item--expanded');
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = renderedGroup;
+                            const groupElement = tempDiv.firstElementChild;
+                            const childrenContainer = groupElement
+                                ? groupElement.querySelector('.group-children')
+                                : null;
+                            if (childrenContainer) {
+                                childrenContainer.innerHTML = wavesHtml;
+                                if (groupData.expanded) {
+                                    childrenContainer.style.display = 'block';
+                                    groupElement.classList.add('list-item--expanded');
+                                } else {
+                                    childrenContainer.style.display = 'none';
+                                    groupElement.classList.remove('list-item--expanded');
+                                }
+                            }
+                            renderedGroup = tempDiv.innerHTML;
                         }
                     }
                     
-                    frag.appendChild(groupElement);
-                    
+                    htmlChunks.push(renderedGroup);
                 } catch (error) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'list-error';
-                    errorDiv.textContent = `Ошибка рендеринга группы: ${error.message}`;
-                    frag.appendChild(errorDiv);
+                    htmlChunks.push(
+                        `<div class="list-error">Ошибка рендеринга группы: ${String(error.message).replace(/</g, '&lt;')}</div>`
+                    );
                 }
             });
-            container.appendChild(frag);
+            container.innerHTML = htmlChunks.join('');
         } else if (itemType === 'personGroup') {
             const renderPersonGroup = this.ensureEjsRenderer('person-group-item-template');
             const renderDate = this.ensureEjsRenderer('date-item-template');
@@ -849,23 +875,45 @@ class UnifiedListManager {
     
 
     updateWavesList() {
-        const container = document.getElementById('wavesList');
-        if (!container) {
-            return;
+        const wrd = window.__waveRenderDebug;
+        const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('unifiedListManager.updateWavesList', {}) : null;
+        let endDetail = { skipped: true };
+        try {
+            const container = document.getElementById('wavesList');
+            if (!container) {
+                wrd && wrd.log('unifiedListManager.updateWavesList.skip', { reason: 'noContainer' });
+                endDetail = { skipped: true, reason: 'noContainer' };
+                return;
+            }
+            
+            const visibleGroups = window.appState.data.groups.filter(group => !group.hidden);
+            const lookups = this.buildWaveListLookups();
+            
+            const allGroups = visibleGroups.map((group) => {
+                const idStr = String(group.id);
+                const fullIndex = lookups.groupIndexById.has(idStr)
+                    ? lookups.groupIndexById.get(idStr)
+                    : window.appState.data.groups.findIndex(g => String(g.id) === idStr);
+                const groupData = this.prepareGroupData(
+                    group,
+                    fullIndex !== undefined && fullIndex >= 0 ? fullIndex : 0,
+                    lookups
+                );
+                return groupData;
+            });
+            
+            this.renderList('wavesList', allGroups, 'group');
+            endDetail = {
+                skipped: false,
+                groupCount: allGroups.length,
+                waveCount: window.appState.data.waves.length
+            };
+        } catch (e) {
+            endDetail = { error: String(e && e.message) };
+            throw e;
+        } finally {
+            end && end(endDetail);
         }
-        
-        // Фильтруем группы: показываем только те, у которых нет флага hidden
-        const visibleGroups = window.appState.data.groups.filter(group => !group.hidden);
-        
-        const allGroups = visibleGroups.map((group) => {
-            const fullIndex = window.appState.data.groups.findIndex(
-                g => String(g.id) === String(group.id)
-            );
-            const groupData = this.prepareGroupData(group, fullIndex >= 0 ? fullIndex : 0);
-            return groupData;
-        });
-        
-        this.renderList('wavesList', allGroups, 'group');
     }
     
     updateIntersectionResults(intersections) {

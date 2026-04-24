@@ -1393,6 +1393,10 @@ class EventManager {
 
 
 	handleWaveVisibilityChange(waveId, isChecked, $checkbox) {
+		const wrd = window.__waveRenderDebug;
+		if (wrd && wrd.isEnabled && wrd.isEnabled()) {
+			wrd.log('eventManager.handleWaveVisibilityChange', { waveId, isChecked });
+		}
 		// Если пытаемся включить волну
 		if (isChecked && window.waves && window.appState) {
 			const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
@@ -1464,6 +1468,7 @@ class EventManager {
 		
 		// Обычная логика для включения/выключения волны (когда группа включена или выключаем волну)
 		if (waveId && window.appState) {
+			const endVis = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('eventManager.handleWaveVisibilityChange.apply', { waveId, isChecked }) : null;
 			const waveIdStr = String(waveId);
 			window.appState.waveVisibility[waveIdStr] = isChecked;
 			window.appState.saveDebounced();
@@ -1491,6 +1496,7 @@ class EventManager {
 			if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 				window.dom.refreshShowOnVizorButtonLabels();
 			}
+			endVis && endVis({ shouldShow });
 		}
 	}
 
@@ -1665,25 +1671,33 @@ class EventManager {
     }
     
     recreateAllWaveElements() {
-        $('.wave-container').remove();
-        if (window.waves) {
-            window.waves.waveContainers = {};
-            window.waves.wavePaths = {};
-        }
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const isGroupEnabledNow = window.waves.isWaveGroupEnabled(wave.id);
-            const shouldShow = isWaveVisible && isGroupEnabledNow;
-            
-            if (shouldShow) {
-                window.waves.createWaveElement(wave);
+        const wrd = window.__waveRenderDebug;
+        const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('eventManager.recreateAllWaveElements', {}) : null;
+        let recreated = 0;
+        try {
+            $('.wave-container').remove();
+            if (window.waves) {
+                window.waves.waveContainers = {};
+                window.waves.wavePaths = {};
             }
-        });
-        
-        if (window.waves.updatePosition) {
-            window.waves.updatePosition();
+            
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const isGroupEnabledNow = window.waves.isWaveGroupEnabled(wave.id);
+                const shouldShow = isWaveVisible && isGroupEnabledNow;
+                
+                if (shouldShow) {
+                    window.waves.createWaveElement(wave);
+                    recreated++;
+                }
+            });
+            
+            if (window.waves.updatePosition) {
+                window.waves.updatePosition({ forceWaveLabels: true });
+            }
+        } finally {
+            end && end({ recreatedCount: recreated, totalWaves: window.appState.data.waves.length });
         }
     }
     

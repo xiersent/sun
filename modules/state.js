@@ -80,6 +80,9 @@ class AppState {
     }
     
     save() {
+        const wrd = typeof window !== 'undefined' && window.__waveRenderDebug;
+        const endSave = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('appState.save', {}) : null;
+        try {
         if (!(this.baseDate instanceof Date)) {
             if (typeof this.baseDate === 'number') {
                 this.baseDate = new Date(this.baseDate);
@@ -118,9 +121,16 @@ class AppState {
         delete this.data.uiSettings.graphBgWhite;
 
         localStorage.setItem('appData', JSON.stringify(this.data));
+        } finally {
+            endSave && endSave({});
+        }
     }
     
     saveDebounced() {
+        const wrd = typeof window !== 'undefined' && window.__waveRenderDebug;
+        if (wrd && wrd.isEnabled && wrd.isEnabled()) {
+            wrd.log('appState.saveDebounced.schedule', { hadPending: this._saveDebounceRaf != null });
+        }
         if (this._saveDebounceRaf != null) {
             cancelAnimationFrame(this._saveDebounceRaf);
         }

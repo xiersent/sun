@@ -21,8 +21,9 @@ class DataManager {
         
         await window.unifiedListManager.renderListWithWait('wavesList', [], 'group');
         
+        const lookups = window.unifiedListManager.buildWaveListLookups();
         const allGroups = window.appState.data.groups.map((group, index) => {
-            return window.unifiedListManager.prepareGroupData(group, index);
+            return window.unifiedListManager.prepareGroupData(group, index, lookups);
         });
         
         await window.unifiedListManager.renderListWithWait('wavesList', allGroups, 'group');

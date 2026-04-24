@@ -267,13 +267,25 @@ class DatesManager {
             }
             
             if (window.waves && window.waves.createVisibleWaveElements) {
-                window.waves.createVisibleWaveElements();
+                const wrd = window.__waveRenderDebug;
+                const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('dates.setActiveDate.createVisibleWaveElements', { dateId }) : null;
+                try {
+                    window.waves.createVisibleWaveElements();
+                } finally {
+                    end && end({});
+                }
             }
         }
         
         if (window.waves) {
-            window.waves.updatePosition();
-            window.waves.updateCornerSquareColors();
+            const wrd = window.__waveRenderDebug;
+            const endPos = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('dates.setActiveDate.wavesUpdatePosition', { dateId }) : null;
+            try {
+                window.waves.updatePosition();
+                window.waves.updateCornerSquareColors();
+            } finally {
+                endPos && endPos({});
+            }
         }
 
         if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {

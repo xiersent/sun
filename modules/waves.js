@@ -1,4 +1,9 @@
 // modules/waves.js - ПОЛНЫЙ ОБНОВЛЕННЫЙ ФАЙЛ
+function __waveDbg() {
+    const w = window.__waveRenderDebug;
+    return w && w.isEnabled() ? w : null;
+}
+
 class WavesManager {
     constructor() {
         this.elements = {};
@@ -24,9 +29,15 @@ class WavesManager {
             return;
         }
         
-        this.createVisibleWaveElements();
-        this.updatePosition();
-        this.initialized = true;
+        const d = __waveDbg();
+        const endInit = d && d.t('waves.init', {});
+        try {
+            this.createVisibleWaveElements();
+            this.updatePosition();
+            this.initialized = true;
+        } finally {
+            endInit && endInit({});
+        }
     }
     
     calculateRequiredPeriods(periodPx) {
@@ -69,39 +80,55 @@ class WavesManager {
     }
     
     createVisibleWaveElements() {
-        document.querySelectorAll('.wave-container').forEach(c => c.remove());
-        document.querySelectorAll('.wave-label').forEach(l => l.remove());
-        
-        const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
-        if (axisXPointsContainer) {
-            axisXPointsContainer.innerHTML = '';
-        }
-        
-        this.waveContainers = {};
-        this.wavePaths = {};
-        this.waveLabelElements = {};
-        
+        const d = __waveDbg();
+        const endAll = d && d.t('waves.createVisibleWaveElements', {});
         let createdCount = 0;
-        
-        const hasActiveDate = window.appState.activeDateId && 
-                             window.appState.data.dates.some(d => d.id === window.appState.activeDateId);
-        
-        if (!hasActiveDate) {
-            return;
-        }
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+        try {
+            const endClear = d && d.t('waves.createVisibleWaveElements.clearDom', {});
+            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            document.querySelectorAll('.wave-label').forEach(l => l.remove());
             
-            if (isWaveVisible && this.isWaveGroupEnabled(wave.id)) {
-                this.createWaveElement(wave);
-                createdCount++;
+            const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+            if (axisXPointsContainer) {
+                axisXPointsContainer.innerHTML = '';
             }
-        });
+            endClear && endClear({});
+            
+            this.waveContainers = {};
+            this.wavePaths = {};
+            this.waveLabelElements = {};
+            
+            const hasActiveDate = window.appState.activeDateId && 
+                                 window.appState.data.dates.some(dt => dt.id === window.appState.activeDateId);
+            
+            if (!hasActiveDate) {
+                d && d.log('waves.createVisibleWaveElements.skip', { reason: 'noActiveDate' });
+                return;
+            }
+            
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                
+                if (isWaveVisible && this.isWaveGroupEnabled(wave.id)) {
+                    this.createWaveElement(wave);
+                    createdCount++;
+                }
+            });
+        } finally {
+            endAll &&
+                endAll({
+                    createdCount,
+                    totalWaves: window.appState.data.waves.length
+                });
+        }
     }
     
     createWaveElement(wave) {
+        const d = __waveDbg();
+        const verbose = d && d.isVerbose && d.isVerbose();
+        const endWave = verbose && d.t('waves.createWaveElement', { id: wave.id, name: wave.name });
+        try {
         const container = document.createElement('div');
         container.className = 'wave-container';
         container.id = `waveContainer${wave.id}`;
@@ -160,7 +187,9 @@ class WavesManager {
             path.classList.add('bold');
         }
         
+        const endSine = verbose && d.t('waves.createWaveElement.generateSineWave', { id: wave.id });
         this.generateSineWave(periodPx, path, container, totalPeriods);
+        endSine && endSine({});
         
         svg.appendChild(path);
         container.appendChild(svg);
@@ -173,6 +202,9 @@ class WavesManager {
         this.waveContainers[wave.id] = container;
         this.wavePaths[wave.id] = path;
         window.appState.periods[wave.id] = periodPx;
+        } finally {
+            endWave && endWave({});
+        }
     }
     
     generateSineWave(periodPx, wavePath, waveContainer, totalPeriods = 3) {
@@ -275,6 +307,8 @@ class WavesManager {
 
     // opts.forceWaveLabels — сразу пересобрать боковые выноски (обход throttle 50 мс).
     updatePosition(opts = {}) {
+        const d = __waveDbg();
+        const endTotal = d && d.t('waves.updatePosition', { forceWaveLabels: !!opts.forceWaveLabels });
         const enabledWaveIds = new Set();
         for (const group of window.appState.data.groups) {
             if (group.enabled && group.waves) {
@@ -285,17 +319,26 @@ class WavesManager {
         }
         this._enabledWaveIdSetForFrame = enabledWaveIds;
         
+        let waveLoopShown = 0;
+        let waveLoopHiddenDom = 0;
+        let waveLoopNoContainer = 0;
+        
         try {
+            const endTb = d && d.t('waves.updatePosition.timeBar', {});
             if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
                 window.timeBarManager.updateTimeIndicator();
             }
+            endTb && endTb({});
             
+            const endGrid = d && d.t('waves.updatePosition.gridOffset', {});
             if (window.grid && window.grid.updateGridOffset) {
                 window.grid.updateGridOffset();
             }
+            endGrid && endGrid({});
             
             const currentDay = window.appState.currentDay || 0;
             
+            const endLoop = d && d.t('waves.updatePosition.waveLoop', { currentDay });
             window.appState.data.waves.forEach(wave => {
                 const waveIdStr = String(wave.id);
                 const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
@@ -329,19 +372,45 @@ class WavesManager {
                     container.style.transition = 'none';
                     container.style.transform = `translateX(${-currentPositionPx}px)`;
                     container.style.display = shouldShow ? 'block' : 'none';
+                    if (shouldShow) {
+                        waveLoopShown++;
+                    } else {
+                        waveLoopHiddenDom++;
+                    }
                     
                     const path = this.wavePaths[wave.id];
                     if (path) {
                         path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
                     }
+                } else if (shouldShow) {
+                    waveLoopNoContainer++;
                 }
             });
+            endLoop &&
+                endLoop({
+                    shown: waveLoopShown,
+                    hiddenDom: waveLoopHiddenDom,
+                    missingContainerButVisible: waveLoopNoContainer,
+                    waveCount: window.appState.data.waves.length
+                });
             
             this.updateAllWaveLabels(opts);
+            
+            const endVTime = d && d.t('waves.updatePosition.verticalWaveLabelsTime', {});
             this.updateVerticalWaveLabelsTime();
+            endVTime && endVTime({});
+            
+            const endInter = d && d.t('waves.updatePosition.renderWaveIntersectionPoints', {});
             this.renderWaveIntersectionPoints();
+            endInter && endInter({});
         } finally {
             this._enabledWaveIdSetForFrame = null;
+            endTotal &&
+                endTotal({
+                    waveLoopShown,
+                    waveLoopHiddenDom,
+                    waveLoopNoContainer
+                });
         }
     }
 
@@ -397,15 +466,28 @@ class WavesManager {
     
     
     updateAllWaveLabels(opts = {}) {
-        this.updateHorizontalWaveLabels(opts);
-        this.updateVerticalWaveLabels();
-        this.updateAxisXIntersectionPoints();
+        const d = __waveDbg();
+        const end = d && d.t('waves.updateAllWaveLabels', { forceWaveLabels: !!opts.forceWaveLabels });
+        try {
+            this.updateHorizontalWaveLabels(opts);
+            this.updateVerticalWaveLabels();
+            this.updateAxisXIntersectionPoints();
+        } finally {
+            end && end({});
+        }
     }
     
     updateHorizontalWaveLabels(opts = {}) {
+        const d = __waveDbg();
         const now = Date.now();
         
         if (!opts.forceWaveLabels && now - this.lastUpdateTime < this.updateInterval) {
+            d &&
+                d.log('waves.updateHorizontalWaveLabels.skipThrottle', {
+                    forceWaveLabels: false,
+                    deltaMs: now - this.lastUpdateTime,
+                    intervalMs: this.updateInterval
+                });
             return;
         }
         
@@ -415,63 +497,85 @@ class WavesManager {
         const rightContainer = document.querySelector('.wave-labels-right');
         
         if (!leftContainer || !rightContainer) {
+            d && d.log('waves.updateHorizontalWaveLabels.skip', { reason: 'noContainers' });
             return;
         }
         
-        leftContainer.innerHTML = '';
-        rightContainer.innerHTML = '';
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+        const end = d && d.t('waves.updateHorizontalWaveLabels', { forceWaveLabels: !!opts.forceWaveLabels });
+        try {
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
             
-            if (!shouldShow) return;
-            
-            const leftY = this.calculateWaveYAtX(wave, 0);
-            const rightY = this.calculateWaveYAtX(wave, window.appState.graphWidth);
-            
-            if (leftY >= 0 && leftY <= window.appState.config.graphHeight) {
-                this.createHorizontalWaveLabel(wave, leftY, 'left', leftContainer);
-            }
-            
-            if (rightY >= 0 && rightY <= window.appState.config.graphHeight) {
-                this.createHorizontalWaveLabel(wave, rightY, 'right', rightContainer);
-            }
-        });
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+                
+                if (!shouldShow) return;
+                
+                const leftY = this.calculateWaveYAtX(wave, 0);
+                const rightY = this.calculateWaveYAtX(wave, window.appState.graphWidth);
+                
+                if (leftY >= 0 && leftY <= window.appState.config.graphHeight) {
+                    this.createHorizontalWaveLabel(wave, leftY, 'left', leftContainer);
+                }
+                
+                if (rightY >= 0 && rightY <= window.appState.config.graphHeight) {
+                    this.createHorizontalWaveLabel(wave, rightY, 'right', rightContainer);
+                }
+            });
+        } finally {
+            end &&
+                end({
+                    leftLabels: leftContainer.children.length,
+                    rightLabels: rightContainer.children.length
+                });
+        }
     }
     
     updateVerticalWaveLabels() {
+        const d = __waveDbg();
         const topContainer = document.querySelector('.wave-labels-top');
         const bottomContainer = document.querySelector('.wave-labels-bottom');
         
         if (!topContainer || !bottomContainer) {
+            d && d.log('waves.updateVerticalWaveLabels.skip', { reason: 'noContainers' });
             return;
         }
         
-        topContainer.innerHTML = '';
-        bottomContainer.innerHTML = '';
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+        const end = d && d.t('waves.updateVerticalWaveLabels', {});
+        try {
+            topContainer.innerHTML = '';
+            bottomContainer.innerHTML = '';
             
-            if (!shouldShow) return;
-            
-            const topXs = this.findAllExtremumXs(wave, 'top');
-            topXs.forEach((topX, idx) => {
-                this.createVerticalWaveLabel(wave, topX, 'top', topContainer, idx);
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+                
+                if (!shouldShow) return;
+                
+                const topXs = this.findAllExtremumXs(wave, 'top');
+                topXs.forEach((topX, idx) => {
+                    this.createVerticalWaveLabel(wave, topX, 'top', topContainer, idx);
+                });
+                
+                const bottomXs = this.findAllExtremumXs(wave, 'bottom');
+                bottomXs.forEach((bottomX, idx) => {
+                    this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer, idx);
+                });
             });
-            
-            const bottomXs = this.findAllExtremumXs(wave, 'bottom');
-            bottomXs.forEach((bottomX, idx) => {
-                this.createVerticalWaveLabel(wave, bottomX, 'bottom', bottomContainer, idx);
-            });
-        });
+        } finally {
+            end &&
+                end({
+                    topLabels: topContainer.children.length,
+                    bottomLabels: bottomContainer.children.length
+                });
+        }
     }
     
     updateAxisXIntersectionPoints() {
+        const d = __waveDbg();
         let axisXPointsContainer = document.querySelector('.wave-axis-x-points');
         if (!axisXPointsContainer) {
             axisXPointsContainer = document.createElement('div');
@@ -492,24 +596,32 @@ class WavesManager {
         
         if (axisXPointsContainer.classList.contains('hidden')) {
             axisXPointsContainer.innerHTML = '';
+            d && d.log('waves.updateAxisXIntersectionPoints.skip', { reason: 'hidden' });
             return;
         }
         
-        axisXPointsContainer.innerHTML = '';
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+        const end = d && d.t('waves.updateAxisXIntersectionPoints', {});
+        let pointCount = 0;
+        try {
+            axisXPointsContainer.innerHTML = '';
             
-            if (!shouldShow) return;
-            
-            const intersectionPoints = this.findAxisXIntersectionPoints(wave);
-            
-            intersectionPoints.forEach(x => {
-                this.createAxisXPoint(wave, x, axisXPointsContainer);
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+                
+                if (!shouldShow) return;
+                
+                const intersectionPoints = this.findAxisXIntersectionPoints(wave);
+                
+                intersectionPoints.forEach(x => {
+                    this.createAxisXPoint(wave, x, axisXPointsContainer);
+                    pointCount++;
+                });
             });
-        });
+        } finally {
+            end && end({ axisXPointElements: pointCount });
+        }
     }
     
     findAxisXIntersectionPoints(wave) {
@@ -844,17 +956,31 @@ class WavesManager {
     onHorizontalWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);
         const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
-        
-        window.appState.waveVisibility[waveIdStr] = !isCurrentlyVisible;
-        
-        this.updatePosition({ forceWaveLabels: true });
-        window.appState.saveDebounced();
-        
-        requestAnimationFrame(() => {
-            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                window.unifiedListManager.updateWavesList();
+        const newChecked = !isCurrentlyVisible;
+        const d = __waveDbg();
+        d &&
+            d.log('waves.onHorizontalWaveLabelClick', {
+                waveId: waveIdStr,
+                wasVisible: isCurrentlyVisible,
+                becomesVisible: newChecked
+            });
+        // Тот же путь, что и чекбокс «Видимость»: без updateWavesList() — иначе полный EJS-рендер списка даёт сотни мс задержки.
+        if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+            window.eventManager.handleWaveVisibilityChange(waveId, newChecked, $());
+            const $vis = $(`.wave-visibility-check[data-id="${waveIdStr}"]`);
+            if ($vis.length) {
+                $vis.prop('checked', newChecked);
             }
-        });
+        } else {
+            window.appState.waveVisibility[waveIdStr] = newChecked;
+            window.appState.saveDebounced();
+            const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
+            const isGroupEnabled = this.isWaveGroupEnabled(waveId);
+            if (newChecked && isGroupEnabled && !this.waveContainers[waveId] && wave) {
+                this.createWaveElement(wave);
+            }
+            this.updatePosition({ forceWaveLabels: true });
+        }
     }
     
     onVerticalWaveLabelClick(labelElement) {
@@ -933,7 +1059,11 @@ class WavesManager {
     }
     
     updateVerticalWaveLabelsTime() {
-        document.querySelectorAll('.wave-label.vertical').forEach(label => {
+        const d = __waveDbg();
+        const labels = document.querySelectorAll('.wave-label.vertical');
+        const end = d && d.t('waves.updateVerticalWaveLabelsTime', { count: labels.length });
+        try {
+        labels.forEach(label => {
             const waveId = label.dataset.waveId;
             const refX = label.dataset.refX;
             
@@ -951,6 +1081,9 @@ class WavesManager {
             }
             label.dataset.extremumTime = String(extremumTime.getTime());
         });
+        } finally {
+            end && end({});
+        }
     }
     
     calculateWaveYAtX(wave, x) {
@@ -1097,16 +1230,24 @@ class WavesManager {
     }
     
     createVisibleWaveElementsForActiveDate() {
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
-            const shouldShow = isWaveVisible && isGroupEnabled;
-            
-            if (shouldShow && !this.waveContainers[wave.id]) {
-                this.createWaveElement(wave);
-            }
-        });
+        const d = __waveDbg();
+        const end = d && d.t('waves.createVisibleWaveElementsForActiveDate', {});
+        let created = 0;
+        try {
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const isGroupEnabled = this.isWaveGroupEnabled(wave.id);
+                const shouldShow = isWaveVisible && isGroupEnabled;
+                
+                if (shouldShow && !this.waveContainers[wave.id]) {
+                    this.createWaveElement(wave);
+                    created++;
+                }
+            });
+        } finally {
+            end && end({ createdNewContainers: created });
+        }
     }
     
     addCustomWave(name, period, type, color) {
@@ -1137,12 +1278,18 @@ class WavesManager {
             defaultGroup.expanded = true;
         }
         
-        if (this.isWaveGroupEnabled(newWave.id)) {
-            this.createWaveElement(newWave);
+        const d = __waveDbg();
+        const endAdd = d && d.t('waves.addCustomWave', { name, period: newWave.period, id: newWave.id });
+        try {
+            if (this.isWaveGroupEnabled(newWave.id)) {
+                this.createWaveElement(newWave);
+            }
+            
+            this.updatePosition();
+            window.appState.save();
+        } finally {
+            endAdd && endAdd({});
         }
-        
-        this.updatePosition();
-        window.appState.save();
         
         return newWave;
     }
@@ -1150,6 +1297,9 @@ class WavesManager {
     deleteWave(waveId) {
         if (!confirm('Уничтожить этот сигнал?')) return;
         
+        const d = __waveDbg();
+        const endDel = d && d.t('waves.deleteWave', { waveId });
+        try {
         const waveIdStr = String(waveId);
         
         window.appState.data.groups.forEach(group => {
@@ -1193,10 +1343,13 @@ class WavesManager {
             }
         });
         
-        this.updatePosition();
-        window.grid.updateGridNotesHighlight();
-        this.updateCornerSquareColors();
-        window.appState.save();
+            this.updatePosition();
+            window.grid.updateGridNotesHighlight();
+            this.updateCornerSquareColors();
+            window.appState.save();
+        } finally {
+            endDel && endDel({ waveIdStr: String(waveId) });
+        }
     }
     
     updateCornerSquareColors() {
@@ -1328,6 +1481,9 @@ class WavesManager {
     }
     
     navigateToPreciseTime(preciseTime) {
+        const d = __waveDbg();
+        const end = d && d.t('waves.navigateToPreciseTime', { preciseTime });
+        try {
         const targetDate = new Date(preciseTime);
         
         window.appState.currentDate = targetDate;
@@ -1337,13 +1493,16 @@ class WavesManager {
         );
         
         window.grid.createGrid();
-        window.waves.updatePosition();
+        this.updatePosition();
         window.appState.save();
         
         const milliseconds = targetDate.getMilliseconds();
         document.getElementById('currentDay').textContent = 
             window.appState.currentDay.toFixed(5) + 
             ` (${milliseconds}ms)`;
+        } finally {
+            end && end({});
+        }
     }
     
     getPixelPhase(wave) {
@@ -1481,18 +1640,27 @@ class WavesManager {
     }
     
     renderWaveIntersectionPoints() {
+        const d = __waveDbg();
         if (window.appState && window.appState.waveIntersectionsVisible === false) {
             this.removeWaveIntersectionPoints();
+            d && d.log('waves.renderWaveIntersectionPoints.skip', { reason: 'waveIntersectionsVisible_false' });
             return;
         }
         
         this.removeWaveIntersectionPoints();
         
+        const endCalc = d && d.t('waves.renderWaveIntersectionPoints.calculateAllWaveIntersections', {});
         const intersections = this.calculateAllWaveIntersections();
+        endCalc &&
+            endCalc({
+                intersectionPairs: intersections.length,
+                activeWaves: this.getActiveWaves().length
+            });
         
         const maxPointsToShow = 50;
         const pointsToShow = intersections.slice(0, maxPointsToShow);
         
+        const endDom = d && d.t('waves.renderWaveIntersectionPoints.buildDom', { pointsToShow: pointsToShow.length });
         const container = document.createElement('div');
         container.className = 'wave-intersection-points';
         container.style.position = 'absolute';
@@ -1561,11 +1729,18 @@ class WavesManager {
             graphElement.appendChild(container);
         }
         
+        endDom && endDom({});
+        
         return container;
     }
     
     removeWaveIntersectionPoints() {
-        document.querySelectorAll('.wave-intersection-points').forEach(el => el.remove());
+        const d = __waveDbg();
+        const nodes = document.querySelectorAll('.wave-intersection-points');
+        if (d && nodes.length) {
+            d.log('waves.removeWaveIntersectionPoints', { layers: nodes.length });
+        }
+        nodes.forEach(el => el.remove());
     }
     
     showIntersectionTooltip(element, point) {
