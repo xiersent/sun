@@ -46,9 +46,12 @@ class AppState {
                 dateSelections: {
                     typeA: null,
                     typeB: null
-                }
+                },
+                waveIntersectionsVisible: true
             }
         };
+        
+        this._saveDebounceTimer = null;
         
         this.load();
     }
@@ -107,8 +110,27 @@ class AppState {
         this.data.uiSettings.waveCornerColor = this.waveCornerColor;
         
         this.data.uiSettings.dateSelections = this.dateSelections;
+        this.data.uiSettings.waveIntersectionsVisible = this.waveIntersectionsVisible;
 
         localStorage.setItem('appData', JSON.stringify(this.data));
+    }
+    
+    saveDebounced(delayMs = 200) {
+        if (this._saveDebounceTimer) {
+            clearTimeout(this._saveDebounceTimer);
+        }
+        this._saveDebounceTimer = setTimeout(() => {
+            this._saveDebounceTimer = null;
+            this.save();
+        }, delayMs);
+    }
+    
+    flushPendingSave() {
+        if (this._saveDebounceTimer) {
+            clearTimeout(this._saveDebounceTimer);
+            this._saveDebounceTimer = null;
+            this.save();
+        }
     }
     
     load() {
@@ -187,6 +209,7 @@ class AppState {
                 this.grayMode = data.uiSettings.grayMode || false;
                 this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
                 this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
+                this.waveIntersectionsVisible = data.uiSettings.waveIntersectionsVisible !== undefined ? data.uiSettings.waveIntersectionsVisible : true;
                 
                 this.editingDateId = null;
                 this.editingWaveId = null;
@@ -330,6 +353,7 @@ class AppState {
         this.grayMode = false;
         this.graphGrayMode = false;
         this.cornerSquaresVisible = true;
+        this.waveIntersectionsVisible = true;
         this.activeDateId = null;
         
         this.editingDateId = null;
@@ -410,3 +434,4 @@ class AppState {
 }
 
 window.appState = new AppState();
+window.addEventListener('pagehide', () => window.appState.flushPendingSave());

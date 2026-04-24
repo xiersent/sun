@@ -2,6 +2,11 @@
 class EventManager {
     constructor() {
         this.askedGroups = new Set();
+        this.isDraggingWave = false;
+        this.waveDragPayload = null;
+        this._dragOverListItemEl = null;
+        this._waveDragOverItemEl = null;
+        this._groupChildrenDropEl = null;
         this.$ = window.jQuery;
         this.setupGlobalHandlers();
         this.setupDateChangeObservers();
@@ -15,11 +20,6 @@ class EventManager {
         });
 
         $(document)
-            .on('mousedown touchstart', '.group-children .list-item--wave', function(e) {
-                e.stopPropagation();
-            });
-        
-        $(document)
             .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing)', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
             .on('dragleave', '.list-item--date[data-type="date"]', this.handleDragLeave.bind(this))
@@ -27,18 +27,23 @@ class EventManager {
             .on('dragend', '.list-item--date[data-type="date"]', this.handleDragEnd.bind(this));
         
         $(document)
-            .on('dragstart', '.list-item--group[data-type="group"]:not(.list-item--editing)', this.handleDragStart.bind(this))
+            .on('dragstart', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--group[data-type="group"]', this.handleDragOver.bind(this))
             .on('dragleave', '.list-item--group[data-type="group"]', this.handleDragLeave.bind(this))
             .on('drop', '.list-item--group[data-type="group"]', this.handleDrop.bind(this))
-            .on('dragend', '.list-item--group[data-type="group"]', this.handleDragEnd.bind(this));
+            .on('dragend', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragEnd.bind(this));
             
         $(document)
-            .on('dragstart', '.group-children .list-item--wave:not(.list-item--editing)', this.handleWaveDragStart.bind(this))
+            .on('dragover', '.group-children', this.handleGroupChildrenDragOver.bind(this))
+            .on('dragleave', '.group-children', this.handleGroupChildrenDragLeave.bind(this))
+            .on('drop', '.group-children', this.handleGroupChildrenWaveDrop.bind(this));
+
+        $(document)
+            .on('dragstart', '.group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle', this.handleWaveDragStart.bind(this))
             .on('dragover', '.group-children .list-item--wave', this.handleWaveDragOver.bind(this))
             .on('dragleave', '.group-children .list-item--wave', this.handleWaveDragLeave.bind(this))
             .on('drop', '.group-children .list-item--wave', this.handleWaveDrop.bind(this))
-            .on('dragend', '.group-children .list-item--wave', this.handleWaveDragEnd.bind(this));
+            .on('dragend', '.group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle', this.handleWaveDragEnd.bind(this));
 
 		$(document).on('click', '.group-enabled-count', (e) => {
 			e.preventDefault();
@@ -78,84 +83,190 @@ class EventManager {
     }
     
     handleWaveDragStart(e) {
-        const $item = $(e.currentTarget);
+        const $item = $(e.currentTarget).closest('.list-item--wave');
         const $group = $item.closest('.list-item--group');
         const waveId = $item.data('id');
-        const index = parseInt($item.data('index') || 0);
+        const index = parseInt($item.data('index') || 0, 10);
         const groupId = $group.data('id');
         
-        if (!waveId || index < 0 || !groupId) {
+        if (waveId == null || waveId === '' || index < 0 || groupId == null || groupId === '') {
             e.preventDefault();
             return;
         }
-        
-        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+
+        this._waveDragOverItemEl = null;
+        this._groupChildrenDropEl = null;
+        this.isDraggingWave = true;
+        this.waveDragPayload = {
             type: 'wave',
             id: waveId,
             index: index,
             groupId: groupId,
             source: 'wave-drag'
-        }));
+        };
+        
+        e.originalEvent.dataTransfer.effectAllowed = 'move';
+        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(this.waveDragPayload));
         
         $item.addClass('list-item--dragging');
     }
+
+    getWaveDragDataFromDropEvent(e) {
+        if (this.waveDragPayload && this.waveDragPayload.type === 'wave') {
+            return this.waveDragPayload;
+        }
+        try {
+            const raw = e.originalEvent.dataTransfer.getData('text/plain');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.type === 'wave') return parsed;
+            }
+        } catch (_) {}
+        return null;
+    }
     
     handleWaveDragOver(e) {
-        if (!this.isDraggingWave) {
+        if (!this.isDraggingWave || !this.waveDragPayload || this.waveDragPayload.type !== 'wave') {
             return;
         }
+
+        const dragData = this.waveDragPayload;
         
         e.preventDefault();
         e.stopPropagation();
         
-        try {
-            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
-            
-            if (!dragData || dragData.type !== 'wave') {
-                e.originalEvent.dataTransfer.dropEffect = 'none';
-                return;
-            }
-            
-            const $item = $(e.currentTarget);
-            const $group = $item.closest('.list-item--group');
-            const targetGroupId = $group.data('id');
-            
-            if (dragData.groupId !== targetGroupId) {
-                e.originalEvent.dataTransfer.dropEffect = 'none';
-                $('.group-children .list-item--wave')
-                    .removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-                return;
-            }
-            
-            e.originalEvent.dataTransfer.dropEffect = 'move';
-            
-            const rect = $item[0].getBoundingClientRect();
-            const y = e.clientY;
-            const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
-            
-            $(`.group-children .list-item--wave[data-parent-group-id="${targetGroupId}"]`)
-                .not($item)
-                .removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-            
-            if (insertPosition === 'before') {
-                $item.addClass('list-item--drag-over-top');
-                $item.removeClass('list-item--drag-over-bottom');
-            } else {
-                $item.addClass('list-item--drag-over-bottom');
-                $item.removeClass('list-item--drag-over-top');
-            }
-        } catch (error) {
-            e.originalEvent.dataTransfer.dropEffect = 'none';
+        const $item = $(e.currentTarget);
+        const itemEl = $item[0];
+        const $group = $item.closest('.list-item--group');
+        const targetGroupId = $group.data('id');
+
+        if (this._groupChildrenDropEl) {
+            this._groupChildrenDropEl.classList.remove('group-children--drag-over');
+            this._groupChildrenDropEl = null;
         }
+
+        if (String(dragData.groupId) === String(targetGroupId) &&
+            String(dragData.id) === String($item.data('id'))) {
+            e.originalEvent.dataTransfer.dropEffect = 'move';
+            if (this._waveDragOverItemEl && this._waveDragOverItemEl !== itemEl) {
+                this._waveDragOverItemEl.classList.remove(
+                    'list-item--drag-over-top',
+                    'list-item--drag-over-bottom'
+                );
+                this._waveDragOverItemEl = null;
+            }
+            return;
+        }
+            
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+        
+        const rect = itemEl.getBoundingClientRect();
+        const y = e.clientY;
+        const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
+        
+        if (this._waveDragOverItemEl && this._waveDragOverItemEl !== itemEl) {
+            this._waveDragOverItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+        }
+        this._waveDragOverItemEl = itemEl;
+        
+        if (insertPosition === 'before') {
+            $item.addClass('list-item--drag-over-top');
+            $item.removeClass('list-item--drag-over-bottom');
+        } else {
+            $item.addClass('list-item--drag-over-bottom');
+            $item.removeClass('list-item--drag-over-top');
+        }
+    }
+
+    handleGroupChildrenDragOver(e) {
+        if (!this.isDraggingWave || !this.waveDragPayload || this.waveDragPayload.type !== 'wave') {
+            return;
+        }
+        if ($(e.target).closest('.list-item--wave').length) {
+            return;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (this._waveDragOverItemEl) {
+            this._waveDragOverItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+            this._waveDragOverItemEl = null;
+        }
+
+        const gc = e.currentTarget;
+        if (this._groupChildrenDropEl && this._groupChildrenDropEl !== gc) {
+            this._groupChildrenDropEl.classList.remove('group-children--drag-over');
+        }
+        this._groupChildrenDropEl = gc;
+        gc.classList.add('group-children--drag-over');
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+    }
+
+    handleGroupChildrenDragLeave(e) {
+        const $gc = $(e.currentTarget);
+        const related = e.originalEvent.relatedTarget;
+        if (related && $gc[0].contains(related)) {
+            return;
+        }
+        $gc.removeClass('group-children--drag-over');
+    }
+
+    handleGroupChildrenWaveDrop(e) {
+        if (!this.isDraggingWave) {
+            return;
+        }
+        if ($(e.target).closest('.list-item--wave').length) {
+            return;
+        }
+
+        const dragData = this.getWaveDragDataFromDropEvent(e);
+        if (!dragData || dragData.type !== 'wave') {
+            return;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.clearWaveDnDVisualState();
+
+        const $gc = $(e.currentTarget);
+        const $group = $gc.closest('.list-item--group');
+        const targetGroupId = $group.data('id');
+        if (!targetGroupId) {
+            return;
+        }
+
+        const targetGroup = window.appState.data.groups.find(g => String(g.id) === String(targetGroupId));
+        const insertAtEnd = (targetGroup && targetGroup.waves) ? targetGroup.waves.length : 0;
+
+        this.moveWaveBetweenGroups(
+            dragData.groupId,
+            targetGroupId,
+            dragData.index,
+            insertAtEnd,
+            false,
+            { emptyOrGapDrop: true }
+        );
     }
     
     handleWaveDragLeave(e) {
         const $item = $(e.currentTarget);
+        const el = $item[0];
         
         if (e.originalEvent.relatedTarget && 
-            !$item[0].contains(e.originalEvent.relatedTarget)) {
+            !el.contains(e.originalEvent.relatedTarget)) {
             
             $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            if (this._waveDragOverItemEl === el) {
+                this._waveDragOverItemEl = null;
+            }
         }
     }
     
@@ -168,40 +279,58 @@ class EventManager {
         e.preventDefault();
         e.stopPropagation();
         
-        $('.list-item--wave').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        this.clearWaveDnDVisualState();
         
-        try {
-            const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
-            
-            if (!dragData || dragData.type !== 'wave') {
-                return;
-            }
-            
-            const $group = $item.closest('.list-item--group');
-            const targetGroupId = $group.data('id');
-            
-            if (dragData.groupId !== targetGroupId) {
-                return;
-            }
-            
-            const targetIndex = parseInt($item.data('index') || 0);
-            
-            const rect = $item[0].getBoundingClientRect();
-            const y = e.clientY;
-            const insertBefore = y - rect.top < rect.height / 2;
-            
-            if (dragData.index === targetIndex) {
-                return;
-            }
-            
-            this.reorderWaveInGroup(dragData.groupId, dragData.index, targetIndex, insertBefore);
-            
-        } catch (error) {
+        const dragData = this.getWaveDragDataFromDropEvent(e);
+        if (!dragData || dragData.type !== 'wave') {
+            return;
         }
+            
+        const $group = $item.closest('.list-item--group');
+        const targetGroupId = $group.data('id');
+        const targetIndex = parseInt($item.data('index') || 0, 10);
+        
+        const rect = $item[0].getBoundingClientRect();
+        const y = e.clientY;
+        const insertBefore = y - rect.top < rect.height / 2;
+        
+        if (String(dragData.groupId) === String(targetGroupId) &&
+            dragData.index === targetIndex) {
+            return;
+        }
+
+        this.moveWaveBetweenGroups(
+            dragData.groupId,
+            targetGroupId,
+            dragData.index,
+            targetIndex,
+            insertBefore,
+            { emptyOrGapDrop: false }
+        );
     }
     
+    clearWaveDnDVisualState() {
+        if (this._waveDragOverItemEl) {
+            this._waveDragOverItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+            this._waveDragOverItemEl = null;
+        }
+        if (this._groupChildrenDropEl) {
+            this._groupChildrenDropEl.classList.remove('group-children--drag-over');
+            this._groupChildrenDropEl = null;
+        }
+    }
+
     handleWaveDragEnd(e) {
-        $('.list-item--wave').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
+        this.isDraggingWave = false;
+        this.waveDragPayload = null;
+        this.clearWaveDnDVisualState();
+        const src = e.target && e.target.closest ? e.target.closest('.list-item--wave') : null;
+        if (src) {
+            src.classList.remove('list-item--dragging');
+        }
     }
     
     reorderWaveInGroup(groupId, sourceIndex, targetIndex, insertBefore) {
@@ -213,7 +342,7 @@ class EventManager {
         
         const waves = [...group.waves];
         const waveId = waves[sourceIndex];
-        if (!waveId) return;
+        if (waveId === undefined) return;
         
         waves.splice(sourceIndex, 1);
         let newIndex = this.calculateNewIndex(sourceIndex, targetIndex, insertBefore);
@@ -226,6 +355,60 @@ class EventManager {
             window.unifiedListManager.updateWavesList();
         }
         
+        setTimeout(() => {
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+        }, 50);
+    }
+
+    /**
+     * Переставляет волну внутри группы или переносит в другую группу.
+     * @param {object} [opts]
+     * @param {boolean} [opts.emptyOrGapDrop] — сброс на пустую область .group-children (в конец списка цели)
+     */
+    moveWaveBetweenGroups(sourceGroupId, targetGroupId, sourceIndex, targetIndex, insertBefore, opts = {}) {
+        const { emptyOrGapDrop = false } = opts;
+        const sourceGroup = window.appState.data.groups.find(g => String(g.id) === String(sourceGroupId));
+        const targetGroup = window.appState.data.groups.find(g => String(g.id) === String(targetGroupId));
+
+        if (!sourceGroup || !targetGroup ||
+            !Array.isArray(sourceGroup.waves) || !Array.isArray(targetGroup.waves)) {
+            return;
+        }
+
+        const sourceWaves = [...sourceGroup.waves];
+        const waveId = sourceWaves[sourceIndex];
+        if (waveId === undefined) return;
+
+        const sameGroup = String(sourceGroupId) === String(targetGroupId);
+
+        if (sameGroup) {
+            this.reorderWaveInGroup(sourceGroupId, sourceIndex, targetIndex, insertBefore);
+            return;
+        }
+
+        sourceWaves.splice(sourceIndex, 1);
+        sourceGroup.waves = sourceWaves;
+
+        const targetWaves = [...targetGroup.waves];
+        let insertAt;
+        if (emptyOrGapDrop || targetWaves.length === 0) {
+            insertAt = targetWaves.length;
+        } else {
+            insertAt = insertBefore ? targetIndex : targetIndex + 1;
+            if (insertAt < 0) insertAt = 0;
+            if (insertAt > targetWaves.length) insertAt = targetWaves.length;
+        }
+        targetWaves.splice(insertAt, 0, waveId);
+        targetGroup.waves = targetWaves;
+
+        window.appState.save();
+
+        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+            window.unifiedListManager.updateWavesList();
+        }
+
         setTimeout(() => {
             if (window.summaryManager && window.summaryManager.updateSummary) {
                 window.summaryManager.updateSummary();
@@ -261,14 +444,23 @@ class EventManager {
             }
         } catch (error) {}
         
-        const $item = $(e.currentTarget);
-        const type = $item.data('type');
-        const id = $item.data('id');
-        const index = parseInt($item.data('index') || 0);
-        
-        if (!id || index < 0) {
+        const $item = $(e.currentTarget).closest('.list-item--group, .list-item--date');
+        if (!$item.length) {
             e.preventDefault();
             return;
+        }
+        const type = $item.data('type');
+        const id = $item.data('id');
+        const index = parseInt($item.data('index') || 0, 10);
+        
+        if (id == null || id === '' || index < 0) {
+            e.preventDefault();
+            return;
+        }
+
+        if (type === 'group' || type === 'date') {
+            this.isDraggingWave = false;
+            this.waveDragPayload = null;
         }
         
         e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
@@ -281,6 +473,14 @@ class EventManager {
     }
     
     handleDragOver(e) {
+        if (this.isDraggingWave) {
+            if ($(e.target).closest('.group-children').length) {
+                return;
+            }
+            e.preventDefault();
+            e.originalEvent.dataTransfer.dropEffect = 'none';
+            return;
+        }
         try {
             const data = e.originalEvent.dataTransfer.getData('text/plain');
             if (data) {
@@ -295,13 +495,20 @@ class EventManager {
         e.originalEvent.dataTransfer.dropEffect = 'move';
         
         const $item = $(e.currentTarget);
-        const rect = $item[0].getBoundingClientRect();
+        const el = $item[0];
+        const rect = el.getBoundingClientRect();
         const y = e.clientY;
         const type = $item.data('type');
         
         const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
         
-        $(`.list-item[data-type="${type}"]`).not($item).removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        if (this._dragOverListItemEl && this._dragOverListItemEl !== el) {
+            this._dragOverListItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+        }
+        this._dragOverListItemEl = el;
     
         if (insertPosition === 'before') {
             $item.addClass('list-item--drag-over-top');
@@ -314,6 +521,7 @@ class EventManager {
     
     handleDrop(e) {
         if (this.isDraggingWave) {
+            e.preventDefault();
             return;
         }
         
@@ -342,20 +550,25 @@ class EventManager {
                 return;
             }
             
-            const targetIndex = parseInt($item.data('index') || 0);
+            const targetIndex = parseInt($item.data('index') || 0, 10);
+            const targetId = $item.data('id');
             
             const rect = $item[0].getBoundingClientRect();
             const y = e.clientY;
             const insertBefore = y - rect.top < rect.height / 2;
             
-            if (dragData.index === targetIndex) {
+            if (dragData.type === 'group' && String(dragData.id) === String(targetId)) {
+                return;
+            }
+            
+            if (dragData.type !== 'group' && dragData.index === targetIndex) {
                 return;
             }
             
             if (dragData.type === 'date') {
                 this.handleDateDrop(dragData, targetIndex, insertBefore);
             } else if (dragData.type === 'group') {
-                this.handleGroupDrop(dragData, targetIndex, insertBefore);
+                this.handleGroupDrop(dragData, targetIndex, insertBefore, targetId);
             }
             
         } catch (error) {
@@ -377,10 +590,25 @@ class EventManager {
         }, 50);
     }
     
-    handleGroupDrop(dragData, targetIndex, insertBefore) {
-        const [movedItem] = window.appState.data.groups.splice(dragData.index, 1);
-        let newIndex = this.calculateNewIndex(dragData.index, targetIndex, insertBefore);
-        window.appState.data.groups.splice(newIndex, 0, movedItem);
+    handleGroupDrop(dragData, targetIndex, insertBefore, targetId) {
+        const groups = window.appState.data.groups;
+        let fromIdx = Number(dragData.index);
+        if (!Number.isInteger(fromIdx) || fromIdx < 0 || fromIdx >= groups.length ||
+            String(groups[fromIdx].id) !== String(dragData.id)) {
+            fromIdx = groups.findIndex(g => String(g.id) === String(dragData.id));
+        }
+        if (fromIdx < 0) return;
+
+        let toIdx = Number(targetIndex);
+        if (!Number.isInteger(toIdx) || toIdx < 0 || toIdx >= groups.length ||
+            String(groups[toIdx].id) !== String(targetId)) {
+            toIdx = groups.findIndex(g => String(g.id) === String(targetId));
+        }
+        if (toIdx < 0) return;
+
+        const [movedItem] = groups.splice(fromIdx, 1);
+        let newIndex = this.calculateNewIndex(fromIdx, toIdx, insertBefore);
+        groups.splice(newIndex, 0, movedItem);
         window.appState.save();
         
         if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
@@ -396,15 +624,38 @@ class EventManager {
     
     handleDragLeave(e) {
         const $item = $(e.currentTarget);
+        const el = $item[0];
         
         if (e.originalEvent.relatedTarget && 
-            !$item[0].contains(e.originalEvent.relatedTarget)) {
+            !el.contains(e.originalEvent.relatedTarget)) {
             
             $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            if (this._dragOverListItemEl === el) {
+                this._dragOverListItemEl = null;
+            }
         }
     }
     
     handleDragEnd(e) {
+        const t = e.target;
+        if (!t || !t.closest) return;
+        if (t.closest('.list-item--wave')) {
+            return;
+        }
+        const $row = $(t).closest('.list-item--group[data-type="group"], .list-item--date[data-type="date"]');
+        if (!$row.length) {
+            return;
+        }
+        this.isDraggingWave = false;
+        this.waveDragPayload = null;
+        if (this._dragOverListItemEl) {
+            this._dragOverListItemEl.classList.remove(
+                'list-item--drag-over-top',
+                'list-item--drag-over-bottom'
+            );
+            this._dragOverListItemEl = null;
+        }
+        this.clearWaveDnDVisualState();
         $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
     }
     
@@ -804,7 +1055,7 @@ class EventManager {
 							
 							const waveIdStr = String(waveId);
 							window.appState.waveVisibility[waveIdStr] = true;
-							window.appState.save();
+							window.appState.saveDebounced();
 							
 							// Убираем группу из askedGroups, если она там была
 							if (this.askedGroups.has(groupId)) {
@@ -820,8 +1071,8 @@ class EventManager {
 								
 								this.updateGroupStatsForWave(waveId, true);
 								
-								if (window.summaryManager && window.summaryManager.updateSummary) {
-									window.summaryManager.updateSummary();
+								if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+									window.summaryManager.debouncedUpdate();
 								}
 								
 								$checkbox.prop('checked', true);
@@ -846,7 +1097,7 @@ class EventManager {
 		if (waveId && window.appState) {
 			const waveIdStr = String(waveId);
 			window.appState.waveVisibility[waveIdStr] = isChecked;
-			window.appState.save();
+			window.appState.saveDebounced();
 			
 			const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
 			const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
@@ -856,13 +1107,6 @@ class EventManager {
 				if (!window.waves.waveContainers[waveId] && wave) {
 					window.waves.createWaveElement(wave);
 				}
-				if (window.waves.waveContainers[waveId]) {
-					$(window.waves.waveContainers[waveId]).show();
-				}
-			} else {
-				if (window.waves.waveContainers[waveId]) {
-					$(window.waves.waveContainers[waveId]).hide();
-				}
 			}
 			
 			if (window.waves && window.waves.updatePosition) {
@@ -871,11 +1115,9 @@ class EventManager {
 			
 			this.updateGroupStatsForWave(waveId, isChecked);
 			
-			setTimeout(() => {
-				if (window.summaryManager && window.summaryManager.updateSummary) {
-					window.summaryManager.updateSummary();
-				}
-			}, 50);
+			if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+				window.summaryManager.debouncedUpdate();
+			}
 		}
 	}
 
@@ -1043,12 +1285,6 @@ class EventManager {
                         if (window.unifiedListManager && window.unifiedListManager.updateGroupStats) {
                             window.unifiedListManager.updateGroupStats(group.id);
                         }
-                        
-                        setTimeout(() => {
-                            if (window.summaryManager && window.summaryManager.updateSummary) {
-                                window.summaryManager.updateSummary();
-                            }
-                        }, 50);
                     }
                 }
             });

@@ -358,21 +358,15 @@ class UIManager {
     }
 
     toggleWaveIntersections() {
-        const container = document.querySelector('.wave-intersection-points');
-        if (container) {
-            const isHidden = container.classList.contains('hidden');
-            if (isHidden) {
-                container.classList.remove('hidden');
-                if (window.waves && window.waves.renderWaveIntersectionPoints) {
-                    window.waves.renderWaveIntersectionPoints();
-                }
-            } else {
-                container.classList.add('hidden');
-            }
-        } else {
+        window.appState.waveIntersectionsVisible = !window.appState.waveIntersectionsVisible;
+        window.appState.save();
+        
+        if (window.appState.waveIntersectionsVisible) {
             if (window.waves && window.waves.renderWaveIntersectionPoints) {
                 window.waves.renderWaveIntersectionPoints();
             }
+        } else if (window.waves && window.waves.removeWaveIntersectionPoints) {
+            window.waves.removeWaveIntersectionPoints();
         }
     }
     

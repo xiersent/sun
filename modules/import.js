@@ -42,6 +42,7 @@ class ImportExportManager {
         dataToSave.uiSettings.grayMode = window.appState.grayMode;
         dataToSave.uiSettings.graphGrayMode = window.appState.graphGrayMode;
         dataToSave.uiSettings.cornerSquaresVisible = window.appState.cornerSquaresVisible;
+        dataToSave.uiSettings.waveIntersectionsVisible = window.appState.waveIntersectionsVisible;
         dataToSave.exportDate = new Date().getTime();
         dataToSave.version = '1.0';
         
@@ -270,6 +271,7 @@ class ImportExportManager {
                             window.appState.grayMode = convertedData.uiSettings.grayMode || false;
                             window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
                             window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
+                            window.appState.waveIntersectionsVisible = convertedData.uiSettings.waveIntersectionsVisible !== undefined ? convertedData.uiSettings.waveIntersectionsVisible : true;
                             
                             if (window.appState.uiHidden) {
                                 document.body.classList.add('ui-hidden');

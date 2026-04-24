@@ -2,10 +2,10 @@
 <div class="list-item list-item--group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
     data-id="<%= data.id %>"
     data-type="group"
-    draggable="<%= !data.editing %>"
+    draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="list-item__drag-handle">⋮⋮</div>
+    <div class="list-item__drag-handle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
     
     <div class="list-item__content">
         <!-- Нормальный вид -->

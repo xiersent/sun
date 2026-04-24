@@ -9,6 +9,14 @@ class WavesManager {
         this.waveLabelElements = {};
         this.lastUpdateTime = 0;
         this.updateInterval = 50;
+        this._enabledWaveIdSetForFrame = null;
+    }
+    
+    _isWaveInEnabledGroupThisFrame(waveId) {
+        if (this._enabledWaveIdSetForFrame) {
+            return this._enabledWaveIdSetForFrame.has(String(waveId));
+        }
+        return this.isWaveGroupEnabled(waveId);
     }
     
     init() {
@@ -260,62 +268,73 @@ class WavesManager {
     
 
     updatePosition() {
-        if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
-            window.timeBarManager.updateTimeIndicator();
-        }
-        
-        if (window.grid && window.grid.updateGridOffset) {
-            window.grid.updateGridOffset();
-        }
-        
-        const currentDay = window.appState.currentDay || 0;
-        
-        window.appState.data.waves.forEach(wave => {
-            const waveIdStr = String(wave.id);
-            const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
-            
-            // ЛОГИКА ПОДСВЕТКИ ЭКСТРЕМУМОВ
-            let isExtremum = false;
-            if (shouldShow) {
-                const state = this.calculateWaveStateAtDay(wave, currentDay);
-                isExtremum = (state >= 4 || state <= -4);
-                this.setWaveStrokeColor(wave.id, isExtremum);
-            } else {
-                this.setWaveStrokeColor(wave.id, false);
-            }
-            
-            // ОБНОВЛЕНИЕ ЦВЕТА ВЫНОСОК
-            this.updateWaveLabelsColor(wave.id, isExtremum);
-            
-            const wavePeriodPixels = window.appState.periods[wave.id] || 
-                                (wave.period * window.appState.config.squareSize);
-            
-            if (!wavePeriodPixels || wavePeriodPixels <= 0) {
-                return;
-            }
-            
-            let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
-            if (currentPositionPx < 0) {
-                currentPositionPx = wavePeriodPixels + currentPositionPx;
-            }
-            
-            const container = this.waveContainers[wave.id];
-            if (container) {
-                container.style.transition = 'none';
-                container.style.transform = `translateX(${-currentPositionPx}px)`;
-                container.style.display = shouldShow ? 'block' : 'none';
-                
-                const path = this.wavePaths[wave.id];
-                if (path) {
-                    path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+        const enabledWaveIds = new Set();
+        for (const group of window.appState.data.groups) {
+            if (group.enabled && group.waves) {
+                for (const wId of group.waves) {
+                    enabledWaveIds.add(String(wId));
                 }
             }
-        });
+        }
+        this._enabledWaveIdSetForFrame = enabledWaveIds;
         
-        this.updateAllWaveLabels();
-        this.updateVerticalWaveLabelsTime();
-        this.renderWaveIntersectionPoints();
+        try {
+            if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
+                window.timeBarManager.updateTimeIndicator();
+            }
+            
+            if (window.grid && window.grid.updateGridOffset) {
+                window.grid.updateGridOffset();
+            }
+            
+            const currentDay = window.appState.currentDay || 0;
+            
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
+                
+                let isExtremum = false;
+                if (shouldShow) {
+                    const state = this.calculateWaveStateAtDay(wave, currentDay);
+                    isExtremum = (state >= 4 || state <= -4);
+                    this.setWaveStrokeColor(wave.id, isExtremum);
+                    this.updateWaveLabelsColor(wave.id, isExtremum);
+                } else {
+                    this.setWaveStrokeColor(wave.id, false);
+                }
+                
+                const wavePeriodPixels = window.appState.periods[wave.id] || 
+                                    (wave.period * window.appState.config.squareSize);
+                
+                if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+                    return;
+                }
+                
+                let currentPositionPx = (currentDay * window.appState.config.squareSize) % wavePeriodPixels;
+                if (currentPositionPx < 0) {
+                    currentPositionPx = wavePeriodPixels + currentPositionPx;
+                }
+                
+                const container = this.waveContainers[wave.id];
+                if (container) {
+                    container.style.transition = 'none';
+                    container.style.transform = `translateX(${-currentPositionPx}px)`;
+                    container.style.display = shouldShow ? 'block' : 'none';
+                    
+                    const path = this.wavePaths[wave.id];
+                    if (path) {
+                        path.classList.toggle('bold', window.appState.waveBold[waveIdStr]);
+                    }
+                }
+            });
+            
+            this.updateAllWaveLabels();
+            this.updateVerticalWaveLabelsTime();
+            this.renderWaveIntersectionPoints();
+        } finally {
+            this._enabledWaveIdSetForFrame = null;
+        }
     }
 
 
@@ -404,7 +423,7 @@ class WavesManager {
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
             
             if (!shouldShow) return;
             
@@ -435,7 +454,7 @@ class WavesManager {
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
             
             if (!shouldShow) return;
             
@@ -481,7 +500,7 @@ class WavesManager {
         window.appState.data.waves.forEach(wave => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-            const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+            const shouldShow = isWaveVisible && this._isWaveInEnabledGroupThisFrame(wave.id);
             
             if (!shouldShow) return;
             
@@ -1429,6 +1448,11 @@ class WavesManager {
     }
     
     renderWaveIntersectionPoints() {
+        if (window.appState && window.appState.waveIntersectionsVisible === false) {
+            this.removeWaveIntersectionPoints();
+            return;
+        }
+        
         this.removeWaveIntersectionPoints();
         
         const intersections = this.calculateAllWaveIntersections();

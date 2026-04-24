@@ -94,6 +94,7 @@
 .group-children .list-item--wave.list-item--drag-over-bottom{border-bottom: 2px solid var(--cp);}
 .group-children .list-item--wave.list-item--drag-over-top::before{content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
 .group-children .list-item--wave.list-item--drag-over-bottom::after{content: ''; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
+.group-children.group-children--drag-over{background: rgba(0, 102, 204, 0.06); outline: 2px dashed var(--cp); outline-offset: -2px; border-radius: 4px;}
 .wave-drag-handle{color: #999; cursor: move; padding: 2px; flex-shrink: 0; user-select: none; margin-right: 4px;}
 .wave-drag-handle:hover{color: var(--text-color);}
 .list-item--wave.list-item--editing .wave-drag-handle{opacity: 0.3; cursor: default;}

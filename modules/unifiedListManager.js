@@ -157,7 +157,9 @@ class UnifiedListManager {
     
     // В unifiedListManager.js - в методе prepareGroupData ДОБАВИТЬ
     prepareGroupData(groupData, index) {
-        const originalGroup = window.appState.data.groups.find(g => g.id === groupData.id);
+        const originalGroup = window.appState.data.groups.find(
+            g => String(g.id) === String(groupData.id)
+        );
         
         if (!originalGroup) {
             return {
@@ -685,8 +687,11 @@ class UnifiedListManager {
         // Фильтруем группы: показываем только те, у которых нет флага hidden
         const visibleGroups = window.appState.data.groups.filter(group => !group.hidden);
         
-        const allGroups = visibleGroups.map((group, index) => {
-            const groupData = this.prepareGroupData(group, index);
+        const allGroups = visibleGroups.map((group) => {
+            const fullIndex = window.appState.data.groups.findIndex(
+                g => String(g.id) === String(group.id)
+            );
+            const groupData = this.prepareGroupData(group, fullIndex >= 0 ? fullIndex : 0);
             return groupData;
         });
         
