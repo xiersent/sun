@@ -573,6 +573,121 @@ class UnifiedListManager {
         };
         return messages[type] || 'Список пуст';
     }
+
+    /**
+     * Режим редактирования волны: класс list-item--editing и поля формы уже в разметке —
+     * переключаем без полного EJS updateWavesList() (сотни мс на больших списках).
+     */
+    syncWaveListEditingVisuals() {
+        const editingId = window.appState.editingWaveId != null ? String(window.appState.editingWaveId) : null;
+        const root = document.getElementById('wavesList');
+        if (!root) return;
+
+        root.querySelectorAll('.list-item--wave').forEach((row) => {
+            const idStr = row.dataset.waveId != null ? String(row.dataset.waveId) : String(row.dataset.id);
+            const isEditing = Boolean(editingId && idStr === editingId);
+            row.classList.toggle('list-item--editing', isEditing);
+            const handle = row.querySelector('.wave-drag-handle');
+            if (handle) {
+                handle.setAttribute('draggable', isEditing ? 'false' : 'true');
+            }
+        });
+
+        if (!editingId) return;
+
+        const wave = window.appState.data.waves.find((w) => String(w.id) === editingId);
+        if (!wave) return;
+
+        const nameInput = document.getElementById(`editWaveName${editingId}`);
+        const periodInput = document.getElementById(`editWavePeriod${editingId}`);
+        const typeInput = document.getElementById(`editWaveType${editingId}`);
+        const colorInput = document.getElementById(`editWaveColor${editingId}`);
+        if (nameInput) nameInput.value = wave.name;
+        if (periodInput) periodInput.value = wave.period;
+        if (typeInput) typeInput.value = wave.type;
+        if (colorInput) colorInput.value = wave.color || '#666666';
+    }
+
+    /** Строка списка после сохранения формы: название, период, описание типа, превью цвета. */
+    syncWaveListRowNormalViewFromModel(wave) {
+        const idStr = String(wave.id);
+        const root = document.getElementById('wavesList');
+        if (!root) return;
+
+        let row = null;
+        root.querySelectorAll('.list-item--wave').forEach((el) => {
+            const rid = el.dataset.waveId != null ? String(el.dataset.waveId) : String(el.dataset.id);
+            if (rid === idStr) row = el;
+        });
+        if (!row) return;
+
+        const titleEl = row.querySelector('.list-item__title');
+        const badge = titleEl && titleEl.querySelector('.wave-period-badge');
+        if (titleEl && badge) {
+            while (titleEl.firstChild && titleEl.firstChild !== badge) {
+                titleEl.removeChild(titleEl.firstChild);
+            }
+            titleEl.insertBefore(document.createTextNode(wave.name), badge);
+            badge.textContent = `${wave.period} дней`;
+        }
+
+        const valueEl = row.querySelector('.list-item__value');
+        if (valueEl && window.dom && typeof window.dom.getWaveDescription === 'function') {
+            valueEl.textContent = window.dom.getWaveDescription(wave.type);
+        }
+
+        const preview = row.querySelector('.wave-color-preview-small');
+        if (preview) {
+            preview.style.backgroundColor = wave.color || '#666666';
+        }
+    }
+
+    /** Режим редактирования группы сигналов — без полного updateWavesList(). */
+    syncGroupListEditingVisuals() {
+        const editingId = window.appState.editingGroupId != null ? String(window.appState.editingGroupId) : null;
+        const root = document.getElementById('wavesList');
+        if (!root) return;
+
+        root.querySelectorAll('.list-item--group').forEach((row) => {
+            const idStr = String(row.dataset.id);
+            const isEditing = Boolean(editingId && idStr === editingId);
+            row.classList.toggle('list-item--editing', isEditing);
+            const handle = row.querySelector(':scope > .list-item__drag-handle');
+            if (handle) {
+                handle.setAttribute('draggable', isEditing ? 'false' : 'true');
+            }
+            const editBtn = row.querySelector('.edit-btn[data-type="group"]');
+            if (editBtn) {
+                editBtn.textContent = isEditing ? 'Редактирование...' : 'Изменить';
+            }
+        });
+
+        if (!editingId) return;
+
+        const group = window.appState.data.groups.find((g) => String(g.id) === editingId);
+        if (!group) return;
+
+        const nameInput = document.getElementById(`editGroupName${editingId}`);
+        if (nameInput) nameInput.value = group.name;
+    }
+
+    /** Заголовок группы в списке после сохранения имени. */
+    syncGroupListRowNormalViewFromModel(group) {
+        const idStr = String(group.id);
+        const root = document.getElementById('wavesList');
+        if (!root) return;
+
+        let row = null;
+        root.querySelectorAll('.list-item--group').forEach((el) => {
+            if (String(el.dataset.id) === idStr) row = el;
+        });
+        if (!row) return;
+
+        const titleEl = row.querySelector('.list-item__normal-view .list-item__title');
+        if (titleEl) {
+            titleEl.textContent = group.name;
+        }
+    }
     
     handleEditClick(id, type, containerId) {
         if (type === 'date') {
@@ -594,18 +709,18 @@ class UnifiedListManager {
                     window.appState.editingWaveId = editingWaveIdStr === idStr ? null : id;
                 }
             });
-            this.updateWavesList();
+            this.syncWaveListEditingVisuals();
         } else if (type === 'group') {
             const idStr = String(id);
             const editingGroupIdStr = window.appState.editingGroupId ? String(window.appState.editingGroupId) : null;
             
             window.appState.editingGroupId = editingGroupIdStr === idStr ? null : id;
-            this.updateWavesList();
+            this.syncGroupListEditingVisuals();
         } else if (type === 'personGroup') {
             const idStr = String(id);
             const cur = window.appState.editingPersonGroupId ? String(window.appState.editingPersonGroupId) : null;
             window.appState.editingPersonGroupId = cur === idStr ? null : id;
-            this.updateDatesList();
+            this.syncPersonGroupListEditingVisuals();
         }
     }
     
@@ -615,9 +730,15 @@ class UnifiedListManager {
             this.updateDatesList();
         } else if (type === 'wave') {
             window.waves.deleteWave(String(id));
+            if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.onWavesStructureChanged) {
+                window.displayViewTemplatesManager.onWavesStructureChanged();
+            }
             this.updateWavesList();
         } else if (type === 'group') {
             window.dates.deleteGroup(id);
+            if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.onWavesStructureChanged) {
+                window.displayViewTemplatesManager.onWavesStructureChanged();
+            }
             this.updateWavesList();
         } else if (type === 'personGroup') {
             if (window.dates.deletePersonGroup(id)) {
@@ -644,13 +765,13 @@ class UnifiedListManager {
             this.updateDatesList();
         } else if (type === 'wave') {
             window.appState.editingWaveId = null;
-            this.updateWavesList();
+            this.syncWaveListEditingVisuals();
         } else if (type === 'group') {
             window.appState.editingGroupId = null;
-            this.updateWavesList();
+            this.syncGroupListEditingVisuals();
         } else if (type === 'personGroup') {
             window.appState.editingPersonGroupId = null;
-            this.updateDatesList();
+            this.syncPersonGroupListEditingVisuals();
         }
     }
     
@@ -714,7 +835,7 @@ class UnifiedListManager {
         const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
         if (!wave) {
             window.appState.editingWaveId = null;
-            this.updateWavesList();
+            this.syncWaveListEditingVisuals();
             return;
         }
         
@@ -766,17 +887,17 @@ class UnifiedListManager {
         window.waves.createWaveElement(wave);
         
         window.appState.editingWaveId = null;
-        
-        this.updateWavesList();
+        this.syncWaveListEditingVisuals();
+        this.syncWaveListRowNormalViewFromModel(wave);
         window.waves.updatePosition();
-        window.appState.save();
+        window.appState.saveDebounced();
     }
     
     saveGroupChanges(groupId) {
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
             window.appState.editingGroupId = null;
-            this.updateWavesList();
+            this.syncGroupListEditingVisuals();
             return;
         }
         
@@ -790,16 +911,16 @@ class UnifiedListManager {
         group.name = newName;
         
         window.appState.editingGroupId = null;
-        
-        this.updateWavesList();
-        window.appState.save();
+        this.syncGroupListEditingVisuals();
+        this.syncGroupListRowNormalViewFromModel(group);
+        window.appState.saveDebounced();
     }
 
     savePersonGroupChanges(groupId) {
         const group = window.appState.data.personGroups.find(g => String(g.id) === String(groupId));
         if (!group) {
             window.appState.editingPersonGroupId = null;
-            this.updateDatesList();
+            this.syncPersonGroupListEditingVisuals();
             return;
         }
         const el = document.getElementById(`editPersonGroupName${groupId}`);
@@ -810,8 +931,9 @@ class UnifiedListManager {
         }
         group.name = newName;
         window.appState.editingPersonGroupId = null;
-        this.updateDatesList();
-        window.appState.save();
+        this.syncPersonGroupListEditingVisuals();
+        this.syncPersonGroupRowNormalViewFromModel(group);
+        window.appState.saveDebounced();
     }
     
     changeWaveColor(wave) {
@@ -913,6 +1035,370 @@ class UnifiedListManager {
             throw e;
         } finally {
             end && end(endDetail);
+        }
+    }
+
+    /**
+     * Чекбоксы «группа вкл» и «видимость сигнала» из appState без полного EJS.
+     * Используется при переключении шаблонов отображения (порядок десятков мс вместо сотен на длинных списках).
+     * @returns {boolean} false, если контейнера списка нет
+     */
+    syncWavesListVisibilityFromAppState() {
+        const root = document.getElementById('wavesList');
+        if (!root) {
+            return false;
+        }
+
+        root.querySelectorAll('.list-item--group[data-type="group"]').forEach((row) => {
+            const gid = String(row.dataset.id);
+            const group = (window.appState.data.groups || []).find((g) => String(g.id) === gid);
+            if (!group) return;
+            const toggle = row.querySelector('.wave-group-toggle');
+            if (toggle) {
+                toggle.checked = !!group.enabled;
+            }
+        });
+
+        root.querySelectorAll('.wave-visibility-check').forEach((cb) => {
+            const wid = String(cb.dataset.id);
+            if (!wid) return;
+            cb.checked = window.appState.waveVisibility[wid] !== false;
+        });
+
+        (window.appState.data.groups || []).forEach((g) => {
+            if (!g.hidden) {
+                this.updateGroupStats(g.id);
+            }
+        });
+
+        if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+            window.dom.refreshShowOnVizorButtonLabels();
+        }
+
+        return true;
+    }
+
+    /**
+     * Только порядок групп в списке: переставить существующие DOM-узлы (без EJS).
+     * Возвращает false, если разметка не совпадает с ожидаемым числом видимых групп — тогда нужен updateWavesList().
+     */
+    reorderGroupsInWavesListDom() {
+        const container = document.getElementById('wavesList');
+        if (!container) return false;
+
+        const visibleGroups = window.appState.data.groups.filter((g) => !g.hidden);
+        const rows = Array.from(container.children).filter(
+            (el) => el.classList && el.classList.contains('list-item--group')
+        );
+
+        if (visibleGroups.length === 0) {
+            return rows.length === 0;
+        }
+        if (rows.length !== visibleGroups.length) {
+            return false;
+        }
+
+        const byId = new Map();
+        for (const el of rows) {
+            byId.set(String(el.dataset.id), el);
+        }
+
+        for (let i = 0; i < visibleGroups.length; i++) {
+            if (!byId.has(String(visibleGroups[i].id))) {
+                return false;
+            }
+        }
+
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < visibleGroups.length; i++) {
+            frag.appendChild(byId.get(String(visibleGroups[i].id)));
+        }
+        container.appendChild(frag);
+
+        container.querySelectorAll(':scope > .list-item--group').forEach((el) => {
+            const idStr = String(el.dataset.id);
+            const fullIdx = window.appState.data.groups.findIndex((g) => String(g.id) === idStr);
+            if (fullIdx >= 0) {
+                el.setAttribute('data-index', String(fullIdx));
+            }
+        });
+
+        return true;
+    }
+
+    _findSignalGroupRow(wavesRoot, groupId) {
+        const idStr = String(groupId);
+        let found = null;
+        wavesRoot.querySelectorAll('.list-item--group').forEach((el) => {
+            if (String(el.dataset.type) !== 'group') return;
+            if (String(el.dataset.id) === idStr) found = el;
+        });
+        return found;
+    }
+
+    _findWaveRowInWavesList(wavesRoot, waveId) {
+        const w = String(waveId);
+        let found = null;
+        wavesRoot.querySelectorAll('.list-item--wave').forEach((el) => {
+            const id = String(el.dataset.waveId != null ? el.dataset.waveId : el.dataset.id);
+            if (id === w) found = el;
+        });
+        return found;
+    }
+
+    _ensureEmptySignalGroupChildrenMessage(container) {
+        if (container.querySelector('.no-waves-message')) return;
+        const div = document.createElement('div');
+        div.className = 'no-waves-message';
+        div.innerHTML =
+            '<span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">Нет сигналов в этой группе</span>';
+        container.appendChild(div);
+    }
+
+    _removeEmptyPlaceholders(container) {
+        container.querySelectorAll(':scope > .no-waves-message').forEach((n) => n.remove());
+    }
+
+    /**
+     * Синхронизировать .group-children одной группы сигналов с appState (перестановка / перенос колоска без EJS).
+     * Сначала обычно вызывают для целевой группы, затем для исходной (перенос между группами).
+     */
+    syncOneSignalGroupChildrenDom(groupId) {
+        const wavesRoot = document.getElementById('wavesList');
+        if (!wavesRoot) return false;
+
+        const group = window.appState.data.groups.find((g) => String(g.id) === String(groupId));
+        if (!group || !Array.isArray(group.waves)) return false;
+
+        const groupEl = this._findSignalGroupRow(wavesRoot, groupId);
+        if (!groupEl) return false;
+
+        const container = groupEl.querySelector('.group-children');
+        if (!container) return false;
+
+        const desired = group.waves.map(String);
+        const byId = new Map();
+
+        for (const wid of desired) {
+            let row = null;
+            Array.from(container.querySelectorAll(':scope > .list-item--wave')).forEach((el) => {
+                const id = String(el.dataset.waveId != null ? el.dataset.waveId : el.dataset.id);
+                if (id === wid) row = el;
+            });
+            if (!row) {
+                row = this._findWaveRowInWavesList(wavesRoot, wid);
+            }
+            if (!row) return false;
+            byId.set(wid, row);
+        }
+
+        this._removeEmptyPlaceholders(container);
+
+        const frag = document.createDocumentFragment();
+        desired.forEach((wid) => {
+            frag.appendChild(byId.get(wid));
+        });
+        container.appendChild(frag);
+
+        if (desired.length === 0) {
+            this._ensureEmptySignalGroupChildrenMessage(container);
+        }
+
+        Array.from(container.querySelectorAll(':scope > .list-item--wave')).forEach((row, i) => {
+            row.setAttribute('data-index', String(i));
+        });
+
+        return true;
+    }
+
+    _findPersonGroupRow(dateRoot, personGroupId) {
+        const idStr = String(personGroupId);
+        let found = null;
+        dateRoot.querySelectorAll('.list-item--person-group').forEach((el) => {
+            if (String(el.dataset.id) === idStr) found = el;
+        });
+        return found;
+    }
+
+    _findDateRowInDateList(dateRoot, dateId) {
+        const d = String(dateId);
+        let found = null;
+        dateRoot.querySelectorAll('.list-item--date').forEach((el) => {
+            if (String(el.dataset.id) === d) found = el;
+        });
+        return found;
+    }
+
+    _ensureEmptyPersonGroupChildrenMessage(container) {
+        if (container.querySelector('.no-waves-message')) return;
+        const div = document.createElement('div');
+        div.className = 'no-waves-message';
+        div.innerHTML =
+            '<span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">Нет персон в этой группе</span>';
+        container.appendChild(div);
+    }
+
+    /**
+     * Порядок групп персон в #dateListForDates по appState.data.personGroups (без EJS).
+     */
+    reorderPersonGroupsInDateListDom() {
+        const container = document.getElementById('dateListForDates');
+        if (!container) return false;
+
+        const pg = window.appState.data.personGroups || [];
+        const rows = Array.from(container.children).filter(
+            (el) => el.classList && el.classList.contains('list-item--person-group')
+        );
+
+        if (pg.length === 0) {
+            return rows.length === 0;
+        }
+        if (rows.length !== pg.length) {
+            return false;
+        }
+
+        const byId = new Map();
+        for (const el of rows) {
+            byId.set(String(el.dataset.id), el);
+        }
+
+        for (let i = 0; i < pg.length; i++) {
+            if (!byId.has(String(pg[i].id))) {
+                return false;
+            }
+        }
+
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < pg.length; i++) {
+            frag.appendChild(byId.get(String(pg[i].id)));
+        }
+        container.appendChild(frag);
+
+        container.querySelectorAll(':scope > .list-item--person-group').forEach((el) => {
+            const idStr = String(el.dataset.id);
+            const fullIdx = pg.findIndex((g) => String(g.id) === idStr);
+            if (fullIdx >= 0) {
+                el.setAttribute('data-index', String(fullIdx));
+            }
+        });
+
+        return true;
+    }
+
+    syncOnePersonGroupChildrenDom(personGroupId) {
+        const dateRoot = document.getElementById('dateListForDates');
+        if (!dateRoot) return false;
+
+        const pg = (window.appState.data.personGroups || []).find((g) => String(g.id) === String(personGroupId));
+        if (!pg || !Array.isArray(pg.dates)) return false;
+
+        const groupEl = this._findPersonGroupRow(dateRoot, personGroupId);
+        if (!groupEl) return false;
+
+        const container = groupEl.querySelector('.person-group-children');
+        if (!container) return false;
+
+        const desired = pg.dates.map(String);
+        const byId = new Map();
+
+        for (const did of desired) {
+            let row = null;
+            Array.from(container.querySelectorAll(':scope > .list-item--date')).forEach((el) => {
+                if (String(el.dataset.id) === did) row = el;
+            });
+            if (!row) {
+                row = this._findDateRowInDateList(dateRoot, did);
+            }
+            if (!row) return false;
+            byId.set(did, row);
+        }
+
+        this._removeEmptyPlaceholders(container);
+
+        const frag = document.createDocumentFragment();
+        desired.forEach((did) => {
+            const row = byId.get(did);
+            row.setAttribute('data-person-group-id', String(personGroupId));
+            frag.appendChild(row);
+        });
+        container.appendChild(frag);
+
+        if (desired.length === 0) {
+            this._ensureEmptyPersonGroupChildrenMessage(container);
+        }
+
+        Array.from(container.querySelectorAll(':scope > .list-item--date')).forEach((row, i) => {
+            row.setAttribute('data-index', String(i));
+        });
+
+        return true;
+    }
+
+    /** Режим редактирования группы персон — без полного updateDatesList(). */
+    syncPersonGroupListEditingVisuals() {
+        const editingId =
+            window.appState.editingPersonGroupId != null ? String(window.appState.editingPersonGroupId) : null;
+        const root = document.getElementById('dateListForDates');
+        if (!root) return;
+
+        root.querySelectorAll('.list-item--person-group').forEach((row) => {
+            const idStr = String(row.dataset.id);
+            const isEditing = Boolean(editingId && idStr === editingId);
+            row.classList.toggle('list-item--editing', isEditing);
+            const handle = row.querySelector(':scope > .list-item__drag-handle');
+            if (handle) {
+                handle.setAttribute('draggable', isEditing ? 'false' : 'true');
+            }
+            const editBtn = row.querySelector('.edit-btn[data-type="personGroup"]');
+            if (editBtn) {
+                editBtn.textContent = isEditing ? 'Редактирование...' : 'Изменить';
+            }
+        });
+
+        if (!editingId) return;
+
+        const group = (window.appState.data.personGroups || []).find((g) => String(g.id) === editingId);
+        if (!group) return;
+
+        const nameInput = document.getElementById(`editPersonGroupName${editingId}`);
+        if (nameInput) nameInput.value = group.name;
+    }
+
+    syncPersonGroupRowNormalViewFromModel(group) {
+        const idStr = String(group.id);
+        const root = document.getElementById('dateListForDates');
+        if (!root) return;
+
+        let row = null;
+        root.querySelectorAll('.list-item--person-group').forEach((el) => {
+            if (String(el.dataset.id) === idStr) row = el;
+        });
+        if (!row) return;
+
+        const titleEl = row.querySelector('.list-item__normal-view .list-item__title');
+        if (titleEl) {
+            titleEl.textContent = group.name;
+        }
+
+        const countEl = row.querySelector('.list-item__value .group-total-count');
+        if (countEl && Array.isArray(group.dates)) {
+            countEl.textContent = `Персон: ${group.dates.length}`;
+        }
+    }
+
+    /** Обновить счётчики «Персон: N» у всех групп персон (после DnD без полного рендера). */
+    syncAllPersonGroupDateCountsFromModel() {
+        const root = document.getElementById('dateListForDates');
+        if (!root) return;
+        const pg = window.appState.data.personGroups || [];
+        for (let i = 0; i < pg.length; i++) {
+            const g = pg[i];
+            const row = this._findPersonGroupRow(root, g.id);
+            if (!row) continue;
+            const countEl = row.querySelector('.list-item__value .group-total-count');
+            if (countEl && Array.isArray(g.dates)) {
+                countEl.textContent = `Персон: ${g.dates.length}`;
+            }
         }
     }
     

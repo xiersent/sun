@@ -48,7 +48,9 @@ class AppState {
                     typeB: null
                 },
                 waveIntersectionsVisible: true,
-                extremumWaveColorHighlight: true
+                extremumWaveColorHighlight: true,
+                displayViewTemplates: [],
+                activeDisplayViewTemplateId: '__display_standard__'
             }
         };
         

@@ -358,6 +358,9 @@ class ImportExportManager {
                             
                             window.dataManager.updateDateList();
                             window.dataManager.updateWavesGroups();
+                            if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.init) {
+                                window.displayViewTemplatesManager.init();
+                            }
                             window.grid.updateCenterDate();
                             window.waves.updatePosition();
                             window.waves.updateCornerSquareColors();
@@ -456,6 +459,9 @@ class ImportExportManager {
                             });
                             
                             window.dataManager.updateWavesGroups();
+                            if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.init) {
+                                window.displayViewTemplatesManager.init();
+                            }
                             window.waves.updatePosition();
                             window.waves.updateCornerSquareColors();
                             window.appState.save();

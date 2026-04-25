@@ -123,6 +123,66 @@ class WavesManager {
                 });
         }
     }
+
+    /**
+     * Смена только видимости/групп: создать недостающие контейнеры волн и убрать лишние без полного пересоздания всех SVG.
+     * Быстрее, чем recreateAllWaveElements(), при переключении шаблонов отображения.
+     */
+    reconcileVisibleWaveElements() {
+        const d = __waveDbg();
+        const end = d && d.t('waves.reconcileVisibleWaveElements', {});
+        try {
+            const hasActiveDate =
+                window.appState.activeDateId &&
+                window.appState.data.dates.some((dt) => dt.id === window.appState.activeDateId);
+            if (!hasActiveDate) {
+                return;
+            }
+
+            window.appState.data.waves.forEach((wave) => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const shouldShow = isWaveVisible && this.isWaveGroupEnabled(wave.id);
+
+                if (shouldShow) {
+                    if (!this.waveContainers[wave.id] && !this.waveContainers[waveIdStr]) {
+                        this.createWaveElement(wave);
+                    }
+                } else {
+                    const cont = this.waveContainers[wave.id] || this.waveContainers[waveIdStr];
+                    if (cont) {
+                        cont.remove();
+                        delete this.waveContainers[wave.id];
+                        delete this.waveContainers[waveIdStr];
+                        delete this.wavePaths[wave.id];
+                        delete this.wavePaths[waveIdStr];
+                        delete window.appState.periods[wave.id];
+                        delete window.appState.periods[waveIdStr];
+
+                        const leftLabel = document.getElementById(`waveLabel${waveIdStr}-left`);
+                        const rightLabel = document.getElementById(`waveLabel${waveIdStr}-right`);
+                        if (leftLabel) leftLabel.remove();
+                        if (rightLabel) rightLabel.remove();
+                        document
+                            .querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"]`)
+                            .forEach((el) => el.remove());
+
+                        delete this.waveLabelElements[`${waveIdStr}-left`];
+                        delete this.waveLabelElements[`${waveIdStr}-right`];
+                        Object.keys(this.waveLabelElements).forEach((key) => {
+                            if (key.startsWith(`${waveIdStr}-top`) || key.startsWith(`${waveIdStr}-bottom`)) {
+                                delete this.waveLabelElements[key];
+                            }
+                        });
+                    }
+                }
+            });
+
+            this.updatePosition({ forceWaveLabels: true });
+        } finally {
+            end && end({});
+        }
+    }
     
     createWaveElement(wave) {
         const d = __waveDbg();
@@ -1286,6 +1346,9 @@ class WavesManager {
             }
             
             this.updatePosition();
+            if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.onNewWaveAdded) {
+                window.displayViewTemplatesManager.onNewWaveAdded(newWave);
+            }
             window.appState.save();
         } finally {
             endAdd && endAdd({});
@@ -1397,12 +1460,9 @@ class WavesManager {
                 checkbox.checked = false;
             }
         });
-        
-        window.appState.save();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-            window.unifiedListManager.updateWavesList();
-        }
+
+        // Без updateWavesList(): состояние чекбоксов уже синхронизировано выше; полный EJS-рендер списка даёт сотни мс и визуальный «миг».
+        window.appState.saveDebounced();
 
         window.dispatchEvent(new CustomEvent('zaraza:waveCornerSelectionChanged'));
     }

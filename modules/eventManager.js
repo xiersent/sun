@@ -21,16 +21,19 @@
 class EventManager {
     constructor() {
         this.askedGroups = new Set();
-        this.isDraggingWave = false;
-        this.waveDragPayload = null;
+        /** @type {{ type: 'wave'|'date', id: *, index: number, groupId: *, source?: string }|null} */
+        this.nestedItemDragPayload = null;
         this._dragOverListItemEl = null;
-        this._waveDragOverItemEl = null;
-        this._groupChildrenDropEl = null;
+        this._nestedDragOverItemEl = null;
+        this._nestedChildrenDropEl = null;
         this._wavesUiRefreshScheduled = null;
+        this._groupOrderDomRefreshScheduled = null;
+        this._wavesOrderDomRefreshScheduled = null;
+        this._wavesOrderDomQueue = [];
+        this._personGroupOrderDomRefreshScheduled = null;
+        this._datesOrderDomRefreshScheduled = null;
+        this._datesOrderDomQueue = [];
         this._datesUiRefreshScheduled = null;
-        this.isDraggingPersonDate = false;
-        this._personDateDragOverItemEl = null;
-        this._personGroupChildrenDropEl = null;
         this.$ = window.jQuery;
         this.setupGlobalHandlers();
         this.setupDateChangeObservers();
@@ -43,13 +46,6 @@ class EventManager {
             this.handleClick(e);
         });
 
-        $(document)
-            .on('dragstart', '.list-item--date[data-type="date"]:not(.list-item--editing) > .list-item__drag-handle.date-drag-handle', this.handleDragStart.bind(this))
-            .on('dragover', '.list-item--date[data-type="date"]', this.handleDragOver.bind(this))
-            .on('dragleave', '.list-item--date[data-type="date"]', this.handleDragLeave.bind(this))
-            .on('drop', '.list-item--date[data-type="date"]', this.handleDrop.bind(this))
-            .on('dragend', '.list-item--date .date-drag-handle', this.handleDragEnd.bind(this));
-        
         $(document)
             .on('dragstart', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragStart.bind(this))
             .on('dragover', '.list-item--group[data-type="group"]', this.handleDragOver.bind(this))
@@ -64,22 +60,49 @@ class EventManager {
             .on('drop', '.list-item--person-group[data-type="personGroup"]', this.handleDrop.bind(this))
             .on('dragend', '.list-item--person-group[data-type="personGroup"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragEnd.bind(this));
             
+        const nd = window.SunNestedListDnD;
+        const nestedContainers = nd.NESTED_CONTAINERS;
         $(document)
-            .on('dragover', '.group-children', this.handleGroupChildrenDragOver.bind(this))
-            .on('dragleave', '.group-children', this.handleGroupChildrenDragLeave.bind(this))
-            .on('drop', '.group-children', this.handleGroupChildrenWaveDrop.bind(this));
+            .on('dragover', nestedContainers, (e) => nd.nestedContainersDragOver(this, e))
+            .on('dragleave', nestedContainers, (e) => nd.nestedContainersDragLeave(this, e))
+            .on('drop', nestedContainers, (e) => nd.nestedContainersDrop(this, e));
 
         $(document)
-            .on('dragstart', '.group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle', this.handleWaveDragStart.bind(this))
-            .on('dragover', '.group-children .list-item--wave', this.handleWaveDragOver.bind(this))
-            .on('dragleave', '.group-children .list-item--wave', this.handleWaveDragLeave.bind(this))
-            .on('drop', '.group-children .list-item--wave', this.handleWaveDrop.bind(this))
-            .on('dragend', '.group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle', this.handleWaveDragEnd.bind(this));
-
-        $(document)
-            .on('dragover', '.person-group-children', this.handlePersonGroupChildrenDragOver.bind(this))
-            .on('dragleave', '.person-group-children', this.handlePersonGroupChildrenDragLeave.bind(this))
-            .on('drop', '.person-group-children', this.handlePersonGroupChildrenDateDrop.bind(this));
+            .on(
+                'dragstart',
+                '#wavesList .group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle',
+                (e) => nd.dragStart(this, e, 'wave')
+            )
+            .on(
+                'dragstart',
+                '#dateListForDates .person-group-children .list-item--date[data-type="date"]:not(.list-item--editing) > .list-item__drag-handle.date-drag-handle',
+                (e) => nd.dragStart(this, e, 'date')
+            )
+            .on(
+                'dragover',
+                '#wavesList .group-children .list-item--wave, #dateListForDates .person-group-children .list-item--date[data-type="date"]',
+                (e) => nd.nestedChildRowsDragOver(this, e)
+            )
+            .on(
+                'dragleave',
+                '#wavesList .group-children .list-item--wave, #dateListForDates .person-group-children .list-item--date[data-type="date"]',
+                (e) => nd.nestedChildRowsDragLeave(this, e)
+            )
+            .on(
+                'drop',
+                '#wavesList .group-children .list-item--wave, #dateListForDates .person-group-children .list-item--date[data-type="date"]',
+                (e) => nd.nestedChildRowsDrop(this, e)
+            )
+            .on(
+                'dragend',
+                '#wavesList .group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle',
+                (e) => nd.dragEnd(this, e, 'wave')
+            )
+            .on(
+                'dragend',
+                '#dateListForDates .person-group-children .list-item--date[data-type="date"]:not(.list-item--editing) > .list-item__drag-handle.date-drag-handle',
+                (e) => nd.dragEnd(this, e, 'date')
+            );
 
 		$(document).on('click', '.group-enabled-count', (e) => {
 			e.preventDefault();
@@ -119,372 +142,9 @@ class EventManager {
 		});
     }
     
-    handleWaveDragStart(e) {
-        const $item = $(e.currentTarget).closest('.list-item--wave');
-        const $group = $item.closest('.list-item--group');
-        const waveId = $item.data('id');
-        const index = parseInt($item.data('index') || 0, 10);
-        const groupId = $group.data('id');
-        
-        if (waveId == null || waveId === '' || index < 0 || groupId == null || groupId === '') {
-            e.preventDefault();
-            return;
-        }
-
-        this.isDraggingPersonDate = false;
-        this._waveDragOverItemEl = null;
-        this._groupChildrenDropEl = null;
-        this.isDraggingWave = true;
-        this.waveDragPayload = {
-            type: 'wave',
-            id: waveId,
-            index: index,
-            groupId: groupId,
-            source: 'wave-drag'
-        };
-        
-        e.originalEvent.dataTransfer.effectAllowed = 'move';
-        e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(this.waveDragPayload));
-        
-        $item.addClass('list-item--dragging');
-        window.sunPerfLog('eventManager', 'wave.dragstart', {
-            waveId: waveId,
-            groupId: groupId,
-            index: index
-        });
-    }
-
-    getWaveDragDataFromDropEvent(e) {
-        if (this.waveDragPayload && this.waveDragPayload.type === 'wave') {
-            return this.waveDragPayload;
-        }
-        try {
-            const raw = e.originalEvent.dataTransfer.getData('text/plain');
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed && parsed.type === 'wave') return parsed;
-            }
-        } catch (_) {}
-        return null;
-    }
-    
-    handleWaveDragOver(e) {
-        if (this.isDraggingPersonDate) {
-            return;
-        }
-        if (!this.isDraggingWave || !this.waveDragPayload || this.waveDragPayload.type !== 'wave') {
-            return;
-        }
-
-        const dragData = this.waveDragPayload;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const $item = $(e.currentTarget);
-        const itemEl = $item[0];
-        const $group = $item.closest('.list-item--group');
-        const targetGroupId = $group.data('id');
-
-        if (this._groupChildrenDropEl) {
-            this._groupChildrenDropEl.classList.remove('group-children--drag-over');
-            this._groupChildrenDropEl = null;
-        }
-
-        if (String(dragData.groupId) === String(targetGroupId) &&
-            String(dragData.id) === String($item.data('id'))) {
-            e.originalEvent.dataTransfer.dropEffect = 'move';
-            if (this._waveDragOverItemEl && this._waveDragOverItemEl !== itemEl) {
-                this._waveDragOverItemEl.classList.remove(
-                    'list-item--drag-over-top',
-                    'list-item--drag-over-bottom'
-                );
-                this._waveDragOverItemEl = null;
-            }
-            return;
-        }
-            
-        e.originalEvent.dataTransfer.dropEffect = 'move';
-        
-        const rect = itemEl.getBoundingClientRect();
-        const y = e.clientY;
-        const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
-        
-        if (this._waveDragOverItemEl && this._waveDragOverItemEl !== itemEl) {
-            this._waveDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
-            );
-        }
-        this._waveDragOverItemEl = itemEl;
-        
-        if (insertPosition === 'before') {
-            $item.addClass('list-item--drag-over-top');
-            $item.removeClass('list-item--drag-over-bottom');
-        } else {
-            $item.addClass('list-item--drag-over-bottom');
-            $item.removeClass('list-item--drag-over-top');
-        }
-    }
-
-    handleGroupChildrenDragOver(e) {
-        if (this.isDraggingPersonDate) {
-            return;
-        }
-        if (!this.isDraggingWave || !this.waveDragPayload || this.waveDragPayload.type !== 'wave') {
-            return;
-        }
-        if ($(e.target).closest('.list-item--wave').length) {
-            return;
-        }
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (this._waveDragOverItemEl) {
-            this._waveDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
-            );
-            this._waveDragOverItemEl = null;
-        }
-
-        const gc = e.currentTarget;
-        if (this._groupChildrenDropEl && this._groupChildrenDropEl !== gc) {
-            this._groupChildrenDropEl.classList.remove('group-children--drag-over');
-        }
-        this._groupChildrenDropEl = gc;
-        gc.classList.add('group-children--drag-over');
-        e.originalEvent.dataTransfer.dropEffect = 'move';
-    }
-
-    handleGroupChildrenDragLeave(e) {
-        const $gc = $(e.currentTarget);
-        const related = e.originalEvent.relatedTarget;
-        if (related && $gc[0].contains(related)) {
-            return;
-        }
-        $gc.removeClass('group-children--drag-over');
-    }
-
-    handleGroupChildrenWaveDrop(e) {
-        if (this.isDraggingPersonDate) {
-            return;
-        }
-        if (!this.isDraggingWave) {
-            return;
-        }
-        if ($(e.target).closest('.list-item--wave').length) {
-            return;
-        }
-
-        const dragData = this.getWaveDragDataFromDropEvent(e);
-        if (!dragData || dragData.type !== 'wave') {
-            return;
-        }
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        this.clearWaveDnDVisualState();
-
-        const $gc = $(e.currentTarget);
-        const $group = $gc.closest('.list-item--group');
-        const targetGroupId = $group.data('id');
-        if (!targetGroupId) {
-            return;
-        }
-
-        const targetGroup = window.appState.data.groups.find(g => String(g.id) === String(targetGroupId));
-        const insertAtEnd = (targetGroup && targetGroup.waves) ? targetGroup.waves.length : 0;
-
-        window.sunPerfLog('eventManager', 'wave.drop.emptyZone', {
-            fromGroup: dragData.groupId,
-            toGroup: targetGroupId,
-            fromIndex: dragData.index
-        });
-        this.moveWaveBetweenGroups(
-            dragData.groupId,
-            targetGroupId,
-            dragData.index,
-            insertAtEnd,
-            false,
-            { emptyOrGapDrop: true }
-        );
-    }
-    
-    handleWaveDragLeave(e) {
-        const $item = $(e.currentTarget);
-        const el = $item[0];
-        
-        if (e.originalEvent.relatedTarget && 
-            !el.contains(e.originalEvent.relatedTarget)) {
-            
-            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
-            if (this._waveDragOverItemEl === el) {
-                this._waveDragOverItemEl = null;
-            }
-        }
-    }
-    
-    handleWaveDrop(e) {
-        if (this.isDraggingPersonDate) {
-            return;
-        }
-        if (!this.isDraggingWave) {
-            return;
-        }
-        
-        const $item = $(e.currentTarget);
-        e.preventDefault();
-        e.stopPropagation();
-        
-        this.clearWaveDnDVisualState();
-        
-        const dragData = this.getWaveDragDataFromDropEvent(e);
-        if (!dragData || dragData.type !== 'wave') {
-            return;
-        }
-            
-        const $group = $item.closest('.list-item--group');
-        const targetGroupId = $group.data('id');
-        const targetIndex = parseInt($item.data('index') || 0, 10);
-        
-        const rect = $item[0].getBoundingClientRect();
-        const y = e.clientY;
-        const insertBefore = y - rect.top < rect.height / 2;
-        
-        if (String(dragData.groupId) === String(targetGroupId) &&
-            dragData.index === targetIndex) {
-            window.sunPerfLog('eventManager', 'wave.drop.skipNoop', { targetGroupId, targetIndex });
-            return;
-        }
-
-        window.sunPerfLog('eventManager', 'wave.drop.onRow', {
-            fromGroup: dragData.groupId,
-            toGroup: targetGroupId,
-            fromIndex: dragData.index,
-            targetIndex,
-            insertBefore
-        });
-        this.moveWaveBetweenGroups(
-            dragData.groupId,
-            targetGroupId,
-            dragData.index,
-            targetIndex,
-            insertBefore,
-            { emptyOrGapDrop: false }
-        );
-    }
-    
-    clearWaveDnDVisualState() {
-        if (this._waveDragOverItemEl) {
-            this._waveDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
-            );
-            this._waveDragOverItemEl = null;
-        }
-        if (this._groupChildrenDropEl) {
-            this._groupChildrenDropEl.classList.remove('group-children--drag-over');
-            this._groupChildrenDropEl = null;
-        }
-    }
-
-    clearPersonDateDnDVisualState() {
-        if (this._personDateDragOverItemEl) {
-            this._personDateDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
-            );
-            this._personDateDragOverItemEl = null;
-        }
-        if (this._personGroupChildrenDropEl) {
-            this._personGroupChildrenDropEl.classList.remove('group-children--drag-over');
-            this._personGroupChildrenDropEl = null;
-        }
-    }
-
-    handlePersonGroupChildrenDragOver(e) {
-        if (!this.isDraggingPersonDate) {
-            return;
-        }
-        if ($(e.target).closest('.list-item--date').length) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        if (this._personDateDragOverItemEl) {
-            this._personDateDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
-            );
-            this._personDateDragOverItemEl = null;
-        }
-        const gc = e.currentTarget;
-        if (this._personGroupChildrenDropEl && this._personGroupChildrenDropEl !== gc) {
-            this._personGroupChildrenDropEl.classList.remove('group-children--drag-over');
-        }
-        this._personGroupChildrenDropEl = gc;
-        gc.classList.add('group-children--drag-over');
-        e.originalEvent.dataTransfer.dropEffect = 'move';
-    }
-
-    handlePersonGroupChildrenDragLeave(e) {
-        const $gc = $(e.currentTarget);
-        const related = e.originalEvent.relatedTarget;
-        if (related && $gc[0].contains(related)) {
-            return;
-        }
-        $gc.removeClass('group-children--drag-over');
-    }
-
-    handlePersonGroupChildrenDateDrop(e) {
-        if (!this.isDraggingPersonDate) {
-            return;
-        }
-        if ($(e.target).closest('.list-item--date').length) {
-            return;
-        }
-        let dragData;
-        try {
-            dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
-        } catch (_) {
-            return;
-        }
-        if (!dragData || dragData.type !== 'date') {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        this.clearPersonDateDnDVisualState();
-        const $gc = $(e.currentTarget);
-        const $group = $gc.closest('.list-item--person-group');
-        const targetGroupId = $group.data('id');
-        if (!targetGroupId) {
-            return;
-        }
-        let sourceGroupId = dragData.personGroupId || this.findPersonGroupIdForDate(dragData.id);
-        const targetGroup = (window.appState.data.personGroups || []).find(g => String(g.id) === String(targetGroupId));
-        const insertAtEnd = (targetGroup && targetGroup.dates) ? targetGroup.dates.length : 0;
-        this.moveDateBetweenPersonGroups(
-            sourceGroupId,
-            targetGroupId,
-            dragData.index,
-            insertAtEnd,
-            false,
-            { emptyOrGapDrop: true }
-        );
-    }
-
-    handleWaveDragEnd(e) {
-        window.sunPerfLog('eventManager', 'wave.dragend', {});
-        this.isDraggingWave = false;
-        this.waveDragPayload = null;
-        this.clearWaveDnDVisualState();
-        const src = e.target && e.target.closest ? e.target.closest('.list-item--wave') : null;
-        if (src) {
-            src.classList.remove('list-item--dragging');
+    clearNestedDnDVisualState() {
+        if (window.SunNestedListDnD) {
+            window.SunNestedListDnD.clearNestedDnDVisuals(this);
         }
     }
 
@@ -532,6 +192,237 @@ class EventManager {
                 msUpdateWavesList: msList,
                 msPopulateGroupSelect: msSelect,
                 msSave: msSave,
+                msTotalRaf: total
+            });
+        });
+    }
+
+    /**
+     * После DnD только порядка групп: перестановка DOM без полного EJS; при несовпадении — полный refresh.
+     */
+    scheduleGroupOrderDomSyncAndSave() {
+        const coalesced = this._groupOrderDomRefreshScheduled !== null;
+        if (this._groupOrderDomRefreshScheduled !== null) {
+            cancelAnimationFrame(this._groupOrderDomRefreshScheduled);
+        }
+        window.sunPerfLog('eventManager', 'scheduleGroupOrderDomSyncAndSave.queue', { coalesced });
+        this._groupOrderDomRefreshScheduled = requestAnimationFrame(() => {
+            this._groupOrderDomRefreshScheduled = null;
+            const tFrame = typeof performance !== 'undefined' ? performance.now() : 0;
+            let msDom = 0;
+            let msList = 0;
+            let msSelect = 0;
+            let msSave = 0;
+            try {
+                let domOk = false;
+                if (window.unifiedListManager && typeof window.unifiedListManager.reorderGroupsInWavesListDom === 'function') {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    domOk = window.unifiedListManager.reorderGroupsInWavesListDom();
+                    msDom = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+                if (!domOk && window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.unifiedListManager.updateWavesList();
+                    msList = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+                if (window.summaryManager && typeof window.summaryManager.populateGroupSelect === 'function') {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    const prev = window.summaryManager.currentGroup;
+                    window.summaryManager.populateGroupSelect();
+                    const sel = window.summaryManager.elements.summaryGroupSelect;
+                    if (sel && prev != null && [...sel.options].some(o => String(o.value) === String(prev))) {
+                        sel.value = String(prev);
+                    }
+                    msSelect = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+            } finally {
+                if (window.appState && typeof window.appState.saveDebounced === 'function') {
+                    const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.appState.saveDebounced();
+                    msSave = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                }
+            }
+            const total = typeof performance !== 'undefined' ? Number((performance.now() - tFrame).toFixed(2)) : 0;
+            window.sunPerfLog('eventManager', 'scheduleGroupOrderDomSyncAndSave.done', {
+                msReorderGroupsDom: msDom,
+                msUpdateWavesListFallback: msList,
+                msPopulateGroupSelect: msSelect,
+                msSaveDebounced: msSave,
+                msTotalRaf: total
+            });
+        });
+    }
+
+    /**
+     * После DnD порядка колосков: синхронизация .group-children затронутых групп без полного EJS.
+     * Аргументы — порядок вызова syncOne (например целевая группа, затем исходная при переносе).
+     */
+    scheduleWavesOrderDomSyncAndSave(...orderedGroupIds) {
+        this._wavesOrderDomQueue.push(...orderedGroupIds.map(String));
+        const coalesced = this._wavesOrderDomRefreshScheduled !== null;
+        if (this._wavesOrderDomRefreshScheduled !== null) {
+            cancelAnimationFrame(this._wavesOrderDomRefreshScheduled);
+        }
+        window.sunPerfLog('eventManager', 'scheduleWavesOrderDomSyncAndSave.queue', {
+            coalesced,
+            queueLen: this._wavesOrderDomQueue.length
+        });
+        this._wavesOrderDomRefreshScheduled = requestAnimationFrame(() => {
+            this._wavesOrderDomRefreshScheduled = null;
+            const tFrame = typeof performance !== 'undefined' ? performance.now() : 0;
+            const queue = this._wavesOrderDomQueue.splice(0);
+            let msSync = 0;
+            let msList = 0;
+            let msSelect = 0;
+            let msSave = 0;
+            let domOk = true;
+            try {
+                const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                if (window.unifiedListManager && typeof window.unifiedListManager.syncOneSignalGroupChildrenDom === 'function') {
+                    for (let i = 0; i < queue.length; i++) {
+                        if (!window.unifiedListManager.syncOneSignalGroupChildrenDom(queue[i])) {
+                            domOk = false;
+                            break;
+                        }
+                    }
+                } else {
+                    domOk = false;
+                }
+                msSync = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                if (!domOk && window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                    const t1 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.unifiedListManager.updateWavesList();
+                    msList = typeof performance !== 'undefined' ? Number((performance.now() - t1).toFixed(2)) : 0;
+                }
+                if (window.summaryManager && typeof window.summaryManager.populateGroupSelect === 'function') {
+                    const t2 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    const prev = window.summaryManager.currentGroup;
+                    window.summaryManager.populateGroupSelect();
+                    const sel = window.summaryManager.elements.summaryGroupSelect;
+                    if (sel && prev != null && [...sel.options].some(o => String(o.value) === String(prev))) {
+                        sel.value = String(prev);
+                    }
+                    msSelect = typeof performance !== 'undefined' ? Number((performance.now() - t2).toFixed(2)) : 0;
+                }
+            } finally {
+                if (window.appState && typeof window.appState.saveDebounced === 'function') {
+                    const t3 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.appState.saveDebounced();
+                    msSave = typeof performance !== 'undefined' ? Number((performance.now() - t3).toFixed(2)) : 0;
+                }
+            }
+            const total = typeof performance !== 'undefined' ? Number((performance.now() - tFrame).toFixed(2)) : 0;
+            window.sunPerfLog('eventManager', 'scheduleWavesOrderDomSyncAndSave.done', {
+                queueLen: queue.length,
+                msSyncOneGroups: msSync,
+                msUpdateWavesListFallback: msList,
+                msPopulateGroupSelect: msSelect,
+                msSaveDebounced: msSave,
+                msTotalRaf: total
+            });
+        });
+    }
+
+    /** DnD порядка групп персон: только перестановка DOM + раскладка + saveDebounced. */
+    schedulePersonGroupOrderDomSyncAndSave() {
+        const coalesced = this._personGroupOrderDomRefreshScheduled !== null;
+        if (this._personGroupOrderDomRefreshScheduled !== null) {
+            cancelAnimationFrame(this._personGroupOrderDomRefreshScheduled);
+        }
+        window.sunPerfLog('eventManager', 'schedulePersonGroupOrderDomSyncAndSave.queue', { coalesced });
+        this._personGroupOrderDomRefreshScheduled = requestAnimationFrame(() => {
+            this._personGroupOrderDomRefreshScheduled = null;
+            const tFrame = typeof performance !== 'undefined' ? performance.now() : 0;
+            let msDom = 0;
+            let msList = 0;
+            let msSave = 0;
+            try {
+                let domOk = false;
+                const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                if (window.unifiedListManager && typeof window.unifiedListManager.reorderPersonGroupsInDateListDom === 'function') {
+                    domOk = window.unifiedListManager.reorderPersonGroupsInDateListDom();
+                }
+                msDom = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                if (!domOk && window.dataManager && window.dataManager.updateDateList) {
+                    const t1 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.dataManager.updateDateList();
+                    msList = typeof performance !== 'undefined' ? Number((performance.now() - t1).toFixed(2)) : 0;
+                } else if (domOk && window.dates && typeof window.dates.syncPersonGroupsLayout === 'function') {
+                    window.dates.syncPersonGroupsLayout();
+                }
+            } finally {
+                if (window.appState && typeof window.appState.saveDebounced === 'function') {
+                    const t2 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.appState.saveDebounced();
+                    msSave = typeof performance !== 'undefined' ? Number((performance.now() - t2).toFixed(2)) : 0;
+                }
+            }
+            const total = typeof performance !== 'undefined' ? Number((performance.now() - tFrame).toFixed(2)) : 0;
+            window.sunPerfLog('eventManager', 'schedulePersonGroupOrderDomSyncAndSave.done', {
+                msReorderPersonGroupsDom: msDom,
+                msUpdateDateListFallback: msList,
+                msSaveDebounced: msSave,
+                msTotalRaf: total
+            });
+        });
+    }
+
+    /** DnD персон внутри / между группами персон: .person-group-children без полного EJS. */
+    scheduleDatesOrderDomSyncAndSave(...orderedPersonGroupIds) {
+        this._datesOrderDomQueue.push(...orderedPersonGroupIds.map(String));
+        const coalesced = this._datesOrderDomRefreshScheduled !== null;
+        if (this._datesOrderDomRefreshScheduled !== null) {
+            cancelAnimationFrame(this._datesOrderDomRefreshScheduled);
+        }
+        window.sunPerfLog('eventManager', 'scheduleDatesOrderDomSyncAndSave.queue', {
+            coalesced,
+            queueLen: this._datesOrderDomQueue.length
+        });
+        this._datesOrderDomRefreshScheduled = requestAnimationFrame(() => {
+            this._datesOrderDomRefreshScheduled = null;
+            const tFrame = typeof performance !== 'undefined' ? performance.now() : 0;
+            const queue = this._datesOrderDomQueue.splice(0);
+            let msSync = 0;
+            let msList = 0;
+            let msSave = 0;
+            let domOk = true;
+            try {
+                const t0 = typeof performance !== 'undefined' ? performance.now() : 0;
+                if (window.unifiedListManager && typeof window.unifiedListManager.syncOnePersonGroupChildrenDom === 'function') {
+                    for (let i = 0; i < queue.length; i++) {
+                        if (!window.unifiedListManager.syncOnePersonGroupChildrenDom(queue[i])) {
+                            domOk = false;
+                            break;
+                        }
+                    }
+                } else {
+                    domOk = false;
+                }
+                msSync = typeof performance !== 'undefined' ? Number((performance.now() - t0).toFixed(2)) : 0;
+                if (domOk && window.unifiedListManager && typeof window.unifiedListManager.syncAllPersonGroupDateCountsFromModel === 'function') {
+                    window.unifiedListManager.syncAllPersonGroupDateCountsFromModel();
+                }
+                if (domOk && window.dates && typeof window.dates.syncPersonGroupsLayout === 'function') {
+                    window.dates.syncPersonGroupsLayout();
+                }
+                if (!domOk && window.dataManager && window.dataManager.updateDateList) {
+                    const t1 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.dataManager.updateDateList();
+                    msList = typeof performance !== 'undefined' ? Number((performance.now() - t1).toFixed(2)) : 0;
+                }
+            } finally {
+                if (window.appState && typeof window.appState.saveDebounced === 'function') {
+                    const t2 = typeof performance !== 'undefined' ? performance.now() : 0;
+                    window.appState.saveDebounced();
+                    msSave = typeof performance !== 'undefined' ? Number((performance.now() - t2).toFixed(2)) : 0;
+                }
+            }
+            const total = typeof performance !== 'undefined' ? Number((performance.now() - tFrame).toFixed(2)) : 0;
+            window.sunPerfLog('eventManager', 'scheduleDatesOrderDomSyncAndSave.done', {
+                queueLen: queue.length,
+                msSyncPersonGroups: msSync,
+                msUpdateDateListFallback: msList,
+                msSaveDebounced: msSave,
                 msTotalRaf: total
             });
         });
@@ -593,16 +484,17 @@ class EventManager {
             insertBefore,
             newIndex
         });
-        this.scheduleWavesListRefreshAndSave();
+        this.scheduleWavesOrderDomSyncAndSave(groupId);
     }
 
     /**
      * Переставляет волну внутри группы или переносит в другую группу.
      * @param {object} [opts]
      * @param {boolean} [opts.emptyOrGapDrop] — сброс на пустую область .group-children (в конец списка цели)
+     * @param {*} [opts.sourceItemId] — id волны в payload DnD: пересчитать индекс в группе-источнике (индекс из dragstart часто устаревает)
      */
     moveWaveBetweenGroups(sourceGroupId, targetGroupId, sourceIndex, targetIndex, insertBefore, opts = {}) {
-        const { emptyOrGapDrop = false } = opts;
+        const { emptyOrGapDrop = false, sourceItemId } = opts;
         const sourceGroup = window.appState.data.groups.find(g => String(g.id) === String(sourceGroupId));
         const targetGroup = window.appState.data.groups.find(g => String(g.id) === String(targetGroupId));
 
@@ -611,18 +503,37 @@ class EventManager {
             return;
         }
 
+        let srcIdx = parseInt(sourceIndex, 10);
+        if (!Number.isFinite(srcIdx) || srcIdx < 0) {
+            srcIdx = 0;
+        }
+        if (sourceItemId != null && sourceItemId !== '') {
+            const byId = sourceGroup.waves.findIndex((w) => String(w) === String(sourceItemId));
+            if (byId >= 0) {
+                srcIdx = byId;
+            }
+        }
+
         const sourceWaves = [...sourceGroup.waves];
-        const waveId = sourceWaves[sourceIndex];
-        if (waveId === undefined) return;
+        const waveId = sourceWaves[srcIdx];
+        if (waveId === undefined) {
+            window.sunPerfLog('eventManager', 'moveWaveBetweenGroups.aborted', {
+                sourceGroupId,
+                sourceIndex,
+                srcIdx,
+                sourceItemId
+            });
+            return;
+        }
 
         const sameGroup = String(sourceGroupId) === String(targetGroupId);
 
         if (sameGroup) {
-            this.reorderWaveInGroup(sourceGroupId, sourceIndex, targetIndex, insertBefore);
+            this.reorderWaveInGroup(sourceGroupId, srcIdx, targetIndex, insertBefore);
             return;
         }
 
-        sourceWaves.splice(sourceIndex, 1);
+        sourceWaves.splice(srcIdx, 1);
         sourceGroup.waves = sourceWaves;
 
         const targetWaves = [...targetGroup.waves];
@@ -643,7 +554,7 @@ class EventManager {
             insertAt,
             emptyOrGapDrop: opts.emptyOrGapDrop
         });
-        this.scheduleWavesListRefreshAndSave();
+        this.scheduleWavesOrderDomSyncAndSave(targetGroupId, sourceGroupId);
     }
     
     calculateNewIndex(sourceIndex, targetIndex, insertBefore) {
@@ -667,14 +578,14 @@ class EventManager {
             const data = e.originalEvent.dataTransfer.getData('text/plain');
             if (data) {
                 const dragData = JSON.parse(data);
-                if (dragData && dragData.type === 'wave') {
+                if (dragData && (dragData.type === 'wave' || dragData.type === 'date')) {
                     e.preventDefault();
                     return;
                 }
             }
         } catch (error) {}
         
-        const $item = $(e.currentTarget).closest('.list-item--group, .list-item--date, .list-item--person-group');
+        const $item = $(e.currentTarget).closest('.list-item--group, .list-item--person-group');
         if (!$item.length) {
             e.preventDefault();
             return;
@@ -688,24 +599,15 @@ class EventManager {
             return;
         }
 
-        if (type === 'group' || type === 'date' || type === 'personGroup') {
-            this.isDraggingWave = false;
-            this.waveDragPayload = null;
+        if (type === 'group' || type === 'personGroup') {
+            this.nestedItemDragPayload = null;
         }
 
-        this.isDraggingPersonDate = type === 'date';
-        
         const payload = {
             type: type,
             id: id,
             index: index
         };
-        if (type === 'date') {
-            const pgId = $item.data('personGroupId');
-            if (pgId != null && pgId !== '') {
-                payload.personGroupId = pgId;
-            }
-        }
         e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(payload));
         
         $item.addClass('list-item--dragging');
@@ -713,8 +615,13 @@ class EventManager {
     }
     
     handleDragOver(e) {
-        if (this.isDraggingWave) {
-            if ($(e.target).closest('.group-children').length) {
+        const nd = window.SunNestedListDnD;
+        const nested = this.nestedItemDragPayload;
+        if (nested && (nested.type === 'wave' || nested.type === 'date')) {
+            const overOwnNested =
+                (nested.type === 'wave' && $(e.target).closest(nd.WAVE_NESTED_CHILDREN).length) ||
+                (nested.type === 'date' && $(e.target).closest(nd.DATE_NESTED_CHILDREN).length);
+            if (overOwnNested) {
                 return;
             }
             e.preventDefault();
@@ -725,7 +632,7 @@ class EventManager {
             const data = e.originalEvent.dataTransfer.getData('text/plain');
             if (data) {
                 const dragData = JSON.parse(data);
-                if (dragData && dragData.type === 'wave') {
+                if (dragData && (dragData.type === 'wave' || dragData.type === 'date')) {
                     return;
                 }
             }
@@ -738,8 +645,7 @@ class EventManager {
         const el = $item[0];
         const rect = el.getBoundingClientRect();
         const y = e.clientY;
-        const type = $item.data('type');
-        
+
         const insertPosition = y - rect.top < rect.height / 2 ? 'before' : 'after';
         
         if (this._dragOverListItemEl && this._dragOverListItemEl !== el) {
@@ -760,11 +666,12 @@ class EventManager {
     }
     
     handleDrop(e) {
-        if (this.isDraggingWave) {
+        const nested = this.nestedItemDragPayload;
+        if (nested && (nested.type === 'wave' || nested.type === 'date')) {
             e.preventDefault();
             return;
         }
-        
+
         try {
             const textData = e.originalEvent.dataTransfer.getData('text');
             if (textData === 'WAVE_DRAG') {
@@ -780,12 +687,12 @@ class EventManager {
         try {
             const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
             
-            if (dragData && (dragData.type === 'wave' || dragData.isWaveDrag)) {
+            if (dragData && (dragData.type === 'wave' || dragData.type === 'date' || dragData.isWaveDrag)) {
                 return;
             }
             
             const targetType = $item.data('type');
-            
+
             if (dragData.type !== targetType) {
                 return;
             }
@@ -803,14 +710,7 @@ class EventManager {
             if (dragData.type === 'personGroup' && String(dragData.id) === String(targetId)) {
                 return;
             }
-            if (dragData.type === 'date' && String(dragData.id) === String(targetId)) {
-                return;
-            }
-            
-            if (dragData.type === 'date') {
-                window.sunPerfLog('eventManager', 'drop.date', { fromIndex: dragData.index, targetIndex, insertBefore });
-                this.handleDateDrop(dragData, targetIndex, insertBefore, $item);
-            } else if (dragData.type === 'group') {
+            if (dragData.type === 'group') {
                 window.sunPerfLog('eventManager', 'drop.group', {
                     fromId: dragData.id,
                     targetId,
@@ -848,7 +748,7 @@ class EventManager {
     }
 
     moveDateBetweenPersonGroups(sourceGroupId, targetGroupId, sourceIndex, targetIndex, insertBefore, opts = {}) {
-        const { emptyOrGapDrop = false } = opts;
+        const { emptyOrGapDrop = false, sourceItemId } = opts;
         const groups = window.appState.data.personGroups || [];
         const sourceGroup = groups.find(g => String(g.id) === String(sourceGroupId));
         const targetGroup = groups.find(g => String(g.id) === String(targetGroupId));
@@ -856,15 +756,33 @@ class EventManager {
             !Array.isArray(sourceGroup.dates) || !Array.isArray(targetGroup.dates)) {
             return;
         }
+        let srcIdx = parseInt(sourceIndex, 10);
+        if (!Number.isFinite(srcIdx) || srcIdx < 0) {
+            srcIdx = 0;
+        }
+        if (sourceItemId != null && sourceItemId !== '') {
+            const byId = sourceGroup.dates.findIndex((d) => String(d) === String(sourceItemId));
+            if (byId >= 0) {
+                srcIdx = byId;
+            }
+        }
         const sourceDates = [...sourceGroup.dates];
-        const dateId = sourceDates[sourceIndex];
-        if (dateId === undefined) return;
-        const sameGroup = String(sourceGroupId) === String(targetGroupId);
-        if (sameGroup) {
-            this.reorderDateInPersonGroup(sourceGroupId, sourceIndex, targetIndex, insertBefore);
+        const dateId = sourceDates[srcIdx];
+        if (dateId === undefined) {
+            window.sunPerfLog('eventManager', 'moveDateBetweenPersonGroups.aborted', {
+                sourceGroupId,
+                sourceIndex,
+                srcIdx,
+                sourceItemId
+            });
             return;
         }
-        sourceDates.splice(sourceIndex, 1);
+        const sameGroup = String(sourceGroupId) === String(targetGroupId);
+        if (sameGroup) {
+            this.reorderDateInPersonGroup(sourceGroupId, srcIdx, targetIndex, insertBefore);
+            return;
+        }
+        sourceDates.splice(srcIdx, 1);
         sourceGroup.dates = sourceDates;
         const targetDates = [...targetGroup.dates];
         let insertAt;
@@ -877,7 +795,7 @@ class EventManager {
         }
         targetDates.splice(insertAt, 0, dateId);
         targetGroup.dates = targetDates;
-        this.scheduleDateListRefreshAndSave();
+        this.scheduleDatesOrderDomSyncAndSave(targetGroupId, sourceGroupId);
     }
 
     reorderDateInPersonGroup(groupId, sourceIndex, targetIndex, insertBefore) {
@@ -890,34 +808,9 @@ class EventManager {
         const newIndex = this.calculateNewIndex(sourceIndex, targetIndex, insertBefore);
         dates.splice(newIndex, 0, dateId);
         group.dates = dates;
-        this.scheduleDateListRefreshAndSave();
+        this.scheduleDatesOrderDomSyncAndSave(groupId);
     }
 
-    handleDateDrop(dragData, targetIndex, insertBefore, $targetItem) {
-        let sourceGroupId = dragData.personGroupId;
-        if (!sourceGroupId) {
-            sourceGroupId = this.findPersonGroupIdForDate(dragData.id);
-        }
-        let targetGroupId = $targetItem.data('personGroupId');
-        if (!targetGroupId) {
-            const $pg = $targetItem.closest('.list-item--person-group');
-            if ($pg.length) {
-                targetGroupId = $pg.data('id');
-            }
-        }
-        if (!targetGroupId) {
-            targetGroupId = sourceGroupId;
-        }
-        this.moveDateBetweenPersonGroups(
-            sourceGroupId,
-            targetGroupId,
-            dragData.index,
-            targetIndex,
-            insertBefore,
-            { emptyOrGapDrop: false }
-        );
-    }
-    
     handleGroupDrop(dragData, targetIndex, insertBefore, targetId) {
         const groups = window.appState.data.groups;
         let fromIdx = Number(dragData.index);
@@ -943,7 +836,7 @@ class EventManager {
             newIndex,
             groupId: movedItem && movedItem.id
         });
-        this.scheduleWavesListRefreshAndSave();
+        this.scheduleGroupOrderDomSyncAndSave();
     }
 
     handlePersonGroupDrop(dragData, targetIndex, insertBefore, targetId) {
@@ -963,7 +856,7 @@ class EventManager {
         const [movedItem] = groups.splice(fromIdx, 1);
         let newIndex = this.calculateNewIndex(fromIdx, toIdx, insertBefore);
         groups.splice(newIndex, 0, movedItem);
-        this.scheduleDateListRefreshAndSave();
+        this.schedulePersonGroupOrderDomSyncAndSave();
     }
     
     handleDragLeave(e) {
@@ -986,14 +879,15 @@ class EventManager {
         if (t.closest('.list-item--wave')) {
             return;
         }
-        const $row = $(t).closest('.list-item--group[data-type="group"], .list-item--date[data-type="date"], .list-item--person-group[data-type="personGroup"]');
+        if (t.closest('#dateListForDates .date-drag-handle')) {
+            return;
+        }
+        const $row = $(t).closest('.list-item--group[data-type="group"], .list-item--person-group[data-type="personGroup"]');
         if (!$row.length) {
             return;
         }
-        this.isDraggingWave = false;
-        this.waveDragPayload = null;
-        this.isDraggingPersonDate = false;
-        this.clearPersonDateDnDVisualState();
+        this.nestedItemDragPayload = null;
+        this.clearNestedDnDVisualState();
         if (this._dragOverListItemEl) {
             this._dragOverListItemEl.classList.remove(
                 'list-item--drag-over-top',
@@ -1001,9 +895,8 @@ class EventManager {
             );
             this._dragOverListItemEl = null;
         }
-        this.clearWaveDnDVisualState();
         $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
-        window.sunPerfLog('eventManager', 'dragend.groupOrDate', { targetTag: t.tagName });
+        window.sunPerfLog('eventManager', 'dragend.groupOrPersonGroup', { targetTag: t.tagName });
     }
     
     setupDateChangeObservers() {
@@ -1427,9 +1320,17 @@ class EventManager {
 							}
 							
 							requestAnimationFrame(() => {
-								if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+								if (window.unifiedListManager && typeof window.unifiedListManager.updateGroupStats === 'function') {
+									window.unifiedListManager.updateGroupStats(groupId);
+								} else if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
 									window.unifiedListManager.updateWavesList();
 								}
+
+								document.querySelectorAll('.wave-group-toggle').forEach((el) => {
+									if (String(el.getAttribute('data-group-id')) === String(groupId)) {
+										el.checked = true;
+									}
+								});
 
 								this.recreateAllWaveElements();
 
@@ -1508,12 +1409,12 @@ class EventManager {
             const group = window.appState.data.groups.find(g => g.id === groupId);
             if (group) {
                 group.enabled = isChecked;
-                window.appState.save();
-                
+                window.appState.saveDebounced();
+
                 if (isChecked && this.askedGroups.has(groupId)) {
                     this.askedGroups.delete(groupId);
                 }
-                
+
                 requestAnimationFrame(() => {
                     $('.wave-container').remove();
                     if (window.waves) {
@@ -1536,9 +1437,15 @@ class EventManager {
                         window.waves.updatePosition();
                     }
 
-                    window.unifiedListManager.updateWavesList();
+                    if (window.unifiedListManager && typeof window.unifiedListManager.updateGroupStats === 'function') {
+                        window.unifiedListManager.updateGroupStats(groupId);
+                    } else if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                        window.unifiedListManager.updateWavesList();
+                    }
 
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
+                    if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+                        window.summaryManager.debouncedUpdate();
+                    } else if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
                     }
 
@@ -1604,7 +1511,10 @@ class EventManager {
             e.preventDefault();
             const groupName = $('#newGroupName').val();
             if (groupName && window.dates) {
-                window.dates.addGroup(groupName);
+                const newGroup = window.dates.addGroup(groupName);
+                if (window.displayViewTemplatesManager && newGroup) {
+                    window.displayViewTemplatesManager.onNewGroupAdded(newGroup);
+                }
                 if (window.dataManager) window.dataManager.updateWavesGroups();
                 $('#newGroupName').val('');
                 

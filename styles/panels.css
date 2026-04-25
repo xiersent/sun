@@ -38,6 +38,15 @@
 .add-custom-wave-form.compact .wave-inputs-row select{flex: 1; min-width: 120px; height: 25px;}
 .add-custom-wave-form.compact .wave-inputs-row .color-input{width: 40px; height: 25px; cursor: pointer; flex-shrink: 0;}
 .add-custom-wave-form.compact .wave-inputs-row #btnAddCustomWave{height: 25px; flex-shrink: 0; white-space: nowrap; margin-top: 0;}
+.display-view-templates-bar.compact{display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--clg); padding-bottom: var(--spacing-md); margin-bottom: var(--spacing-md); font-size: var(--font-size-sm);}
+.display-view-templates-label{font-weight: 500; color: var(--text-color, #333);}
+.display-view-templates-row{display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;}
+.display-view-templates-row #displayViewTemplateSelect{flex: 1; min-width: 160px; height: 25px; font-size: var(--font-size-sm);}
+.display-view-templates-row #newDisplayViewTemplateName{flex: 1; min-width: 140px; height: 25px; padding: 3px 5px; font-size: var(--font-size-sm);}
+.display-view-templates-row #btnAddDisplayViewTemplate,
+.display-view-templates-row #btnDeleteDisplayViewTemplate{height: 25px; flex-shrink: 0; white-space: nowrap;}
+.display-view-templates-description-row{width: 100%;}
+.display-view-templates-description-input{width: 100%; min-height: 44px; max-height: 160px; resize: vertical; font-size: var(--font-size-sm); padding: 6px 8px; box-sizing: border-box; line-height: 1.35;}
 #notes-panel{width: var(--gw);}
 .notes-section{display: flex; flex-direction: column; gap: var(--spacing-sm);}
 .db-import-section{border: 1px solid var(--clg); padding: var(--spacing-md);}
