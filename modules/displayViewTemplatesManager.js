@@ -279,17 +279,12 @@
             }
             const idx = ui.displayViewTemplates.findIndex((t) => String(t.id) === String(id));
             if (idx < 0) return;
-
-            const snap = this.captureSnapshotFromAppState();
-            const std = this.getTemplateById(STANDARD_ID);
-            if (std) {
-                std.groupEnabled = { ...snap.groupEnabled };
-                std.waveVisibility = { ...snap.waveVisibility };
-            }
             ui.displayViewTemplates.splice(idx, 1);
-            ui.activeDisplayViewTemplateId = STANDARD_ID;
-            if (std) {
-                this.applySnapshotToAppState(std);
+
+            const fallback = this.getTemplateById(STANDARD_ID) || ui.displayViewTemplates[0] || null;
+            ui.activeDisplayViewTemplateId = fallback ? fallback.id : STANDARD_ID;
+            if (fallback) {
+                this.applySnapshotToAppState(fallback);
             }
             window.appState.save();
             this.refreshGraphAndList();
