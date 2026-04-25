@@ -1408,7 +1408,6 @@ class WavesManager {
         
             this.updatePosition();
             window.grid.updateGridNotesHighlight();
-            this.updateCornerSquareColors();
             window.appState.save();
         } finally {
             endDel && endDel({ waveIdStr: String(waveId) });

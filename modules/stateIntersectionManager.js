@@ -525,6 +525,9 @@ class StateIntersectionManager {
                         <div class="selected-wave-detail">
                             Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
                         </div>
+                        <div class="selected-wave-detail" style="color:#666;">
+                            Рекомендация: используйте один из сигналов из экспериментальной группы.
+                        </div>
                     </div>
                 </div>
             `;
@@ -538,6 +541,9 @@ class StateIntersectionManager {
                         <div>Выберите сигнал для анализа пересечений</div>
                         <div style="font-size: 11px; color: #666; margin-top: 8px;">
                             Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
+                        </div>
+                        <div style="font-size: 11px; color: #666; margin-top: 4px;">
+                            Рекомендация: используйте один из сигналов из экспериментальной группы.
                         </div>
                     </div>
                 </div>

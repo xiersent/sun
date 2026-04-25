@@ -392,23 +392,48 @@ class DatesManager {
     }
     
     deleteGroup(groupId) {
-        if (!confirm(`Уничтожить группу? Колоски будут перемещены в группу по умолчанию.`)) return;
-        
         const groupIdStr = String(groupId);
         const group = window.appState.data.groups.find(g => String(g.id) === groupIdStr);
         if (!group) return;
-        
-        const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
-        if (defaultGroup && group.waves && group.waves.length > 0) {
-            group.waves.forEach(waveId => {
-                const waveIdStr = String(waveId);
-                if (!defaultGroup.waves.some(wId => String(wId) === waveIdStr)) {
-                    defaultGroup.waves.push(waveId);
-                }
+
+        const wavesToDelete = Array.isArray(group.waves) ? group.waves.map(String) : [];
+        const wavesCount = wavesToDelete.length;
+
+        if (!confirm('Уничтожить группу?')) return;
+        if (!confirm(`Вместе с группой будет уничтожено ${wavesCount} волн. Продолжить?`)) return;
+
+        if (wavesCount > 0) {
+            const wavesToDeleteSet = new Set(wavesToDelete);
+            window.appState.data.waves = window.appState.data.waves.filter(
+                w => !wavesToDeleteSet.has(String(w.id))
+            );
+            wavesToDelete.forEach((waveIdStr) => {
+                delete window.appState.waveVisibility[waveIdStr];
+                delete window.appState.waveBold[waveIdStr];
+                delete window.appState.waveCornerColor[waveIdStr];
+                delete window.appState.periods[waveIdStr];
             });
         }
-        
+
         window.appState.data.groups = window.appState.data.groups.filter(g => String(g.id) !== groupIdStr);
+
+        if (window.waves) {
+            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            window.waves.waveContainers = {};
+            window.waves.wavePaths = {};
+            window.appState.periods = {};
+
+            window.appState.data.waves.forEach(wave => {
+                const waveIdStr = String(wave.id);
+                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
+                const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
+                if (isWaveVisible && isGroupEnabled) {
+                    window.waves.createWaveElement(wave);
+                }
+            });
+            window.waves.updatePosition({ forceWaveLabels: true });
+        }
+
         window.appState.save();
         
         return true;
