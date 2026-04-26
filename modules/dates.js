@@ -64,6 +64,33 @@ class DatesManager {
     }
 
     /**
+     * Разворачивает группу персон, в которой находится дата с данным id (чтобы активная персона была видна в списке).
+     */
+    ensurePersonGroupExpandedForDateId(dateId) {
+        if (dateId == null || String(dateId) === '') {
+            return false;
+        }
+        this.ensurePersonGroupsShape();
+        const idStr = String(dateId);
+        const groups = window.appState.data.personGroups || [];
+        let changed = false;
+        for (let i = 0; i < groups.length; i++) {
+            const g = groups[i];
+            if (!g.dates || !Array.isArray(g.dates)) {
+                continue;
+            }
+            if (g.dates.some((did) => String(did) === idStr)) {
+                if (g.expanded !== true) {
+                    g.expanded = true;
+                    changed = true;
+                }
+                break;
+            }
+        }
+        return changed;
+    }
+
+    /**
      * Синхронизация: каждая дата в ровно одной группе; лишние id в группах убираются; «осиротевшие» даты — в группу по умолчанию.
      */
     syncPersonGroupsLayout() {
@@ -205,6 +232,7 @@ class DatesManager {
     setActiveDate(dateId, useExactTime = false) {
         const oldActiveId = window.appState.activeDateId;
         window.appState.activeDateId = dateId;
+        this.ensurePersonGroupExpandedForDateId(dateId);
         
         // СИНХРОНИЗАЦИЯ: При активации даты выделяем ее как тип A
         if (!window.appState.dateSelections) {

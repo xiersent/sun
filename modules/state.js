@@ -256,16 +256,30 @@ class AppState {
                 this.editingGroupId = null;
                 this.editingPersonGroupId = null;
                 
-                if (data.uiSettings.activeDateId) {
-                    this.activeDateId = data.uiSettings.activeDateId;
-                } else if (data.dates && data.dates.length > 0) {
-                    this.activeDateId = data.dates[0].id;
+                const datesArr = Array.isArray(data.dates) ? data.dates : [];
+                let resolvedActiveId =
+                    data.uiSettings.activeDateId != null &&
+                    String(data.uiSettings.activeDateId) !== ''
+                        ? data.uiSettings.activeDateId
+                        : null;
+                if (datesArr.length > 0) {
+                    if (resolvedActiveId != null) {
+                        const foundDate = datesArr.find(
+                            (d) => String(d.id) === String(resolvedActiveId)
+                        );
+                        resolvedActiveId = foundDate ? foundDate.id : datesArr[0].id;
+                    } else {
+                        resolvedActiveId = datesArr[0].id;
+                    }
                 } else {
-                    this.activeDateId = null;
+                    resolvedActiveId = null;
                 }
+                this.activeDateId = resolvedActiveId;
                 
                 if (this.activeDateId) {
-                    const activeDate = data.dates.find(d => d.id === this.activeDateId);
+                    const activeDate = datesArr.find(
+                        (d) => String(d.id) === String(this.activeDateId)
+                    );
                     if (activeDate) {
                         try {
                             const activeDateLocal = window.timeUtils ? 
@@ -331,12 +345,19 @@ class AppState {
                 });
                 
                 if (data.uiSettings.dateSelections) {
-                    this.dateSelections = data.uiSettings.dateSelections;
+                    this.dateSelections = { ...data.uiSettings.dateSelections };
                 } else {
                     this.dateSelections = {
                         typeA: null,
                         typeB: null
                     };
+                }
+                if (this.activeDateId != null) {
+                    const aStr = String(this.activeDateId);
+                    if (String(this.dateSelections.typeA || '') !== aStr) {
+                        this.dateSelections.typeA = this.activeDateId;
+                        this.dateSelections.typeB = null;
+                    }
                 }
                 
                 if (!(this.baseDate instanceof Date)) {
