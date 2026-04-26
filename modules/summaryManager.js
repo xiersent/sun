@@ -203,6 +203,15 @@ class SummaryManager {
 		try {
 			this.isUpdating = true;
 			
+			if (!window.appState.hasActivePerson()) {
+				const resultsElement = this.elements.summaryResults;
+				if (resultsElement) {
+					resultsElement.innerHTML =
+						'<div class="summary-empty">Выберите персону в списке дат — сводка по состояниям сигналов строится от выбранной даты рождения.</div>';
+				}
+				return;
+			}
+			
 			const waves = this.getWavesForSelectedGroup();
 			const stateWaves = this.filterWavesByState(waves);
 			

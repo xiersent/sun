@@ -276,6 +276,11 @@ class ExtremumTimeManager {
     updateExtremums() {
         if (!this.timeBarContainer) return;
         
+        if (!window.appState.hasActivePerson()) {
+            this.renderMarkers([]);
+            return;
+        }
+        
         const currentDate = window.appState.currentDate || new Date();
         const extremums = this.calculateExtremumsForDay(currentDate);
         const groupedExtremums = this.groupExtremumsByTime(extremums);

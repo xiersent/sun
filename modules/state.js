@@ -524,6 +524,16 @@ class AppState {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }
     
+    /** Есть выбранная персона (дата из списка), привязанная к activeDateId */
+    hasActivePerson() {
+        const id = this.activeDateId;
+        if (id == null || String(id) === '') {
+            return false;
+        }
+        const dates = this.data && Array.isArray(this.data.dates) ? this.data.dates : [];
+        return dates.some((d) => String(d.id) === String(id));
+    }
+    
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }

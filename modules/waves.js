@@ -98,11 +98,8 @@ class WavesManager {
             this.wavePaths = {};
             this.waveLabelElements = {};
             
-            const hasActiveDate = window.appState.activeDateId && 
-                                 window.appState.data.dates.some(dt => dt.id === window.appState.activeDateId);
-            
-            if (!hasActiveDate) {
-                d && d.log('waves.createVisibleWaveElements.skip', { reason: 'noActiveDate' });
+            if (!window.appState.hasActivePerson()) {
+                d && d.log('waves.createVisibleWaveElements.skip', { reason: 'noActivePerson' });
                 return;
             }
             
@@ -132,10 +129,16 @@ class WavesManager {
         const d = __waveDbg();
         const end = d && d.t('waves.reconcileVisibleWaveElements', {});
         try {
-            const hasActiveDate =
-                window.appState.activeDateId &&
-                window.appState.data.dates.some((dt) => dt.id === window.appState.activeDateId);
-            if (!hasActiveDate) {
+            if (!window.appState.hasActivePerson()) {
+                document.querySelectorAll('.wave-container').forEach((c) => c.remove());
+                document.querySelectorAll('.wave-label').forEach((l) => l.remove());
+                const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+                if (axisXPointsContainer) {
+                    axisXPointsContainer.innerHTML = '';
+                }
+                this.waveContainers = {};
+                this.wavePaths = {};
+                this.waveLabelElements = {};
                 return;
             }
 
@@ -389,6 +392,11 @@ class WavesManager {
                 window.timeBarManager.updateTimeIndicator();
             }
             endTb && endTb({});
+            
+            if (!window.appState.hasActivePerson()) {
+                this.removeWaveIntersectionPoints();
+                return;
+            }
             
             const endGrid = d && d.t('waves.updatePosition.gridOffset', {});
             if (window.grid && window.grid.updateGridOffset) {
@@ -1294,6 +1302,9 @@ class WavesManager {
         const end = d && d.t('waves.createVisibleWaveElementsForActiveDate', {});
         let created = 0;
         try {
+            if (!window.appState.hasActivePerson()) {
+                return;
+            }
             window.appState.data.waves.forEach(wave => {
                 const waveIdStr = String(wave.id);
                 const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
@@ -1341,7 +1352,7 @@ class WavesManager {
         const d = __waveDbg();
         const endAdd = d && d.t('waves.addCustomWave', { name, period: newWave.period, id: newWave.id });
         try {
-            if (this.isWaveGroupEnabled(newWave.id)) {
+            if (window.appState.hasActivePerson() && this.isWaveGroupEnabled(newWave.id)) {
                 this.createWaveElement(newWave);
             }
             
@@ -1703,6 +1714,12 @@ class WavesManager {
         if (window.appState && window.appState.waveIntersectionsVisible === false) {
             this.removeWaveIntersectionPoints();
             d && d.log('waves.renderWaveIntersectionPoints.skip', { reason: 'waveIntersectionsVisible_false' });
+            return;
+        }
+        
+        if (!window.appState.hasActivePerson()) {
+            this.removeWaveIntersectionPoints();
+            d && d.log('waves.renderWaveIntersectionPoints.skip', { reason: 'noActivePerson' });
             return;
         }
         

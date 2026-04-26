@@ -17,6 +17,11 @@ class GridManager {
 	createGrid() {
 		this.clearGrid();
 		
+		if (!window.appState.hasActivePerson()) {
+			this.updateCenterDate();
+			return;
+		}
+		
 		const centerX = window.appState.graphWidth / 2;
 		const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
 		
@@ -229,6 +234,19 @@ class GridManager {
         const element = document.getElementById('centerDateLabel');
         if (!element) return;
         
+        if (!window.appState.hasActivePerson()) {
+            element.innerHTML = `
+                <div class="center-date-main">
+                    <div class="center-date-datetime" style="opacity:0.85">Нет выбранной персоны</div>
+                    <div class="center-name-container">
+                        <div class="center-date-name">Выберите персону в списке дат</div>
+                    </div>
+                </div>
+                <div class="center-date-weekday">График и расчёты недоступны</div>
+            `;
+            return;
+        }
+        
         const date = window.appState.currentDate || new Date();
         
         const day = String(date.getDate()).padStart(2, '0');
@@ -241,7 +259,9 @@ class GridManager {
         const dateTimeStr = `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
         const weekday = window.dom.getWeekdayName(date, true);
         
-        const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
+        const activeDate = window.appState.data.dates.find(
+            (d) => String(d.id) === String(window.appState.activeDateId)
+        );
         const name = activeDate?.name || 'Новая дата';
         
         element.innerHTML = `

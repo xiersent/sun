@@ -302,6 +302,31 @@ class StateIntersectionManager {
         try {
             this.isUpdating = true;
             
+            if (!window.appState.hasActivePerson()) {
+                this.showNoIntersectionsMessage(
+                    'Выберите персону в списке дат — без неё график и пересечения не строятся.'
+                );
+                if (this.elements.intersectionSelectedInfo) {
+                    this.elements.intersectionSelectedInfo.innerHTML = `
+                        <div class="selected-wave-info no-selection">
+                            <div class="selected-wave-header">
+                                <span class="selected-wave-icon">👤</span>
+                                <span class="selected-wave-name">Персона не выбрана</span>
+                            </div>
+                            <div class="selected-wave-details">
+                                <div class="selected-wave-detail">
+                                    Укажите персону в списке дат слева — это база для расчёта дня и сигналов.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                if (this.elements.intersectionStats) {
+                    this.elements.intersectionStats.style.display = 'none';
+                }
+                return;
+            }
+            
             if (!this.selectedWaveId) {
                 this.showNoWaveSelectedMessage();
                 return;

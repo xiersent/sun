@@ -105,6 +105,18 @@ async function finalizeInitialization() {
         if (window.dates && window.dates.recalculateCurrentDay) {
             window.dates.recalculateCurrentDay(true);
         }
+        if (window.waves && window.waves.createVisibleWaveElements) {
+            window.waves.createVisibleWaveElements();
+        }
+        if (window.grid && window.grid.createGrid) {
+            window.grid.createGrid();
+        }
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+        }
+        if (window.waves && window.waves.updatePosition) {
+            window.waves.updatePosition();
+        }
     }
 
     if (window.dataManager) {

@@ -207,8 +207,17 @@ class DatesManager {
                 window.appState.baseDate = window.timeUtils.nowTimestamp();
                 this.recalculateCurrentDay();
                 this.updateCurrentDayElement();
-                window.grid.updateCenterDate();
-                window.waves.updatePosition();
+                if (window.waves && window.waves.createVisibleWaveElements) {
+                    window.waves.createVisibleWaveElements();
+                }
+                if (window.grid && window.grid.createGrid) {
+                    window.grid.createGrid();
+                } else if (window.grid && window.grid.updateCenterDate) {
+                    window.grid.updateCenterDate();
+                }
+                if (window.waves && window.waves.updatePosition) {
+                    window.waves.updatePosition();
+                }
             }
         }
         
