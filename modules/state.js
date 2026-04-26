@@ -110,7 +110,20 @@ class AppState {
         this.data.uiSettings.grayMode = this.grayMode;
         this.data.uiSettings.graphGrayMode = this.graphGrayMode;
         this.data.uiSettings.cornerSquaresVisible = this.cornerSquaresVisible;
-        this.data.uiSettings.activeDateId = this.activeDateId;
+        // Не затирать activeDateId из JSON значением null из памяти до hydrate в load()
+        // (иначе save() после миграций сбрасывает выбранную персону на «первую в списке»).
+        {
+            const datesInData = Array.isArray(this.data.dates) ? this.data.dates : [];
+            const memActive =
+                this.activeDateId != null && String(this.activeDateId) !== ''
+                    ? this.activeDateId
+                    : null;
+            if (memActive != null) {
+                this.data.uiSettings.activeDateId = memActive;
+            } else if (datesInData.length === 0) {
+                this.data.uiSettings.activeDateId = null;
+            }
+        }
         
         this.data.uiSettings.waveVisibility = this.waveVisibility;
         this.data.uiSettings.waveBold = this.waveBold;
@@ -375,6 +388,11 @@ class AppState {
                     }
                 }
                 
+                if (this._migrateNeedsSaveAfterLoadHydrate) {
+                    this._migrateNeedsSaveAfterLoadHydrate = false;
+                    this.save();
+                }
+                
                 queueMicrotask(() => {
                     if (window.dates && window.dates.forceInitialize) {
                         window.dates.forceInitialize();
@@ -382,6 +400,7 @@ class AppState {
                 });
                 
             } catch (e) {
+                this._migrateNeedsSaveAfterLoadHydrate = false;
                 __lp && __lp.mark('appState_load_impl_error', { message: e && e.message });
                 console.error('Error loading state:', e);
                 this.reset();

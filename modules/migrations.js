@@ -126,6 +126,7 @@ class MigrationsManager {
         // Шаг 3: Запуск миграций
         this.log('Шаг 3: Запуск миграций...');
         
+        let anyMigrationApplied = false;
         for (const migration of discovered) {
             try {
                 const instance = new migration.class(this.appState);
@@ -136,6 +137,7 @@ class MigrationsManager {
                     
                     if (instance.up) {
                         await instance.up();
+                        anyMigrationApplied = true;
                         const duration = Date.now() - startTime;
                         this.log(`${migration.name} применена за ${duration}ms`, 'success');
                         this.migrationLog.push(`${migration.name}: применена (${duration}ms)`);
@@ -156,9 +158,10 @@ class MigrationsManager {
         
         this.log(`=== МИГРАЦИИ ЗАВЕРШЕНЫ (${this.migrationLog.length} операций) ===`);
         
-        // Финальное сохранение
-        if (this.migrationLog.length > 0 && this.appState.save) {
-            this.appState.save();
+        // Не вызывать save() здесь: поля AppState ещё не восстановлены из JSON — получится
+        // перезапись localStorage дефолтами из конструктора. Сохранение — в конце load().
+        if (anyMigrationApplied) {
+            this.appState._migrateNeedsSaveAfterLoadHydrate = true;
         }
         
         return this.migrationLog;
