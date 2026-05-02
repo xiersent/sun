@@ -1,4 +1,5 @@
 <!-- templates/person-group-item.ejs — группа персон (только порядок и сворачивание) -->
+<% var _attrEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }; %>
 <div class="list-item list-item--person-group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
     data-id="<%= data.id %>"
     data-type="personGroup"
@@ -12,7 +13,7 @@
             <div class="list-item__row">
                 <div class="list-item__left">
                     <div class="list-item__title-container">
-                        <div class="list-item__title">
+                        <div class="list-item__title" title="<%= _attrEsc(data.name) %>">
                             <%= data.name %>
                         </div>
                     </div>

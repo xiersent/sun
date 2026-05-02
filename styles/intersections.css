@@ -45,6 +45,32 @@
 .list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
 #btnClearWaveSelection{margin-left: auto;}
 
+/* Рамка и размер кнопок как у подвкладок сравнения — для верхних вкладок (.tab-buttons--framed) и строки вида отчёта */
+.tab-buttons.tab-buttons--framed,
+.date-comparison-view-tabs {
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--clg);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+.date-comparison-view-tabs {
+    margin-top: var(--spacing-sm);
+}
+.tab-buttons.tab-buttons--framed .tab-button,
+.date-comparison-view-tabs .tab-button {
+    font-size: var(--font-size-sm);
+    padding: 6px 10px;
+    flex: 1 1 0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tab-buttons.tab-buttons--framed .tab-button.active,
+.date-comparison-view-tabs .tab-button.active {
+    font-weight: 600;
+}
 .date-comparison-intro{font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 var(--spacing-md); line-height: 1.4;}
 .date-comparison-selects{gap: var(--spacing-md); align-items: flex-end;}
 .date-comparison-selects .intersection-select-group{flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 4px;}

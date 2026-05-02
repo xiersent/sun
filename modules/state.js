@@ -369,7 +369,13 @@ class AppState {
                     const aStr = String(this.activeDateId);
                     if (String(this.dateSelections.typeA || '') !== aStr) {
                         this.dateSelections.typeA = this.activeDateId;
-                        this.dateSelections.typeB = null;
+                        const bStr =
+                            this.dateSelections.typeB != null ? String(this.dateSelections.typeB) : '';
+                        if (bStr === aStr) {
+                            const allD = this.data.dates || [];
+                            const altB = allD.find((d) => String(d.id) !== aStr);
+                            this.dateSelections.typeB = altB ? altB.id : null;
+                        }
                     }
                 }
                 

@@ -2,8 +2,179 @@
 class DateComparisonManager {
     constructor() {
         this._updateRaf = null;
+        /** Кэш состава списка дат — чтобы не пересобирать option при каждом клике */
+        this._cachedDateListSignature = null;
+        /** Глубина программной записи в select — игнорировать всплывающие change (и каскад из _resolveDuplicateSelection) */
+        this._progSelectDepth = 0;
+        /** Вкладка отчёта: phaseMatch | phaseGap | quadrature */
+        this._compareTabMode = 'phaseMatch';
         this.cacheElements();
         this.init();
+    }
+
+    _progSelectEnter() {
+        this._progSelectDepth++;
+    }
+
+    _progSelectExit() {
+        this._progSelectDepth = Math.max(0, this._progSelectDepth - 1);
+    }
+
+    _progSelectActive() {
+        return this._progSelectDepth > 0;
+    }
+
+    /**
+     * Сигнатура для пересборки option/optgroup: набор дат, порядок и состав групп, имена (как в списке слева).
+     * Без expanded — сворачивание группы не трогает порядок в селекте.
+     */
+    _computeDateListSignature() {
+        const dates = window.appState.data.dates || [];
+        const pg = window.appState.data.personGroups || [];
+        if (dates.length === 0 && pg.length === 0) {
+            return '0';
+        }
+        let dpart = '';
+        for (let i = 0; i < dates.length; i++) {
+            const d = dates[i];
+            dpart += `${String(d.id)}\t${String(d.name || '')}\t${d.date};`;
+        }
+        let s = `${dates.length}|${dpart}|g${pg.length}:`;
+        for (let i = 0; i < pg.length; i++) {
+            const g = pg[i];
+            const ids = (g.dates || []).map(String).join(',');
+            s += `${String(g.id)}\t${String(g.name || '')}\t${ids}|`;
+        }
+        return s;
+    }
+
+    invalidateDateListSignatureCache() {
+        this._cachedDateListSignature = null;
+    }
+
+    _optionValueExists(sel, valueStr) {
+        if (!valueStr) return true;
+        const opts = sel.options;
+        for (let i = 0; i < opts.length; i++) {
+            if (opts[i].value === valueStr) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Перед перерисовкой списка дат: полная пересборка селектов только если изменился набор id.
+     */
+    ensureSelectsSyncedWithDateList() {
+        if (!this.elA || !this.elB) {
+            window.sunDateListLog && window.sunDateListLog('ensureSelects:skip no elA/elB');
+            return;
+        }
+        const sig = this._computeDateListSignature();
+        const sigChanged = sig !== this._cachedDateListSignature;
+        window.sunDateListLog && window.sunDateListLog('ensureSelects', {
+            sigChanged,
+            sig,
+            cached: this._cachedDateListSignature,
+            dateSelections: { ...window.appState.dateSelections }
+        });
+        if (sigChanged) {
+            this._cachedDateListSignature = sig;
+            this.populateSelects();
+        } else {
+            this.applySelectValuesFromDateSelections();
+        }
+    }
+
+    /**
+     * Только выставить value у селектов из dateSelections (без innerHTML).
+     */
+    applySelectValuesFromDateSelections() {
+        if (!this.elA || !this.elB) return;
+        this._progSelectEnter();
+        try {
+        const ds = window.appState.dateSelections || { typeA: null, typeB: null };
+        const dates = window.appState.data.dates || [];
+        const str = (id) => (id != null && String(id) !== '' ? String(id) : '');
+        const activeStr =
+            window.appState.activeDateId != null && String(window.appState.activeDateId) !== ''
+                ? String(window.appState.activeDateId)
+                : '';
+        let a = str(ds.typeA);
+        if (activeStr) {
+            a = activeStr;
+        }
+        let b = str(ds.typeB);
+        window.sunDateListLog && window.sunDateListLog('applySelectValues:enter', { a, b, optCountA: this.elA.options.length });
+        if ((a && !this._optionValueExists(this.elA, a)) || (b && !this._optionValueExists(this.elB, b))) {
+            window.sunDateListLog &&
+                window.sunDateListLog('applySelectValues:→ populateSelects (missing option)', {
+                    a,
+                    b,
+                    existsA: a ? this._optionValueExists(this.elA, a) : true,
+                    existsB: b ? this._optionValueExists(this.elB, b) : true
+                });
+            this._cachedDateListSignature = null;
+            this.populateSelects();
+            return;
+        }
+        this.elA.value = a || '';
+        this.elB.value = b || '';
+        if (a && String(this.elA.value) !== a) {
+            window.sunDateListLog &&
+                window.sunDateListLog('applySelectValues:→ populateSelects (elA mismatch)', {
+                    a,
+                    got: this.elA.value
+                });
+            this._cachedDateListSignature = null;
+            this.populateSelects();
+            return;
+        }
+        if (b && String(this.elB.value) !== b) {
+            window.sunDateListLog &&
+                window.sunDateListLog('applySelectValues:→ populateSelects (elB mismatch)', {
+                    b,
+                    got: this.elB.value
+                });
+            this._cachedDateListSignature = null;
+            this.populateSelects();
+            return;
+        }
+        let needApply = false;
+        if (!this.elA.value && dates[0]) {
+            if (!a) {
+                window.sunDateListLog &&
+                    window.sunDateListLog('applySelectValues:default elA to first date', { firstId: dates[0].id });
+                this.elA.value = String(dates[0].id);
+                needApply = true;
+            } else {
+                window.sunDateListLog &&
+                    window.sunDateListLog('applySelectValues:→ populateSelects (empty elA but a set)', { a });
+                this._cachedDateListSignature = null;
+                this.populateSelects();
+                return;
+            }
+        }
+        if (
+            this.elA.value &&
+            this.elB.value &&
+            String(this.elA.value) === String(this.elB.value)
+        ) {
+            window.sunDateListLog && window.sunDateListLog('applySelectValues:resolve duplicate A/B');
+            this._resolveDuplicateSelection('a');
+            needApply = true;
+        }
+        if (needApply) {
+            this._applySelectsToDateSelections();
+        }
+        window.sunDateListLog &&
+            window.sunDateListLog('applySelectValues:done', {
+                elA: this.elA.value,
+                elB: this.elB.value,
+                needApply
+            });
+        } finally {
+            this._progSelectExit();
+        }
     }
 
     cacheElements() {
@@ -11,14 +182,42 @@ class DateComparisonManager {
         this.elB = document.getElementById('dateCompareSelectB');
         this.elTableWrap = document.getElementById('dateCompareResults');
         this.elHint = document.getElementById('dateCompareVizorHint');
+        this.elViewTablist = document.querySelector('.date-comparison-view-tabs');
     }
 
     init() {
         if (this.elA) {
-            this.elA.addEventListener('change', () => this._onSelectChange('a'));
+            this.elA.addEventListener('change', () => {
+                if (this._progSelectActive()) {
+                    return;
+                }
+                this._onSelectChange('a');
+            });
         }
         if (this.elB) {
-            this.elB.addEventListener('change', () => this._onSelectChange('b'));
+            this.elB.addEventListener('change', () => {
+                if (this._progSelectActive()) {
+                    return;
+                }
+                this._onSelectChange('b');
+            });
+        }
+        if (this.elViewTablist) {
+            this.elViewTablist.addEventListener('click', (e) => {
+                const btn = e.target.closest('.date-comparison-view-tab');
+                if (!btn || !this.elViewTablist.contains(btn)) return;
+                const mode = btn.getAttribute('data-date-compare-view');
+                if (!mode || mode === this._compareTabMode) return;
+                this._compareTabMode = mode;
+                const tabs = this.elViewTablist.querySelectorAll('.date-comparison-view-tab');
+                for (let i = 0; i < tabs.length; i++) {
+                    const t = tabs[i];
+                    const on = t === btn;
+                    t.classList.toggle('active', on);
+                    t.setAttribute('aria-selected', on ? 'true' : 'false');
+                }
+                this.updateComparison();
+            });
         }
     }
 
@@ -32,32 +231,44 @@ class DateComparisonManager {
         });
     }
 
+    /** @deprecated используйте ensureSelectsSyncedWithDateList + updateComparison из dataManager */
     refresh() {
-        this.populateSelects();
+        this.ensureSelectsSyncedWithDateList();
         this.updateComparison();
-        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
-        }
     }
 
     _onSelectChange(which) {
-        this._resolveDuplicateSelection(which);
-        this._applySelectsToDateSelections();
-        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
+        if (this._progSelectActive()) {
+            return;
         }
-        this.updateComparison();
+        this._resolveDuplicateSelection(which);
+        if (which === 'a' && this.elA && this.elA.value && window.dates) {
+            if (this.elB && this.elB.value) {
+                window.dates.ensurePersonGroupExpandedForDateId(this.elB.value);
+            }
+            window.dates.setActiveDate(this.elA.value, true);
+            return;
+        }
+        if (which === 'b' && this.elB && this.elB.value && window.dates) {
+            window.dates.ensurePersonGroupExpandedForDateId(this.elB.value);
+        }
+        this._applySelectsToDateSelections();
+        if (window.dataManager && window.dataManager.updateDateList) {
+            window.dataManager.updateDateList();
+        } else {
+            if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                window.unifiedListManager.updateDatesList();
+            }
+            this.updateComparison();
+        }
     }
 
     /**
-     * Синхронизация с чекбоксами A/B в списке дат (общий источник — appState.dateSelections).
+     * Обновить только селекты и таблицу; список дат уже перерисован вызывающим кодом.
      */
     syncSelectsFromAppState() {
-        this.populateSelects();
+        this.applySelectValuesFromDateSelections();
         this.updateComparison();
-        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
-        }
     }
 
     _applySelectsToDateSelections() {
@@ -67,8 +278,59 @@ class DateComparisonManager {
                 typeB: null
             };
         }
-        const a = this.elA && this.elA.value ? this.elA.value : null;
-        const b = this.elB && this.elB.value ? this.elB.value : null;
+        const norm = (v) => (v != null && String(v) !== '' ? String(v) : null);
+        const active = window.appState.activeDateId;
+        let a =
+            active != null && String(active) !== ''
+                ? String(active)
+                : this.elA && this.elA.value
+                  ? this.elA.value
+                  : null;
+        let b = this.elB && this.elB.value ? this.elB.value : null;
+        let na = norm(a);
+        let nb = norm(b);
+        if (na && nb && na === nb) {
+            const dates = window.appState.data.dates || [];
+            const alt = dates.find((d) => String(d.id) !== na);
+            this._progSelectEnter();
+            try {
+                if (alt) {
+                    b = String(alt.id);
+                    nb = norm(b);
+                    if (this.elB && this._optionValueExists(this.elB, b)) {
+                        this.elB.value = b;
+                    }
+                } else {
+                    b = null;
+                    nb = null;
+                    if (this.elB) {
+                        this.elB.value = '';
+                    }
+                }
+            } finally {
+                this._progSelectExit();
+            }
+        }
+        if (this.elA && na && String(this.elA.value) !== na && this._optionValueExists(this.elA, na)) {
+            this._progSelectEnter();
+            try {
+                this.elA.value = na;
+            } finally {
+                this._progSelectExit();
+            }
+        }
+        const oa = norm(window.appState.dateSelections.typeA);
+        const ob = norm(window.appState.dateSelections.typeB);
+        if (na === oa && nb === ob) {
+            return;
+        }
+        window.sunDateListLog &&
+            window.sunDateListLog('_applySelectsToDateSelections:save', {
+                from: { typeA: window.appState.dateSelections.typeA, typeB: window.appState.dateSelections.typeB },
+                to: { a, b },
+                norm: { na, nb, oa, ob },
+                activeDateId: window.appState.activeDateId
+            });
         window.appState.dateSelections.typeA = a;
         window.appState.dateSelections.typeB = b;
         window.appState.save();
@@ -84,54 +346,164 @@ class DateComparisonManager {
         if (idA && idB && String(idA) === String(idB)) {
             const alt = dates.find((d) => String(d.id) !== String(idA));
             if (!alt) return;
-            if (changedWhich === 'a') {
-                this.elB.value = alt.id;
-            } else {
-                this.elA.value = alt.id;
+            this._progSelectEnter();
+            try {
+                if (changedWhich === 'a') {
+                    this.elB.value = alt.id;
+                } else {
+                    this.elA.value = alt.id;
+                }
+            } finally {
+                this._progSelectExit();
             }
         }
     }
 
-    populateSelects() {
-        if (!this.elA || !this.elB) return;
+    /**
+     * Порядок дат как в селектах сравнения: по группам персон, внутри группы — по списку g.dates.
+     * Заголовки групп — native optgroup label (не выбираются, только подпись секции).
+     */
+    _fillCompareSelectOptions(sel) {
+        sel.innerHTML = '';
+        const empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = '— выберите —';
+        sel.appendChild(empty);
 
-        const dates = window.appState.data.dates || [];
+        const allDates = window.appState.data.dates || [];
+        const datesById = new Map();
+        for (let i = 0; i < allDates.length; i++) {
+            datesById.set(String(allDates[i].id), allDates[i]);
+        }
 
-        const fill = (sel) => {
-            sel.innerHTML = '';
-            const empty = document.createElement('option');
-            empty.value = '';
-            empty.textContent = '— выберите —';
-            sel.appendChild(empty);
-            dates.forEach((d) => {
-                const opt = document.createElement('option');
-                opt.value = d.id;
-                const birth = window.timeUtils ? window.timeUtils.formatDate(d.date) : '';
-                opt.textContent = (d.name || 'Без названия') + (birth ? ` · ${birth}` : '');
-                sel.appendChild(opt);
-            });
+        const appendOption = (d) => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            const birth = window.timeUtils ? window.timeUtils.formatDate(d.date) : '';
+            opt.textContent = (d.name || 'Без названия') + (birth ? ` · ${birth}` : '');
+            return opt;
         };
 
-        fill(this.elA);
-        fill(this.elB);
+        const pg = window.appState.data.personGroups || [];
+        if (pg.length === 0) {
+            for (let i = 0; i < allDates.length; i++) {
+                sel.appendChild(appendOption(allDates[i]));
+            }
+            return;
+        }
+
+        if (window.dates && typeof window.dates.ensurePersonGroupsShape === 'function') {
+            window.dates.ensurePersonGroupsShape();
+        }
+
+        const assigned = new Set();
+        for (let gi = 0; gi < pg.length; gi++) {
+            const g = pg[gi];
+            const groupDates = [];
+            const ids = g.dates || [];
+            for (let j = 0; j < ids.length; j++) {
+                const d = datesById.get(String(ids[j]));
+                if (d) {
+                    groupDates.push(d);
+                    assigned.add(String(d.id));
+                }
+            }
+            if (groupDates.length === 0) {
+                continue;
+            }
+            const og = document.createElement('optgroup');
+            og.label = g.name || 'Группа';
+            for (let k = 0; k < groupDates.length; k++) {
+                og.appendChild(appendOption(groupDates[k]));
+            }
+            sel.appendChild(og);
+        }
+
+        const orphans = [];
+        for (let i = 0; i < allDates.length; i++) {
+            if (!assigned.has(String(allDates[i].id))) {
+                orphans.push(allDates[i]);
+            }
+        }
+        if (orphans.length > 0) {
+            const og = document.createElement('optgroup');
+            og.label = 'Прочие';
+            for (let i = 0; i < orphans.length; i++) {
+                og.appendChild(appendOption(orphans[i]));
+            }
+            sel.appendChild(og);
+        }
+    }
+
+    _firstDateIdInCompareSelectOrder() {
+        const allDates = window.appState.data.dates || [];
+        if (allDates.length === 0) {
+            return null;
+        }
+        const pg = window.appState.data.personGroups || [];
+        if (pg.length === 0) {
+            return allDates[0].id;
+        }
+        const datesById = new Map();
+        for (let i = 0; i < allDates.length; i++) {
+            datesById.set(String(allDates[i].id), allDates[i]);
+        }
+        for (let gi = 0; gi < pg.length; gi++) {
+            const ids = pg[gi].dates || [];
+            for (let j = 0; j < ids.length; j++) {
+                const d = datesById.get(String(ids[j]));
+                if (d) {
+                    return d.id;
+                }
+            }
+        }
+        return allDates[0].id;
+    }
+
+    populateSelects() {
+        if (!this.elA || !this.elB) return;
+        this._progSelectEnter();
+        try {
+        this._fillCompareSelectOptions(this.elA);
+        this._fillCompareSelectOptions(this.elB);
 
         const ds = window.appState.dateSelections || { typeA: null, typeB: null };
         const setIfOption = (sel, id) => {
             const s = id != null && String(id) !== '' ? String(id) : '';
-            if (s && [...sel.options].some((o) => o.value === s)) {
+            if (s && this._optionValueExists(sel, s)) {
                 sel.value = s;
             } else {
                 sel.value = '';
             }
         };
-        setIfOption(this.elA, ds.typeA);
+        const typeAUnsetInState =
+            (ds.typeA == null || String(ds.typeA) === '') &&
+            (window.appState.activeDateId == null || String(window.appState.activeDateId) === '');
+        const typeAForEl =
+            window.appState.activeDateId != null && String(window.appState.activeDateId) !== ''
+                ? window.appState.activeDateId
+                : ds.typeA;
+        setIfOption(this.elA, typeAForEl);
         setIfOption(this.elB, ds.typeB);
-        if (!this.elA.value && dates[0]) {
-            this.elA.value = String(dates[0].id);
+        if (!this.elA.value && typeAUnsetInState) {
+            const firstId = this._firstDateIdInCompareSelectOrder();
+            if (firstId != null) {
+                this.elA.value = String(firstId);
+            }
         }
 
         this._resolveDuplicateSelection('a');
         this._applySelectsToDateSelections();
+        this._cachedDateListSignature = this._computeDateListSignature();
+        window.sunDateListLog &&
+            window.sunDateListLog('populateSelects:done', {
+                elA: this.elA.value,
+                elB: this.elB.value,
+                dateSelections: { ...window.appState.dateSelections }
+            });
+        } finally {
+            this._progSelectExit();
+        }
     }
 
     _matchPercent(stateA, stateB) {
@@ -146,6 +518,14 @@ class DateComparisonManager {
         if (pct >= 45) return 'intersection-item-fairly-close';
         if (pct >= 25) return 'intersection-item-nearby';
         return 'intersection-item-within-tolerance';
+    }
+
+    /**
+     * Близость к «квадратуре»: |Δсостояния| ≈ 5 (середина между совпадением и противофазой на шкале −5…+5).
+     */
+    _quadraturePct(stateA, stateB) {
+        const d = Math.abs(stateA - stateB);
+        return Math.max(0, Math.min(100, 100 * (1 - Math.abs(d - 5) / 5)));
     }
 
     updateComparison() {
@@ -204,16 +584,42 @@ class DateComparisonManager {
                 wave,
                 stateA: sA,
                 stateB: sB,
-                pct
+                pct,
+                gapPct: 100 - pct,
+                quadPct: this._quadraturePct(sA, sB)
             });
         }
 
-        rows.sort((a, b) => b.pct - a.pct);
+        const mode = this._compareTabMode || 'phaseMatch';
+        if (mode === 'phaseGap') {
+            rows.sort((a, b) => b.gapPct - a.gapPct);
+        } else if (mode === 'quadrature') {
+            rows.sort((a, b) => b.quadPct - a.quadPct);
+        } else {
+            rows.sort((a, b) => b.pct - a.pct);
+        }
 
         if (rows.length === 0) {
             this.elTableWrap.innerHTML = '<div class="summary-empty">Нет волн с положительным периодом.</div>';
             return;
         }
+
+        const metricHeader =
+            mode === 'phaseGap'
+                ? 'Разность фаз, %'
+                : mode === 'quadrature'
+                  ? 'Квадратура, %'
+                  : 'Совпадение, %';
+
+        const legends = {
+            phaseMatch:
+                '100% — одинаковое состояние волны (кривые совпадают по фазе); ~0% — противоположные состояния (максимальный разброс).',
+            phaseGap:
+                'Разность фаз: 100% — максимальное расхождение фаз (противофаза), 0% — полное совпадение. Список от большей разности к меньшей.',
+            quadrature:
+                'Квадратура фаз: при модуле разности состояний около 5 (между совпадением и противофазой на шкале −5…+5) сдвиг близок к четверти периода синусоиды. 100% — близко к этому режиму; список от лучшего совпадения с квадратурой.'
+        };
+        const legendText = legends[mode] || legends.phaseMatch;
 
         const head = `
             <table class="date-comparison-table">
@@ -223,14 +629,25 @@ class DateComparisonManager {
                         <th>Сигнал</th>
                         <th>Сост. A</th>
                         <th>Сост. B</th>
-                        <th>Совпадение</th>
+                        <th>${metricHeader}</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
         const body = rows
             .map((row, idx) => {
-                const cls = this._matchClass(row.pct);
+                let metricPct;
+                let cls;
+                if (mode === 'phaseGap') {
+                    metricPct = row.gapPct;
+                    cls = this._matchClass(row.gapPct);
+                } else if (mode === 'quadrature') {
+                    metricPct = row.quadPct;
+                    cls = this._matchClass(row.quadPct);
+                } else {
+                    metricPct = row.pct;
+                    cls = this._matchClass(row.pct);
+                }
                 const name = `${this._escapeHtml(row.wave.name || '')} <span class="date-comparison-period">(${row.wave.period} дн.)</span>`;
                 return `<tr>
                     <td class="date-comparison-num">${idx + 1}</td>
@@ -240,14 +657,14 @@ class DateComparisonManager {
                     </td>
                     <td>${row.stateA.toFixed(2)}</td>
                     <td>${row.stateB.toFixed(2)}</td>
-                    <td><span class="intersection-result-closeness ${cls}">${row.pct.toFixed(1)}%</span></td>
+                    <td><span class="intersection-result-closeness ${cls}">${metricPct.toFixed(1)}%</span></td>
                 </tr>`;
             })
             .join('');
         const foot = '</tbody></table>';
 
         this.elTableWrap.innerHTML =
-            `<p class="date-comparison-legend">100% — одинаковое состояние волны (кривые совпадают по фазе); ~0% — противоположные состояния (максимальный разброс).</p>` +
+            `<p class="date-comparison-legend">${this._escapeHtml(legendText)}</p>` +
             head +
             body +
             foot;

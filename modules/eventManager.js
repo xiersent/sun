@@ -929,20 +929,8 @@ class EventManager {
                             typeB: null
                         };
                     }
-                    
-                    window.appState.dateSelections.typeA = dateId;
-                    window.appState.dateSelections.typeB = null;
-                    
                     window.dates.setActiveDate(dateId, true);
                     window.appState.save();
-                    
-                    if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                        window.unifiedListManager.updateDatesList();
-                    }
-
-                    if (window.dateComparisonManager && window.dateComparisonManager.syncSelectsFromAppState) {
-                        window.dateComparisonManager.syncSelectsFromAppState();
-                    }
                     
                     if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
@@ -953,19 +941,59 @@ class EventManager {
     }
 
     setupDateSelectionHandlers() {
-        $(document).on('click', '.date-checkbox', (e) => {
+        $(document).on('click', '.date-checkbox', async (e) => {
             e.preventDefault();
             e.stopPropagation();
             
-            const $checkbox = $(e.currentTarget);
-            const dateId = $checkbox.data('id');
-            const checkboxType = $checkbox.data('type');
+            // У input есть DOM-свойство type === "checkbox"; jQuery .data('type') может вернуть его
+            // вместо атрибута data-type="a"|"b" — чекбоксы A/B перестают обрабатываться.
+            const el = e.currentTarget;
+            const dateId = el.getAttribute('data-id');
+            const checkboxType = el.getAttribute('data-type');
+            window.sunDateListLog && window.sunDateListLog('checkbox:click dom', {
+                dateId,
+                checkboxType,
+                nativeChecked: el.checked,
+                dateSelectionsBefore: window.appState.dateSelections
+                    ? { ...window.appState.dateSelections }
+                    : null
+            });
             
-            this.handleDateCheckboxClick(dateId, checkboxType);
+            await this.handleDateCheckboxClick(dateId, checkboxType, el);
         });
     }
 
-    handleDateCheckboxClick(dateId, checkboxType) {
+    /**
+     * После асинхронного updateDateList ещё раз выставить :checked (Firefox + preventDefault на click).
+     */
+    _pinClickedDateCheckboxVisual(checkboxEl, dateId, checkboxType) {
+        const settle = () => {
+            if (window.unifiedListManager && window.unifiedListManager.syncDateListSelectionVisuals) {
+                window.unifiedListManager.syncDateListSelectionVisuals();
+            }
+            if (!checkboxEl || !checkboxEl.isConnected || !window.appState.dateSelections) {
+                return;
+            }
+            const idStr = String(dateId);
+            const ds = window.appState.dateSelections;
+            if (checkboxType === 'a') {
+                checkboxEl.checked = ds.typeA != null && String(ds.typeA) === idStr;
+            } else if (checkboxType === 'b') {
+                checkboxEl.checked = ds.typeB != null && String(ds.typeB) === idStr;
+            }
+        };
+        settle();
+        requestAnimationFrame(() => {
+            settle();
+        });
+    }
+
+    async handleDateCheckboxClick(dateId, checkboxType, clickedEl) {
+        window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:enter', { dateId, checkboxType });
+        if (checkboxType !== 'a' && checkboxType !== 'b') {
+            window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:skip bad type');
+            return;
+        }
         if (!window.appState.dateSelections) {
             window.appState.dateSelections = {
                 typeA: null,
@@ -996,30 +1024,60 @@ class EventManager {
                 
                 selections.typeB = dateId;
                 window.appState.save();
-                
-                if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                if (window.dataManager && window.dataManager.updateDateList) {
+                    await window.dataManager.updateDateList();
+                } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
                     window.unifiedListManager.updateDatesList();
                 }
-                if (window.dateComparisonManager && window.dateComparisonManager.syncSelectsFromAppState) {
-                    window.dateComparisonManager.syncSelectsFromAppState();
-                }
+                this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
                 return;
             } else {
+                window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:B conflict no other date for A');
                 return;
             }
+        }
+
+        if (checkboxType === 'a' && selections.typeB && String(selections.typeB) === dateIdStr) {
+            const allDatesAonB = window.appState.data.dates || [];
+            const newTypeBDate = allDatesAonB.find((date) => String(date.id) !== dateIdStr);
+            if (newTypeBDate) {
+                selections.typeA = dateId;
+                selections.typeB = newTypeBDate.id;
+                if (window.dates) {
+                    window.dates.setActiveDate(dateId, true);
+                }
+                window.appState.save();
+                if (window.dataManager && window.dataManager.updateDateList) {
+                    await window.dataManager.updateDateList();
+                } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                    window.unifiedListManager.updateDatesList();
+                }
+                this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
+                return;
+            }
+            window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:A conflict no other date for B');
+            return;
         }
         
         if (checkboxType === 'a') {
             if (currentTargetStr === dateIdStr) {
+                window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:early return A already selected');
+                if (clickedEl) {
+                    clickedEl.checked = true;
+                }
+                if (window.unifiedListManager && window.unifiedListManager.syncDateListSelectionVisuals) {
+                    window.unifiedListManager.syncDateListSelectionVisuals();
+                }
+                this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
                 return;
             } else {
                 selections.typeA = dateId;
                 
-                if (selections.typeB && String(selections.typeB) === dateIdStr) {
-                    selections.typeB = null;
-                }
-                
                 if (window.dates) {
+                    window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:call setActiveDate', {
+                        dateId,
+                        dateSelections: { ...selections }
+                    });
                     window.dates.setActiveDate(dateId, true);
                 }
             }
@@ -1032,13 +1090,17 @@ class EventManager {
         }
         
         window.appState.save();
-        
-        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+        window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:after mutate', {
+            dateSelections: { ...window.appState.dateSelections },
+            activeDateId: window.appState.activeDateId
+        });
+        if (window.dataManager && window.dataManager.updateDateList) {
+            await window.dataManager.updateDateList();
+        } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
             window.unifiedListManager.updateDatesList();
         }
-        if (window.dateComparisonManager && window.dateComparisonManager.syncSelectsFromAppState) {
-            window.dateComparisonManager.syncSelectsFromAppState();
-        }
+        this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
+        window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:done');
     }
     
     handleClick(e) {
@@ -1081,7 +1143,8 @@ class EventManager {
             }
         }
         
-        if ($target.hasClass('tab-button')) {
+        // Только верхние вкладки панели ([data-tab]); не подвкладки сравнения дат (.date-comparison-view-tab).
+        if ($target.hasClass('tab-button') && $target.is('[data-tab]')) {
             e.preventDefault();
             e.stopPropagation();
             if (window.uiManager) {

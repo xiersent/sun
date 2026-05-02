@@ -13,10 +13,158 @@ class UnifiedListManager {
         this._ejsRenderers = {};
         
         this.templatesLoadPromise = null;
+        /** Подпись структуры списка дат; при совпадении — только патч выделения без EJS */
+        this._datesListStructureSig = null;
     }
 
     invalidateEjsRenderers() {
         this._ejsRenderers = {};
+        this._datesListStructureSig = null;
+        if (window.dateComparisonManager && window.dateComparisonManager.invalidateDateListSignatureCache) {
+            window.dateComparisonManager.invalidateDateListSignatureCache();
+        }
+    }
+
+    invalidateDatesListStructureCache() {
+        this._datesListStructureSig = null;
+        if (window.dateComparisonManager && window.dateComparisonManager.invalidateDateListSignatureCache) {
+            window.dateComparisonManager.invalidateDateListSignatureCache();
+        }
+    }
+
+    _computeDatesListStructureSignature() {
+        const pg = window.appState.data.personGroups || [];
+        const dates = window.appState.data.dates || [];
+        let dpart = '';
+        for (let i = 0; i < dates.length; i++) {
+            const d = dates[i];
+            dpart += `${String(d.id)}\t${String(d.name || '')}\t${d.date};`;
+        }
+        let s = `${pg.length}|${dpart}|`;
+        for (let i = 0; i < pg.length; i++) {
+            const g = pg[i];
+            const ids = (g.dates || []).map(String).join(',');
+            s += `${String(g.id)}\t${String(g.name || '')}\t${g.expanded !== false ? '1' : '0'}\t${ids}|`;
+        }
+        return s;
+    }
+
+    _canPatchDateListDom() {
+        if (window.appState.editingDateId != null || window.appState.editingPersonGroupId != null) {
+            return false;
+        }
+        const root = document.getElementById('dateListForDates');
+        if (!root) {
+            return false;
+        }
+        if (root.querySelector('.list-empty') && root.textContent && root.textContent.indexOf('Загрузка') !== -1) {
+            return false;
+        }
+        const dateRows = root.querySelectorAll('.list-item--date[data-type="date"]');
+        const n = dateRows.length;
+        const dataDates = window.appState.data.dates || [];
+        if (n !== dataDates.length) {
+            return false;
+        }
+        if (n > 0) {
+            const idSet = new Set();
+            for (let d = 0; d < dataDates.length; d++) {
+                idSet.add(String(dataDates[d].id));
+            }
+            for (let i = 0; i < dateRows.length; i++) {
+                const id = dateRows[i].getAttribute('data-id');
+                if (!id || !idSet.has(String(id))) {
+                    return false;
+                }
+            }
+        }
+        const groupRows = root.querySelectorAll('.list-item--person-group');
+        const pg = window.appState.data.personGroups || [];
+        if (groupRows.length !== pg.length) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Только активная дата и чекбоксы A/B — без перерисовки списка (скролл не сбрасывается).
+     * Подсветка A/B на строке — через CSS :has(:checked), классы на строке не ставим.
+     * Чекбоксы — по всем input.date-checkbox в контейнере (надёжнее, чем поиск от строки).
+     */
+    syncDateListSelectionVisuals() {
+        const root = document.getElementById('dateListForDates');
+        if (!root) {
+            window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:no #dateListForDates');
+            return;
+        }
+        const activeIdStr =
+            window.appState.activeDateId != null ? String(window.appState.activeDateId) : '';
+        const ds = window.appState.dateSelections || {};
+        const typeAStr = ds.typeA != null ? String(ds.typeA) : '';
+        const typeBStr = ds.typeB != null ? String(ds.typeB) : '';
+        const editingDateIdStr =
+            window.appState.editingDateId != null ? String(window.appState.editingDateId) : '';
+
+        const rows = root.querySelectorAll('.list-item--date[data-type="date"]');
+        window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:start', {
+            rowCount: rows.length,
+            activeIdStr,
+            typeAStr,
+            typeBStr,
+            dateSelections: { ...ds }
+        });
+
+        rows.forEach((row) => {
+            const id = row.getAttribute('data-id');
+            if (!id) {
+                return;
+            }
+            const idStr = String(id);
+            const isEditing = editingDateIdStr !== '' && idStr === editingDateIdStr;
+            row.classList.toggle('list-item--editing', isEditing);
+            row.classList.toggle('active', idStr === activeIdStr);
+
+            const dhandle = row.querySelector('.date-drag-handle');
+            if (dhandle) {
+                dhandle.setAttribute('draggable', isEditing ? 'false' : 'true');
+            }
+        });
+
+        root.querySelectorAll('input.date-checkbox').forEach((inp) => {
+            const t = inp.getAttribute('data-type');
+            const rid = inp.getAttribute('data-id');
+            if (!rid || (t !== 'a' && t !== 'b')) {
+                return;
+            }
+            const ridStr = String(rid);
+            if (t === 'a') {
+                inp.checked = typeAStr !== '' && ridStr === typeAStr;
+            } else {
+                inp.checked = typeBStr !== '' && ridStr === typeBStr;
+            }
+        });
+
+        const snap = [];
+        root.querySelectorAll('input.date-checkbox').forEach((inp) => {
+            const idStr = String(inp.getAttribute('data-id') || '');
+            const t = inp.getAttribute('data-type');
+            const wantA = t === 'a' && typeAStr !== '' && idStr === typeAStr;
+            const wantB = t === 'b' && typeBStr !== '' && idStr === typeBStr;
+            if (
+                wantA ||
+                wantB ||
+                idStr === activeIdStr ||
+                inp.checked
+            ) {
+                snap.push({
+                    id: idStr,
+                    t,
+                    want: t === 'a' ? wantA : wantB,
+                    chk: inp.checked
+                });
+            }
+        });
+        window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:applied', { snap });
     }
 
     /** O(1) доступ к волнам/группам при сборке списков с большим числом сигналов */
@@ -993,14 +1141,126 @@ class UnifiedListManager {
         
         colorInput.click();
     }
+
+    /**
+     * Сохраняет скролл списка дат и вложенных .person-group-children до полной перерисовки EJS.
+     */
+    _captureDateListScrollState() {
+        const root = document.getElementById('dateListForDates');
+        if (!root) {
+            return null;
+        }
+        const nested = [];
+        root.querySelectorAll('.list-item--person-group').forEach((row) => {
+            const gid = row.getAttribute('data-id');
+            if (!gid) {
+                return;
+            }
+            const ch = row.querySelector('.person-group-children');
+            if (ch) {
+                nested.push({ groupId: gid, top: ch.scrollTop });
+            }
+        });
+        return {
+            rootTop: root.scrollTop,
+            rootLeft: root.scrollLeft,
+            nested
+        };
+    }
+
+    /**
+     * Восстанавливает скролл после renderList; два rAF — после расчёта вёрстки.
+     */
+    _restoreDateListScrollState(state) {
+        if (!state) {
+            return;
+        }
+        const root = document.getElementById('dateListForDates');
+        if (!root) {
+            return;
+        }
+        const apply = () => {
+            const maxRoot = Math.max(0, root.scrollHeight - root.clientHeight);
+            root.scrollTop = Math.min(state.rootTop, maxRoot);
+            root.scrollLeft = state.rootLeft;
+            const rows = root.querySelectorAll('.list-item--person-group');
+            for (let n = 0; n < state.nested.length; n++) {
+                const { groupId, top } = state.nested[n];
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.getAttribute('data-id') === groupId) {
+                        const ch = row.querySelector('.person-group-children');
+                        if (ch) {
+                            const maxN = Math.max(0, ch.scrollHeight - ch.clientHeight);
+                            ch.scrollTop = Math.min(top, maxN);
+                        }
+                        break;
+                    }
+                }
+            }
+        };
+        requestAnimationFrame(() => {
+            apply();
+            requestAnimationFrame(apply);
+        });
+    }
     
-    updateDatesList() {
+    /**
+     * @param {{ forceFull?: boolean }} [opts]
+     */
+    updateDatesList(opts) {
         if (window.dates && window.dates.syncPersonGroupsLayout) {
             window.dates.syncPersonGroupsLayout();
         }
-        const pg = window.appState.data.personGroups || [];
-        const allGroups = pg.map((g, idx) => this.preparePersonGroupData(g, idx));
-        this.renderList('dateListForDates', allGroups, 'personGroup');
+        const sig = this._computeDatesListStructureSignature();
+        const forceFull = opts && opts.forceFull === true;
+        const structureUnchanged =
+            this._datesListStructureSig !== null && this._datesListStructureSig === sig;
+
+        const rootProbe = document.getElementById('dateListForDates');
+        const dateRowCount = rootProbe
+            ? rootProbe.querySelectorAll('.list-item--date[data-type="date"]').length
+            : 0;
+        const dataDatesLen = (window.appState.data.dates || []).length;
+        const canPatch = this._canPatchDateListDom();
+        const usePatch = !forceFull && structureUnchanged && canPatch;
+        window.sunDateListLog && window.sunDateListLog('updateDatesList', {
+            path: usePatch ? 'patch' : 'full',
+            forceFull,
+            structureUnchanged,
+            canPatch,
+            dateRowCount,
+            dataDatesLen,
+            editingDateId: window.appState.editingDateId,
+            editingPersonGroupId: window.appState.editingPersonGroupId
+        });
+
+        if (usePatch) {
+            this.syncDateListSelectionVisuals();
+        } else {
+            const pg = window.appState.data.personGroups || [];
+            const allGroups = pg.map((g, idx) => this.preparePersonGroupData(g, idx));
+            const scrollState = this._captureDateListScrollState();
+            this.renderList('dateListForDates', allGroups, 'personGroup');
+
+            const root = document.getElementById('dateListForDates');
+            if (
+                root &&
+                (root.querySelector('.list-item--person-group') ||
+                    (allGroups.length === 0 && root.querySelector('.list-empty')))
+            ) {
+                this._datesListStructureSig = sig;
+            }
+
+            this._restoreDateListScrollState(scrollState);
+        }
+
+        if (window.dateComparisonManager && window.dateComparisonManager.ensureSelectsSyncedWithDateList) {
+            window.dateComparisonManager.ensureSelectsSyncedWithDateList();
+        }
+        if (window.dateComparisonManager && window.dateComparisonManager.updateComparison) {
+            window.dateComparisonManager.updateComparison();
+        }
     }
     
 

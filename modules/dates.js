@@ -253,9 +253,14 @@ class DatesManager {
             };
         }
         
-        // Устанавливаем эту дату как тип A
+        // Устанавливаем эту дату как тип A; если B был на этой же дате — переносим B на другую (как при конфликте чекбоксов)
         window.appState.dateSelections.typeA = dateId;
-        window.appState.dateSelections.typeB = null;
+        const bSel = window.appState.dateSelections.typeB;
+        if (bSel != null && String(bSel) === String(dateId)) {
+            const allD = window.appState.data.dates || [];
+            const altB = allD.find((d) => String(d.id) !== String(dateId));
+            window.appState.dateSelections.typeB = altB ? altB.id : null;
+        }
         
         const dateIdStr = String(dateId);
         const dateObj = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
@@ -293,10 +298,6 @@ class DatesManager {
         this.recalculateCurrentDay(useExactTime);
         
         this.updateCurrentDayElement();
-        
-        if (window.dataManager && window.dataManager.updateDateList) {
-            window.dataManager.updateDateList();
-        }
         
         if (oldActiveId !== dateId) {
             document.querySelectorAll('.wave-container').forEach(c => c.remove());
@@ -350,7 +351,15 @@ class DatesManager {
 
         this.updateDateTimeInputs();
 
-        if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+        window.sunDateListLog &&
+            window.sunDateListLog('setActiveDate:→ updateDateList', {
+                dateId,
+                activeDateId: window.appState.activeDateId,
+                dateSelections: window.appState.dateSelections ? { ...window.appState.dateSelections } : null
+            });
+        if (window.dataManager && window.dataManager.updateDateList) {
+            window.dataManager.updateDateList();
+        } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
             window.unifiedListManager.updateDatesList();
         }
     }

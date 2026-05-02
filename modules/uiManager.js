@@ -470,7 +470,10 @@ class UIManager {
 
     handleTabClick(tabButton) {
         const tabId = tabButton.dataset.tab;
-        
+        if (!tabId) {
+            return;
+        }
+
         if (this.activeTab === tabId) {
             this.deactivateTab(tabButton);
             this.activeTab = null;
@@ -503,8 +506,8 @@ class UIManager {
     
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
-        
-        document.querySelectorAll('.tab-button').forEach(btn => {
+
+        document.querySelectorAll('.tab-button[data-tab]').forEach((btn) => {
             btn.classList.remove('active');
         });
         

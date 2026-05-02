@@ -154,10 +154,6 @@ async function finalizeInitialization() {
         __lp && __lp.phaseEnd('finalize_summary');
     }
 
-    if (window.dateComparisonManager && window.dateComparisonManager.refresh) {
-        window.dateComparisonManager.refresh();
-    }
-
     const mainDateInputDate = document.getElementById('mainDateInputDate');
     const mainDateInputTime = document.getElementById('mainDateInputTime');
 
@@ -200,10 +196,20 @@ async function finalizeInitialization() {
 
         if (currentTypeAStr !== activeDateIdStr) {
             window.appState.dateSelections.typeA = window.appState.activeDateId;
-            window.appState.dateSelections.typeB = null;
+            const bStr =
+                window.appState.dateSelections.typeB != null
+                    ? String(window.appState.dateSelections.typeB)
+                    : '';
+            if (bStr === activeDateIdStr) {
+                const allD = window.appState.data.dates || [];
+                const altB = allD.find((d) => String(d.id) !== activeDateIdStr);
+                window.appState.dateSelections.typeB = altB ? altB.id : null;
+            }
             window.appState.save();
 
-            if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+            if (window.dataManager && window.dataManager.updateDateList) {
+                await window.dataManager.updateDateList();
+            } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
                 window.unifiedListManager.updateDatesList();
             }
         }

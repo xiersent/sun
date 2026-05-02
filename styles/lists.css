@@ -124,5 +124,5 @@
 .date-checkbox:checked::after, .wave-group-toggle:checked::after, .wave-visibility-check:checked::after, .wave-bold-check:checked::after, .wave-corner-color-check:checked::after{content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold;}
 .date-checkbox:checked, .wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{border-color: transparent;}
 .list-item--date .date-selection-checks{pointer-events: auto; display: flex; align-items: center; gap: 6px;}
-.list-item--date.selected-type-a{background-color: #E8F4FE;}
-.list-item--date.selected-type-b{background-color: #FFF4E5;}
+.list-item--date:has(.date-checkbox[data-type="a"]:checked){background-color: #E8F4FE;}
+.list-item--date:has(.date-checkbox[data-type="b"]:checked){background-color: #FFF4E5;}

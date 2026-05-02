@@ -122,10 +122,10 @@
 
             <div class="panel-section tabs-section" id="tabs-section">
                 <div class="tab-container">
-                    <div class="tab-buttons">
-                        <button class="tab-button" data-tab="summary">Состояния</button>
-                        <button class="tab-button" data-tab="intersections">Пересечения</button>
-                        <button class="tab-button" data-tab="dateCompare">Сравнение дат</button>
+                    <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Разделы панели">
+                        <button type="button" class="tab-button" data-tab="summary" role="tab">Состояния</button>
+                        <button type="button" class="tab-button" data-tab="intersections" role="tab">Пересечения</button>
+                        <button type="button" class="tab-button" data-tab="dateCompare" role="tab">Сравнение дат</button>
                     </div>
                     
                     <div class="tab-content" id="summary-tab">
@@ -244,6 +244,11 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="date-comparison-view-tabs tab-buttons tab-buttons--framed" role="tablist" aria-label="Вид отчёта сравнения">
+                                <button type="button" class="tab-button date-comparison-view-tab active" data-date-compare-view="phaseMatch" role="tab" aria-selected="true">Совпадение фаз</button>
+                                <button type="button" class="tab-button date-comparison-view-tab" data-date-compare-view="phaseGap" role="tab" aria-selected="false">Разность фаз</button>
+                                <button type="button" class="tab-button date-comparison-view-tab" data-date-compare-view="quadrature" role="tab" aria-selected="false">Квадратура фаз</button>
                             </div>
                             <div class="summary-results-container intersection-results-container">
                                 <div class="summary-results" id="dateCompareResults"></div>

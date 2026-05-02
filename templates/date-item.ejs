@@ -1,9 +1,10 @@
 <!-- templates/date-item.ejs -->
+<% var _attrEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }; %>
+<% var _dateTitleName = _attrEsc(data.name + (data.formattedDate ? ' · ' + data.formattedDate : '')); %>
+<% var _dateTitleValue = _attrEsc(data.formattedDate + (data.yearsFromCurrent > 0 ? ' [' + data.yearsFromCurrent + ']' : '')); %>
 <div class="list-item list-item--date 
     <%= data.active ? 'active' : '' %> 
-    <%= data.editing ? 'list-item--editing' : '' %>
-    <%= data.selectedTypeA ? 'selected-type-a' : '' %>
-    <%= data.selectedTypeB ? 'selected-type-b' : '' %>"
+    <%= data.editing ? 'list-item--editing' : '' %>"
     data-id="<%= data.id %>"
     data-type="date"
     data-person-group-id="<%= data.personGroupId || '' %>"
@@ -32,7 +33,7 @@
                     </div>
                     
                     <div class="list-item__title-container">
-                        <div class="list-item__title date-name">
+                        <div class="list-item__title date-name" title="<%= _dateTitleName %>">
                             <%= data.name %>
                         </div>
                         <span class="list-item__icon date-star">★</span>
@@ -40,7 +41,7 @@
                 </div>
                 
                 <div class="list-item__right">
-                    <div class="list-item__value">
+                    <div class="list-item__value" title="<%= _dateTitleValue %>">
                         <%= data.formattedDate %>
                         <% if (data.yearsFromCurrent > 0) { %>
                             [<%= data.yearsFromCurrent %>]
