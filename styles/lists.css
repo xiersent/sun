@@ -117,12 +117,13 @@
 .list-item--wave.list-item--editing .wave-drag-handle{opacity: 0.3; cursor: default;}
 
 /* Чекбоксы */
-.date-checkbox, .wave-group-toggle, .wave-visibility-check, .wave-bold-check, .wave-corner-color-check{-webkit-appearance: none; appearance: none; width: 14px; height: 14px; cursor: pointer; margin: 0; flex-shrink: 0; border: 1px solid #ccc; border-radius: 2px; position: relative; background-color: white;}
+.date-checkbox, .wave-group-toggle, .wave-visibility-check, .wave-b-visibility-check, .wave-corner-color-check{-webkit-appearance: none; appearance: none; width: 14px; height: 14px; cursor: pointer; margin: 0; flex-shrink: 0; border: 1px solid #ccc; border-radius: 2px; position: relative; background-color: white;}
 .date-checkbox[data-type="a"]:checked{background-color: #2196F3;}
-.date-checkbox[data-type="b"]:checked{background-color: #FF9800;}
-.wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{background-color: #2196F3;}
-.date-checkbox:checked::after, .wave-group-toggle:checked::after, .wave-visibility-check:checked::after, .wave-bold-check:checked::after, .wave-corner-color-check:checked::after{content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold;}
-.date-checkbox:checked, .wave-group-toggle:checked, .wave-visibility-check:checked, .wave-bold-check:checked, .wave-corner-color-check:checked{border-color: transparent;}
+.date-checkbox[data-type="b"]:checked,
+.wave-b-visibility-check:checked{background-color: #FF9800;}
+.wave-group-toggle:checked, .wave-visibility-check:checked, .wave-corner-color-check:checked{background-color: #2196F3;}
+.date-checkbox:checked::after, .wave-group-toggle:checked::after, .wave-visibility-check:checked::after, .wave-b-visibility-check:checked::after, .wave-corner-color-check:checked::after{content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: bold;}
+.date-checkbox:checked, .wave-group-toggle:checked, .wave-visibility-check:checked, .wave-b-visibility-check:checked, .wave-corner-color-check:checked{border-color: transparent;}
 .list-item--date .date-selection-checks{pointer-events: auto; display: flex; align-items: center; gap: 6px;}
 .list-item--date:has(.date-checkbox[data-type="a"]:checked){background-color: #E8F4FE;}
 .list-item--date:has(.date-checkbox[data-type="b"]:checked){background-color: #FFF4E5;}

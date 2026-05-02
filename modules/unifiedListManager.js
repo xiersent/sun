@@ -485,7 +485,7 @@ class UnifiedListManager {
             typeValue: wave.type,
             description: window.dom.getWaveDescription(wave.type),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
-            // UI: вторая персона B; ключ в состоянии по истории — waveBold
+            // UI: .wave-b-visibility-check; в appState ключ waveBold (историческое имя поля)
             bold: window.appState.waveBold[waveIdStr] || false,
             cornerColor: window.appState.waveCornerColor[waveIdStr] || false,
             editing: editingWaveIdStr === waveIdStr,
@@ -1323,7 +1323,7 @@ class UnifiedListManager {
     }
 
     /**
-     * Чекбоксы «группа вкл» и «видимость сигнала» из appState без полного EJS.
+     * Чекбоксы «группа вкл», «видимость A» (.wave-visibility-check) и «видимость B» (.wave-b-visibility-check) из appState без полного EJS.
      * Используется при переключении шаблонов отображения (порядок десятков мс вместо сотен на длинных списках).
      * @returns {boolean} false, если контейнера списка нет
      */
@@ -1347,6 +1347,12 @@ class UnifiedListManager {
             const wid = String(cb.dataset.id);
             if (!wid) return;
             cb.checked = window.appState.waveVisibility[wid] !== false;
+        });
+
+        root.querySelectorAll('.wave-b-visibility-check').forEach((cb) => {
+            const wid = String(cb.dataset.id);
+            if (!wid) return;
+            cb.checked = window.appState.waveBold[wid] === true;
         });
 
         (window.appState.data.groups || []).forEach((g) => {

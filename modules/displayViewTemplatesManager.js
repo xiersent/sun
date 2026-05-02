@@ -5,6 +5,20 @@
 (function () {
     const STANDARD_ID = '__display_standard__';
 
+    /** Шаблоны до поля waveBold: не трогаем appState.waveBold при apply и не создаём пустой снимок до миграции. */
+    function templateHasWaveBoldSnapshot(tpl) {
+        return tpl && Object.prototype.hasOwnProperty.call(tpl, 'waveBold');
+    }
+
+    function seedTemplateWaveBoldFromAppState(tpl) {
+        const next = {};
+        (window.appState.data.waves || []).forEach((w) => {
+            const wid = String(w.id);
+            next[wid] = window.appState.waveBold[wid] === true;
+        });
+        tpl.waveBold = next;
+    }
+
     class DisplayViewTemplatesManager {
         constructor() {
             this._controlsBound = false;
@@ -17,14 +31,16 @@
         captureSnapshotFromAppState() {
             const groupEnabled = {};
             const waveVisibility = {};
+            const waveBold = {};
             (window.appState.data.groups || []).forEach((g) => {
                 groupEnabled[String(g.id)] = !!g.enabled;
             });
             (window.appState.data.waves || []).forEach((w) => {
                 const wid = String(w.id);
                 waveVisibility[wid] = window.appState.waveVisibility[wid] !== false;
+                waveBold[wid] = window.appState.waveBold[wid] === true;
             });
-            return { groupEnabled, waveVisibility };
+            return { groupEnabled, waveVisibility, waveBold };
         }
 
         captureIntoTemplate(tpl) {
@@ -32,11 +48,15 @@
             const snap = this.captureSnapshotFromAppState();
             tpl.groupEnabled = { ...snap.groupEnabled };
             tpl.waveVisibility = { ...snap.waveVisibility };
+            tpl.waveBold = { ...snap.waveBold };
         }
 
         applySnapshotToAppState(tpl) {
             const ge = tpl.groupEnabled || {};
             const wv = tpl.waveVisibility || {};
+            const applyWaveBold =
+                templateHasWaveBoldSnapshot(tpl) && tpl.waveBold && typeof tpl.waveBold === 'object';
+            const wb = applyWaveBold ? tpl.waveBold : null;
             (window.appState.data.groups || []).forEach((g) => {
                 const gid = String(g.id);
                 g.enabled = ge[gid] !== false;
@@ -44,6 +64,9 @@
             (window.appState.data.waves || []).forEach((w) => {
                 const wid = String(w.id);
                 window.appState.waveVisibility[wid] = wv[wid] !== false;
+                if (applyWaveBold) {
+                    window.appState.waveBold[wid] = wb[wid] === true;
+                }
             });
         }
 
@@ -66,7 +89,8 @@
                     builtIn: true,
                     description: '',
                     groupEnabled: {},
-                    waveVisibility: {}
+                    waveVisibility: {},
+                    waveBold: {}
                 };
                 list.unshift(std);
                 createdStd = true;
@@ -80,6 +104,7 @@
                 if (!std.waveVisibility || typeof std.waveVisibility !== 'object') {
                     std.waveVisibility = {};
                 }
+                /* Уже сохранённый стандартный шаблон без waveBold не дополняем {} — иначе сломаем миграцию и сбросим B при apply. */
             }
 
             const hasData =
@@ -87,7 +112,9 @@
                 (window.appState.data.waves && window.appState.data.waves.length > 0);
             const stdEmpty =
                 Object.keys(std.groupEnabled).length === 0 &&
-                Object.keys(std.waveVisibility).length === 0;
+                Object.keys(std.waveVisibility).length === 0 &&
+                (!templateHasWaveBoldSnapshot(std) ||
+                    Object.keys(std.waveBold).length === 0);
             if (hasData && stdEmpty && (createdStd || list.length === 1)) {
                 this.captureIntoTemplate(std);
             }
@@ -123,12 +150,22 @@
                 });
                 tpl.groupEnabled = nextG;
                 tpl.waveVisibility = nextW;
+                if (templateHasWaveBoldSnapshot(tpl)) {
+                    const wb = tpl.waveBold || {};
+                    const nextB = {};
+                    Object.keys(wb).forEach((k) => {
+                        const ks = String(k);
+                        if (wids.has(ks)) nextB[ks] = !!wb[k];
+                    });
+                    tpl.waveBold = nextB;
+                }
             });
         }
 
         mergeMissingEntitiesIntoSnapshots() {
             const ui = this.getUi();
             if (!Array.isArray(ui.displayViewTemplates)) return;
+            const activeId = this.getActiveTemplateId();
             ui.displayViewTemplates.forEach((tpl) => {
                 if (!tpl.groupEnabled) tpl.groupEnabled = {};
                 if (!tpl.waveVisibility) tpl.waveVisibility = {};
@@ -144,6 +181,21 @@
                         tpl.waveVisibility[wid] = true;
                     }
                 });
+                if (!templateHasWaveBoldSnapshot(tpl)) {
+                    /* Старые шаблоны: копируем текущий appState.waveBold во все снимки, чтобы переключение шаблона не обнуляло B после первого save. */
+                    seedTemplateWaveBoldFromAppState(tpl);
+                } else {
+                    if (!tpl.waveBold || typeof tpl.waveBold !== 'object') tpl.waveBold = {};
+                    (window.appState.data.waves || []).forEach((w) => {
+                        const wid = String(w.id);
+                        if (tpl.waveBold[wid] === undefined) {
+                            tpl.waveBold[wid] =
+                                String(tpl.id) === String(activeId)
+                                    ? window.appState.waveBold[wid] === true
+                                    : false;
+                        }
+                    });
+                }
             });
         }
 
@@ -260,7 +312,8 @@
                 builtIn: false,
                 description: '',
                 groupEnabled: { ...snap.groupEnabled },
-                waveVisibility: { ...snap.waveVisibility }
+                waveVisibility: { ...snap.waveVisibility },
+                waveBold: { ...snap.waveBold }
             });
             ui.activeDisplayViewTemplateId = id;
             window.appState.save();
@@ -314,12 +367,29 @@
             const wid = String(wave.id);
             const activeId = this.getActiveTemplateId();
             const vis = window.appState.waveVisibility[wid] !== false;
+            const bold = window.appState.waveBold[wid] === true;
             ui.displayViewTemplates.forEach((tpl) => {
                 if (!tpl.waveVisibility) tpl.waveVisibility = {};
+                if (!templateHasWaveBoldSnapshot(tpl)) {
+                    if (String(tpl.id) === String(activeId)) {
+                        tpl.waveVisibility[wid] = vis;
+                    } else if (tpl.waveVisibility[wid] === undefined) {
+                        tpl.waveVisibility[wid] = true;
+                    }
+                    seedTemplateWaveBoldFromAppState(tpl);
+                    return;
+                }
+                if (!tpl.waveBold || typeof tpl.waveBold !== 'object') tpl.waveBold = {};
                 if (String(tpl.id) === String(activeId)) {
                     tpl.waveVisibility[wid] = vis;
-                } else if (tpl.waveVisibility[wid] === undefined) {
-                    tpl.waveVisibility[wid] = true;
+                    tpl.waveBold[wid] = bold;
+                } else {
+                    if (tpl.waveVisibility[wid] === undefined) {
+                        tpl.waveVisibility[wid] = true;
+                    }
+                    if (tpl.waveBold[wid] === undefined) {
+                        tpl.waveBold[wid] = false;
+                    }
                 }
             });
             window.appState.saveDebounced();

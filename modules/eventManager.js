@@ -1280,26 +1280,11 @@ class EventManager {
             return;
         }
         
-        if ($target.hasClass('wave-bold-check')) {
+        if ($target.hasClass('wave-b-visibility-check')) {
             e.stopPropagation();
             const waveId = $target.data('id');
-
-            if (waveId && window.appState) {
-                // Семантика: полупрозрачная волна для даты B (ключ исторически waveBold).
-                window.appState.waveBold[waveId] = $target.prop('checked');
-                window.appState.save();
-                if (window.waves) {
-                    if (typeof window.waves.reconcileVisibleWaveElements === 'function') {
-                        window.waves.reconcileVisibleWaveElements();
-                    } else {
-                        window.waves.updatePosition();
-                    }
-                }
-
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    window.summaryManager.updateSummary();
-                }
-            }
+            const isChecked = $target.prop('checked');
+            this.handleWavePersonBVisibilityChange(waveId, isChecked, $target);
             return;
         }
 
@@ -1365,42 +1350,45 @@ class EventManager {
 
 
 
-	handleWaveVisibilityChange(waveId, isChecked, $checkbox) {
+	/**
+	 * Общая логика .wave-visibility-check (слой A) и .wave-b-visibility-check (слой B): одно правило для выключенной группы.
+	 * @param {'a'|'b'} layer — 'a' → waveVisibility; 'b' → waveBold (ключ в данных исторический).
+	 */
+	handleWaveLayerToggle(waveId, isChecked, $checkbox, layer) {
 		const wrd = window.__waveRenderDebug;
+		const layerA = layer === 'a';
 		if (wrd && wrd.isEnabled && wrd.isEnabled()) {
-			wrd.log('eventManager.handleWaveVisibilityChange', { waveId, isChecked });
+			wrd.log('eventManager.handleWaveLayerToggle', { waveId, isChecked, layer });
 		}
-		// Если пытаемся включить волну
+
 		if (isChecked && window.waves && window.appState) {
 			const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
-			
-			// Если группа выключена
 			if (!isGroupEnabled) {
 				const groupId = this.findGroupForWave(waveId);
-				
 				if (groupId) {
-					const group = window.appState.data.groups.find(g => g.id === groupId);
+					const group = window.appState.data.groups.find((g) => g.id === groupId);
 					const groupName = group ? group.name : 'Неизвестная группа';
-					
-					// ИСПРАВЛЕНИЕ: Всегда спрашиваем, даже если ранее спрашивали
-					const shouldEnableGroup = confirm(`Группа "${groupName}" отключена. Включить её для отображения сигнала?`);
-					
+					const shouldEnableGroup = confirm(
+						`Группа "${groupName}" отключена. Включить её для отображения сигнала?`
+					);
 					if (shouldEnableGroup) {
-						// Включаем группу
 						if (group) {
 							group.enabled = true;
-							
 							const waveIdStr = String(waveId);
-							window.appState.waveVisibility[waveIdStr] = true;
+							if (layerA) {
+								window.appState.waveVisibility[waveIdStr] = true;
+							} else {
+								window.appState.waveBold[waveIdStr] = true;
+							}
 							window.appState.saveDebounced();
-							
-							// Убираем группу из askedGroups, если она там была
 							if (this.askedGroups.has(groupId)) {
 								this.askedGroups.delete(groupId);
 							}
-							
 							requestAnimationFrame(() => {
-								if (window.unifiedListManager && typeof window.unifiedListManager.updateGroupStats === 'function') {
+								if (
+									window.unifiedListManager &&
+									typeof window.unifiedListManager.updateGroupStats === 'function'
+								) {
 									window.unifiedListManager.updateGroupStats(groupId);
 								} else if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
 									window.unifiedListManager.updateWavesList();
@@ -1430,62 +1418,82 @@ class EventManager {
 							window.dom.refreshShowOnVizorButtonLabels();
 						}
 						return;
-					} else {
-						// ИСПРАВЛЕНИЕ: Не добавляем в askedGroups, чтобы при повторной попытке снова спросить
-						// Просто возвращаем чекбокс в выключенное состояние
-						$checkbox.prop('checked', false);
-						
-						// НЕ добавляем в askedGroups
-						// this.askedGroups.add(groupId); // УДАЛЯЕМ ЭТУ СТРОКУ
-						
-						if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
-							window.dom.refreshShowOnVizorButtonLabels();
-						}
-						return;
 					}
+					$checkbox.prop('checked', false);
+					if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+						window.dom.refreshShowOnVizorButtonLabels();
+					}
+					return;
 				}
 			}
 		}
-		
-		// Обычная логика для включения/выключения волны (когда группа включена или выключаем волну)
-		if (waveId && window.appState) {
-			const endVis = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('eventManager.handleWaveVisibilityChange.apply', { waveId, isChecked }) : null;
-			const waveIdStr = String(waveId);
-			window.appState.waveVisibility[waveIdStr] = isChecked;
-			window.appState.saveDebounced();
-			
-			const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
-			const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
-			const shouldShow = isChecked && isGroupEnabled;
 
-			if (
-				wave &&
-				typeof window.waves.waveNeedsGraphContainer === 'function' &&
-				window.waves.waveNeedsGraphContainer(waveId) &&
-				!window.waves.waveContainers[waveId]
-			) {
-				window.waves.createWaveElement(wave);
+		if (waveId && window.appState) {
+			const waveIdStr = String(waveId);
+			if (layerA) {
+				const endVis =
+					wrd && wrd.isEnabled && wrd.isEnabled()
+						? wrd.t('eventManager.handleWaveVisibilityChange.apply', { waveId, isChecked })
+						: null;
+				window.appState.waveVisibility[waveIdStr] = isChecked;
+				window.appState.saveDebounced();
+
+				const wave = window.appState.data.waves.find((w) => String(w.id) === waveIdStr);
+				const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
+				const shouldShow = isChecked && isGroupEnabled;
+
+				if (
+					wave &&
+					typeof window.waves.waveNeedsGraphContainer === 'function' &&
+					window.waves.waveNeedsGraphContainer(waveId) &&
+					!window.waves.waveContainers[waveId]
+				) {
+					window.waves.createWaveElement(wave);
+				}
+
+				if (window.waves && window.waves.updatePosition) {
+					window.waves.updatePosition({ forceWaveLabels: true });
+				}
+
+				this.updateGroupStatsForWave(waveId, isChecked);
+
+				if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+					window.summaryManager.debouncedUpdate();
+				}
+
+				if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+					window.dom.refreshShowOnVizorButtonLabels();
+				}
+				endVis && endVis({ shouldShow });
+			} else {
+				window.appState.waveBold[waveIdStr] = isChecked;
+				window.appState.saveDebounced();
+				if (window.waves) {
+					if (typeof window.waves.reconcileVisibleWaveElements === 'function') {
+						window.waves.reconcileVisibleWaveElements();
+					} else if (window.waves.updatePosition) {
+						window.waves.updatePosition({ forceWaveLabels: true });
+					}
+				}
+				this.updateGroupStatsForWave(waveId, isChecked);
+				if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+					window.summaryManager.debouncedUpdate();
+				}
+				if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+					window.dom.refreshShowOnVizorButtonLabels();
+				}
 			}
-			
-			if (window.waves && window.waves.updatePosition) {
-				window.waves.updatePosition({ forceWaveLabels: true });
-			}
-			
-			this.updateGroupStatsForWave(waveId, isChecked);
-			
-			if (window.summaryManager && window.summaryManager.debouncedUpdate) {
-				window.summaryManager.debouncedUpdate();
-			}
-			
-			if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
-				window.dom.refreshShowOnVizorButtonLabels();
-			}
-			endVis && endVis({ shouldShow });
 		}
 	}
 
+	handleWaveVisibilityChange(waveId, isChecked, $checkbox) {
+		this.handleWaveLayerToggle(waveId, isChecked, $checkbox, 'a');
+	}
 
-
+	/** Пара handleWaveVisibilityChange: слой B, чекбокс .wave-b-visibility-check. */
+	handleWavePersonBVisibilityChange(waveId, isChecked, $checkbox) {
+		this.handleWaveLayerToggle(waveId, isChecked, $checkbox, 'b');
+	}
 
     handleGroupToggle(groupId, isChecked) {
         if (groupId && window.appState) {

@@ -6,7 +6,7 @@ function __waveDbg() {
 
 /**
  * Если true — `waveBold` снова добавляет класс .bold (stroke-width в CSS).
- * Сейчас false: те же ключи `appState.waveBold` означают «показать полупрозрачную волну для персоны B» (дата B в сравнении).
+ * Сейчас false: `appState.waveBold` — флаг видимости слоя B (пара `waveVisibility` для A); UI — .wave-b-visibility-check.
  */
 const WAVE_BOLD_STROKE_VISUAL_ENABLED = false;
 
@@ -1325,37 +1325,56 @@ class WavesManager {
     }
 
     
-    /** Клик по боковой выноске слоя B — то же, что чекбокс «вторая персона» для этой волны. */
+    /** Клик по боковой выноске слоя B — тот же путь, что чекбокс .wave-b-visibility-check (см. handleWavePersonBVisibilityChange). */
     onHorizontalWaveLabelBClick(waveId) {
         const waveIdStr = String(waveId);
-        const wasBold = window.appState.waveBold[waveIdStr] === true;
-        const newChecked = !wasBold;
+        const wasLayerBOn = window.appState.waveBold[waveIdStr] === true;
+        const newChecked = !wasLayerBOn;
         const d = __waveDbg();
         d &&
             d.log('waves.onHorizontalWaveLabelBClick', {
                 waveId: waveIdStr,
-                wasBold,
-                becomesBold: newChecked
+                wasLayerBOn,
+                becomesLayerBOn: newChecked
             });
 
-        window.appState.waveBold[waveIdStr] = newChecked;
-        window.appState.save();
-
-        document.querySelectorAll(`.wave-bold-check[data-id="${waveIdStr}"]`).forEach((el) => {
-            el.checked = newChecked;
-        });
-
-        if (typeof this.reconcileVisibleWaveElements === 'function') {
-            this.reconcileVisibleWaveElements();
+        const applyPersonBVisibilityWithoutEventPath = () => {
+            window.appState.waveBold[waveIdStr] = newChecked;
+            window.appState.save();
+            if (typeof this.reconcileVisibleWaveElements === 'function') {
+                this.reconcileVisibleWaveElements();
+            } else {
+                this.updatePosition({ forceWaveLabels: true });
+            }
+            if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+                window.summaryManager.debouncedUpdate();
+            } else if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+        };
+        if (
+            window.eventManager &&
+            typeof window.eventManager.handleWavePersonBVisibilityChange === 'function'
+        ) {
+            const $ = window.jQuery;
+            if ($) {
+                const $bVis = $(`.wave-b-visibility-check[data-id="${waveIdStr}"]`);
+                window.eventManager.handleWavePersonBVisibilityChange(
+                    waveId,
+                    newChecked,
+                    $bVis.length ? $bVis : $()
+                );
+            } else {
+                applyPersonBVisibilityWithoutEventPath();
+            }
         } else {
-            this.updatePosition({ forceWaveLabels: true });
+            applyPersonBVisibilityWithoutEventPath();
         }
 
-        if (window.summaryManager && window.summaryManager.debouncedUpdate) {
-            window.summaryManager.debouncedUpdate();
-        } else if (window.summaryManager && window.summaryManager.updateSummary) {
-            window.summaryManager.updateSummary();
-        }
+        const applied = window.appState.waveBold[waveIdStr] === true;
+        document.querySelectorAll(`.wave-b-visibility-check[data-id="${waveIdStr}"]`).forEach((el) => {
+            el.checked = applied;
+        });
     }
 
     onHorizontalWaveLabelClick(waveId) {
