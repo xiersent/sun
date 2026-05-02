@@ -27,17 +27,12 @@
                 <div class="list-item__right">
                     <div class="list-item__value">
                         <span class="group-stats">
-                            <% if (data.enabledCount > 0) { %>
-                                <span class="group-enabled-count" title="Включено сигналов">
-                                    Включено: <%= data.enabledCount %>
-                                </span>
-                                <span class="group-total-count" title="Всего сигналов">
-                                    Сигналов: <%= data.waveCount %>
-                                </span>
-                            <% } else { %>
-                                <span class="group-total-count">
-                                    Сигналов: <%= data.waveCount %>
-                                </span>
+                            <span class="group-stat-total" title="Отключить все слои (A и B) у всех сигналов группы">Всего: <%= data.waveCount %></span>
+                            <% var _a = typeof data.enabledCountA !== 'undefined' ? data.enabledCountA : (data.enabledCount || 0); if (_a > 0) { %>
+                            <span class="group-stat-a" title="Отключить слой A у всех сигналов группы">Включено: <%= _a %></span>
+                            <% } %>
+                            <% var _b = typeof data.enabledCountB !== 'undefined' ? data.enabledCountB : 0; if (_b > 0) { %>
+                            <span class="group-stat-b" title="Отключить слой B у всех сигналов группы">Включено: <%= _b %></span>
                             <% } %>
                         </span>
                     </div>

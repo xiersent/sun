@@ -199,10 +199,31 @@ class DOM {
         return this.isWaveShownOnVizor(waveId) ? 'Скрыть волну' : 'Показать волну';
     }
 
+    /** Слои A и B сигнала видны на графике (группа вкл, видимость A и B). */
+    isBothWaveLayersOnVizor(waveId) {
+        if (!window.appState || !window.waves) return false;
+        const wid = String(waveId);
+        if (window.waves.isWaveGroupEnabled && !window.waves.isWaveGroupEnabled(waveId)) {
+            return false;
+        }
+        const aOn = window.appState.waveVisibility[wid] !== false;
+        const bOn = window.appState.waveBold[wid] === true;
+        return aOn && bOn;
+    }
+
+    getDateCompareVizorToggleLabel(waveId) {
+        return this.isBothWaveLayersOnVizor(waveId) ? 'Скрыть A и B' : 'Показать A и B';
+    }
+
     refreshShowOnVizorButtonLabels() {
-        document.querySelectorAll('.show-on-vizor-btn[data-wave-id]').forEach(btn => {
+        document.querySelectorAll('.show-on-vizor-btn[data-wave-id]').forEach((btn) => {
             const id = btn.dataset.waveId;
-            if (id) btn.textContent = this.getWaveVizorToggleButtonLabel(id);
+            if (!id) return;
+            if (btn.classList.contains('date-compare-vizor-btn')) {
+                btn.textContent = this.getDateCompareVizorToggleLabel(id);
+            } else {
+                btn.textContent = this.getWaveVizorToggleButtonLabel(id);
+            }
         });
     }
 }

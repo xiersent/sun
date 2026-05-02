@@ -104,42 +104,59 @@ class EventManager {
                 (e) => nd.dragEnd(this, e, 'date')
             );
 
-		$(document).on('click', '.group-enabled-count', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			window.sunPerfLog('eventManager', 'click.groupEnabledCount', { target: 'group-stats' });
-			
-			// Находим родительскую группу
-			const $groupItem = $(e.target).closest('.list-item--group');
-			if (!$groupItem.length) return;
-			
-			const groupId = $groupItem.data('id');
-			if (!groupId) return;
-			
-			const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
+		const disableGroupWaveLayers = (groupId, mode) => {
+			const group = window.appState.data.groups.find((g) => String(g.id) === String(groupId));
 			if (!group || !group.waves) return;
-			
-			// Снимаем чекбоксы всех сигналов в группе
-			group.waves.forEach(waveId => {
+			group.waves.forEach((waveId) => {
 				const waveIdStr = String(waveId);
-				window.appState.waveVisibility[waveIdStr] = false;
-				
-				// Снимаем чекбокс в интерфейсе
-				const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-				if (checkbox) checkbox.checked = false;
+				if (mode === 'all' || mode === 'a') {
+					window.appState.waveVisibility[waveIdStr] = false;
+				}
+				if (mode === 'all' || mode === 'b') {
+					window.appState.waveBold[waveIdStr] = false;
+				}
 			});
-			
 			window.appState.save();
-			
-			// Обновляем статистику группы (спан "Включено" исчезнет)
-			if (window.unifiedListManager) {
-				window.unifiedListManager.updateGroupStats(groupId);
+			if (window.unifiedListManager && typeof window.unifiedListManager.syncWavesListVisibilityFromAppState === 'function') {
+				window.unifiedListManager.syncWavesListVisibilityFromAppState();
 			}
-			
-			// Обновляем отображение волн
 			if (window.waves) window.waves.updatePosition();
 			if (window.summaryManager) window.summaryManager.updateSummary();
+		};
+
+		$(document).on('click', '.group-stat-total', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			window.sunPerfLog('eventManager', 'click.groupStat', { target: 'total' });
+			const $groupItem = $(e.target).closest('.list-item--group');
+			if (!$groupItem.length) return;
+			const groupId = $groupItem.data('id');
+			if (!groupId) return;
+			disableGroupWaveLayers(groupId, 'all');
 		});
+
+		$(document).on('click', '.group-stat-a', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			window.sunPerfLog('eventManager', 'click.groupStat', { target: 'layerA' });
+			const $groupItem = $(e.target).closest('.list-item--group');
+			if (!$groupItem.length) return;
+			const groupId = $groupItem.data('id');
+			if (!groupId) return;
+			disableGroupWaveLayers(groupId, 'a');
+		});
+
+		$(document).on('click', '.group-stat-b', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			window.sunPerfLog('eventManager', 'click.groupStat', { target: 'layerB' });
+			const $groupItem = $(e.target).closest('.list-item--group');
+			if (!$groupItem.length) return;
+			const groupId = $groupItem.data('id');
+			if (!groupId) return;
+			disableGroupWaveLayers(groupId, 'b');
+		});
+
     }
     
     clearNestedDnDVisualState() {
@@ -1328,7 +1345,7 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('show-on-vizor-btn')) {
+        if ($target.hasClass('show-on-vizor-btn') && !$target.hasClass('date-compare-vizor-btn')) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -1342,6 +1359,16 @@ class EventManager {
                 this.handleWaveVisibilityChange(waveId, isChecked, checkbox);
             }
             
+            return;
+        }
+
+        if ($target.hasClass('date-compare-vizor-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const waveId = $target.data('wave-id');
+            if (waveId) {
+                this.handleDateCompareBothLayersToggle(waveId);
+            }
             return;
         }
         
@@ -1493,6 +1520,175 @@ class EventManager {
 	/** Пара handleWaveVisibilityChange: слой B, чекбокс .wave-b-visibility-check. */
 	handleWavePersonBVisibilityChange(waveId, isChecked, $checkbox) {
 		this.handleWaveLayerToggle(waveId, isChecked, $checkbox, 'b');
+	}
+
+	/**
+	 * Фактическое состояние чекбоксов A/B у волны: приоритет DOM (как видит пользователь),
+	 * иначе как в unifiedListManager.syncWavesListVisibilityFromAppState.
+	 */
+	_readWaveLayerCheckboxStates(wid) {
+		const idStr = String(wid);
+		const matchId = (cb) => String(cb.getAttribute('data-id') || '') === idStr;
+		const root = document.getElementById('wavesList');
+		let elA = root
+			? Array.from(root.querySelectorAll('.wave-visibility-check')).find(matchId)
+			: null;
+		let elB = root
+			? Array.from(root.querySelectorAll('.wave-b-visibility-check')).find(matchId)
+			: null;
+		if (!elA) {
+			elA = Array.from(document.querySelectorAll('.wave-visibility-check')).find(matchId) || null;
+		}
+		if (!elB) {
+			elB = Array.from(document.querySelectorAll('.wave-b-visibility-check')).find(matchId) || null;
+		}
+		const aChecked = elA
+			? elA.checked
+			: window.appState.waveVisibility[idStr] !== false;
+		const bChecked = elB
+			? elB.checked
+			: window.appState.waveBold[idStr] === true;
+		return { aChecked, bChecked };
+	}
+
+	/**
+	 * Выставить оба чекбокса волны в DOM без селектора [data-id="…"] (спецсимволы в id ломают querySelector).
+	 */
+	_syncWaveABCheckboxesDom(wid, checked) {
+		const idStr = String(wid);
+		const match = (cb) => String(cb.getAttribute('data-id') || '') === idStr;
+		document.querySelectorAll('.wave-visibility-check').forEach((cb) => {
+			if (match(cb)) {
+				cb.checked = checked;
+			}
+		});
+		document.querySelectorAll('.wave-b-visibility-check').forEach((cb) => {
+			if (match(cb)) {
+				cb.checked = checked;
+			}
+		});
+	}
+
+	/**
+	 * Таблица «Сравнение дат»: синхронно включить или выключить оба чекбокса волны (A и B),
+	 * без смены активной даты / селектов сравнения — только waveVisibility и waveBold.
+	 */
+	handleDateCompareBothLayersToggle(waveId) {
+		const wid = String(waveId);
+		if (!window.appState || !window.waves) {
+			return;
+		}
+
+		const groupEnabled =
+			typeof window.waves.isWaveGroupEnabled === 'function'
+				? window.waves.isWaveGroupEnabled(waveId)
+				: true;
+		const { aChecked, bChecked } = this._readWaveLayerCheckboxStates(wid);
+		let wantOn;
+		if (!groupEnabled) {
+			/* Группа выключена — всегда шаг «включить оба» (после confirm группы). */
+			wantOn = true;
+		} else {
+			/* Группа включена: оба чекбокса уже включены → выключаем оба; иначе включаем оба (синхронизация). */
+			wantOn = !(aChecked && bChecked);
+		}
+
+		const afterGraphUpdate = () => {
+			if (
+				window.unifiedListManager &&
+				typeof window.unifiedListManager.syncWavesListVisibilityFromAppState === 'function' &&
+				window.unifiedListManager.syncWavesListVisibilityFromAppState()
+			) {
+				/* чекбоксы A/B всех волн из appState */
+			} else {
+				this._syncWaveABCheckboxesDom(wid, wantOn);
+			}
+			this.updateGroupStatsForWave(waveId, wantOn);
+			if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+				window.summaryManager.debouncedUpdate();
+			}
+			if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+				window.dom.refreshShowOnVizorButtonLabels();
+			}
+		};
+
+		if (wantOn && !groupEnabled) {
+			const groupId = this.findGroupForWave(waveId);
+			if (!groupId) {
+				return;
+			}
+			const group = window.appState.data.groups.find((g) => g.id === groupId);
+			const groupName = group ? group.name : 'Неизвестная группа';
+			const shouldEnable = confirm(
+				`Группа "${groupName}" отключена. Включить её для отображения сигнала?`
+			);
+			if (!shouldEnable || !group) {
+				return;
+			}
+			group.enabled = true;
+			window.appState.waveVisibility[wid] = true;
+			window.appState.waveBold[wid] = true;
+			window.appState.saveDebounced();
+			if (this.askedGroups.has(groupId)) {
+				this.askedGroups.delete(groupId);
+			}
+			requestAnimationFrame(() => {
+				if (
+					window.unifiedListManager &&
+					typeof window.unifiedListManager.updateGroupStats === 'function'
+				) {
+					window.unifiedListManager.updateGroupStats(groupId);
+				} else if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+					window.unifiedListManager.updateWavesList();
+				}
+				document.querySelectorAll('.wave-group-toggle').forEach((el) => {
+					if (String(el.getAttribute('data-group-id')) === String(groupId)) {
+						el.checked = true;
+					}
+				});
+				this.recreateAllWaveElements();
+				this.updateGroupStatsForWave(waveId, true);
+				afterGraphUpdate();
+			});
+			if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
+				window.dom.refreshShowOnVizorButtonLabels();
+			}
+			return;
+		}
+
+		if (wantOn) {
+			window.appState.waveVisibility[wid] = true;
+			window.appState.waveBold[wid] = true;
+			window.appState.saveDebounced();
+		} else {
+			window.appState.waveVisibility[wid] = false;
+			window.appState.waveBold[wid] = false;
+			window.appState.saveDebounced();
+		}
+
+		const wave = window.appState.data.waves.find((w) => String(w.id) === wid);
+		const noContainerYet =
+			wave &&
+			!window.waves.waveContainers[wave.id] &&
+			!window.waves.waveContainers[waveId] &&
+			!window.waves.waveContainers[wid];
+		if (
+			wantOn &&
+			wave &&
+			typeof window.waves.waveNeedsGraphContainer === 'function' &&
+			window.waves.waveNeedsGraphContainer(waveId) &&
+			noContainerYet
+		) {
+			window.waves.createWaveElement(wave);
+		}
+
+		if (typeof window.waves.reconcileVisibleWaveElements === 'function') {
+			window.waves.reconcileVisibleWaveElements();
+		} else if (window.waves.updatePosition) {
+			window.waves.updatePosition({ forceWaveLabels: true });
+		}
+
+		afterGraphUpdate();
 	}
 
     handleGroupToggle(groupId, isChecked) {

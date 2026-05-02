@@ -418,6 +418,8 @@ class UnifiedListManager {
                 ...groupData,
                 waveCount: 0,
                 enabledCount: 0,
+                enabledCountA: 0,
+                enabledCountB: 0,
                 children: [],
                 expanded: false,
                 enabled: false,
@@ -426,7 +428,8 @@ class UnifiedListManager {
         }
         
         const existingWaves = [];
-        let enabledCount = 0;
+        let enabledCountA = 0;
+        let enabledCountB = 0;
         
         if (originalGroup.waves && Array.isArray(originalGroup.waves)) {
             originalGroup.waves.forEach((waveId, waveIndex) => {
@@ -440,7 +443,10 @@ class UnifiedListManager {
                     existingWaves.push(wave);
                     const waveIdStrForCheck = String(wave.id);
                     if (window.appState.waveVisibility[waveIdStrForCheck] !== false) {
-                        enabledCount++;
+                        enabledCountA++;
+                    }
+                    if (window.appState.waveBold[waveIdStrForCheck] === true) {
+                        enabledCountB++;
                     }
                 }
             });
@@ -462,7 +468,9 @@ class UnifiedListManager {
             name: originalGroup.name,
             type: 'group',
             waveCount: waveCount,
-            enabledCount: enabledCount,
+            enabledCount: enabledCountA,
+            enabledCountA: enabledCountA,
+            enabledCountB: enabledCountB,
             enabled: originalGroup.enabled !== undefined ? originalGroup.enabled : false,
             expanded: originalGroup.expanded !== undefined ? originalGroup.expanded : false,
             children: childrenData,
@@ -582,6 +590,12 @@ class UnifiedListManager {
                     }
                     if (groupData.enabledCount === undefined) {
                         groupData.enabledCount = 0;
+                    }
+                    if (groupData.enabledCountA === undefined) {
+                        groupData.enabledCountA = groupData.enabledCount || 0;
+                    }
+                    if (groupData.enabledCountB === undefined) {
+                        groupData.enabledCountB = 0;
                     }
                     
                     let renderedGroup = renderGroup({ data: groupData });
@@ -1126,7 +1140,7 @@ class UnifiedListManager {
             if (window.waves.wavePaths && window.waves.wavePaths[wave.id]) {
                 window.waves.wavePaths[wave.id].style.stroke = newColor;
             }
-            
+
             // ИСПРАВЛЕНИЕ: Найти превью по разным типам ID
             const waveIdStr = String(wave.id);
             document.querySelectorAll(`.wave-color-preview-small`).forEach(preview => {
@@ -1707,36 +1721,38 @@ class UnifiedListManager {
             return;
         }
         
-        let enabledCount = 0;
+        let enabledCountA = 0;
+        let enabledCountB = 0;
         const waveCount = group.waves ? group.waves.length : 0;
         
         if (group.waves && Array.isArray(group.waves)) {
             group.waves.forEach(waveId => {
                 const waveIdStr = String(waveId);
                 if (window.appState.waveVisibility[waveIdStr] !== false) {
-                    enabledCount++;
+                    enabledCountA++;
+                }
+                if (window.appState.waveBold[waveIdStr] === true) {
+                    enabledCountB++;
                 }
             });
         }
         
         const statsElement = groupElement.querySelector('.list-item__value .group-stats');
         if (statsElement) {
-            if (enabledCount > 0) {
-                statsElement.innerHTML = `
-                    <span class="group-enabled-count" title="Включено сигналов">
-                        Включено: ${enabledCount}
-                    </span>
-                    <span class="group-total-count" title="Всего сигналов">
-                        Сигналов: ${waveCount}
-                    </span>
-                `;
-            } else {
-                statsElement.innerHTML = `
-                    <span class="group-total-count">
-                        Сигналов: ${waveCount}
-                    </span>
-                `;
+            const parts = [
+                `<span class="group-stat-total" title="Отключить все слои (A и B) у всех сигналов группы">Всего: ${waveCount}</span>`
+            ];
+            if (enabledCountA > 0) {
+                parts.push(
+                    `<span class="group-stat-a" title="Отключить слой A у всех сигналов группы">Включено: ${enabledCountA}</span>`
+                );
             }
+            if (enabledCountB > 0) {
+                parts.push(
+                    `<span class="group-stat-b" title="Отключить слой B у всех сигналов группы">Включено: ${enabledCountB}</span>`
+                );
+            }
+            statsElement.innerHTML = parts.join('');
         }
     }
     

@@ -627,6 +627,9 @@ class DateComparisonManager {
                   ? 'Квадратура, %'
                   : 'Совпадение, %';
 
+        /* Кнопка «Показать A и B» — на всех видах таблицы этой вкладки (как в «Состояниях» / «Пересечениях»). */
+        const showBothLayersBtnCol = true;
+
         const legends = {
             phaseMatch:
                 '100% — одинаковое состояние волны (кривые совпадают по фазе); ~0% — противоположные состояния (максимальный разброс).',
@@ -646,6 +649,7 @@ class DateComparisonManager {
                         <th>Сост. A</th>
                         <th>Сост. B</th>
                         <th>${metricHeader}</th>
+                        ${showBothLayersBtnCol ? '<th class="date-comparison-actions">График</th>' : ''}
                     </tr>
                 </thead>
                 <tbody>
@@ -665,6 +669,13 @@ class DateComparisonManager {
                     cls = this._matchClass(row.pct);
                 }
                 const name = `${this._escapeHtml(row.wave.name || '')} <span class="date-comparison-period">(${row.wave.period} дн.)</span>`;
+                const vizorLabel =
+                    window.dom && typeof window.dom.getDateCompareVizorToggleLabel === 'function'
+                        ? window.dom.getDateCompareVizorToggleLabel(row.wave.id)
+                        : 'Показать A и B';
+                const vizorCell = showBothLayersBtnCol
+                    ? `<td class="date-comparison-actions"><button type="button" class="ui-btn show-on-vizor-btn date-compare-vizor-btn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
+                    : '';
                 return `<tr>
                     <td class="date-comparison-num">${idx + 1}</td>
                     <td class="date-comparison-name">
@@ -674,6 +685,7 @@ class DateComparisonManager {
                     <td>${row.stateA.toFixed(2)}</td>
                     <td>${row.stateB.toFixed(2)}</td>
                     <td><span class="intersection-result-closeness ${cls}">${metricPct.toFixed(1)}%</span></td>
+                    ${vizorCell}
                 </tr>`;
             })
             .join('');

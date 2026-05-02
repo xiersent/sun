@@ -12,6 +12,23 @@
     };
 })();
 
+/** Слой B волн / сравнение дат. Отключить: window.__SUN_DEBUG_WAVE_LAYER_B = false */
+(function initSunWaveLayerBLog() {
+    if (typeof window.sunWaveLayerBLog === 'function') {
+        return;
+    }
+    window.sunWaveLayerBLog = function sunWaveLayerBLog(message, payload) {
+        if (window.__SUN_DEBUG_WAVE_LAYER_B === false) {
+            return;
+        }
+        if (payload !== undefined) {
+            console.log('[sun:waveLayerB]', message, payload);
+        } else {
+            console.log('[sun:waveLayerB]', message);
+        }
+    };
+})();
+
 class DataManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};

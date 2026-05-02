@@ -477,11 +477,11 @@ class StateIntersectionManager {
         container.innerHTML = resultsHTML;
 
         queueMicrotask(() => {
-            container.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+            container.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
                 btn.replaceWith(btn.cloneNode(true));
             });
 
-            document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+            container.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();

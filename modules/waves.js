@@ -499,15 +499,16 @@ class WavesManager {
     
     /** Слой A: экстремум по currentDay; слой B: по дню персоны B (независимо от A). */
     setWaveStrokeColor(waveId, isExtremumA, isExtremumB = false) {
-        const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
+        const widStr = String(waveId);
+        const wave = window.appState.data.waves.find((w) => String(w.id) === widStr);
         if (!wave) return;
 
-        const path = this.wavePaths[waveId];
+        const path = this.wavePaths[waveId] || this.wavePaths[widStr];
         if (path) {
             path.style.stroke = isExtremumA ? '#ff0000' : wave.color;
         }
 
-        const pathB = this.waveBPaths[waveId];
+        const pathB = this.waveBPaths[waveId] || this.waveBPaths[widStr];
         if (pathB) {
             pathB.style.stroke = isExtremumB ? '#ff0000' : wave.color;
         }
@@ -540,6 +541,8 @@ class WavesManager {
             endTb && endTb({});
             
             if (!window.appState.hasActivePerson()) {
+                window.sunWaveLayerBLog &&
+                    window.sunWaveLayerBLog('updatePosition:skip (no active person)');
                 this.removeWaveIntersectionPoints();
                 return;
             }
@@ -551,6 +554,7 @@ class WavesManager {
             endGrid && endGrid({});
             
             const currentDay = window.appState.currentDay || 0;
+            const layerBTrace = [];
             
             const endLoop = d && d.t('waves.updatePosition.waveLoop', { currentDay });
             window.appState.data.waves.forEach(wave => {
@@ -599,7 +603,8 @@ class WavesManager {
                     currentPositionPx = wavePeriodPixels + currentPositionPx;
                 }
                 
-                const container = this.waveContainers[wave.id];
+                const container =
+                    this.waveContainers[wave.id] || this.waveContainers[waveIdStr];
                 if (container) {
                     container.style.transition = 'none';
                     container.style.transform = '';
@@ -610,7 +615,7 @@ class WavesManager {
                         waveLoopHiddenDom++;
                     }
 
-                    const path = this.wavePaths[wave.id];
+                    const path = this.wavePaths[wave.id] || this.wavePaths[waveIdStr];
                     if (path) {
                         path.classList.toggle(
                             'bold',
@@ -618,7 +623,29 @@ class WavesManager {
                         );
                     }
 
-                    const layers = this.wavePathLayerGroups[wave.id] || this.wavePathLayerGroups[waveIdStr];
+                    let layers = this.wavePathLayerGroups[wave.id] || this.wavePathLayerGroups[waveIdStr];
+                    let layerBRepairedFromDom = false;
+                    if (
+                        layers &&
+                        layers.a &&
+                        layers.b &&
+                        (!container.contains(layers.a) || !container.contains(layers.b))
+                    ) {
+                        delete this.wavePathLayerGroups[wave.id];
+                        delete this.wavePathLayerGroups[waveIdStr];
+                        layers = null;
+                    }
+                    if ((!layers || !layers.a || !layers.b) && container.querySelector) {
+                        const svg = container.querySelector('svg.wave');
+                        const gA = svg && svg.querySelector('.wave-svg-layer--a');
+                        const gB = svg && svg.querySelector('.wave-svg-layer--b');
+                        if (gA && gB) {
+                            layerBRepairedFromDom = true;
+                            layers = { a: gA, b: gB };
+                            this.wavePathLayerGroups[wave.id] = layers;
+                            this.wavePathLayerGroups[waveIdStr] = layers;
+                        }
+                    }
                     if (layers && layers.a && layers.b) {
                         layers.a.setAttribute('transform', `translate(${-currentPositionPx},0)`);
                         if (shouldShowA) {
@@ -628,23 +655,92 @@ class WavesManager {
                         }
                         if (showB) {
                             const dayB = this._getSecondPersonDayOffset();
-                            let posB =
-                                (dayB * window.appState.config.squareSize) % wavePeriodPixels;
-                            if (posB < 0) {
-                                posB = wavePeriodPixels + posB;
+                            if (dayB != null) {
+                                let posB =
+                                    (dayB * window.appState.config.squareSize) % wavePeriodPixels;
+                                if (posB < 0) {
+                                    posB = wavePeriodPixels + posB;
+                                }
+                                layers.b.setAttribute('transform', `translate(${-posB},0)`);
+                                layers.b.removeAttribute('display');
+                            } else {
+                                layers.b.setAttribute('display', 'none');
                             }
-                            layers.b.setAttribute('transform', `translate(${-posB},0)`);
-                            layers.b.removeAttribute('display');
                         } else {
                             layers.b.setAttribute('display', 'none');
                         }
                     } else {
                         container.style.transform = `translateX(${-currentPositionPx}px)`;
                     }
+
+                    if (
+                        window.sunWaveLayerBLog &&
+                        (window.appState.waveBold[waveIdStr] === true || showB)
+                    ) {
+                        const dayBForLog = this._getSecondPersonDayOffset();
+                        layerBTrace.push({
+                            waveId: waveIdStr,
+                            showB,
+                            shouldShowA,
+                            waveBold: window.appState.waveBold[waveIdStr],
+                            groupOk,
+                            containerVisible,
+                            dayB: dayBForLog,
+                            hasContainer: true,
+                            hasLayersMap: !!(layers && layers.a && layers.b),
+                            repairedFromDom: layerBRepairedFromDom,
+                            gBDisplay:
+                                layers && layers.b ? layers.b.getAttribute('display') : null,
+                            fallbackContainerTransformOnly: !(
+                                layers &&
+                                layers.a &&
+                                layers.b
+                            )
+                        });
+                    }
                 } else if (containerVisible) {
                     waveLoopNoContainer++;
+                    if (
+                        window.sunWaveLayerBLog &&
+                        (window.appState.waveBold[waveIdStr] === true || showB)
+                    ) {
+                        layerBTrace.push({
+                            waveId: waveIdStr,
+                            showB,
+                            shouldShowA,
+                            waveBold: window.appState.waveBold[waveIdStr],
+                            groupOk,
+                            containerVisible,
+                            dayB: this._getSecondPersonDayOffset(),
+                            hasContainer: false,
+                            note: 'missingContainerButVisible'
+                        });
+                    }
                 }
             });
+            if (layerBTrace.length && window.sunWaveLayerBLog) {
+                const now = Date.now();
+                const force = !!opts.forceWaveLabels;
+                const every = window.__SUN_DEBUG_WAVE_LAYER_B_EVERY_FRAME === true;
+                if (force || every || now - (this._layerBPosLogLast || 0) >= 500) {
+                    this._layerBPosLogLast = now;
+                    window.sunWaveLayerBLog('updatePosition', {
+                        forceWaveLabels: force,
+                        currentDay,
+                        globalDayB: this._getSecondPersonDayOffset(),
+                        dateSelections: window.appState.dateSelections
+                            ? { ...window.appState.dateSelections }
+                            : null,
+                        trace: layerBTrace,
+                        trace0: layerBTrace[0] || null,
+                        shouldDrawSecondPersonThisWave:
+                            layerBTrace[0] &&
+                            layerBTrace[0].waveId != null
+                                ? this._shouldDrawSecondPersonWave(String(layerBTrace[0].waveId))
+                                : null
+                    });
+                }
+            }
             endLoop &&
                 endLoop({
                     shown: waveLoopShown,

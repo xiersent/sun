@@ -75,7 +75,15 @@
 .list-error{padding: var(--spacing-sm); text-align: center; color: var(--danger-color); font-size: var(--font-size-sm); background: #f8d7da; border: 1px solid #f5c6cb;}
 
 /* Группы */
-.group-stats{font-size: var(--font-size-sm); white-space: nowrap; display: flex; gap: 8px;}
+.group-stats{font-size: var(--font-size-sm); white-space: nowrap; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;}
+.group-stat-total{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.95; cursor: pointer; text-decoration: none;}
+.group-stat-total:hover{text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 2px;}
+.group-stat-a,
+.group-stat-b{font-size: var(--font-size-xs); cursor: pointer; font-weight: 600; text-decoration: none;}
+.group-stat-a{color: #1565c0;}
+.group-stat-a:hover{color: #0d47a1; text-decoration: underline; text-decoration-color: #0d47a1; text-underline-offset: 2px;}
+.group-stat-b{color: #ef6c00;}
+.group-stat-b:hover{color: #e65100; text-decoration: underline; text-decoration-color: #e65100; text-underline-offset: 2px;}
 .group-enabled-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8; cursor: pointer;}
 .group-total-count{color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
 .list-item--group.list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}

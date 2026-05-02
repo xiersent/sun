@@ -365,11 +365,11 @@ class SummaryManager {
 		resultsElement.innerHTML = resultsHTML;
 
 		queueMicrotask(() => {
-			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+			resultsElement.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
 				btn.replaceWith(btn.cloneNode(true));
 			});
 
-			document.querySelectorAll('.show-on-vizor-btn').forEach(btn => {
+			resultsElement.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
 				btn.addEventListener('click', (e) => {
 					e.preventDefault();
 					e.stopPropagation();
