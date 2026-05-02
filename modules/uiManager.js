@@ -148,7 +148,7 @@ class UIManager {
     syncExtremumWaveColorHighlightButton() {
         const btn = document.getElementById('btnExtremumWaveColorHighlight');
         if (!btn) return;
-        const on = window.appState.extremumWaveColorHighlight !== false;
+        const on = window.appState.extremumWaveColorHighlight === true;
         btn.classList.toggle('ui-btn-toggle-off', !on);
         btn.title = on
             ? 'Окраска волн и выносок при экстремумах включена'
@@ -157,7 +157,7 @@ class UIManager {
     }
     
     toggleExtremumWaveColors() {
-        const next = !(window.appState.extremumWaveColorHighlight !== false);
+        const next = window.appState.extremumWaveColorHighlight !== true;
         window.appState.extremumWaveColorHighlight = next;
         this.syncExtremumWaveColorHighlightButton();
         if (window.waves && window.waves.updatePosition) {

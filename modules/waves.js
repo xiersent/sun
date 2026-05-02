@@ -494,7 +494,7 @@ class WavesManager {
     }
     
     isExtremumHighlightEnabled() {
-        return window.appState && window.appState.extremumWaveColorHighlight !== false;
+        return window.appState && window.appState.extremumWaveColorHighlight === true;
     }
     
     /** Слой A: экстремум по currentDay; слой B: по дню персоны B (независимо от A). */

@@ -289,7 +289,7 @@ class ImportExportManager {
                             window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
                             window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
                             window.appState.waveIntersectionsVisible = convertedData.uiSettings.waveIntersectionsVisible !== undefined ? convertedData.uiSettings.waveIntersectionsVisible : true;
-                            window.appState.extremumWaveColorHighlight = convertedData.uiSettings.extremumWaveColorHighlight !== undefined ? convertedData.uiSettings.extremumWaveColorHighlight : true;
+                            window.appState.extremumWaveColorHighlight = convertedData.uiSettings.extremumWaveColorHighlight !== undefined ? convertedData.uiSettings.extremumWaveColorHighlight : false;
                             
                             if (window.appState.uiHidden) {
                                 document.body.classList.add('ui-hidden');

@@ -75,9 +75,8 @@
 .date-comparison-selects{gap: var(--spacing-md); align-items: flex-end;}
 .date-comparison-selects .intersection-select-group{flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 4px;}
 .date-comparison-selects .intersection-form-label{cursor: default;}
-.date-comparison-legend{font-size: 11px; color: #666; margin: 0 0 var(--spacing-sm); line-height: 1.4;}
 .date-comparison-table{width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);}
-.date-comparison-table th{text-align: left; padding: 8px 6px; border-bottom: 2px solid var(--clg); background: #f8f9fa; font-weight: 600;}
+.date-comparison-table th{text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--clg); background: #f8f9fa; font-weight: 600;}
 .date-comparison-table td{padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: middle;}
 .date-comparison-table tbody tr:hover{background-color: #f0f4f8;}
 .date-comparison-num{color: var(--text-secondary); width: 2.2rem; text-align: right;}

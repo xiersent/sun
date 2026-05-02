@@ -49,7 +49,7 @@ class AppState {
                     typeB: null
                 },
                 waveIntersectionsVisible: true,
-                extremumWaveColorHighlight: true,
+                extremumWaveColorHighlight: false,
                 displayViewTemplates: [],
                 activeDisplayViewTemplateId: '__display_standard__'
             }
@@ -263,7 +263,7 @@ class AppState {
                 this.graphGrayMode = data.uiSettings.graphGrayMode !== undefined ? data.uiSettings.graphGrayMode : false;
                 this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
                 this.waveIntersectionsVisible = data.uiSettings.waveIntersectionsVisible !== undefined ? data.uiSettings.waveIntersectionsVisible : true;
-                this.extremumWaveColorHighlight = data.uiSettings.extremumWaveColorHighlight !== undefined ? data.uiSettings.extremumWaveColorHighlight : true;
+                this.extremumWaveColorHighlight = data.uiSettings.extremumWaveColorHighlight !== undefined ? data.uiSettings.extremumWaveColorHighlight : false;
                 
                 this.editingDateId = null;
                 this.editingWaveId = null;
@@ -451,7 +451,7 @@ class AppState {
         this.graphGrayMode = false;
         this.cornerSquaresVisible = true;
         this.waveIntersectionsVisible = true;
-        this.extremumWaveColorHighlight = true;
+        this.extremumWaveColorHighlight = false;
         this.activeDateId = null;
         
         this.editingDateId = null;

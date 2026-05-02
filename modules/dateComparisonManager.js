@@ -630,16 +630,6 @@ class DateComparisonManager {
         /* Кнопка «Показать A и B» — на всех видах таблицы этой вкладки (как в «Состояниях» / «Пересечениях»). */
         const showBothLayersBtnCol = true;
 
-        const legends = {
-            phaseMatch:
-                '100% — одинаковое состояние волны (кривые совпадают по фазе); ~0% — противоположные состояния (максимальный разброс).',
-            phaseGap:
-                'Разность фаз: 100% — максимальное расхождение фаз (противофаза), 0% — полное совпадение. Список от большей разности к меньшей.',
-            quadrature:
-                'Квадратура фаз: при модуле разности состояний около 5 (между совпадением и противофазой на шкале −5…+5) сдвиг близок к четверти периода синусоиды. 100% — близко к этому режиму; список от лучшего совпадения с квадратурой.'
-        };
-        const legendText = legends[mode] || legends.phaseMatch;
-
         const head = `
             <table class="date-comparison-table">
                 <thead>
@@ -691,11 +681,7 @@ class DateComparisonManager {
             .join('');
         const foot = '</tbody></table>';
 
-        this.elTableWrap.innerHTML =
-            `<p class="date-comparison-legend">${this._escapeHtml(legendText)}</p>` +
-            head +
-            body +
-            foot;
+        this.elTableWrap.innerHTML = head + body + foot;
     }
 
     _escapeHtml(s) {
