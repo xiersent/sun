@@ -125,6 +125,7 @@
                     <div class="tab-buttons">
                         <button class="tab-button" data-tab="summary">Состояния</button>
                         <button class="tab-button" data-tab="intersections">Пересечения</button>
+                        <button class="tab-button" data-tab="dateCompare">Сравнение дат</button>
                     </div>
                     
                     <div class="tab-content" id="summary-tab">
@@ -220,6 +221,32 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="dateCompare-tab">
+                        <div class="panel-section" id="dateComparePanel">
+                            <div class="summary-header">
+                                <h3>Сравнение волн для двух дат</h3>
+                            </div>
+                            <p class="date-comparison-intro" id="dateCompareVizorHint"></p>
+                            <div class="summary-controls">
+                                <div class="intersection-form">
+                                    <div class="intersection-form-row date-comparison-selects">
+                                        <div class="intersection-select-group">
+                                            <label class="intersection-form-label" for="dateCompareSelectA">Дата A</label>
+                                            <select class="summary-select" id="dateCompareSelectA"></select>
+                                        </div>
+                                        <div class="intersection-select-group">
+                                            <label class="intersection-form-label" for="dateCompareSelectB">Дата B</label>
+                                            <select class="summary-select" id="dateCompareSelectB"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="summary-results-container intersection-results-container">
+                                <div class="summary-results" id="dateCompareResults"></div>
                             </div>
                         </div>
                     </div>
@@ -366,6 +393,7 @@
     <script src="modules/uiManager.js"></script>
     <script src="modules/unifiedListManager.js"></script>
     <script src="modules/waves.js"></script>
+    <script src="modules/dateComparisonManager.js"></script>
     <script src="modules/init.js"></script>
     <script>window.__loadPerf && window.__loadPerf.mark('local_modules_parse_done');</script>
 

@@ -154,6 +154,10 @@ async function finalizeInitialization() {
         __lp && __lp.phaseEnd('finalize_summary');
     }
 
+    if (window.dateComparisonManager && window.dateComparisonManager.refresh) {
+        window.dateComparisonManager.refresh();
+    }
+
     const mainDateInputDate = document.getElementById('mainDateInputDate');
     const mainDateInputTime = document.getElementById('mainDateInputTime');
 

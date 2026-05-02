@@ -1570,6 +1570,12 @@ class WavesManager {
         document.getElementById('currentDay').textContent = 
             window.appState.currentDay.toFixed(5) + 
             ` (${milliseconds}ms)`;
+        if (window.dates) {
+            window.dates.lastRecalculateUsedExactTime = true;
+        }
+        if (window.dateComparisonManager && window.dateComparisonManager.debouncedUpdate) {
+            window.dateComparisonManager.debouncedUpdate();
+        }
         } finally {
             end && end({});
         }

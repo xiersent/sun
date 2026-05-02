@@ -939,6 +939,10 @@ class EventManager {
                     if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
                         window.unifiedListManager.updateDatesList();
                     }
+
+                    if (window.dateComparisonManager && window.dateComparisonManager.syncSelectsFromAppState) {
+                        window.dateComparisonManager.syncSelectsFromAppState();
+                    }
                     
                     if (window.summaryManager && window.summaryManager.updateSummary) {
                         window.summaryManager.updateSummary();
@@ -996,6 +1000,9 @@ class EventManager {
                 if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
                     window.unifiedListManager.updateDatesList();
                 }
+                if (window.dateComparisonManager && window.dateComparisonManager.syncSelectsFromAppState) {
+                    window.dateComparisonManager.syncSelectsFromAppState();
+                }
                 return;
             } else {
                 return;
@@ -1028,6 +1035,9 @@ class EventManager {
         
         if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
             window.unifiedListManager.updateDatesList();
+        }
+        if (window.dateComparisonManager && window.dateComparisonManager.syncSelectsFromAppState) {
+            window.dateComparisonManager.syncSelectsFromAppState();
         }
     }
     

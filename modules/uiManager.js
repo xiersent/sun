@@ -493,6 +493,12 @@ class UIManager {
                 window.stateIntersectionManager.updateIntersections();
             });
         }
+
+        if (tabId === 'dateCompare' && window.dateComparisonManager) {
+            queueMicrotask(() => {
+                window.dateComparisonManager.updateComparison();
+            });
+        }
     }
     
     activateTab(tabButton) {

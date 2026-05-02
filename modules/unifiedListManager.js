@@ -184,9 +184,17 @@ class UnifiedListManager {
         const editingDateIdStr = window.appState.editingDateId ? String(window.appState.editingDateId) : null;
         const dateObjIdStr = String(dateObj.id);
         
-        // Состояния выделения
-        const isSelectedTypeA = window.appState.dateSelections.typeA === dateObj.id;
-        const isSelectedTypeB = window.appState.dateSelections.typeB === dateObj.id;
+        // Состояния выделения (id могут быть строкой/числом)
+        const typeAStr =
+            window.appState.dateSelections && window.appState.dateSelections.typeA != null
+                ? String(window.appState.dateSelections.typeA)
+                : '';
+        const typeBStr =
+            window.appState.dateSelections && window.appState.dateSelections.typeB != null
+                ? String(window.appState.dateSelections.typeB)
+                : '';
+        const isSelectedTypeA = typeAStr !== '' && typeAStr === dateObjIdStr;
+        const isSelectedTypeB = typeBStr !== '' && typeBStr === dateObjIdStr;
         
         return {
             id: dateObj.id,

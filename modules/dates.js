@@ -2,6 +2,8 @@
 class DatesManager {
     constructor() {
         this.elements = {};
+        /** Какой режим использовался в последнем recalculateCurrentDay (для согласованности с панелями). */
+        this.lastRecalculateUsedExactTime = true;
         this.cacheElements();
     }
     
@@ -540,7 +542,50 @@ class DatesManager {
     }
 
     
+    /**
+     * Смещение в днях от даты рождения (начало локального дня) до момента на визоре.
+     * Та же логика, что в recalculateCurrentDay.
+     */
+    computeDayOffsetFromBirth(birthTimeMs, vizorDate, useExactTime) {
+        const currentDate = window.timeUtils
+            ? window.timeUtils.toLocalDate(vizorDate)
+            : new Date(vizorDate);
+        const baseDate = window.timeUtils
+            ? window.timeUtils.toLocalDate(birthTimeMs)
+            : new Date(birthTimeMs);
+
+        const utcCurrent = Date.UTC(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            currentDate.getDate()
+        );
+        const utcBase = Date.UTC(
+            baseDate.getFullYear(),
+            baseDate.getMonth(),
+            baseDate.getDate()
+        );
+        const diffMsStart = utcCurrent - utcBase;
+        const daysStart = diffMsStart / (1000 * 60 * 60 * 24);
+
+        const hours = currentDate.getHours();
+        const minutes = currentDate.getMinutes();
+        const seconds = currentDate.getSeconds();
+        const milliseconds = currentDate.getMilliseconds();
+        const timeOfDayFraction =
+            (hours * 60 * 60 * 1000 +
+                minutes * 60 * 1000 +
+                seconds * 1000 +
+                milliseconds) /
+            (24 * 60 * 60 * 1000);
+
+        if (useExactTime) {
+            return Math.floor(daysStart) + timeOfDayFraction;
+        }
+        return Math.round(daysStart);
+    }
+
     recalculateCurrentDay(useExactTime = false) {
+        this.lastRecalculateUsedExactTime = !!useExactTime;
         const currentDate = window.appState.currentDate;
         
         let baseDate;
@@ -589,6 +634,10 @@ class DatesManager {
         
         this.updateCurrentDayElement();
         window.appState.save();
+        
+        if (window.dateComparisonManager && window.dateComparisonManager.debouncedUpdate) {
+            window.dateComparisonManager.debouncedUpdate();
+        }
         
         return window.appState.currentDay;
     }

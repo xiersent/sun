@@ -11,6 +11,9 @@ class DataManager {
         if (window.unifiedListManager.updateDatesList) {
             window.unifiedListManager.updateDatesList();
         }
+        if (window.dateComparisonManager && window.dateComparisonManager.refresh) {
+            window.dateComparisonManager.refresh();
+        }
     }
     
     async updateWavesGroups() {
@@ -30,6 +33,9 @@ class DataManager {
 
         if (window.summaryManager && window.summaryManager.refresh) {
             window.summaryManager.refresh();
+        }
+        if (window.dateComparisonManager && window.dateComparisonManager.refresh) {
+            window.dateComparisonManager.refresh();
         }
     }
 }
