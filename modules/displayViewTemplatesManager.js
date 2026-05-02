@@ -177,13 +177,12 @@
                 window.eventManager.recreateAllWaveElements();
             } else if (window.waves) {
                 document.querySelectorAll('.wave-container').forEach((c) => c.remove());
-                window.waves.waveContainers = {};
-                window.waves.wavePaths = {};
+                window.waves.clearWaveDomReferences();
                 window.appState.data.waves.forEach((wave) => {
-                    const waveIdStr = String(wave.id);
-                    const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-                    const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
-                    if (isWaveVisible && isGroupEnabled) {
+                    if (
+                        typeof window.waves.waveNeedsGraphContainer === 'function' &&
+                        window.waves.waveNeedsGraphContainer(wave.id)
+                    ) {
                         window.waves.createWaveElement(wave);
                     }
                 });

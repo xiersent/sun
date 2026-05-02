@@ -264,7 +264,12 @@ class PreciseIntersectionManager {
     }
     
     getActiveWaves() {
-        return window.appState.data.waves.filter(wave => {
+        if (window.waves && typeof window.waves.waveNeedsGraphContainer === 'function') {
+            return window.appState.data.waves.filter((wave) =>
+                window.waves.waveNeedsGraphContainer(wave.id)
+            );
+        }
+        return window.appState.data.waves.filter((wave) => {
             const waveIdStr = String(wave.id);
             const isVisible = window.appState.waveVisibility[waveIdStr] !== false;
             const isGroupEnabled = window.waves?.isWaveGroupEnabled?.(wave.id) || true;

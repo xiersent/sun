@@ -485,6 +485,7 @@ class UnifiedListManager {
             typeValue: wave.type,
             description: window.dom.getWaveDescription(wave.type),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
+            // UI: вторая персона B; ключ в состоянии по истории — waveBold
             bold: window.appState.waveBold[waveIdStr] || false,
             cornerColor: window.appState.waveCornerColor[waveIdStr] || false,
             editing: editingWaveIdStr === waveIdStr,
@@ -1025,14 +1026,26 @@ class UnifiedListManager {
         // Обновляем отображение на графике
         if (window.waves.wavePaths && window.waves.wavePaths[waveId]) {
             window.waves.wavePaths[waveId].style.stroke = newColor;
-            
+
             const path = window.waves.wavePaths[waveId];
             path.classList.remove('solid', 'dashed', 'dotted', 'zigzag', 'dash-dot', 'long-dash');
             if (newType !== 'solid') {
                 path.classList.add(newType);
             }
-            
-            path.classList.toggle('bold', window.appState.waveBold[waveId]);
+
+            const boldOn =
+                typeof window.waves.isBoldStrokeVisualEnabled === 'function' &&
+                window.waves.isBoldStrokeVisualEnabled() &&
+                window.appState.waveBold[waveId];
+            path.classList.toggle('bold', !!boldOn);
+        }
+        if (window.waves.waveBPaths && window.waves.waveBPaths[waveId]) {
+            const pathB = window.waves.waveBPaths[waveId];
+            pathB.style.stroke = newColor;
+            pathB.classList.remove('solid', 'dashed', 'dotted', 'zigzag', 'dash-dot', 'long-dash');
+            if (newType !== 'solid') {
+                pathB.classList.add(newType);
+            }
         }
         
         // Пересоздаем элемент волны
@@ -1261,8 +1274,11 @@ class UnifiedListManager {
         if (window.dateComparisonManager && window.dateComparisonManager.updateComparison) {
             window.dateComparisonManager.updateComparison();
         }
+        if (window.waves && typeof window.waves.updatePosition === 'function') {
+            window.waves.updatePosition();
+        }
     }
-    
+
 
     updateWavesList() {
         const wrd = window.__waveRenderDebug;

@@ -41,6 +41,7 @@ class AppState {
                 cornerSquaresVisible: true,
                 activeDateId: null,
                 waveVisibility: {},
+                /** По ключам id волны: показать на графике полупрозрачный слой для персоны B (dateSelections.typeB). Имя поля историческое. */
                 waveBold: {},
                 waveCornerColor: {},
                 dateSelections: {
@@ -365,6 +366,7 @@ class AppState {
                         typeB: null
                     };
                 }
+                this.data.uiSettings.dateSelections = this.dateSelections;
                 if (this.activeDateId != null) {
                     const aStr = String(this.activeDateId);
                     if (String(this.dateSelections.typeA || '') !== aStr) {

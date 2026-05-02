@@ -3,6 +3,8 @@
 .wave{position: absolute; width: 100%; height: 100%; left: 0; top: 50%; transform: translateY(-50%);}
 .wave-path{fill: none; stroke-width: 1.5px; stroke-linecap: round;}
 .wave-path.bold{stroke-width: 3px;}
+.wave-svg-layer--b{opacity: 0.45;}
+.wave-path--person-b{pointer-events: none;}
 .wave-path.solid{stroke-dasharray: none;}
 .wave-path.dashed{stroke-dasharray: 5px;}
 .wave-path.dotted{stroke-dasharray: 2px;}

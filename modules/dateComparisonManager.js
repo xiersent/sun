@@ -228,6 +228,9 @@ class DateComparisonManager {
         this._updateRaf = requestAnimationFrame(() => {
             this._updateRaf = null;
             this.updateComparison();
+            if (window.waves && typeof window.waves.updatePosition === 'function') {
+                window.waves.updatePosition();
+            }
         });
     }
 
@@ -235,6 +238,9 @@ class DateComparisonManager {
     refresh() {
         this.ensureSelectsSyncedWithDateList();
         this.updateComparison();
+        if (window.waves && typeof window.waves.updatePosition === 'function') {
+            window.waves.updatePosition();
+        }
     }
 
     _onSelectChange(which) {
@@ -269,6 +275,9 @@ class DateComparisonManager {
     syncSelectsFromAppState() {
         this.applySelectValuesFromDateSelections();
         this.updateComparison();
+        if (window.waves && typeof window.waves.updatePosition === 'function') {
+            window.waves.updatePosition();
+        }
     }
 
     _applySelectsToDateSelections() {
@@ -334,6 +343,9 @@ class DateComparisonManager {
         window.appState.dateSelections.typeA = a;
         window.appState.dateSelections.typeB = b;
         window.appState.save();
+        if (window.waves && typeof window.waves.updatePosition === 'function') {
+            window.waves.updatePosition();
+        }
     }
 
     _resolveDuplicateSelection(changedWhich) {
@@ -543,6 +555,11 @@ class DateComparisonManager {
             this.elTableWrap.innerHTML =
                 '<div class="summary-empty">Добавьте в список как минимум две даты, чтобы сравнить волны.</div>';
             return;
+        }
+
+        // Чекбоксы A/B в списке дат меняют dateSelections напрямую; селекты должны совпадать перед чтением id.
+        if (this.elA && this.elB) {
+            this.applySelectValuesFromDateSelections();
         }
 
         const idA = this.elA ? this.elA.value : '';

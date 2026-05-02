@@ -500,6 +500,9 @@ class UIManager {
         if (tabId === 'dateCompare' && window.dateComparisonManager) {
             queueMicrotask(() => {
                 window.dateComparisonManager.updateComparison();
+                if (window.waves && typeof window.waves.updatePosition === 'function') {
+                    window.waves.updatePosition();
+                }
             });
         }
     }

@@ -349,13 +349,12 @@ class ImportExportManager {
                                 container.remove();
                             });
                             
-                            window.waves.waveContainers = {};
-                            window.waves.wavePaths = {};
-                            
+                            window.waves.clearWaveDomReferences();
+
                             window.appState.data.waves.forEach(wave => {
                                 window.waves.createWaveElement(wave);
                             });
-                            
+
                             window.dataManager.updateDateList();
                             window.dataManager.updateWavesGroups();
                             if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.init) {
@@ -451,13 +450,12 @@ class ImportExportManager {
                                 container.remove();
                             });
                             
-                            window.waves.waveContainers = {};
-                            window.waves.wavePaths = {};
-                            
+                            window.waves.clearWaveDomReferences();
+
                             window.appState.data.waves.forEach(wave => {
                                 window.waves.createWaveElement(wave);
                             });
-                            
+
                             window.dataManager.updateWavesGroups();
                             if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.init) {
                                 window.displayViewTemplatesManager.init();

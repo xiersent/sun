@@ -1283,11 +1283,18 @@ class EventManager {
         if ($target.hasClass('wave-bold-check')) {
             e.stopPropagation();
             const waveId = $target.data('id');
-            
+
             if (waveId && window.appState) {
+                // Семантика: полупрозрачная волна для даты B (ключ исторически waveBold).
                 window.appState.waveBold[waveId] = $target.prop('checked');
                 window.appState.save();
-                if (window.waves) window.waves.updatePosition();
+                if (window.waves) {
+                    if (typeof window.waves.reconcileVisibleWaveElements === 'function') {
+                        window.waves.reconcileVisibleWaveElements();
+                    } else {
+                        window.waves.updatePosition();
+                    }
+                }
 
                 if (window.summaryManager && window.summaryManager.updateSummary) {
                     window.summaryManager.updateSummary();
@@ -1450,11 +1457,14 @@ class EventManager {
 			const wave = window.appState.data.waves.find(w => String(w.id) === waveIdStr);
 			const isGroupEnabled = window.waves.isWaveGroupEnabled(waveId);
 			const shouldShow = isChecked && isGroupEnabled;
-			
-			if (shouldShow) {
-				if (!window.waves.waveContainers[waveId] && wave) {
-					window.waves.createWaveElement(wave);
-				}
+
+			if (
+				wave &&
+				typeof window.waves.waveNeedsGraphContainer === 'function' &&
+				window.waves.waveNeedsGraphContainer(waveId) &&
+				!window.waves.waveContainers[waveId]
+			) {
+				window.waves.createWaveElement(wave);
 			}
 			
 			if (window.waves && window.waves.updatePosition) {
@@ -1491,17 +1501,14 @@ class EventManager {
                 requestAnimationFrame(() => {
                     $('.wave-container').remove();
                     if (window.waves) {
-                        window.waves.waveContainers = {};
-                        window.waves.wavePaths = {};
+                        window.waves.clearWaveDomReferences();
                     }
 
-                    window.appState.data.waves.forEach(wave => {
-                        const waveIdStr = String(wave.id);
-                        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-                        const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
-                        const shouldShow = isWaveVisible && isGroupEnabled;
-
-                        if (shouldShow) {
+                    window.appState.data.waves.forEach((wave) => {
+                        if (
+                            typeof window.waves.waveNeedsGraphContainer === 'function' &&
+                            window.waves.waveNeedsGraphContainer(wave.id)
+                        ) {
                             window.waves.createWaveElement(wave);
                         }
                     });
@@ -1660,17 +1667,14 @@ class EventManager {
         try {
             $('.wave-container').remove();
             if (window.waves) {
-                window.waves.waveContainers = {};
-                window.waves.wavePaths = {};
+                window.waves.clearWaveDomReferences();
             }
-            
-            window.appState.data.waves.forEach(wave => {
-                const waveIdStr = String(wave.id);
-                const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-                const isGroupEnabledNow = window.waves.isWaveGroupEnabled(wave.id);
-                const shouldShow = isWaveVisible && isGroupEnabledNow;
-                
-                if (shouldShow) {
+
+            window.appState.data.waves.forEach((wave) => {
+                if (
+                    typeof window.waves.waveNeedsGraphContainer === 'function' &&
+                    window.waves.waveNeedsGraphContainer(wave.id)
+                ) {
                     window.waves.createWaveElement(wave);
                     recreated++;
                 }
