@@ -207,13 +207,13 @@ class DatesManager {
             } else {
                 window.appState.activeDateId = null;
                 window.appState.baseDate = window.timeUtils.nowTimestamp();
-                this.recalculateCurrentDay();
+                this.recalculateCurrentDay(false, { skipSave: true });
                 this.updateCurrentDayElement();
                 if (window.waves && window.waves.createVisibleWaveElements) {
                     window.waves.createVisibleWaveElements();
                 }
-                if (window.grid && window.grid.createGrid) {
-                    window.grid.createGrid();
+                if (window.grid && window.grid.refreshForCurrentDay) {
+                    window.grid.refreshForCurrentDay();
                 } else if (window.grid && window.grid.updateCenterDate) {
                     window.grid.updateCenterDate();
                 }
@@ -295,7 +295,7 @@ class DatesManager {
             }
         }
         
-        this.recalculateCurrentDay(useExactTime);
+        this.recalculateCurrentDay(useExactTime, { skipSave: true });
         
         this.updateCurrentDayElement();
         
@@ -332,8 +332,8 @@ class DatesManager {
         }
         
         if (window.grid) {
-            if (window.grid.createGrid) {
-                window.grid.createGrid();
+            if (window.grid.refreshForCurrentDay) {
+                window.grid.refreshForCurrentDay();
             }
             if (window.grid.updateCenterDate) {
                 window.grid.updateCenterDate();
@@ -494,10 +494,10 @@ class DatesManager {
             window.timeUtils.toLocalDate(newDate) : 
             newDate;
         
-        this.recalculateCurrentDay(false);
-        window.waves.updatePosition();
-        window.grid.createGrid();
+        this.recalculateCurrentDay(false, { skipSave: true });
+        window.grid.refreshForCurrentDay();
         window.grid.updateCenterDate();
+        window.waves.updatePosition();
         window.appState.save();
         
         this.updateTodayButton();
@@ -524,11 +524,11 @@ class DatesManager {
             window.appState.currentDate = window.timeUtils.parseStringToLocal(newDate);
         }
         
-        this.recalculateCurrentDay(useExactTime);
+        this.recalculateCurrentDay(useExactTime, { skipSave: true });
         
-        window.waves.updatePosition();
-        window.grid.createGrid();
+        window.grid.refreshForCurrentDay();
         window.grid.updateCenterDate();
+        window.waves.updatePosition();
         window.appState.save();
         
         this.updateTodayButton();
@@ -591,7 +591,12 @@ class DatesManager {
         return Math.round(daysStart);
     }
 
-    recalculateCurrentDay(useExactTime = false) {
+    /**
+     * @param {boolean} useExactTime
+     * @param {{ skipSave?: boolean }} [options] skipSave: не писать localStorage (вызывающий сделает save один раз в конце)
+     */
+    recalculateCurrentDay(useExactTime = false, options = {}) {
+        const skipSave = options.skipSave === true;
         this.lastRecalculateUsedExactTime = !!useExactTime;
         const currentDate = window.appState.currentDate;
         
@@ -640,7 +645,9 @@ class DatesManager {
         window.appState.virtualPosition = daysDiff * window.appState.config.squareSize;
         
         this.updateCurrentDayElement();
-        window.appState.save();
+        if (!skipSave) {
+            window.appState.save();
+        }
         
         if (window.dateComparisonManager && window.dateComparisonManager.debouncedUpdate) {
             window.dateComparisonManager.debouncedUpdate();
@@ -654,10 +661,10 @@ class DatesManager {
         
         window.appState.currentDate = new Date(todayStart);
         
-        this.recalculateCurrentDay(false);
+        this.recalculateCurrentDay(false, { skipSave: true });
         
-        if (window.grid && window.grid.createGrid) {
-            window.grid.createGrid();
+        if (window.grid && window.grid.refreshForCurrentDay) {
+            window.grid.refreshForCurrentDay();
         }
         
         window.grid.updateCenterDate();
@@ -680,15 +687,15 @@ class DatesManager {
     goToNow() {
         window.appState.currentDate = new Date();
         
-        this.recalculateCurrentDay(true);
+        this.recalculateCurrentDay(true, { skipSave: true });
         
-        window.grid.createGrid();
+        window.grid.refreshForCurrentDay();
         window.grid.updateCenterDate();
         window.waves.updatePosition();
         window.appState.save();
         
         this.updateTodayButton();
-
+        
         if (window.summaryManager && window.summaryManager.updateSummary) {
             window.summaryManager.updateSummary();
         }
@@ -709,9 +716,9 @@ class DatesManager {
             
             window.appState.currentDate = newDate;
             
-            this.recalculateCurrentDay(true);
+            this.recalculateCurrentDay(true, { skipSave: true });
             
-            window.grid.createGrid();
+            window.grid.refreshForCurrentDay();
             window.grid.updateCenterDate();
             window.waves.updatePosition();
             window.appState.save();
@@ -793,8 +800,8 @@ class DatesManager {
         }
         
         if (window.grid) {
-            if (window.grid.createGrid) {
-                window.grid.createGrid();
+            if (window.grid.refreshForCurrentDay) {
+                window.grid.refreshForCurrentDay();
             }
             if (window.grid.updateCenterDate) {
                 window.grid.updateCenterDate();

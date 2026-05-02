@@ -228,9 +228,8 @@ class DateComparisonManager {
         this._updateRaf = requestAnimationFrame(() => {
             this._updateRaf = null;
             this.updateComparison();
-            if (window.waves && typeof window.waves.updatePosition === 'function') {
-                window.waves.updatePosition();
-            }
+            // updatePosition уже вызывается из dates.setDate / navigateDay / setActiveDate и т.д.;
+            // повтор на следующем кадре давал полную пересборку выносок и точек пересечений дважды.
         });
     }
 

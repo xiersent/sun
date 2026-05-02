@@ -3,6 +3,8 @@ class GridManager {
         this.gridElements = [];
         this.gridContainer = null;
         this.staticElementsContainer = null;
+        /** Сигнатура раскладки; при смене — нужен полный createGrid */
+        this._lastGridLayoutSignature = null;
     }
     
     calculateGridPosition(offset) {
@@ -66,7 +68,56 @@ class GridManager {
 		}
 		
 		this.updateGridNotesHighlight();
+        this._lastGridLayoutSignature = this._getGridLayoutSignature();
 	}
+
+    _getGridLayoutSignature() {
+        const c = window.appState.config;
+        return [c.gridSquaresX, c.squareSize, window.appState.graphWidth, window.appState.graphHeight].join('|');
+    }
+
+    /**
+     * Быстрое обновление при смене currentDay / currentDate на визоре без сноса DOM сетки.
+     * Если сетки нет или изменилась геометрия — вызывает createGrid().
+     */
+    refreshForCurrentDay() {
+        if (!window.appState.hasActivePerson()) {
+            this.clearGrid();
+            this.updateCenterDate();
+            return;
+        }
+        const sig = this._getGridLayoutSignature();
+        if (!this.gridContainer || !this.staticElementsContainer || this._lastGridLayoutSignature !== sig) {
+            this.createGrid();
+            return;
+        }
+        this.updateGridOffset();
+        this.updateDateLabels();
+        this.updateGridNotesHighlight();
+        this._syncGridLineActivesForVizor();
+    }
+
+    _syncGridLineActivesForVizor() {
+        const currentDay = window.appState.currentDay || 0;
+        const integerPart = Math.floor(currentDay);
+        const fractionalPart = currentDay - integerPart;
+        this.gridElements.forEach((wrapper) => {
+            const line = wrapper.querySelector('.grid-line-inner');
+            if (!line) return;
+            const offset = parseInt(wrapper.getAttribute('data-day-offset'), 10);
+            if (Number.isNaN(offset)) return;
+            const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
+            line.classList.toggle('active', isExactlyOnLine);
+            if (line.classList.contains('has-notes')) {
+                return;
+            }
+            if (isExactlyOnLine) {
+                line.style.backgroundColor = '#666';
+            } else {
+                line.style.backgroundColor = '';
+            }
+        });
+    }
     
     createGridLine(offset) {
         if (!this.gridContainer) return;
@@ -224,7 +275,8 @@ class GridManager {
         this.gridElements = [];
         this.gridContainer = null;
         this.staticElementsContainer = null;
-        
+        this._lastGridLayoutSignature = null;
+
         document.querySelectorAll('.labels:not(.center-date-label), .grid-line, .grid-line-inner, .grid-wrapper').forEach(el => {
             el.remove();
         });

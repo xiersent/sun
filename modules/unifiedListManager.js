@@ -974,10 +974,10 @@ class UnifiedListManager {
             
             if (String(window.appState.activeDateId) === String(dateId)) {
                 window.appState.baseDate = newDate.getTime();
-                window.dates.recalculateCurrentDay();
-                window.waves.updatePosition();
+                window.dates.recalculateCurrentDay(false, { skipSave: true });
+                window.grid.refreshForCurrentDay();
                 window.grid.updateCenterDate();
-                window.grid.createGrid();
+                window.waves.updatePosition();
                 window.grid.updateGridNotesHighlight();
             }
             

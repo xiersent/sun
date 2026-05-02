@@ -5,6 +5,59 @@
 .wave-path.bold{stroke-width: 3px;}
 .wave-svg-layer--b{opacity: 0.45;}
 .wave-path--person-b{pointer-events: none;}
+
+/* Выноски и метки времени для персоны B — как слой волны: ниже непрозрачность, другой контур */
+.wave-label.wave-label--person-b{
+    opacity: 0.5;
+    font-style: italic;
+    font-weight: 400;
+    outline: 1px dashed rgba(255, 255, 255, 0.42);
+    outline-offset: -1px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.wave-label.wave-label--person-b:hover{
+    opacity: 0.88;
+}
+.wave-label.wave-label--person-b .wave-label-text{
+    letter-spacing: 0.35px;
+}
+
+/* Горизонтальные выноски B: тонкий усик только со стороны выноски (стрелка к графику), не у края с названием */
+.wave-label.horizontal.wave-label--person-b{
+    overflow: visible;
+}
+.wave-label.horizontal.wave-label--person-b::before{
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 2px;
+    margin-top: -1px;
+    /* Цвет заливки подложки, не currentColor (текст белый на светлом фоне усик пропадал) */
+    background: var(--wave-label-fill, #888);
+    opacity: 0.95;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 1px;
+}
+/* Левая колонка выносок */
+.wave-label.horizontal.left.wave-label--person-b::before{
+    left: 0;
+    transform: translateX(-100%);
+}
+/* Правая колонка выносок */
+.wave-label.horizontal.right.wave-label--person-b::before{
+    right: 0;
+    transform: translateX(100%);
+}
+
+.wave-axis-x-point.wave-axis-x-point--person-b{
+    opacity: 0.45;
+    border-style: dashed;
+}
+.wave-axis-x-point.wave-axis-x-point--person-b:hover{
+    opacity: 0.85;
+}
 .wave-path.solid{stroke-dasharray: none;}
 .wave-path.dashed{stroke-dasharray: 5px;}
 .wave-path.dotted{stroke-dasharray: 2px;}
