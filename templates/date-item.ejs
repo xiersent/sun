@@ -20,12 +20,12 @@
                 <div class="list-item__left">
                     <!-- Два чекбокса выделения -->
                     <div class="date-selection-checks">
-                        <input type="checkbox" class="date-checkbox" 
+                        <input type="checkbox" class="date-checkbox" autocomplete="off"
                                <%= data.selectedTypeA ? 'checked' : '' %>
                                data-id="<%= data.id %>" 
                                data-type="a"
                                title="Выделение типа A">
-                        <input type="checkbox" class="date-checkbox"
+                        <input type="checkbox" class="date-checkbox" autocomplete="off"
                                <%= data.selectedTypeB ? 'checked' : '' %>
                                data-id="<%= data.id %>" 
                                data-type="b"

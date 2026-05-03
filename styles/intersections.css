@@ -1,16 +1,4 @@
 /* styles/intersections.css - ПОЛНЫЙ (все стили пересечений, которые были в 3 файлах, объединены) */
-.intersection-selected-info{margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: #f0f7ff; border-radius: var(--border-radius); border-left: 3px solid #2196F3;}
-.selected-wave-info{display: flex; flex-direction: column; gap: var(--spacing-sm);}
-.selected-wave-info.no-selection{background: #fff3cd; border-left-color: #ffc107;}
-.selected-wave-header{display: flex; align-items: center; gap: var(--spacing-sm);}
-.selected-wave-icon{font-size: 20px;}
-.selected-wave-name{font-weight: 600; font-size: var(--font-size-md);}
-.selected-wave-details{display: flex; flex-wrap: wrap; gap: var(--spacing-md); margin-top: var(--spacing-xs);}
-.selected-wave-detail{display: flex; align-items: baseline; gap: var(--spacing-xs); font-size: var(--font-size-sm);}
-.detail-label{color: var(--text-secondary); font-weight: 400;}
-.detail-value{font-weight: 600; color: var(--text-color);}
-.detail-value.extremum{color: #ff0000; font-weight: 700;}
-.detail-value.equilibrium{color: #4CAF50; font-weight: 700;}
 .intersection-controls{margin-bottom: var(--spacing-md);}
 .intersection-form{display: flex; flex-direction: column; gap: var(--spacing-md);}
 .intersection-form-row{display: flex; align-items: center; flex-wrap: wrap;}
@@ -43,7 +31,7 @@
 .intersection-stats strong{font-weight: 600; color: #0c4121;}
 .intersection-stats-content{line-height: 1.5;}
 .list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
-#btnClearWaveSelection{margin-left: auto;}
+.intersection-form-row-actions{display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin-left: auto;}
 
 /* Рамка и размер кнопок как у подвкладок сравнения — для верхних вкладок (.tab-buttons--framed) и строки вида отчёта */
 .tab-buttons.tab-buttons--framed,

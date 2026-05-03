@@ -57,7 +57,7 @@ const templates = {
                 <div class="wave-group-left flex items-center gap-sm">
                     <div class="drag-handle">⋮⋮</div>
                     <label class="flex items-center gap-xs">
-                        <input type="checkbox" class="wave-group-toggle" ${group.enabled ? 'checked' : ''} 
+                        <input type="checkbox" class="wave-group-toggle" autocomplete="off" ${group.enabled ? 'checked' : ''} 
                                data-group-id="${group.id}"> Вкл
                     </label>
                     <div class="wave-group-title">${group.name}</div>
@@ -86,7 +86,7 @@ const templates = {
     waveView: (wave) => `
         <div class="flex items-center justify-between gap-sm w-full">
             <div class="flex items-center gap-sm">
-                <input type="checkbox" class="wave-visibility" ${wave.visible ? 'checked' : ''} 
+                <input type="checkbox" class="wave-visibility" autocomplete="off" ${wave.visible ? 'checked' : ''} 
                        data-wave-id="${wave.id}" title="Видимость">
                 <div class="wave-color-preview" style="background: ${wave.color}" 
                      data-wave-id="${wave.id}"></div>

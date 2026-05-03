@@ -16,12 +16,12 @@
             <div class="list-item__row">
                 <div class="list-item__left">
                     <div class="wave-controls-inline">
-                        <input type="checkbox" class="wave-visibility-check" 
+                        <input type="checkbox" class="wave-visibility-check" autocomplete="off"
                                <%= data.visible ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
                                title="Видимость">
                         
-                        <input type="checkbox" class="wave-b-visibility-check" 
+                        <input type="checkbox" class="wave-b-visibility-check" autocomplete="off"
                                <%= data.bold ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
                                title="Видимость слоя B (вторая персона), как левый чекбокс — для слоя A">
@@ -31,7 +31,7 @@
                              data-id="<%= String(data.id) %>" 
                              title="Изменить цвет"></div>
                         
-                        <input type="checkbox" class="wave-corner-color-check" 
+                        <input type="checkbox" class="wave-corner-color-check" autocomplete="off"
                                <%= data.cornerColor ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
                                title="Окрасить края в цвет сигнала">

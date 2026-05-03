@@ -348,6 +348,10 @@ class DatesManager {
             window.summaryManager.updateSummary();
         }
 
+        if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+            window.stateIntersectionManager.updateIntersections();
+        }
+
         this.updateDateTimeInputs();
 
         window.sunDateListLog &&

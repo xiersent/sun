@@ -219,6 +219,10 @@ async function finalizeInitialization() {
         __lp && __lp.mark('finalize_stateIntersection_refresh');
         window.stateIntersectionManager.refresh();
     }
+
+    document.querySelectorAll('input[type="checkbox"]').forEach((el) => {
+        el.setAttribute('autocomplete', 'off');
+    });
 }
 
 window.finalizeInitialization = finalizeInitialization;

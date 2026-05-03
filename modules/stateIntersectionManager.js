@@ -21,7 +21,6 @@ class StateIntersectionManager {
             'intersectionGroupSelect',
             'intersectionSortSelect',  // ДОБАВЛЕНО
             'intersectionResults',
-            'intersectionSelectedInfo',
             'intersectionStats'
         ];
         
@@ -68,6 +67,36 @@ class StateIntersectionManager {
                 this.clearSelection();
             });
         }
+
+        const railBtn = document.getElementById('btnIntersectionTimeRail');
+        if (railBtn) {
+            railBtn.addEventListener('click', () => {
+                if (
+                    !window.intersectionTimeRailOverlay ||
+                    !this.lastIntersections ||
+                    this.lastIntersections.length === 0 ||
+                    !this.lastSelectedWave ||
+                    !this.lastCurrentDate
+                ) {
+                    return;
+                }
+                const byTime = [...this.lastIntersections].sort(
+                    (a, b) => a.time.getTime() - b.time.getTime()
+                );
+                window.intersectionTimeRailOverlay.open(byTime, this.lastSelectedWave, this.lastCurrentDate);
+            });
+        }
+    }
+
+    syncTimeRailOverlayButton() {
+        const btn = document.getElementById('btnIntersectionTimeRail');
+        if (!btn) return;
+        const ok =
+            this.lastIntersections &&
+            this.lastIntersections.length > 0 &&
+            this.lastSelectedWave &&
+            this.lastCurrentDate;
+        btn.disabled = !ok;
     }
     
     setupWaveSelectionObserver() {
@@ -295,7 +324,45 @@ class StateIntersectionManager {
         
         return uniqueIntersections.sort((a, b) => a.time - b.time);
     }
-    
+
+    /**
+     * Пересечения выбранной волны с остальными за несколько календарных дней подряд (от полуночи firstDayDate).
+     * @param {object} selectedWave
+     * @param {object[]} otherWaves
+     * @param {Date} firstDayDate
+     * @param {number} numDays целое >= 1
+     * @returns {Array<{ time: Date, wave1: object, wave2: object, value: number }>}
+     */
+    findIntersectionsMultiDay(selectedWave, otherWaves, firstDayDate, numDays) {
+        const n = Math.max(1, Math.floor(Number(numDays) || 1));
+        const merged = [];
+        for (let i = 0; i < n; i++) {
+            const day = new Date(firstDayDate);
+            day.setHours(0, 0, 0, 0);
+            day.setDate(day.getDate() + i);
+            const one = this.findIntersectionsWithSelectedWave(selectedWave, otherWaves, day);
+            merged.push(...one);
+        }
+        const unique = [];
+        for (const inter of merged) {
+            let isDuplicate = false;
+            for (const existing of unique) {
+                if (
+                    Math.abs(existing.time.getTime() - inter.time.getTime()) < 1000 &&
+                    String(existing.wave1.id) === String(inter.wave1.id) &&
+                    String(existing.wave2.id) === String(inter.wave2.id)
+                ) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            if (!isDuplicate) {
+                unique.push(inter);
+            }
+        }
+        return unique.sort((a, b) => a.time.getTime() - b.time.getTime());
+    }
+
     updateIntersections() {
         if (this.isUpdating) return;
         
@@ -303,29 +370,20 @@ class StateIntersectionManager {
             this.isUpdating = true;
             
             if (!window.appState.hasActivePerson()) {
+                this.lastIntersections = [];
+                this.lastSelectedWave = null;
                 this.showNoIntersectionsMessage(
                     'Выберите персону в списке дат — без неё график и пересечения не строятся.'
                 );
-                if (this.elements.intersectionSelectedInfo) {
-                    this.elements.intersectionSelectedInfo.innerHTML = `
-                        <div class="selected-wave-info no-selection">
-                            <div class="selected-wave-header">
-                                <span class="selected-wave-icon">👤</span>
-                                <span class="selected-wave-name">Персона не выбрана</span>
-                            </div>
-                            <div class="selected-wave-details">
-                                <div class="selected-wave-detail">
-                                    Укажите персону в списке дат слева — это база для расчёта дня и сигналов.
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
                 if (this.elements.intersectionStats) {
                     this.elements.intersectionStats.style.display = 'none';
                 }
                 return;
             }
+            
+            // После load() чекбоксы «окраска углов» в appState, а selectedWaveId мог
+            // остаться null из конструктора (скрипт грузится до await appState.load()).
+            this.selectedWaveId = this.getSelectedWaveId();
             
             if (!this.selectedWaveId) {
                 this.showNoWaveSelectedMessage();
@@ -341,6 +399,8 @@ class StateIntersectionManager {
             const allWaves = this.getAllWavesFromSelectedGroup();
             
             if (allWaves.length < 2) {
+                this.lastIntersections = [];
+                this.lastSelectedWave = null;
                 this.showNoIntersectionsMessage('Недостаточно сигналов для поиска пересечений');
                 return;
             }
@@ -362,6 +422,8 @@ class StateIntersectionManager {
             
         } catch (error) {
             console.error('Error updating intersections:', error);
+            this.lastIntersections = [];
+            this.lastSelectedWave = null;
             this.showNoIntersectionsMessage('Ошибка при расчете пересечений');
         } finally {
             this.isUpdating = false;
@@ -391,39 +453,8 @@ class StateIntersectionManager {
     displayResults(intersections, selectedWave, currentDate) {
         const container = this.elements.intersectionResults;
         const stats = this.elements.intersectionStats;
-        const selectedInfo = this.elements.intersectionSelectedInfo;
         
         if (!container) return;
-        
-        // Обновляем информацию о выбранном сигнале
-        if (selectedInfo) {
-            const dateStr = currentDate.toLocaleDateString('ru-RU');
-            selectedInfo.innerHTML = `
-                <div class="selected-wave-info">
-                    <div class="selected-wave-header">
-                        <span class="selected-wave-icon">🎯</span>
-                        <span class="selected-wave-name" style="color: ${selectedWave.color || '#666'}">
-                            ${this.escapeHtml(selectedWave.name)}
-                        </span>
-                        <span class="wave-period-badge">${selectedWave.period} дней</span>
-                    </div>
-                    <div class="selected-wave-details">
-                        <div class="selected-wave-detail">
-                            <span class="detail-label">Дата анализа:</span>
-                            <span class="detail-value">${dateStr}</span>
-                        </div>
-                        <div class="selected-wave-detail">
-                            <span class="detail-label">Найдено пересечений:</span>
-                            <span class="detail-value">${intersections.length}</span>
-                        </div>
-                        <div class="selected-wave-detail">
-                            <span class="detail-label">Сортировка:</span>
-                            <span class="detail-value">${this.currentSortMode === 'time-asc' ? 'по времени ↑' : 'по периоду ↓'}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
         
         if (intersections.length === 0) {
             container.innerHTML = `
@@ -435,6 +466,7 @@ class StateIntersectionManager {
                 </div>
             `;
             if (stats) stats.style.display = 'none';
+            this.syncTimeRailOverlayButton();
             return;
         }
         
@@ -532,31 +564,14 @@ class StateIntersectionManager {
                 });
             });
         });
+        this.syncTimeRailOverlayButton();
     }
     
     showNoWaveSelectedMessage() {
+        this.lastIntersections = [];
+        this.lastSelectedWave = null;
         const container = this.elements.intersectionResults;
         const stats = this.elements.intersectionStats;
-        const selectedInfo = this.elements.intersectionSelectedInfo;
-        
-        if (selectedInfo) {
-            selectedInfo.innerHTML = `
-                <div class="selected-wave-info no-selection">
-                    <div class="selected-wave-header">
-                        <span class="selected-wave-icon">⚠️</span>
-                        <span class="selected-wave-name">Сигнал не выбран</span>
-                    </div>
-                    <div class="selected-wave-details">
-                        <div class="selected-wave-detail">
-                            Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
-                        </div>
-                        <div class="selected-wave-detail" style="color:#666;">
-                            Рекомендация: используйте один из сигналов из экспериментальной группы.
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
         
         if (container) {
             container.innerHTML = `
@@ -576,6 +591,7 @@ class StateIntersectionManager {
         }
         
         if (stats) stats.style.display = 'none';
+        this.syncTimeRailOverlayButton();
     }
     
     showNoIntersectionsMessage(message) {
@@ -591,6 +607,7 @@ class StateIntersectionManager {
                 </div>
             `;
         }
+        this.syncTimeRailOverlayButton();
     }
     
     clearSelection() {

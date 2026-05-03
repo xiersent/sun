@@ -446,6 +446,11 @@ class DateComparisonManager {
         }
     }
 
+    /** Тот же состав option/optgroup, что у селектов «Дата A» / «Дата B» на вкладке сравнения. */
+    fillCompareSelectOptions(sel) {
+        this._fillCompareSelectOptions(sel);
+    }
+
     _firstDateIdInCompareSelectOrder() {
         const allDates = window.appState.data.dates || [];
         if (allDates.length === 0) {

@@ -1221,9 +1221,7 @@ class WavesManager {
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
-        if (layerKey === 'b') {
-            labelElement.style.setProperty('--wave-label-fill', waveColor);
-        }
+        labelElement.style.setProperty('--wave-label-fill', waveColor);
         if (layerKey !== 'b') {
             labelElement.style.opacity = '0.7';
         }
@@ -1345,6 +1343,7 @@ class WavesManager {
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
+        labelElement.style.setProperty('--wave-label-fill', waveColor);
         if (layerKey !== 'b') {
             labelElement.style.opacity = '0.7';
         }

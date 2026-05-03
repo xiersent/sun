@@ -146,7 +146,7 @@
                                             <button class="ui-btn" data-action="now">Сейчас</button>
                                         </div>
                                         <label class="intersection-form-label" style="margin-left: 10px;">
-                                            <input type="checkbox" id="includePastWaves" 
+                                            <input type="checkbox" id="includePastWaves" autocomplete="off"
                                                 onchange="if (window.summaryManager) window.summaryManager.updateSummary()">
                                             Учитывать прошедшие
                                         </label>
@@ -166,20 +166,6 @@
                                 <h3>Сигналы, близкие по состоянию к выбранному</h3>
                             </div>
                             
-                            <div class="intersection-selected-info" id="intersectionSelectedInfo">
-                                <div class="selected-wave-info no-selection">
-                                    <div class="selected-wave-header">
-                                        <span class="selected-wave-icon">⚠️</span>
-                                        <span class="selected-wave-name">Сигнал не выбран</span>
-                                    </div>
-                                    <div class="selected-wave-details">
-                                        <div class="selected-wave-detail">
-                                            Используйте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <div class="summary-controls">
                                 <div class="intersection-form">
 									<div class="intersection-form-row">
@@ -197,9 +183,14 @@
 											</select>
 										</div>
 										
-										<button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
-											Сбросить выбор сигнала
-										</button>
+										<div class="intersection-form-row-actions">
+											<button type="button" id="btnIntersectionTimeRail" class="ui-btn" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
+												Шкала времени
+											</button>
+											<button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
+												Сбросить выбор сигнала
+											</button>
+										</div>
 									</div>
                                 </div>
                             </div>
@@ -391,6 +382,7 @@
     <script src="modules/migrations.js"></script>
     <script src="modules/preciseIntersectionManager.js"></script>
     <script src="modules/stateIntersectionManager.js"></script>
+    <script src="modules/intersectionTimeRailOverlay.js"></script>
     <script src="modules/stateManager.js"></script>
     <script src="modules/summaryManager.js"></script>
     <script src="modules/templates.js"></script>

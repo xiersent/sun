@@ -532,8 +532,9 @@ class UnifiedListManager {
     
     renderList(containerId, items, itemType) {
         const __perfT0 = typeof performance !== 'undefined' ? performance.now() : 0;
+        let container = null;
         try {
-        const container = document.getElementById(containerId);
+        container = document.getElementById(containerId);
         if (!container) {
             return;
         }
@@ -722,6 +723,11 @@ class UnifiedListManager {
             container.innerHTML = renderedItems.join('');
         }
         } finally {
+            if (container) {
+                container.querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                    el.setAttribute('autocomplete', 'off');
+                });
+            }
             if (typeof window.sunPerfLog === 'function' && window.__SUN_PERF_LOG !== false) {
                 window.sunPerfLog('unifiedListManager', 'renderList', {
                     containerId,
