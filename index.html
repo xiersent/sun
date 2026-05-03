@@ -168,40 +168,35 @@
                             
                             <div class="summary-controls">
                                 <div class="intersection-form">
-                                    <div class="intersection-form-row date-comparison-selects intersection-date-pair-row">
+                                    <div class="intersection-form-row intersection-toolbar-one-row date-comparison-selects">
                                         <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="intersectionDateSelectA">Дата А — фаза выбранного сигнала</label>
-                                            <select class="summary-select" id="intersectionDateSelectA" title="От какой персоны считать фазу сигнала с окрашенными углами"></select>
+                                            <label class="intersection-form-label" for="intersectionSortSelect">Сортировка</label>
+                                            <select class="summary-select" id="intersectionSortSelect" title="Порядок строк в таблице пересечений">
+                                                <option value="period-desc">По периоду ↓ (большие сначала)</option>
+                                                <option value="time-asc">По времени ↑ (ранние сначала)</option>
+                                            </select>
                                         </div>
                                         <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="intersectionDateSelectB">Дата Б — фаза остальных сигналов</label>
-                                            <select class="summary-select" id="intersectionDateSelectB" title="От какой персоны считать фазу всех прочих сигналов в группе"></select>
+                                            <label class="intersection-form-label" for="intersectionDateSelectA">Дата А</label>
+                                            <select class="summary-select" id="intersectionDateSelectA" title="Фаза выбранного сигнала (окраска углов)"></select>
+                                        </div>
+                                        <div class="intersection-select-group">
+                                            <label class="intersection-form-label" for="intersectionDateSelectB">Дата Б</label>
+                                            <select class="summary-select" id="intersectionDateSelectB" title="Фаза остальных сигналов (кроме выбранного)"></select>
+                                        </div>
+                                        <div class="intersection-select-group">
+                                            <label class="intersection-form-label" for="intersectionWaveSelect">Сигнал</label>
+                                            <select class="summary-select" id="intersectionWaveSelect" title="Сигнал для анализа (то же, что «Окрасить края» в списке волн)"></select>
                                         </div>
                                     </div>
-									<div class="intersection-form-row">
-										<div class="intersection-select-group">
-											<select class="summary-select" id="intersectionGroupSelect">
-												<option value="all">Все доступные группы с сигналами</option>
-											</select>
-										</div>
-										
-										<!-- НОВЫЙ СЕЛЕКТ СОРТИРОВКИ -->
-										<div class="intersection-select-group">
-											<select class="summary-select" id="intersectionSortSelect">
-												<option value="period-desc">Сортировка: по периоду ↓ (большие сначала)</option>
-												<option value="time-asc">Сортировка: по времени ↑ (ранние сначала)</option>
-											</select>
-										</div>
-										
-										<div class="intersection-form-row-actions">
-											<button type="button" id="btnIntersectionTimeRail" class="ui-btn" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
-												Шкала времени
-											</button>
-											<button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
-												Сбросить выбор сигнала
-											</button>
-										</div>
-									</div>
+                                    <div class="intersection-form-row intersection-form-row-actions">
+                                        <button type="button" id="btnIntersectionTimeRail" class="ui-btn" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
+                                            Шкала времени
+                                        </button>
+                                        <button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
+                                            Сбросить выбор сигнала
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -214,7 +209,7 @@
                                             <div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
                                             <div>Выберите сигнал для анализа</div>
                                             <div style="font-size: 11px; color: #666; margin-top: 8px;">
-                                                Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
+                                                Выберите сигнал в списке <strong>«Сигнал»</strong> выше или чекбокс <strong>«Окрасить края»</strong> в списке волн
                                             </div>
                                             <div style="font-size: 11px; color: #666; margin-top: 4px;">
                                                 Рекомендация: используйте один из сигналов из экспериментальной группы.

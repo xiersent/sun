@@ -10,6 +10,8 @@ class StateIntersectionManager {
         this.isUpdating = false;
         this._intersectionUpdateRaf = null;
         this._intersectionDateMirrorSilent = false;
+        this._intersectionWaveSelectMirrorSilent = false;
+        this._intersectionWaveSelectSig = null;
         this.lastIntersectionBaseMsA = null;
         this.lastIntersectionBaseMsB = null;
         this._onWaveCornerSelectionChanged = this._onWaveCornerSelectionChanged.bind(this);
@@ -23,8 +25,8 @@ class StateIntersectionManager {
             'intersectionPanel',
             'intersectionDateSelectA',
             'intersectionDateSelectB',
-            'intersectionGroupSelect',
             'intersectionSortSelect',  // ДОБАВЛЕНО
+            'intersectionWaveSelect',
             'intersectionResults',
             'intersectionStats'
         ];
@@ -37,8 +39,6 @@ class StateIntersectionManager {
     
     init() {
         this.setupEventListeners();
-        this.populateGroupSelect();
-        this.restoreGroupSelection();
         this.restoreSortSelection();  // ДОБАВЛЕНО
         this.setupWaveSelectionObserver();
         this.setupDateObservers();
@@ -51,15 +51,6 @@ class StateIntersectionManager {
     }
     
     setupEventListeners() {
-        const groupSelect = this.elements.intersectionGroupSelect;
-        
-        if (groupSelect) {
-            groupSelect.addEventListener('change', () => {
-                this.saveGroupSelection();
-                this.updateIntersections();
-            });
-        }
-        
         // ДОБАВЛЕНО: Обработчик для селекта сортировки
         const sortSelect = this.elements.intersectionSortSelect;
         if (sortSelect) {
@@ -74,6 +65,21 @@ class StateIntersectionManager {
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
                 this.clearSelection();
+            });
+        }
+
+        const waveSel = this.elements.intersectionWaveSelect;
+        if (waveSel) {
+            waveSel.addEventListener('change', () => {
+                if (this._intersectionWaveSelectMirrorSilent) return;
+                const v = waveSel.value;
+                if (!v) {
+                    this.clearSelection();
+                    return;
+                }
+                if (window.waves && typeof window.waves.setWaveCornerColor === 'function') {
+                    window.waves.setWaveCornerColor(v, true);
+                }
             });
         }
 
@@ -313,35 +319,6 @@ class StateIntersectionManager {
         });
     }
     
-    populateGroupSelect() {
-        const select = this.elements.intersectionGroupSelect;
-        if (!select || !window.appState || !window.appState.data) return;
-        
-        select.innerHTML = '<option value="all">Все группы (включая отключенные)</option>';
-        
-        window.appState.data.groups.forEach(group => {
-            if (group.waves && group.waves.length > 0 && !group.hidden) {
-                const option = document.createElement('option');
-                option.value = group.id;
-                option.textContent = `${group.name} ${group.enabled ? '✓' : '(выкл)'}`;
-                select.appendChild(option);
-            }
-        });
-    }
-    
-    restoreGroupSelection() {
-        const savedGroup = localStorage.getItem('intersectionSelectedGroup');
-        if (savedGroup && this.elements.intersectionGroupSelect) {
-            this.elements.intersectionGroupSelect.value = savedGroup;
-        }
-    }
-    
-    saveGroupSelection() {
-        if (this.elements.intersectionGroupSelect) {
-            localStorage.setItem('intersectionSelectedGroup', this.elements.intersectionGroupSelect.value);
-        }
-    }
-    
     // ДОБАВЛЕНО: Сохранение/восстановление выбранной сортировки
     restoreSortSelection() {
         const savedSort = localStorage.getItem('intersectionSelectedSort');
@@ -357,25 +334,126 @@ class StateIntersectionManager {
         }
     }
     
+    /** Все сигналы данных (вкладка «Пересечения» без фильтра по группе отображения). */
     getAllWavesFromSelectedGroup() {
-        if (!window.appState || !window.appState.data) return [];
-        
-        const groupId = this.elements.intersectionGroupSelect?.value;
-        
-        if (!groupId || groupId === 'all') {
-            return window.appState.data.waves;
+        if (!window.appState || !window.appState.data || !window.appState.data.waves) return [];
+        return window.appState.data.waves;
+    }
+
+    _computeIntersectionWaveListSignature() {
+        if (!window.appState || !window.appState.data) return '';
+        const waves = this.getAllWavesFromSelectedGroup();
+        const ids = waves
+            .map((w) => String(w.id))
+            .sort()
+            .join(',');
+        const groups = window.appState.data.groups || [];
+        const structure = groups.map((g) => `${g.id}:${(g.waves || []).join('.')}`).join('|');
+        return `${structure}|${ids}`;
+    }
+
+    _fillIntersectionWaveSelectOptions() {
+        const sel = this.elements.intersectionWaveSelect;
+        if (!sel || !window.appState || !window.appState.data) return;
+
+        const allowedWaves = this.getAllWavesFromSelectedGroup();
+        sel.innerHTML = '';
+
+        const empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = '— не выбран —';
+        sel.appendChild(empty);
+
+        const appendWaveOption = (w) => {
+            const o = document.createElement('option');
+            o.value = String(w.id);
+            o.textContent = w.name != null ? String(w.name) : `id ${w.id}`;
+            return o;
+        };
+
+        const allowedById = new Set(allowedWaves.map((w) => String(w.id)));
+        if (allowedById.size === 0) {
+            return;
         }
-        
-        const group = window.appState.data.groups.find(g => g.id === groupId);
-        if (!group || !group.waves) return [];
-        
-        const waves = [];
-        group.waves.forEach(waveId => {
-            const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
-            if (wave) waves.push(wave);
-        });
-        
-        return waves;
+
+        const data = window.appState.data;
+        const groups = data.groups || [];
+        const allWaves = data.waves || [];
+
+        if (groups.length === 0) {
+            for (let i = 0; i < allowedWaves.length; i++) {
+                sel.appendChild(appendWaveOption(allowedWaves[i]));
+            }
+            return;
+        }
+
+        const assigned = new Set();
+        for (let gi = 0; gi < groups.length; gi++) {
+            const g = groups[gi];
+            const waveIds = g.waves || [];
+            if (waveIds.length === 0) continue;
+            const groupWaves = [];
+            for (let wi = 0; wi < waveIds.length; wi++) {
+                const wid = String(waveIds[wi]);
+                if (!allowedById.has(wid)) continue;
+                const w = allWaves.find((x) => String(x.id) === wid);
+                if (w) {
+                    groupWaves.push(w);
+                    assigned.add(wid);
+                }
+            }
+            if (groupWaves.length === 0) continue;
+            const og = document.createElement('optgroup');
+            og.label = g.name || 'Группа';
+            for (let i = 0; i < groupWaves.length; i++) {
+                og.appendChild(appendWaveOption(groupWaves[i]));
+            }
+            sel.appendChild(og);
+        }
+
+        const orphans = [];
+        for (let i = 0; i < allowedWaves.length; i++) {
+            const w = allowedWaves[i];
+            if (!assigned.has(String(w.id))) {
+                orphans.push(w);
+            }
+        }
+        if (orphans.length > 0) {
+            const og = document.createElement('optgroup');
+            og.label = 'Прочие';
+            for (let i = 0; i < orphans.length; i++) {
+                og.appendChild(appendWaveOption(orphans[i]));
+            }
+            sel.appendChild(og);
+        }
+    }
+
+    refreshIntersectionWaveSelectIfNeeded() {
+        const sel = this.elements.intersectionWaveSelect;
+        if (!sel) return;
+        const sig = this._computeIntersectionWaveListSignature();
+        if (sig !== this._intersectionWaveSelectSig) {
+            this._intersectionWaveSelectSig = sig;
+            this._fillIntersectionWaveSelectOptions();
+        }
+        this._syncIntersectionWaveSelectFromAppState();
+    }
+
+    _syncIntersectionWaveSelectFromAppState() {
+        const sel = this.elements.intersectionWaveSelect;
+        if (!sel) return;
+        const id = this.getSelectedWaveId();
+        const str = id != null && String(id) !== '' ? String(id) : '';
+        this._intersectionWaveSelectMirrorSilent = true;
+        try {
+            if (str && [...sel.options].some((o) => o.value === str)) {
+                sel.value = str;
+            } else {
+                sel.value = '';
+            }
+        } finally {
+            this._intersectionWaveSelectMirrorSilent = false;
+        }
     }
     
     findIntersectionsWithSelectedWave(selectedWave, otherWaves, date, baseMsA, baseMsB) {
@@ -522,6 +600,7 @@ class StateIntersectionManager {
         
         try {
             this.isUpdating = true;
+            this.refreshIntersectionWaveSelectIfNeeded();
             
             if (!window.appState.hasActivePerson()) {
                 this.lastIntersections = [];
@@ -642,7 +721,7 @@ class StateIntersectionManager {
             } else {
                 body =
                     `Выбранный сигнал «<strong>${waveName}</strong>» — фаза <strong>А</strong> (${this.escapeHtml(inf.labelA)}); ` +
-                    `остальные сигналы в группе — фаза <strong>Б</strong> (${this.escapeHtml(inf.labelB)}).`;
+                    `остальные сигналы — фаза <strong>Б</strong> (${this.escapeHtml(inf.labelB)}).`;
             }
             stats.innerHTML = `<div class="intersection-stats-content">${body}</div>`;
             stats.style.display = 'block';
@@ -812,7 +891,7 @@ class StateIntersectionManager {
                         <div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
                         <div>Выберите сигнал для анализа пересечений</div>
                         <div style="font-size: 11px; color: #666; margin-top: 8px;">
-                            Отметьте чекбокс <strong>"Окрасить края"</strong> у любого сигнала в списке волн
+                            Выберите сигнал в списке <strong>«Сигнал»</strong> выше или чекбокс <strong>«Окрасить края»</strong> в списке волн
                         </div>
                         <div style="font-size: 11px; color: #666; margin-top: 4px;">
                             Рекомендация: используйте один из сигналов из экспериментальной группы.
@@ -874,6 +953,7 @@ class StateIntersectionManager {
         }
         
         this.selectedWaveId = null;
+        this.refreshIntersectionWaveSelectIfNeeded();
         this.showNoWaveSelectedMessage();
     }
     
@@ -892,7 +972,6 @@ class StateIntersectionManager {
     }
     
     refresh() {
-        this.populateGroupSelect();
         this.mirrorCompareSelectsToIntersection();
         this.updateIntersections();
     }

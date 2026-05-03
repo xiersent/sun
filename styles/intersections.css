@@ -32,6 +32,11 @@
 .intersection-stats-content{line-height: 1.5;}
 .list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
 .intersection-form-row-actions{display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin-left: auto;}
+.intersection-form > .intersection-form-row-actions{
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+}
 
 /* Рамка и размер кнопок как у подвкладок сравнения — для верхних вкладок (.tab-buttons--framed) и строки вида отчёта */
 .tab-buttons.tab-buttons--framed,
@@ -62,7 +67,12 @@
 .date-comparison-intro{font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 var(--spacing-md); line-height: 1.4;}
 .date-comparison-selects{gap: var(--spacing-md); align-items: flex-end;}
 .date-comparison-selects .intersection-select-group{flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 4px;}
-.intersection-date-pair-row{margin-bottom: var(--spacing-xs);}
+.intersection-toolbar-one-row{margin-bottom: var(--spacing-sm);}
+.intersection-toolbar-one-row .intersection-select-group{
+    flex: 1 1 130px;
+    min-width: 0;
+    max-width: min(100%, 220px);
+}
 .date-comparison-selects .intersection-form-label{cursor: default;}
 .date-comparison-table{width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);}
 .date-comparison-table th{text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--clg); background: #f8f9fa; font-weight: 600;}

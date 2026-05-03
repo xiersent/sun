@@ -80,11 +80,11 @@ class IntersectionTimeRailOverlay {
                 <div class="intersection-time-rail__mirror" aria-hidden="true">
                     <div class="intersection-time-rail__mirror-title">Зеркальное представление</div>
                     <div class="intersection-time-rail__mirror-row">
-                        <span class="intersection-time-rail__mirror-next" title="Последующее пересечение"></span>
+                        <span class="intersection-time-rail__mirror-prev" title="Последнее пересечение (раньше по времени)"></span>
                         <span class="intersection-time-rail__mirror-head" title="Голова, смотрящая вперёд на пользователя">👤</span>
-                        <span class="intersection-time-rail__mirror-prev" title="Последнее пересечение"></span>
+                        <span class="intersection-time-rail__mirror-next" title="Следующее пересечение (позже по времени)"></span>
                     </div>
-                    <div class="intersection-time-rail__mirror-sep">&lt; ----</div>
+                    <div class="intersection-time-rail__mirror-sep" aria-hidden="true">────→</div>
                     <div class="intersection-time-rail__mirror-stats">
                         <div class="intersection-time-rail__mirror-duration"></div>
                         <div class="intersection-time-rail__mirror-countdown"></div>
@@ -271,7 +271,6 @@ class IntersectionTimeRailOverlay {
     _computeRailWaveListSignature() {
         const sim = window.stateIntersectionManager;
         if (!sim || !window.appState || !window.appState.data) return '';
-        const gid = sim.elements && sim.elements.intersectionGroupSelect ? sim.elements.intersectionGroupSelect.value : '';
         const waves = typeof sim.getAllWavesFromSelectedGroup === 'function' ? sim.getAllWavesFromSelectedGroup() : [];
         const ids = waves
             .map((w) => String(w.id))
@@ -279,7 +278,7 @@ class IntersectionTimeRailOverlay {
             .join(',');
         const groups = window.appState.data.groups || [];
         const structure = groups.map((g) => `${g.id}:${(g.waves || []).join('.')}`).join('|');
-        return `${gid}|${structure}|${ids}`;
+        return `${structure}|${ids}`;
     }
 
     /**
