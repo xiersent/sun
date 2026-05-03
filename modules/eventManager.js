@@ -1345,7 +1345,11 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('show-on-vizor-btn') && !$target.hasClass('date-compare-vizor-btn')) {
+        if (
+            $target.hasClass('show-on-vizor-btn') &&
+            !$target.hasClass('date-compare-vizor-btn') &&
+            !$target.hasClass('intersection-vizor-b-btn')
+        ) {
             e.preventDefault();
             e.stopPropagation();
             

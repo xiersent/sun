@@ -9,6 +9,9 @@ class StateIntersectionManager {
         this.selectedWaveId = null;
         this.isUpdating = false;
         this._intersectionUpdateRaf = null;
+        this._intersectionDateMirrorSilent = false;
+        this.lastIntersectionBaseMsA = null;
+        this.lastIntersectionBaseMsB = null;
         this._onWaveCornerSelectionChanged = this._onWaveCornerSelectionChanged.bind(this);
         this.currentSortMode = 'period-desc'; // 'period-desc' или 'time-asc'
         
@@ -18,6 +21,8 @@ class StateIntersectionManager {
     cacheElements() {
         const ids = [
             'intersectionPanel',
+            'intersectionDateSelectA',
+            'intersectionDateSelectB',
             'intersectionGroupSelect',
             'intersectionSortSelect',  // ДОБАВЛЕНО
             'intersectionResults',
@@ -37,8 +42,12 @@ class StateIntersectionManager {
         this.restoreSortSelection();  // ДОБАВЛЕНО
         this.setupWaveSelectionObserver();
         this.setupDateObservers();
+        this.setupIntersectionDateSelects();
         this.selectedWaveId = this.getSelectedWaveId();
         this.updateIntersections();
+        setTimeout(() => {
+            this.mirrorCompareSelectsToIntersection();
+        }, 0);
     }
     
     setupEventListeners() {
@@ -151,6 +160,148 @@ class StateIntersectionManager {
         });
         window.appState._currentDay = originalCurrentDay;
     }
+
+    setupIntersectionDateSelects() {
+        const elA = this.elements.intersectionDateSelectA;
+        const elB = this.elements.intersectionDateSelectB;
+        if (elA) {
+            elA.addEventListener('change', () => this._onIntersectionDateSelectChange('a'));
+        }
+        if (elB) {
+            elB.addEventListener('change', () => this._onIntersectionDateSelectChange('b'));
+        }
+    }
+
+    /**
+     * Синхронизировать селекты вкладки «Пересечения» с «Дата A» / «Дата B» вкладки сравнения (общий dateSelections).
+     */
+    mirrorCompareSelectsToIntersection() {
+        const ia = this.elements.intersectionDateSelectA;
+        const ib = this.elements.intersectionDateSelectB;
+        if (!ia || !ib) return;
+        const ca = document.getElementById('dateCompareSelectA');
+        const cb = document.getElementById('dateCompareSelectB');
+        const dcm = window.dateComparisonManager;
+        if (!dcm || typeof dcm.fillCompareSelectOptions !== 'function') {
+            return;
+        }
+        if (ca && !ca.options.length) {
+            return;
+        }
+        this._intersectionDateMirrorSilent = true;
+        try {
+            dcm.fillCompareSelectOptions(ia, false);
+            dcm.fillCompareSelectOptions(ib, true);
+            if (ca && ca.value && [...ia.options].some((o) => o.value === ca.value)) {
+                ia.value = ca.value;
+            }
+            if (cb && cb.value && [...ib.options].some((o) => o.value === cb.value)) {
+                ib.value = cb.value;
+            } else if (cb) {
+                ib.value = cb.value || '';
+            }
+        } finally {
+            this._intersectionDateMirrorSilent = false;
+        }
+    }
+
+    _onIntersectionDateSelectChange(which) {
+        if (this._intersectionDateMirrorSilent) return;
+        const ia = this.elements.intersectionDateSelectA;
+        const ib = this.elements.intersectionDateSelectB;
+        const ca = document.getElementById('dateCompareSelectA');
+        const cb = document.getElementById('dateCompareSelectB');
+        const dcm = window.dateComparisonManager;
+        if (!dcm || !ca || !cb) return;
+        if (which === 'a' && ia) {
+            if (ia.value && [...ca.options].some((o) => o.value === ia.value)) {
+                ca.value = ia.value;
+            }
+            dcm._onSelectChange('a');
+            return;
+        }
+        if (which === 'b' && ib) {
+            if (ib.value && [...cb.options].some((o) => o.value === ib.value)) {
+                cb.value = ib.value;
+            }
+            dcm._onSelectChange('b');
+        }
+    }
+
+    /** Остаток по модулю периода (дней), всегда в [0, period). */
+    _modPositiveDays(days, period) {
+        let m = days % period;
+        if (m < 0) m += period;
+        return m;
+    }
+
+    _getBirthStartMsForDateId(dateId) {
+        if (dateId == null || String(dateId) === '') return null;
+        const person = (window.appState.data.dates || []).find((d) => String(d.id) === String(dateId));
+        if (!person || person.date == null) return null;
+        const selectedDate = window.timeUtils
+            ? window.timeUtils.toLocalDate(person.date)
+            : new Date(person.date);
+        return new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate(),
+            0,
+            0,
+            0,
+            0
+        ).getTime();
+    }
+
+    _personDisplayName(dateId) {
+        const person = (window.appState.data.dates || []).find((d) => String(d.id) === String(dateId));
+        if (!person) return '—';
+        const birth = window.timeUtils ? window.timeUtils.formatDate(person.date) : '';
+        const name = person.name || 'Без названия';
+        return birth ? `${name} · ${birth}` : name;
+    }
+
+    /**
+     * Опоры фаз: А — выбранный сигнал (wave1), Б — остальные (wave2). Совпадает с логикой слоёв A/B на графике.
+     */
+    _getIntersectionPhaseBases() {
+        const ds = window.appState.dateSelections || { typeA: null, typeB: null };
+        const active = window.appState.activeDateId;
+        const idA =
+            ds.typeA != null && String(ds.typeA) !== ''
+                ? String(ds.typeA)
+                : active != null && String(active) !== ''
+                  ? String(active)
+                  : '';
+        let idB = ds.typeB != null && String(ds.typeB) !== '' ? String(ds.typeB) : '';
+        if (!idB || idB === idA) {
+            idB = idA;
+        }
+        const bdRaw =
+            window.appState.baseDate instanceof Date
+                ? window.appState.baseDate
+                : new Date(window.appState.baseDate);
+        const fallbackMs = new Date(
+            bdRaw.getFullYear(),
+            bdRaw.getMonth(),
+            bdRaw.getDate(),
+            0,
+            0,
+            0,
+            0
+        ).getTime();
+        const baseMsA = this._getBirthStartMsForDateId(idA) ?? fallbackMs;
+        const baseMsB = this._getBirthStartMsForDateId(idB) ?? baseMsA;
+        return {
+            idA,
+            idB,
+            baseMsA,
+            baseMsB,
+            labelA: idA ? this._personDisplayName(idA) : '—',
+            labelB: idB ? this._personDisplayName(idB) : '—',
+            samePerson: String(idA) === String(idB)
+        };
+    }
     
     debouncedUpdate() {
         if (this._intersectionUpdateRaf != null) {
@@ -227,21 +378,21 @@ class StateIntersectionManager {
         return waves;
     }
     
-    findIntersectionsWithSelectedWave(selectedWave, otherWaves, date) {
+    findIntersectionsWithSelectedWave(selectedWave, otherWaves, date, baseMsA, baseMsB) {
         const allIntersections = [];
         
         const dayStart = new Date(date);
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(dayStart);
         dayEnd.setHours(23, 59, 59, 999);
+
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const bA = baseMsA != null ? baseMsA : this._getIntersectionPhaseBases().baseMsA;
+        const bB = baseMsB != null ? baseMsB : bA;
         
-        const baseDate = window.appState.baseDate instanceof Date ? 
-            window.appState.baseDate : 
-            new Date(window.appState.baseDate);
-        
-        const getWaveValue = (wave, timeMs) => {
-            const daysFromBase = (timeMs - baseDate.getTime()) / (1000 * 60 * 60 * 24);
-            const phase = (daysFromBase % wave.period) / wave.period;
+        const getWaveValue = (wave, timeMs, birthStartMs) => {
+            const daysFromBase = (timeMs - birthStartMs) / msPerDay;
+            const phase = this._modPositiveDays(daysFromBase, wave.period) / wave.period;
             const angle = phase * 2 * Math.PI;
             return Math.sin(angle);
         };
@@ -252,9 +403,10 @@ class StateIntersectionManager {
             const T1 = selectedWave.period;
             const T2 = otherWave.period;
             
-            const daysToStart = (dayStart.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24);
-            const phase1 = (daysToStart % T1) / T1;
-            const phase2 = (daysToStart % T2) / T2;
+            const daysToStartA = (dayStart.getTime() - bA) / msPerDay;
+            const daysToStartB = (dayStart.getTime() - bB) / msPerDay;
+            const phase1 = this._modPositiveDays(daysToStartA, T1) / T1;
+            const phase2 = this._modPositiveDays(daysToStartB, T2) / T2;
             
             const phi1 = phase1 * 2 * Math.PI;
             const phi2 = phase2 * 2 * Math.PI;
@@ -269,8 +421,8 @@ class StateIntersectionManager {
                     const timeMs = dayStart.getTime() + t * 24 * 60 * 60 * 1000;
                     
                     if (timeMs >= dayStart.getTime() && timeMs <= dayEnd.getTime()) {
-                        const y1 = getWaveValue(selectedWave, timeMs);
-                        const y2 = getWaveValue(otherWave, timeMs);
+                        const y1 = getWaveValue(selectedWave, timeMs, bA);
+                        const y2 = getWaveValue(otherWave, timeMs, bB);
                         
                         if (Math.abs(y1 - y2) < 1e-8) {
                             allIntersections.push({
@@ -290,8 +442,8 @@ class StateIntersectionManager {
                 const timeMs = dayStart.getTime() + t * 24 * 60 * 60 * 1000;
                 
                 if (timeMs >= dayStart.getTime() && timeMs <= dayEnd.getTime()) {
-                    const y1 = getWaveValue(selectedWave, timeMs);
-                    const y2 = getWaveValue(otherWave, timeMs);
+                    const y1 = getWaveValue(selectedWave, timeMs, bA);
+                    const y2 = getWaveValue(otherWave, timeMs, bB);
                     
                     if (Math.abs(y1 - y2) < 1e-8) {
                         allIntersections.push({
@@ -333,14 +485,16 @@ class StateIntersectionManager {
      * @param {number} numDays целое >= 1
      * @returns {Array<{ time: Date, wave1: object, wave2: object, value: number }>}
      */
-    findIntersectionsMultiDay(selectedWave, otherWaves, firstDayDate, numDays) {
+    findIntersectionsMultiDay(selectedWave, otherWaves, firstDayDate, numDays, baseMsA, baseMsB) {
         const n = Math.max(1, Math.floor(Number(numDays) || 1));
+        const bA = baseMsA != null ? baseMsA : this.lastIntersectionBaseMsA;
+        const bB = baseMsB != null ? baseMsB : this.lastIntersectionBaseMsB ?? bA;
         const merged = [];
         for (let i = 0; i < n; i++) {
             const day = new Date(firstDayDate);
             day.setHours(0, 0, 0, 0);
             day.setDate(day.getDate() + i);
-            const one = this.findIntersectionsWithSelectedWave(selectedWave, otherWaves, day);
+            const one = this.findIntersectionsWithSelectedWave(selectedWave, otherWaves, day, bA, bB);
             merged.push(...one);
         }
         const unique = [];
@@ -372,11 +526,13 @@ class StateIntersectionManager {
             if (!window.appState.hasActivePerson()) {
                 this.lastIntersections = [];
                 this.lastSelectedWave = null;
+                this.lastIntersectionPhaseInfo = null;
                 this.showNoIntersectionsMessage(
                     'Выберите персону в списке дат — без неё график и пересечения не строятся.'
                 );
                 if (this.elements.intersectionStats) {
                     this.elements.intersectionStats.style.display = 'none';
+                    this.elements.intersectionStats.innerHTML = '';
                 }
                 return;
             }
@@ -401,16 +557,32 @@ class StateIntersectionManager {
             if (allWaves.length < 2) {
                 this.lastIntersections = [];
                 this.lastSelectedWave = null;
+                this.lastIntersectionPhaseInfo = null;
                 this.showNoIntersectionsMessage('Недостаточно сигналов для поиска пересечений');
+                if (this.elements.intersectionStats) {
+                    this.elements.intersectionStats.style.display = 'none';
+                    this.elements.intersectionStats.innerHTML = '';
+                }
                 return;
             }
             
             const currentDate = window.appState.currentDate || new Date();
+
+            const phaseBases = this._getIntersectionPhaseBases();
+            this.lastIntersectionBaseMsA = phaseBases.baseMsA;
+            this.lastIntersectionBaseMsB = phaseBases.baseMsB;
+            this.lastIntersectionPhaseInfo = {
+                labelA: phaseBases.labelA,
+                labelB: phaseBases.labelB,
+                samePerson: phaseBases.samePerson
+            };
             
             const intersections = this.findIntersectionsWithSelectedWave(
                 selectedWave, 
                 allWaves, 
-                currentDate
+                currentDate,
+                phaseBases.baseMsA,
+                phaseBases.baseMsB
             );
             
             // Сохраняем для использования при смене сортировки
@@ -424,7 +596,12 @@ class StateIntersectionManager {
             console.error('Error updating intersections:', error);
             this.lastIntersections = [];
             this.lastSelectedWave = null;
+            this.lastIntersectionPhaseInfo = null;
             this.showNoIntersectionsMessage('Ошибка при расчете пересечений');
+            if (this.elements.intersectionStats) {
+                this.elements.intersectionStats.style.display = 'none';
+                this.elements.intersectionStats.innerHTML = '';
+            }
         } finally {
             this.isUpdating = false;
         }
@@ -455,6 +632,21 @@ class StateIntersectionManager {
         const stats = this.elements.intersectionStats;
         
         if (!container) return;
+
+        if (stats && this.lastIntersectionPhaseInfo) {
+            const inf = this.lastIntersectionPhaseInfo;
+            const waveName = this.escapeHtml(selectedWave.name);
+            let body;
+            if (inf.samePerson) {
+                body = `Фаза всех сигналов от одной персоны: <strong>${this.escapeHtml(inf.labelA)}</strong>.`;
+            } else {
+                body =
+                    `Выбранный сигнал «<strong>${waveName}</strong>» — фаза <strong>А</strong> (${this.escapeHtml(inf.labelA)}); ` +
+                    `остальные сигналы в группе — фаза <strong>Б</strong> (${this.escapeHtml(inf.labelB)}).`;
+            }
+            stats.innerHTML = `<div class="intersection-stats-content">${body}</div>`;
+            stats.style.display = 'block';
+        }
         
         if (intersections.length === 0) {
             container.innerHTML = `
@@ -465,21 +657,25 @@ class StateIntersectionManager {
                     </div>
                 </div>
             `;
-            if (stats) stats.style.display = 'none';
             this.syncTimeRailOverlayButton();
             return;
         }
         
-        if (stats) {
-            stats.style.display = 'none';
-        }
-        
         // ПРИМЕНЯЕМ СОРТИРОВКУ
         const sortedIntersections = this.sortIntersections(intersections);
-        
+        const useLayerB =
+            this.lastIntersectionPhaseInfo && this.lastIntersectionPhaseInfo.samePerson === false;
+
         const resultsHTML = sortedIntersections.map((inter, index) => {
             const wave = inter.wave2;
             const timeStr = this.formatTime(inter.time);
+            const vizorBtnClass = useLayerB ? 'ui-btn show-on-vizor-btn intersection-vizor-b-btn' : 'ui-btn show-on-vizor-btn';
+            const vizorLabel =
+                window.dom && useLayerB
+                    ? window.dom.getIntersectionVizorToggleLabelForWaveB(wave.id)
+                    : window.dom
+                      ? window.dom.getWaveVizorToggleButtonLabel(wave.id)
+                      : 'Показать волну';
             
             return `
                 <div class="summary-item">
@@ -498,8 +694,8 @@ class StateIntersectionManager {
                     </div>
                     <div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
                     <div class="summary-item-actions">
-                        <button class="ui-btn show-on-vizor-btn" data-wave-id="${wave.id}">
-                            ${window.dom ? window.dom.getWaveVizorToggleButtonLabel(wave.id) : 'Показать волну'}
+                        <button type="button" class="${vizorBtnClass}" data-wave-id="${wave.id}">
+                            ${vizorLabel}
                         </button>
                     </div>
                 </div>
@@ -521,40 +717,75 @@ class StateIntersectionManager {
                     const waveId = btn.dataset.waveId;
                     if (!waveId) return;
 
-                    let checkbox = null;
-                    checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-
-                    if (!checkbox) {
-                        checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
-                    }
-
-                    if (checkbox) {
-                        const isChecked = checkbox.checked;
-                        checkbox.checked = !isChecked;
-
-                        const changeEvent = new Event('change', {
-                            bubbles: true,
-                            cancelable: true
+                    if (btn.classList.contains('intersection-vizor-b-btn')) {
+                        let bCheckbox = null;
+                        document.querySelectorAll('.wave-b-visibility-check').forEach((cb) => {
+                            if (String(cb.getAttribute('data-id') || '') === String(waveId)) {
+                                bCheckbox = cb;
+                            }
                         });
-                        checkbox.dispatchEvent(changeEvent);
-
-                        if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
-                            const $checkbox = $(checkbox);
-                            window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
+                        if (bCheckbox) {
+                            const isChecked = bCheckbox.checked;
+                            bCheckbox.checked = !isChecked;
+                            bCheckbox.dispatchEvent(
+                                new Event('change', {
+                                    bubbles: true,
+                                    cancelable: true
+                                })
+                            );
+                            if (window.eventManager && window.eventManager.handleWavePersonBVisibilityChange) {
+                                window.eventManager.handleWavePersonBVisibilityChange(
+                                    waveId,
+                                    !isChecked,
+                                    $(bCheckbox)
+                                );
+                            }
+                        } else if (window.eventManager && window.eventManager.handleWavePersonBVisibilityChange) {
+                            const wid = String(waveId);
+                            const cur = window.appState.waveBold[wid] === true;
+                            const next = !cur;
+                            const $fake = $('<input type="checkbox" />');
+                            $fake.prop('checked', next);
+                            window.eventManager.handleWavePersonBVisibilityChange(waveId, next, $fake);
                         }
                     } else {
-                        if (window.appState && window.appState.waveVisibility) {
-                            const waveIdStr = String(waveId);
-                            const currentState = window.appState.waveVisibility[waveIdStr];
-                            window.appState.waveVisibility[waveIdStr] = currentState === false;
-                            window.appState.save();
+                        let checkbox = null;
+                        checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
 
-                            if (window.waves && window.waves.updatePosition) {
-                                window.waves.updatePosition();
+                        if (!checkbox) {
+                            checkbox = document.querySelector(
+                                `.group-children .wave-visibility-check[data-id="${waveId}"]`
+                            );
+                        }
+
+                        if (checkbox) {
+                            const isChecked = checkbox.checked;
+                            checkbox.checked = !isChecked;
+
+                            const changeEvent = new Event('change', {
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            checkbox.dispatchEvent(changeEvent);
+
+                            if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+                                const $checkbox = $(checkbox);
+                                window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
                             }
+                        } else {
+                            if (window.appState && window.appState.waveVisibility) {
+                                const waveIdStr = String(waveId);
+                                const currentState = window.appState.waveVisibility[waveIdStr];
+                                window.appState.waveVisibility[waveIdStr] = currentState === false;
+                                window.appState.save();
 
-                            if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                                window.unifiedListManager.updateWavesList();
+                                if (window.waves && window.waves.updatePosition) {
+                                    window.waves.updatePosition();
+                                }
+
+                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                                    window.unifiedListManager.updateWavesList();
+                                }
                             }
                         }
                     }
@@ -570,6 +801,7 @@ class StateIntersectionManager {
     showNoWaveSelectedMessage() {
         this.lastIntersections = [];
         this.lastSelectedWave = null;
+        this.lastIntersectionPhaseInfo = null;
         const container = this.elements.intersectionResults;
         const stats = this.elements.intersectionStats;
         
@@ -590,12 +822,20 @@ class StateIntersectionManager {
             `;
         }
         
-        if (stats) stats.style.display = 'none';
+        if (stats) {
+            stats.style.display = 'none';
+            stats.innerHTML = '';
+        }
         this.syncTimeRailOverlayButton();
     }
     
     showNoIntersectionsMessage(message) {
         const container = this.elements.intersectionResults;
+        const stats = this.elements.intersectionStats;
+        if (stats) {
+            stats.style.display = 'none';
+            stats.innerHTML = '';
+        }
         
         if (container) {
             container.innerHTML = `
@@ -653,6 +893,7 @@ class StateIntersectionManager {
     
     refresh() {
         this.populateGroupSelect();
+        this.mirrorCompareSelectsToIntersection();
         this.updateIntersections();
     }
 }

@@ -29,6 +29,7 @@ class IntersectionTimeRailOverlay {
         this._dayHeightPx = 4000;
         this._selectedWave = null;
         this.personSelectA = null;
+        this.personSelectB = null;
         this.viewportHoursSelect = null;
         this.waveSelect = null;
         /** Сколько часов суток умещается по вертикали на экран (см. опции «Обзор»). */
@@ -38,6 +39,8 @@ class IntersectionTimeRailOverlay {
         this._railWaveListSig = null;
         /** @type {null | (() => void)} */
         this._onCompareElAChangeBound = null;
+        /** @type {null | (() => void)} */
+        this._onCompareElBChangeBound = null;
         /** @type {null | (() => void)} */
         this._onWaveCornerRailBound = null;
     }
@@ -57,6 +60,10 @@ class IntersectionTimeRailOverlay {
                     <div class="intersection-time-rail__person-field">
                         <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailPersonA">Дата A</label>
                         <select id="intersectionTimeRailPersonA" class="summary-select intersection-time-rail__person-select" title="Активная персона (как «Дата A» на вкладке сравнения дат)"></select>
+                    </div>
+                    <div class="intersection-time-rail__person-field">
+                        <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailPersonB">Дата B</label>
+                        <select id="intersectionTimeRailPersonB" class="summary-select intersection-time-rail__person-select" title="Фаза остальных сигналов (как «Дата B»; можно «Сравнение с той же датой»)"></select>
                     </div>
                     <div class="intersection-time-rail__person-field">
                         <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailViewportHours">Обзор</label>
@@ -97,6 +104,7 @@ class IntersectionTimeRailOverlay {
         this.waveAxis = root.querySelector('.intersection-time-rail__wave-axis');
         this.nowLabel = root.querySelector('.intersection-time-rail__now-label');
         this.personSelectA = root.querySelector('#intersectionTimeRailPersonA');
+        this.personSelectB = root.querySelector('#intersectionTimeRailPersonB');
         this.viewportHoursSelect = root.querySelector('#intersectionTimeRailViewportHours');
         this.waveSelect = root.querySelector('#intersectionTimeRailWave');
         this.mirrorNext = root.querySelector('.intersection-time-rail__mirror-next');
@@ -123,28 +131,22 @@ class IntersectionTimeRailOverlay {
                 } else if (this.personSelectA.value && window.dates) {
                     window.dates.setActiveDate(this.personSelectA.value, true);
                 }
-                if (this._open) {
-                    queueMicrotask(() => {
-                        if (!this._open) {
-                            return;
-                        }
-                        const sim = window.stateIntersectionManager;
-                        if (
-                            sim &&
-                            typeof sim.updateIntersections === 'function' &&
-                            window.appState &&
-                            window.appState.currentDate
-                        ) {
-                            sim.updateIntersections();
-                            const list = sim.lastIntersections;
-                            const wave = sim.lastSelectedWave || this._selectedWave;
-                            if (list && list.length > 0 && wave && window.appState.currentDate) {
-                                const byTime = [...list].sort((a, b) => a.time.getTime() - b.time.getTime());
-                                this.open(byTime, wave, window.appState.currentDate);
-                            }
-                        }
-                    });
+                this._queueReopenRailFromIntersections();
+            });
+        }
+        if (this.personSelectB) {
+            this.personSelectB.addEventListener('change', () => {
+                const mgr = window.dateComparisonManager;
+                if (mgr && mgr.elB) {
+                    mgr._progSelectEnter();
+                    try {
+                        mgr.elB.value = this.personSelectB.value;
+                    } finally {
+                        mgr._progSelectExit();
+                    }
+                    mgr._onSelectChange('b');
                 }
+                this._queueReopenRailFromIntersections();
             });
         }
         const elCompareA = document.getElementById('dateCompareSelectA');
@@ -156,6 +158,16 @@ class IntersectionTimeRailOverlay {
                 this._syncRailPersonSelectFromElA();
             };
             elCompareA.addEventListener('change', this._onCompareElAChangeBound);
+        }
+        const elCompareB = document.getElementById('dateCompareSelectB');
+        if (elCompareB && !this._onCompareElBChangeBound) {
+            this._onCompareElBChangeBound = () => {
+                if (!this._open || !this.personSelectB) {
+                    return;
+                }
+                this._syncRailPersonSelectFromElB();
+            };
+            elCompareB.addEventListener('change', this._onCompareElBChangeBound);
         }
         if (this.waveSelect) {
             this.waveSelect.addEventListener('change', () => {
@@ -203,6 +215,42 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    _syncRailPersonSelectFromElB() {
+        const mgr = window.dateComparisonManager;
+        if (!this.personSelectB || !mgr || !mgr.elB) {
+            return;
+        }
+        if (this.personSelectB.value !== mgr.elB.value) {
+            this.personSelectB.value = mgr.elB.value;
+        }
+    }
+
+    _queueReopenRailFromIntersections() {
+        if (!this._open) {
+            return;
+        }
+        queueMicrotask(() => {
+            if (!this._open) {
+                return;
+            }
+            const sim = window.stateIntersectionManager;
+            if (
+                sim &&
+                typeof sim.updateIntersections === 'function' &&
+                window.appState &&
+                window.appState.currentDate
+            ) {
+                sim.updateIntersections();
+                const list = sim.lastIntersections;
+                const wave = sim.lastSelectedWave || this._selectedWave;
+                if (list && list.length > 0 && wave && window.appState.currentDate) {
+                    const byTime = [...list].sort((a, b) => a.time.getTime() - b.time.getTime());
+                    this.open(byTime, wave, window.appState.currentDate);
+                }
+            }
+        });
+    }
+
     _refreshRailPersonSelectIfNeeded() {
         const mgr = window.dateComparisonManager;
         if (!this.personSelectA || !mgr || typeof mgr._computeDateListSignature !== 'function') {
@@ -211,9 +259,13 @@ class IntersectionTimeRailOverlay {
         const sig = mgr._computeDateListSignature();
         if (sig !== this._railPersonListSig) {
             this._railPersonListSig = sig;
-            mgr.fillCompareSelectOptions(this.personSelectA);
+            mgr.fillCompareSelectOptions(this.personSelectA, false);
+            if (this.personSelectB) {
+                mgr.fillCompareSelectOptions(this.personSelectB, true);
+            }
         }
         this._syncRailPersonSelectFromElA();
+        this._syncRailPersonSelectFromElB();
     }
 
     _computeRailWaveListSignature() {
@@ -793,7 +845,14 @@ class IntersectionTimeRailOverlay {
         if (sim && selectedWave && typeof sim.findIntersectionsMultiDay === 'function') {
             const waves = sim.getAllWavesFromSelectedGroup();
             if (waves && waves.length >= 2) {
-                const md = sim.findIntersectionsMultiDay(selectedWave, waves, currentDate, RAIL_TIMELINE_DAYS);
+                const md = sim.findIntersectionsMultiDay(
+                    selectedWave,
+                    waves,
+                    currentDate,
+                    RAIL_TIMELINE_DAYS,
+                    sim.lastIntersectionBaseMsA,
+                    sim.lastIntersectionBaseMsB
+                );
                 if (md && md.length > 0) {
                     sorted = md;
                 }

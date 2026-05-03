@@ -62,6 +62,7 @@
 .date-comparison-intro{font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 var(--spacing-md); line-height: 1.4;}
 .date-comparison-selects{gap: var(--spacing-md); align-items: flex-end;}
 .date-comparison-selects .intersection-select-group{flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 4px;}
+.intersection-date-pair-row{margin-bottom: var(--spacing-xs);}
 .date-comparison-selects .intersection-form-label{cursor: default;}
 .date-comparison-table{width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);}
 .date-comparison-table th{text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--clg); background: #f8f9fa; font-weight: 600;}

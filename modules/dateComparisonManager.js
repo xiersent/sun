@@ -1,4 +1,10 @@
 // modules/dateComparisonManager.js — сравнение волн для двух дат (записей из списка) в текущий момент на визоре
+
+/** Значение <option> «дата B = как дата A»; в dateSelections.typeB сохраняется null. */
+if (typeof window.SUN_DATE_B_SAME_AS_A === 'undefined') {
+    window.SUN_DATE_B_SAME_AS_A = '__sun_same_as_a__';
+}
+
 class DateComparisonManager {
     constructor() {
         this._updateRaf = null;
@@ -118,7 +124,17 @@ class DateComparisonManager {
             return;
         }
         this.elA.value = a || '';
-        this.elB.value = b || '';
+        const sameVal = window.SUN_DATE_B_SAME_AS_A;
+        const wantSameB = !b || (a && String(b) === String(a));
+        if (wantSameB && this._optionValueExists(this.elB, sameVal)) {
+            this.elB.value = sameVal;
+        } else if (b && this._optionValueExists(this.elB, b)) {
+            this.elB.value = b;
+        } else if (this._optionValueExists(this.elB, sameVal)) {
+            this.elB.value = sameVal;
+        } else {
+            this.elB.value = '';
+        }
         if (a && String(this.elA.value) !== a) {
             window.sunDateListLog &&
                 window.sunDateListLog('applySelectValues:→ populateSelects (elA mismatch)', {
@@ -129,10 +145,19 @@ class DateComparisonManager {
             this.populateSelects();
             return;
         }
-        if (b && String(this.elB.value) !== b) {
+        const expectedB =
+            wantSameB && this._optionValueExists(this.elB, sameVal)
+                ? sameVal
+                : b && this._optionValueExists(this.elB, b)
+                  ? b
+                  : this._optionValueExists(this.elB, sameVal)
+                    ? sameVal
+                    : '';
+        if (b && String(b) !== String(a) && String(this.elB.value) !== String(expectedB)) {
             window.sunDateListLog &&
                 window.sunDateListLog('applySelectValues:→ populateSelects (elB mismatch)', {
                     b,
+                    expectedB,
                     got: this.elB.value
                 });
             this._cachedDateListSignature = null;
@@ -174,6 +199,12 @@ class DateComparisonManager {
             });
         } finally {
             this._progSelectExit();
+            if (
+                window.stateIntersectionManager &&
+                typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function'
+            ) {
+                window.stateIntersectionManager.mirrorCompareSelectsToIntersection();
+            }
         }
     }
 
@@ -295,6 +326,9 @@ class DateComparisonManager {
                   ? this.elA.value
                   : null;
         let b = this.elB && this.elB.value ? this.elB.value : null;
+        if (b === window.SUN_DATE_B_SAME_AS_A) {
+            b = null;
+        }
         let na = norm(a);
         let nb = norm(b);
         if (na && nb && na === nb) {
@@ -330,6 +364,12 @@ class DateComparisonManager {
         const oa = norm(window.appState.dateSelections.typeA);
         const ob = norm(window.appState.dateSelections.typeB);
         if (na === oa && nb === ob) {
+            if (
+                window.stateIntersectionManager &&
+                typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function'
+            ) {
+                window.stateIntersectionManager.mirrorCompareSelectsToIntersection();
+            }
             return;
         }
         window.sunDateListLog &&
@@ -345,6 +385,15 @@ class DateComparisonManager {
         if (window.waves && typeof window.waves.updatePosition === 'function') {
             window.waves.updatePosition();
         }
+        if (
+            window.stateIntersectionManager &&
+            typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function'
+        ) {
+            window.stateIntersectionManager.mirrorCompareSelectsToIntersection();
+        }
+        if (window.stateIntersectionManager && typeof window.stateIntersectionManager.updateIntersections === 'function') {
+            window.stateIntersectionManager.updateIntersections();
+        }
     }
 
     _resolveDuplicateSelection(changedWhich) {
@@ -354,6 +403,9 @@ class DateComparisonManager {
 
         const idA = this.elA.value;
         const idB = this.elB.value;
+        if (idB === window.SUN_DATE_B_SAME_AS_A) {
+            return;
+        }
         if (idA && idB && String(idA) === String(idB)) {
             const alt = dates.find((d) => String(d.id) !== String(idA));
             if (!alt) return;
@@ -374,12 +426,23 @@ class DateComparisonManager {
      * Порядок дат как в селектах сравнения: по группам персон, внутри группы — по списку g.dates.
      * Заголовки групп — native optgroup label (не выбираются, только подпись секции).
      */
-    _fillCompareSelectOptions(sel) {
+    /**
+     * @param {HTMLSelectElement} sel
+     * @param {boolean} [isDateBSlot] true — первая опция «та же дата, что А» (для селекта даты B)
+     */
+    _fillCompareSelectOptions(sel, isDateBSlot) {
         sel.innerHTML = '';
-        const empty = document.createElement('option');
-        empty.value = '';
-        empty.textContent = '— выберите —';
-        sel.appendChild(empty);
+        if (isDateBSlot) {
+            const same = document.createElement('option');
+            same.value = window.SUN_DATE_B_SAME_AS_A;
+            same.textContent = 'Сравнение с той же датой';
+            sel.appendChild(same);
+        } else {
+            const empty = document.createElement('option');
+            empty.value = '';
+            empty.textContent = '— выберите —';
+            sel.appendChild(empty);
+        }
 
         const allDates = window.appState.data.dates || [];
         const datesById = new Map();
@@ -447,8 +510,8 @@ class DateComparisonManager {
     }
 
     /** Тот же состав option/optgroup, что у селектов «Дата A» / «Дата B» на вкладке сравнения. */
-    fillCompareSelectOptions(sel) {
-        this._fillCompareSelectOptions(sel);
+    fillCompareSelectOptions(sel, isDateBSlot) {
+        this._fillCompareSelectOptions(sel, !!isDateBSlot);
     }
 
     _firstDateIdInCompareSelectOrder() {
@@ -480,8 +543,8 @@ class DateComparisonManager {
         if (!this.elA || !this.elB) return;
         this._progSelectEnter();
         try {
-        this._fillCompareSelectOptions(this.elA);
-        this._fillCompareSelectOptions(this.elB);
+        this._fillCompareSelectOptions(this.elA, false);
+        this._fillCompareSelectOptions(this.elB, true);
 
         const ds = window.appState.dateSelections || { typeA: null, typeB: null };
         const setIfOption = (sel, id) => {
@@ -500,7 +563,19 @@ class DateComparisonManager {
                 ? window.appState.activeDateId
                 : ds.typeA;
         setIfOption(this.elA, typeAForEl);
-        setIfOption(this.elB, ds.typeB);
+        const sameAsA = window.SUN_DATE_B_SAME_AS_A;
+        const aStrForB = typeAForEl != null && String(typeAForEl) !== '' ? String(typeAForEl) : '';
+        const bStored = ds.typeB != null && String(ds.typeB) !== '' ? String(ds.typeB) : '';
+        const useSameAsA =
+            !bStored ||
+            (aStrForB && bStored === aStrForB);
+        if (useSameAsA && this._optionValueExists(this.elB, sameAsA)) {
+            this.elB.value = sameAsA;
+        } else if (bStored && this._optionValueExists(this.elB, bStored)) {
+            this.elB.value = bStored;
+        } else if (this._optionValueExists(this.elB, sameAsA)) {
+            this.elB.value = sameAsA;
+        }
         if (!this.elA.value && typeAUnsetInState) {
             const firstId = this._firstDateIdInCompareSelectOrder();
             if (firstId != null) {
@@ -567,8 +642,22 @@ class DateComparisonManager {
         }
 
         const idA = this.elA ? this.elA.value : '';
-        const idB = this.elB ? this.elB.value : '';
-        if (!idA || !idB || String(idA) === String(idB)) {
+        const rawB = this.elB ? this.elB.value : '';
+        const sameVal = window.SUN_DATE_B_SAME_AS_A;
+        const idB = rawB === sameVal ? '' : rawB;
+        if (!idA) {
+            this.elTableWrap.innerHTML =
+                '<div class="summary-empty">Выберите дату A в списке выше.</div>';
+            return;
+        }
+        if (!idB) {
+            this.elTableWrap.innerHTML =
+                rawB === sameVal
+                    ? '<div class="summary-empty">Для отчёта по двум датам выберите в «Дата B» другую персону. Режим «Сравнение с той же датой» используется на вкладке «Пересечения» (фазы всех сигналов от даты A).</div>'
+                    : '<div class="summary-empty">Выберите две разные даты в списках выше.</div>';
+            return;
+        }
+        if (String(idA) === String(idB)) {
             this.elTableWrap.innerHTML =
                 '<div class="summary-empty">Выберите две разные даты в списках выше.</div>';
             return;

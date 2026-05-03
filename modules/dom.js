@@ -199,6 +199,20 @@ class DOM {
         return this.isWaveShownOnVizor(waveId) ? 'Скрыть волну' : 'Показать волну';
     }
 
+    /** Слой B (фаза даты Б на визоре), группа сигнала должна быть включена. */
+    isWaveLayerBOnVizor(waveId) {
+        if (!window.appState) return false;
+        const wid = String(waveId);
+        if (window.waves && typeof window.waves.isWaveGroupEnabled === 'function' && !window.waves.isWaveGroupEnabled(waveId)) {
+            return false;
+        }
+        return window.appState.waveBold[wid] === true;
+    }
+
+    getIntersectionVizorToggleLabelForWaveB(waveId) {
+        return this.isWaveLayerBOnVizor(waveId) ? 'Скрыть волну от даты Б' : 'Показать волну от даты Б';
+    }
+
     /** Слои A и B сигнала видны на графике (группа вкл, видимость A и B). */
     isBothWaveLayersOnVizor(waveId) {
         if (!window.appState || !window.waves) return false;
@@ -221,6 +235,8 @@ class DOM {
             if (!id) return;
             if (btn.classList.contains('date-compare-vizor-btn')) {
                 btn.textContent = this.getDateCompareVizorToggleLabel(id);
+            } else if (btn.classList.contains('intersection-vizor-b-btn')) {
+                btn.textContent = this.getIntersectionVizorToggleLabelForWaveB(id);
             } else {
                 btn.textContent = this.getWaveVizorToggleButtonLabel(id);
             }

@@ -493,6 +493,9 @@ class UIManager {
         
         if (tabId === 'intersections' && window.stateIntersectionManager) {
             queueMicrotask(() => {
+                if (typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function') {
+                    window.stateIntersectionManager.mirrorCompareSelectsToIntersection();
+                }
                 window.stateIntersectionManager.updateIntersections();
             });
         }
