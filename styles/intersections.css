@@ -41,7 +41,6 @@
 /* Рамка и размер кнопок как у подвкладок сравнения — для верхних вкладок (.tab-buttons--framed) и строки вида отчёта */
 .tab-buttons.tab-buttons--framed,
 .date-comparison-view-tabs {
-    margin-bottom: var(--spacing-sm);
     border: 1px solid var(--clg);
     border-radius: 4px;
     overflow: hidden;
@@ -49,6 +48,12 @@
 }
 .date-comparison-view-tabs {
     margin-top: var(--spacing-sm);
+}
+.date-comparison-view-tabs + .summary-results-container {
+    margin-top: var(--spacing-sm);
+}
+.tab-container:has(> .tab-buttons--framed) {
+    gap: var(--spacing-sm);
 }
 .tab-buttons.tab-buttons--framed .tab-button,
 .date-comparison-view-tabs .tab-button {

@@ -120,6 +120,9 @@ class EventManager {
 			if (window.unifiedListManager && typeof window.unifiedListManager.syncWavesListVisibilityFromAppState === 'function') {
 				window.unifiedListManager.syncWavesListVisibilityFromAppState();
 			}
+			if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+				window.extremumTimeManager.updateExtremums();
+			}
 			if (window.waves) window.waves.updatePosition();
 			if (window.summaryManager) window.summaryManager.updateSummary();
 		};
@@ -1443,10 +1446,16 @@ class EventManager {
 								if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 									window.dom.refreshShowOnVizorButtonLabels();
 								}
+								if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+									window.extremumTimeManager.updateExtremums();
+								}
 							});
 						}
 						if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 							window.dom.refreshShowOnVizorButtonLabels();
+						}
+						if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+							window.extremumTimeManager.updateExtremums();
 						}
 						return;
 					}
@@ -1495,6 +1504,9 @@ class EventManager {
 				if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 					window.dom.refreshShowOnVizorButtonLabels();
 				}
+				if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+					window.extremumTimeManager.updateExtremums();
+				}
 				endVis && endVis({ shouldShow });
 			} else {
 				window.appState.waveBold[waveIdStr] = isChecked;
@@ -1512,6 +1524,9 @@ class EventManager {
 				}
 				if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 					window.dom.refreshShowOnVizorButtonLabels();
+				}
+				if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+					window.extremumTimeManager.updateExtremums();
 				}
 			}
 		}
@@ -1613,6 +1628,9 @@ class EventManager {
 			}
 			if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
 				window.dom.refreshShowOnVizorButtonLabels();
+			}
+			if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+				window.extremumTimeManager.updateExtremums();
 			}
 		};
 
@@ -1740,6 +1758,10 @@ class EventManager {
                     if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
                         window.dom.refreshShowOnVizorButtonLabels();
                     }
+                    if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+                        window.extremumTimeManager.updateExtremums();
+                    }
+
                 });
             }
         }

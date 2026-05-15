@@ -105,3 +105,12 @@ body.graph-gray-mode .wave-label, body.graph-gray-mode .extremum-label, body.gra
 
 /* Ховер из исходных стилей */
 .extremum-label:hover{border-color: #000; z-index: 20; pointer-events: auto;}
+
+/* Полосы +5…−5: две стрелки (перебивают общее .extremum-label-top .extremum-label-arrow) */
+.time-bar-segment .extremum-label-top .extremum-label-arrow{position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-style: solid; z-index: 1;}
+.time-bar-segment .extremum-label-top .extremum-label-arrow-top{top: -6px; bottom: auto; border-width: 0 4px 6px 4px; border-color: transparent transparent rgb(192, 192, 192) transparent;}
+.time-bar-segment .extremum-label-top .extremum-label-arrow-bottom{top: auto; bottom: -6px; border-width: 6px 4px 0 4px; border-color: rgb(192, 192, 192) transparent transparent transparent;}
+.time-bar-segment-slot:hover .extremum-label-top .extremum-label-arrow-top,
+.time-bar-segment .extremum-label-top:hover .extremum-label-arrow-top{border-top-color: transparent; border-right-color: transparent; border-left-color: transparent; border-bottom-color: #000;}
+.time-bar-segment-slot:hover .extremum-label-top .extremum-label-arrow-bottom,
+.time-bar-segment .extremum-label-top:hover .extremum-label-arrow-bottom{border-top-color: #000; border-right-color: transparent; border-left-color: transparent; border-bottom-color: transparent;}

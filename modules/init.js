@@ -176,6 +176,10 @@ async function finalizeInitialization() {
         window.uiManager.syncExtremumWaveColorHighlightButton();
     }
 
+    if (window.timeBarManager && window.timeBarManager.refreshControlsPanel) {
+        window.timeBarManager.refreshControlsPanel();
+    }
+
     if (window.extremumTimeManager && window.extremumTimeManager.init) {
         __lp && __lp.mark('finalize_extremumTimeManager_init');
         window.extremumTimeManager.init();

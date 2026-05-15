@@ -109,13 +109,35 @@
             </div>
 
 
-            <div class="time-bar-container" id="timeBarContainer">
-                <div class="time-bar">
-                    <div class="time-scale" id="timeScale"></div>
-                    <div class="time-indicator" id="timeIndicator">
-                        <div class="time-indicator-label"></div>
+            <div class="time-bar-wrap" id="timeBarWrap">
+                <div class="panel-section time-bar-controls-section" id="timeBarControlsSection">
+                    <div class="tab-container">
+                        <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Настройки полосы времени">
+                            <button type="button" class="tab-button time-bar-controls-toggle" id="timeBarControlsToggle" aria-expanded="false" aria-controls="timeBarControls">Редактировать</button>
+                        </div>
                     </div>
-                    <div class="time-labels" id="timeLabels"></div>
+                    <div class="time-bar-controls time-bar-controls--collapsed" id="timeBarControls" aria-label="Видимость полос и групп"></div>
+                </div>
+                <div class="time-bar-container" id="timeBarContainer">
+                <div class="time-bar time-bar--stacked">
+                    <div class="time-bar-state-row time-bar-hours-row">
+                        <div class="time-bar-state-side time-bar-state-side--hours" aria-hidden="true"></div>
+                        <div class="time-bar-hours-track">
+                            <div class="time-scale" id="timeScale"></div>
+                            <div class="time-labels" id="timeLabels"></div>
+                        </div>
+                    </div>
+                    <div class="time-bar-state-stack" id="timeBarStateStack"></div>
+                    <div class="time-bar-now-vline" id="timeNowVline" aria-hidden="true"></div>
+                    <div class="time-bar-now-row">
+                        <div class="time-bar-state-side time-bar-state-side--now" aria-hidden="true"></div>
+                        <div class="time-bar-now-track">
+                            <div class="time-indicator time-bar-now-marker" id="timeIndicator" title="">
+                                <div class="time-indicator-label time-bar-now-label"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 </div>
             </div>
 

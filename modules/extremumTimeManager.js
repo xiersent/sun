@@ -1,298 +1,352 @@
-// modules/extremumTimeManager.js - ПЕРЕЧИСЛЕНИЕ КОЛОСКОВ В ВЫНОСКАХ
+// modules/extremumTimeManager.js — полосы состояний +5…−5, моменты прохождения sin(фаза)·5
 class ExtremumTimeManager {
     constructor() {
         this.markers = [];
         this.labels = [];
-        this.timeBarContainer = null;
-        this.groupTolerance = 1 * 60 * 1000; // 1 минута в мс для группировки
+        this.groupTolerance = 1 * 60 * 1000;
+        this._visibilityRefreshQueued = false;
     }
 
     init() {
-        this.timeBarContainer = document.querySelector('.time-scale');
-        if (!this.timeBarContainer) {
-            requestAnimationFrame(() => {
-                this.timeBarContainer = document.querySelector('.time-scale');
-                if (!this.timeBarContainer) {
-                    return;
-                }
-                this.updateExtremums();
-                this.setupDateChangeObserver();
-            });
+        const stack = document.getElementById('timeBarStateStack');
+        if (!stack) {
+            requestAnimationFrame(() => this.init());
             return;
         }
-
+        this.installWaveVisibilityObserver();
         this.updateExtremums();
         this.setupDateChangeObserver();
     }
 
-    calculateExtremumsForDay(date) {
+    /**
+     * Доли цикла [0,1), в которых 5·sin(2πf) = k (целое −5…5).
+     */
+    _cycleFractionsForState(k) {
+        if (k === 5) return [0.25];
+        if (k === -5) return [0.75];
+        if (k === 0) return [0, 0.5];
+        const s = k / 5;
+        const a = Math.asin(s) / (2 * Math.PI);
+        const b = (Math.PI - Math.asin(s)) / (2 * Math.PI);
+        return [a, b];
+    }
+
+    _isWaveRelevant(wave) {
+        if (window.timeBarManager && typeof window.timeBarManager.isTimeBarGroupVisibleForWave === 'function') {
+            return window.timeBarManager.isTimeBarGroupVisibleForWave(wave.id);
+        }
+        return true;
+    }
+
+    /**
+     * Доли суток от полуночи [0,1), когда доля цикла = targetF.
+     * fract(p0 + d/P) = targetF  ⇒  d = P·(m + targetF − p0), d ∈ [0,1).
+     */
+    _dayFractionsForCycleTarget(p0, periodDays, targetF) {
+        const hits = [];
+        const p = periodDays;
+        const from = -Math.ceil(p) - 3;
+        const to = Math.ceil(p) + 3;
+        for (let m = from; m <= to; m++) {
+            const d = p * (m + targetF - p0);
+            if (d >= 0 && d < 1 - 1e-12) {
+                hits.push(d);
+            }
+        }
+        return hits;
+    }
+
+    calculateStateEventsForDay(date) {
         if (!window.appState?.data?.waves) return [];
-        
+
         const dayStart = new Date(date);
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(date);
         dayEnd.setHours(23, 59, 59, 999);
-        
-        const extremums = [];
-        const allWaves = window.appState.data.waves;
-        
-        allWaves.forEach(wave => {
+
+        const baseDate =
+            window.appState.baseDate instanceof Date
+                ? window.appState.baseDate
+                : new Date(window.appState.baseDate);
+
+        const dayMs = 24 * 60 * 60 * 1000;
+        const events = [];
+
+        window.appState.data.waves.forEach((wave) => {
             if (!wave.period || wave.period <= 0) return;
-            
-            const baseDate = window.appState.baseDate instanceof Date ? 
-                window.appState.baseDate : 
-                new Date(window.appState.baseDate);
-            
+            if (!this._isWaveRelevant(wave)) return;
+
             const daysFromBaseToStart = window.timeUtils.getDaysBetween(baseDate, dayStart);
-            const phaseAtStart = ((daysFromBaseToStart % wave.period) / wave.period);
-            const normalizedPhaseAtStart = phaseAtStart < 0 ? phaseAtStart + 1 : phaseAtStart;
-            
-            const extremumPhases = [
-                { phase: 0.25, position: 'top' },
-                { phase: 0.75, position: 'bottom' }
-            ];
-            
-            extremumPhases.forEach(({ phase, position }) => {
-                let phaseDiff = phase - normalizedPhaseAtStart;
-                if (phaseDiff < 0) phaseDiff += 1;
-                
-                const firstExtremumDays = phaseDiff * wave.period;
-                let firstExtremumTime = new Date(
-                    dayStart.getTime() + (firstExtremumDays * 24 * 3600 * 1000)
-                );
-                
-                if (firstExtremumTime < dayStart) {
-                    firstExtremumTime = new Date(
-                        firstExtremumTime.getTime() + (wave.period * 24 * 3600 * 1000)
-                    );
-                }
-                
-                let currentTime = firstExtremumTime;
-                while (currentTime <= dayEnd) {
-                    if (currentTime >= dayStart && currentTime <= dayEnd) {
-                        extremums.push({
-                            time: new Date(currentTime),
-                            wave: wave,
-                            position: position,
-                            color: wave.color || '#666666'
-                        });
+            let p0 = (daysFromBaseToStart % wave.period) / wave.period;
+            if (p0 < 0) p0 += 1;
+
+            for (let k = 5; k >= -5; k--) {
+                const targets = this._cycleFractionsForState(k);
+                for (const targetF of targets) {
+                    const dayFracs = this._dayFractionsForCycleTarget(p0, wave.period, targetF);
+                    for (const d of dayFracs) {
+                        const t = new Date(dayStart.getTime() + d * dayMs);
+                        if (t >= dayStart && t <= dayEnd) {
+                            events.push({
+                                time: t,
+                                wave,
+                                state: k,
+                                color: wave.color || '#666666'
+                            });
+                        }
                     }
-                    
-                    currentTime = new Date(
-                        currentTime.getTime() + (wave.period * 24 * 3600 * 1000)
-                    );
                 }
-            });
+            }
         });
-        
-        return extremums.sort((a, b) => a.time.getTime() - b.time.getTime());
+
+        return events.sort((a, b) => a.time.getTime() - b.time.getTime());
     }
 
-    groupExtremumsByTime(extremums) {
-        const groups = [];
-        
-        // Сначала группируем по позиции (верх/низ)
-        const topExtremums = extremums.filter(e => e.position === 'top');
-        const bottomExtremums = extremums.filter(e => e.position === 'bottom');
-        
-        // Группируем верхние экстремумы
-        this.groupByTimeThreshold(topExtremums, 'top').forEach(group => {
-            groups.push(group);
-        });
-        
-        // Группируем нижние экстремумы
-        this.groupByTimeThreshold(bottomExtremums, 'bottom').forEach(group => {
-            groups.push(group);
-        });
-        
-        return groups;
+    groupEventsByState(events) {
+        /** @type {Map<number, Array<{ time: Date, waves: unknown[], colors: string[] }>>} */
+        const byState = new Map();
+        for (let k = 5; k >= -5; k--) {
+            byState.set(k, []);
+        }
+        for (const e of events) {
+            const list = byState.get(e.state);
+            if (list) list.push(e);
+        }
+        const grouped = new Map();
+        for (const [state, list] of byState) {
+            if (list.length === 0) {
+                grouped.set(state, []);
+                continue;
+            }
+            list.sort((a, b) => a.time.getTime() - b.time.getTime());
+            grouped.set(state, this._groupByTimeThreshold(list));
+        }
+        return grouped;
     }
 
-    groupByTimeThreshold(extremums, position) {
+    _groupByTimeThreshold(extremums) {
         if (extremums.length === 0) return [];
-        
         const groups = [];
         let currentGroup = {
             time: extremums[0].time,
             waves: [extremums[0].wave],
             colors: [extremums[0].color],
-            position: position
+            state: extremums[0].state
         };
-        
         for (let i = 1; i < extremums.length; i++) {
-            const currentExtremum = extremums[i];
-            const timeDiff = Math.abs(currentExtremum.time.getTime() - currentGroup.time.getTime());
-            
+            const cur = extremums[i];
+            const timeDiff = Math.abs(cur.time.getTime() - currentGroup.time.getTime());
             if (timeDiff <= this.groupTolerance) {
-                // Добавляем в текущую группу
-                currentGroup.waves.push(currentExtremum.wave);
-                currentGroup.colors.push(currentExtremum.color);
+                currentGroup.waves.push(cur.wave);
+                currentGroup.colors.push(cur.color);
             } else {
-                // Сохраняем текущую группу и начинаем новую
                 groups.push({ ...currentGroup });
                 currentGroup = {
-                    time: currentExtremum.time,
-                    waves: [currentExtremum.wave],
-                    colors: [currentExtremum.color],
-                    position: position
+                    time: cur.time,
+                    waves: [cur.wave],
+                    colors: [cur.color],
+                    state: cur.state
                 };
             }
         }
-        
-        // Добавляем последнюю группу
         groups.push(currentGroup);
-        
         return groups;
     }
 
+    _getTrackForState(state) {
+        return document.querySelector(`.time-bar-state-track[data-state="${state}"]`);
+    }
 
-	renderMarkers(groupedExtremums) {
-		// Очищаем старые маркеры и выноски
-		this.clearAll();
-		
-		if (!this.timeBarContainer || !groupedExtremums.length) return;
-		
-		const dayMs = 24 * 60 * 60 * 1000;
-		
-		groupedExtremums.forEach(group => {
-			const dayStart = new Date(group.time);
-			dayStart.setHours(0, 0, 0, 0);
-			const timeFromMidnight = group.time.getTime() - dayStart.getTime();
-			const positionPercent = (timeFromMidnight / dayMs) * 100;
-			const clampedPercent = Math.max(0, Math.min(100, positionPercent));
-			
-			// Маркер (риска) - цвет от волны
-			const marker = document.createElement('div');
-			marker.className = 'extremum-marker';
-			marker.style.left = `${clampedPercent}%`;
-			marker.style.backgroundColor = group.colors[0];
-			
-			if (group.position === 'top') {
-				marker.classList.add('extremum-marker-top');
-			} else {
-				marker.classList.add('extremum-marker-bottom');
-			}
-			
-			// Выноска - ЧЕРНЫЙ фон, без цвета волны
-			const label = document.createElement('div');
-			label.className = 'extremum-label';
-			label.style.left = `${clampedPercent}%`;
-			// НЕТ установки backgroundColor - будет черный из CSS
-			
-			if (group.position === 'top') {
-				label.classList.add('extremum-label-top');
-			} else {
-				label.classList.add('extremum-label-bottom');
-			}
-			
-			// Имена колосков
-			const waveNameMap = new Map();
-			group.waves.forEach(wave => {
-				waveNameMap.set(wave.name, wave.id);
-			});
-			
-			const uniqueNames = Array.from(waveNameMap.keys());
-			const waveIds = Array.from(waveNameMap.values());
-			
-			const labelHTML = uniqueNames.map((name, index) => {
-				const waveId = waveIds[index];
-				return `<span class="extremum-wave-name" data-wave-id="${waveId}">${name}</span>`;
-			}).join(', ');
-			
-			const labelTextElement = document.createElement('div');
-			labelTextElement.className = 'extremum-label-text';
-			labelTextElement.innerHTML = labelHTML;
-			
-			const arrow = document.createElement('div');
-			arrow.className = 'extremum-label-arrow';
-			
-			label.appendChild(labelTextElement);
-			label.appendChild(arrow);
-			
-			this.timeBarContainer.appendChild(marker);
-			this.timeBarContainer.appendChild(label);
-			
-			this.markers.push(marker);
-			this.labels.push(label);
-			
-			// Обработчики кликов
-			queueMicrotask(() => {
-				labelTextElement.querySelectorAll('.extremum-wave-name').forEach(span => {
-					span.addEventListener('click', (e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						const waveId = span.dataset.waveId;
-						if (waveId) {
-							const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
-							if (checkbox) checkbox.click();
-						}
-					});
-				});
-			});
-		});
-	}
+    _isRowHidden(state) {
+        const row = document.querySelector(`.time-bar-state-row[data-state="${state}"]`);
+        return !!(row && row.classList.contains('time-bar-state-row--hidden'));
+    }
 
+    _dayFractionForTime(time, dayMs) {
+        const dayStart = new Date(time);
+        dayStart.setHours(0, 0, 0, 0);
+        return Math.max(0, Math.min(1, (time.getTime() - dayStart.getTime()) / dayMs));
+    }
+
+    /** Подчёркивание: слой A из appState.waveVisibility (источник правды для чекбокса). */
+    _isWaveVisibilityChecked(waveId) {
+        if (!window.appState || !window.appState.waveVisibility) {
+            return false;
+        }
+        return window.appState.waveVisibility[String(waveId)] !== false;
+    }
+
+    _scheduleVisibilityRefresh() {
+        if (this._visibilityRefreshQueued) {
+            return;
+        }
+        this._visibilityRefreshQueued = true;
+        queueMicrotask(() => {
+            this._visibilityRefreshQueued = false;
+            this.updateExtremums();
+        });
+    }
+
+    /** Любое изменение waveVisibility → перерисовка выносок на time-bar. */
+    installWaveVisibilityObserver() {
+        if (!window.appState) {
+            return;
+        }
+        const raw = window.appState.waveVisibility;
+        if (!raw || typeof raw !== 'object') {
+            return;
+        }
+        if (raw.__isWaveVisibilityProxy) {
+            return;
+        }
+
+        const mgr = this;
+        const proxy = new Proxy(raw, {
+            set(target, prop, value) {
+                const prev = target[prop];
+                const ok = Reflect.set(target, prop, value);
+                if (prev !== value) {
+                    mgr._scheduleVisibilityRefresh();
+                }
+                return ok;
+            },
+            deleteProperty(target, prop) {
+                const had = Object.prototype.hasOwnProperty.call(target, prop);
+                const ok = Reflect.deleteProperty(target, prop);
+                if (had) {
+                    mgr._scheduleVisibilityRefresh();
+                }
+                return ok;
+            }
+        });
+        proxy.__isWaveVisibilityProxy = true;
+        proxy.__waveVisibilityTarget = raw;
+        window.appState.waveVisibility = proxy;
+    }
+
+    _buildSegmentElement(group, frac) {
+        const waveNameMap = new Map();
+        group.waves.forEach((wave) => {
+            waveNameMap.set(wave.name, wave.id);
+        });
+        const uniqueNames = Array.from(waveNameMap.keys());
+        const waveIds = Array.from(waveNameMap.values());
+        const namesHtml = uniqueNames
+            .map((name, index) => {
+                const waveId = waveIds[index];
+                const checked = this._isWaveVisibilityChecked(waveId);
+                const cls = checked
+                    ? 'extremum-wave-name extremum-wave-name--on-vizor'
+                    : 'extremum-wave-name';
+                return `<span class="${cls}" data-wave-id="${waveId}">${name}</span>`;
+            })
+            .join(', ');
+
+        const slot = document.createElement('div');
+        slot.className = 'time-bar-segment-slot';
+        slot.style.left = `${Math.max(0, Math.min(100, frac * 100))}%`;
+
+        const seg = document.createElement('div');
+        seg.className = 'time-bar-segment';
+
+        const label = document.createElement('div');
+        label.className = 'extremum-label extremum-label-top time-bar-segment-label';
+
+        const labelText = document.createElement('div');
+        labelText.className = 'extremum-label-text';
+        labelText.innerHTML = namesHtml;
+
+        const arrowTop = document.createElement('div');
+        arrowTop.className = 'extremum-label-arrow extremum-label-arrow-top';
+
+        const arrowBottom = document.createElement('div');
+        arrowBottom.className = 'extremum-label-arrow extremum-label-arrow-bottom';
+
+        label.appendChild(arrowTop);
+        label.appendChild(labelText);
+        label.appendChild(arrowBottom);
+        seg.appendChild(label);
+        slot.appendChild(seg);
+
+        queueMicrotask(() => {
+            labelText.querySelectorAll('.extremum-wave-name').forEach((span) => {
+                span.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const waveId = span.dataset.waveId;
+                    if (waveId) {
+                        const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+                        if (checkbox) checkbox.click();
+                    }
+                });
+            });
+        });
+
+        return slot;
+    }
+
+    renderMarkers(groupedByState) {
+        this.clearAll();
+        const dayMs = 24 * 60 * 60 * 1000;
+
+        for (let state = 5; state >= -5; state--) {
+            if (this._isRowHidden(state)) continue;
+            const track = this._getTrackForState(state);
+            if (!track) continue;
+            const groups = (groupedByState.get(state) || []).slice().sort((a, b) => a.time.getTime() - b.time.getTime());
+            if (!groups.length) continue;
+
+            for (let i = 0; i < groups.length; i++) {
+                const group = groups[i];
+                const frac = this._dayFractionForTime(group.time, dayMs);
+                const slot = this._buildSegmentElement(group, frac);
+                /* Раньше по времени — выше z-index (перекрывают более поздние). */
+                slot.style.zIndex = String(9 + (groups.length - 1 - i));
+                track.appendChild(slot);
+                this.markers.push(slot);
+            }
+        }
+    }
 
     clearAll() {
-        // Очищаем маркеры
-        this.markers.forEach(marker => {
-            if (marker.parentNode) marker.parentNode.removeChild(marker);
+        document.querySelectorAll('.time-bar-state-track').forEach((track) => {
+            track.innerHTML = '';
         });
         this.markers = [];
-        
-        // Очищаем выноски
-        this.labels.forEach(label => {
-            if (label.parentNode) label.parentNode.removeChild(label);
-        });
         this.labels = [];
     }
 
-    getContrastTextColor(backgroundColor) {
-        if (!backgroundColor) return '#000000';
-        
-        let r, g, b;
-        
-        if (backgroundColor.startsWith('#')) {
-            const hex = backgroundColor.slice(1);
-            if (hex.length === 3) {
-                r = parseInt(hex[0] + hex[0], 16);
-                g = parseInt(hex[1] + hex[1], 16);
-                b = parseInt(hex[2] + hex[2], 16);
-            } else if (hex.length === 6) {
-                r = parseInt(hex.slice(0, 2), 16);
-                g = parseInt(hex.slice(2, 4), 16);
-                b = parseInt(hex.slice(4, 6), 16);
-            } else {
-                return '#000000';
-            }
-        } else {
-            return '#000000';
-        }
-        
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        return luminance > 0.5 ? '#000000' : '#ffffff';
-    }
-
     updateExtremums() {
-        if (!this.timeBarContainer) return;
-        
+        if (!document.getElementById('timeBarStateStack')) return;
+
         if (!window.appState.hasActivePerson()) {
-            this.renderMarkers([]);
+            this.renderMarkers(new Map());
             return;
         }
-        
+
         const currentDate = window.appState.currentDate || new Date();
-        const extremums = this.calculateExtremumsForDay(currentDate);
-        const groupedExtremums = this.groupExtremumsByTime(extremums);
-        this.renderMarkers(groupedExtremums);
+        const events = this.calculateStateEventsForDay(currentDate);
+        const grouped = this.groupEventsByState(events);
+        this.renderMarkers(grouped);
     }
 
     setupDateChangeObserver() {
         const originalCurrentDate = window.appState.currentDate;
+        const desc = Object.getOwnPropertyDescriptor(window.appState, 'currentDate');
+        const prevSet = desc && desc.set;
         Object.defineProperty(window.appState, 'currentDate', {
-            get() { return this._currentDate; },
+            get() {
+                return this._currentDate;
+            },
             set(value) {
                 this._currentDate = value;
+                if (typeof prevSet === 'function') {
+                    try {
+                        prevSet.call(window.appState, value);
+                    } catch (e) {
+                        /* ignore */
+                    }
+                }
                 queueMicrotask(() => {
                     if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
                         window.extremumTimeManager.updateExtremums();
@@ -300,10 +354,20 @@ class ExtremumTimeManager {
                 });
             }
         });
-        
+
         window.appState._currentDate = originalCurrentDate;
     }
 }
 
-// Автоматически создаем экземпляр
+/** Повторно обернуть waveVisibility после перезагрузки appState (импорт, сброс). */
+ExtremumTimeManager.reinstallWaveVisibilityObserver = function reinstallWaveVisibilityObserver() {
+    if (window.extremumTimeManager && window.extremumTimeManager.installWaveVisibilityObserver) {
+        const vis = window.appState && window.appState.waveVisibility;
+        if (vis && vis.__isWaveVisibilityProxy && vis.__waveVisibilityTarget) {
+            window.appState.waveVisibility = vis.__waveVisibilityTarget;
+        }
+        window.extremumTimeManager.installWaveVisibilityObserver();
+    }
+};
+
 window.extremumTimeManager = new ExtremumTimeManager();
