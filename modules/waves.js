@@ -492,6 +492,20 @@ class WavesManager {
         
         return waveState;
     }
+
+    /**
+     * Направление волны в моменте day: +1 восходящая, −1 низходящая, 0 у экстремума (плоско).
+     * Совпадает со знаком d/dt от sin(фаза)·5 по оси дней.
+     */
+    calculateWaveDirectionAtDay(wave, currentDay) {
+        if (!wave.period || wave.period <= 0) return 0;
+        const phase = currentDay % wave.period;
+        const normalizedPhase = (phase / wave.period) * 2 * Math.PI;
+        const deriv = Math.cos(normalizedPhase);
+        const flatEps = 0.08;
+        if (Math.abs(deriv) < flatEps) return 0;
+        return deriv > 0 ? 1 : -1;
+    }
     
     isExtremumHighlightEnabled() {
         return window.appState && window.appState.extremumWaveColorHighlight === true;

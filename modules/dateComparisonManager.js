@@ -597,9 +597,25 @@ class DateComparisonManager {
         }
     }
 
-    _matchPercent(stateA, stateB) {
+    _matchPercent(stateA, stateB, dirA = 0, dirB = 0) {
         const diff = Math.abs(stateA - stateB);
-        return 100 * (1 - diff / 10);
+        let pct = 100 * (1 - diff / 10);
+        if (dirA !== 0 && dirB !== 0 && dirA !== dirB) {
+            return 0;
+        }
+        return Math.max(0, Math.min(100, pct));
+    }
+
+    _directionLabel(dir) {
+        if (dir > 0) return '↑';
+        if (dir < 0) return '↓';
+        return '—';
+    }
+
+    _directionTitle(dir) {
+        if (dir > 0) return 'восходящая';
+        if (dir < 0) return 'низходящая';
+        return 'экстремум';
     }
 
     _matchClass(pct) {
@@ -689,13 +705,24 @@ class DateComparisonManager {
             if (!wave.period || wave.period <= 0) continue;
             const sA = window.waves.calculateWaveStateAtDay(wave, dayA);
             const sB = window.waves.calculateWaveStateAtDay(wave, dayB);
-            const pct = this._matchPercent(sA, sB);
+            const dirA =
+                typeof window.waves.calculateWaveDirectionAtDay === 'function'
+                    ? window.waves.calculateWaveDirectionAtDay(wave, dayA)
+                    : 0;
+            const dirB =
+                typeof window.waves.calculateWaveDirectionAtDay === 'function'
+                    ? window.waves.calculateWaveDirectionAtDay(wave, dayB)
+                    : 0;
+            const statePct = Math.max(0, Math.min(100, 100 * (1 - Math.abs(sA - sB) / 10)));
+            const pct = this._matchPercent(sA, sB, dirA, dirB);
             rows.push({
                 wave,
                 stateA: sA,
                 stateB: sB,
+                dirA,
+                dirB,
                 pct,
-                gapPct: 100 - pct,
+                gapPct: 100 - statePct,
                 quadPct: this._quadraturePct(sA, sB)
             });
         }
@@ -720,6 +747,7 @@ class DateComparisonManager {
                 : mode === 'quadrature'
                   ? 'Квадратура, %'
                   : 'Совпадение, %';
+        const showDirectionCols = mode === 'phaseMatch';
 
         /* Кнопка «Показать A и B» — на всех видах таблицы этой вкладки (как в «Состояниях» / «Пересечениях»). */
         const showBothLayersBtnCol = true;
@@ -731,7 +759,9 @@ class DateComparisonManager {
                         <th>№</th>
                         <th>Сигнал</th>
                         <th>Сост. A</th>
+                        ${showDirectionCols ? '<th>Напр. A</th>' : ''}
                         <th>Сост. B</th>
+                        ${showDirectionCols ? '<th>Напр. B</th>' : ''}
                         <th>${metricHeader}</th>
                         ${showBothLayersBtnCol ? '<th class="date-comparison-actions">График</th>' : ''}
                     </tr>
@@ -760,6 +790,12 @@ class DateComparisonManager {
                 const vizorCell = showBothLayersBtnCol
                     ? `<td class="date-comparison-actions"><button type="button" class="ui-btn show-on-vizor-btn date-compare-vizor-btn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
                     : '';
+                const dirACell = showDirectionCols
+                    ? `<td class="date-comparison-dir" title="${this._escapeHtml(this._directionTitle(row.dirA))}">${this._directionLabel(row.dirA)}</td>`
+                    : '';
+                const dirBCell = showDirectionCols
+                    ? `<td class="date-comparison-dir" title="${this._escapeHtml(this._directionTitle(row.dirB))}">${this._directionLabel(row.dirB)}</td>`
+                    : '';
                 return `<tr>
                     <td class="date-comparison-num">${idx + 1}</td>
                     <td class="date-comparison-name">
@@ -767,7 +803,9 @@ class DateComparisonManager {
                         ${name}
                     </td>
                     <td>${row.stateA.toFixed(2)}</td>
+                    ${dirACell}
                     <td>${row.stateB.toFixed(2)}</td>
+                    ${dirBCell}
                     <td><span class="intersection-result-closeness ${cls}">${metricPct.toFixed(1)}%</span></td>
                     ${vizorCell}
                 </tr>`;
