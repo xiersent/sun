@@ -204,7 +204,7 @@ class GridManager {
 	createHorizontalGridLines() {
 		if (!this.staticElementsContainer) return;
 		
-		for (let i = 1; i <= 4; i++) {
+		for (let i = 1; i <= 5; i++) {
 			const topLine = document.createElement('div');
 			topLine.className = 'grid-line x';
 			topLine.style.position = 'absolute';
@@ -240,14 +240,14 @@ class GridManager {
 		zeroLabel.textContent = '0';
 		this.staticElementsContainer.appendChild(zeroLabel);
 		
-		for (let i = 1; i <= 4; i++) {
+		for (let i = 1; i <= 5; i++) {
 			const labelTop = document.createElement('div');
 			labelTop.className = 'labels y-labels';
 			labelTop.style.position = 'absolute';
 			labelTop.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
 			labelTop.style.transform = 'translateY(-50%)';
 			labelTop.style.left = '10px';
-			labelTop.textContent = i + 1;
+			labelTop.textContent = String(i);
 			this.staticElementsContainer.appendChild(labelTop);
 			
 			const labelBottom = document.createElement('div');
@@ -256,7 +256,7 @@ class GridManager {
 			labelBottom.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
 			labelBottom.style.transform = 'translateY(-50%)';
 			labelBottom.style.left = '10px';
-			labelBottom.textContent = -(i + 1);
+			labelBottom.textContent = String(-i);
 			this.staticElementsContainer.appendChild(labelBottom);
 		}
 	}
