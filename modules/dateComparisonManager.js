@@ -618,6 +618,12 @@ class DateComparisonManager {
             : '';
     }
 
+    _dirCell(dir) {
+        const title = this._escapeHtml(this._directionTitle(dir));
+        const label = this._directionLabel(dir);
+        return `<td title="${title}">${label}</td>`;
+    }
+
     _matchClass(pct) {
         if (pct >= 99.5) return 'intersection-item-exact';
         if (pct >= 85) return 'intersection-item-very-close';
@@ -754,11 +760,10 @@ class DateComparisonManager {
             <table class="date-comparison-table">
                 <thead>
                     <tr>
-                        <th>№</th>
                         <th>Сигнал</th>
-                        <th>Сост. A</th>
+                        <th class="date-comparison-state">Сост. A</th>
                         <th>Напр. A</th>
-                        <th>Сост. B</th>
+                        <th class="date-comparison-state">Сост. B</th>
                         <th>Напр. B</th>
                         <th>${metricHeader}</th>
                         ${showBothLayersBtnCol ? '<th class="date-comparison-actions">График</th>' : ''}
@@ -767,7 +772,7 @@ class DateComparisonManager {
                 <tbody>
         `;
         const body = rows
-            .map((row, idx) => {
+            .map((row) => {
                 let metricPct;
                 let cls;
                 if (mode === 'phaseGap') {
@@ -788,18 +793,15 @@ class DateComparisonManager {
                 const vizorCell = showBothLayersBtnCol
                     ? `<td class="date-comparison-actions"><button type="button" class="ui-btn show-on-vizor-btn date-compare-vizor-btn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
                     : '';
-                const dirACell = `<td class="date-comparison-dir" title="${this._escapeHtml(this._directionTitle(row.dirA))}">${this._directionLabel(row.dirA)}</td>`;
-                const dirBCell = `<td class="date-comparison-dir" title="${this._escapeHtml(this._directionTitle(row.dirB))}">${this._directionLabel(row.dirB)}</td>`;
                 return `<tr>
-                    <td class="date-comparison-num">${idx + 1}</td>
                     <td class="date-comparison-name">
                         <span class="date-comparison-color" style="background-color:${row.wave.color || '#666'}"></span>
                         ${name}
                     </td>
-                    <td>${row.stateA.toFixed(2)}</td>
-                    ${dirACell}
-                    <td>${row.stateB.toFixed(2)}</td>
-                    ${dirBCell}
+                    <td class="date-comparison-state">${row.stateA.toFixed(2)}</td>
+                    ${this._dirCell(row.dirA)}
+                    <td class="date-comparison-state">${row.stateB.toFixed(2)}</td>
+                    ${this._dirCell(row.dirB)}
                     <td><span class="intersection-result-closeness ${cls}">${metricPct.toFixed(1)}%</span></td>
                     ${vizorCell}
                 </tr>`;
