@@ -15,6 +15,12 @@ class GridManager {
             pixelPosition: pixelPosition
         };
     }
+
+    /** Индексы вертикальных линий/подписей: −12…+13 при 24 клетках (край справа при конце дня). */
+    _getDayLineOffsetRange() {
+        const half = Math.floor(window.appState.config.gridSquaresX / 2);
+        return { min: -half, max: half + 1 };
+    }
     
 	createGrid() {
 		this.clearGrid();
@@ -23,9 +29,6 @@ class GridManager {
 			this.updateCenterDate();
 			return;
 		}
-		
-		const centerX = window.appState.graphWidth / 2;
-		const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
 		
 		const currentDay = window.appState.currentDay || 0;
 		const fractionalOffset = currentDay - Math.floor(currentDay);
@@ -52,8 +55,8 @@ class GridManager {
 		this.staticElementsContainer.style.pointerEvents = 'none';
 		this.staticElementsContainer.style.zIndex = '5';
 		
-		// ИЗМЕНЕНИЕ: начинаем с -halfSquaresX + 1, а не с -halfSquaresX
-		for (let i = -halfSquaresX + 1; i <= halfSquaresX; i++) {
+		const { min: minOffset, max: maxOffset } = this._getDayLineOffsetRange();
+		for (let i = minOffset; i <= maxOffset; i++) {
 			this.createGridLine(i);
 			this.createDateLabel(i);
 		}
@@ -173,13 +176,11 @@ class GridManager {
     createDateLabel(offset) {
         if (!this.gridContainer) return;
         
-        const adjustedOffset = -offset;
-        
         const currentDay = window.appState.currentDay || 0;
         const date = new Date(window.appState.baseDate);
-        date.setDate(date.getDate() + Math.floor(currentDay) + adjustedOffset);
+        date.setDate(date.getDate() + Math.floor(currentDay) + offset);
         
-        const positionData = this.calculateGridPosition(adjustedOffset);
+        const positionData = this.calculateGridPosition(offset);
         
         const label = document.createElement('div');
         label.className = 'labels date-labels';
@@ -373,8 +374,8 @@ class GridManager {
         
         this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach(el => el.remove());
         
-        const halfSquaresX = Math.floor(window.appState.config.gridSquaresX / 2);
-        for (let i = -halfSquaresX + 1; i <= halfSquaresX; i++) {
+        const { min: minOffset, max: maxOffset } = this._getDayLineOffsetRange();
+        for (let i = minOffset; i <= maxOffset; i++) {
             this.createDateLabel(i);
         }
     }
