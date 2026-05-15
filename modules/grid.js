@@ -16,10 +16,16 @@ class GridManager {
         };
     }
 
-    /** Индексы вертикальных линий/подписей: −12…+13 при 24 клетках (край справа при конце дня). */
-    _getDayLineOffsetRange() {
+    /** Подписи дат по краям видимой сетки: −12…+13 при 24 клетках (край справа при конце дня). */
+    _getDayLabelOffsetRange() {
         const half = Math.floor(window.appState.config.gridSquaresX / 2);
         return { min: -half, max: half + 1 };
+    }
+
+    /** Вертикальные линии сетки — без крайних (они сливаются с outline графика). */
+    _getDayGridLineOffsetRange() {
+        const half = Math.floor(window.appState.config.gridSquaresX / 2);
+        return { min: -half + 1, max: half };
     }
     
 	createGrid() {
@@ -55,10 +61,13 @@ class GridManager {
 		this.staticElementsContainer.style.pointerEvents = 'none';
 		this.staticElementsContainer.style.zIndex = '5';
 		
-		const { min: minOffset, max: maxOffset } = this._getDayLineOffsetRange();
-		for (let i = minOffset; i <= maxOffset; i++) {
-			this.createGridLine(i);
+		const labelRange = this._getDayLabelOffsetRange();
+		const lineRange = this._getDayGridLineOffsetRange();
+		for (let i = labelRange.min; i <= labelRange.max; i++) {
 			this.createDateLabel(i);
+		}
+		for (let i = lineRange.min; i <= lineRange.max; i++) {
+			this.createGridLine(i);
 		}
 		
 		this.createHorizontalGridLines();
@@ -205,7 +214,8 @@ class GridManager {
 	createHorizontalGridLines() {
 		if (!this.staticElementsContainer) return;
 		
-		for (let i = 1; i <= 5; i++) {
+		const halfSquaresY = Math.floor(window.appState.config.graphHeight / window.appState.config.squareSize / 2);
+		for (let i = 1; i < halfSquaresY; i++) {
 			const topLine = document.createElement('div');
 			topLine.className = 'grid-line x';
 			topLine.style.position = 'absolute';
@@ -374,7 +384,7 @@ class GridManager {
         
         this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach(el => el.remove());
         
-        const { min: minOffset, max: maxOffset } = this._getDayLineOffsetRange();
+        const { min: minOffset, max: maxOffset } = this._getDayLabelOffsetRange();
         for (let i = minOffset; i <= maxOffset; i++) {
             this.createDateLabel(i);
         }
