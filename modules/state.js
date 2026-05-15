@@ -81,6 +81,15 @@ class AppState {
         this.waves1000 = [];
         this.waves1000Ids = [];
     }
+
+    /** Plain-объект waveVisibility для JSON (без Proxy и служебных полей). */
+    getWaveVisibilityPlain() {
+        const vis = this.waveVisibility;
+        if (vis && typeof vis === 'object' && vis.__isWaveVisibilityProxy && vis.__waveVisibilityTarget) {
+            return vis.__waveVisibilityTarget;
+        }
+        return vis && typeof vis === 'object' ? vis : {};
+    }
     
     save() {
         const wrd = typeof window !== 'undefined' && window.__waveRenderDebug;
@@ -126,7 +135,7 @@ class AppState {
             }
         }
         
-        this.data.uiSettings.waveVisibility = this.waveVisibility;
+        this.data.uiSettings.waveVisibility = { ...this.getWaveVisibilityPlain() };
         this.data.uiSettings.waveBold = this.waveBold;
         this.data.uiSettings.waveCornerColor = this.waveCornerColor;
         

@@ -219,8 +219,8 @@ class ExtremumTimeManager {
                 return ok;
             }
         });
-        proxy.__isWaveVisibilityProxy = true;
-        proxy.__waveVisibilityTarget = raw;
+        Object.defineProperty(proxy, '__isWaveVisibilityProxy', { value: true, enumerable: false });
+        Object.defineProperty(proxy, '__waveVisibilityTarget', { value: raw, enumerable: false });
         window.appState.waveVisibility = proxy;
     }
 
