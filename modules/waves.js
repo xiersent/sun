@@ -506,6 +506,18 @@ class WavesManager {
         if (Math.abs(deriv) < flatEps) return 0;
         return deriv > 0 ? 1 : -1;
     }
+
+    formatWaveDirectionLabel(dir) {
+        if (dir > 0) return '↑';
+        if (dir < 0) return '↓';
+        return '—';
+    }
+
+    formatWaveDirectionTitle(dir) {
+        if (dir > 0) return 'восходящая';
+        if (dir < 0) return 'низходящая';
+        return 'экстремум';
+    }
     
     isExtremumHighlightEnabled() {
         return window.appState && window.appState.extremumWaveColorHighlight === true;

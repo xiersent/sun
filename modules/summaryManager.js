@@ -239,6 +239,10 @@ class SummaryManager {
 			const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
 			const waveState = (Math.sin(normalizedPhase) * 5);
 			const difference = Math.abs(waveState - this.currentState);
+			const dir =
+				window.waves && typeof window.waves.calculateWaveDirectionAtDay === 'function'
+					? window.waves.calculateWaveDirectionAtDay(wave, currentDay)
+					: 0;
 			
 			if (difference <= this.tolerance) {
 				const isPresentOrFuture = this.isWaveInPresentOrFuture(wave, normalizedPhase);
@@ -249,6 +253,7 @@ class SummaryManager {
 						wave: wave,
 						phase: phase,
 						state: waveState,
+						dir,
 						difference: difference,
 						closeness: this.getClosenessLevel(difference),
 						isPastWave: isPastWave
@@ -336,6 +341,14 @@ class SummaryManager {
 		const resultsHTML = stateWaves.map((item, index) => {
 			const closenessClass = this.getClosenessClass(item.difference);
 			const stateValue = item.state.toFixed(2);
+			const dirLabel =
+				window.waves && typeof window.waves.formatWaveDirectionLabel === 'function'
+					? window.waves.formatWaveDirectionLabel(item.dir)
+					: '—';
+			const dirTitle =
+				window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
+					? window.waves.formatWaveDirectionTitle(item.dir)
+					: '';
 			
 			const pastWaveMarker = item.isPastWave ? '<span style="color: #666; font-style: italic;"> (прошедшая)</span>' : '';
 			
@@ -347,7 +360,7 @@ class SummaryManager {
 							${item.wave.name} (${item.wave.period} дней)${pastWaveMarker}
 						</div>
 						<div class="summary-item-details">
-							<span class="summary-item-state">Состояние: ${stateValue}</span>
+							<span class="summary-item-state">Состояние: ${stateValue} <span class="wave-direction-label" title="${dirTitle}">${dirLabel}</span></span>
 							<span class="summary-item-difference">Разница: ${item.difference.toFixed(2)}</span>
 							<span class="summary-item-closeness">${item.closeness}</span>
 						</div>

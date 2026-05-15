@@ -745,9 +745,29 @@ class StateIntersectionManager {
         const useLayerB =
             this.lastIntersectionPhaseInfo && this.lastIntersectionPhaseInfo.samePerson === false;
 
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const baseMsB = this.lastIntersectionBaseMsB != null ? this.lastIntersectionBaseMsB : this._getIntersectionPhaseBases().baseMsB;
+
         const resultsHTML = sortedIntersections.map((inter, index) => {
             const wave = inter.wave2;
             const timeStr = this.formatTime(inter.time);
+            const dayAtInter = (inter.time.getTime() - baseMsB) / msPerDay;
+            const stateAtInter =
+                window.waves && typeof window.waves.calculateWaveStateAtDay === 'function'
+                    ? window.waves.calculateWaveStateAtDay(wave, dayAtInter)
+                    : inter.value * 5;
+            const dirAtInter =
+                window.waves && typeof window.waves.calculateWaveDirectionAtDay === 'function'
+                    ? window.waves.calculateWaveDirectionAtDay(wave, dayAtInter)
+                    : 0;
+            const dirLabel =
+                window.waves && typeof window.waves.formatWaveDirectionLabel === 'function'
+                    ? window.waves.formatWaveDirectionLabel(dirAtInter)
+                    : '—';
+            const dirTitle =
+                window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
+                    ? window.waves.formatWaveDirectionTitle(dirAtInter)
+                    : '';
             const vizorBtnClass = useLayerB ? 'ui-btn show-on-vizor-btn intersection-vizor-b-btn' : 'ui-btn show-on-vizor-btn';
             const vizorLabel =
                 window.dom && useLayerB
@@ -768,7 +788,7 @@ class StateIntersectionManager {
                         </div>
                         <div class="summary-item-details">
                             <span class="summary-item-state">🕐 ${timeStr}</span>
-                            <span class="summary-item-difference">Значение: ${inter.value.toFixed(3)}</span>
+                            <span class="summary-item-difference">Состояние: ${stateAtInter.toFixed(2)} <span class="wave-direction-label" title="${this.escapeHtml(dirTitle)}">${dirLabel}</span></span>
                         </div>
                     </div>
                     <div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
