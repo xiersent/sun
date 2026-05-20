@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         __lp && __lp.mark('timeUtils_dom_construct');
         window.timeUtils = window.timeUtils || new TimeUtils();
         window.dom = window.dom || new DOM();
+        window.cursorTooltip = window.cursorTooltip || new CursorTooltip();
+        window.cursorTooltip.init();
 
         const managers = [
             { name: 'dates', class: DatesManager },
