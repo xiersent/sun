@@ -1221,6 +1221,9 @@ class UnifiedListManager {
         this.syncWaveListRowNormalViewFromModel(wave);
         window.waves.updatePosition();
         window.appState.saveDebounced();
+        if (window.SecretScheme?.applyCellColors) {
+            window.SecretScheme.applyCellColors();
+        }
         requestAnimationFrame(() => {
             this.flashListItemSaved('wave', waveId);
         });
@@ -1314,6 +1317,10 @@ class UnifiedListManager {
             }
             
             window.appState.save();
+
+            if (window.SecretScheme?.applyCellColors) {
+                window.SecretScheme.applyCellColors();
+            }
             
             // Обновляем список волн
             this.updateWavesList();

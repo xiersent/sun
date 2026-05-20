@@ -138,6 +138,10 @@ async function finalizeInitialization() {
         window.displayViewTemplatesManager.init();
     }
 
+    if (window.SecretScheme && typeof window.SecretScheme.init === 'function') {
+        window.SecretScheme.init();
+    }
+
     if (window.grid) {
         if (window.grid.updateCenterDate) {
             __lp && __lp.mark('finalize_grid_updateCenterDate');

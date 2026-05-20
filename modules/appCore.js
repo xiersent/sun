@@ -859,7 +859,41 @@ class AppCore {
         document.documentElement.style.setProperty('--gw', window.appState.graphWidth + 'px');
     }
     
+    setupSecretSchemePanel() {
+        const toggle = document.getElementById('secretSchemeToggle');
+        const panel = document.getElementById('secretSchemePanel');
+        if (!toggle || !panel) {
+            return;
+        }
+        const title =
+            'Секретная схема того, как ты думаешь через меня перебирая циферки онлайна';
+        const applyOpen = (open) => {
+            panel.classList.toggle('secret-scheme-panel--collapsed', !open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) {
+                toggle.textContent = 'Скрыть';
+                toggle.classList.add('active');
+            } else {
+                toggle.textContent = title;
+                toggle.classList.remove('active');
+            }
+        };
+        toggle.addEventListener('click', () => {
+            const willOpen = panel.classList.contains('secret-scheme-panel--collapsed');
+            applyOpen(willOpen);
+            if (willOpen && window.SecretScheme && typeof window.SecretScheme.init === 'function') {
+                window.SecretScheme.init();
+            }
+        });
+        applyOpen(false);
+        if (window.SecretScheme && typeof window.SecretScheme.init === 'function') {
+            window.SecretScheme.init();
+        }
+    }
+
     setupEventListeners() {
+        this.setupSecretSchemePanel();
+
         // Обработчик для кнопки "Программа"
         const colorPickerBtn = document.getElementById('colorPickerBtn');
         if (colorPickerBtn) {

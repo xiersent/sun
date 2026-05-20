@@ -109,6 +109,19 @@
             </div>
 
 
+            <div class="secret-scheme-wrap" id="secretSchemeWrap">
+                <div class="panel-section secret-scheme-section" id="secretSchemeSection">
+                    <div class="tab-container">
+                        <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Секретная схема">
+                            <button type="button" class="tab-button secret-scheme-toggle" id="secretSchemeToggle" aria-expanded="false" aria-controls="secretSchemePanel">Секретная схема того, как ты думаешь через меня перебирая циферки онлайна</button>
+                        </div>
+                    </div>
+                    <div class="secret-scheme-panel secret-scheme-panel--collapsed" id="secretSchemePanel">
+                        <div class="secret-scheme-grid" id="secretSchemeGrid" role="grid"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="time-bar-wrap" id="timeBarWrap">
                 <div class="panel-section time-bar-controls-section" id="timeBarControlsSection">
                     <div class="tab-container">
@@ -403,6 +416,7 @@
     <script src="modules/state.js"></script>
     <script src="modules/dom.js"></script>
     <script src="modules/cursorTooltip.js"></script>
+    <script src="modules/secretScheme.js?v=fix-syntax"></script>
     <script src="modules/appCore.js"></script>
     <script src="modules/autoSaveHandler.js"></script>
     <script src="modules/dataManager.js"></script>
