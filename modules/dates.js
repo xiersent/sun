@@ -50,12 +50,11 @@ class DatesManager {
         if (isCurrent) {
             btnToday.classList.remove('today-inactive');
             btnToday.classList.add('today-active');
-            btnToday.title = 'Текущая дата уже на визоре';
         } else {
             btnToday.classList.remove('today-active');
             btnToday.classList.add('today-inactive');
-            btnToday.title = 'Перейти к сегодняшней дате';
         }
+        btnToday.removeAttribute('title');
     }
     
     ensurePersonGroupsShape() {
