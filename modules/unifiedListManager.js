@@ -86,6 +86,64 @@ class UnifiedListManager {
         return true;
     }
 
+    static LIST_ITEM_SAVE_FLASH = {
+        date: { rootId: 'dateListForDates', rowClass: 'list-item--date', dataType: 'date' },
+        wave: { rootId: 'wavesList', rowClass: 'list-item--wave', dataType: 'wave' },
+        group: { rootId: 'wavesList', rowClass: 'list-item--group', dataType: 'group' },
+        personGroup: {
+            rootId: 'dateListForDates',
+            rowClass: 'list-item--person-group',
+            dataType: 'personGroup'
+        }
+    };
+
+    /**
+     * Малиновое затухание фона строки после успешного сохранения.
+     * @param {'date'|'wave'|'group'|'personGroup'} type
+     * @param {string|number} id
+     */
+    flashListItemSaved(type, id) {
+        const cfg = UnifiedListManager.LIST_ITEM_SAVE_FLASH[type];
+        if (!cfg || id == null) {
+            return;
+        }
+        const root = document.getElementById(cfg.rootId);
+        if (!root) {
+            return;
+        }
+        const idStr = String(id);
+        const escaped =
+            typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(idStr) : idStr.replace(/"/g, '\\"');
+        const row = root.querySelector(
+            `.${cfg.rowClass}[data-type="${cfg.dataType}"][data-id="${escaped}"]`
+        );
+        if (!row) {
+            return;
+        }
+
+        const done = () => {
+            row.classList.remove('list-item--save-flash');
+        };
+
+        row.classList.remove('list-item--save-flash');
+        void row.offsetWidth;
+        row.classList.add('list-item--save-flash');
+        row.addEventListener('animationend', done, { once: true });
+        window.setTimeout(() => {
+            if (row.classList.contains('list-item--save-flash')) {
+                row.classList.remove('list-item--save-flash');
+            }
+        }, 950);
+    }
+
+    scheduleFlashListItemSaved(type, id) {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this.flashListItemSaved(type, id);
+            });
+        });
+    }
+
     /**
      * Имя, дата, пол и годы в обычном виде строки — без полного EJS (после сохранения редактирования).
      */
@@ -1085,6 +1143,7 @@ class UnifiedListManager {
             
             this.updateDatesList();
             window.appState.save();
+            this.scheduleFlashListItemSaved('date', dateId);
         } catch (error) {
             alert(`Ошибка при сохранении даты: ${error.message}`);
         }
@@ -1162,6 +1221,9 @@ class UnifiedListManager {
         this.syncWaveListRowNormalViewFromModel(wave);
         window.waves.updatePosition();
         window.appState.saveDebounced();
+        requestAnimationFrame(() => {
+            this.flashListItemSaved('wave', waveId);
+        });
     }
     
     saveGroupChanges(groupId) {
@@ -1185,6 +1247,9 @@ class UnifiedListManager {
         this.syncGroupListEditingVisuals();
         this.syncGroupListRowNormalViewFromModel(group);
         window.appState.saveDebounced();
+        requestAnimationFrame(() => {
+            this.flashListItemSaved('group', groupId);
+        });
     }
 
     savePersonGroupChanges(groupId) {
@@ -1205,6 +1270,9 @@ class UnifiedListManager {
         this.syncPersonGroupListEditingVisuals();
         this.syncPersonGroupRowNormalViewFromModel(group);
         window.appState.saveDebounced();
+        requestAnimationFrame(() => {
+            this.flashListItemSaved('personGroup', groupId);
+        });
     }
     
     changeWaveColor(wave) {

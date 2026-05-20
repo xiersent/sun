@@ -12,6 +12,27 @@
 .list-item__drag-handle:hover{color: var(--text-color);}
 .list-item--dragging{opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
 .list-item--drag-over{background-color: #e6f2ff; border-top: 2px solid var(--cp);}
+@keyframes list-item-save-flash{
+    0%{background-color: rgba(199, 21, 133, 0.42);}
+    100%{background-color: transparent;}
+}
+@keyframes list-item-save-flash-active{
+    0%{background-color: rgba(199, 21, 133, 0.42);}
+    100%{background-color: transparent;}
+}
+/* Подсветка только внутри outline, рамка строки не мигает */
+.list-item--save-flash::before{
+    content: '';
+    position: absolute;
+    inset: 1px;
+    z-index: 0;
+    pointer-events: none;
+    animation: list-item-save-flash 0.85s ease-out forwards;
+}
+.list-item--save-flash > *{position: relative; z-index: 1;}
+@media (prefers-reduced-motion: reduce){
+    .list-item--save-flash::before{animation-duration: 0.15s;}
+}
 .list-item__content{flex: 1; min-width: 0; display: flex; flex-direction: column;}
 .list-item__row{display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-sm); width: 100%;}
 .list-item__left{display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;}
