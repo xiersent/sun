@@ -87,6 +87,46 @@ class UnifiedListManager {
     }
 
     /**
+     * Имя, дата, пол и годы в обычном виде строки — без полного EJS (после сохранения редактирования).
+     */
+    _syncDateRowDisplayFromAppState(row, dateObj) {
+        if (!row || !dateObj || !window.dom) {
+            return;
+        }
+        const currentTimestamp =
+            window.appState.currentDate instanceof Date
+                ? window.appState.currentDate.getTime()
+                : window.appState.currentDate;
+        const formatted = window.dom.formatDate(dateObj.date);
+        const gender = window.dom.normalizePersonGender(dateObj.gender);
+        const icon = window.dom.getPersonGenderIcon(gender);
+        const genderLabel = window.dom.getPersonGenderLabel(gender);
+        const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObj.date, currentTimestamp);
+
+        const nameEl = row.querySelector('.date-name');
+        if (nameEl) {
+            nameEl.textContent = dateObj.name;
+        }
+
+        const valueEl = row.querySelector('.list-item__value');
+        if (valueEl) {
+            valueEl.textContent = '';
+            valueEl.appendChild(document.createTextNode(formatted));
+            valueEl.appendChild(document.createTextNode(' '));
+            const badge = document.createElement('span');
+            badge.className = 'date-gender-badge';
+            badge.title = genderLabel;
+            badge.textContent = `[${icon}]`;
+            valueEl.appendChild(badge);
+            if (yearsFromCurrent > 0) {
+                valueEl.appendChild(document.createTextNode(` [${yearsFromCurrent}]`));
+            }
+            valueEl.title =
+                formatted + (yearsFromCurrent > 0 ? ` [${yearsFromCurrent}]` : '');
+        }
+    }
+
+    /**
      * Только активная дата и чекбоксы A/B — без перерисовки списка (скролл не сбрасывается).
      * Подсветка A/B на строке — через CSS :has(:checked), классы на строке не ставим.
      * Чекбоксы — по всем input.date-checkbox в контейнере (надёжнее, чем поиск от строки).
@@ -131,6 +171,9 @@ class UnifiedListManager {
 
             const dateObj = window.appState.data.dates.find((d) => String(d.id) === idStr);
             if (dateObj && window.dom && typeof window.dom.formatPersonDateHoverTitle === 'function') {
+                if (!isEditing) {
+                    this._syncDateRowDisplayFromAppState(row, dateObj);
+                }
                 const formatted = window.dom.formatDate(dateObj.date);
                 const description = typeof dateObj.description === 'string' ? dateObj.description : '';
                 const gender = window.dom.normalizePersonGender(dateObj.gender);
