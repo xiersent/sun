@@ -144,27 +144,24 @@ class UnifiedListManager {
             }
         });
 
-        const snap = [];
-        root.querySelectorAll('input.date-checkbox').forEach((inp) => {
-            const idStr = String(inp.getAttribute('data-id') || '');
-            const t = inp.getAttribute('data-type');
-            const wantA = t === 'a' && typeAStr !== '' && idStr === typeAStr;
-            const wantB = t === 'b' && typeBStr !== '' && idStr === typeBStr;
-            if (
-                wantA ||
-                wantB ||
-                idStr === activeIdStr ||
-                inp.checked
-            ) {
-                snap.push({
-                    id: idStr,
-                    t,
-                    want: t === 'a' ? wantA : wantB,
-                    chk: inp.checked
-                });
-            }
-        });
-        window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:applied', { snap });
+        if (window.sunDateListLog) {
+            const snap = [];
+            root.querySelectorAll('input.date-checkbox').forEach((inp) => {
+                const idStr = String(inp.getAttribute('data-id') || '');
+                const t = inp.getAttribute('data-type');
+                const wantA = t === 'a' && typeAStr !== '' && idStr === typeAStr;
+                const wantB = t === 'b' && typeBStr !== '' && idStr === typeBStr;
+                if (wantA || wantB || idStr === activeIdStr || inp.checked) {
+                    snap.push({
+                        id: idStr,
+                        t,
+                        want: t === 'a' ? wantA : wantB,
+                        chk: inp.checked
+                    });
+                }
+            });
+            window.sunDateListLog('syncDateListSelectionVisuals:applied', { snap });
+        }
     }
 
     /** O(1) доступ к волнам/группам при сборке списков с большим числом сигналов */

@@ -289,7 +289,9 @@ class DateComparisonManager {
             window.dates.ensurePersonGroupExpandedForDateId(this.elB.value);
         }
         this._applySelectsToDateSelections();
-        if (window.dataManager && window.dataManager.updateDateList) {
+        if (which === 'b' && window.dataManager && window.dataManager.applyDateSelectionChange) {
+            window.dataManager.applyDateSelectionChange('b');
+        } else if (window.dataManager && window.dataManager.updateDateList) {
             window.dataManager.updateDateList();
         } else {
             if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {

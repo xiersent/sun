@@ -1008,6 +1008,38 @@ class EventManager {
         });
     }
 
+    /**
+     * Завершение клика по чекбоксу A/B: без повторного updateDateList после setActiveDate.
+     * @param {{ activeDateChanged?: boolean, changedType?: 'a'|'b'|'both' }} opts
+     */
+    _finishDateCheckboxChange(clickedEl, dateId, checkboxType, opts = {}) {
+        const activeDateChanged = opts.activeDateChanged === true;
+        const changedType = opts.changedType || checkboxType;
+
+        if (activeDateChanged) {
+            if (
+                window.unifiedListManager &&
+                window.unifiedListManager.syncDateListSelectionVisuals
+            ) {
+                window.unifiedListManager.syncDateListSelectionVisuals();
+            }
+            if (
+                window.dateComparisonManager &&
+                window.dateComparisonManager.ensureSelectsSyncedWithDateList
+            ) {
+                window.dateComparisonManager.ensureSelectsSyncedWithDateList();
+            }
+        } else if (window.dataManager && window.dataManager.applyDateSelectionChange) {
+            window.dataManager.applyDateSelectionChange(changedType);
+        } else if (window.dataManager && window.dataManager.updateDateList) {
+            window.dataManager.updateDateList();
+        } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+            window.unifiedListManager.updateDatesList();
+        }
+
+        this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
+    }
+
     async handleDateCheckboxClick(dateId, checkboxType, clickedEl) {
         window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:enter', { dateId, checkboxType });
         if (checkboxType !== 'a' && checkboxType !== 'b') {
@@ -1024,7 +1056,6 @@ class EventManager {
         const selections = window.appState.dateSelections;
         const dateIdStr = String(dateId);
         const targetKey = checkboxType === 'a' ? 'typeA' : 'typeB';
-        const oppositeKey = checkboxType === 'a' ? 'typeB' : 'typeA';
         
         const currentTargetStr = selections[targetKey] ? String(selections[targetKey]) : null;
         
@@ -1034,22 +1065,21 @@ class EventManager {
             
             if (newTypeADate) {
                 selections.typeA = newTypeADate.id;
-                
+                let activeDateChanged = false;
+
                 if (window.appState.activeDateId && String(window.appState.activeDateId) === dateIdStr) {
-                    window.appState.activeDateId = newTypeADate.id;
                     if (window.dates) {
                         window.dates.setActiveDate(newTypeADate.id, true);
+                        activeDateChanged = true;
                     }
                 }
                 
                 selections.typeB = dateId;
                 window.appState.save();
-                if (window.dataManager && window.dataManager.updateDateList) {
-                    await window.dataManager.updateDateList();
-                } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                    window.unifiedListManager.updateDatesList();
-                }
-                this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
+                this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, {
+                    activeDateChanged,
+                    changedType: 'both'
+                });
                 return;
             } else {
                 window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:B conflict no other date for A');
@@ -1067,12 +1097,10 @@ class EventManager {
                     window.dates.setActiveDate(dateId, true);
                 }
                 window.appState.save();
-                if (window.dataManager && window.dataManager.updateDateList) {
-                    await window.dataManager.updateDateList();
-                } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-                    window.unifiedListManager.updateDatesList();
-                }
-                this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
+                this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, {
+                    activeDateChanged: true,
+                    changedType: 'both'
+                });
                 return;
             }
             window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:A conflict no other date for B');
@@ -1099,6 +1127,11 @@ class EventManager {
                         dateSelections: { ...selections }
                     });
                     window.dates.setActiveDate(dateId, true);
+                    window.appState.save();
+                    this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, {
+                        activeDateChanged: true
+                    });
+                    return;
                 }
             }
         } else if (checkboxType === 'b') {
@@ -1114,12 +1147,7 @@ class EventManager {
             dateSelections: { ...window.appState.dateSelections },
             activeDateId: window.appState.activeDateId
         });
-        if (window.dataManager && window.dataManager.updateDateList) {
-            await window.dataManager.updateDateList();
-        } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
-        }
-        this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
+        this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, { activeDateChanged: false });
         window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:done');
     }
     

@@ -62,6 +62,65 @@ class DataManager {
         });
         window.sunDateListLog && window.sunDateListLog('updateDateList:done');
     }
+
+    /**
+     * Смена только выделения персоны A/B в списке дат — без полной перерисовки списка и без повторного updateDateList.
+     * @param {'a'|'b'|'both'} [changedType]
+     */
+    applyDateSelectionChange(changedType = 'both') {
+        window.sunDateListLog &&
+            window.sunDateListLog('applyDateSelectionChange', {
+                changedType,
+                dateSelections: { ...window.appState.dateSelections }
+            });
+
+        if (window.unifiedListManager && window.unifiedListManager.syncDateListSelectionVisuals) {
+            window.unifiedListManager.syncDateListSelectionVisuals();
+        }
+        if (
+            window.dateComparisonManager &&
+            window.dateComparisonManager.ensureSelectsSyncedWithDateList
+        ) {
+            window.dateComparisonManager.ensureSelectsSyncedWithDateList();
+        }
+
+        const layer =
+            changedType === 'a' || changedType === 'b' ? changedType : 'both';
+        if (window.waves) {
+            if (layer === 'b' && typeof window.waves.reconcileVisibleWaveElements === 'function') {
+                window.waves.reconcileVisibleWaveElements();
+            } else {
+                window.waves.updatePosition();
+                if (typeof window.waves.updateCornerSquareColors === 'function') {
+                    window.waves.updateCornerSquareColors();
+                }
+            }
+        }
+
+        if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+            window.extremumTimeManager.updateExtremums();
+        }
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+        }
+
+        if (window.stateIntersectionManager && window.stateIntersectionManager.debouncedUpdate) {
+            window.stateIntersectionManager.debouncedUpdate();
+        } else if (
+            window.stateIntersectionManager &&
+            window.stateIntersectionManager.updateIntersections
+        ) {
+            window.stateIntersectionManager.updateIntersections();
+        }
+        if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+            window.summaryManager.debouncedUpdate();
+        } else if (window.summaryManager && window.summaryManager.updateSummary) {
+            window.summaryManager.updateSummary();
+        }
+        if (window.dateComparisonManager && window.dateComparisonManager.debouncedUpdate) {
+            window.dateComparisonManager.debouncedUpdate();
+        }
+    }
     
     async updateWavesGroups() {
         const container = document.getElementById('wavesList');
