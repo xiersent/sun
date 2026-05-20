@@ -551,7 +551,7 @@ class TimeBarManager {
         }
         const nowRow = this.container && this.container.querySelector('.time-bar-now-row');
         if (nowRow) {
-            nowRow.style.display = display;
+            nowRow.style.display = '';
         }
     }
 
