@@ -1287,10 +1287,6 @@ class WavesManager {
         const text = document.createElement('div');
         text.className = 'wave-label-text';
         text.textContent = wave.name;
-        text.title =
-            layerKey === 'b'
-                ? `${wave.name} (${wave.period} дн.) — клик: вкл/выкл волну B (как чекбокс «вторая персона»)`
-                : `${wave.name} (${wave.period} дней)`;
         text.style.position = 'relative';
         text.style.zIndex = '2';
         

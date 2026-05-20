@@ -1,10 +1,9 @@
-// modules/cursorTooltip.js — подсказка под курсором вместо нативного title
+// modules/cursorTooltip.js — подсказка над курсором по центру вместо нативного title
 class CursorTooltip {
     constructor() {
         this.tipEl = null;
         this.activeTarget = null;
-        this.offsetX = 12;
-        this.offsetY = 14;
+        this.gapAbove = 10;
         this._inited = false;
     }
 
@@ -124,31 +123,30 @@ class CursorTooltip {
             return;
         }
 
-        const padX = this.offsetX;
-        const padY = this.offsetY;
-        let x = e.clientX + padX;
-        let y = e.clientY + padY;
-
         const rect = this.tipEl.getBoundingClientRect();
         const margin = 8;
+        const gap = this.gapAbove;
         const vw = window.innerWidth;
         const vh = window.innerHeight;
 
-        if (x + rect.width > vw - margin) {
-            x = e.clientX - rect.width - padX;
-        }
-        if (y + rect.height > vh - margin) {
-            y = e.clientY - rect.height - padY;
-        }
+        let x = e.clientX - rect.width / 2;
+        let y = e.clientY - rect.height - gap;
+
         if (x < margin) {
             x = margin;
         }
+        if (x + rect.width > vw - margin) {
+            x = vw - margin - rect.width;
+        }
         if (y < margin) {
-            y = margin;
+            y = e.clientY + gap;
+        }
+        if (y + rect.height > vh - margin) {
+            y = vh - margin - rect.height;
         }
 
-        this.tipEl.style.left = `${x}px`;
-        this.tipEl.style.top = `${y}px`;
+        this.tipEl.style.left = `${Math.round(x)}px`;
+        this.tipEl.style.top = `${Math.round(y)}px`;
     }
 }
 

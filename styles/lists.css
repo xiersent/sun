@@ -26,6 +26,8 @@
 .list-item--date .list-item__edit-row--date-main{display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
 .list-item--date .list-item__edit-row--date-main .date-name-edit{flex: 1; min-width: 120px;}
 .list-item--date .list-item__edit-row--date-main .date-input{flex: 0 1 auto; min-width: 140px;}
+.list-item--date .list-item__edit-row--date-actions{width: 100%; justify-content: flex-end;}
+.list-item--date .list-item__edit-row--date-actions .list-item__edit-actions{width: 100%; justify-content: flex-end;}
 .list-item--date .list-item__edit-row--full{width: 100%;}
 .list-item--date .date-description-edit{width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: var(--font-family); font-size: var(--font-size-sm);}
 .list-item__edit-row{display: flex; gap: var(--spacing-xs); align-items: center; width: 100%;}

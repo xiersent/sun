@@ -61,14 +61,16 @@
             <div class="list-item__edit-row list-item__edit-row--date-main">
                 <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
                 <input type="date" class="date-input list-item__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
+            </div>
+            <div class="list-item__edit-row list-item__edit-row--full">
+                <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"><%= _textEsc(data.description || '') %></textarea>
+            </div>
+            <div class="list-item__edit-row list-item__edit-row--date-actions">
                 <div class="list-item__edit-actions">
                     <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Сохранить" aria-label="Сохранить">💾</button>
                     <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
-            </div>
-            <div class="list-item__edit-row list-item__edit-row--full">
-                <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"><%= _textEsc(data.description || '') %></textarea>
             </div>
         </div>
     </div>
