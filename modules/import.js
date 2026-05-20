@@ -23,6 +23,9 @@ class ImportExportManager {
                 const dateObj = window.timeUtils.parseStringToLocal(date.date);
                 date.date = dateObj.getTime();
             }
+            if (typeof date.description !== 'string') {
+                date.description = '';
+            }
         });
     }
     

@@ -360,6 +360,7 @@ class UnifiedListManager {
         return {
             id: dateObj.id,
             name: dateObj.name,
+            description: typeof dateObj.description === 'string' ? dateObj.description : '',
             type: 'date',
             personGroupId: personGroupId != null ? personGroupId : null,
             formattedDate: window.dom.formatDate(dateObj.date),
@@ -977,6 +978,7 @@ class UnifiedListManager {
         
         const nameInput = document.getElementById(`editDateName${dateId}`);
         const dateInput = document.getElementById(`editDateValue${dateId}`);
+        const descriptionInput = document.getElementById(`editDateDescription${dateId}`);
         
         if (!nameInput || !dateInput) {
             window.appState.editingDateId = null;
@@ -1004,6 +1006,7 @@ class UnifiedListManager {
             
             dateObj.name = newName;
             dateObj.date = newDate.getTime();
+            dateObj.description = descriptionInput ? String(descriptionInput.value) : '';
             
             window.appState.editingDateId = null;
             

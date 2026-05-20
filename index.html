@@ -335,10 +335,15 @@
                             <input type="text" class="add-group-input" id="newPersonGroupName" placeholder="Название группы персон" style="flex: 1">
                             <button class="add-group-btn ui-btn" id="btnAddPersonGroup" type="button">Добавить группу</button>
                         </div>
-                        <div class="date-controls-buttons">
-                            <input type="date" class="date-input" id="dateInput">
-                            <input type="text" class="date-input" id="dateNameInput" placeholder="Название" style="flex:1">
-                            <button id="btnAddDate" class="ui-btn">Добавить дату</button>
+                        <div class="date-add-form">
+                            <div class="date-controls-buttons">
+                                <input type="date" class="date-input" id="dateInput">
+                                <input type="text" class="date-input" id="dateNameInput" placeholder="Название" style="flex:1">
+                                <button id="btnAddDate" class="ui-btn">Добавить персону</button>
+                            </div>
+                            <div class="date-add-description-row">
+                                <textarea id="dateDescriptionInput" class="form-input date-add-description-input" rows="2" placeholder="Описание персоны…" aria-label="Описание персоны"></textarea>
+                            </div>
                         </div>
                         <div class="list-container" id="dateListForDates"></div>
                     </div>

@@ -22,6 +22,12 @@
 .list-item__value{color: var(--text-secondary); white-space: nowrap; font-size: var(--font-size-sm);}
 .list-item__actions{display: flex; gap: 3px; flex-shrink: 0;}
 .list-item__edit-form{display: none; flex-wrap: wrap; gap: 8px; width: 100%;}
+.list-item--date .list-item__edit-form{flex-direction: column; align-items: stretch; gap: var(--spacing-xs);}
+.list-item--date .list-item__edit-row--date-main{display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
+.list-item--date .list-item__edit-row--date-main .date-name-edit{flex: 1; min-width: 120px;}
+.list-item--date .list-item__edit-row--date-main .date-input{flex: 0 1 auto; min-width: 140px;}
+.list-item--date .list-item__edit-row--full{width: 100%;}
+.list-item--date .date-description-edit{width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: var(--font-family); font-size: var(--font-size-sm);}
 .list-item__edit-row{display: flex; gap: var(--spacing-xs); align-items: center; width: 100%;}
 .list-item__edit-label{font-weight: 400; flex-shrink: 0; font-size: var(--font-size-sm); color: var(--text-color);}
 .list-item__edit-input{flex: 1; padding: 3px 5px; border: 1px solid var(--clg); min-width: 0; font-size: var(--font-size-sm); height: 25px;}

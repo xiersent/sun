@@ -1,5 +1,6 @@
 <!-- templates/date-item.ejs -->
 <% var _attrEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }; %>
+<% var _textEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }; %>
 <% var _dateTitleName = _attrEsc(data.name + (data.formattedDate ? ' · ' + data.formattedDate : '')); %>
 <% var _dateTitleValue = _attrEsc(data.formattedDate + (data.yearsFromCurrent > 0 ? ' [' + data.yearsFromCurrent + ']' : '')); %>
 <div class="list-item list-item--date 
@@ -57,17 +58,16 @@
         
         <!-- Форма редактирования -->
         <div class="list-item__edit-form">
-            <div class="list-item__left">
-                <div class="list-item__title-container">
-                    <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
-                </div>
-            </div>
-            <div class="list-item__right">
-                <input type="date" class="date-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
+            <div class="list-item__edit-row list-item__edit-row--date-main">
+                <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
+                <input type="date" class="date-input list-item__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
                 <div class="list-item__edit-actions">
                     <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Сохранить" aria-label="Сохранить">💾</button>
                     <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
+            </div>
+            <div class="list-item__edit-row list-item__edit-row--full">
+                <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Описание персоны…" aria-label="Описание персоны"><%= _textEsc(data.description || '') %></textarea>
             </div>
         </div>
     </div>

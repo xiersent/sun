@@ -507,6 +507,9 @@ class AppState {
                         }
                     } catch (e) {}
                 }
+                if (typeof date.description !== 'string') {
+                    date.description = '';
+                }
             });
         }
         

@@ -9,7 +9,7 @@ class DatesManager {
     
     cacheElements() {
         const ids = [
-            'dateInput', 'dateNameInput', 'btnAddDate', 'dateListForDates',
+            'dateInput', 'dateNameInput', 'dateDescriptionInput', 'btnAddDate', 'dateListForDates',
             'mainDateInputDate', 'mainDateInputTime', 'btnSetDate', 'currentDay', 'btnPrevDay',
             'btnNextDay', 'btnToday', 'btnNow',
             'customWaveName', 'customWavePeriod', 'customWaveType',
@@ -151,7 +151,7 @@ class DatesManager {
         g.dates.push(dateId);
     }
 
-    addDate(dateValue, name) {
+    addDate(dateValue, name, description) {
         let timestamp;
         
         if (typeof dateValue === 'string') {
@@ -166,7 +166,8 @@ class DatesManager {
         const newDate = {
             id: window.appState.generateId(),
             date: timestamp,
-            name: name || 'Новая дата'
+            name: name || 'Новая дата',
+            description: typeof description === 'string' ? description : ''
         };
         
         window.appState.data.dates.push(newDate);
@@ -175,6 +176,9 @@ class DatesManager {
         
         if (this.elements.dateNameInput) {
             this.elements.dateNameInput.value = '';
+        }
+        if (this.elements.dateDescriptionInput) {
+            this.elements.dateDescriptionInput.value = '';
         }
         
         this.setActiveDate(newDate.id);

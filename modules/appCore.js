@@ -975,10 +975,12 @@ class AppCore {
             btnAddDate.addEventListener('click', () => {
                 const dateValue = document.getElementById('dateInput').value;
                 const name = document.getElementById('dateNameInput').value || 'Новая дата';
+                const descEl = document.getElementById('dateDescriptionInput');
+                const description = descEl ? String(descEl.value) : '';
                 
                 if (dateValue) {
                     if (window.dates && window.dates.addDate) {
-                        window.dates.addDate(dateValue, name);
+                        window.dates.addDate(dateValue, name, description);
                     }
                     
                     if (window.dataManager && window.dataManager.updateDateList) {

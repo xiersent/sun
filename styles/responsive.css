@@ -31,6 +31,7 @@
     .display-view-templates-row #btnDeleteDisplayViewTemplate{width: 100%;}
     .display-view-templates-description-input{min-height: 56px;}
     .date-controls-buttons{flex-direction: column;}
+    .date-add-description-input{min-height: 56px;}
     .notes-panel-layout{flex-direction: column;}
     .add-group-form{flex-direction: column;}
     .db-import-controls{flex-direction: column;}
