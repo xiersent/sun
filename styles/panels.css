@@ -74,7 +74,8 @@
 .transform-row{display: flex; justify-content: center; gap: var(--spacing-xs); flex-wrap: wrap;}
 .corner-controls{display: flex; flex-wrap: wrap; gap: var(--spacing-xs); justify-content: center;}
 .date-add-form{display: flex; flex-direction: column; gap: var(--spacing-xs); margin-bottom: var(--spacing-sm);}
-.date-controls-buttons{display: flex; gap: var(--spacing-xs); align-items: center;}
+.date-controls-buttons{display: flex; gap: var(--spacing-xs); align-items: center; flex-wrap: wrap;}
+.date-gender-select{flex: 0 0 auto; width: 42px; min-width: 42px; max-width: 42px; height: 25px; padding: 2px 4px; font-size: var(--font-size-sm); text-align: center; text-align-last: center;}
 .date-add-description-row{width: 100%;}
 .date-add-description-input{width: 100%; min-height: 44px; max-height: 160px; resize: vertical; font-size: var(--font-size-sm); padding: 6px 8px; box-sizing: border-box; line-height: 1.35;}
 .date-time-input-group{display: flex; gap: var(--spacing-xs); flex: 1; min-width: 0; align-items: center;}

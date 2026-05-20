@@ -133,10 +133,12 @@ class UnifiedListManager {
             if (dateObj && window.dom && typeof window.dom.formatPersonDateHoverTitle === 'function') {
                 const formatted = window.dom.formatDate(dateObj.date);
                 const description = typeof dateObj.description === 'string' ? dateObj.description : '';
+                const gender = window.dom.normalizePersonGender(dateObj.gender);
                 const hoverTitle = window.dom.formatPersonDateHoverTitle(
                     dateObj.name,
                     formatted,
-                    description
+                    description,
+                    gender
                 );
                 const nameEl = row.querySelector('.date-name');
                 const starEl = row.querySelector('.date-star');
@@ -362,12 +364,20 @@ class UnifiedListManager {
         
         const formattedDate = window.dom.formatDate(dateObj.date);
         const description = typeof dateObj.description === 'string' ? dateObj.description : '';
+        const gender = window.dom.normalizePersonGender(dateObj.gender);
 
         return {
             id: dateObj.id,
             name: dateObj.name,
             description,
-            hoverTitle: window.dom.formatPersonDateHoverTitle(dateObj.name, formattedDate, description),
+            gender,
+            genderIcon: window.dom.getPersonGenderIcon(gender),
+            hoverTitle: window.dom.formatPersonDateHoverTitle(
+                dateObj.name,
+                formattedDate,
+                description,
+                gender
+            ),
             type: 'date',
             personGroupId: personGroupId != null ? personGroupId : null,
             formattedDate,
@@ -986,6 +996,7 @@ class UnifiedListManager {
         const nameInput = document.getElementById(`editDateName${dateId}`);
         const dateInput = document.getElementById(`editDateValue${dateId}`);
         const descriptionInput = document.getElementById(`editDateDescription${dateId}`);
+        const genderSelect = document.getElementById(`editDateGender${dateId}`);
         
         if (!nameInput || !dateInput) {
             window.appState.editingDateId = null;
@@ -1014,6 +1025,9 @@ class UnifiedListManager {
             dateObj.name = newName;
             dateObj.date = newDate.getTime();
             dateObj.description = descriptionInput ? String(descriptionInput.value) : '';
+            dateObj.gender = genderSelect
+                ? window.dom.normalizePersonGender(genderSelect.value)
+                : window.dom.normalizePersonGender(dateObj.gender);
             
             window.appState.editingDateId = null;
             

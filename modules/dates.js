@@ -5,11 +5,28 @@ class DatesManager {
         /** Какой режим использовался в последнем recalculateCurrentDay (для согласованности с панелями). */
         this.lastRecalculateUsedExactTime = true;
         this.cacheElements();
+        this.bindGenderSelectTitles();
+    }
+
+    bindGenderSelectTitles() {
+        if (this._genderSelectTitlesBound) {
+            return;
+        }
+        this._genderSelectTitlesBound = true;
+        document.addEventListener('change', (e) => {
+            const sel = e.target;
+            if (!sel || !sel.classList || !sel.classList.contains('date-gender-select')) {
+                return;
+            }
+            if (window.dom && typeof window.dom.getPersonGenderLabel === 'function') {
+                sel.title = window.dom.getPersonGenderLabel(sel.value);
+            }
+        });
     }
     
     cacheElements() {
         const ids = [
-            'dateInput', 'dateNameInput', 'dateDescriptionInput', 'btnAddDate', 'dateListForDates',
+            'dateInput', 'dateNameInput', 'dateGenderSelect', 'dateDescriptionInput', 'btnAddDate', 'dateListForDates',
             'mainDateInputDate', 'mainDateInputTime', 'btnSetDate', 'currentDay', 'btnPrevDay',
             'btnNextDay', 'btnToday', 'btnNow',
             'customWaveName', 'customWavePeriod', 'customWaveType',
@@ -150,7 +167,7 @@ class DatesManager {
         g.dates.push(dateId);
     }
 
-    addDate(dateValue, name, description) {
+    addDate(dateValue, name, description, gender) {
         let timestamp;
         
         if (typeof dateValue === 'string') {
@@ -166,7 +183,13 @@ class DatesManager {
             id: window.appState.generateId(),
             date: timestamp,
             name: name || 'Новая дата',
-            description: typeof description === 'string' ? description : ''
+            description: typeof description === 'string' ? description : '',
+            gender:
+                window.dom && typeof window.dom.normalizePersonGender === 'function'
+                    ? window.dom.normalizePersonGender(gender)
+                    : gender === 'male' || gender === 'female'
+                      ? gender
+                      : 'unset'
         };
         
         window.appState.data.dates.push(newDate);
@@ -178,6 +201,12 @@ class DatesManager {
         }
         if (this.elements.dateDescriptionInput) {
             this.elements.dateDescriptionInput.value = '';
+        }
+        if (this.elements.dateGenderSelect) {
+            this.elements.dateGenderSelect.value = 'unset';
+            if (window.dom && typeof window.dom.getPersonGenderLabel === 'function') {
+                this.elements.dateGenderSelect.title = window.dom.getPersonGenderLabel('unset');
+            }
         }
         
         this.setActiveDate(newDate.id);

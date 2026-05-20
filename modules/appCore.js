@@ -977,10 +977,12 @@ class AppCore {
                 const name = document.getElementById('dateNameInput').value || 'Новая дата';
                 const descEl = document.getElementById('dateDescriptionInput');
                 const description = descEl ? String(descEl.value) : '';
+                const genderEl = document.getElementById('dateGenderSelect');
+                const gender = genderEl ? genderEl.value : 'unset';
                 
                 if (dateValue) {
                     if (window.dates && window.dates.addDate) {
-                        window.dates.addDate(dateValue, name, description);
+                        window.dates.addDate(dateValue, name, description, gender);
                     }
                     
                     if (window.dataManager && window.dataManager.updateDateList) {

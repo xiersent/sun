@@ -3,6 +3,7 @@
 <% var _textEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }; %>
 <% var _descForTitle = String(data.description || '').trim(); var _hoverFallback = String(data.name || '') + '\n-\n' + String(data.formattedDate || ''); if (_descForTitle) { _hoverFallback += '\n-\n' + _descForTitle; } var _dateTitleHover = _attrEsc(data.hoverTitle != null ? data.hoverTitle : _hoverFallback); %>
 <% var _dateTitleValue = _attrEsc(data.formattedDate + (data.yearsFromCurrent > 0 ? ' [' + data.yearsFromCurrent + ']' : '')); %>
+<% var _genderIcon = { unset: '⚥', male: '♂', female: '♀' }; var _genderTip = data.gender === 'male' ? 'Мужской' : (data.gender === 'female' ? 'Женский' : 'Не указан'); %>
 <div class="list-item list-item--date 
     <%= data.active ? 'active' : '' %> 
     <%= data.editing ? 'list-item--editing' : '' %>"
@@ -44,6 +45,7 @@
                 <div class="list-item__right">
                     <div class="list-item__value" title="<%= _dateTitleValue %>">
                         <%= data.formattedDate %>
+                        <span class="date-gender-badge" title="<%= _attrEsc(_genderTip) %>">[<%= data.genderIcon %>]</span>
                         <% if (data.yearsFromCurrent > 0) { %>
                             [<%= data.yearsFromCurrent %>]
                         <% } %>
@@ -61,6 +63,11 @@
             <div class="list-item__edit-row list-item__edit-row--date-main">
                 <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
                 <input type="date" class="date-input list-item__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
+                <select class="form-input date-gender-select" id="editDateGender<%= data.id %>" aria-label="Пол" title="<%= _attrEsc(_genderTip) %>">
+                    <option value="unset"<%= data.gender === 'unset' ? ' selected' : '' %> title="Не указан"><%= _genderIcon.unset %></option>
+                    <option value="male"<%= data.gender === 'male' ? ' selected' : '' %> title="Мужской"><%= _genderIcon.male %></option>
+                    <option value="female"<%= data.gender === 'female' ? ' selected' : '' %> title="Женский"><%= _genderIcon.female %></option>
+                </select>
             </div>
             <div class="list-item__edit-row list-item__edit-row--full">
                 <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"><%= _textEsc(data.description || '') %></textarea>

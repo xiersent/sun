@@ -26,6 +26,11 @@ class ImportExportManager {
             if (typeof date.description !== 'string') {
                 date.description = '';
             }
+            if (window.dom && typeof window.dom.normalizePersonGender === 'function') {
+                date.gender = window.dom.normalizePersonGender(date.gender);
+            } else if (date.gender !== 'male' && date.gender !== 'female') {
+                date.gender = 'unset';
+            }
         });
     }
     

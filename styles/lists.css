@@ -20,12 +20,14 @@
 .list-item__icon{color: var(--text-secondary); font-size: var(--font-size-lg); flex-shrink: 0;}
 .list-item__right{display: flex; gap: 8px; align-items: center; flex-shrink: 0;}
 .list-item__value{color: var(--text-secondary); white-space: nowrap; font-size: var(--font-size-sm);}
+.list-item--date .date-gender-badge{margin: 0 0.15em;}
 .list-item__actions{display: flex; gap: 3px; flex-shrink: 0;}
 .list-item__edit-form{display: none; flex-wrap: wrap; gap: 8px; width: 100%;}
 .list-item--date .list-item__edit-form{flex-direction: column; align-items: stretch; gap: var(--spacing-xs);}
 .list-item--date .list-item__edit-row--date-main{display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
 .list-item--date .list-item__edit-row--date-main .date-name-edit{flex: 1; min-width: 120px;}
 .list-item--date .list-item__edit-row--date-main .date-input{flex: 0 1 auto; min-width: 140px;}
+.list-item--date .date-gender-select{flex: 0 0 auto; width: 42px; min-width: 42px; max-width: 42px; height: 25px; padding: 2px 4px; font-size: var(--font-size-sm); text-align: center; text-align-last: center;}
 .list-item--date .list-item__edit-row--date-actions{width: 100%; justify-content: flex-end;}
 .list-item--date .list-item__edit-row--date-actions .list-item__edit-actions{width: 100%; justify-content: flex-end;}
 .list-item--date .list-item__edit-row--full{width: 100%;}

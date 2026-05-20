@@ -8,15 +8,45 @@ class DOM {
         return window.timeUtils.formatDate(timestamp);
     }
 
-    /** Тултип строки персоны: имя, дата, заметка (через «-» на отдельных строках). */
-    formatPersonDateHoverTitle(name, formattedDate, description) {
+    static PERSON_GENDER_ICONS = { unset: '⚥', male: '♂', female: '♀' };
+
+    normalizePersonGender(value) {
+        if (value === 'male' || value === 'female') {
+            return value;
+        }
+        return 'unset';
+    }
+
+    getPersonGenderIcon(gender) {
+        const g = this.normalizePersonGender(gender);
+        return DOM.PERSON_GENDER_ICONS[g] || DOM.PERSON_GENDER_ICONS.unset;
+    }
+
+    getPersonGenderLabel(gender) {
+        const g = this.normalizePersonGender(gender);
+        if (g === 'male') {
+            return 'Мужской';
+        }
+        if (g === 'female') {
+            return 'Женский';
+        }
+        return 'Не указан';
+    }
+
+    /** Тултип строки персоны: имя, дата, пол (если указан), заметка (через «-» на отдельных строках). */
+    formatPersonDateHoverTitle(name, formattedDate, description, gender) {
         const n = String(name == null ? '' : name);
         const d = String(formattedDate == null ? '' : formattedDate);
         const desc = typeof description === 'string' ? description.trim() : '';
-        if (!desc) {
-            return `${n}\n-\n${d}`;
+        const g = this.normalizePersonGender(gender);
+        const parts = [n, '-', d];
+        if (g !== 'unset') {
+            parts.push('-', this.getPersonGenderLabel(g));
         }
-        return `${n}\n-\n${d}\n-\n${desc}`;
+        if (desc) {
+            parts.push('-', desc);
+        }
+        return parts.join('\n');
     }
     
     formatDateTimeFull(timestamp) {
