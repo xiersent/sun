@@ -244,4 +244,57 @@ class DOM {
     }
 }
 
+/** Иконки и подсказки кнопок действий в списках (на кнопке — только иконка). */
+window.SUN_ACTION_LABELS = {
+    edit: '✎',
+    editActive: '✎',
+    editTitle: 'Редактировать',
+    editActiveTitle: 'Редактирование…',
+    save: '💾',
+    saveTitle: 'Сохранить',
+    destroy: '⨯',
+    destroyTitle: 'Уничтожить',
+    cancel: '↩',
+    cancelTitle: 'Отмена',
+    expand: '▶',
+    expandTitle: 'Развернуть',
+    collapse: '▼',
+    collapseTitle: 'Свернуть'
+};
+
+window.SUN_ACTION_LABELS.applyToButton = function applyToButton(btn, action, opts) {
+    if (!btn || !action) return;
+    const L = window.SUN_ACTION_LABELS;
+    const editing = opts && opts.editing;
+    if (action === 'edit') {
+        btn.textContent = editing ? L.editActive : L.edit;
+        const title = editing ? L.editActiveTitle : L.editTitle;
+        btn.title = title;
+        btn.setAttribute('aria-label', title);
+    } else if (action === 'save') {
+        btn.textContent = L.save;
+        btn.title = L.saveTitle;
+        btn.setAttribute('aria-label', L.saveTitle);
+    } else if (action === 'destroy') {
+        btn.textContent = L.destroy;
+        btn.title = L.destroyTitle;
+        btn.setAttribute('aria-label', L.destroyTitle);
+    } else if (action === 'cancel') {
+        btn.textContent = L.cancel;
+        btn.title = L.cancelTitle;
+        btn.setAttribute('aria-label', L.cancelTitle);
+    }
+};
+
+window.SUN_ACTION_LABELS.applyExpandButton = function applyExpandButton(btn, expanded) {
+    if (!btn) return;
+    const L = window.SUN_ACTION_LABELS;
+    const isOpen = !!expanded;
+    btn.textContent = isOpen ? L.collapse : L.expand;
+    const title = isOpen ? L.collapseTitle : L.expandTitle;
+    btn.title = title;
+    btn.setAttribute('aria-label', title);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+};
+
 window.dom = new DOM();

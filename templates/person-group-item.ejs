@@ -28,23 +28,22 @@
                         </span>
                     </div>
                     <div class="list-item__actions">
-                        <button class="ui-btn expand-collapse-btn person-group-expand-btn" 
+                        <button type="button" class="ui-btn expand-collapse-btn person-group-expand-btn" 
                                 data-id="<%= data.id %>" 
-                                data-type="personGroup">
-                            <%= data.expanded ? 'Свернуть' : 'Развернуть' %>
-                        </button>
-                        <button class="ui-btn edit-btn" 
+                                data-type="personGroup"
+                                title="<%= data.expanded ? 'Свернуть' : 'Развернуть' %>"
+                                aria-label="<%= data.expanded ? 'Свернуть' : 'Развернуть' %>"
+                                aria-expanded="<%= data.expanded ? 'true' : 'false' %>"><%= data.expanded ? '▼' : '▶' %></button>
+                        <button type="button" class="ui-btn edit-btn" 
                                 data-id="<%= data.id %>" 
-                                data-type="personGroup">
-                            <%= data.editing ? 'Редактирование...' : 'Изменить' %>
-                        </button>
-                        <% if (data.id !== 'default-person-group') { %>
-                        <button class="ui-btn delete-date-btn" 
+                                data-type="personGroup"
+                                title="<%= data.editing ? 'Редактирование…' : 'Редактировать' %>"
+                                aria-label="<%= data.editing ? 'Редактирование…' : 'Редактировать' %>">✎</button>
+                        <button type="button" class="ui-btn delete-date-btn" 
                                 data-id="<%= data.id %>" 
-                                data-type="personGroup">
-                            Уничтожить
-                        </button>
-                        <% } %>
+                                data-type="personGroup"
+                                title="Уничтожить"
+                                aria-label="Уничтожить">⨯</button>
                     </div>
                 </div>
             </div>
@@ -55,8 +54,8 @@
                 <input type="text" placeholder="Название группы" class="list-item__edit-input" id="editPersonGroupName<%= data.id %>" value="<%= data.name %>">
             </div>
             <div class="list-item__edit-actions">
-                <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup">Сохранить</button>
-                <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup">Отмена</button>
+                <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup" title="Сохранить" aria-label="Сохранить">💾</button>
+                <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup" title="Отмена" aria-label="Отмена">↩</button>
             </div>
         </div>
         

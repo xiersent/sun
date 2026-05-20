@@ -26,8 +26,8 @@ const templates = {
                     ${date.yearsFromCurrent > 0 ? `[${date.yearsFromCurrent}]` : ''}
                 </div>
                 <div class="date-actions flex gap-xs">
-                    <button class="btn edit-btn" data-id="${date.id}">Изменить</button>
-                    <button class="btn delete-date-btn" data-id="${date.id}">Удалить</button>
+                    <button type="button" class="btn edit-btn" data-id="${date.id}" title="Редактировать" aria-label="Редактировать">✎</button>
+                    <button type="button" class="btn delete-date-btn" data-id="${date.id}" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                 </div>
             </div>
         </div>
@@ -39,8 +39,8 @@ const templates = {
             <div class="date-info-actions flex items-center gap-xs">
                 <input type="date" class="form-input" value="${date.dateForInput}">
                 <div class="date-actions flex gap-xs">
-                    <button class="btn save-btn" data-id="${date.id}">Сохранить</button>
-                    <button class="btn cancel-btn" data-id="${date.id}">Отмена</button>
+                    <button type="button" class="btn save-btn" data-id="${date.id}" title="Сохранить" aria-label="Сохранить">💾</button>
+                    <button type="button" class="btn cancel-btn" data-id="${date.id}" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@ const templates = {
                     <div class="wave-group-title">${group.name}</div>
                 </div>
                 <div class="wave-group-right">
-                    <button class="btn delete-group-btn" data-group-id="${group.id}">Удалить</button>
+                    <button type="button" class="btn delete-group-btn" data-group-id="${group.id}" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                 </div>
             </div>
             <div class="wave-group-waves" style="display: ${group.expanded ? 'block' : 'none'}">
@@ -96,8 +96,8 @@ const templates = {
                 </div>
             </div>
             <div class="wave-actions flex gap-xs">
-                <button class="btn edit-wave-btn" data-wave-id="${wave.id}">Изменить</button>
-                <button class="btn delete-wave-btn" data-wave-id="${wave.id}">Удалить</button>
+                <button type="button" class="btn edit-wave-btn" data-wave-id="${wave.id}" title="Редактировать" aria-label="Редактировать">✎</button>
+                <button type="button" class="btn delete-wave-btn" data-wave-id="${wave.id}" title="Уничтожить" aria-label="Уничтожить">⨯</button>
             </div>
         </div>
     `,
@@ -117,8 +117,8 @@ const templates = {
                 <input type="color" class="color-input" value="${wave.color}" data-field="color">
             </div>
             <div class="form-actions flex gap-sm">
-                <button class="btn save-wave-btn" data-wave-id="${wave.id}">Сохранить</button>
-                <button class="btn cancel-edit-btn" data-wave-id="${wave.id}">Отмена</button>
+                <button type="button" class="btn save-wave-btn" data-wave-id="${wave.id}" title="Сохранить" aria-label="Сохранить">💾</button>
+                <button type="button" class="btn cancel-edit-btn" data-wave-id="${wave.id}" title="Отмена" aria-label="Отмена">↩</button>
             </div>
         </div>
     `,

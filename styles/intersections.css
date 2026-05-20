@@ -1,7 +1,7 @@
 /* styles/intersections.css - ПОЛНЫЙ (все стили пересечений, которые были в 3 файлах, объединены) */
 .intersection-controls{margin-bottom: var(--spacing-md);}
-.intersection-form{display: flex; flex-direction: column; gap: var(--spacing-md);}
-.intersection-form-row{display: flex; align-items: center; flex-wrap: wrap;}
+.intersection-form{display: flex; flex-direction: column; gap: var(--spacing-xs);}
+.intersection-form-row{display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs);}
 .intersection-select{width: 100%; padding: var(--spacing-xs); border: 1px solid var(--clg); font-size: var(--font-size-sm); height: 25px; background: #fff;}
 .intersection-form-label{display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); cursor: pointer; white-space: nowrap;}
 .intersection-results-container{max-height: 400px; min-height: 200px; overflow-y: auto; border: 1px solid var(--clg); background: #fff;}
@@ -31,7 +31,7 @@
 .intersection-stats strong{font-weight: 600; color: #0c4121;}
 .intersection-stats-content{line-height: 1.5;}
 .list-empty{padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
-.intersection-form-row-actions{display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); margin-left: auto;}
+.intersection-form-row-actions{display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); margin-left: auto;}
 .intersection-form > .intersection-form-row-actions{
     justify-content: flex-end;
     margin-left: 0;
@@ -70,8 +70,9 @@
     font-weight: 600;
 }
 .date-comparison-intro{font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 var(--spacing-md); line-height: 1.4;}
-.date-comparison-selects{gap: var(--spacing-md); align-items: flex-end;}
-.date-comparison-selects .intersection-select-group{flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 4px;}
+.date-comparison-selects{gap: var(--spacing-xs); align-items: flex-end;}
+.date-comparison-selects .intersection-select-group{flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: var(--spacing-xs);}
+.intersection-select-group{display: flex; flex-direction: column; gap: var(--spacing-xs);}
 .intersection-toolbar-one-row{margin-bottom: var(--spacing-sm);}
 .intersection-toolbar-one-row .intersection-select-group{
     flex: 1 1 130px;

@@ -19,11 +19,11 @@
     .custom-wave-item-controls{flex-wrap: wrap;}
     .corner-square.tc, .corner-square.bc, .corner-square.lc, .corner-square.rc, .corner-square.mt, .corner-square.mb, .corner-square.ml, .corner-square.mr, .corner-square.mt2, .corner-square.mb2, .corner-square.ml2, .corner-square.mr2{display: none;}
     .add-custom-wave-form{flex-direction: column;}
-    .add-custom-wave-form.compact{flex-direction: column; gap: var(--spacing-sm);}
-    .add-custom-wave-form.compact .add-group-form{flex-direction: column; gap: 8px;}
+    .add-custom-wave-form.compact{flex-direction: column; gap: var(--spacing-xs);}
+    .add-custom-wave-form.compact .add-group-form{flex-direction: column; gap: var(--spacing-xs);}
     .add-custom-wave-form.compact .add-group-input, .add-custom-wave-form.compact .wave-inputs-row .form-input, .add-custom-wave-form.compact .wave-inputs-row select, .add-custom-wave-form.compact .wave-inputs-row .color-input{width: 100%; min-width: 0;}
     .add-custom-wave-form.compact .add-group-btn, .add-custom-wave-form.compact .wave-inputs-row #btnAddCustomWave{width: 100%;}
-    .add-custom-wave-form.compact .wave-inputs-row{flex-direction: column; gap: var(--spacing-sm);}
+    .add-custom-wave-form.compact .wave-inputs-row{flex-direction: column; gap: var(--spacing-xs);}
     .display-view-templates-row{flex-direction: column; align-items: stretch;}
     .display-view-templates-row #displayViewTemplateSelect,
     .display-view-templates-row #newDisplayViewTemplateName{width: 100%; min-width: 0;}

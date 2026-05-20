@@ -1,6 +1,6 @@
 /**
  * Шаблоны отображения: сохранённые комбинации включения групп и видимости волн.
- * Стандартный шаблон (неудаляемый) хранит снимок как и остальные; при первом запуске заполняется из текущего состояния.
+ * Стандартный шаблон (неуничтожаемый) хранит снимок как и остальные; при первом запуске заполняется из текущего состояния.
  */
 (function () {
     const STANDARD_ID = '__display_standard__';
@@ -325,8 +325,12 @@
             const id = this.getActiveTemplateId();
             this.persistDescriptionToTemplate(id);
             const tpl = this.getTemplateById(id);
-            if (!tpl || tpl.builtIn) {
-                alert('Стандартный шаблон нельзя удалить');
+            if (!tpl || tpl.builtIn || String(tpl.id) === STANDARD_ID) {
+                alert('Стандартный шаблон уничтожить нельзя.');
+                return;
+            }
+            const label = (tpl.name || '').trim() || tpl.id;
+            if (!confirm(`Уничтожить шаблон «${label}»?`)) {
                 return;
             }
             const idx = ui.displayViewTemplates.findIndex((t) => String(t.id) === String(id));
@@ -441,11 +445,6 @@
                 if (String(tpl.id) === String(active)) opt.selected = true;
                 sel.appendChild(opt);
             });
-            const delBtn = document.getElementById('btnDeleteDisplayViewTemplate');
-            if (delBtn) {
-                const cur = this.getTemplateById(active);
-                delBtn.disabled = !!(cur && cur.builtIn);
-            }
             this.syncDescriptionFieldFromActive();
         }
 

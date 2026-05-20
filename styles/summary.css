@@ -3,7 +3,7 @@
 .summary-header{margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-xs); border-bottom: 1px solid var(--clg);}
 .summary-header h3{margin: 0; font-size: var(--font-size-lg); font-weight: 600; color: var(--text-color);}
 .summary-controls{margin-bottom: var(--spacing-md);}
-.summary-select-row{display: flex; gap: var(--spacing-lg); margin-bottom: var(--spacing-md); align-items: center; flex-wrap: wrap;}
+.summary-select-row{display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-md); align-items: center; flex-wrap: wrap;}
 .summary-select-group{display: flex; align-items: center; gap: var(--spacing-xs); min-width: 200px;}
 .summary-label{font-weight: 400; color: var(--text-color); font-size: var(--font-size-sm); white-space: nowrap;}
 .summary-select{flex: 1; padding: var(--spacing-xs); border: 1px solid var(--clg); font-size: var(--font-size-sm); height: 25px;}

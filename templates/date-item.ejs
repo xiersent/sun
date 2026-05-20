@@ -36,7 +36,7 @@
                         <div class="list-item__title date-name" title="<%= _dateTitleName %>">
                             <%= data.name %>
                         </div>
-                        <span class="list-item__icon date-star">★</span>
+                        <span class="list-item__icon date-star" title="<%= _dateTitleName %>">★</span>
                     </div>
                 </div>
                 
@@ -48,10 +48,8 @@
                         <% } %>
                     </div>
                     <div class="list-item__actions">
-                        <button class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="date">
-                            Изменить
-                        </button>
-                        <button class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date">Уничтожить</button>
+                        <button type="button" class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="date" title="Редактировать" aria-label="Редактировать">✎</button>
+                        <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     </div>
                 </div>
             </div>
@@ -67,8 +65,8 @@
             <div class="list-item__right">
                 <input type="date" class="date-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
                 <div class="list-item__edit-actions">
-                    <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date">Сохранить</button>
-                    <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date">Отмена</button>
+                    <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Сохранить" aria-label="Сохранить">💾</button>
+                    <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
             </div>
         </div>

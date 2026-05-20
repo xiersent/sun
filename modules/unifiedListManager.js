@@ -128,6 +128,22 @@ class UnifiedListManager {
             if (dhandle) {
                 dhandle.setAttribute('draggable', isEditing ? 'false' : 'true');
             }
+
+            const dateObj = window.appState.data.dates.find((d) => String(d.id) === idStr);
+            if (dateObj && window.dom && typeof window.dom.formatDate === 'function') {
+                const formatted = window.dom.formatDate(dateObj.date);
+                const titleName =
+                    String(dateObj.name || '') +
+                    (formatted ? ' · ' + formatted : '');
+                const nameEl = row.querySelector('.date-name');
+                const starEl = row.querySelector('.date-star');
+                if (nameEl) {
+                    nameEl.setAttribute('title', titleName);
+                }
+                if (starEl) {
+                    starEl.setAttribute('title', titleName);
+                }
+            }
         });
 
         root.querySelectorAll('input.date-checkbox').forEach((inp) => {
@@ -832,7 +848,9 @@ class UnifiedListManager {
             }
             const editBtn = row.querySelector('.edit-btn[data-type="group"]');
             if (editBtn) {
-                editBtn.textContent = isEditing ? 'Редактирование...' : 'Изменить';
+                if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyToButton) {
+                    window.SUN_ACTION_LABELS.applyToButton(editBtn, 'edit', { editing: isEditing });
+                }
             }
         });
 
@@ -1658,7 +1676,9 @@ class UnifiedListManager {
             }
             const editBtn = row.querySelector('.edit-btn[data-type="personGroup"]');
             if (editBtn) {
-                editBtn.textContent = isEditing ? 'Редактирование...' : 'Изменить';
+                if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyToButton) {
+                    window.SUN_ACTION_LABELS.applyToButton(editBtn, 'edit', { editing: isEditing });
+                }
             }
         });
 

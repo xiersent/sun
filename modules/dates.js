@@ -411,7 +411,7 @@ class DatesManager {
     deletePersonGroup(groupId) {
         const groupIdStr = String(groupId);
         if (groupIdStr === 'default-person-group') {
-            alert('Группу по умолчанию нельзя уничтожить.');
+            alert('Группу по умолчанию уничтожить нельзя.');
             return false;
         }
         if (!confirm('Уничтожить группу персон? Персоны будут перенесены в группу по умолчанию.')) {

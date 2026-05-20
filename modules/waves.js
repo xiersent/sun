@@ -34,7 +34,7 @@ class WavesManager {
         return this.isWaveGroupEnabled(waveId);
     }
     
-    /** Сброс ссылок на DOM волн (после удаления контейнеров из document) */
+    /** Сброс ссылок на DOM волн (после уничтожения контейнеров из document) */
     clearWaveDomReferences() {
         this.waveContainers = {};
         this.wavePaths = {};

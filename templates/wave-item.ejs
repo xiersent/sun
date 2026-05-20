@@ -29,7 +29,7 @@
                         <div class="wave-color-preview-small" 
                              style="background-color: <%= data.color || '#666666' %>;" 
                              data-id="<%= String(data.id) %>" 
-                             title="Изменить цвет"></div>
+                             title="Редактировать цвет"></div>
                         
                         <input type="checkbox" class="wave-corner-color-check" autocomplete="off"
                                <%= data.cornerColor ? 'checked' : '' %> 
@@ -49,10 +49,8 @@
                         <%= data.description || 'Сигнал' %>
                     </div>
                     <div class="list-item__actions">
-                        <button class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="wave">
-                            Изменить
-                        </button>
-                        <button class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="wave">Уничтожить</button>
+                        <button type="button" class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="wave" title="Редактировать" aria-label="Редактировать">✎</button>
+                        <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="wave" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     </div>
                 </div>
             </div>
@@ -81,8 +79,8 @@
                 <input type="color" class="color-input" id="editWaveColor<%= data.id %>" value="<%= data.color %>">
             </div>
             <div class="list-item__edit-actions">
-                <button class="save-btn ui-btn" data-id="<%= data.id %>" data-type="wave">Сохранить</button>
-                <button class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="wave">Отмена</button>
+                <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="wave" title="Сохранить" aria-label="Сохранить">💾</button>
+                <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="wave" title="Отмена" aria-label="Отмена">↩</button>
             </div>
         </div>
     </div>

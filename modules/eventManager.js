@@ -1223,7 +1223,9 @@ class EventManager {
                             }
                             const expandBtn = groupElement.querySelector('.expand-collapse-btn');
                             if (expandBtn) {
-                                expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+                                if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyExpandButton) {
+                                    window.SUN_ACTION_LABELS.applyExpandButton(expandBtn, group.expanded);
+                                }
                             }
                         }
                     }
@@ -1244,7 +1246,9 @@ class EventManager {
                             
                             const expandBtn = groupElement.querySelector('.expand-collapse-btn');
                             if (expandBtn) {
-                                expandBtn.textContent = group.expanded ? 'Свернуть' : 'Развернуть';
+                                if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyExpandButton) {
+                                    window.SUN_ACTION_LABELS.applyExpandButton(expandBtn, group.expanded);
+                                }
                             }
                         }
                     }

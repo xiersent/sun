@@ -125,7 +125,11 @@ class TimeBarManager {
         } else {
             this.controlsPanel.classList.add('time-bar-controls--collapsed');
             this.controlsToggle.setAttribute('aria-expanded', 'false');
-            this.controlsToggle.textContent = 'Редактировать';
+            const L = window.SUN_ACTION_LABELS;
+            const editLabel = L && L.editTitle ? L.editTitle : 'Редактировать';
+            this.controlsToggle.textContent = editLabel;
+            this.controlsToggle.title = editLabel;
+            this.controlsToggle.setAttribute('aria-label', editLabel);
             this.controlsToggle.classList.remove('active');
         }
     }
@@ -192,7 +196,11 @@ class TimeBarManager {
             btn.type = 'button';
             btn.className = 'tab-button time-bar-controls-toggle';
             btn.id = 'timeBarControlsToggle';
-            btn.textContent = 'Редактировать';
+            const L = window.SUN_ACTION_LABELS;
+            const editLabel = L && L.editTitle ? L.editTitle : 'Редактировать';
+            btn.textContent = editLabel;
+            btn.title = editLabel;
+            btn.setAttribute('aria-label', editLabel);
             btn.setAttribute('aria-expanded', 'false');
             btn.setAttribute('aria-controls', 'timeBarControls');
             tabButtons.appendChild(btn);

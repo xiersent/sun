@@ -113,7 +113,7 @@
                 <div class="panel-section time-bar-controls-section" id="timeBarControlsSection">
                     <div class="tab-container">
                         <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Настройки полосы времени">
-                            <button type="button" class="tab-button time-bar-controls-toggle" id="timeBarControlsToggle" aria-expanded="false" aria-controls="timeBarControls">Редактировать</button>
+                            <button type="button" class="tab-button time-bar-controls-toggle" id="timeBarControlsToggle" aria-expanded="false" aria-controls="timeBarControls" title="Редактировать" aria-label="Редактировать">Редактировать</button>
                         </div>
                     </div>
                     <div class="time-bar-controls time-bar-controls--collapsed" id="timeBarControls" aria-label="Видимость полос и групп"></div>
@@ -295,7 +295,7 @@
                     <button id="btnToday" class="ui-btn" data-action="today">Сегодня</button>
                     <button id="btnNow" class="ui-btn" data-action="now">Сейчас</button>
                     
-                    <div class="date-time-input-group" style="display: flex; gap: 4px; flex: 1; min-width: 0;">
+                    <div class="date-time-input-group">
                         <input type="date" class="date-input" id="mainDateInputDate" 
                             title="Выберите дату" style="flex: 1;">
                         <input type="time" class="date-input" id="mainDateInputTime" step="1"
@@ -331,7 +331,7 @@
             <div class="main-controls-panel">
                 <div class="control-panel">
                     <div class="panel-section" id="dates-panel">
-                        <div class="add-group-form" style="margin-bottom: 8px;">
+                        <div class="add-group-form" style="margin-bottom: var(--spacing-sm);">
                             <input type="text" class="add-group-input" id="newPersonGroupName" placeholder="Название группы персон" style="flex: 1">
                             <button class="add-group-btn ui-btn" id="btnAddPersonGroup" type="button">Добавить группу</button>
                         </div>
@@ -349,12 +349,13 @@
                                 <select id="displayViewTemplateSelect" class="form-input summary-select" title="Переключение сохранённой комбинации включения групп и видимости сигналов"></select>
                                 <input type="text" id="newDisplayViewTemplateName" class="form-input" placeholder="Название нового шаблона">
                                 <button type="button" class="ui-btn" id="btnAddDisplayViewTemplate">Добавить шаблон</button>
-                                <button type="button" class="ui-btn" id="btnDeleteDisplayViewTemplate" title="Уничтожить выбранный пользовательский шаблон">Уничтожить</button>
+                                <button type="button" class="ui-btn" id="btnDeleteDisplayViewTemplate" title="Уничтожить выбранный пользовательский шаблон" aria-label="Уничтожить">⨯</button>
                             </div>
                             <div class="display-view-templates-description-row">
                                 <textarea id="displayViewTemplateDescription" class="form-input display-view-templates-description-input" rows="2" placeholder="Заметка к выбранному шаблону видимости…" aria-label="Описание шаблона видимости"></textarea>
                             </div>
                         </div>
+                        <div class="display-view-templates-separator" role="separator" aria-hidden="true"></div>
                         <div class="add-custom-wave-form compact">
                             <div class="add-group-form">
                                 <input type="text" class="add-group-input" id="newGroupName" placeholder="Название новой группы" style="flex: 1">

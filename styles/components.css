@@ -17,6 +17,13 @@ button:hover{filter: brightness(0.9);}
 .transform-btn{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 .delete-date-btn, .edit-btn, .delete-group-btn{background-color: var(--cp); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm);}
 .save-btn, .cancel-btn{background-color: var(--cp); padding: 3px 8px; font-size: var(--font-size-sm);}
+.list-item__actions .edit-btn,
+.list-item__actions .delete-date-btn,
+.list-item__actions .expand-collapse-btn,
+.list-item__edit-actions .save-btn,
+.list-item__edit-actions .cancel-btn,
+#btnDeleteDisplayViewTemplate{min-width: 28px; padding-left: 6px; padding-right: 6px; text-align: center; line-height: 1;}
+.time-bar-controls-toggle{min-width: 0; white-space: nowrap;}
 .add-group-btn{padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 #btnToday.today-active{background-color: var(--cp); color: #fff;}
 #btnToday.today-inactive{background-color: #ff9900; color: #fff;}
