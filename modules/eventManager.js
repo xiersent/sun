@@ -1536,8 +1536,24 @@ class EventManager {
 		this.handleWaveLayerToggle(waveId, isChecked, $checkbox, 'a');
 	}
 
+	/** Есть ли выбранная персона B (чекбокс типа B в списке дат). */
+	_isPersonBDateSelected() {
+		const root = document.getElementById('dateListForDates');
+		if (root) {
+			const bChecked = root.querySelector('input.date-checkbox[data-type="b"]:checked');
+			if (bChecked) {
+				return true;
+			}
+		}
+		const ds = window.appState && window.appState.dateSelections;
+		return !!(ds && ds.typeB != null && String(ds.typeB) !== '');
+	}
+
 	/** Пара handleWaveVisibilityChange: слой B, чекбокс .wave-b-visibility-check. */
 	handleWavePersonBVisibilityChange(waveId, isChecked, $checkbox) {
+		if (isChecked && !this._isPersonBDateSelected()) {
+			alert('Волна не появится, пока не будет включена персона B.');
+		}
 		this.handleWaveLayerToggle(waveId, isChecked, $checkbox, 'b');
 	}
 
