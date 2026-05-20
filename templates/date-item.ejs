@@ -1,7 +1,7 @@
 <!-- templates/date-item.ejs -->
 <% var _attrEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }; %>
 <% var _textEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }; %>
-<% var _dateTitleName = _attrEsc(data.name + (data.formattedDate ? ' · ' + data.formattedDate : '')); %>
+<% var _descForTitle = String(data.description || '').trim(); var _hoverFallback = String(data.name || '') + '\n-\n' + String(data.formattedDate || ''); if (_descForTitle) { _hoverFallback += '\n-\n' + _descForTitle; } var _dateTitleHover = _attrEsc(data.hoverTitle != null ? data.hoverTitle : _hoverFallback); %>
 <% var _dateTitleValue = _attrEsc(data.formattedDate + (data.yearsFromCurrent > 0 ? ' [' + data.yearsFromCurrent + ']' : '')); %>
 <div class="list-item list-item--date 
     <%= data.active ? 'active' : '' %> 
@@ -34,10 +34,10 @@
                     </div>
                     
                     <div class="list-item__title-container">
-                        <div class="list-item__title date-name" title="<%= _dateTitleName %>">
+                        <div class="list-item__title date-name" title="<%= _dateTitleHover %>">
                             <%= data.name %>
                         </div>
-                        <span class="list-item__icon date-star" title="<%= _dateTitleName %>">★</span>
+                        <span class="list-item__icon date-star" title="<%= _dateTitleHover %>">★</span>
                     </div>
                 </div>
                 
@@ -62,12 +62,13 @@
                 <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
                 <input type="date" class="date-input list-item__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
                 <div class="list-item__edit-actions">
+                    <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Сохранить" aria-label="Сохранить">💾</button>
                     <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
             </div>
             <div class="list-item__edit-row list-item__edit-row--full">
-                <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Описание персоны…" aria-label="Описание персоны"><%= _textEsc(data.description || '') %></textarea>
+                <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"><%= _textEsc(data.description || '') %></textarea>
             </div>
         </div>
     </div>

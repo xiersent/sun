@@ -130,18 +130,21 @@ class UnifiedListManager {
             }
 
             const dateObj = window.appState.data.dates.find((d) => String(d.id) === idStr);
-            if (dateObj && window.dom && typeof window.dom.formatDate === 'function') {
+            if (dateObj && window.dom && typeof window.dom.formatPersonDateHoverTitle === 'function') {
                 const formatted = window.dom.formatDate(dateObj.date);
-                const titleName =
-                    String(dateObj.name || '') +
-                    (formatted ? ' · ' + formatted : '');
+                const description = typeof dateObj.description === 'string' ? dateObj.description : '';
+                const hoverTitle = window.dom.formatPersonDateHoverTitle(
+                    dateObj.name,
+                    formatted,
+                    description
+                );
                 const nameEl = row.querySelector('.date-name');
                 const starEl = row.querySelector('.date-star');
                 if (nameEl) {
-                    nameEl.setAttribute('title', titleName);
+                    nameEl.setAttribute('title', hoverTitle);
                 }
                 if (starEl) {
-                    starEl.setAttribute('title', titleName);
+                    starEl.setAttribute('title', hoverTitle);
                 }
             }
         });
@@ -357,13 +360,17 @@ class UnifiedListManager {
         const isSelectedTypeA = typeAStr !== '' && typeAStr === dateObjIdStr;
         const isSelectedTypeB = typeBStr !== '' && typeBStr === dateObjIdStr;
         
+        const formattedDate = window.dom.formatDate(dateObj.date);
+        const description = typeof dateObj.description === 'string' ? dateObj.description : '';
+
         return {
             id: dateObj.id,
             name: dateObj.name,
-            description: typeof dateObj.description === 'string' ? dateObj.description : '',
+            description,
+            hoverTitle: window.dom.formatPersonDateHoverTitle(dateObj.name, formattedDate, description),
             type: 'date',
             personGroupId: personGroupId != null ? personGroupId : null,
-            formattedDate: window.dom.formatDate(dateObj.date),
+            formattedDate,
             dateForInput: window.dom.formatDateForInput(dateObj.date),
             yearsFromCurrent: yearsFromCurrent,
             active: activeDateIdStr === dateObjIdStr,

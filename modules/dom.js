@@ -7,6 +7,17 @@ class DOM {
     formatDate(timestamp) {
         return window.timeUtils.formatDate(timestamp);
     }
+
+    /** Тултип строки персоны: имя, дата, заметка (через «-» на отдельных строках). */
+    formatPersonDateHoverTitle(name, formattedDate, description) {
+        const n = String(name == null ? '' : name);
+        const d = String(formattedDate == null ? '' : formattedDate);
+        const desc = typeof description === 'string' ? description.trim() : '';
+        if (!desc) {
+            return `${n}\n-\n${d}`;
+        }
+        return `${n}\n-\n${d}\n-\n${desc}`;
+    }
     
     formatDateTimeFull(timestamp) {
         return window.timeUtils.formatDateTime(timestamp);

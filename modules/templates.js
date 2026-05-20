@@ -39,6 +39,7 @@ const templates = {
             <div class="date-info-actions flex items-center gap-xs">
                 <input type="date" class="form-input" value="${date.dateForInput}">
                 <div class="date-actions flex gap-xs">
+                    <button type="button" class="btn delete-date-btn" data-id="${date.id}" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     <button type="button" class="btn save-btn" data-id="${date.id}" title="Сохранить" aria-label="Сохранить">💾</button>
                     <button type="button" class="btn cancel-btn" data-id="${date.id}" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
