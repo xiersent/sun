@@ -1157,12 +1157,6 @@ class EventManager {
         if ($target.is('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate') || 
             $target.closest('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate').length) {
             e.preventDefault();
-
-            queueMicrotask(() => {
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    window.summaryManager.updateSummary();
-                }
-            });
         }
 
         const $actionBtn = $target.closest('[data-action]');

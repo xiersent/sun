@@ -542,9 +542,11 @@ class WavesManager {
     
 
     // opts.forceWaveLabels — сразу пересобрать боковые выноски (обход throttle 50 мс).
+    // opts.light — быстрый кадр при пошаговой навигации (только transform волн).
     updatePosition(opts = {}) {
+        const light = opts.light === true;
         const d = __waveDbg();
-        const endTotal = d && d.t('waves.updatePosition', { forceWaveLabels: !!opts.forceWaveLabels });
+        const endTotal = d && d.t('waves.updatePosition', { forceWaveLabels: !!opts.forceWaveLabels, light });
         const enabledWaveIds = new Set();
         for (const group of window.appState.data.groups) {
             if (group.enabled && group.waves) {
@@ -560,11 +562,13 @@ class WavesManager {
         let waveLoopNoContainer = 0;
         
         try {
-            const endTb = d && d.t('waves.updatePosition.timeBar', {});
-            if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
-                window.timeBarManager.updateTimeIndicator();
+            if (!light) {
+                const endTb = d && d.t('waves.updatePosition.timeBar', {});
+                if (window.timeBarManager && window.timeBarManager.updateTimeIndicator) {
+                    window.timeBarManager.updateTimeIndicator();
+                }
+                endTb && endTb({});
             }
-            endTb && endTb({});
             
             if (!window.appState.hasActivePerson()) {
                 window.sunWaveLayerBLog &&
@@ -573,11 +577,13 @@ class WavesManager {
                 return;
             }
             
-            const endGrid = d && d.t('waves.updatePosition.gridOffset', {});
-            if (window.grid && window.grid.updateGridOffset) {
-                window.grid.updateGridOffset();
+            if (!light) {
+                const endGrid = d && d.t('waves.updatePosition.gridOffset', {});
+                if (window.grid && window.grid.updateGridOffset) {
+                    window.grid.updateGridOffset();
+                }
+                endGrid && endGrid({});
             }
-            endGrid && endGrid({});
             
             const currentDay = window.appState.currentDay || 0;
             const layerBTrace = [];
@@ -591,7 +597,7 @@ class WavesManager {
                 const showB = groupOk && this._shouldDrawSecondPersonWave(waveIdStr);
                 const containerVisible = shouldShowA || showB;
 
-                const highlight = this.isExtremumHighlightEnabled();
+                const highlight = !light && this.isExtremumHighlightEnabled();
                 let isExtremumA = false;
                 let isExtremumB = false;
                 if (highlight && shouldShowA) {
@@ -605,9 +611,15 @@ class WavesManager {
                         isExtremumB = s >= 4 || s <= -4;
                     }
                 }
-                this.setWaveStrokeColor(wave.id, isExtremumA, isExtremumB);
+                if (highlight) {
+                    this.setWaveStrokeColor(wave.id, isExtremumA, isExtremumB);
+                }
 
-                if (containerVisible && (shouldShowA || (showB && this._getSecondPersonDayOffset() != null))) {
+                if (
+                    !light &&
+                    containerVisible &&
+                    (shouldShowA || (showB && this._getSecondPersonDayOffset() != null))
+                ) {
                     this.updateWaveLabelsColorForLayers(
                         wave.id,
                         shouldShowA,
@@ -775,12 +787,16 @@ class WavesManager {
                     waveCount: window.appState.data.waves.length
                 });
             
-            this.updateAllWaveLabels(opts);
-            
+            const labelOpts = {
+                ...opts,
+                forceWaveLabels: !!(opts.forceWaveLabels || light)
+            };
+            this.updateAllWaveLabels(labelOpts);
+
             const endVTime = d && d.t('waves.updatePosition.verticalWaveLabelsTime', {});
             this.updateVerticalWaveLabelsTime();
             endVTime && endVTime({});
-            
+
             const endInter = d && d.t('waves.updatePosition.renderWaveIntersectionPoints', {});
             this.renderWaveIntersectionPoints();
             endInter && endInter({});

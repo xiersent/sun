@@ -91,8 +91,10 @@ class GridManager {
     /**
      * Быстрое обновление при смене currentDay / currentDate на визоре без сноса DOM сетки.
      * Если сетки нет или изменилась геометрия — вызывает createGrid().
+     * @param {{ light?: boolean }} [opts] light: без подсветки заметок (откладывается до settle)
      */
-    refreshForCurrentDay() {
+    refreshForCurrentDay(opts = {}) {
+        const light = opts.light === true;
         if (!window.appState.hasActivePerson()) {
             this.clearGrid();
             this.updateCenterDate();
@@ -105,7 +107,9 @@ class GridManager {
         }
         this.updateGridOffset();
         this.updateDateLabels();
-        this.updateGridNotesHighlight();
+        if (!light) {
+            this.updateGridNotesHighlight();
+        }
         this._syncGridLineActivesForVizor();
     }
 
@@ -197,6 +201,7 @@ class GridManager {
         label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
         label.style.transform = 'translateX(-50%)';
         label.style.bottom = '30px';
+        label.setAttribute('data-day-offset', String(offset));
         label.textContent = date.getDate();
         
         const weekday = document.createElement('div');
@@ -205,6 +210,7 @@ class GridManager {
         weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
         weekday.style.transform = 'translateX(-50%)';
         weekday.style.bottom = '10px';
+        weekday.setAttribute('data-day-offset', String(offset));
         weekday.textContent = window.dom.getWeekdayName(date);
         
         this.gridContainer.appendChild(label);
@@ -381,9 +387,31 @@ class GridManager {
     
     updateDateLabels() {
         if (!this.gridContainer) return;
-        
-        this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach(el => el.remove());
-        
+
+        const dateLabels = this.gridContainer.querySelectorAll('.date-labels[data-day-offset]');
+        if (dateLabels.length > 0) {
+            const currentDay = window.appState.currentDay || 0;
+            const integerDays = Math.floor(currentDay);
+            dateLabels.forEach((label) => {
+                const offset = parseInt(label.getAttribute('data-day-offset'), 10);
+                if (Number.isNaN(offset)) {
+                    return;
+                }
+                const date = new Date(window.appState.baseDate);
+                date.setDate(date.getDate() + integerDays + offset);
+                label.textContent = date.getDate();
+                const weekday = this.gridContainer.querySelector(
+                    `.weekday-label[data-day-offset="${offset}"]`
+                );
+                if (weekday) {
+                    weekday.textContent = window.dom.getWeekdayName(date);
+                }
+            });
+            return;
+        }
+
+        this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach((el) => el.remove());
+
         const { min: minOffset, max: maxOffset } = this._getDayLabelOffsetRange();
         for (let i = minOffset; i <= maxOffset; i++) {
             this.createDateLabel(i);
