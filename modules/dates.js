@@ -275,8 +275,23 @@ class DatesManager {
         }
     }
     
+    _syncDateListAfterActiveChange() {
+        if (window.unifiedListManager && window.unifiedListManager.syncDateListSelectionVisuals) {
+            window.unifiedListManager.syncDateListSelectionVisuals({ selectionOnly: true });
+        }
+        if (
+            window.dateComparisonManager &&
+            window.dateComparisonManager.ensureSelectsSyncedWithDateList
+        ) {
+            window.dateComparisonManager.ensureSelectsSyncedWithDateList();
+        }
+    }
+
     setActiveDate(dateId, useExactTime = false) {
         const oldActiveId = window.appState.activeDateId;
+        const wasProgrammatic = window.appState.isProgrammaticDateChange;
+        window.appState.isProgrammaticDateChange = true;
+
         window.appState.activeDateId = dateId;
         this.ensurePersonGroupExpandedForDateId(dateId);
         
@@ -334,15 +349,16 @@ class DatesManager {
         
         this.updateCurrentDayElement();
         
-        if (oldActiveId !== dateId) {
-            document.querySelectorAll('.wave-container').forEach(c => c.remove());
-            if (window.waves) {
-                window.waves.clearWaveDomReferences();
-            }
-            
-            if (window.waves && window.waves.createVisibleWaveElements) {
+        if (oldActiveId !== dateId && window.waves) {
+            const hasWaveDom =
+                Object.keys(window.waves.waveContainers || {}).length > 0 ||
+                !!document.querySelector('.wave-container');
+            if (!hasWaveDom && window.waves.createVisibleWaveElements) {
                 const wrd = window.__waveRenderDebug;
-                const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('dates.setActiveDate.createVisibleWaveElements', { dateId }) : null;
+                const end =
+                    wrd && wrd.isEnabled && wrd.isEnabled()
+                        ? wrd.t('dates.setActiveDate.createVisibleWaveElements', { dateId })
+                        : null;
                 try {
                     window.waves.createVisibleWaveElements();
                 } finally {
@@ -350,13 +366,18 @@ class DatesManager {
                 }
             }
         }
-        
+
         if (window.waves) {
             const wrd = window.__waveRenderDebug;
-            const endPos = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('dates.setActiveDate.wavesUpdatePosition', { dateId }) : null;
+            const endPos =
+                wrd && wrd.isEnabled && wrd.isEnabled()
+                    ? wrd.t('dates.setActiveDate.wavesUpdatePosition', { dateId })
+                    : null;
             try {
                 window.waves.updatePosition();
-                window.waves.updateCornerSquareColors();
+                if (window.waves.updateCornerSquareColors) {
+                    window.waves.updateCornerSquareColors();
+                }
             } finally {
                 endPos && endPos({});
             }
@@ -375,31 +396,40 @@ class DatesManager {
             }
         }
         
-        window.appState.save();
-        
+        if (window.appState.saveDebounced) {
+            window.appState.saveDebounced();
+        } else {
+            window.appState.save();
+        }
+
         this.updateTodayButton();
-        
-        if (window.summaryManager && window.summaryManager.updateSummary) {
+
+        if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+            window.summaryManager.debouncedUpdate();
+        } else if (window.summaryManager && window.summaryManager.updateSummary) {
             window.summaryManager.updateSummary();
         }
 
-        if (window.stateIntersectionManager && window.stateIntersectionManager.updateIntersections) {
+        if (window.stateIntersectionManager && window.stateIntersectionManager.debouncedUpdate) {
+            window.stateIntersectionManager.debouncedUpdate();
+        } else if (
+            window.stateIntersectionManager &&
+            window.stateIntersectionManager.updateIntersections
+        ) {
             window.stateIntersectionManager.updateIntersections();
         }
 
         this.updateDateTimeInputs();
 
         window.sunDateListLog &&
-            window.sunDateListLog('setActiveDate:→ updateDateList', {
+            window.sunDateListLog('setActiveDate:→ syncDateListSelectionVisuals', {
                 dateId,
                 activeDateId: window.appState.activeDateId,
                 dateSelections: window.appState.dateSelections ? { ...window.appState.dateSelections } : null
             });
-        if (window.dataManager && window.dataManager.updateDateList) {
-            window.dataManager.updateDateList();
-        } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
-        }
+        this._syncDateListAfterActiveChange();
+
+        window.appState.isProgrammaticDateChange = wasProgrammatic;
     }
     
     addGroup(name) {

@@ -950,11 +950,6 @@ class EventManager {
                         };
                     }
                     window.dates.setActiveDate(dateId, true);
-                    window.appState.save();
-                    
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
                 }
             }
         });
@@ -1016,25 +1011,14 @@ class EventManager {
         const activeDateChanged = opts.activeDateChanged === true;
         const changedType = opts.changedType || checkboxType;
 
-        if (activeDateChanged) {
-            if (
-                window.unifiedListManager &&
-                window.unifiedListManager.syncDateListSelectionVisuals
-            ) {
-                window.unifiedListManager.syncDateListSelectionVisuals();
+        if (!activeDateChanged) {
+            if (window.dataManager && window.dataManager.applyDateSelectionChange) {
+                window.dataManager.applyDateSelectionChange(changedType);
+            } else if (window.dataManager && window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
+                window.unifiedListManager.updateDatesList();
             }
-            if (
-                window.dateComparisonManager &&
-                window.dateComparisonManager.ensureSelectsSyncedWithDateList
-            ) {
-                window.dateComparisonManager.ensureSelectsSyncedWithDateList();
-            }
-        } else if (window.dataManager && window.dataManager.applyDateSelectionChange) {
-            window.dataManager.applyDateSelectionChange(changedType);
-        } else if (window.dataManager && window.dataManager.updateDateList) {
-            window.dataManager.updateDateList();
-        } else if (window.unifiedListManager && window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
         }
 
         this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
@@ -1075,7 +1059,11 @@ class EventManager {
                 }
                 
                 selections.typeB = dateId;
-                window.appState.save();
+                if (window.appState.saveDebounced) {
+                    window.appState.saveDebounced();
+                } else {
+                    window.appState.save();
+                }
                 this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, {
                     activeDateChanged,
                     changedType: 'both'
@@ -1096,7 +1084,6 @@ class EventManager {
                 if (window.dates) {
                     window.dates.setActiveDate(dateId, true);
                 }
-                window.appState.save();
                 this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, {
                     activeDateChanged: true,
                     changedType: 'both'
@@ -1127,7 +1114,6 @@ class EventManager {
                         dateSelections: { ...selections }
                     });
                     window.dates.setActiveDate(dateId, true);
-                    window.appState.save();
                     this._finishDateCheckboxChange(clickedEl, dateId, checkboxType, {
                         activeDateChanged: true
                     });

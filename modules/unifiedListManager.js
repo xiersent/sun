@@ -189,7 +189,8 @@ class UnifiedListManager {
      * Подсветка A/B на строке — через CSS :has(:checked), классы на строке не ставим.
      * Чекбоксы — по всем input.date-checkbox в контейнере (надёжнее, чем поиск от строки).
      */
-    syncDateListSelectionVisuals() {
+    syncDateListSelectionVisuals(opts = {}) {
+        const selectionOnly = opts.selectionOnly === true;
         const root = document.getElementById('dateListForDates');
         if (!root) {
             window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:no #dateListForDates');
@@ -209,6 +210,7 @@ class UnifiedListManager {
             activeIdStr,
             typeAStr,
             typeBStr,
+            selectionOnly,
             dateSelections: { ...ds }
         });
 
@@ -225,6 +227,10 @@ class UnifiedListManager {
             const dhandle = row.querySelector('.date-drag-handle');
             if (dhandle) {
                 dhandle.setAttribute('draggable', isEditing ? 'false' : 'true');
+            }
+
+            if (selectionOnly) {
+                return;
             }
 
             const dateObj = window.appState.data.dates.find((d) => String(d.id) === idStr);
