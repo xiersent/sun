@@ -182,6 +182,14 @@ async function finalizeInitialization() {
         window.uiManager.syncExtremumWaveColorHighlightButton();
     }
 
+    if (window.uiManager && window.uiManager.syncTransformFlipButtons) {
+        window.uiManager.syncTransformFlipButtons();
+    }
+
+    if (window.wavesTransformLayer && window.wavesTransformLayer.applyFromAppState) {
+        window.wavesTransformLayer.applyFromAppState();
+    }
+
     if (window.timeBarManager && window.timeBarManager.refreshControlsPanel) {
         window.timeBarManager.refreshControlsPanel();
     }

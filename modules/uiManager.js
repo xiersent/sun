@@ -301,6 +301,43 @@ class UIManager {
         window.appState.transform.scaleY *= -1;
         this.applyTransform();
     }
+
+    syncFlipHButton() {
+        const btn = document.getElementById('btnFlipH');
+        if (!btn) {
+            return;
+        }
+        const flipped =
+            window.wavesTransformLayer && window.wavesTransformLayer.isScaleXFlipped
+                ? window.wavesTransformLayer.isScaleXFlipped()
+                : (window.appState.transform && window.appState.transform.scaleX < 0);
+        btn.classList.toggle('flip-h-active', flipped);
+        btn.setAttribute('aria-pressed', flipped ? 'true' : 'false');
+        btn.title = flipped
+            ? 'Горизонтальное отражение включено'
+            : 'Отразить волны по горизонтали';
+    }
+
+    syncTransformFlipButtons() {
+        this.syncFlipHButton();
+        this.syncFlipVButton();
+    }
+
+    syncFlipVButton() {
+        const btn = document.getElementById('btnFlipV');
+        if (!btn) {
+            return;
+        }
+        const flipped =
+            window.wavesTransformLayer && window.wavesTransformLayer.isScaleYFlipped
+                ? window.wavesTransformLayer.isScaleYFlipped()
+                : (window.appState.transform && window.appState.transform.scaleY < 0);
+        btn.classList.toggle('flip-v-active', flipped);
+        btn.setAttribute('aria-pressed', flipped ? 'true' : 'false');
+        btn.title = flipped
+            ? 'Вертикальное отражение включено'
+            : 'Отразить волны по вертикали';
+    }
     
     rotate(degrees) {
         window.appState.transform.rotation += degrees;
@@ -317,17 +354,10 @@ class UIManager {
     }
     
     applyTransform() {
-        let transform = '';
-        if (window.appState.transform.rotation !== 0) {
-            transform += `rotate(${window.appState.transform.rotation}deg) `;
+        if (window.wavesTransformLayer && window.wavesTransformLayer.applyFromAppState) {
+            window.wavesTransformLayer.applyFromAppState();
         }
-        transform += `scaleX(${window.appState.transform.scaleX}) scaleY(${window.appState.transform.scaleY})`;
-        
-        const graphElement = document.getElementById('graphElement');
-        if (graphElement) {
-            graphElement.style.transform = transform;
-        }
-        
+        this.syncTransformFlipButtons();
         window.appState.save();
     }
     

@@ -42,6 +42,53 @@ class WavesManager {
         this.wavePathLayerGroups = {};
     }
 
+    _mapLabelDisplayY(y, graphH) {
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapDisplayY) {
+            return window.wavesTransformLayer.mapDisplayY(y, graphH);
+        }
+        return y;
+    }
+
+    _mapLabelDisplayX(x, graphW) {
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapDisplayX) {
+            return window.wavesTransformLayer.mapDisplayX(x, graphW);
+        }
+        return x;
+    }
+
+    _horizontalLabelSideForFlip(side) {
+        const flipH =
+            window.wavesTransformLayer && window.wavesTransformLayer.isScaleXFlipped
+                ? window.wavesTransformLayer.isScaleXFlipped()
+                : false;
+        if (!flipH) {
+            return side;
+        }
+        return side === 'left' ? 'right' : 'left';
+    }
+
+    _verticalLabelBandForFlip(position) {
+        const flipV =
+            window.wavesTransformLayer && window.wavesTransformLayer.isScaleYFlipped
+                ? window.wavesTransformLayer.isScaleYFlipped()
+                : false;
+        if (!flipV) {
+            return position;
+        }
+        return position === 'top' ? 'bottom' : 'top';
+    }
+
+    /** Точка монтирования волн и волновых оверлеев (внутри #wavesTransformLayer) */
+    _getWavesMountElement() {
+        if (window.wavesTransformLayer && window.wavesTransformLayer.getMountElement) {
+            const mount = window.wavesTransformLayer.getMountElement();
+            if (mount) {
+                return mount;
+            }
+        }
+        return document.getElementById('graphElement');
+    }
+
     /** См. WAVE_BOLD_STROKE_VISUAL_ENABLED — для внешних модулей (например сохранение стиля волны). */
     isBoldStrokeVisualEnabled() {
         return WAVE_BOLD_STROKE_VISUAL_ENABLED;
@@ -400,9 +447,9 @@ class WavesManager {
         svg.appendChild(gB);
         container.appendChild(svg);
         
-        const graphElement = document.getElementById('graphElement');
-        if (graphElement) {
-            graphElement.appendChild(container);
+        const mount = this._getWavesMountElement();
+        if (mount) {
+            mount.appendChild(container);
         }
         
         this.waveContainers[wave.id] = container;
@@ -830,15 +877,17 @@ class WavesManager {
         const arrow = el.querySelector('.wave-label-arrow');
         if (!arrow) return;
         const side = el.dataset.side;
-        const pos = el.dataset.position;
         if (side === 'left') {
             arrow.style.borderColor = `transparent transparent transparent ${color}`;
         } else if (side === 'right') {
             arrow.style.borderColor = `transparent ${color} transparent transparent`;
-        } else if (pos === 'top') {
-            arrow.style.borderColor = `${color} transparent transparent transparent`;
-        } else if (pos === 'bottom') {
-            arrow.style.borderColor = `transparent transparent ${color} transparent`;
+        } else if (el.dataset.labelType === 'vertical') {
+            const band = el.dataset.visualBand || el.dataset.position;
+            if (band === 'bottom') {
+                arrow.style.borderColor = `transparent transparent ${color} transparent`;
+            } else {
+                arrow.style.borderColor = `${color} transparent transparent transparent`;
+            }
         }
     }
 
@@ -913,10 +962,79 @@ class WavesManager {
         const isExtremum =
             this.isExtremumHighlightEnabled() && (state >= 4 || state <= -4);
         this._applyLabelColors(el, wave, isExtremum);
+        const side = this._sideFromLabelElement(el);
+        const fill = isExtremum ? '#ff0000' : wave.color || '#666666';
+        this._syncHorizontalLabelSideGeometry(el, side, fill);
     }
 
-    _syncVerticalWaveLabelContent(el, wave, x, effDay, layerKey) {
-        el.style.left = `${x}px`;
+    _sideFromLabelElement(el) {
+        if (el.closest('.wave-labels-left')) {
+            return 'left';
+        }
+        if (el.closest('.wave-labels-right')) {
+            return 'right';
+        }
+        return el.dataset.visualSide || el.dataset.side || 'left';
+    }
+
+    /**
+     * Стрелка к графику: left-полоса — справа плашки вправо; right-полоса — слева плашки влево.
+     * @param {'left'|'right'} side
+     */
+    _syncHorizontalLabelSideGeometry(el, side, waveColor) {
+        const color = waveColor || el.style.backgroundColor || '#666666';
+        const layerKey = el.dataset.waveLayer || 'a';
+        el.className =
+            layerKey === 'b'
+                ? `wave-label horizontal ${side} wave-label--person-b`
+                : `wave-label horizontal ${side}`;
+        el.dataset.visualSide = side;
+        el.dataset.side = side;
+
+        el.style.left = '';
+        el.style.right = '';
+        el.style.marginLeft = '';
+        el.style.marginRight = '';
+
+        let arrow = el.querySelector('.wave-label-arrow');
+        if (!arrow) {
+            arrow = document.createElement('div');
+            arrow.className = 'wave-label-arrow';
+            el.appendChild(arrow);
+        }
+
+        arrow.style.position = 'absolute';
+        arrow.style.top = '50%';
+        arrow.style.bottom = '';
+        arrow.style.left = '';
+        arrow.style.right = '';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        arrow.style.transform = 'translateY(-50%)';
+
+        if (side === 'left') {
+            el.style.right = '0';
+            el.style.marginRight = '10px';
+            arrow.style.right = '-6px';
+            arrow.style.borderWidth = '4px 0 4px 6px';
+            arrow.style.borderColor = `transparent transparent transparent ${color}`;
+        } else {
+            el.style.left = '0';
+            el.style.marginLeft = '10px';
+            arrow.style.left = '-6px';
+            arrow.style.borderWidth = '4px 6px 4px 0';
+            arrow.style.borderColor = `transparent ${color} transparent transparent`;
+        }
+
+        arrow.style.setProperty('--wave-label-fill', color);
+    }
+
+    _syncVerticalWaveLabelContent(el, wave, x, effDay, layerKey, logicalBand) {
+        const graphW = window.appState.graphWidth;
+        const displayX = this._mapLabelDisplayX(x, graphW);
+        el.style.left = `${displayX}px`;
         el.dataset.refX = String(x);
         const extremumTime = this.calculateTimeFromXCoordinate(wave, x, effDay, layerKey);
         el.dataset.extremumTime = String(extremumTime.getTime());
@@ -928,6 +1046,78 @@ class WavesManager {
         const isExtremum =
             this.isExtremumHighlightEnabled() && (state >= 4 || state <= -4);
         this._applyLabelColors(el, wave, isExtremum);
+        const logical =
+            logicalBand ||
+            el.dataset.logicalBand ||
+            this._bandFromLabelElement(el);
+        el.dataset.logicalBand = logical;
+        const band = this._verticalLabelBandForFlip(logical);
+        const fill = isExtremum ? '#ff0000' : wave.color || '#666666';
+        this._syncVerticalLabelBandGeometry(el, band, fill);
+    }
+
+    _bandFromLabelElement(el) {
+        if (el.closest('.wave-labels-top')) {
+            return 'top';
+        }
+        if (el.closest('.wave-labels-bottom')) {
+            return 'bottom';
+        }
+        return el.dataset.visualBand || el.dataset.position || 'top';
+    }
+
+    /**
+     * Стрелка к графику: top-полоса — снизу плашки вниз; bottom-полоса — сверху плашки вверх.
+     * @param {'top'|'bottom'} band
+     */
+    _syncVerticalLabelBandGeometry(el, band, waveColor) {
+        const color = waveColor || el.style.backgroundColor || '#666666';
+        const layerKey = el.dataset.waveLayer || 'a';
+        el.className =
+            layerKey === 'b'
+                ? `wave-label vertical ${band} wave-label--person-b`
+                : `wave-label vertical ${band}`;
+        el.dataset.visualBand = band;
+        el.dataset.position = band;
+
+        el.style.top = '';
+        el.style.bottom = '';
+        el.style.marginTop = '';
+        el.style.marginBottom = '';
+
+        let arrow = el.querySelector('.wave-label-arrow');
+        if (!arrow) {
+            arrow = document.createElement('div');
+            arrow.className = 'wave-label-arrow';
+            el.appendChild(arrow);
+        }
+
+        arrow.style.position = 'absolute';
+        arrow.style.left = '50%';
+        arrow.style.right = '';
+        arrow.style.width = '0';
+        arrow.style.height = '0';
+        arrow.style.borderStyle = 'solid';
+        arrow.style.zIndex = '1';
+        arrow.style.transform = 'translateX(-50%)';
+
+        if (band === 'top') {
+            el.style.top = '0';
+            el.style.marginTop = '5px';
+            arrow.style.top = '';
+            arrow.style.bottom = '-6px';
+            arrow.style.borderWidth = '6px 4px 0 4px';
+            arrow.style.borderColor = `${color} transparent transparent transparent`;
+        } else {
+            el.style.bottom = '0';
+            el.style.marginBottom = '5px';
+            arrow.style.top = '-6px';
+            arrow.style.bottom = '';
+            arrow.style.borderWidth = '0 4px 6px 4px';
+            arrow.style.borderColor = `transparent transparent ${color} transparent`;
+        }
+
+        arrow.style.setProperty('--wave-label-fill', color);
     }
 
     _syncAxisXPointPosition(el, x, refDay) {
@@ -954,9 +1144,9 @@ class WavesManager {
         container.style.zIndex = '9';
         container.style.top = '0';
         container.style.left = '0';
-        const graphElement = document.getElementById('graphElement');
-        if (graphElement) {
-            graphElement.appendChild(container);
+        const mount = this._getWavesMountElement();
+        if (mount) {
+            mount.appendChild(container);
         }
         return container;
     }
@@ -1062,17 +1252,26 @@ class WavesManager {
                         if (y < 0 || y > graphH) {
                             return;
                         }
+                        const displayY = this._mapLabelDisplayY(y, graphH);
+                        const displaySide = this._horizontalLabelSideForFlip(side);
                         const domId = this._horizontalWaveLabelDomId(wave.id, side, layer.key);
                         activeDomIds.add(domId);
-                        const container = side === 'left' ? leftContainer : rightContainer;
+                        const container =
+                            displaySide === 'left' ? leftContainer : rightContainer;
                         let el = document.getElementById(domId);
                         if (!el) {
-                            this.createHorizontalWaveLabel(wave, y, side, container, layer.key);
+                            this.createHorizontalWaveLabel(
+                                wave,
+                                displayY,
+                                displaySide,
+                                container,
+                                layer.key
+                            );
                         } else {
                             if (el.parentNode !== container) {
                                 container.appendChild(el);
                             }
-                            el.style.top = `${y}px`;
+                            el.style.top = `${displayY}px`;
                             this._syncHorizontalWaveLabelAppearance(el, wave, effDay);
                         }
                     });
@@ -1125,7 +1324,8 @@ class WavesManager {
                     ];
 
                     bands.forEach(({ position, xs }) => {
-                        const container = position === 'top' ? topContainer : bottomContainer;
+                        const band = this._verticalLabelBandForFlip(position);
+                        const container = band === 'top' ? topContainer : bottomContainer;
                         xs.forEach((x, idx) => {
                             const domId = this._verticalWaveLabelDomId(
                                 wave.id,
@@ -1149,7 +1349,14 @@ class WavesManager {
                                 if (el.parentNode !== container) {
                                     container.appendChild(el);
                                 }
-                                this._syncVerticalWaveLabelContent(el, wave, x, effDay, layer.key);
+                                this._syncVerticalWaveLabelContent(
+                                    el,
+                                    wave,
+                                    x,
+                                    effDay,
+                                    layer.key,
+                                    position
+                                );
                             }
                         });
                     });
@@ -1181,9 +1388,9 @@ class WavesManager {
             axisXPointsContainer.style.top = '0';
             axisXPointsContainer.style.left = '0';
             
-            const graphElement = document.getElementById('graphElement');
-            if (graphElement) {
-                graphElement.appendChild(axisXPointsContainer);
+            const mount = this._getWavesMountElement();
+            if (mount) {
+                mount.appendChild(axisXPointsContainer);
             }
         }
         
@@ -1451,13 +1658,8 @@ class WavesManager {
         const textColor = this.getContrastTextColor(waveColor);
         
         const labelElement = document.createElement('div');
-        labelElement.className =
-            layerKey === 'b'
-                ? `wave-label horizontal ${side} wave-label--person-b`
-                : `wave-label horizontal ${side}`;
         labelElement.id = `waveLabel${labelId}`;
         labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.side = side;
         labelElement.dataset.labelType = 'horizontal';
         labelElement.dataset.waveLayer = layerKey;
         
@@ -1479,30 +1681,6 @@ class WavesManager {
         labelElement.style.fontWeight = '500';
         labelElement.style.whiteSpace = 'nowrap';
         
-        const arrow = document.createElement('div');
-        arrow.className = 'wave-label-arrow';
-        arrow.style.position = 'absolute';
-        arrow.style.top = '50%';
-        arrow.style.transform = 'translateY(-50%)';
-        arrow.style.width = '0';
-        arrow.style.height = '0';
-        arrow.style.borderStyle = 'solid';
-        arrow.style.zIndex = '1';
-        
-        if (side === 'left') {
-            arrow.style.right = '-6px';
-            arrow.style.borderWidth = '4px 0 4px 6px';
-            arrow.style.borderColor = `transparent transparent transparent ${waveColor}`;
-            labelElement.style.right = '0';
-            labelElement.style.marginRight = '10px';
-        } else {
-            arrow.style.left = '-6px';
-            arrow.style.borderWidth = '4px 6px 4px 0';
-            arrow.style.borderColor = `transparent ${waveColor} transparent transparent`;
-            labelElement.style.left = '0';
-            labelElement.style.marginLeft = '10px';
-        }
-        
         const text = document.createElement('div');
         text.className = 'wave-label-text';
         text.textContent = wave.name;
@@ -1510,8 +1688,8 @@ class WavesManager {
         text.style.zIndex = '2';
         
         labelElement.appendChild(text);
-        labelElement.appendChild(arrow);
         container.appendChild(labelElement);
+        this._syncHorizontalLabelSideGeometry(labelElement, side, waveColor);
         
         this.waveLabelElements[labelId] = labelElement;
         
@@ -1546,9 +1724,9 @@ class WavesManager {
     }
 
 
-    createVerticalWaveLabel(wave, x, position, container, index = 0, layerKey = 'a', effDay) {
+    createVerticalWaveLabel(wave, x, logicalBand, container, index = 0, layerKey = 'a', effDay) {
         const suffix = layerKey === 'b' ? '-person-b' : '';
-        const labelId = `${wave.id}-${position}-${index}${suffix}`;
+        const labelId = `${wave.id}-${logicalBand}-${index}${suffix}`;
         const day =
             effDay !== undefined && effDay !== null
                 ? effDay
@@ -1559,28 +1737,25 @@ class WavesManager {
         const atExtremum = (state >= 4 || state <= -4);
         const isExtremum = this.isExtremumHighlightEnabled() && atExtremum;
         
-        // Выбираем цвет: красный для экстремума, иначе цвет волны
         const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
         const textColor = this.getContrastTextColor(waveColor);
         
         const extremumTime = this.calculateTimeFromXCoordinate(wave, x, day, layerKey);
         const timeString = this.formatExtremumTime(extremumTime);
+        const displayX = this._mapLabelDisplayX(x, window.appState.graphWidth);
+        const visualBand = this._verticalLabelBandForFlip(logicalBand);
         
         const labelElement = document.createElement('div');
-        labelElement.className =
-            layerKey === 'b'
-                ? `wave-label vertical ${position} wave-label--person-b`
-                : `wave-label vertical ${position}`;
         labelElement.id = `waveLabel${labelId}`;
         labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.position = position;
         labelElement.dataset.labelType = 'vertical';
         labelElement.dataset.waveLayer = layerKey;
+        labelElement.dataset.logicalBand = logicalBand;
         labelElement.dataset.refX = String(x);
         labelElement.dataset.extremumTime = extremumTime.getTime();
         
         labelElement.style.position = 'absolute';
-        labelElement.style.left = `${x}px`;
+        labelElement.style.left = `${displayX}px`;
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
@@ -1604,35 +1779,9 @@ class WavesManager {
         text.textContent = timeString;
         text.style.textAlign = 'center';
         
-        const arrow = document.createElement('div');
-        arrow.className = 'wave-label-arrow';
-        arrow.style.position = 'absolute';
-        arrow.style.width = '0';
-        arrow.style.height = '0';
-        arrow.style.borderStyle = 'solid';
-        arrow.style.zIndex = '1';
-        
-        if (position === 'top') {
-            arrow.style.bottom = '-6px';
-            arrow.style.left = '50%';
-            arrow.style.transform = 'translateX(-50%)';
-            arrow.style.borderWidth = '6px 4px 0 4px';
-            arrow.style.borderColor = `${waveColor} transparent transparent transparent`;
-            labelElement.style.top = '0';
-            labelElement.style.marginTop = '5px';
-        } else {
-            arrow.style.top = '-6px';
-            arrow.style.left = '50%';
-            arrow.style.transform = 'translateX(-50%)';
-            arrow.style.borderWidth = '0 4px 6px 4px';
-            arrow.style.borderColor = `transparent transparent ${waveColor} transparent`;
-            labelElement.style.bottom = '0';
-            labelElement.style.marginBottom = '5px';
-        }
-        
         labelElement.appendChild(text);
-        labelElement.appendChild(arrow);
         container.appendChild(labelElement);
+        this._syncVerticalLabelBandGeometry(labelElement, visualBand, waveColor);
         
         labelElement.addEventListener('click', (e) => {
             e.stopPropagation();

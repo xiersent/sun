@@ -297,8 +297,8 @@
                     <button class="ui-btn" data-action="toggleEquilibrium">Эквил.</button>
                     <button class="ui-btn" data-action="toggleWaveIntersections">Пересечения</button>
                     <button class="ui-btn" data-action="toggleGraphGrayMode">Цвет</button>
-                    <button class="ui-btn" data-action="flipH">↔</button>
-                    <button class="ui-btn" data-action="flipV">↕</button>
+                    <button type="button" class="ui-btn" id="btnFlipH" data-action="flipH" aria-pressed="false" title="Отразить волны по горизонтали">↔</button>
+                    <button type="button" class="ui-btn" id="btnFlipV" data-action="flipV" aria-pressed="false" title="Отразить волны по вертикали">↕</button>
                     <button class="ui-btn" data-action="rotateL">↶</button>
                     <button class="ui-btn" data-action="rotateR">↷</button>
                     <button class="ui-btn" data-action="resetTransform">⟲</button>
@@ -325,6 +325,9 @@
                         <div class="axis y-axis"></div>
                         <div class="center-date-label" id="centerDateLabel"></div>
                         <div class="zoom-overlay" id="zoomOverlay"></div>
+                        <div id="wavesTransformLayer" class="waves-transform-layer">
+                            <div id="wavesMount" class="waves-mount"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="wave-labels-container" id="waveLabelsContainer">
@@ -438,6 +441,7 @@
     <script src="modules/summaryManager.js"></script>
     <script src="modules/templates.js"></script>
     <script src="modules/timeBarManager.js"></script>
+    <script src="modules/wavesTransformLayer.js"></script>
     <script src="modules/uiManager.js"></script>
     <script src="modules/unifiedListManager.js"></script>
     <script src="modules/waves.js"></script>

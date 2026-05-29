@@ -14,7 +14,7 @@ class AppCore {
     cacheElements() {
         const ids = [
             'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
-            'graphContainer', 'graphElement', 'centerDateLabel',
+            'graphContainer', 'graphElement', 'wavesTransformLayer', 'wavesMount', 'centerDateLabel',
             'dateListForDates', 'wavesList',
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
             'dbImportStatus', 'intersectionResults', 'intersectionStats',
@@ -99,6 +99,10 @@ class AppCore {
             __lp && __lp.phaseStart('appCore_waves_init');
             await window.waves.init();
             __lp && __lp.phaseEnd('appCore_waves_init');
+        }
+
+        if (window.wavesTransformLayer && window.wavesTransformLayer.applyFromAppState) {
+            window.wavesTransformLayer.applyFromAppState();
         }
 
         if (window.grid && window.grid.createGrid) {

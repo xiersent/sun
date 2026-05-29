@@ -8,12 +8,76 @@ class GridManager {
     }
     
     calculateGridPosition(offset) {
-        const pixelPosition = offset * window.appState.config.squareSize;
-        
+        let displayOffset = offset;
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapGridDayOffset) {
+            displayOffset = window.wavesTransformLayer.mapGridDayOffset(offset);
+        }
+        const pixelPosition = displayOffset * window.appState.config.squareSize;
+
         return {
             actualOffset: offset,
             pixelPosition: pixelPosition
         };
+    }
+
+    _isGridFlipY() {
+        return (
+            window.wavesTransformLayer &&
+            window.wavesTransformLayer.isScaleYFlippedForGrid &&
+            window.wavesTransformLayer.isScaleYFlippedForGrid()
+        );
+    }
+
+    /** Перестроить Y-подписи/горизонтальные линии (flipV) и позиции дат/вертикалей (flipH). */
+    applyFlipState() {
+        if (!window.appState.hasActivePerson()) {
+            return;
+        }
+        this._ensureGridContainerRefs();
+
+        if (this.staticElementsContainer) {
+            this.staticElementsContainer
+                .querySelectorAll('.grid-line.x, .labels.y-labels')
+                .forEach((el) => el.remove());
+            this.createHorizontalGridLines();
+            this.createYAxisLabels();
+            this.staticElementsContainer.style.transformOrigin = '50% 50%';
+            this.staticElementsContainer.style.transform = '';
+        }
+
+        this._applyGridHorizontalMirrorPositions();
+    }
+
+    _ensureGridContainerRefs() {
+        if (!this.gridContainer) {
+            this.gridContainer = document.querySelector('.grid-absolute-container');
+        }
+        if (!this.staticElementsContainer) {
+            this.staticElementsContainer = document.querySelector('.grid-static-container');
+        }
+    }
+
+    _applyGridHorizontalMirrorPositions() {
+        this._ensureGridContainerRefs();
+        if (!this.gridContainer) {
+            return;
+        }
+        const applyOffset = (el, offset) => {
+            const positionData = this.calculateGridPosition(offset);
+            el.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+        };
+        this.gridContainer.querySelectorAll('[data-day-offset]').forEach((el) => {
+            const offset = parseInt(el.getAttribute('data-day-offset'), 10);
+            if (!Number.isNaN(offset)) {
+                applyOffset(el, offset);
+            }
+        });
+        this.gridContainer.querySelectorAll('.grid-wrapper[data-day-offset]').forEach((wrapper) => {
+            const offset = parseInt(wrapper.getAttribute('data-day-offset'), 10);
+            if (!Number.isNaN(offset)) {
+                applyOffset(wrapper, offset);
+            }
+        });
     }
 
     /** Подписи дат по краям видимой сетки: −12…+13 при 24 клетках (край справа при конце дня). */
@@ -81,6 +145,7 @@ class GridManager {
 		
 		this.updateGridNotesHighlight();
         this._lastGridLayoutSignature = this._getGridLayoutSignature();
+        this.applyFlipState();
 	}
 
     _getGridLayoutSignature() {
@@ -219,27 +284,33 @@ class GridManager {
     
 	createHorizontalGridLines() {
 		if (!this.staticElementsContainer) return;
-		
-		const halfSquaresY = Math.floor(window.appState.config.graphHeight / window.appState.config.squareSize / 2);
+
+		const flipY = this._isGridFlipY();
+		const sq = window.appState.config.squareSize;
+		const halfSquaresY = Math.floor(window.appState.config.graphHeight / sq / 2);
 		for (let i = 1; i < halfSquaresY; i++) {
 			const topLine = document.createElement('div');
 			topLine.className = 'grid-line x';
 			topLine.style.position = 'absolute';
 			topLine.style.width = '100%';
 			topLine.style.height = '1px';
-			topLine.style.bottom = `calc(50% + ${i * window.appState.config.squareSize}px)`;
+			topLine.style.bottom = flipY
+				? `calc(50% - ${i * sq}px)`
+				: `calc(50% + ${i * sq}px)`;
 			topLine.style.left = '0';
 			topLine.style.zIndex = '1';
-			
+
 			const bottomLine = document.createElement('div');
 			bottomLine.className = 'grid-line x';
 			bottomLine.style.position = 'absolute';
 			bottomLine.style.width = '100%';
 			bottomLine.style.height = '1px';
-			bottomLine.style.bottom = `calc(50% - ${i * window.appState.config.squareSize}px)`;
+			bottomLine.style.bottom = flipY
+				? `calc(50% + ${i * sq}px)`
+				: `calc(50% - ${i * sq}px)`;
 			bottomLine.style.left = '0';
 			bottomLine.style.zIndex = '1';
-			
+
 			this.staticElementsContainer.appendChild(topLine);
 			this.staticElementsContainer.appendChild(bottomLine);
 		}
@@ -247,7 +318,10 @@ class GridManager {
     
 	createYAxisLabels() {
 		if (!this.staticElementsContainer) return;
-		
+
+		const flipY = this._isGridFlipY();
+		const sq = window.appState.config.squareSize;
+
 		const zeroLabel = document.createElement('div');
 		zeroLabel.className = 'labels y-labels';
 		zeroLabel.style.position = 'absolute';
@@ -256,24 +330,28 @@ class GridManager {
 		zeroLabel.style.left = '10px';
 		zeroLabel.textContent = '0';
 		this.staticElementsContainer.appendChild(zeroLabel);
-		
+
 		for (let i = 1; i <= 5; i++) {
 			const labelTop = document.createElement('div');
 			labelTop.className = 'labels y-labels';
 			labelTop.style.position = 'absolute';
-			labelTop.style.top = `calc(50% - ${i * window.appState.config.squareSize}px)`;
+			labelTop.style.top = flipY
+				? `calc(50% + ${i * sq}px)`
+				: `calc(50% - ${i * sq}px)`;
 			labelTop.style.transform = 'translateY(-50%)';
 			labelTop.style.left = '10px';
-			labelTop.textContent = String(i);
+			labelTop.textContent = flipY ? String(-i) : String(i);
 			this.staticElementsContainer.appendChild(labelTop);
-			
+
 			const labelBottom = document.createElement('div');
 			labelBottom.className = 'labels y-labels';
 			labelBottom.style.position = 'absolute';
-			labelBottom.style.top = `calc(50% + ${i * window.appState.config.squareSize}px)`;
+			labelBottom.style.top = flipY
+				? `calc(50% - ${i * sq}px)`
+				: `calc(50% + ${i * sq}px)`;
 			labelBottom.style.transform = 'translateY(-50%)';
 			labelBottom.style.left = '10px';
-			labelBottom.textContent = String(-i);
+			labelBottom.textContent = flipY ? String(i) : String(-i);
 			this.staticElementsContainer.appendChild(labelBottom);
 		}
 	}

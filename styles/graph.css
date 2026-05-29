@@ -3,6 +3,10 @@
 .graph-viewport{position: relative; width: var(--gw); align-self: center; flex-shrink: 0;}
 /* Graph container */
 .graph-container{position: relative; width: var(--gw); height: var(--gh); background-color: #fff; outline: 1px solid var(--clg); overflow: hidden;}
+
+/* Слой волн внутри #graphElement: transform только здесь; обрезка — overflow у .graph-container */
+.waves-transform-layer{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8; transform-origin: 50% 50%;}
+.waves-mount{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden;}
 .graph-container.graph-gray-mode{filter: grayscale(1);}
 .graph-container.graph-gray-mode .wave-label{filter: grayscale(1) !important;}
 .graph-container.graph-gray-mode .wave-axis-x-point{filter: grayscale(1) !important;}
@@ -38,14 +42,12 @@
 .wave-label-text{white-space: nowrap; font-weight: 400; font-size: 11px; position: relative; z-index: 2;}
 .wave-label-arrow{position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
 .wave-labels-container .wave-label-arrow{top: 50%; transform: translateY(-50%);}
-.wave-labels-left .wave-label-arrow{right: -6px; border-width: 4px 0 4px 6px; border-color: transparent transparent transparent var(--wave-label-fill, #666);}
-.wave-labels-right .wave-label-arrow{left: -6px; border-width: 4px 6px 4px 0; border-color: transparent var(--wave-label-fill, #666) transparent transparent;}
+/* Горизонтальные стрелки — waves.js _syncHorizontalLabelSideGeometry */
+/* Вертикальные стрелки: позиция и направление — waves.js _syncVerticalLabelBandGeometry (по полосе top/bottom) */
 .wave-labels-vertical-container .wave-label-arrow{left: 50%; transform: translateX(-50%);}
-.wave-labels-top .wave-label-arrow{bottom: -6px; border-width: 6px 4px 0 4px; border-color: var(--wave-label-fill, #666) transparent transparent transparent;}
-.wave-labels-bottom .wave-label-arrow{top: -6px; border-width: 0 4px 6px 4px; border-color: transparent transparent var(--wave-label-fill, #666) transparent;}
 
 /* График и оси */
-.graph{position: relative; width: 100%; height: 100%; transform: scaleX(1) scaleY(1);}
+.graph{position: relative; width: 100%; height: 100%;}
 .axis{position: absolute; background-color: #c9c9c9; z-index: 5; cursor: pointer; pointer-events: none;}
 .x-axis{width: 100%; height: 1px; bottom: 50%; left: 0;}
 .y-axis{width: 1px; height: 100%; left: 50%; top: 0;}
