@@ -786,20 +786,25 @@ class WavesManager {
                     missingContainerButVisible: waveLoopNoContainer,
                     waveCount: window.appState.data.waves.length
                 });
-            
-            const labelOpts = {
-                ...opts,
-                forceWaveLabels: !!(opts.forceWaveLabels || light)
-            };
-            this.updateAllWaveLabels(labelOpts);
-
-            const endVTime = d && d.t('waves.updatePosition.verticalWaveLabelsTime', {});
-            this.updateVerticalWaveLabelsTime();
-            endVTime && endVTime({});
 
             const endInter = d && d.t('waves.updatePosition.renderWaveIntersectionPoints', {});
             this.renderWaveIntersectionPoints();
             endInter && endInter({});
+
+            const endAxis = d && d.t('waves.updatePosition.axisXPoints', {});
+            this.updateAxisXIntersectionPoints();
+            endAxis && endAxis({});
+
+            const labelOpts = {
+                ...opts,
+                forceWaveLabels: !!(opts.forceWaveLabels || light)
+            };
+            this.updateHorizontalWaveLabels(labelOpts);
+            this.updateVerticalWaveLabels();
+
+            const endVTime = d && d.t('waves.updatePosition.verticalWaveLabelsTime', {});
+            this.updateVerticalWaveLabelsTime();
+            endVTime && endVTime({});
         } finally {
             this._enabledWaveIdSetForFrame = null;
             endTotal &&
@@ -870,6 +875,138 @@ class WavesManager {
             end && end({});
         }
     }
+
+    _horizontalWaveLabelDomId(waveId, side, layerKey) {
+        const suffix = layerKey === 'b' ? '-person-b' : '';
+        return `waveLabel${waveId}-${side}${suffix}`;
+    }
+
+    _verticalWaveLabelDomId(waveId, position, index, layerKey) {
+        const suffix = layerKey === 'b' ? '-person-b' : '';
+        return `waveLabel${waveId}-${position}-${index}${suffix}`;
+    }
+
+    _axisXPointKey(waveId, layerKey, x) {
+        return `${String(waveId)}-${layerKey}-${Math.round(x * 100)}`;
+    }
+
+    _removeStaleLabelElements(container, selector, activeDomIds) {
+        container.querySelectorAll(selector).forEach((el) => {
+            if (activeDomIds.has(el.id)) {
+                return;
+            }
+            if (el.id && el.id.startsWith('waveLabel')) {
+                const cacheKey = el.id.slice('waveLabel'.length);
+                delete this.waveLabelElements[cacheKey];
+            }
+            el.remove();
+        });
+    }
+
+    _syncHorizontalWaveLabelAppearance(el, wave, effDay) {
+        const state = this.calculateWaveStateAtDay(wave, effDay);
+        const isExtremum =
+            this.isExtremumHighlightEnabled() && (state >= 4 || state <= -4);
+        this._applyLabelColors(el, wave, isExtremum);
+    }
+
+    _syncVerticalWaveLabelContent(el, wave, x, effDay, layerKey) {
+        el.style.left = `${x}px`;
+        el.dataset.refX = String(x);
+        const extremumTime = this.calculateTimeFromXCoordinate(wave, x, effDay, layerKey);
+        el.dataset.extremumTime = String(extremumTime.getTime());
+        const textEl = el.querySelector('.wave-label-text');
+        if (textEl) {
+            textEl.textContent = this.formatExtremumTime(extremumTime);
+        }
+        const state = this.calculateWaveStateAtDay(wave, effDay);
+        const isExtremum =
+            this.isExtremumHighlightEnabled() && (state >= 4 || state <= -4);
+        this._applyLabelColors(el, wave, isExtremum);
+    }
+
+    _syncAxisXPointPosition(el, x, refDay) {
+        el.style.transition = 'none';
+        el.style.left = `${x}px`;
+        el.style.transition = 'transform 0.2s, box-shadow 0.2s';
+        el.dataset.x = String(x);
+        if (refDay !== undefined && refDay !== null) {
+            el.dataset.refDay = String(refDay);
+        }
+    }
+
+    _ensureWaveIntersectionPointsContainer() {
+        let container = document.querySelector('.wave-intersection-points');
+        if (container) {
+            return container;
+        }
+        container = document.createElement('div');
+        container.className = 'wave-intersection-points';
+        container.style.position = 'absolute';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.zIndex = '9';
+        container.style.top = '0';
+        container.style.left = '0';
+        const graphElement = document.getElementById('graphElement');
+        if (graphElement) {
+            graphElement.appendChild(container);
+        }
+        return container;
+    }
+
+    _buildWaveIntersectionPointTitle(point) {
+        const timeStr = this.formatExtremumTime(point.time);
+        const timeBefore = new Date(point.time.getTime() - 2.5 * 60 * 1000);
+        const timeAfter = new Date(point.time.getTime() + 2.5 * 60 * 1000);
+        let titleText = `${point.wavePair}\n${timeStr}`;
+        titleText += `\n---`;
+        titleText += `\n${this.formatExtremumTime(timeBefore)} (началось)`;
+        titleText += `\n${this.formatExtremumTime(timeAfter)} (закончилось)`;
+        return titleText;
+    }
+
+    _createWaveIntersectionPointElement(point) {
+        const pointElement = document.createElement('div');
+        pointElement.className = 'wave-intersection-point';
+        pointElement.dataset.time = point.time.toISOString();
+        pointElement.dataset.wavePair = point.wavePair;
+        pointElement.title = this._buildWaveIntersectionPointTitle(point);
+        pointElement.style.position = 'absolute';
+        pointElement.style.left = `${point.x}px`;
+        pointElement.style.top = `${point.y}px`;
+        pointElement.style.width = '8px';
+        pointElement.style.height = '8px';
+        pointElement.style.borderRadius = '50%';
+        pointElement.style.backgroundColor = '#ff0000';
+        pointElement.style.border = '2px solid #fff';
+        pointElement.style.cursor = 'pointer';
+        pointElement.style.pointerEvents = 'auto';
+        pointElement.style.zIndex = '10';
+        pointElement.style.opacity = '0.9';
+        pointElement.style.transform = 'translate(-50%, -50%)';
+
+        pointElement.addEventListener('mouseenter', (e) => {
+            e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            e.target.style.zIndex = '15';
+        });
+
+        pointElement.addEventListener('mouseleave', (e) => {
+            e.target.style.transform = 'translate(-50%, -50%)';
+            e.target.style.zIndex = '10';
+        });
+
+        pointElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const iso = e.currentTarget.dataset.time;
+            if (iso) {
+                this.navigateToIntersectionTime(new Date(iso));
+            }
+        });
+
+        return pointElement;
+    }
     
     updateHorizontalWaveLabels(opts = {}) {
         const d = __waveDbg();
@@ -897,9 +1034,10 @@ class WavesManager {
         
         const end = d && d.t('waves.updateHorizontalWaveLabels', { forceWaveLabels: !!opts.forceWaveLabels });
         try {
-            leftContainer.innerHTML = '';
-            rightContainer.innerHTML = '';
-            
+            const activeDomIds = new Set();
+            const graphH = window.appState.config.graphHeight;
+            const graphW = window.appState.graphWidth;
+
             window.appState.data.waves.forEach((wave) => {
                 if (!this.waveNeedsGraphContainer(wave.id)) {
                     return;
@@ -907,18 +1045,45 @@ class WavesManager {
 
                 for (const layer of this._visibleLayersForWave(wave)) {
                     const effDay = layer.day;
-                    const leftY = this.calculateWaveYAtXForDay(wave, 0, effDay);
-                    const rightY = this.calculateWaveYAtXForDay(wave, window.appState.graphWidth, effDay);
+                    const sides = [
+                        { side: 'left', y: this.calculateWaveYAtXForDay(wave, 0, effDay) },
+                        {
+                            side: 'right',
+                            y: this.calculateWaveYAtXForDay(wave, graphW, effDay)
+                        }
+                    ];
 
-                    if (leftY >= 0 && leftY <= window.appState.config.graphHeight) {
-                        this.createHorizontalWaveLabel(wave, leftY, 'left', leftContainer, layer.key);
-                    }
-
-                    if (rightY >= 0 && rightY <= window.appState.config.graphHeight) {
-                        this.createHorizontalWaveLabel(wave, rightY, 'right', rightContainer, layer.key);
-                    }
+                    sides.forEach(({ side, y }) => {
+                        if (y < 0 || y > graphH) {
+                            return;
+                        }
+                        const domId = this._horizontalWaveLabelDomId(wave.id, side, layer.key);
+                        activeDomIds.add(domId);
+                        const container = side === 'left' ? leftContainer : rightContainer;
+                        let el = document.getElementById(domId);
+                        if (!el) {
+                            this.createHorizontalWaveLabel(wave, y, side, container, layer.key);
+                        } else {
+                            if (el.parentNode !== container) {
+                                container.appendChild(el);
+                            }
+                            el.style.top = `${y}px`;
+                            this._syncHorizontalWaveLabelAppearance(el, wave, effDay);
+                        }
+                    });
                 }
             });
+
+            this._removeStaleLabelElements(
+                leftContainer,
+                '.wave-label.horizontal',
+                activeDomIds
+            );
+            this._removeStaleLabelElements(
+                rightContainer,
+                '.wave-label.horizontal',
+                activeDomIds
+            );
         } finally {
             end &&
                 end({
@@ -940,9 +1105,8 @@ class WavesManager {
         
         const end = d && d.t('waves.updateVerticalWaveLabels', {});
         try {
-            topContainer.innerHTML = '';
-            bottomContainer.innerHTML = '';
-            
+            const activeDomIds = new Set();
+
             window.appState.data.waves.forEach((wave) => {
                 if (!this.waveNeedsGraphContainer(wave.id)) {
                     return;
@@ -950,33 +1114,45 @@ class WavesManager {
 
                 for (const layer of this._visibleLayersForWave(wave)) {
                     const effDay = layer.day;
-                    const topXs = this.findAllExtremumXs(wave, 'top', effDay);
-                    topXs.forEach((topX, idx) => {
-                        this.createVerticalWaveLabel(
-                            wave,
-                            topX,
-                            'top',
-                            topContainer,
-                            idx,
-                            layer.key,
-                            effDay
-                        );
-                    });
+                    const bands = [
+                        { position: 'top', xs: this.findAllExtremumXs(wave, 'top', effDay) },
+                        { position: 'bottom', xs: this.findAllExtremumXs(wave, 'bottom', effDay) }
+                    ];
 
-                    const bottomXs = this.findAllExtremumXs(wave, 'bottom', effDay);
-                    bottomXs.forEach((bottomX, idx) => {
-                        this.createVerticalWaveLabel(
-                            wave,
-                            bottomX,
-                            'bottom',
-                            bottomContainer,
-                            idx,
-                            layer.key,
-                            effDay
-                        );
+                    bands.forEach(({ position, xs }) => {
+                        const container = position === 'top' ? topContainer : bottomContainer;
+                        xs.forEach((x, idx) => {
+                            const domId = this._verticalWaveLabelDomId(
+                                wave.id,
+                                position,
+                                idx,
+                                layer.key
+                            );
+                            activeDomIds.add(domId);
+                            let el = document.getElementById(domId);
+                            if (!el) {
+                                this.createVerticalWaveLabel(
+                                    wave,
+                                    x,
+                                    position,
+                                    container,
+                                    idx,
+                                    layer.key,
+                                    effDay
+                                );
+                            } else {
+                                if (el.parentNode !== container) {
+                                    container.appendChild(el);
+                                }
+                                this._syncVerticalWaveLabelContent(el, wave, x, effDay, layer.key);
+                            }
+                        });
                     });
                 }
             });
+
+            this._removeStaleLabelElements(topContainer, '.wave-label.vertical', activeDomIds);
+            this._removeStaleLabelElements(bottomContainer, '.wave-label.vertical', activeDomIds);
         } finally {
             end &&
                 end({
@@ -1015,8 +1191,8 @@ class WavesManager {
         const end = d && d.t('waves.updateAxisXIntersectionPoints', {});
         let pointCount = 0;
         try {
-            axisXPointsContainer.innerHTML = '';
-            
+            const activeKeys = new Set();
+
             window.appState.data.waves.forEach((wave) => {
                 if (!this.waveNeedsGraphContainer(wave.id)) {
                     return;
@@ -1025,9 +1201,30 @@ class WavesManager {
                 for (const layer of this._visibleLayersForWave(wave)) {
                     const intersectionPoints = this.findAxisXIntersectionPoints(wave, layer.day);
                     intersectionPoints.forEach((x) => {
-                        this.createAxisXPoint(wave, x, axisXPointsContainer, layer.day, layer.key);
+                        const key = this._axisXPointKey(wave.id, layer.key, x);
+                        activeKeys.add(key);
+                        let point = axisXPointsContainer.querySelector(
+                            `[data-axis-key="${CSS.escape(key)}"]`
+                        );
+                        if (!point) {
+                            point = this.createAxisXPoint(
+                                wave,
+                                x,
+                                axisXPointsContainer,
+                                layer.day,
+                                layer.key
+                            );
+                        } else {
+                            this._syncAxisXPointPosition(point, x, layer.day);
+                        }
                         pointCount++;
                     });
+                }
+            });
+
+            axisXPointsContainer.querySelectorAll('.wave-axis-x-point').forEach((el) => {
+                if (!activeKeys.has(el.dataset.axisKey)) {
+                    el.remove();
                 }
             });
         } finally {
@@ -1088,6 +1285,7 @@ class WavesManager {
         point.dataset.waveId = wave.id;
         point.dataset.x = x;
         point.dataset.waveLayer = layerKey;
+        point.dataset.axisKey = this._axisXPointKey(wave.id, layerKey, x);
         if (refDay !== undefined && refDay !== null) {
             point.dataset.refDay = String(refDay);
         }
@@ -1104,7 +1302,7 @@ class WavesManager {
         point.style.cursor = 'pointer';
         point.style.pointerEvents = 'auto';
         point.style.zIndex = '9';
-        point.style.transition = 'all 0.2s';
+        point.style.transition = 'transform 0.2s, box-shadow 0.2s';
         
         point.title =
             layerKey === 'b'
@@ -2287,9 +2485,7 @@ class WavesManager {
             d && d.log('waves.renderWaveIntersectionPoints.skip', { reason: 'noActivePerson' });
             return;
         }
-        
-        this.removeWaveIntersectionPoints();
-        
+
         const endCalc = d && d.t('waves.renderWaveIntersectionPoints.calculateAllWaveIntersections', {});
         const intersections = this.calculateAllWaveIntersections();
         endCalc &&
@@ -2297,81 +2493,43 @@ class WavesManager {
                 intersectionPairs: intersections.length,
                 activeWaves: this.getActiveWaves().length
             });
-        
+
         const maxPointsToShow = 50;
         const pointsToShow = intersections.slice(0, maxPointsToShow);
-        
-        const endDom = d && d.t('waves.renderWaveIntersectionPoints.buildDom', { pointsToShow: pointsToShow.length });
-        const container = document.createElement('div');
-        container.className = 'wave-intersection-points';
-        container.style.position = 'absolute';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.pointerEvents = 'none';
-        container.style.zIndex = '9';
-        container.style.top = '0';
-        container.style.left = '0';
-        
-        pointsToShow.forEach(point => {
-            const pointElement = document.createElement('div');
-            pointElement.className = 'wave-intersection-point';
-            pointElement.dataset.time = point.time.toISOString();
-            pointElement.dataset.wavePair = point.wavePair;
-            
-            const timeStr = this.formatExtremumTime(point.time);
-            
-            const timeBefore = new Date(point.time.getTime() - 2.5 * 60 * 1000);
-            const timeAfter = new Date(point.time.getTime() + 2.5 * 60 * 1000);
-            
-            const timeBeforeStr = this.formatExtremumTime(timeBefore);
-            const timeAfterStr = this.formatExtremumTime(timeAfter);
-            
-            let titleText = `${point.wavePair}\n${timeStr}`;
-            titleText += `\n---`;
-            titleText += `\n${timeBeforeStr} (началось)`;
-            titleText += `\n${timeAfterStr} (закончилось)`;
-            
-            pointElement.title = titleText;
-            
-            pointElement.style.position = 'absolute';
-            pointElement.style.left = `${point.x}px`;
-            pointElement.style.top = `${point.y}px`;
-            pointElement.style.width = '8px';
-            pointElement.style.height = '8px';
-            pointElement.style.borderRadius = '50%';
-            pointElement.style.backgroundColor = '#ff0000';
-            pointElement.style.border = '2px solid #fff';
-            pointElement.style.cursor = 'pointer';
-            pointElement.style.pointerEvents = 'auto';
-            pointElement.style.zIndex = '10';
-            pointElement.style.opacity = '0.9';
-            pointElement.style.transform = 'translate(-50%, -50%)';
-            
-            pointElement.addEventListener('mouseenter', (e) => {
-                e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
-                e.target.style.zIndex = '15';
-            });
-            
-            pointElement.addEventListener('mouseleave', (e) => {
-                e.target.style.transform = 'translate(-50%, -50%)';
-                e.target.style.zIndex = '10';
-            });
-            
-            pointElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.navigateToIntersectionTime(point.time);
-            });
-            
-            container.appendChild(pointElement);
+
+        const endDom = d && d.t('waves.renderWaveIntersectionPoints.buildDom', {
+            pointsToShow: pointsToShow.length
         });
-        
-        const graphElement = document.getElementById('graphElement');
-        if (graphElement) {
-            graphElement.appendChild(container);
-        }
-        
+        const container = this._ensureWaveIntersectionPointsContainer();
+        const activeKeys = new Set();
+
+        pointsToShow.forEach((point, index) => {
+            const key = `i${index}`;
+            activeKeys.add(key);
+            let pointElement = container.querySelector(`[data-intersection-key="${key}"]`);
+            if (!pointElement) {
+                pointElement = this._createWaveIntersectionPointElement(point);
+                pointElement.dataset.intersectionKey = key;
+                container.appendChild(pointElement);
+            } else {
+                pointElement.style.transition = 'none';
+                pointElement.style.left = `${point.x}px`;
+                pointElement.style.top = `${point.y}px`;
+                pointElement.style.transition = 'transform 0.2s, box-shadow 0.2s';
+                pointElement.dataset.time = point.time.toISOString();
+                pointElement.dataset.wavePair = point.wavePair;
+                pointElement.title = this._buildWaveIntersectionPointTitle(point);
+            }
+        });
+
+        container.querySelectorAll('.wave-intersection-point').forEach((el) => {
+            if (!activeKeys.has(el.dataset.intersectionKey)) {
+                el.remove();
+            }
+        });
+
         endDom && endDom({});
-        
+
         return container;
     }
     

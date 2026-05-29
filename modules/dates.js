@@ -4,9 +4,6 @@ class DatesManager {
         this.elements = {};
         /** Какой режим использовался в последнем recalculateCurrentDay (для согласованности с панелями). */
         this.lastRecalculateUsedExactTime = true;
-        /** Накопленный сдвиг по дням до ближайшего RAF (быстрая навигация). */
-        this._navDayPendingDelta = 0;
-        this._navDayRaf = null;
         /** Таймер «полного» обновления после паузы в навигации. */
         this._navDaySettleTimer = null;
         this._navDaySettleMs = 180;
@@ -529,39 +526,6 @@ class DatesManager {
     
 
     navigateDay(delta) {
-        this._navDayPendingDelta += delta;
-        this._scheduleDayNavigationFrame();
-        this._scheduleDayNavigationSettle();
-    }
-
-    _scheduleDayNavigationFrame() {
-        if (this._navDayRaf != null) {
-            return;
-        }
-        this._navDayRaf = requestAnimationFrame(() => {
-            this._navDayRaf = null;
-            this._applyDayNavigationFrame();
-        });
-    }
-
-    _scheduleDayNavigationSettle() {
-        if (this._navDaySettleTimer != null) {
-            clearTimeout(this._navDaySettleTimer);
-        }
-        this._navDaySettleTimer = setTimeout(() => {
-            this._navDaySettleTimer = null;
-            this._flushDayNavigationSettled();
-        }, this._navDaySettleMs);
-    }
-
-    /** Быстрый кадр: сдвиг даты, сетка и волны без тяжёлых пересчётов. */
-    _applyDayNavigationFrame() {
-        const delta = this._navDayPendingDelta;
-        if (delta === 0) {
-            return;
-        }
-        this._navDayPendingDelta = 0;
-
         const newDate = new Date(window.appState.currentDate);
         newDate.setDate(newDate.getDate() + delta);
 
@@ -590,18 +554,21 @@ class DatesManager {
 
         this.updateTodayButton();
         this.updateDateTimeInputs();
+        this._scheduleDayNavigationSettle();
     }
 
-    /** После паузы: заметки сетки, выноски, пересечения, сводка. */
-    _flushDayNavigationSettled() {
-        if (this._navDayPendingDelta !== 0) {
-            if (this._navDayRaf != null) {
-                cancelAnimationFrame(this._navDayRaf);
-                this._navDayRaf = null;
-            }
-            this._applyDayNavigationFrame();
+    _scheduleDayNavigationSettle() {
+        if (this._navDaySettleTimer != null) {
+            clearTimeout(this._navDaySettleTimer);
         }
+        this._navDaySettleTimer = setTimeout(() => {
+            this._navDaySettleTimer = null;
+            this._flushDayNavigationSettled();
+        }, this._navDaySettleMs);
+    }
 
+    /** После паузы: заметки сетки, подсветка экстремумов, сводка. */
+    _flushDayNavigationSettled() {
         window.appState.isProgrammaticDateChange = false;
 
         if (window.grid && window.grid.refreshForCurrentDay) {

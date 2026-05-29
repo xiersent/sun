@@ -1068,6 +1068,10 @@ class AppCore {
         
         document.addEventListener('keydown', (e) => {
             if (!window.dates) return;
+
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+            }
             
             switch(e.key) {
                 case 'ArrowLeft': 

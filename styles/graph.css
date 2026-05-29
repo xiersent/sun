@@ -23,7 +23,7 @@
 /* Точки пересечения с осью X */
 .wave-axis-x-points{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8;}
 .wave-axis-x-points.hidden{display: none !important;}
-.wave-axis-x-point{position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #fff; box-shadow: 0 0 2px rgba(0,0,0,0.3); cursor: pointer; pointer-events: auto; z-index: 9; transition: all 0.2s; transform: translate(-50%, -50%);}
+.wave-axis-x-point{position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #fff; box-shadow: 0 0 2px rgba(0,0,0,0.3); cursor: pointer; pointer-events: auto; z-index: 9; transition: transform 0.2s, box-shadow 0.2s; transform: translate(-50%, -50%);}
 .wave-axis-x-point:hover{transform: translate(-50%, -50%) scale(1.3); z-index: 10; box-shadow: 0 0 4px rgba(0,0,0,0.5);}
 
 /* Общие стили выносок */
@@ -87,7 +87,7 @@ body.graph-gray-mode .wave-label, body.graph-gray-mode .extremum-label, body.gra
 
 /* Точки пересечения волн */
 .wave-intersection-points{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9;}
-.wave-intersection-point{position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 2px solid #fff; background-color: #ff0000; cursor: pointer; pointer-events: auto; z-index: 10; transform: translate(-50%, -50%); transition: all 0.2s; box-shadow: 0 0 3px rgba(0,0,0,0.5);}
+.wave-intersection-point{position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 2px solid #fff; background-color: #ff0000; cursor: pointer; pointer-events: auto; z-index: 10; transform: translate(-50%, -50%); transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 3px rgba(0,0,0,0.5);}
 .wave-intersection-point:hover{transform: translate(-50%, -50%) scale(1.3); z-index: 11; box-shadow: 0 0 6px rgba(255,0,0,0.7);}
 
 /* ВЫНОСКИ ЭКСТРЕМУМОВ - ОБЪЕДИНЕНЫ из 4 определений (включая ховер) */
