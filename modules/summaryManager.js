@@ -131,20 +131,27 @@ class SummaryManager {
                 return this._currentDate;
             },
             set(value) {
-                const oldValue = this._currentDate;
                 this._currentDate = value;
-                
-                if (window.summaryManager && !this.isProgrammaticDateChange) {
-                    window.summaryManager.debouncedUpdate();
+
+                if (!this.isProgrammaticDateChange) {
+                    if (window.summaryManager && window.summaryManager.debouncedUpdate) {
+                        window.summaryManager.debouncedUpdate();
+                    }
+                    if (
+                        window.stateIntersectionManager &&
+                        window.stateIntersectionManager.debouncedUpdate
+                    ) {
+                        window.stateIntersectionManager.debouncedUpdate();
+                    }
                 }
             }
         });
-        
+
         window.appState._currentDate = originalCurrentDate;
-        
+
         this.setupGlobalDateObserver();
     }
-    
+
     setupGlobalDateObserver() {
         const originalCurrentDay = window.appState.currentDay;
         Object.defineProperty(window.appState, 'currentDay', {
@@ -154,15 +161,21 @@ class SummaryManager {
             set(value) {
                 const oldValue = this._currentDay;
                 this._currentDay = value;
-                
-                if (Math.abs(value - oldValue) > 0.001) {
-                    if (window.summaryManager && !this.isProgrammaticDateChange) {
+
+                if (Math.abs(value - oldValue) > 0.001 && !this.isProgrammaticDateChange) {
+                    if (window.summaryManager && window.summaryManager.debouncedUpdate) {
                         window.summaryManager.debouncedUpdate();
+                    }
+                    if (
+                        window.stateIntersectionManager &&
+                        window.stateIntersectionManager.debouncedUpdate
+                    ) {
+                        window.stateIntersectionManager.debouncedUpdate();
                     }
                 }
             }
         });
-        
+
         window.appState._currentDay = originalCurrentDay;
     }
     
@@ -235,7 +248,10 @@ class SummaryManager {
 		waves.forEach(wave => {
 			if (!wave.period || wave.period <= 0) return;
 			
-			const phase = (currentDay % wave.period);
+			const phase =
+				window.waves && typeof window.waves._wavePhaseInPeriod === 'function'
+					? window.waves._wavePhaseInPeriod(wave, currentDay)
+					: (currentDay % wave.period);
 			const normalizedPhase = ((phase / wave.period) * 2 * Math.PI);
 			const waveState = (Math.sin(normalizedPhase) * 5);
 			const difference = Math.abs(waveState - this.currentState);

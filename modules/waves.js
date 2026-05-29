@@ -483,14 +483,27 @@ class WavesManager {
     
     // ========== НОВЫЕ МЕТОДЫ ДЛЯ ПОДСВЕТКИ ЭКСТРЕМУМОВ ==========
     
+    /** Фаза волны в днях с учётом phaseOffsetDays (как на графике). */
+    _wavePhaseInPeriod(wave, effDay) {
+        if (!wave.period || wave.period <= 0) {
+            return 0;
+        }
+        const period = wave.period;
+        const phaseOffset = window.appState.config.phaseOffsetDays || 0;
+        let phase = (effDay + phaseOffset) % period;
+        if (phase < 0) {
+            phase += period;
+        }
+        return phase;
+    }
+
     calculateWaveStateAtDay(wave, currentDay) {
-        if (!wave.period || wave.period <= 0) return 0;
-        
-        const phase = (currentDay % wave.period);
+        if (!wave.period || wave.period <= 0) {
+            return 0;
+        }
+        const phase = this._wavePhaseInPeriod(wave, currentDay);
         const normalizedPhase = (phase / wave.period) * 2 * Math.PI;
-        const waveState = Math.sin(normalizedPhase) * 5;
-        
-        return waveState;
+        return Math.sin(normalizedPhase) * 5;
     }
 
     /**
@@ -498,12 +511,16 @@ class WavesManager {
      * Совпадает со знаком d/dt от sin(фаза)·5 по оси дней.
      */
     calculateWaveDirectionAtDay(wave, currentDay) {
-        if (!wave.period || wave.period <= 0) return 0;
-        const phase = currentDay % wave.period;
+        if (!wave.period || wave.period <= 0) {
+            return 0;
+        }
+        const phase = this._wavePhaseInPeriod(wave, currentDay);
         const normalizedPhase = (phase / wave.period) * 2 * Math.PI;
         const deriv = Math.cos(normalizedPhase);
         const flatEps = 0.08;
-        if (Math.abs(deriv) < flatEps) return 0;
+        if (Math.abs(deriv) < flatEps) {
+            return 0;
+        }
         return deriv > 0 ? 1 : -1;
     }
 
@@ -597,7 +614,7 @@ class WavesManager {
                 const showB = groupOk && this._shouldDrawSecondPersonWave(waveIdStr);
                 const containerVisible = shouldShowA || showB;
 
-                const highlight = !light && this.isExtremumHighlightEnabled();
+                const highlight = this.isExtremumHighlightEnabled();
                 let isExtremumA = false;
                 let isExtremumB = false;
                 if (highlight && shouldShowA) {
@@ -613,20 +630,8 @@ class WavesManager {
                 }
                 if (highlight) {
                     this.setWaveStrokeColor(wave.id, isExtremumA, isExtremumB);
-                }
-
-                if (
-                    !light &&
-                    containerVisible &&
-                    (shouldShowA || (showB && this._getSecondPersonDayOffset() != null))
-                ) {
-                    this.updateWaveLabelsColorForLayers(
-                        wave.id,
-                        shouldShowA,
-                        showB && this._getSecondPersonDayOffset() != null,
-                        isExtremumA,
-                        isExtremumB
-                    );
+                } else {
+                    this.setWaveStrokeColor(wave.id, false, false);
                 }
                 
                 const wavePeriodPixels = window.appState.periods[wave.id] || 

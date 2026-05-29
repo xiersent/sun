@@ -567,15 +567,12 @@ class DatesManager {
         }, this._navDaySettleMs);
     }
 
-    /** После паузы: заметки сетки, подсветка экстремумов, сводка. */
+    /** После паузы: заметки на сетке, сводка, вкладка «Пересечения» (без повторного updatePosition). */
     _flushDayNavigationSettled() {
         window.appState.isProgrammaticDateChange = false;
 
-        if (window.grid && window.grid.refreshForCurrentDay) {
-            window.grid.refreshForCurrentDay();
-        }
-        if (window.waves && window.waves.updatePosition) {
-            window.waves.updatePosition();
+        if (window.grid && window.grid.updateGridNotesHighlight) {
+            window.grid.updateGridNotesHighlight();
         }
 
         if (window.appState && window.appState.saveDebounced) {

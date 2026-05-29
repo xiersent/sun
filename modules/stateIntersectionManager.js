@@ -138,34 +138,11 @@ class StateIntersectionManager {
         return null;
     }
     
-    setupDateObservers() {
-        const originalCurrentDate = window.appState.currentDate;
-        Object.defineProperty(window.appState, 'currentDate', {
-            get() { return this._currentDate; },
-            set(value) {
-                this._currentDate = value;
-                if (window.stateIntersectionManager && !this.isProgrammaticDateChange) {
-                    window.stateIntersectionManager.debouncedUpdate();
-                }
-            }
-        });
-        window.appState._currentDate = originalCurrentDate;
-        
-        const originalCurrentDay = window.appState.currentDay;
-        Object.defineProperty(window.appState, 'currentDay', {
-            get() { return this._currentDay; },
-            set(value) {
-                const prev = this._currentDay;
-                this._currentDay = value;
-                if (Math.abs(value - (prev ?? 0)) > 0.001) {
-                    if (window.stateIntersectionManager && !this.isProgrammaticDateChange) {
-                        window.stateIntersectionManager.debouncedUpdate();
-                    }
-                }
-            }
-        });
-        window.appState._currentDay = originalCurrentDay;
-    }
+    /**
+     * Observers на currentDate/currentDay — в summaryManager.setupStateObservers()
+     * (единый setter для сводки и вкладки «Пересечения»).
+     */
+    setupDateObservers() {}
 
     setupIntersectionDateSelects() {
         const elA = this.elements.intersectionDateSelectA;
