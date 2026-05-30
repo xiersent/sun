@@ -20,39 +20,66 @@ class GridManager {
         };
     }
 
-    _isGridFlipY() {
-        return (
-            window.wavesTransformLayer &&
-            window.wavesTransformLayer.isScaleYFlippedForGrid &&
-            window.wavesTransformLayer.isScaleYFlippedForGrid()
-        );
+    calculateGridYPosition(level) {
+        let displayLevel = Number(level);
+        if (Number.isNaN(displayLevel)) {
+            displayLevel = 0;
+        }
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapGridYLevel) {
+            displayLevel = window.wavesTransformLayer.mapGridYLevel(level);
+        }
+        const sq = window.appState.config.squareSize;
+        return {
+            actualLevel: level,
+            displayLevel,
+            labelTop: `calc(50% - ${displayLevel * sq}px)`,
+            lineBottom: `calc(50% + ${displayLevel * sq}px)`
+        };
     }
 
-    /** Перестроить Y-подписи/горизонтальные линии (flipV) и позиции дат/вертикалей (flipH). */
+    /** flipH → даты, flipV → Y-метки и горизонтальные линии. */
     applyFlipState() {
         if (!window.appState.hasActivePerson()) {
             return;
         }
         this._ensureGridContainerRefs();
-
-        if (this.staticElementsContainer) {
+        if (this.staticElementsContainer && !this.staticElementsContainer.querySelector('[data-y-level]')) {
             this.staticElementsContainer
                 .querySelectorAll('.grid-line.x, .labels.y-labels')
                 .forEach((el) => el.remove());
             this.createHorizontalGridLines();
             this.createYAxisLabels();
-            this.staticElementsContainer.style.transformOrigin = '50% 50%';
-            this.staticElementsContainer.style.transform = '';
         }
-
         this._applyGridHorizontalMirrorPositions();
+        this._applyGridVerticalMirrorPositions();
+    }
+
+    _applyGridVerticalMirrorPositions() {
+        this._ensureGridContainerRefs();
+        if (!this.staticElementsContainer) {
+            return;
+        }
+        this.staticElementsContainer.querySelectorAll('[data-y-level]').forEach((el) => {
+            const level = parseInt(el.getAttribute('data-y-level'), 10);
+            if (Number.isNaN(level)) {
+                return;
+            }
+            const pos = this.calculateGridYPosition(level);
+            if (el.classList.contains('y-labels')) {
+                el.style.top = pos.labelTop;
+                el.style.bottom = '';
+                el.style.transform = 'translateY(-50%)';
+            } else if (el.classList.contains('grid-line')) {
+                el.style.bottom = pos.lineBottom;
+            }
+        });
     }
 
     _ensureGridContainerRefs() {
-        if (!this.gridContainer) {
+        if (!this.gridContainer || !this.gridContainer.isConnected) {
             this.gridContainer = document.querySelector('.grid-absolute-container');
         }
-        if (!this.staticElementsContainer) {
+        if (!this.staticElementsContainer || !this.staticElementsContainer.isConnected) {
             this.staticElementsContainer = document.querySelector('.grid-static-container');
         }
     }
@@ -123,7 +150,7 @@ class GridManager {
 		this.staticElementsContainer.style.top = '0';
 		this.staticElementsContainer.style.left = '0';
 		this.staticElementsContainer.style.pointerEvents = 'none';
-		this.staticElementsContainer.style.zIndex = '5';
+		this.staticElementsContainer.style.zIndex = '9';
 		
 		const labelRange = this._getDayLabelOffsetRange();
 		const lineRange = this._getDayGridLineOffsetRange();
@@ -133,7 +160,7 @@ class GridManager {
 		for (let i = lineRange.min; i <= lineRange.max; i++) {
 			this.createGridLine(i);
 		}
-		
+
 		this.createHorizontalGridLines();
 		this.createYAxisLabels();
 		
@@ -176,6 +203,7 @@ class GridManager {
             this.updateGridNotesHighlight();
         }
         this._syncGridLineActivesForVizor();
+        this.applyFlipState();
     }
 
     _syncGridLineActivesForVizor() {
@@ -285,74 +313,45 @@ class GridManager {
 	createHorizontalGridLines() {
 		if (!this.staticElementsContainer) return;
 
-		const flipY = this._isGridFlipY();
-		const sq = window.appState.config.squareSize;
-		const halfSquaresY = Math.floor(window.appState.config.graphHeight / sq / 2);
+		const halfSquaresY = Math.floor(
+			window.appState.config.graphHeight / window.appState.config.squareSize / 2
+		);
 		for (let i = 1; i < halfSquaresY; i++) {
-			const topLine = document.createElement('div');
-			topLine.className = 'grid-line x';
-			topLine.style.position = 'absolute';
-			topLine.style.width = '100%';
-			topLine.style.height = '1px';
-			topLine.style.bottom = flipY
-				? `calc(50% - ${i * sq}px)`
-				: `calc(50% + ${i * sq}px)`;
-			topLine.style.left = '0';
-			topLine.style.zIndex = '1';
-
-			const bottomLine = document.createElement('div');
-			bottomLine.className = 'grid-line x';
-			bottomLine.style.position = 'absolute';
-			bottomLine.style.width = '100%';
-			bottomLine.style.height = '1px';
-			bottomLine.style.bottom = flipY
-				? `calc(50% + ${i * sq}px)`
-				: `calc(50% - ${i * sq}px)`;
-			bottomLine.style.left = '0';
-			bottomLine.style.zIndex = '1';
-
-			this.staticElementsContainer.appendChild(topLine);
-			this.staticElementsContainer.appendChild(bottomLine);
+			[i, -i].forEach((level) => {
+				const pos = this.calculateGridYPosition(level);
+				const line = document.createElement('div');
+				line.className = 'grid-line x';
+				line.style.position = 'absolute';
+				line.style.width = '100%';
+				line.style.height = '1px';
+				line.style.left = '0';
+				line.style.bottom = pos.lineBottom;
+				line.setAttribute('data-y-level', String(level));
+				this.staticElementsContainer.appendChild(line);
+			});
 		}
 	}
     
 	createYAxisLabels() {
 		if (!this.staticElementsContainer) return;
 
-		const flipY = this._isGridFlipY();
-		const sq = window.appState.config.squareSize;
+		const add = (level) => {
+			const pos = this.calculateGridYPosition(level);
+			const el = document.createElement('div');
+			el.className = 'labels y-labels';
+			el.style.position = 'absolute';
+			el.style.left = '10px';
+			el.style.top = pos.labelTop;
+			el.style.transform = 'translateY(-50%)';
+			el.setAttribute('data-y-level', String(level));
+			el.textContent = String(level);
+			this.staticElementsContainer.appendChild(el);
+		};
 
-		const zeroLabel = document.createElement('div');
-		zeroLabel.className = 'labels y-labels';
-		zeroLabel.style.position = 'absolute';
-		zeroLabel.style.top = '50%';
-		zeroLabel.style.transform = 'translateY(-50%)';
-		zeroLabel.style.left = '10px';
-		zeroLabel.textContent = '0';
-		this.staticElementsContainer.appendChild(zeroLabel);
-
+		add(0);
 		for (let i = 1; i <= 5; i++) {
-			const labelTop = document.createElement('div');
-			labelTop.className = 'labels y-labels';
-			labelTop.style.position = 'absolute';
-			labelTop.style.top = flipY
-				? `calc(50% + ${i * sq}px)`
-				: `calc(50% - ${i * sq}px)`;
-			labelTop.style.transform = 'translateY(-50%)';
-			labelTop.style.left = '10px';
-			labelTop.textContent = flipY ? String(-i) : String(i);
-			this.staticElementsContainer.appendChild(labelTop);
-
-			const labelBottom = document.createElement('div');
-			labelBottom.className = 'labels y-labels';
-			labelBottom.style.position = 'absolute';
-			labelBottom.style.top = flipY
-				? `calc(50% - ${i * sq}px)`
-				: `calc(50% + ${i * sq}px)`;
-			labelBottom.style.transform = 'translateY(-50%)';
-			labelBottom.style.left = '10px';
-			labelBottom.textContent = flipY ? String(i) : String(-i);
-			this.staticElementsContainer.appendChild(labelBottom);
+			add(i);
+			add(-i);
 		}
 	}
     

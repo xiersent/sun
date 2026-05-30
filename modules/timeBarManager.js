@@ -861,6 +861,16 @@ class TimeBarManager {
         
         this.isInitialized = false;
     }
+
+    /** flipV: зеркало стека −5…+5 (как mapGridDayOffset / flipH для дат). */
+    applyFlipState() {
+        const stack = document.getElementById('timeBarStateStack');
+        if (!stack) {
+            return;
+        }
+        const flipY = window.wavesTransformLayer && window.wavesTransformLayer.isScaleYFlipped();
+        stack.style.flexDirection = flipY ? 'column-reverse' : 'column';
+    }
 }
 
 window.timeBarManager = new TimeBarManager();

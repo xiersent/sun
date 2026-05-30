@@ -60,6 +60,21 @@ class WavesTransformLayerManager {
         return this.isScaleXFlipped() ? -o : o;
     }
 
+    /** Шаг навигации по дням: при flipH ←/→ должны совпадать с зеркальной осью времени. */
+    mapNavigationDayDelta(delta) {
+        const d = Number(delta) || 0;
+        return this.isScaleXFlipped() ? -d : d;
+    }
+
+    /** Логический уровень Y (−5…+5) → отображаемый при flipV (как mapGridDayOffset для дат). */
+    mapGridYLevel(level) {
+        const l = Number(level);
+        if (Number.isNaN(l)) {
+            return 0;
+        }
+        return this.isScaleYFlipped() ? -l : l;
+    }
+
     isScaleYFlippedForGrid() {
         return this.isScaleYFlipped();
     }
@@ -140,6 +155,10 @@ class WavesTransformLayerManager {
 
         if (window.grid && typeof window.grid.applyFlipState === 'function') {
             window.grid.applyFlipState();
+        }
+
+        if (window.timeBarManager && typeof window.timeBarManager.applyFlipState === 'function') {
+            window.timeBarManager.applyFlipState();
         }
     }
 }

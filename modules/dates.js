@@ -556,6 +556,9 @@ class DatesManager {
     
 
     navigateDay(delta) {
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapNavigationDayDelta) {
+            delta = window.wavesTransformLayer.mapNavigationDayDelta(delta);
+        }
         const newDate = new Date(window.appState.currentDate);
         newDate.setDate(newDate.getDate() + delta);
 
