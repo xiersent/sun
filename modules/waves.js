@@ -42,6 +42,154 @@ class WavesManager {
         this.wavePathLayerGroups = {};
     }
 
+    _mapLabelDisplayPoint(x, y, graphW, graphH) {
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapGraphPointToDisplay) {
+            return window.wavesTransformLayer.mapGraphPointToDisplay(x, y, graphW, graphH);
+        }
+        return { x, y };
+    }
+
+    /** Выноски вне #wavesTransformLayer — экранные координаты с учётом flip в mapLogicalOffsets. */
+    _mapLabelPointForViewport(x, y) {
+        const { w: lw, h: lh } = this._getLogicalGraphSize();
+        return this._mapLabelDisplayPoint(x, y, lw, lh);
+    }
+
+    _getLogicalGraphSize() {
+        return {
+            w: window.appState.graphWidth,
+            h: window.appState.config.graphHeight
+        };
+    }
+
+    _getDisplayGraphSize() {
+        const wtl = window.wavesTransformLayer;
+        if (wtl && wtl.getDisplayGraphWidth) {
+            return { w: wtl.getDisplayGraphWidth(), h: wtl.getDisplayGraphHeight() };
+        }
+        const { w, h } = this._getLogicalGraphSize();
+        return { w, h };
+    }
+
+    /**
+     * Точка в #wavesMount: при 180° без flip — логические px (поворот слоя через CSS);
+     * иначе mapGraphPointToLayer (flip — CSS scale на #wavesTransformLayer).
+     */
+    _mapOverlayPoint(logicalX, logicalY) {
+        const { w: lw, h: lh } = this._getLogicalGraphSize();
+        const wtl = window.wavesTransformLayer;
+        if (wtl && wtl.getRotationQuarter() === 2) {
+            const flip =
+                (wtl.isScaleXFlipped && wtl.isScaleXFlipped()) ||
+                (wtl.isScaleYFlipped && wtl.isScaleYFlipped());
+            if (!flip) {
+                return { x: logicalX, y: logicalY };
+            }
+        }
+        if (wtl && wtl.mapGraphPointToLayer) {
+            return wtl.mapGraphPointToLayer(logicalX, logicalY, lw, lh);
+        }
+        return this._mapLabelDisplayPoint(logicalX, logicalY, lw, lh);
+    }
+
+    /** Y-начало для SVG-пути при вертикальной прокрутке волны (ось дней вдоль display Y). */
+    _getWavePathScrollOriginY() {
+        const { w: lw } = this._getLogicalGraphSize();
+        const { h: dh } = this._getDisplayGraphSize();
+        return dh / 2 - lw / 2;
+    }
+
+    _resolveWaveLabelPlacement(logicalEdge) {
+        if (window.wavesTransformLayer && window.wavesTransformLayer.resolveWaveLabelPlacement) {
+            return window.wavesTransformLayer.resolveWaveLabelPlacement(logicalEdge);
+        }
+        if (logicalEdge === 'left' || logicalEdge === 'right') {
+            return { axis: 'horizontal', slot: logicalEdge };
+        }
+        return { axis: 'vertical', slot: logicalEdge };
+    }
+
+    _getWaveLabelContainer(slot) {
+        const map = {
+            left: '.wave-labels-left',
+            right: '.wave-labels-right',
+            top: '.wave-labels-top',
+            bottom: '.wave-labels-bottom'
+        };
+        return document.querySelector(map[slot]);
+    }
+
+    _resetWaveLabelPositionStyles(el) {
+        el.style.left = '';
+        el.style.right = '';
+        el.style.top = '';
+        el.style.bottom = '';
+        el.style.marginLeft = '';
+        el.style.marginRight = '';
+        el.style.marginTop = '';
+        el.style.marginBottom = '';
+        el.style.width = 'auto';
+        el.style.maxWidth = '';
+    }
+
+    /** Имя волны (боковые выноски; при повороте могут оказаться в полосах top/bottom). */
+    _applyWaveNameTypography(el) {
+        el.classList.remove('wave-label--extremum');
+        el.classList.add('wave-label--name');
+        el.style.fontFamily = '';
+        el.style.letterSpacing = '';
+        el.style.textAlign = '';
+        const textEl = el.querySelector('.wave-label-text');
+        if (textEl) {
+            textEl.style.textAlign = '';
+        }
+    }
+
+    /** Время экстремума (верх/низ или боковые полосы после поворота). */
+    _applyExtremumTimeTypography(el) {
+        el.classList.remove('wave-label--name');
+        el.classList.add('wave-label--extremum');
+        el.style.fontFamily = '';
+        el.style.letterSpacing = '';
+        const textEl = el.querySelector('.wave-label-text');
+        if (textEl) {
+            textEl.style.textAlign = 'center';
+        }
+    }
+
+    _applyWaveLabelLayout(el, placement, displayPoint) {
+        el.dataset.labelType = placement.axis;
+        this._resetWaveLabelPositionStyles(el);
+        if (placement.axis === 'horizontal') {
+            el.style.top = `${displayPoint.y}px`;
+            el.style.transform = 'translateY(-50%)';
+        } else {
+            el.style.left = `${displayPoint.x}px`;
+            el.style.transform = 'translateX(-50%)';
+        }
+    }
+
+    _syncWaveLabelGeometry(el, placement, waveColor) {
+        if (placement.axis === 'horizontal') {
+            this._syncHorizontalLabelSideGeometry(el, placement.slot, waveColor);
+        } else {
+            this._syncVerticalLabelBandGeometry(el, placement.slot, waveColor);
+        }
+    }
+
+    _cleanupWaveLabelContainers(activeDomIds) {
+        [
+            document.querySelector('.wave-labels-left'),
+            document.querySelector('.wave-labels-right'),
+            document.querySelector('.wave-labels-top'),
+            document.querySelector('.wave-labels-bottom')
+        ].forEach((container) => {
+            if (container) {
+                this._removeStaleLabelElements(container, '.wave-label', activeDomIds);
+            }
+        });
+    }
+
     _mapLabelDisplayY(y, graphH) {
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapDisplayY) {
             return window.wavesTransformLayer.mapDisplayY(y, graphH);
@@ -57,25 +205,54 @@ class WavesManager {
     }
 
     _horizontalLabelSideForFlip(side) {
-        const flipH =
-            window.wavesTransformLayer && window.wavesTransformLayer.isScaleXFlipped
-                ? window.wavesTransformLayer.isScaleXFlipped()
-                : false;
-        if (!flipH) {
-            return side;
-        }
-        return side === 'left' ? 'right' : 'left';
+        return this._resolveWaveLabelPlacement(side).slot;
     }
 
     _verticalLabelBandForFlip(position) {
-        const flipV =
-            window.wavesTransformLayer && window.wavesTransformLayer.isScaleYFlipped
-                ? window.wavesTransformLayer.isScaleYFlipped()
-                : false;
-        if (!flipV) {
-            return position;
-        }
-        return position === 'top' ? 'bottom' : 'top';
+        return this._resolveWaveLabelPlacement(position).slot;
+    }
+
+    _isWaveAxisSwapped() {
+        return !!(
+            window.wavesTransformLayer &&
+            window.wavesTransformLayer.isAxisSwapped &&
+            window.wavesTransformLayer.isAxisSwapped()
+        );
+    }
+
+    rebuildForTransformLayout() {
+        const graphW = window.appState.graphWidth;
+        const graphH = window.appState.config.graphHeight;
+        window.appState.data.waves.forEach((wave) => {
+            const waveIdStr = String(wave.id);
+            const container = this.waveContainers[wave.id] || this.waveContainers[waveIdStr];
+            if (!container) {
+                return;
+            }
+            const periodPx =
+                window.appState.periods[wave.id] ||
+                wave.period * window.appState.config.squareSize;
+            const totalPeriods = parseInt(container.dataset.totalPeriods, 10) ||
+                this.calculateRequiredPeriods(periodPx);
+            const swapped = this._isWaveAxisSwapped();
+            if (swapped) {
+                container.classList.add('wave-container--swapped');
+                const containerHeight = periodPx * totalPeriods;
+                container.style.width = '100%';
+                container.style.height = `${containerHeight}px`;
+            } else {
+                container.classList.remove('wave-container--swapped');
+                const containerWidth = periodPx * totalPeriods;
+                container.style.width = `${containerWidth}px`;
+                container.style.height = '100%';
+            }
+            const path = this.wavePaths[wave.id] || this.wavePaths[waveIdStr];
+            const pathB = this.waveBPaths[wave.id] || this.waveBPaths[waveIdStr];
+            this.generateSineWave(periodPx, path, container, totalPeriods);
+            if (pathB) {
+                this.generateSineWave(periodPx, pathB, container, totalPeriods);
+            }
+        });
     }
 
     /** Точка монтирования волн и волновых оверлеев (внутри #wavesTransformLayer) */
@@ -111,7 +288,11 @@ class WavesManager {
     }
     
     calculateRequiredPeriods(periodPx) {
-        const viewportWidth = window.appState.graphWidth;
+        const wtl = window.wavesTransformLayer;
+        const viewportWidth =
+            wtl && wtl.isAxisSwapped && wtl.isAxisSwapped()
+                ? wtl.getDisplayGraphHeight()
+                : window.appState.graphWidth;
         
         if (periodPx < 250) {
             return 30;
@@ -366,16 +547,21 @@ class WavesManager {
         const endWave = verbose && d.t('waves.createWaveElement', { id: wave.id, name: wave.name });
         try {
         const container = document.createElement('div');
+        const swapped = this._isWaveAxisSwapped();
         container.className = 'wave-container';
+        if (swapped) {
+            container.classList.add('wave-container--swapped');
+        }
         container.id = `waveContainer${wave.id}`;
         
         const periodPx = wave.period * window.appState.config.squareSize;
         
         const totalPeriods = this.calculateRequiredPeriods(periodPx);
-        const containerWidth = periodPx * totalPeriods;
+        const totalSpan = periodPx * totalPeriods;
+        const containerWidth = swapped ? null : totalSpan;
         
-        container.style.width = `${containerWidth}px`;
-        container.style.height = '100%';
+        container.style.width = swapped ? '100%' : `${containerWidth}px`;
+        container.style.height = swapped ? `${totalSpan}px` : '100%';
         container.style.position = 'absolute';
         container.style.top = '0';
         container.style.left = '0';
@@ -388,7 +574,12 @@ class WavesManager {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.classList.add('wave');
         svg.setAttribute('preserveAspectRatio', 'none');
-        svg.setAttribute('viewBox', `0 0 ${containerWidth} ${window.appState.config.graphHeight}`);
+        const { w: dw, h: dh } = this._getDisplayGraphSize();
+        const lh = window.appState.config.graphHeight;
+        svg.setAttribute(
+            'viewBox',
+            swapped ? `0 0 ${dw} ${totalSpan}` : `0 0 ${containerWidth || dw} ${lh}`
+        );
         svg.style.width = '100%';
         svg.style.height = '100%';
         
@@ -463,35 +654,49 @@ class WavesManager {
     }
     
     generateSineWave(periodPx, wavePath, waveContainer, totalPeriods = 3) {
-        const totalWidth = periodPx * totalPeriods;
+        const { w: lw, h: lh } = this._getLogicalGraphSize();
+        const { w: dw, h: dh } = this._getDisplayGraphSize();
+        const swapped = this._isWaveAxisSwapped();
+        const totalSpan = periodPx * totalPeriods;
         const points = 1500;
-        const step = totalWidth / points;
-        
+        const step = totalSpan / points;
+
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
-        const centerY = window.appState.config.graphHeight / 2;
+        const centerY = lh / 2;
         const amplitude = window.appState.config.amplitude;
-        
+        const scrollOriginY = this._getWavePathScrollOriginY();
+
         const waveSvg = waveContainer.querySelector('.wave');
         if (waveSvg) {
-            waveSvg.setAttribute('viewBox', `0 0 ${totalWidth} ${window.appState.config.graphHeight}`);
+            waveSvg.setAttribute(
+                'viewBox',
+                swapped ? `0 0 ${dw} ${totalSpan}` : `0 0 ${totalSpan} ${lh}`
+            );
         }
-        
-        // M(0,y) по той же формуле, что и остальные точки — иначе излом при ненулевом phaseOffset.
-        const y0 = centerY - amplitude * Math.sin(2 * Math.PI * (0 + phaseOffsetPixels) / periodPx);
-        let pathData = `M0,${y0} `;
-        
-        for (let i = 1; i <= points; i++) {
-            const x = i * step;
-            
-            const y = centerY - amplitude * Math.sin(2 * Math.PI * (x + phaseOffsetPixels) / periodPx);
-            
-            pathData += `L${x},${y} `;
+
+        let pathData = '';
+        for (let i = 0; i <= points; i++) {
+            const logicalX = i * step;
+            const logicalY =
+                centerY -
+                amplitude * Math.sin((2 * Math.PI * (logicalX + phaseOffsetPixels)) / periodPx);
+            let px;
+            let py;
+            if (swapped) {
+                const d = this._mapOverlayPoint(logicalX, logicalY);
+                px = d.x;
+                py = d.y - scrollOriginY;
+            } else {
+                px = logicalX;
+                py = logicalY;
+            }
+            pathData += `${i === 0 ? 'M' : 'L'}${px},${py} `;
         }
-        
+
         if (wavePath) {
             wavePath.setAttribute('d', pathData);
         }
-        
+
         const waveId = waveContainer.dataset.waveId;
         if (waveId) {
             window.appState.periods[waveId] = periodPx;
@@ -502,17 +707,16 @@ class WavesManager {
         const container = this.waveContainers[waveId];
         if (container) {
             const totalPeriods = this.calculateRequiredPeriods(periodPx);
-            const containerWidth = periodPx * totalPeriods;
-            
-            container.style.width = `${containerWidth}px`;
+            const swapped = this._isWaveAxisSwapped();
             container.dataset.totalPeriods = totalPeriods;
             container.dataset.periodPx = periodPx;
-            
-            const waveSvg = container.querySelector('.wave');
-            if (waveSvg) {
-                waveSvg.setAttribute('viewBox', `0 0 ${containerWidth} ${window.appState.config.graphHeight}`);
+            if (swapped) {
+                container.style.width = '100%';
+                container.style.height = `${periodPx * totalPeriods}px`;
+            } else {
+                container.style.width = `${periodPx * totalPeriods}px`;
+                container.style.height = '100%';
             }
-            
             const wavePath = this.wavePaths[waveId];
             if (wavePath) {
                 this.generateSineWave(periodPx, wavePath, container, totalPeriods);
@@ -737,7 +941,16 @@ class WavesManager {
                         }
                     }
                     if (layers && layers.a && layers.b) {
-                        layers.a.setAttribute('transform', `translate(${-currentPositionPx},0)`);
+                        const wtl = window.wavesTransformLayer;
+                        const scrollPx =
+                            wtl && wtl.getWaveLayerScrollPx
+                                ? wtl.getWaveLayerScrollPx(currentPositionPx)
+                                : -currentPositionPx;
+                        if (this._isWaveAxisSwapped()) {
+                            layers.a.setAttribute('transform', `translate(0,${scrollPx})`);
+                        } else {
+                            layers.a.setAttribute('transform', `translate(${scrollPx},0)`);
+                        }
                         if (shouldShowA) {
                             layers.a.removeAttribute('display');
                         } else {
@@ -751,7 +964,15 @@ class WavesManager {
                                 if (posB < 0) {
                                     posB = wavePeriodPixels + posB;
                                 }
-                                layers.b.setAttribute('transform', `translate(${-posB},0)`);
+                                const scrollPxB =
+                                    wtl && wtl.getWaveLayerScrollPx
+                                        ? wtl.getWaveLayerScrollPx(posB)
+                                        : -posB;
+                                if (this._isWaveAxisSwapped()) {
+                                    layers.b.setAttribute('transform', `translate(0,${scrollPxB})`);
+                                } else {
+                                    layers.b.setAttribute('transform', `translate(${scrollPxB},0)`);
+                                }
                                 layers.b.removeAttribute('display');
                             } else {
                                 layers.b.setAttribute('display', 'none');
@@ -760,7 +981,15 @@ class WavesManager {
                             layers.b.setAttribute('display', 'none');
                         }
                     } else {
-                        container.style.transform = `translateX(${-currentPositionPx}px)`;
+                        const scrollPx =
+                            wtl && wtl.getWaveLayerScrollPx
+                                ? wtl.getWaveLayerScrollPx(currentPositionPx)
+                                : -currentPositionPx;
+                        if (this._isWaveAxisSwapped()) {
+                            container.style.transform = `translateY(${scrollPx}px)`;
+                        } else {
+                            container.style.transform = `translateX(${scrollPx}px)`;
+                        }
                     }
 
                     if (
@@ -849,10 +1078,13 @@ class WavesManager {
 
             const labelOpts = {
                 ...opts,
-                forceWaveLabels: !!(opts.forceWaveLabels || light)
+                forceWaveLabels: !!(opts.forceWaveLabels || light),
+                skipStaleCleanup: true
             };
-            this.updateHorizontalWaveLabels(labelOpts);
-            this.updateVerticalWaveLabels();
+            const activeDomIds = new Set();
+            this.updateHorizontalWaveLabels({ ...labelOpts, activeDomIds });
+            this.updateVerticalWaveLabels({ activeDomIds });
+            this._cleanupWaveLabelContainers(activeDomIds);
 
             const endVTime = d && d.t('waves.updatePosition.verticalWaveLabelsTime', {});
             this.updateVerticalWaveLabelsTime();
@@ -922,8 +1154,10 @@ class WavesManager {
         const d = __waveDbg();
         const end = d && d.t('waves.updateAllWaveLabels', { forceWaveLabels: !!opts.forceWaveLabels });
         try {
-            this.updateHorizontalWaveLabels(opts);
-            this.updateVerticalWaveLabels();
+            const activeDomIds = new Set();
+            this.updateHorizontalWaveLabels({ ...opts, activeDomIds, skipStaleCleanup: true });
+            this.updateVerticalWaveLabels({ activeDomIds, skipStaleCleanup: true });
+            this._cleanupWaveLabelContainers(activeDomIds);
             this.updateAxisXIntersectionPoints();
         } finally {
             end && end({});
@@ -957,14 +1191,44 @@ class WavesManager {
         });
     }
 
-    _syncHorizontalWaveLabelAppearance(el, wave, effDay) {
+    /**
+     * Боковые выноски (имя волны): полное обновление текста, позиции и геометрии.
+     */
+    _syncHorizontalWaveLabelContent(el, wave, displayPoint, logicalEdge, placement, layerKey, effDay) {
+        const waveIdStr = String(wave.id);
+        el.dataset.waveId = waveIdStr;
+        el.dataset.waveLayer = layerKey;
+        el.dataset.logicalEdge = logicalEdge;
+        delete el.dataset.logicalBand;
+        delete el.dataset.refX;
+        delete el.dataset.extremumTime;
+        delete el.dataset.visualBand;
+        delete el.dataset.position;
+
+        const textEl = el.querySelector('.wave-label-text');
+        if (textEl) {
+            textEl.textContent = wave.name;
+        }
+
         const state = this.calculateWaveStateAtDay(wave, effDay);
         const isExtremum =
             this.isExtremumHighlightEnabled() && (state >= 4 || state <= -4);
         this._applyLabelColors(el, wave, isExtremum);
-        const side = this._sideFromLabelElement(el);
         const fill = isExtremum ? '#ff0000' : wave.color || '#666666';
-        this._syncHorizontalLabelSideGeometry(el, side, fill);
+        this._applyWaveLabelLayout(el, placement, displayPoint);
+        this._syncWaveLabelGeometry(el, placement, fill);
+        this._applyWaveNameTypography(el);
+    }
+
+    /** Сброс боковых выносок при смене раскладки (поворот/сброс transform). */
+    clearSideWaveLabelsAfterLayoutChange() {
+        document.querySelectorAll('.wave-label[data-logical-edge]').forEach((el) => {
+            if (el.id && el.id.startsWith('waveLabel')) {
+                delete this.waveLabelElements[el.id.slice('waveLabel'.length)];
+            }
+            el.remove();
+        });
+        this.lastUpdateTime = 0;
     }
 
     _sideFromLabelElement(el) {
@@ -1033,8 +1297,18 @@ class WavesManager {
 
     _syncVerticalWaveLabelContent(el, wave, x, effDay, layerKey, logicalBand) {
         const graphW = window.appState.graphWidth;
-        const displayX = this._mapLabelDisplayX(x, graphW);
-        el.style.left = `${displayX}px`;
+        const graphH = window.appState.config.graphHeight;
+        const amplitude = window.appState.config.amplitude;
+        const logical =
+            logicalBand ||
+            el.dataset.logicalBand ||
+            this._bandFromLabelElement(el);
+        el.dataset.logicalBand = logical;
+        const graphY =
+            logical === 'top' ? graphH / 2 - amplitude : graphH / 2 + amplitude;
+        const displayPoint = this._mapLabelPointForViewport(x, graphY);
+        const placement = this._resolveWaveLabelPlacement(logical);
+        this._applyWaveLabelLayout(el, placement, displayPoint);
         el.dataset.refX = String(x);
         const extremumTime = this.calculateTimeFromXCoordinate(wave, x, effDay, layerKey);
         el.dataset.extremumTime = String(extremumTime.getTime());
@@ -1046,14 +1320,9 @@ class WavesManager {
         const isExtremum =
             this.isExtremumHighlightEnabled() && (state >= 4 || state <= -4);
         this._applyLabelColors(el, wave, isExtremum);
-        const logical =
-            logicalBand ||
-            el.dataset.logicalBand ||
-            this._bandFromLabelElement(el);
-        el.dataset.logicalBand = logical;
-        const band = this._verticalLabelBandForFlip(logical);
         const fill = isExtremum ? '#ff0000' : wave.color || '#666666';
-        this._syncVerticalLabelBandGeometry(el, band, fill);
+        this._syncWaveLabelGeometry(el, placement, fill);
+        this._applyExtremumTimeTypography(el);
     }
 
     _bandFromLabelElement(el) {
@@ -1121,8 +1390,11 @@ class WavesManager {
     }
 
     _syncAxisXPointPosition(el, x, refDay) {
+        const centerY = window.appState.config.graphHeight / 2;
+        const d = this._mapOverlayPoint(x, centerY);
         el.style.transition = 'none';
-        el.style.left = `${x}px`;
+        el.style.left = `${d.x}px`;
+        el.style.top = `${d.y}px`;
         el.style.transition = 'transform 0.2s, box-shadow 0.2s';
         el.dataset.x = String(x);
         if (refDay !== undefined && refDay !== null) {
@@ -1168,9 +1440,10 @@ class WavesManager {
         pointElement.dataset.time = point.time.toISOString();
         pointElement.dataset.wavePair = point.wavePair;
         pointElement.title = this._buildWaveIntersectionPointTitle(point);
+        const d = this._mapOverlayPoint(point.x, point.y);
         pointElement.style.position = 'absolute';
-        pointElement.style.left = `${point.x}px`;
-        pointElement.style.top = `${point.y}px`;
+        pointElement.style.left = `${d.x}px`;
+        pointElement.style.top = `${d.y}px`;
         pointElement.style.width = '8px';
         pointElement.style.height = '8px';
         pointElement.style.borderRadius = '50%';
@@ -1214,24 +1487,18 @@ class WavesManager {
                     deltaMs: now - this.lastUpdateTime,
                     intervalMs: this.updateInterval
                 });
-            return;
+            return opts.activeDomIds || null;
         }
         
         this.lastUpdateTime = now;
         
-        const leftContainer = document.querySelector('.wave-labels-left');
-        const rightContainer = document.querySelector('.wave-labels-right');
-        
-        if (!leftContainer || !rightContainer) {
-            d && d.log('waves.updateHorizontalWaveLabels.skip', { reason: 'noContainers' });
-            return;
-        }
-        
         const end = d && d.t('waves.updateHorizontalWaveLabels', { forceWaveLabels: !!opts.forceWaveLabels });
         try {
-            const activeDomIds = new Set();
+            const activeDomIds = opts.activeDomIds || new Set();
             const graphH = window.appState.config.graphHeight;
             const graphW = window.appState.graphWidth;
+            const amplitude = window.appState.config.amplitude;
+            const centerY = graphH / 2;
 
             window.appState.data.waves.forEach((wave) => {
                 if (!this.waveNeedsGraphContainer(wave.id)) {
@@ -1252,18 +1519,22 @@ class WavesManager {
                         if (y < 0 || y > graphH) {
                             return;
                         }
-                        const displayY = this._mapLabelDisplayY(y, graphH);
-                        const displaySide = this._horizontalLabelSideForFlip(side);
+                        const graphX = side === 'left' ? 0 : graphW;
+                        const placement = this._resolveWaveLabelPlacement(side);
+                        const container = this._getWaveLabelContainer(placement.slot);
+                        if (!container) {
+                            return;
+                        }
+                        const displayPoint = this._mapLabelPointForViewport(graphX, y);
                         const domId = this._horizontalWaveLabelDomId(wave.id, side, layer.key);
                         activeDomIds.add(domId);
-                        const container =
-                            displaySide === 'left' ? leftContainer : rightContainer;
                         let el = document.getElementById(domId);
                         if (!el) {
-                            this.createHorizontalWaveLabel(
+                            el = this.createHorizontalWaveLabel(
                                 wave,
-                                displayY,
-                                displaySide,
+                                displayPoint,
+                                side,
+                                placement,
                                 container,
                                 layer.key
                             );
@@ -1271,45 +1542,50 @@ class WavesManager {
                             if (el.parentNode !== container) {
                                 container.appendChild(el);
                             }
-                            el.style.top = `${displayY}px`;
-                            this._syncHorizontalWaveLabelAppearance(el, wave, effDay);
+                            this._syncHorizontalWaveLabelContent(
+                                el,
+                                wave,
+                                displayPoint,
+                                side,
+                                placement,
+                                layer.key,
+                                effDay
+                            );
                         }
                     });
                 }
             });
 
-            this._removeStaleLabelElements(
-                leftContainer,
-                '.wave-label.horizontal',
-                activeDomIds
-            );
-            this._removeStaleLabelElements(
-                rightContainer,
-                '.wave-label.horizontal',
-                activeDomIds
-            );
+            if (!opts.skipStaleCleanup) {
+                this._cleanupWaveLabelContainers(activeDomIds);
+            }
+            return activeDomIds;
         } finally {
             end &&
                 end({
-                    leftLabels: leftContainer.children.length,
-                    rightLabels: rightContainer.children.length
+                    leftLabels: document.querySelector('.wave-labels-left')?.children.length,
+                    rightLabels: document.querySelector('.wave-labels-right')?.children.length
                 });
         }
     }
     
-    updateVerticalWaveLabels() {
+    updateVerticalWaveLabels(opts = {}) {
         const d = __waveDbg();
         const topContainer = document.querySelector('.wave-labels-top');
         const bottomContainer = document.querySelector('.wave-labels-bottom');
         
         if (!topContainer || !bottomContainer) {
             d && d.log('waves.updateVerticalWaveLabels.skip', { reason: 'noContainers' });
-            return;
+            return opts.activeDomIds || null;
         }
         
         const end = d && d.t('waves.updateVerticalWaveLabels', {});
         try {
-            const activeDomIds = new Set();
+            const activeDomIds = opts.activeDomIds || new Set();
+            const graphW = window.appState.graphWidth;
+            const graphH = window.appState.config.graphHeight;
+            const amplitude = window.appState.config.amplitude;
+            const centerY = graphH / 2;
 
             window.appState.data.waves.forEach((wave) => {
                 if (!this.waveNeedsGraphContainer(wave.id)) {
@@ -1324,9 +1600,15 @@ class WavesManager {
                     ];
 
                     bands.forEach(({ position, xs }) => {
-                        const band = this._verticalLabelBandForFlip(position);
-                        const container = band === 'top' ? topContainer : bottomContainer;
+                        const graphY =
+                            position === 'top' ? centerY - amplitude : centerY + amplitude;
+                        const placement = this._resolveWaveLabelPlacement(position);
+                        const container = this._getWaveLabelContainer(placement.slot);
+                        if (!container) {
+                            return;
+                        }
                         xs.forEach((x, idx) => {
+                            const displayPoint = this._mapLabelPointForViewport(x, graphY);
                             const domId = this._verticalWaveLabelDomId(
                                 wave.id,
                                 position,
@@ -1340,6 +1622,8 @@ class WavesManager {
                                     wave,
                                     x,
                                     position,
+                                    placement,
+                                    displayPoint,
                                     container,
                                     idx,
                                     layer.key,
@@ -1363,8 +1647,10 @@ class WavesManager {
                 }
             });
 
-            this._removeStaleLabelElements(topContainer, '.wave-label.vertical', activeDomIds);
-            this._removeStaleLabelElements(bottomContainer, '.wave-label.vertical', activeDomIds);
+            if (!opts.skipStaleCleanup) {
+                this._cleanupWaveLabelContainers(activeDomIds);
+            }
+            return activeDomIds;
         } finally {
             end &&
                 end({
@@ -1485,7 +1771,6 @@ class WavesManager {
     }
 
     createAxisXPoint(wave, x, container, refDay, layerKey = 'a') {
-        const centerY = window.appState.config.graphHeight / 2;
         const waveColor = wave.color || '#666666';
         const textColor = this.getContrastTextColor(waveColor);
         
@@ -1503,9 +1788,6 @@ class WavesManager {
         }
         
         point.style.position = 'absolute';
-        point.style.left = `${x}px`;
-        point.style.top = `${centerY}px`;
-        point.style.transform = 'translate(-50%, -50%)';
         point.style.width = '6px';
         point.style.height = '6px';
         point.style.borderRadius = '50%';
@@ -1515,6 +1797,7 @@ class WavesManager {
         point.style.pointerEvents = 'auto';
         point.style.zIndex = '9';
         point.style.transition = 'transform 0.2s, box-shadow 0.2s';
+        this._syncAxisXPointPosition(point, x, refDay);
         
         point.title =
             layerKey === 'b'
@@ -1644,27 +1927,25 @@ class WavesManager {
     
 
     
-    createHorizontalWaveLabel(wave, y, side, container, layerKey = 'a') {
+    createHorizontalWaveLabel(wave, displayPoint, logicalEdge, placement, container, layerKey = 'a') {
         const suffix = layerKey === 'b' ? '-person-b' : '';
-        const labelId = `${wave.id}-${side}${suffix}`;
+        const labelId = `${wave.id}-${logicalEdge}${suffix}`;
         const effDay =
             layerKey === 'b' ? this._getSecondPersonDayOffset() : window.appState.currentDay || 0;
         const state = this.calculateWaveStateAtDay(wave, effDay);
         const atExtremum = (state >= 4 || state <= -4);
         const isExtremum = this.isExtremumHighlightEnabled() && atExtremum;
         
-        // Выбираем цвет: красный для экстремума, иначе цвет волны
         const waveColor = isExtremum ? '#ff0000' : (wave.color || '#666666');
         const textColor = this.getContrastTextColor(waveColor);
         
         const labelElement = document.createElement('div');
         labelElement.id = `waveLabel${labelId}`;
         labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.labelType = 'horizontal';
         labelElement.dataset.waveLayer = layerKey;
+        labelElement.dataset.logicalEdge = logicalEdge;
         
         labelElement.style.position = 'absolute';
-        labelElement.style.top = `${y}px`;
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
@@ -1676,7 +1957,6 @@ class WavesManager {
         labelElement.style.padding = '2px 6px';
         labelElement.style.borderRadius = '3px';
         labelElement.style.fontSize = '11px';
-        labelElement.style.transform = 'translateY(-50%)';
         labelElement.style.cursor = 'pointer';
         labelElement.style.fontWeight = '500';
         labelElement.style.whiteSpace = 'nowrap';
@@ -1689,7 +1969,9 @@ class WavesManager {
         
         labelElement.appendChild(text);
         container.appendChild(labelElement);
-        this._syncHorizontalLabelSideGeometry(labelElement, side, waveColor);
+        this._applyWaveLabelLayout(labelElement, placement, displayPoint);
+        this._syncWaveLabelGeometry(labelElement, placement, waveColor);
+        this._applyWaveNameTypography(labelElement);
         
         this.waveLabelElements[labelId] = labelElement;
         
@@ -1724,7 +2006,17 @@ class WavesManager {
     }
 
 
-    createVerticalWaveLabel(wave, x, logicalBand, container, index = 0, layerKey = 'a', effDay) {
+    createVerticalWaveLabel(
+        wave,
+        x,
+        logicalBand,
+        placement,
+        displayPoint,
+        container,
+        index = 0,
+        layerKey = 'a',
+        effDay
+    ) {
         const suffix = layerKey === 'b' ? '-person-b' : '';
         const labelId = `${wave.id}-${logicalBand}-${index}${suffix}`;
         const day =
@@ -1742,20 +2034,16 @@ class WavesManager {
         
         const extremumTime = this.calculateTimeFromXCoordinate(wave, x, day, layerKey);
         const timeString = this.formatExtremumTime(extremumTime);
-        const displayX = this._mapLabelDisplayX(x, window.appState.graphWidth);
-        const visualBand = this._verticalLabelBandForFlip(logicalBand);
         
         const labelElement = document.createElement('div');
         labelElement.id = `waveLabel${labelId}`;
         labelElement.dataset.waveId = wave.id;
-        labelElement.dataset.labelType = 'vertical';
         labelElement.dataset.waveLayer = layerKey;
         labelElement.dataset.logicalBand = logicalBand;
         labelElement.dataset.refX = String(x);
         labelElement.dataset.extremumTime = extremumTime.getTime();
         
         labelElement.style.position = 'absolute';
-        labelElement.style.left = `${displayX}px`;
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
@@ -1767,21 +2055,19 @@ class WavesManager {
         labelElement.style.padding = '2px 6px';
         labelElement.style.borderRadius = '3px';
         labelElement.style.fontSize = '11px';
-        labelElement.style.transform = 'translateX(-50%)';
         labelElement.style.cursor = 'pointer';
-        labelElement.style.fontFamily = 'monospace';
-        labelElement.style.letterSpacing = '0.5px';
         labelElement.style.fontWeight = '500';
         labelElement.style.whiteSpace = 'nowrap';
         
         const text = document.createElement('div');
         text.className = 'wave-label-text';
         text.textContent = timeString;
-        text.style.textAlign = 'center';
         
         labelElement.appendChild(text);
         container.appendChild(labelElement);
-        this._syncVerticalLabelBandGeometry(labelElement, visualBand, waveColor);
+        this._applyWaveLabelLayout(labelElement, placement, displayPoint);
+        this._syncWaveLabelGeometry(labelElement, placement, waveColor);
+        this._applyExtremumTimeTypography(labelElement);
         
         labelElement.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1984,6 +2270,9 @@ class WavesManager {
         const end = d && d.t('waves.updateVerticalWaveLabelsTime', { count: labels.length });
         try {
         labels.forEach(label => {
+            if (label.dataset.logicalEdge) {
+                return;
+            }
             const waveId = label.dataset.waveId;
             const refX = label.dataset.refX;
             
@@ -2009,6 +2298,7 @@ class WavesManager {
                 textElement.textContent = timeString;
             }
             label.dataset.extremumTime = String(extremumTime.getTime());
+            this._applyExtremumTimeTypography(label);
         });
         } finally {
             end && end({});
@@ -2666,9 +2956,10 @@ class WavesManager {
                 pointElement.dataset.intersectionKey = key;
                 container.appendChild(pointElement);
             } else {
+                const d = this._mapOverlayPoint(point.x, point.y);
                 pointElement.style.transition = 'none';
-                pointElement.style.left = `${point.x}px`;
-                pointElement.style.top = `${point.y}px`;
+                pointElement.style.left = `${d.x}px`;
+                pointElement.style.top = `${d.y}px`;
                 pointElement.style.transition = 'transform 0.2s, box-shadow 0.2s';
                 pointElement.dataset.time = point.time.toISOString();
                 pointElement.dataset.wavePair = point.wavePair;

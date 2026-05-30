@@ -860,7 +860,17 @@ class AppCore {
     
     updateCSSVariables() {
         document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
-        document.documentElement.style.setProperty('--gw', window.appState.graphWidth + 'px');
+        const lw = window.appState.graphWidth;
+        const lh = window.appState.config.graphHeight;
+        document.documentElement.style.setProperty('--gw', `${lw}px`);
+        document.documentElement.style.setProperty('--gh', `${lh}px`);
+        const wtl = window.wavesTransformLayer;
+        const dgw =
+            wtl && wtl.getDisplayGraphWidth ? wtl.getDisplayGraphWidth() : lw;
+        const dgh =
+            wtl && wtl.getDisplayGraphHeight ? wtl.getDisplayGraphHeight() : lh;
+        document.documentElement.style.setProperty('--dgw', `${dgw}px`);
+        document.documentElement.style.setProperty('--dgh', `${dgh}px`);
     }
     
     setupSecretSchemePanel() {

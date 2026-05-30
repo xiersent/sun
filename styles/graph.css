@@ -1,8 +1,8 @@
 /* styles/graph.css - ОБЪЕДИНЕН (4 блока extremum → 1 с учетом порядка 1→2→3→4) */
 /* Обёртка: ширина как у графика, чтобы выноски (position:absolute; left: x px) совпадали с координатами волн/пересечений */
-.graph-viewport{position: relative; width: var(--gw); align-self: center; flex-shrink: 0;}
+.graph-viewport{position: relative; width: var(--dgw, var(--gw)); align-self: center; flex-shrink: 0;}
 /* Graph container */
-.graph-container{position: relative; width: var(--gw); height: var(--gh); background-color: #fff; outline: 1px solid var(--clg); overflow: hidden;}
+.graph-container{position: relative; width: var(--dgw, var(--gw)); height: var(--dgh, var(--gh)); background-color: #fff; outline: 1px solid var(--clg); overflow: hidden;}
 
 /* Слой волн внутри #graphElement: transform только здесь; обрезка — overflow у .graph-container */
 .waves-transform-layer{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8; transform-origin: 50% 50%;}
@@ -31,7 +31,7 @@
 .wave-axis-x-point:hover{transform: translate(-50%, -50%) scale(1.3); z-index: 10; box-shadow: 0 0 4px rgba(0,0,0,0.5);}
 
 /* Общие стили выносок */
-.wave-label{position: absolute; display: flex; align-items: center; white-space: nowrap; font-size: var(--font-size-sm); font-weight: 400; pointer-events: auto; cursor: default; padding: 2px 8px; color: #fff; border-radius: 3px; opacity: 0.5; z-index: 1;}
+.wave-label{position: absolute; display: inline-flex; align-items: center; width: max-content; max-width: 100%; box-sizing: border-box; white-space: nowrap; font-size: var(--font-size-sm); font-weight: 400; pointer-events: auto; cursor: default; padding: 2px 8px; color: #fff; border-radius: 3px; opacity: 0.5; z-index: 1;}
 .wave-label:hover{opacity: 1; z-index: 10; filter: brightness(1.2);}
 .wave-labels-container .wave-label.horizontal{transform: translateY(-50%); height: 20px;}
 .wave-labels-left .wave-label{flex-direction: row-reverse; right: 0; margin-right: 10px;}
@@ -40,6 +40,8 @@
 .wave-labels-top .wave-label{top: 0; margin-top: 5px;}
 .wave-labels-bottom .wave-label{bottom: 0; margin-bottom: 5px;}
 .wave-label-text{white-space: nowrap; font-weight: 400; font-size: 11px; position: relative; z-index: 2;}
+.wave-label--name{font-family: inherit; letter-spacing: normal;}
+.wave-label--extremum{font-family: monospace; letter-spacing: 0.5px;}
 .wave-label-arrow{position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
 .wave-labels-container .wave-label-arrow{top: 50%; transform: translateY(-50%);}
 /* Горизонтальные стрелки — waves.js _syncHorizontalLabelSideGeometry */
@@ -70,7 +72,12 @@
 .grid-line.y.active.has-notes:hover{background-color: var(--danger-color); width: 1px;}
 .x-labels{bottom: 10px; transform: translateX(-50%); color: var(--text-secondary);}
 .date-labels{bottom: 30px; transform: translateX(-50%); color: var(--text-secondary);}
+.date-row{color: var(--text-secondary); white-space: nowrap; font-size: inherit;}
+.date-row .date-labels, .date-row .weekday-label{position: static; transform: none; bottom: auto; left: auto;}
 .y-labels{left: 10px; transform: translateY(-50%); color: var(--text-secondary);}
+.state-labels{color: var(--text-secondary);}
+.grid-line.state-v{background-color: #eee; z-index: 1;}
+.grid-line.day-h{background-color: #eee; z-index: 1;}
 
 /* Центральная дата */
 .center-date-label{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); user-select: none; background: rgba(255, 255, 255, 0.9); padding: var(--spacing-xs) var(--spacing-sm); z-index: 20; color: var(--text-color); text-align: center; pointer-events: none; font-weight: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; font-size: var(--font-size-md); min-height: auto;}

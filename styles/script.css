@@ -10,4 +10,6 @@
 .wave-label.horizontal.left{right: 0; margin-right: var(--spacing-sm);}
 .wave-label.horizontal.right{left: 0; margin-left: var(--spacing-sm);}
 .wave-label-arrow{position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
-.wave-label.vertical{position: absolute; background-color: var(--wave-color, #666); color: #fff; opacity: 0.5; z-index: 1; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-sm); transform: translateX(-50%); cursor: pointer; font-family: monospace; letter-spacing: 0.5px;}
+.wave-label.vertical{position: absolute; background-color: var(--wave-color, #666); color: #fff; opacity: 0.5; z-index: 1; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-sm); transform: translateX(-50%); cursor: pointer;}
+.wave-label.vertical.wave-label--extremum{font-family: monospace; letter-spacing: 0.5px;}
+.wave-label.vertical.wave-label--name{font-family: inherit; letter-spacing: normal;}

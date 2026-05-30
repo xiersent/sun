@@ -8,36 +8,88 @@ class GridManager {
     }
     
     calculateGridPosition(offset) {
+        const sq = window.appState.config.squareSize;
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapLogicalOffsets) {
+            const m = window.wavesTransformLayer.mapLogicalOffsets(offset, 0);
+            return {
+                actualOffset: offset,
+                pixelPosition: window.wavesTransformLayer.isAxisSwapped() ? m.y : m.x,
+                crossPixel: window.wavesTransformLayer.isAxisSwapped() ? m.x : m.y,
+                axisSwapped: window.wavesTransformLayer.isAxisSwapped()
+            };
+        }
         let displayOffset = offset;
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapGridDayOffset) {
             displayOffset = window.wavesTransformLayer.mapGridDayOffset(offset);
         }
-        const pixelPosition = displayOffset * window.appState.config.squareSize;
-
         return {
             actualOffset: offset,
-            pixelPosition: pixelPosition
+            pixelPosition: displayOffset * sq,
+            crossPixel: 0,
+            axisSwapped: false
         };
     }
 
     calculateGridYPosition(level) {
-        let displayLevel = Number(level);
-        if (Number.isNaN(displayLevel)) {
-            displayLevel = 0;
+        let numericLevel = Number(level);
+        if (Number.isNaN(numericLevel)) {
+            numericLevel = 0;
         }
+        if (window.wavesTransformLayer && window.wavesTransformLayer.mapLogicalOffsets) {
+            const m = window.wavesTransformLayer.mapLogicalOffsets(0, numericLevel);
+            const swapped = window.wavesTransformLayer.isAxisSwapped();
+            if (swapped) {
+                return {
+                    actualLevel: numericLevel,
+                    swapped: true,
+                    labelLeft: `calc(50% + ${m.x}px)`,
+                    lineLeft: `calc(50% + ${m.x}px)`
+                };
+            }
+            return {
+                actualLevel: numericLevel,
+                swapped: false,
+                labelTop: `calc(50% + ${m.y}px)`,
+                lineBottom: `calc(50% + ${-m.y}px)`
+            };
+        }
+        let displayLevel = numericLevel;
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapGridYLevel) {
             displayLevel = window.wavesTransformLayer.mapGridYLevel(level);
         }
         const sq = window.appState.config.squareSize;
         return {
             actualLevel: level,
-            displayLevel,
+            swapped: false,
             labelTop: `calc(50% - ${displayLevel * sq}px)`,
             lineBottom: `calc(50% + ${displayLevel * sq}px)`
         };
     }
 
-    /** flipH → даты, flipV → Y-метки и горизонтальные линии. */
+    _isAxisSwapped() {
+        return !!(
+            window.wavesTransformLayer &&
+            window.wavesTransformLayer.isAxisSwapped &&
+            window.wavesTransformLayer.isAxisSwapped()
+        );
+    }
+
+    applyTransformLayout(opts = {}) {
+        const sig = this._getGridLayoutSignature();
+        const needsRecreate =
+            opts.forceRecreate === true ||
+            !this.gridContainer ||
+            !this.staticElementsContainer ||
+            this._lastGridLayoutSignature !== sig;
+
+        if (needsRecreate && window.appState.hasActivePerson()) {
+            this.createGrid();
+            return;
+        }
+        this.applyFlipState();
+    }
+
+    /** flipH/V и rotate → позиции меток/линий (без CSS rotate на контейнерах). */
     applyFlipState() {
         if (!window.appState.hasActivePerson()) {
             return;
@@ -45,34 +97,140 @@ class GridManager {
         this._ensureGridContainerRefs();
         if (this.staticElementsContainer && !this.staticElementsContainer.querySelector('[data-y-level]')) {
             this.staticElementsContainer
-                .querySelectorAll('.grid-line.x, .labels.y-labels')
+                .querySelectorAll('.grid-line.x, .grid-line.state-v, .labels.y-labels, .labels.state-labels')
                 .forEach((el) => el.remove());
-            this.createHorizontalGridLines();
-            this.createYAxisLabels();
+            if (this._isAxisSwapped()) {
+                this.createStateGridLines();
+                this.createStateAxisLabels();
+            } else {
+                this.createHorizontalGridLines();
+                this.createYAxisLabels();
+            }
         }
-        this._applyGridHorizontalMirrorPositions();
-        this._applyGridVerticalMirrorPositions();
+        this._applyGridMirrorPositions();
+        this.applyGridContainerTransform();
+    }
+
+    _applyDayPosition(el, offset) {
+        if (
+            el.classList.contains('date-labels') ||
+            el.classList.contains('weekday-label')
+        ) {
+            if (el.closest('.date-row')) {
+                return;
+            }
+        }
+        const pos = this.calculateGridPosition(offset);
+        el.style.left = '';
+        el.style.right = '';
+        el.style.top = '';
+        el.style.bottom = '';
+        el.style.marginLeft = '';
+        el.style.marginTop = '';
+        if (pos.axisSwapped) {
+            if (el.classList.contains('date-row')) {
+                el.style.left = '10px';
+                el.style.top = `calc(50% + ${pos.pixelPosition}px)`;
+                el.style.transform = 'translateY(-50%)';
+            } else {
+                el.style.top = `calc(50% + ${pos.pixelPosition}px)`;
+                el.style.transform = 'translateY(-50%)';
+            }
+        } else {
+            el.style.left = `calc(50% + ${pos.pixelPosition}px)`;
+            el.style.transform = 'translateX(-50%)';
+        }
+    }
+
+    _applyStateLabelPosition(el, pos) {
+        el.style.left = '';
+        el.style.right = '';
+        el.style.top = '';
+        el.style.bottom = '';
+        if (pos.swapped) {
+            el.style.bottom = '10px';
+            el.style.left = pos.labelLeft;
+            el.style.transform = 'translateX(-50%)';
+        } else {
+            el.style.left = '10px';
+            el.style.top = pos.labelTop;
+            el.style.transform = 'translateY(-50%)';
+        }
+    }
+
+    _applyGridMirrorPositions() {
+        this._ensureGridContainerRefs();
+        if (this.gridContainer) {
+            this.gridContainer.querySelectorAll('[data-day-offset]').forEach((el) => {
+                const offset = parseInt(el.getAttribute('data-day-offset'), 10);
+                if (!Number.isNaN(offset)) {
+                    this._applyDayPosition(el, offset);
+                }
+            });
+            this.gridContainer.querySelectorAll('.grid-wrapper[data-day-offset]').forEach((wrapper) => {
+                const offset = parseInt(wrapper.getAttribute('data-day-offset'), 10);
+                if (!Number.isNaN(offset)) {
+                    this._applyDayPosition(wrapper, offset);
+                }
+            });
+        }
+        if (this.staticElementsContainer) {
+            this.staticElementsContainer.querySelectorAll('[data-y-level]').forEach((el) => {
+                const level = parseInt(el.getAttribute('data-y-level'), 10);
+                if (Number.isNaN(level)) {
+                    return;
+                }
+                const pos = this.calculateGridYPosition(level);
+                if (el.classList.contains('y-labels') || el.classList.contains('state-labels')) {
+                    this._applyStateLabelPosition(el, pos);
+                    el.textContent = String(level);
+                } else if (el.classList.contains('grid-line')) {
+                    el.style.top = '';
+                    el.style.bottom = '';
+                    el.style.left = '';
+                    el.style.right = '';
+                    if (pos.swapped) {
+                        el.style.left = pos.lineLeft;
+                    } else {
+                        el.style.bottom = pos.lineBottom;
+                    }
+                }
+            });
+        }
+    }
+
+    applyGridContainerTransform() {
+        this._ensureGridContainerRefs();
+        if (!this.gridContainer) {
+            return;
+        }
+        const currentDay = window.appState.currentDay || 0;
+        const fractionalOffset = currentDay - Math.floor(currentDay);
+        const wtl = window.wavesTransformLayer;
+        const scrollPx =
+            wtl && wtl.getDayAxisScrollPx
+                ? wtl.getDayAxisScrollPx(fractionalOffset)
+                : -fractionalOffset * window.appState.config.squareSize;
+        if (this._isAxisSwapped()) {
+            this.gridContainer.style.transform = `translateY(${scrollPx}px)`;
+        } else {
+            this.gridContainer.style.transform = `translateX(${scrollPx}px)`;
+        }
+        this.gridContainer.style.transformOrigin = '50% 50%';
+        if (this.staticElementsContainer) {
+            this.staticElementsContainer.style.transform = '';
+            this.staticElementsContainer.style.transformOrigin = '';
+        }
     }
 
     _applyGridVerticalMirrorPositions() {
-        this._ensureGridContainerRefs();
-        if (!this.staticElementsContainer) {
-            return;
-        }
-        this.staticElementsContainer.querySelectorAll('[data-y-level]').forEach((el) => {
-            const level = parseInt(el.getAttribute('data-y-level'), 10);
-            if (Number.isNaN(level)) {
-                return;
-            }
-            const pos = this.calculateGridYPosition(level);
-            if (el.classList.contains('y-labels')) {
-                el.style.top = pos.labelTop;
-                el.style.bottom = '';
-                el.style.transform = 'translateY(-50%)';
-            } else if (el.classList.contains('grid-line')) {
-                el.style.bottom = pos.lineBottom;
-            }
-        });
+        /* legacy alias */
+        this._applyGridMirrorPositions();
+    }
+
+    _applyGridHorizontalMirrorPositions() {
+        /* legacy alias */
+        this._applyGridMirrorPositions();
     }
 
     _ensureGridContainerRefs() {
@@ -84,39 +242,40 @@ class GridManager {
         }
     }
 
-    _applyGridHorizontalMirrorPositions() {
-        this._ensureGridContainerRefs();
-        if (!this.gridContainer) {
-            return;
-        }
-        const applyOffset = (el, offset) => {
-            const positionData = this.calculateGridPosition(offset);
-            el.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        };
-        this.gridContainer.querySelectorAll('[data-day-offset]').forEach((el) => {
-            const offset = parseInt(el.getAttribute('data-day-offset'), 10);
-            if (!Number.isNaN(offset)) {
-                applyOffset(el, offset);
-            }
-        });
-        this.gridContainer.querySelectorAll('.grid-wrapper[data-day-offset]').forEach((wrapper) => {
-            const offset = parseInt(wrapper.getAttribute('data-day-offset'), 10);
-            if (!Number.isNaN(offset)) {
-                applyOffset(wrapper, offset);
-            }
-        });
-    }
-
     /** Подписи дат по краям видимой сетки: −12…+13 при 24 клетках (край справа при конце дня). */
     _getDayLabelOffsetRange() {
         const half = Math.floor(window.appState.config.gridSquaresX / 2);
         return { min: -half, max: half + 1 };
     }
 
-    /** Вертикальные линии сетки — без крайних (они сливаются с outline графика). */
+    /** Линии сетки по оси дней — без крайних (сливаются с outline графика). */
     _getDayGridLineOffsetRange() {
         const half = Math.floor(window.appState.config.gridSquaresX / 2);
+        if (this._isAxisSwapped()) {
+            const q =
+                window.wavesTransformLayer &&
+                window.wavesTransformLayer.getRotationQuarter
+                    ? window.wavesTransformLayer.getRotationQuarter()
+                    : 0;
+            // ↶ −90° (q=3): линия offset +half совпадает с верхним outline
+            if (q === 3) {
+                return { min: -half + 1, max: half - 1 };
+            }
+            return { min: -half + 1, max: half };
+        }
         return { min: -half + 1, max: half };
+    }
+
+    /** Не рисовать вертикальную линию состояния на outline графика (↷/↶). */
+    _isStateGridLineOnGraphOutline(level) {
+        const wtl = window.wavesTransformLayer;
+        if (!wtl || !wtl.mapLogicalOffsets || !wtl.getDisplayGraphWidth) {
+            return false;
+        }
+        const m = wtl.mapLogicalOffsets(0, level);
+        const dw = wtl.getDisplayGraphWidth();
+        const leftPx = dw / 2 + m.x;
+        return leftPx <= 0.5 || leftPx >= dw - 0.5;
     }
     
 	createGrid() {
@@ -139,7 +298,7 @@ class GridManager {
 		this.gridContainer.style.top = '0';
 		this.gridContainer.style.left = '0';
 		
-		this.gridContainer.style.transform = `translateX(${-timeOffsetPx}px)`;
+		this.gridContainer.style.transform = '';
 		this.gridContainer.style.transition = 'none';
 		
 		this.staticElementsContainer = document.createElement('div');
@@ -154,15 +313,25 @@ class GridManager {
 		
 		const labelRange = this._getDayLabelOffsetRange();
 		const lineRange = this._getDayGridLineOffsetRange();
-		for (let i = labelRange.min; i <= labelRange.max; i++) {
-			this.createDateLabel(i);
+		if (this._isAxisSwapped()) {
+			for (let i = labelRange.min; i <= labelRange.max; i++) {
+				this.createDateLabel(i);
+			}
+			for (let i = lineRange.min; i <= lineRange.max; i++) {
+				this.createDayGridLineSwapped(i);
+			}
+			this.createStateGridLines();
+			this.createStateAxisLabels();
+		} else {
+			for (let i = labelRange.min; i <= labelRange.max; i++) {
+				this.createDateLabel(i);
+			}
+			for (let i = lineRange.min; i <= lineRange.max; i++) {
+				this.createGridLine(i);
+			}
+			this.createHorizontalGridLines();
+			this.createYAxisLabels();
 		}
-		for (let i = lineRange.min; i <= lineRange.max; i++) {
-			this.createGridLine(i);
-		}
-
-		this.createHorizontalGridLines();
-		this.createYAxisLabels();
 		
 		const graphElement = document.getElementById('graphElement');
 		if (graphElement) {
@@ -170,14 +339,25 @@ class GridManager {
 			graphElement.appendChild(this.gridContainer);
 		}
 		
-		this.updateGridNotesHighlight();
+        this.updateGridNotesHighlight();
         this._lastGridLayoutSignature = this._getGridLayoutSignature();
         this.applyFlipState();
 	}
 
     _getGridLayoutSignature() {
         const c = window.appState.config;
-        return [c.gridSquaresX, c.squareSize, window.appState.graphWidth, window.appState.graphHeight].join('|');
+        const q =
+            window.wavesTransformLayer && window.wavesTransformLayer.getRotationQuarter
+                ? window.wavesTransformLayer.getRotationQuarter()
+                : 0;
+        const wtl = window.wavesTransformLayer;
+        const dw =
+            wtl && wtl.getDisplayGraphWidth ? wtl.getDisplayGraphWidth() : window.appState.graphWidth;
+        const dh =
+            wtl && wtl.getDisplayGraphHeight
+                ? wtl.getDisplayGraphHeight()
+                : c.graphHeight;
+        return [c.gridSquaresX, c.squareSize, window.appState.graphWidth, c.graphHeight, dw, dh, q].join('|');
     }
 
     /**
@@ -287,27 +467,104 @@ class GridManager {
         date.setDate(date.getDate() + Math.floor(currentDay) + offset);
         
         const positionData = this.calculateGridPosition(offset);
+        const swapped = positionData.axisSwapped;
         
-        const label = document.createElement('div');
+        const label = document.createElement('span');
         label.className = 'labels date-labels';
-        label.style.position = 'absolute';
-        label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        label.style.transform = 'translateX(-50%)';
-        label.style.bottom = '30px';
-        label.setAttribute('data-day-offset', String(offset));
         label.textContent = date.getDate();
         
-        const weekday = document.createElement('div');
+        const weekday = document.createElement('span');
         weekday.className = 'labels x-labels weekday-label';
-        weekday.style.position = 'absolute';
-        weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
-        weekday.style.transform = 'translateX(-50%)';
-        weekday.style.bottom = '10px';
-        weekday.setAttribute('data-day-offset', String(offset));
         weekday.textContent = window.dom.getWeekdayName(date);
         
-        this.gridContainer.appendChild(label);
-        this.gridContainer.appendChild(weekday);
+        if (swapped) {
+            const row = document.createElement('div');
+            row.className = 'labels date-row';
+            row.style.position = 'absolute';
+            row.style.display = 'flex';
+            row.style.flexDirection = 'row';
+            row.style.alignItems = 'center';
+            row.style.gap = '6px';
+            row.style.left = '10px';
+            row.style.top = `calc(50% + ${positionData.pixelPosition}px)`;
+            row.style.transform = 'translateY(-50%)';
+            row.setAttribute('data-day-offset', String(offset));
+            row.appendChild(label);
+            row.appendChild(weekday);
+            this.gridContainer.appendChild(row);
+        } else {
+            label.style.position = 'absolute';
+            label.setAttribute('data-day-offset', String(offset));
+            weekday.style.position = 'absolute';
+            weekday.setAttribute('data-day-offset', String(offset));
+            label.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+            label.style.transform = 'translateX(-50%)';
+            label.style.bottom = '30px';
+            weekday.style.left = `calc(50% + ${positionData.pixelPosition}px)`;
+            weekday.style.transform = 'translateX(-50%)';
+            weekday.style.bottom = '10px';
+            this.gridContainer.appendChild(label);
+            this.gridContainer.appendChild(weekday);
+        }
+    }
+
+    createDayGridLineSwapped(offset) {
+        if (!this.gridContainer) return;
+
+        const pos = this.calculateGridPosition(offset);
+        const line = document.createElement('div');
+        line.className = 'grid-line day-h';
+        line.style.position = 'absolute';
+        line.style.width = '100%';
+        line.style.height = '1px';
+        line.style.left = '0';
+        line.style.top = `calc(50% + ${pos.pixelPosition}px)`;
+        line.setAttribute('data-day-offset', String(offset));
+        this.gridContainer.appendChild(line);
+        this.gridElements.push(line);
+    }
+
+    createStateGridLines() {
+        if (!this.staticElementsContainer) return;
+
+        for (let i = 1; i <= 5; i++) {
+            [i, -i].forEach((level) => {
+                if (this._isStateGridLineOnGraphOutline(level)) {
+                    return;
+                }
+                const pos = this.calculateGridYPosition(level);
+                const line = document.createElement('div');
+                line.className = 'grid-line state-v';
+                line.style.position = 'absolute';
+                line.style.height = '100%';
+                line.style.width = '1px';
+                line.style.top = '0';
+                line.style.left = pos.lineLeft;
+                line.setAttribute('data-y-level', String(level));
+                this.staticElementsContainer.appendChild(line);
+            });
+        }
+    }
+
+    createStateAxisLabels() {
+        if (!this.staticElementsContainer) return;
+
+        const add = (level) => {
+            const pos = this.calculateGridYPosition(level);
+            const el = document.createElement('div');
+            el.className = 'labels state-labels';
+            el.style.position = 'absolute';
+            el.setAttribute('data-y-level', String(level));
+            el.textContent = String(level);
+            this._applyStateLabelPosition(el, pos);
+            this.staticElementsContainer.appendChild(el);
+        };
+
+        add(0);
+        for (let i = 1; i <= 5; i++) {
+            add(i);
+            add(-i);
+        }
     }
     
 	createHorizontalGridLines() {
@@ -451,19 +708,34 @@ class GridManager {
     }
     
     updateGridOffset() {
-        if (!this.gridContainer) return;
-        
-        const currentDay = window.appState.currentDay || 0;
-        const fractionalOffset = currentDay - Math.floor(currentDay);
-        const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
-        
-        const invertedTimeOffsetPx = -timeOffsetPx;
-        
-        this.gridContainer.style.transform = `translateX(${invertedTimeOffsetPx}px)`;
+        this.applyGridContainerTransform();
     }
     
     updateDateLabels() {
         if (!this.gridContainer) return;
+
+        const dateRows = this.gridContainer.querySelectorAll('.date-row[data-day-offset]');
+        if (dateRows.length > 0) {
+            const currentDay = window.appState.currentDay || 0;
+            const integerDays = Math.floor(currentDay);
+            dateRows.forEach((row) => {
+                const offset = parseInt(row.getAttribute('data-day-offset'), 10);
+                if (Number.isNaN(offset)) {
+                    return;
+                }
+                const date = new Date(window.appState.baseDate);
+                date.setDate(date.getDate() + integerDays + offset);
+                const label = row.querySelector('.date-labels');
+                const weekday = row.querySelector('.weekday-label');
+                if (label) {
+                    label.textContent = date.getDate();
+                }
+                if (weekday) {
+                    weekday.textContent = window.dom.getWeekdayName(date);
+                }
+            });
+            return;
+        }
 
         const dateLabels = this.gridContainer.querySelectorAll('.date-labels[data-day-offset]');
         if (dateLabels.length > 0) {
@@ -487,7 +759,7 @@ class GridManager {
             return;
         }
 
-        this.gridContainer.querySelectorAll('.date-labels, .weekday-label').forEach((el) => el.remove());
+        this.gridContainer.querySelectorAll('.date-row, .date-labels, .weekday-label').forEach((el) => el.remove());
 
         const { min: minOffset, max: maxOffset } = this._getDayLabelOffsetRange();
         for (let i = minOffset; i <= maxOffset; i++) {
