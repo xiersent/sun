@@ -5,8 +5,11 @@
 .graph-container{position: relative; width: var(--dgw, var(--gw)); height: var(--dgh, var(--gh)); background-color: #fff; outline: 1px solid var(--clg); overflow: hidden;}
 
 /* Слой волн внутри #graphElement: transform только здесь; обрезка — overflow у .graph-container */
-.waves-transform-layer{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8; transform-origin: 50% 50%;}
+#graphElement > .waves-transform-layer{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; transform-origin: 50% 50%;}
+#graphElement > .grid-static-container, #graphElement > .grid-absolute-container{z-index: 4; pointer-events: none;}
+#graphElement > .grid-absolute-container .grid-wrapper{pointer-events: auto;}
 .waves-mount{position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden;}
+.waves-mount .wave-container, .waves-mount .wave-container svg, .waves-mount .wave-container .wave, .waves-mount .wave-container .wave-path{pointer-events: none;}
 .graph-container.graph-gray-mode{filter: grayscale(1);}
 .graph-container.graph-gray-mode .wave-label{filter: grayscale(1) !important;}
 .graph-container.graph-gray-mode .wave-axis-x-point{filter: grayscale(1) !important;}

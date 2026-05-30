@@ -309,7 +309,6 @@ class GridManager {
 		this.staticElementsContainer.style.top = '0';
 		this.staticElementsContainer.style.left = '0';
 		this.staticElementsContainer.style.pointerEvents = 'none';
-		this.staticElementsContainer.style.zIndex = '9';
 		
 		const labelRange = this._getDayLabelOffsetRange();
 		const lineRange = this._getDayGridLineOffsetRange();
@@ -337,6 +336,9 @@ class GridManager {
 		if (graphElement) {
 			graphElement.appendChild(this.staticElementsContainer);
 			graphElement.appendChild(this.gridContainer);
+		}
+		if (window.wavesTransformLayer && typeof window.wavesTransformLayer.ensureWavesLayerAboveGrid === 'function') {
+			window.wavesTransformLayer.ensureWavesLayerAboveGrid();
 		}
 		
         this.updateGridNotesHighlight();

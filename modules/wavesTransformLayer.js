@@ -313,6 +313,22 @@ class WavesTransformLayerManager {
         }
     }
 
+    /** Слой волн поверх сетки (z-index) и последним в DOM после пересоздания grid. */
+    ensureWavesLayerAboveGrid() {
+        const graph = document.getElementById('graphElement');
+        const layer = this.getLayerElement();
+        if (!graph || !layer) {
+            return;
+        }
+        if (layer.parentNode === graph) {
+            graph.appendChild(layer);
+        }
+        layer.style.zIndex = '10';
+        graph.querySelectorAll('.grid-static-container, .grid-absolute-container').forEach((el) => {
+            el.style.zIndex = '4';
+        });
+    }
+
     applyFromAppState() {
         this.migrateWaveDomFromGraphElement();
         this.clearLegacyGraphElementTransform();
@@ -368,6 +384,8 @@ class WavesTransformLayerManager {
         if (window.timeBarManager && typeof window.timeBarManager.applyFlipState === 'function') {
             window.timeBarManager.applyFlipState();
         }
+
+        this.ensureWavesLayerAboveGrid();
 
         this._lastTransformLayoutSignature = layoutSig;
     }
