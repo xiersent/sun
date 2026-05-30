@@ -24,33 +24,59 @@
     letter-spacing: 0.35px;
 }
 
-/* Горизонтальные выноски B: тонкий усик только со стороны выноски (стрелка к графику), не у края с названием */
-.wave-label.horizontal.wave-label--person-b{
+/* Усик B: с противоположной стороны от стрелки (у края с названием, не у графика) */
+.wave-label.wave-label--person-b{
     overflow: visible;
 }
-.wave-label.horizontal.wave-label--person-b::before{
+/* 0° / 180° — боковые полосы */
+.wave-labels-left .wave-label.horizontal.wave-label--person-b[data-logical-edge]::before,
+.wave-labels-right .wave-label.horizontal.wave-label--person-b[data-logical-edge]::before{
     content: '';
     position: absolute;
     top: 50%;
-    width: 14px;
+    width: 12px;
     height: 2px;
     margin-top: -1px;
-    /* Цвет заливки подложки, не currentColor (текст белый на светлом фоне усик пропадал) */
     background: var(--wave-label-fill, #888);
     opacity: 0.95;
     pointer-events: none;
     z-index: 0;
     border-radius: 1px;
 }
-/* Левая колонка выносок */
-.wave-label.horizontal.left.wave-label--person-b::before{
+.wave-labels-left .wave-label.horizontal.wave-label--person-b[data-logical-edge]::before{
     left: 0;
+    right: auto;
     transform: translateX(-100%);
 }
-/* Правая колонка выносок */
-.wave-label.horizontal.right.wave-label--person-b::before{
+.wave-labels-right .wave-label.horizontal.wave-label--person-b[data-logical-edge]::before{
     right: 0;
+    left: auto;
     transform: translateX(100%);
+}
+/* 90° / 270° — верх/низ (противоположно стрелке) */
+.wave-labels-top .wave-label.vertical.wave-label--person-b[data-logical-edge]::before,
+.wave-labels-bottom .wave-label.vertical.wave-label--person-b[data-logical-edge]::before{
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 2px;
+    height: 10px;
+    margin-left: -1px;
+    background: var(--wave-label-fill, #888);
+    opacity: 0.95;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 1px;
+}
+.wave-labels-top .wave-label.vertical.wave-label--person-b[data-logical-edge]::before{
+    top: 0;
+    bottom: auto;
+    transform: translate(-50%, -100%);
+}
+.wave-labels-bottom .wave-label.vertical.wave-label--person-b[data-logical-edge]::before{
+    bottom: 0;
+    top: auto;
+    transform: translate(-50%, 100%);
 }
 
 .wave-axis-x-point.wave-axis-x-point--person-b{

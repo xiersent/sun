@@ -1292,6 +1292,7 @@ class WavesManager {
             arrow.style.borderColor = `transparent ${color} transparent transparent`;
         }
 
+        el.style.setProperty('--wave-label-fill', color);
         arrow.style.setProperty('--wave-label-fill', color);
     }
 
@@ -1386,6 +1387,7 @@ class WavesManager {
             arrow.style.borderColor = `transparent transparent ${color} transparent`;
         }
 
+        el.style.setProperty('--wave-label-fill', color);
         arrow.style.setProperty('--wave-label-fill', color);
     }
 
