@@ -81,6 +81,8 @@
 .state-labels{color: var(--text-secondary);}
 .grid-line.state-v{background-color: #eee; z-index: 1;}
 .grid-line.day-h{background-color: #eee; z-index: 1;}
+.grid-line.day-h.active{background-color: var(--cp) !important; z-index: 6 !important;}
+#graphElement.graph--axis-swapped .axis.x-axis.active{background-color: var(--cp) !important; z-index: 6;}
 
 /* Центральная дата */
 .center-date-label{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); user-select: none; background: rgba(255, 255, 255, 0.9); padding: var(--spacing-xs) var(--spacing-sm); z-index: 20; color: var(--text-color); text-align: center; pointer-events: none; font-weight: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; font-size: var(--font-size-md); min-height: auto;}

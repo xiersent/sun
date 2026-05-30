@@ -60,7 +60,7 @@ class ImportExportManager {
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${window.dom.formatDate(new Date())}_all.json`;
+        link.download = `${window.dom.formatDate(new Date())}_everything.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

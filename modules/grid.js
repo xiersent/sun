@@ -109,6 +109,27 @@ class GridManager {
         }
         this._applyGridMirrorPositions();
         this.applyGridContainerTransform();
+        this._syncGraphAxesVisibility();
+    }
+
+    /** При 90°/270° центральная горизонталь — .axis.x-axis (day-h offset 0 не рисуем). */
+    _syncGraphAxesVisibility() {
+        const graph = document.getElementById('graphElement');
+        if (!graph) {
+            return;
+        }
+        const swapped = this._isAxisSwapped();
+        graph.classList.toggle('graph--axis-swapped', swapped);
+        const xAxis = graph.querySelector('.axis.x-axis');
+        if (xAxis && !swapped) {
+            xAxis.classList.remove('active');
+            xAxis.style.backgroundColor = '';
+        }
+    }
+
+    /** При ↷/↶ линия offset 0 совпадает с фиксированной .axis.x-axis. */
+    _isDayGridLineOnCentralAxis(offset) {
+        return this._isAxisSwapped() && Number(offset) === 0;
     }
 
     _applyDayPosition(el, offset) {
@@ -252,18 +273,22 @@ class GridManager {
     _getDayGridLineOffsetRange() {
         const half = Math.floor(window.appState.config.gridSquaresX / 2);
         if (this._isAxisSwapped()) {
-            const q =
-                window.wavesTransformLayer &&
-                window.wavesTransformLayer.getRotationQuarter
-                    ? window.wavesTransformLayer.getRotationQuarter()
-                    : 0;
-            // ↶ −90° (q=3): линия offset +half совпадает с верхним outline
-            if (q === 3) {
-                return { min: -half + 1, max: half - 1 };
-            }
-            return { min: -half + 1, max: half };
+            // ↷ +90° (q=1): offset +half — нижний outline; ↶ −90° (q=3): +half — верхний
+            return { min: -half + 1, max: half - 1 };
         }
         return { min: -half + 1, max: half };
+    }
+
+    /** Горизонтальная линия дня (↷/↶) на границе графика — не рисовать. */
+    _isDayGridLineOnGraphOutline(offset) {
+        const wtl = window.wavesTransformLayer;
+        if (!wtl || !wtl.mapLogicalOffsets || !this._isAxisSwapped()) {
+            return false;
+        }
+        const m = wtl.mapLogicalOffsets(offset, 0);
+        const dh = wtl.getDisplayGraphHeight();
+        const topPx = dh / 2 + m.y;
+        return topPx <= 0.5 || topPx >= dh - 0.5;
     }
 
     /** Не рисовать вертикальную линию состояния на outline графика (↷/↶). */
@@ -344,6 +369,8 @@ class GridManager {
         this.updateGridNotesHighlight();
         this._lastGridLayoutSignature = this._getGridLayoutSignature();
         this.applyFlipState();
+        this._syncGraphAxesVisibility();
+        this._syncGridLineActivesForVizor();
 	}
 
     _getGridLayoutSignature() {
@@ -386,17 +413,30 @@ class GridManager {
         }
         this._syncGridLineActivesForVizor();
         this.applyFlipState();
+        this._syncGraphAxesVisibility();
     }
 
     _syncGridLineActivesForVizor() {
         const currentDay = window.appState.currentDay || 0;
         const integerPart = Math.floor(currentDay);
         const fractionalPart = currentDay - integerPart;
-        this.gridElements.forEach((wrapper) => {
-            const line = wrapper.querySelector('.grid-line-inner');
-            if (!line) return;
-            const offset = parseInt(wrapper.getAttribute('data-day-offset'), 10);
-            if (Number.isNaN(offset)) return;
+        this.gridElements.forEach((el) => {
+            let line = null;
+            let offsetAttr = null;
+            if (el.classList && el.classList.contains('grid-wrapper')) {
+                line = el.querySelector('.grid-line-inner');
+                offsetAttr = el.getAttribute('data-day-offset');
+            } else if (el.classList && el.classList.contains('day-h')) {
+                line = el;
+                offsetAttr = el.getAttribute('data-day-offset');
+            }
+            if (!line || offsetAttr == null) {
+                return;
+            }
+            const offset = parseInt(offsetAttr, 10);
+            if (Number.isNaN(offset)) {
+                return;
+            }
             const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
             line.classList.toggle('active', isExactlyOnLine);
             if (line.classList.contains('has-notes')) {
@@ -408,6 +448,21 @@ class GridManager {
                 line.style.backgroundColor = '';
             }
         });
+
+        const graph = document.getElementById('graphElement');
+        const xAxis = graph && graph.querySelector('.axis.x-axis');
+        if (!xAxis) {
+            return;
+        }
+        if (!this._isAxisSwapped()) {
+            xAxis.classList.remove('active');
+            xAxis.style.backgroundColor = '';
+            return;
+        }
+        const onCentralDayLine =
+            Math.abs(fractionalPart) < 0.001 && integerPart === 0;
+        xAxis.classList.toggle('active', onCentralDayLine);
+        xAxis.style.backgroundColor = onCentralDayLine ? '' : '';
     }
     
     createGridLine(offset) {
@@ -512,6 +567,9 @@ class GridManager {
 
     createDayGridLineSwapped(offset) {
         if (!this.gridContainer) return;
+        if (this._isDayGridLineOnCentralAxis(offset) || this._isDayGridLineOnGraphOutline(offset)) {
+            return;
+        }
 
         const pos = this.calculateGridPosition(offset);
         const line = document.createElement('div');
@@ -522,6 +580,16 @@ class GridManager {
         line.style.left = '0';
         line.style.top = `calc(50% + ${pos.pixelPosition}px)`;
         line.setAttribute('data-day-offset', String(offset));
+
+        const currentDay = window.appState.currentDay || 0;
+        const integerPart = Math.floor(currentDay);
+        const fractionalPart = currentDay - integerPart;
+        const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
+        if (isExactlyOnLine) {
+            line.classList.add('active');
+            line.style.backgroundColor = '#666';
+        }
+
         this.gridContainer.appendChild(line);
         this.gridElements.push(line);
     }
