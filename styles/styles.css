@@ -176,13 +176,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-app .sun-graphSection {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
-@media (min-width: 0px) {
   .sun-mobileDeviceRoot {
     overflow: hidden;
     height: 100vh;
@@ -220,6 +213,11 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-graphGrayMode {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
   .sun-dateLabelVisible {
     display: inline-block !important;
   }
@@ -227,6 +225,180 @@ textarea {
 @media (min-width: 0px) {
   .sun-dateName.sun-dateLabelVisible, .sun-centerDateName.sun-dateLabelVisible {
     display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateName {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateStar {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app .sun-graphSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-starsMode .sun-dateName {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-starsMode .sun-dateStar {
+    display: inline-block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-starsMode .sun-centerDateName {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-starsMode .sun-centerDateStar {
+    display: inline-block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-namesMode .sun-dateName {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-namesMode .sun-dateStar {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-namesMode .sun-centerDateName {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-namesMode .sun-centerDateStar {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-grayMode {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-grayMode .sun-cornerSquare {
+    filter: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-uiHidden .sun-interfaceContainer {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-uiHidden .sun-controlsSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-uiHidden .sun-graphSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-uiHidden .sun-panelSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-uiHidden .sun-cornerSquare {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphHidden .sun-graphSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-graphContainer {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-waveLabelsContainer {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-waveLabelsVerticalContainer {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-timeBarContainer {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-waveLabel {
+    filter: grayscale(1) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-extremumLabel {
+    filter: grayscale(1) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-graphGrayMode .sun-waveAxisXPoint {
+    filter: grayscale(1) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice {
+    overflow: hidden;
+    height: 100vh;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice .sun-interfaceContainer {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice .sun-controlsSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice .sun-graphSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice .sun-panelSection {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice .sun-cornerSquare {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-app.sun-mobileDevice .sun-warningOverlay {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
   }
 }
 @media (min-width: 0px) {
@@ -311,7 +483,29 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarControlsSectionLayout {
+  .sun-timeBarControlsSection .sun-tabContainer {
+    align-items: flex-start;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed {
+    width: -moz-fit-content;
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarControlsSection .sun-tabButtons {
+    justify-content: flex-start;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
+    flex: 0 1 auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarWrap > .sun-panelSection.sun-timeBarControlsSection {
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
@@ -319,30 +513,8 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarControlsInSection {
+  .sun-timeBarWrap > .sun-panelSection.sun-timeBarControlsSection > .sun-timeBarControls {
     outline: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabContainerTimeBarControls {
-    align-items: flex-start;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed {
-    width: -moz-fit-content;
-    width: fit-content;
-    max-width: 100%;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButtonsTimeBarControls {
-    justify-content: flex-start;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed .sun-tabButton {
-    flex: 0 1 auto;
   }
 }
 @media (min-width: 0px) {
@@ -391,7 +563,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarControlLabelInGroups {
+  .sun-timeBarControlsGroups .sun-timeBarControlLabel {
     white-space: nowrap;
   }
 }
@@ -401,7 +573,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarContainerInWrap {
+  .sun-timeBarWrap .sun-timeBarContainer {
     width: 100%;
     min-height: 0;
     height: auto;
@@ -429,7 +601,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-graphGrayMode {
+  .sun-graphContainer.sun-graphGrayMode + .sun-timeBarContainer {
     filter: grayscale(1);
   }
 }
@@ -470,7 +642,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeScaleInHoursTrack {
+  .sun-timeBarHoursTrack .sun-timeScale {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -479,16 +651,10 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeLabelsInHoursTrack {
+  .sun-timeBarHoursTrack .sun-timeLabels {
     position: absolute;
     inset: 0;
     pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourMarkerInTimeBar {
-    min-height: 100%;
-    box-sizing: border-box;
   }
 }
 @media (min-width: 0px) {
@@ -515,7 +681,12 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarStateRowLastVisible {
+  .sun-timeBarStateStack > .sun-timeBarStateRow:hover > .sun-timeBarStateTrack {
+    background-color: rgba(0, 0, 0, 0.025);
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateStack > .sun-timeBarStateRow:not(.sun-timeBarStateRowHidden):not(:has(~ .sun-timeBarStateRow:not(.sun-timeBarStateRowHidden))) {
     border-bottom: none;
   }
 }
@@ -591,7 +762,6 @@ textarea {
   .sun-timeBarStateTrack:hover {
     z-index: 5;
     overflow: visible;
-    background-color: rgba(0, 0, 0, 0.025);
   }
 }
 @media (min-width: 0px) {
@@ -620,7 +790,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel {
+  .sun-timeBarSegment .sun-extremumLabel.sun-timeBarSegmentLabel {
     position: relative;
     transform: none;
     bottom: auto;
@@ -632,32 +802,32 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel.sun-extremumLabelTop {
+  .sun-timeBarSegment .sun-extremumLabel.sun-timeBarSegmentLabel.sun-extremumLabelTop {
     bottom: auto;
     margin-bottom: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumLabelTextInSegment {
+  .sun-timeBarSegment .sun-extremumLabelText {
     overflow: visible;
     text-overflow: clip;
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel:hover {
+  .sun-timeBarSegment .sun-extremumLabel.sun-timeBarSegmentLabel:hover {
     border-color: #000;
     pointer-events: auto;
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumWaveNameInSegment {
+  .sun-timeBarSegment .sun-extremumWaveName {
     cursor: pointer;
     pointer-events: auto;
     text-decoration: none;
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumWaveNameOnVizor {
+  .sun-timeBarSegment .sun-extremumWaveNameOnVizor {
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -696,7 +866,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarNowRowWhenStackEmpty {
+  .sun-timeBarStateStack:not(:has(> .sun-timeBarStateRow:not(.sun-timeBarStateRowHidden))) ~ .sun-timeBarNowRow {
     border-top: none;
   }
 }
@@ -725,7 +895,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarNowLabel {
+  .sun-timeBarNowMarker .sun-timeBarNowLabel {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -742,7 +912,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarNowLabel::before {
+  .sun-timeBarNowMarker .sun-timeBarNowLabel::before {
     content: "";
     display: block;
     position: absolute;
@@ -757,8 +927,14 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarNowLabel::after {
+  .sun-timeBarNowMarker .sun-timeBarNowLabel::after {
     display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarHoursTrack .sun-timeScale > .sun-hourMarker {
+    min-height: 100%;
+    box-sizing: border-box;
   }
 }
 @media (min-width: 0px) {
@@ -791,7 +967,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-hourLabelActive {
+  .sun-hourMarker.sun-active .sun-hourLabel {
     color: var(--cp);
     font-weight: 600;
   }
@@ -807,17 +983,6 @@ textarea {
     white-space: nowrap;
     font-weight: 400;
     font-family: var(--font-family);
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourLabelMidnight {
-    color: var(--danger-color);
-    font-weight: 700;
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourLabelInTimeBar {
-    font-size: 10px;
   }
 }
 @media (min-width: 0px) {
@@ -908,6 +1073,11 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-timeBarContainer .sun-hourLabel {
+    font-size: 10px;
+  }
+}
+@media (min-width: 0px) {
   .sun-hourMarker.sun-clickable {
     cursor: pointer;
   }
@@ -915,6 +1085,12 @@ textarea {
 @media (min-width: 0px) {
   .sun-hourMarker.sun-midnight {
     border-left-color: var(--danger-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-hourMarker.sun-midnight .sun-hourLabel {
+    color: var(--danger-color);
+    font-weight: 700;
   }
 }
 @media (min-width: 0px) {
@@ -953,12 +1129,12 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-datesPanelInControl {
+  .sun-controlPanel > .sun-datesPanel {
     grid-column: 1;
   }
 }
 @media (min-width: 0px) {
-  .sun-wavesPanelInControl {
+  .sun-controlPanel > .sun-wavesPanel {
     grid-column: 2;
   }
 }
@@ -1192,7 +1368,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-tabPanelInner {
+  .sun-tabContent .sun-summaryPanel {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -1202,18 +1378,82 @@ textarea {
     background: transparent;
     box-sizing: border-box;
     overflow: visible;
-    outline: none;
   }
 }
 @media (min-width: 0px) {
-  .sun-tabContainerInTabs {
+  .sun-tabContent .sun-intersectionPanel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContent .sun-dateComparePanel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContent .sun-analysisPanel {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContent .sun-notesPanel {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContent .sun-dbImportSection {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContent .sun-panelSection {
+    border: none;
+    padding: 0;
+    outline: none;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabsSection .sun-tabContainer {
     width: 100%;
     max-width: 100%;
     min-width: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-tabContentInTabs {
+  .sun-tabsSection .sun-tabContent {
     max-width: 100%;
     min-width: 0;
     overflow-x: hidden;
@@ -1318,7 +1558,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemSaveFlashChild {
+  .sun-listItemSaveFlash > * {
     position: relative;
     z-index: 1;
   }
@@ -1397,7 +1637,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateGenderBadge {
+  .sun-listItemDate .sun-dateGenderBadge {
     margin: 0 0.15em;
   }
 }
@@ -1417,14 +1657,14 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateEditForm {
+  .sun-listItemDate .sun-listItemEditForm {
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-xs);
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemEditRowDateMain {
+  .sun-listItemDate .sun-listItemEditRowDateMain {
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-xs);
@@ -1433,19 +1673,19 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateNameEdit {
+  .sun-listItemDate .sun-listItemEditRowDateMain .sun-dateNameEdit {
     flex: 1;
     min-width: 120px;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateInputInListEdit {
+  .sun-listItemDate .sun-listItemEditRowDateMain .dateInput {
     flex: 0 1 auto;
     min-width: 140px;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateGenderSelect {
+  .sun-listItemDate .sun-dateGenderSelect {
     flex: 0 0 auto;
     width: 42px;
     min-width: 42px;
@@ -1459,19 +1699,24 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemEditRowDateActions {
-    display: flex;
+  .sun-listItemDate .sun-listItemEditRowDateActions {
     width: 100%;
     justify-content: flex-end;
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemEditRowFull {
+  .sun-listItemDate .sun-listItemEditRowDateActions .sun-listItemEditActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemDate .sun-listItemEditRowFull {
     width: 100%;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateDescriptionEdit {
+  .sun-listItemDate .sun-dateDescriptionEdit {
     width: 100%;
     min-height: 44px;
     max-height: 160px;
@@ -1519,22 +1764,37 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemViewHidden {
+  .sun-listItemEditing > .sun-listItemContent > .sun-listItemNormalView {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemEditing > .sun-listItemContent > .sun-listItemEditForm {
+    display: flex;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup.sun-listItemEditing .sun-groupChildren .sun-listItemWave .sun-listItemNormalView {
+    display: flex !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup.sun-listItemEditing .sun-groupChildren .sun-listItemWave .sun-listItemEditForm {
     display: none !important;
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemViewShown {
-    display: flex !important;
+  .sun-listItemWave.sun-listItemEditing .sun-listItemNormalView {
+    display: none;
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemViewForceShown {
-    display: flex !important;
+  .sun-listItemWave.sun-listItemEditing .sun-listItemEditForm {
+    display: flex;
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemDragHandleMuted {
+  .sun-listItemEditing > .sun-listItemDragHandle {
     opacity: 0.3;
     cursor: default;
   }
@@ -1555,41 +1815,73 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup {
+  .sun-listItemWave {
     cursor: default;
-    background: #fafafa;
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup:hover {
-    background: #f0f0f0;
+  .sun-listItemWave:hover {
+    background-color: #f5f5f5;
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup:last-child {
-    margin-bottom: 0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveControlsInline {
+  .sun-listItemWave .sun-waveControlsInline {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     margin-right: 8px;
   }
 }
 @media (min-width: 0px) {
-  .sun-wavePeriodBadge {
+  .sun-listItemWave .sun-waveVisibilityCheck, .sun-listItemWave .sun-waveBVisibilityCheck, .sun-listItemWave .sun-waveCornerColorCheck {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+         appearance: none;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    position: relative;
+    background-color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemWave .sun-waveCornerColorCheck {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemDate .sun-dateCheckbox {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+         appearance: none;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    position: relative;
+    background-color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemWave .sun-wavePeriodBadge {
     background: #e0e0e0;
     padding: 2px 6px;
     border-radius: 3px;
-    font-size: 9px;
-    margin-left: 6px;
+    font-size: var(--font-size-xs);
+    margin-left: 8px;
     flex-shrink: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-waveColorPreviewSmall {
+  .sun-listItemWave .sun-waveColorPreviewSmall {
     width: 14px;
     height: 14px;
     border: 1px solid #ccc;
@@ -1626,6 +1918,16 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-listItemGroup .sun-waveGroupToggle {
+    margin-right: 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup .sun-waveGroupToggle:hover {
+    filter: brightness(0.9);
+  }
+}
+@media (min-width: 0px) {
   .sun-groupChildren {
     margin-top: var(--spacing-sm);
     max-height: 361px;
@@ -1634,8 +1936,58 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-groupChildrenOpen {
+  .sun-listItemExpanded .sun-groupChildren {
     display: block;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-listItemWave {
+    background: #fafafa;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-listItemWave:last-child {
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-listItemWave:hover {
+    background: #f0f0f0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-waveControlsInline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-wavePeriodBadge {
+    background: #e0e0e0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    margin-left: 6px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-waveColorPreviewSmall {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    cursor: pointer;
+    align-self: center;
+    margin: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren .sun-waveCornerColorCheck {
+    margin-left: 1px;
+    margin-right: 1px;
+    flex-shrink: 0;
   }
 }
 @media (min-width: 0px) {
@@ -1835,6 +2187,17 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-listItemGroup:not(.sun-listItemEditing) .sun-listItemDragHandle {
+    cursor: move;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup.sun-listItemEditing .sun-listItemDragHandle {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+@media (min-width: 0px) {
   .sun-listItemPersonGroup {
     cursor: default;
   }
@@ -1847,6 +2210,17 @@ textarea {
 @media (min-width: 0px) {
   .sun-listItemPersonGroup.sun-listItemExpanded {
     background-color: inherit;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup:not(.sun-listItemEditing) .sun-listItemDragHandle {
+    cursor: move;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup.sun-listItemEditing .sun-listItemDragHandle {
+    opacity: 0.3;
+    cursor: default;
   }
 }
 @media (min-width: 0px) {
@@ -1891,23 +2265,33 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateInPersonGroup {
+  .sun-personGroupChildren .sun-listItemDate {
     background: #fafafa;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateInPersonGroup:hover {
+  .sun-personGroupChildren .sun-listItemDate:hover {
     background: #f0f0f0;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateInPersonGroup.sun-listItemDragOverTop {
+  .sun-personGroupChildren .sun-listItemDate.sun-listItemDragOverTop {
     border-top: 2px solid var(--cp);
   }
 }
 @media (min-width: 0px) {
-  .sun-dateInPersonGroup.sun-listItemDragOverBottom {
+  .sun-personGroupChildren .sun-listItemDate.sun-listItemDragOverBottom {
     border-bottom: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup.sun-listItemEditing .sun-personGroupChildren .sun-listItemDate .sun-listItemNormalView {
+    display: flex !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup.sun-listItemEditing .sun-personGroupChildren .sun-listItemDate .sun-listItemEditForm {
+    display: none !important;
   }
 }
 @media (min-width: 0px) {
@@ -1925,6 +2309,12 @@ textarea {
 @media (min-width: 0px) {
   .sun-dateDragHandle:hover {
     color: var(--text-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemDate.sun-listItemEditing .sun-dateDragHandle {
+    opacity: 0.3;
+    cursor: default;
   }
 }
 @media (min-width: 0px) {
@@ -1949,24 +2339,24 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragging {
+  .sun-groupChildren .sun-listItemWave.sun-listItemDragging {
     opacity: 0.5;
     background-color: #f0f0f0;
     z-index: 10;
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverTop {
+  .sun-groupChildren .sun-listItemWave.sun-listItemDragOverTop {
     border-top: 2px solid var(--cp);
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverBottom {
+  .sun-groupChildren .sun-listItemWave.sun-listItemDragOverBottom {
     border-bottom: 2px solid var(--cp);
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverTop::before {
+  .sun-groupChildren .sun-listItemWave.sun-listItemDragOverTop::before {
     content: "";
     position: absolute;
     left: -5px;
@@ -1979,7 +2369,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverBottom::after {
+  .sun-groupChildren .sun-listItemWave.sun-listItemDragOverBottom::after {
     content: "";
     position: absolute;
     left: -5px;
@@ -2025,6 +2415,12 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-listItemWave.sun-listItemEditing .sun-waveDragHandle {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+@media (min-width: 0px) {
   .sun-dateCheckbox {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -2054,16 +2450,6 @@ textarea {
     border-radius: 2px;
     position: relative;
     background-color: white;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveGroupToggle {
-    margin-right: 8px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveGroupToggle:hover {
-    filter: brightness(0.9);
   }
 }
 @media (min-width: 0px) {
@@ -2112,13 +2498,6 @@ textarea {
     border-radius: 2px;
     position: relative;
     background-color: white;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveCornerColorCheck {
-    margin-left: 1px;
-    margin-right: 1px;
-    flex-shrink: 0;
   }
 }
 @media (min-width: 0px) {
@@ -2244,7 +2623,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateSelectionChecks {
+  .sun-listItemDate .sun-dateSelectionChecks {
     pointer-events: auto;
     display: flex;
     align-items: center;
@@ -2922,7 +3301,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-secretSchemeCell {
+  .sun-secretSchemeMiniGrid > .sun-secretSchemeCell {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3002,7 +3381,32 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-graphContainer.sun-graphGrayMode .sun-axis, .sun-graphContainer.sun-graphGrayMode .sun-gridLine, .sun-graphContainer.sun-graphGrayMode .sun-gridLineInner, .sun-graphContainer.sun-graphGrayMode .sun-wavePath {
+  .sun-graphContainer.sun-graphGrayMode .sun-waveLabel {
+    filter: grayscale(1) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode .sun-waveAxisXPoint {
+    filter: grayscale(1) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode .sun-axis {
+    filter: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode .sun-gridLine {
+    filter: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode .sun-gridLineInner {
+    filter: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode .sun-wavePath {
     filter: none;
   }
 }
@@ -3231,7 +3635,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-wavesTransformLayer {
+  .sun-graph > .sun-wavesTransformLayer {
     position: absolute;
     top: 0;
     left: 0;
@@ -3240,6 +3644,23 @@ textarea {
     pointer-events: none;
     z-index: 10;
     transform-origin: 50% 50%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graph > .sun-gridStaticContainer {
+    z-index: 4;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graph > .sun-gridAbsoluteContainer {
+    z-index: 4;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graph > .sun-gridAbsoluteContainer .sun-gridWrapper {
+    pointer-events: auto;
   }
 }
 @media (min-width: 0px) {
@@ -3280,11 +3701,6 @@ textarea {
     height: 100%;
     cursor: pointer;
     z-index: 4;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridWrapperInAbsolute {
-    pointer-events: auto;
   }
 }
 @media (min-width: 0px) {
@@ -3682,7 +4098,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumLabelArrowInSegment {
+  .sun-timeBarSegment .sun-extremumLabelTop .sun-extremumLabelArrow {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -3693,7 +4109,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumLabelArrowTopInSegment {
+  .sun-timeBarSegment .sun-extremumLabelTop .sun-extremumLabelArrowTop {
     top: -6px;
     bottom: auto;
     border-width: 0 4px 6px 4px;
@@ -3701,7 +4117,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumLabelArrowBottomInSegment {
+  .sun-timeBarSegment .sun-extremumLabelTop .sun-extremumLabelArrowBottom {
     top: auto;
     bottom: -6px;
     border-width: 6px 4px 0 4px;
@@ -3709,7 +4125,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel:hover .sun-extremumLabelArrowTopInSegment {
+  .sun-timeBarSegment .sun-extremumLabelTop:hover .sun-extremumLabelArrowTop {
     border-top-color: transparent;
     border-right-color: transparent;
     border-left-color: transparent;
@@ -3717,7 +4133,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel:hover .sun-extremumLabelArrowBottomInSegment {
+  .sun-timeBarSegment .sun-extremumLabelTop:hover .sun-extremumLabelArrowBottom {
     border-top-color: #000;
     border-right-color: transparent;
     border-left-color: transparent;
@@ -4558,8 +4974,8 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-warningDonateRow {
-    height: 32px;
-    display: flex;
+    height: 32px; /*display: flex;*/
+    display: none;
     justify-content: center;
     margin-top: 20px;
     max-width: 100%;
@@ -4626,7 +5042,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-topControlsItem {
+  .sun-topControls > * {
     display: flex;
     align-items: center;
     min-height: 25px;
@@ -4730,7 +5146,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-groupChildrenItem {
+  .sun-groupChildren > * {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -5266,7 +5682,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionFormRowActionsInForm {
+  .sun-intersectionForm > .sun-intersectionFormRowActions {
     justify-content: flex-end;
     margin-left: 0;
     margin-top: var(--spacing-xs);
@@ -5288,7 +5704,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-tabContainerWithFramedButtons {
+  .sun-tabContainer:has(> .sun-tabButtonsFramed) {
     gap: var(--spacing-sm);
   }
 }
@@ -5662,7 +6078,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionTimeRailMirrorCountdownInStats {
+  .sun-intersectionTimeRailMirrorStats > .sun-intersectionTimeRailMirrorCountdown {
     margin: 6px 0 0;
     padding: 0;
     font-size: var(--font-size-xs);
@@ -5673,7 +6089,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionTimeRailMirrorDurationInStats {
+  .sun-intersectionTimeRailMirrorStats > .sun-intersectionTimeRailMirrorDuration {
     margin-top: 0;
   }
 }
@@ -5844,8 +6260,6 @@ textarea {
     height: 100%;
     top: 0;
     left: 0;
-    z-index: 4;
-    pointer-events: none;
   }
 }
 @media (min-width: 0px) {
@@ -5855,8 +6269,6 @@ textarea {
     height: 100%;
     top: 0;
     left: 0;
-    z-index: 4;
-    pointer-events: none;
   }
 }
 @media (min-width: 0px) {
@@ -5949,6 +6361,578 @@ textarea {
     letter-spacing: normal;
   }
 }
+.sun- {
+  /* --- migration blocks from HEAD --- */
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonActionsBtn {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonState {
+    width: 1%;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTableCell {
+    padding: 8px 6px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTableHeadCell {
+    text-align: left;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--clg);
+    background: #f8f9fa;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTableRow:hover {
+    background-color: #f0f4f8;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateDescriptionEdit {
+    width: 100%;
+    min-height: 44px;
+    max-height: 160px;
+    resize: vertical;
+    height: auto;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    line-height: 1.35;
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateEditForm {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateGenderBadge {
+    margin: 0 0.15em;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInPersonGroup {
+    background: #fafafa;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInPersonGroup:hover {
+    background: #f0f0f0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInputInListEdit {
+    flex: 0 1 auto;
+    min-width: 140px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateNameEdit {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateSelectionChecks {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-datesPanelInControl {
+    grid-column: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumLabelArrowBottomInSegment {
+    top: auto;
+    bottom: -6px;
+    border-width: 6px 4px 0 4px;
+    border-color: rgb(192, 192, 192) transparent transparent transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumLabelArrowInSegment {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    z-index: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumLabelArrowTopInSegment {
+    top: -6px;
+    bottom: auto;
+    border-width: 0 4px 6px 4px;
+    border-color: transparent transparent rgb(192, 192, 192) transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumLabelTextInSegment {
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumWaveNameInSegment {
+    cursor: pointer;
+    pointer-events: auto;
+    text-decoration: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumWaveNameOnVizor {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridWrapperInAbsolute {
+    pointer-events: auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildrenItem {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildrenOpen {
+    display: block;
+  }
+}
+@media (min-width: 0px) {
+  .sun-hourLabelActive {
+    color: var(--cp);
+    font-weight: 600;
+  }
+}
+@media (min-width: 0px) {
+  .sun-hourLabelInTimeBar {
+    font-size: 10px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-hourLabelMidnight {
+    color: var(--danger-color);
+    font-weight: 700;
+  }
+}
+@media (min-width: 0px) {
+  .sun-hourMarkerInTimeBar {
+    min-height: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionFormRowActionsInForm {
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionTimeRailMirrorCountdownInStats {
+    margin: 6px 0 0;
+    padding: 0;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text-color);
+    font-variant-numeric: tabular-nums;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionTimeRailMirrorDurationInStats {
+    margin-top: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemDragHandleMuted {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemEditRowDateActions {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemEditRowDateMain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    align-items: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemEditRowFull {
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemSaveFlash::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: 0;
+    pointer-events: none;
+    animation: list-item-save-flash 0.85s ease-out forwards;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemSaveFlashChild {
+    position: relative;
+    z-index: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemViewForceShown {
+    display: flex !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemViewHidden {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemViewShown {
+    display: flex !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-secretSchemeCell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    background: #fff;
+    outline: 1px solid var(--clg);
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-size: var(--font-size-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabButtonsTimeBarControls {
+    justify-content: flex-start;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContainerInTabs {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContainerTimeBarControls {
+    align-items: flex-start;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContainerWithFramedButtons {
+    gap: var(--spacing-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContentInTabs {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabPanelInner {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-sizing: border-box;
+    overflow: visible;
+    outline: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarContainerInWrap {
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    background-color: #fff;
+    outline: 1px solid var(--clg);
+    position: relative;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
+    margin: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarControlLabelInGroups {
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarControlsInSection {
+    outline: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarControlsSectionLayout {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarNowLabel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+    font-family: monospace;
+    background-color: var(--danger-color);
+    color: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarNowLabel::before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: -4px;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid var(--danger-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarNowLabel::after {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarNowRowWhenStackEmpty {
+    border-top: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarSegmentLabel {
+    position: relative;
+    transform: none;
+    bottom: auto;
+    top: auto;
+    margin: 0;
+    max-width: none;
+    pointer-events: auto;
+    z-index: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarSegmentLabel:hover {
+    border-color: #000;
+    pointer-events: auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateRowLastVisible {
+    border-bottom: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeLabelsInHoursTrack {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeScaleInHoursTrack {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+  }
+}
+@media (min-width: 0px) {
+  .sun-topControlsItem {
+    display: flex;
+    align-items: center;
+    min-height: 25px;
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveColorPreviewSmall {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    align-self: center;
+    margin: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveControlsInline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup {
+    cursor: default;
+    background: #fafafa;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup:hover {
+    background: #f0f0f0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup:last-child {
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesPanelInControl {
+    grid-column: 2;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesTransformLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    transform-origin: 50% 50%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverTop::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--cp);
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverBottom::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--cp);
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverTop {
+    border-top: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverBottom {
+    border-bottom: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren.sun-groupChildrenDragOver {
+    background: rgba(0, 102, 204, 0.06);
+    outline: 2px dashed var(--cp);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-personGroupChildren.sun-groupChildrenDragOver {
+    background: rgba(0, 102, 204, 0.06);
+    outline: 2px dashed var(--cp);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInPersonGroup.sun-listItemDragOverTop {
+    border-top: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInPersonGroup.sun-listItemDragOverBottom {
+    border-bottom: 2px solid var(--cp);
+  }
+}
 @media (max-width: 768px) and (min-width: 0px) {
   .sun-controlPanel {
     grid-template-columns: 1fr;
@@ -5961,7 +6945,7 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-topControlsItem {
+  .sun-topControls > * {
     height: auto;
     width: 100%;
   }
@@ -6289,4 +7273,32 @@ textarea {
   .sun-warningInfo {
     font-size: var(--font-size-sm);
   }
+}
+
+/* Маркеры часов: алиасы без sun- у модификаторов (устаревший styles.css / кэш) */
+.sun-hourMarker.clickable,
+.sun-hourMarker.sun-clickable {
+  cursor: pointer;
+}
+
+.sun-hourMarker.midnight,
+.sun-hourMarker.sun-midnight {
+  border-left-color: var(--danger-color);
+}
+
+.sun-hourMarker.midnight .sun-hourLabel,
+.sun-hourMarker.sun-midnight .sun-hourLabel {
+  color: var(--danger-color);
+  font-weight: 700;
+}
+
+.sun-hourMarker.active,
+.sun-hourMarker.sun-active {
+  background-color: #e6f2ff;
+}
+
+.sun-hourMarker.active .sun-hourLabel,
+.sun-hourMarker.sun-active .sun-hourLabel {
+  color: var(--cp);
+  font-weight: 600;
 }/*# sourceMappingURL=styles.css.map */

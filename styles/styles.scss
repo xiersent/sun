@@ -2010,7 +2010,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){margin-left: 10px;}
 	}
 	&warningDonateRow{
-		@media(min-width: 0px){height: 32px; display: flex; justify-content: center; margin-top: 20px; max-width: 100%; overflow: hidden;}
+		@media(min-width: 0px){height: 32px; /*display: flex;*/ display: none; justify-content: center; margin-top: 20px; max-width: 100%; overflow: hidden;}
 	}
 	&warningDonateFrame{
 		@media(min-width: 0px){width: 216px;}
