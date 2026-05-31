@@ -1,4 +1,8 @@
-// modules/waves.js - ПОЛНЫЙ ОБНОВЛЕННЫЙ ФАЙЛ
+/**
+ * @file waves.js
+ * Менеджер волн: SVG-синусоиды, слои A/B, выноски, пересечения, точки на оси X, навигация по времени.
+ */
+/** Хелпер профилирования waveRenderDebug. */
 function __waveDbg() {
     const w = window.__waveRenderDebug;
     return w && w.isEnabled() ? w : null;
@@ -11,6 +15,7 @@ function __waveDbg() {
 const WAVE_BOLD_STROKE_VISUAL_ENABLED = false;
 
 class WavesManager {
+    /** Инициализация кэшей DOM волн и выносок. */
     constructor() {
         this.elements = {};
         this.waveContainers = {};
@@ -26,7 +31,8 @@ class WavesManager {
         this.updateInterval = 50;
         this._enabledWaveIdSetForFrame = null;
     }
-    
+
+    /** Проверяет, входит ли волна в включённую группу на текущем кадре (кэш или isWaveGroupEnabled). */
     _isWaveInEnabledGroupThisFrame(waveId) {
         if (this._enabledWaveIdSetForFrame) {
             return this._enabledWaveIdSetForFrame.has(String(waveId));
@@ -42,6 +48,7 @@ class WavesManager {
         this.wavePathLayerGroups = {};
     }
 
+    /** Преобразует логическую точку графа в экранные координаты через wavesTransformLayer. */
     _mapLabelDisplayPoint(x, y, graphW, graphH) {
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapGraphPointToDisplay) {
             return window.wavesTransformLayer.mapGraphPointToDisplay(x, y, graphW, graphH);
@@ -55,6 +62,7 @@ class WavesManager {
         return this._mapLabelDisplayPoint(x, y, lw, lh);
     }
 
+    /** Логические размеры графа из appState (ширина и высота). */
     _getLogicalGraphSize() {
         return {
             w: window.appState.graphWidth,
@@ -62,6 +70,7 @@ class WavesManager {
         };
     }
 
+    /** Отображаемые размеры графа с учётом поворота/масштаба transform-слоя. */
     _getDisplayGraphSize() {
         const wtl = window.wavesTransformLayer;
         if (wtl && wtl.getDisplayGraphWidth) {
@@ -99,6 +108,7 @@ class WavesManager {
         return dh / 2 - lw / 2;
     }
 
+    /** Определяет ось и слот (left/right/top/bottom) для выноски по логическому краю. */
     _resolveWaveLabelPlacement(logicalEdge) {
         if (window.wavesTransformLayer && window.wavesTransformLayer.resolveWaveLabelPlacement) {
             return window.wavesTransformLayer.resolveWaveLabelPlacement(logicalEdge);
@@ -109,6 +119,7 @@ class WavesManager {
         return { axis: 'vertical', slot: logicalEdge };
     }
 
+    /** Возвращает DOM-контейнер полосы выносок по слоту (left, right, top, bottom). */
     _getWaveLabelContainer(slot) {
         const map = {
             left: '.wave-labels-left',
@@ -119,6 +130,7 @@ class WavesManager {
         return document.querySelector(map[slot]);
     }
 
+    /** Сбрасывает inline-стили позиционирования элемента выноски. */
     _resetWaveLabelPositionStyles(el) {
         el.style.left = '';
         el.style.right = '';
@@ -157,6 +169,7 @@ class WavesManager {
         }
     }
 
+    /** Расставляет выноску по оси horizontal/vertical в экранных координатах. */
     _applyWaveLabelLayout(el, placement, displayPoint) {
         el.dataset.labelType = placement.axis;
         this._resetWaveLabelPositionStyles(el);
@@ -169,6 +182,7 @@ class WavesManager {
         }
     }
 
+    /** Синхронизирует геометрию стрелки выноски (горизонтальная или вертикальная полоса). */
     _syncWaveLabelGeometry(el, placement, waveColor) {
         if (placement.axis === 'horizontal') {
             this._syncHorizontalLabelSideGeometry(el, placement.slot, waveColor);
@@ -177,6 +191,7 @@ class WavesManager {
         }
     }
 
+    /** Удаляет устаревшие элементы выносок из всех четырёх полос. */
     _cleanupWaveLabelContainers(activeDomIds) {
         [
             document.querySelector('.wave-labels-left'),
@@ -190,6 +205,7 @@ class WavesManager {
         });
     }
 
+    /** Преобразует логическую Y-координату в отображаемую (flip/поворот). */
     _mapLabelDisplayY(y, graphH) {
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapDisplayY) {
             return window.wavesTransformLayer.mapDisplayY(y, graphH);
@@ -197,6 +213,7 @@ class WavesManager {
         return y;
     }
 
+    /** Преобразует логическую X-координату в отображаемую (flip/поворот). */
     _mapLabelDisplayX(x, graphW) {
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapDisplayX) {
             return window.wavesTransformLayer.mapDisplayX(x, graphW);
@@ -204,14 +221,17 @@ class WavesManager {
         return x;
     }
 
+    /** Возвращает визуальную сторону боковой выноски с учётом flip раскладки. */
     _horizontalLabelSideForFlip(side) {
         return this._resolveWaveLabelPlacement(side).slot;
     }
 
+    /** Возвращает визуальную полосу (top/bottom) вертикальной выноски с учётом flip. */
     _verticalLabelBandForFlip(position) {
         return this._resolveWaveLabelPlacement(position).slot;
     }
 
+    /** True, если оси волн и дней поменяны местами (вертикальная прокрутка). */
     _isWaveAxisSwapped() {
         return !!(
             window.wavesTransformLayer &&
@@ -220,6 +240,7 @@ class WavesManager {
         );
     }
 
+    /** Пересобирает размеры контейнеров и SVG-пути волн после смены transform-раскладки. */
     rebuildForTransformLayout() {
         const graphW = window.appState.graphWidth;
         const graphH = window.appState.config.graphHeight;
@@ -271,6 +292,7 @@ class WavesManager {
         return WAVE_BOLD_STROKE_VISUAL_ENABLED;
     }
 
+    /** Первичная инициализация: создание DOM волн и первый updatePosition. */
     init() {
         if (this.initialized) {
             return;
@@ -286,7 +308,12 @@ class WavesManager {
             endInit && endInit({});
         }
     }
-    
+
+    /**
+     * Число периодов синусоиды в SVG для покрытия viewport с запасом.
+     * @param {number} periodPx период волны в пикселях
+     * @returns {number}
+     */
     calculateRequiredPeriods(periodPx) {
         const wtl = window.wavesTransformLayer;
         const viewportWidth =
@@ -315,7 +342,8 @@ class WavesManager {
         
         return Math.max(3, periodsToCoverViewport + safetyMargin);
     }
-    
+
+    /** True, если волна входит хотя бы в одну включённую группу. */
     isWaveGroupEnabled(waveId) {
         const waveIdStr = String(waveId);
         
@@ -363,6 +391,7 @@ class WavesManager {
         return window.dates.computeDayOffsetFromBirth(personB.date, vizor, useExact);
     }
 
+    /** Нужно ли рисовать полупрозрачную синусоиду персоны B для данной волны. */
     _shouldDrawSecondPersonWave(waveIdStr) {
         if (!window.appState.waveBold[waveIdStr]) {
             return false;
@@ -429,6 +458,7 @@ class WavesManager {
         return window.appState.currentDay || 0;
     }
 
+    /** Полное пересоздание DOM контейнеров волн, выносок и точек оси X. */
     createVisibleWaveElements() {
         const d = __waveDbg();
         const endAll = d && d.t('waves.createVisibleWaveElements', {});
@@ -540,7 +570,8 @@ class WavesManager {
             end && end({});
         }
     }
-    
+
+    /** Создаёт DOM-контейнер одной волны: SVG, пути A/B, монтирование в #wavesMount. */
     createWaveElement(wave) {
         const d = __waveDbg();
         const verbose = d && d.isVerbose && d.isVerbose();
@@ -652,7 +683,12 @@ class WavesManager {
             endWave && endWave({});
         }
     }
-    
+
+    /**
+     * Генерирует SVG path синусоиды в контейнере волны.
+     * @param {number} periodPx период в пикселях
+     * @param {number} [totalPeriods=3] число периодов в path
+     */
     generateSineWave(periodPx, wavePath, waveContainer, totalPeriods = 3) {
         const { w: lw, h: lh } = this._getLogicalGraphSize();
         const { w: dw, h: dh } = this._getDisplayGraphSize();
@@ -702,7 +738,8 @@ class WavesManager {
             window.appState.periods[waveId] = periodPx;
         }
     }
-    
+
+    /** Обновляет размер контейнера и перегенерирует path A/B при смене periodPx. */
     updateWaveContainer(waveId, periodPx) {
         const container = this.waveContainers[waveId];
         if (container) {
@@ -727,7 +764,8 @@ class WavesManager {
             }
         }
     }
-    
+
+    /** Список волн, для которых нужен графический контейнер на текущей дате. */
     getActiveWaves() {
         return window.appState.data.waves.filter((wave) => this.waveNeedsGraphContainer(wave.id));
     }
@@ -748,6 +786,10 @@ class WavesManager {
         return phase;
     }
 
+    /**
+     * Значение sin-волны в точке дня (амplitude × sin), шкала ±5.
+     * @returns {number}
+     */
     calculateWaveStateAtDay(wave, currentDay) {
         if (!wave.period || wave.period <= 0) {
             return 0;
@@ -775,18 +817,21 @@ class WavesManager {
         return deriv > 0 ? 1 : -1;
     }
 
+    /** Символ направления волны для UI: ↑, ↓ или —. */
     formatWaveDirectionLabel(dir) {
         if (dir > 0) return '↑';
         if (dir < 0) return '↓';
         return '—';
     }
 
+    /** Текстовое описание направления волны для title/tooltip. */
     formatWaveDirectionTitle(dir) {
         if (dir > 0) return 'восходящая';
         if (dir < 0) return 'низходящая';
         return 'экстремум';
     }
-    
+
+    /** Включена ли подсветка экстремумов красным цветом stroke и выносок. */
     isExtremumHighlightEnabled() {
         return window.appState && window.appState.extremumWaveColorHighlight === true;
     }
@@ -807,10 +852,11 @@ class WavesManager {
             pathB.style.stroke = isExtremumB ? '#ff0000' : wave.color;
         }
     }
-    
 
-    // opts.forceWaveLabels — сразу пересобрать боковые выноски (обход throttle 50 мс).
-    // opts.light — быстрый кадр при пошаговой навигации (только transform волн).
+    /**
+     * Главный кадр: сдвиг волн, экстремумы, пересечения, выноски, точки оси X.
+     * @param {Object} [opts] forceWaveLabels — обход throttle; light — только transform волн
+     */
     updatePosition(opts = {}) {
         const light = opts.light === true;
         const d = __waveDbg();
@@ -1100,7 +1146,7 @@ class WavesManager {
         }
     }
 
-
+    /** Задаёт фон, текст и цвет стрелки выноски (обычный или экстремум). */
     _applyLabelColors(el, wave, isExtremum) {
         const color = isExtremum ? '#ff0000' : wave.color;
         const textColor = this.getContrastTextColor(color);
@@ -1148,8 +1194,8 @@ class WavesManager {
                 .forEach((label) => this._applyLabelColors(label, wave, isExtremumB));
         }
     }
-    
-    
+
+    /** Пересобирает все выноски и точки пересечения с осью X (без throttle). */
     updateAllWaveLabels(opts = {}) {
         const d = __waveDbg();
         const end = d && d.t('waves.updateAllWaveLabels', { forceWaveLabels: !!opts.forceWaveLabels });
@@ -1164,20 +1210,24 @@ class WavesManager {
         }
     }
 
+    /** DOM id боковой выноски: waveLabel{id}-{side}[-person-b]. */
     _horizontalWaveLabelDomId(waveId, side, layerKey) {
         const suffix = layerKey === 'b' ? '-person-b' : '';
         return `waveLabel${waveId}-${side}${suffix}`;
     }
 
+    /** DOM id вертикальной выноски экстремума с индексом и слоем. */
     _verticalWaveLabelDomId(waveId, position, index, layerKey) {
         const suffix = layerKey === 'b' ? '-person-b' : '';
         return `waveLabel${waveId}-${position}-${index}${suffix}`;
     }
 
+    /** Ключ data-axis-key для точки пересечения волны с осью X. */
     _axisXPointKey(waveId, layerKey, x) {
         return `${String(waveId)}-${layerKey}-${Math.round(x * 100)}`;
     }
 
+    /** Удаляет из контейнера выноски, отсутствующие в activeDomIds. */
     _removeStaleLabelElements(container, selector, activeDomIds) {
         container.querySelectorAll(selector).forEach((el) => {
             if (activeDomIds.has(el.id)) {
@@ -1231,6 +1281,7 @@ class WavesManager {
         this.lastUpdateTime = 0;
     }
 
+    /** Определяет визуальную сторону (left/right) боковой выноски по DOM-родителю. */
     _sideFromLabelElement(el) {
         if (el.closest('.wave-labels-left')) {
             return 'left';
@@ -1296,6 +1347,7 @@ class WavesManager {
         arrow.style.setProperty('--wave-label-fill', color);
     }
 
+    /** Обновляет текст, позицию и стиль вертикальной выноски времени экстремума. */
     _syncVerticalWaveLabelContent(el, wave, x, effDay, layerKey, logicalBand) {
         const graphW = window.appState.graphWidth;
         const graphH = window.appState.config.graphHeight;
@@ -1326,6 +1378,7 @@ class WavesManager {
         this._applyExtremumTimeTypography(el);
     }
 
+    /** Определяет логическую полосу (top/bottom) вертикальной выноски по DOM. */
     _bandFromLabelElement(el) {
         if (el.closest('.wave-labels-top')) {
             return 'top';
@@ -1391,6 +1444,7 @@ class WavesManager {
         arrow.style.setProperty('--wave-label-fill', color);
     }
 
+    /** Позиционирует DOM-точку пересечения с осью X в координатах слоя волн. */
     _syncAxisXPointPosition(el, x, refDay) {
         const centerY = window.appState.config.graphHeight / 2;
         const d = this._mapOverlayPoint(x, centerY);
@@ -1404,6 +1458,7 @@ class WavesManager {
         }
     }
 
+    /** Создаёт или возвращает контейнер .wave-intersection-points в #wavesMount. */
     _ensureWaveIntersectionPointsContainer() {
         let container = document.querySelector('.wave-intersection-points');
         if (container) {
@@ -1425,6 +1480,7 @@ class WavesManager {
         return container;
     }
 
+    /** Формирует многострочный title для маркера пересечения двух волн. */
     _buildWaveIntersectionPointTitle(point) {
         const timeStr = this.formatExtremumTime(point.time);
         const timeBefore = new Date(point.time.getTime() - 2.5 * 60 * 1000);
@@ -1436,6 +1492,7 @@ class WavesManager {
         return titleText;
     }
 
+    /** Создаёт кликабельный DOM-элемент маркера пересечения двух волн. */
     _createWaveIntersectionPointElement(point) {
         const pointElement = document.createElement('div');
         pointElement.className = 'wave-intersection-point';
@@ -1477,7 +1534,8 @@ class WavesManager {
 
         return pointElement;
     }
-    
+
+    /** Обновляет боковые выноски имён волн (left/right) для всех видимых слоёв. */
     updateHorizontalWaveLabels(opts = {}) {
         const d = __waveDbg();
         const now = Date.now();
@@ -1570,7 +1628,8 @@ class WavesManager {
                 });
         }
     }
-    
+
+    /** Обновляет верхние/нижние выноски времени экстремумов. */
     updateVerticalWaveLabels(opts = {}) {
         const d = __waveDbg();
         const topContainer = document.querySelector('.wave-labels-top');
@@ -1661,7 +1720,8 @@ class WavesManager {
                 });
         }
     }
-    
+
+    /** Синхронизирует DOM-точки пересечения волн с горизонтальной осью (y = centerY). */
     updateAxisXIntersectionPoints() {
         const d = __waveDbg();
         let axisXPointsContainer = document.querySelector('.wave-axis-x-points');
@@ -1731,7 +1791,11 @@ class WavesManager {
             end && end({ axisXPointElements: pointCount });
         }
     }
-    
+
+    /**
+     * X-координаты нулей синусоиды (пересечений с осью) в пределах ширины графа.
+     * @returns {number[]}
+     */
     findAxisXIntersectionPoints(wave, effDay) {
         const wavePeriodPixels = window.appState.periods[wave.id] ||
             (wave.period * window.appState.config.squareSize);
@@ -1772,6 +1836,7 @@ class WavesManager {
         return uniq;
     }
 
+    /** Создаёт DOM-элемент точки пересечения волны с осью X и вешает навигацию по клику. */
     createAxisXPoint(wave, x, container, refDay, layerKey = 'a') {
         const waveColor = wave.color || '#666666';
         const textColor = this.getContrastTextColor(waveColor);
@@ -1827,7 +1892,8 @@ class WavesManager {
         
         container.appendChild(point);
     }
-    
+
+    /** Переходит к календарному времени пересечения волны с осью X в столбце x. */
     navigateToAxisXIntersection(wave, x, refDay, layerKey = 'a') {
         // Время календаря в столбце x текущего визора; совпадает с фазой точки эквилибриума по этой x
         // (старая логика через phaseInPeriod и «первое» пересечение от leftDate ломалась при нескольких нулях на экране)
@@ -1892,7 +1958,8 @@ class WavesManager {
 
         return pointTime;
     }
-    
+
+    /** Нормализованная фаза волны [0, 1) для заданного календарного времени. */
     getPhaseAtTime(wave, time) {
         const daysFromBase = window.timeUtils.getDaysBetween(window.appState.baseDate, time);
         
@@ -1900,7 +1967,8 @@ class WavesManager {
         
         return phase < 0 ? phase + 1 : phase;
     }
-    
+
+    /** Возвращает чёрный или белый цвет текста для контраста с фоном (#hex). */
     getContrastTextColor(backgroundColor) {
         if (!backgroundColor) return '#000000';
         
@@ -1928,7 +1996,7 @@ class WavesManager {
     }
     
 
-    
+    /** Создаёт DOM боковой выноски с именем волны и обработчиками клика/hover. */
     createHorizontalWaveLabel(wave, displayPoint, logicalEdge, placement, container, layerKey = 'a') {
         const suffix = layerKey === 'b' ? '-person-b' : '';
         const labelId = `${wave.id}-${logicalEdge}${suffix}`;
@@ -2007,7 +2075,7 @@ class WavesManager {
         return labelElement;
     }
 
-
+    /** Создаёт DOM вертикальной выноски времени экстремума на полосе top/bottom. */
     createVerticalWaveLabel(
         wave,
         x,
@@ -2150,6 +2218,7 @@ class WavesManager {
         });
     }
 
+    /** Клик по боковой выноске слоя A — переключает видимость волны (как чекбокс). */
     onHorizontalWaveLabelClick(waveId) {
         const waveIdStr = String(waveId);
         const isCurrentlyVisible = window.appState.waveVisibility[waveIdStr] !== false;
@@ -2179,7 +2248,8 @@ class WavesManager {
             this.updatePosition({ forceWaveLabels: true });
         }
     }
-    
+
+    /** Клик по вертикальной выноске — навигация к времени экстремума. */
     onVerticalWaveLabelClick(labelElement) {
         const waveId = labelElement.dataset.waveId;
         const wave = window.appState.data.waves.find((w) => String(w.id) === String(waveId));
@@ -2198,7 +2268,8 @@ class WavesManager {
 
         this.navigateToExtremumTime(extremumTime.getTime());
     }
-    
+
+    /** Устанавливает дату визора на время экстремума через dates.setDate. */
     navigateToExtremumTime(timestamp) {
         const extremumDate = new Date(timestamp);
         
@@ -2206,7 +2277,8 @@ class WavesManager {
             window.dates.setDate(extremumDate, true);
         }
     }
-    
+
+    /** Вычисляет ближайшее время экстремума (top/bottom) в видимом диапазоне графа. */
     calculateExtremumTime(wave, position) {
         const periodPx = window.appState.periods[wave.id] || 
                         (wave.period * window.appState.config.squareSize);
@@ -2257,7 +2329,8 @@ class WavesManager {
         const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
         return nextExtremumTime;
     }
-    
+
+    /** Форматирует время экстремума как HH:MM:SS для подписи выноски. */
     formatExtremumTime(date) {
         const hours = date.getHours().toString().padStart(2, '0');
         const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -2265,7 +2338,8 @@ class WavesManager {
         
         return `${hours}:${minutes}:${seconds}`;
     }
-    
+
+    /** Обновляет текст времени на всех вертикальных выносках при сдвиге визора. */
     updateVerticalWaveLabelsTime() {
         const d = __waveDbg();
         const labels = document.querySelectorAll('.wave-label.vertical');
@@ -2306,7 +2380,8 @@ class WavesManager {
             end && end({});
         }
     }
-    
+
+    /** Y-координата синусоиды в точке x для заданного дня отсчёта фазы. */
     calculateWaveYAtXForDay(wave, x, effDay) {
         const wavePeriodPixels = window.appState.periods[wave.id] ||
             wave.period * window.appState.config.squareSize;
@@ -2332,6 +2407,7 @@ class WavesManager {
         );
     }
 
+    /** Y-координата синусоиды в x с effective day текущего слоя волны. */
     calculateWaveYAtX(wave, x) {
         return this.calculateWaveYAtXForDay(wave, x, this.getEffectiveDayOffsetForWave(wave));
     }
@@ -2396,7 +2472,8 @@ class WavesManager {
         return all.reduce((best, x) =>
             (Math.abs(x - cx) < Math.abs(best - cx) ? x : best), all[0]);
     }
-    
+
+    /** Все X, где волна пересекает горизонталь targetY в пределах графа. */
     findAllWaveXAtY(wave, targetY) {
         const wavePeriodPixels = window.appState.periods[wave.id] ||
             (wave.period * window.appState.config.squareSize);
@@ -2449,7 +2526,8 @@ class WavesManager {
         
         return points.sort((a, b) => a - b);
     }
-    
+
+    /** Создаёт контейнеры волн, отсутствующие в кэше, для активной даты. */
     createVisibleWaveElementsForActiveDate() {
         const d = __waveDbg();
         const end = d && d.t('waves.createVisibleWaveElementsForActiveDate', {});
@@ -2468,7 +2546,8 @@ class WavesManager {
             end && end({ createdNewContainers: created });
         }
     }
-    
+
+    /** Добавляет пользовательскую волну в appState, группу default и DOM. */
     addCustomWave(name, period, type, color) {
         if (!name || !period) {
             alert('Пожалуйста, введите название и период сигнала');
@@ -2515,7 +2594,8 @@ class WavesManager {
         
         return newWave;
     }
-    
+
+    /** Удаляет волну из данных, групп, DOM и кэшей менеджера. */
     deleteWave(waveId) {
         if (!confirm('Уничтожить этот сигнал?')) return;
         
@@ -2580,7 +2660,8 @@ class WavesManager {
             endDel && endDel({ waveIdStr: String(waveId) });
         }
     }
-    
+
+    /** Красит угловые квадраты цветом волны с включённым waveCornerColor. */
     updateCornerSquareColors() {
         let activeColor = 'red';
         let hasActiveWave = false;
@@ -2601,7 +2682,8 @@ class WavesManager {
             }
         });
     }
-    
+
+    /** Включает/выключает подсветку углов для одной волны (остальные сбрасываются). */
     setWaveCornerColor(waveId, enabled) {
         const waveIdStr = String(waveId);
         
@@ -2632,7 +2714,8 @@ class WavesManager {
 
         window.dispatchEvent(new CustomEvent('zaraza:waveCornerSelectionChanged'));
     }
-    
+
+    /** Возвращает объекты волн группы по списку id в group.waves. */
     getAllWavesInGroup(group) {
         const waves = [];
         
@@ -2654,7 +2737,8 @@ class WavesManager {
         
         return waves;
     }
-    
+
+    /** Разница в днях между двумя датами (timeUtils или fallback). */
     calculateDaysBetweenDates(date1, date2) {
         if (!window.timeUtils || !window.timeUtils.getDaysBetweenExact) {
             const d1 = date1 instanceof Date ? date1 : new Date(date1);
@@ -2670,7 +2754,8 @@ class WavesManager {
         
         return window.timeUtils.getDaysBetweenExact(date1, date2);
     }
-    
+
+    /** Точки пересечения двух волн при заданных днях отсчёта фаз слоёв A/B. */
     findWaveIntersectionPointsForDays(wave1, wave2, day1, day2, layer1Key = 'a', layer2Key = 'a') {
         const points = [];
 
@@ -2710,6 +2795,7 @@ class WavesManager {
         return points.filter((p) => p !== null);
     }
 
+    /** Точки пересечения двух волн для effective day обеих волн (слой A). */
     findWaveIntersectionPoints(wave1, wave2) {
         return this.findWaveIntersectionPointsForDays(
             wave1,
@@ -2720,7 +2806,8 @@ class WavesManager {
             'a'
         );
     }
-    
+
+    /** Точная навигация: обновляет currentDate/Day, сетку и UI миллисекунд. */
     navigateToPreciseTime(preciseTime) {
         const d = __waveDbg();
         const end = d && d.t('waves.navigateToPreciseTime', { preciseTime });
@@ -2751,7 +2838,8 @@ class WavesManager {
             end && end({});
         }
     }
-    
+
+    /** Фаза синусоиды в пикселях (радианы) для заданного дня отсчёта. */
     getPixelPhaseForDay(wave, effDay) {
         const periodPx = wave.period * window.appState.config.squareSize;
         const phaseOffsetPixels = window.appState.config.phaseOffsetDays * window.appState.config.squareSize;
@@ -2762,10 +2850,12 @@ class WavesManager {
         return (2 * Math.PI * (phaseOffsetPixels + normalizedOffset)) / periodPx;
     }
 
+    /** Фаза синусоиды в пикселях для effective day текущего слоя волны. */
     getPixelPhase(wave) {
         return this.getPixelPhaseForDay(wave, this.getEffectiveDayOffsetForWave(wave));
     }
-    
+
+    /** Строит объект точки пересечения двух волн в x (координаты, волны, время). */
     createIntersectionPoint(x, wave1, wave2, day1, day2, layer1Key = 'a', layer2Key = 'a') {
         const centerY = window.appState.config.graphHeight / 2;
         const amplitude = window.appState.config.amplitude;
@@ -2789,7 +2879,8 @@ class WavesManager {
             time: this.calculateTimeFromXCoordinate(wave1, x, day1, layer1Key)
         };
     }
-    
+
+    /** Бинарный поиск уточнения X пересечения двух синусоид на отрезке [x1, x2]. */
     refineIntersectionPoint(wave1, wave2, x1, x2, offset1, offset2, periodPx1, periodPx2) {
         const maxIterations = 10;
         const tolerance = 0.01;
@@ -2838,7 +2929,8 @@ class WavesManager {
         
         return null;
     }
-    
+
+    /** Все пересечения пар видимых волн и слоёв A/B в пределах графа. */
     calculateAllWaveIntersections() {
         const visibleWaves = this.getActiveWaves();
         const allIntersections = [];
@@ -2900,7 +2992,8 @@ class WavesManager {
 
         return allIntersections;
     }
-    
+
+    /** Убирает точки пересечения, расположенные ближе minDistance по оси X. */
     filterClosePoints(points, minDistance) {
         if (points.length === 0) return [];
         
@@ -2917,7 +3010,8 @@ class WavesManager {
         
         return filteredPoints;
     }
-    
+
+    /** Рендерит до 50 маркеров пересечений волн в .wave-intersection-points. */
     renderWaveIntersectionPoints() {
         const d = __waveDbg();
         if (window.appState && window.appState.waveIntersectionsVisible === false) {
@@ -2979,7 +3073,8 @@ class WavesManager {
 
         return container;
     }
-    
+
+    /** Удаляет все DOM-слои .wave-intersection-points с графа. */
     removeWaveIntersectionPoints() {
         const d = __waveDbg();
         const nodes = document.querySelectorAll('.wave-intersection-points');
@@ -2988,15 +3083,18 @@ class WavesManager {
         }
         nodes.forEach(el => el.remove());
     }
-    
+
+    /** Устанавливает title на элементе маркера пересечения (пара волн и время). */
     showIntersectionTooltip(element, point) {
         element.title = `${point.wave1.name} × ${point.wave2.name}\n${this.formatExtremumTime(point.time)}`;
     }
-    
+
+    /** Удаляет всплывающие .intersection-tooltip из document. */
     hideIntersectionTooltip() {
         document.querySelectorAll('.intersection-tooltip').forEach(el => el.remove());
     }
-    
+
+    /** Переходит к времени пересечения двух волн через dates.setDate. */
     navigateToIntersectionTime(time) {
         if (window.dates && window.dates.setDate) {
             window.dates.setDate(time, true);

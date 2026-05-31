@@ -1,9 +1,19 @@
+/**
+ * @file debugState.js
+ * Журнал сохранений appState и проверка обязательных ключей uiSettings.
+ * Глобально: exportStateDebug(), checkStateIssues(), forceSaveAll().
+ */
 class DebugState {
     constructor() {
         this.logs = [];
         this.maxLogs = 100;
     }
-    
+
+    /**
+     * Добавить запись в журнал (последние maxLogs событий).
+     * @param {string} action — метка действия
+     * @param {object} [data] — произвольные данные события
+     */
     logSave(action, data = {}) {
         const log = {
             timestamp: new Date().toISOString(),
@@ -11,16 +21,20 @@ class DebugState {
             data,
             state: this.getStateSnapshot()
         };
-        
+
         this.logs.unshift(log);
         if (this.logs.length > this.maxLogs) {
             this.logs.pop();
         }
     }
-    
+
+    /**
+     * Снимок uiSettings, states и счётчиков данных для отладки.
+     * @returns {object|null}
+     */
     getStateSnapshot() {
         if (!window.appState) return null;
-        
+
         return {
             uiSettings: { ...window.appState.uiSettings },
             states: {
@@ -36,7 +50,8 @@ class DebugState {
             }
         };
     }
-    
+
+    /** Скачать JSON журнала logSave и текущего снимка состояния. */
     exportLogs() {
         const data = {
             logs: this.logs,
@@ -46,11 +61,11 @@ class DebugState {
                 stateSnapshot: this.getStateSnapshot()
             }
         };
-        
+
         const dataStr = JSON.stringify(data, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = `state-debug-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
@@ -59,56 +74,60 @@ class DebugState {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
-    
+
+    /**
+     * Проверить наличие обязательных полей в uiSettings.
+     * @returns {string[]} список отсутствующих ключей (пустой — всё ок)
+     */
     checkForMissingSaves() {
         const missing = [];
-        
-        const requiredSettings = [
-            'graphHeight6Squares',
-            'graphGrayMode',
-            'cornerSquaresVisible'
-        ];
-        
-        requiredSettings.forEach(setting => {
+
+        const requiredSettings = ['graphHeight6Squares', 'graphGrayMode', 'cornerSquaresVisible'];
+
+        requiredSettings.forEach((setting) => {
             if (window.appState.uiSettings[setting] === undefined) {
                 missing.push(`uiSettings.${setting}`);
             }
         });
-        
+
         if (missing.length > 0) {
             return missing;
         }
-        
+
         return [];
     }
 }
 
 window.debugState = new DebugState();
 
-window.showState = function() {
-};
+/** Зарезервировано под вывод состояния в консоль. */
+window.showState = function () {};
 
-window.forceSaveAll = function() {
+/** Принудительно вызвать save у appState и stateManager. */
+window.forceSaveAll = function () {
     if (window.appState?.save) {
         window.appState.save();
     }
-    
+
     if (window.stateManager?.forceSave) {
         window.stateManager.forceSave();
     }
 };
 
-window.exportStateDebug = function() {
+/** Скачать журнал debugState. */
+window.exportStateDebug = function () {
     if (window.debugState?.exportLogs) {
         window.debugState.exportLogs();
     }
 };
 
-window.checkStateIssues = function() {
+/**
+ * Консоль: проверить отсутствующие ключи uiSettings.
+ * @returns {string[]}
+ */
+window.checkStateIssues = function () {
     if (window.debugState?.checkForMissingSaves) {
         const issues = window.debugState.checkForMissingSaves();
-        if (issues.length === 0) {
-        }
         return issues;
     }
     return [];

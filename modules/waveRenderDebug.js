@@ -22,6 +22,7 @@
     let cacheEnabled = false;
     const CACHE_MS = 120;
 
+    /** Проверить флаг отладки: global, localStorage, query ?waveRenderDebug=1. */
     function readEnabledRaw() {
         if (global.ZARAZA_WAVE_RENDER_DEBUG === true) {
             return true;
@@ -42,6 +43,7 @@
         return false;
     }
 
+    /** Кэшированная проверка включения профилирования (~120 ms). */
     function isEnabled() {
         const now = Date.now();
         if (now - cacheT < CACHE_MS) {
@@ -52,6 +54,7 @@
         return cacheEnabled;
     }
 
+    /** Подробный лог каждой createWaveElement / generateSineWave (localStorage verbose). */
     function isVerbose() {
         try {
             const v = global.localStorage && global.localStorage.getItem(LS_KEY);
@@ -61,6 +64,7 @@
         }
     }
 
+    /** Добавить строку в кольцевой буфер (макс. BUF_MAX записей). */
     function pushRow(row) {
         buf.push(row);
         if (buf.length > BUF_MAX) {
@@ -68,6 +72,7 @@
         }
     }
 
+    /** Записать этап в буфер и console.log [WaveRender]. */
     function log(stage, detail) {
         if (!isEnabled()) {
             return;
@@ -89,6 +94,9 @@
     }
 
     /**
+     * Таймер этапа: log(stage.start), возвращает колбэк для stage.end с durationMs.
+     * @param {string} stage
+     * @param {object} [detail]
      * @returns {function(object=): void}
      */
     function t(stage, detail) {
@@ -119,15 +127,19 @@
         t,
         isEnabled,
         isVerbose,
+        /** Копия буфера событий отрисовки. */
         getBuffer: function () {
             return buf.slice();
         },
+        /** JSON буфера для копирования в консоль. */
         dump: function () {
             return JSON.stringify(buf, null, 2);
         },
+        /** Очистить буфер событий. */
         clear: function () {
             buf.length = 0;
         },
+        /** Сбросить кэш isEnabled после смены флага без перезагрузки. */
         invalidate: function () {
             cacheT = 0;
         }

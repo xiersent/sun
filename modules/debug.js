@@ -1,34 +1,48 @@
+/**
+ * @file debug.js
+ * Отладка волн в консоли: информация о периодах, маркеры границ периодов на контейнере.
+ * Глобально: debugWaves(), showPeriodMarkers(), hidePeriodMarkers().
+ */
 class WavesDebugger {
     constructor() {
         this.debugInfo = {};
     }
-    
+
+    /**
+     * Записать в debugInfo параметры волны (период в px, ширина контейнера).
+     * @param {object} wave — объект сигнала из appState.data.waves
+     */
     logWaveInfo(wave) {
         if (!window.waves) return;
-        
+
         const periodPx = wave.period * window.appState.config.squareSize;
         const totalPeriods = window.waves.calculateRequiredPeriods(periodPx);
         const containerWidth = periodPx * totalPeriods;
     }
-    
+
+    /** Вывести в консоль данные по всем видимым и включённым волнам. */
     showAllWavesInfo() {
-        window.appState.data.waves.forEach(wave => {
+        window.appState.data.waves.forEach((wave) => {
             const waveIdStr = String(wave.id);
             const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
             const isGroupEnabled = window.waves.isWaveGroupEnabled(wave.id);
-            
+
             if (isWaveVisible && isGroupEnabled) {
                 this.logWaveInfo(wave);
             }
         });
     }
-    
+
+    /**
+     * Нарисовать вертикальные линии границ периодов поверх .wave-container.
+     * @param {HTMLElement} waveContainer
+     */
     addPeriodMarkers(waveContainer) {
         if (!waveContainer || !waveContainer.dataset.periodPx) return;
-        
+
         const periodPx = parseFloat(waveContainer.dataset.periodPx);
-        const totalPeriods = parseInt(waveContainer.dataset.totalPeriods) || 3;
-        
+        const totalPeriods = parseInt(waveContainer.dataset.totalPeriods, 10) || 3;
+
         for (let i = 0; i <= totalPeriods; i++) {
             const marker = document.createElement('div');
             marker.className = 'period-marker';
@@ -41,28 +55,32 @@ class WavesDebugger {
             marker.style.zIndex = '1000';
             marker.style.pointerEvents = 'none';
             marker.title = `Период ${i}`;
-            
+
             waveContainer.appendChild(marker);
         }
     }
-    
+
+    /** Удалить все .period-marker с графика. */
     removePeriodMarkers() {
-        document.querySelectorAll('.period-marker').forEach(marker => marker.remove());
+        document.querySelectorAll('.period-marker').forEach((marker) => marker.remove());
     }
 }
 
 window.wavesDebugger = new WavesDebugger();
 
-window.debugWaves = function() {
+/** Консоль: показать информацию по видимым волнам. */
+window.debugWaves = function () {
     window.wavesDebugger.showAllWavesInfo();
 };
 
-window.showPeriodMarkers = function() {
-    document.querySelectorAll('.wave-container').forEach(container => {
+/** Консоль: маркеры периодов на всех контейнерах волн. */
+window.showPeriodMarkers = function () {
+    document.querySelectorAll('.wave-container').forEach((container) => {
         window.wavesDebugger.addPeriodMarkers(container);
     });
 };
 
-window.hidePeriodMarkers = function() {
+/** Консоль: убрать маркеры периодов. */
+window.hidePeriodMarkers = function () {
     window.wavesDebugger.removePeriodMarkers();
 };
