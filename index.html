@@ -407,9 +407,11 @@
         </div>
     </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" onload="window.__loadPerf && window.__loadPerf.mark('vendor_jquery_loaded')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js" onload="window.__loadPerf && window.__loadPerf.mark('vendor_sqljs_loaded')"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.9/ejs.min.js" onload="window.__loadPerf && window.__loadPerf.mark('vendor_ejs_loaded')"></script>
+    <script src="vendor/jquery-3.7.1.min.js" onload="window.__loadPerf && window.__loadPerf.mark('vendor_jquery_loaded')"></script>
+    <!-- legacy SQLite (sql.js) — отключено
+    <script src="vendor/sql-wasm.js" onload="window.__loadPerf && window.__loadPerf.mark('vendor_sqljs_loaded')"></script>
+    -->
+    <script src="vendor/ejs-3.1.9.min.js" onload="window.__loadPerf && window.__loadPerf.mark('vendor_ejs_loaded')"></script>
 
     <script>window.__loadPerf && window.__loadPerf.mark('local_modules_parse_start');</script>
     <script src="modules/timeUtils.js"></script>

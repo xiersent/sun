@@ -342,9 +342,11 @@ class AppState {
                 this.virtualPosition = this.currentDay * this.config.squareSize;
                 this.graphWidth = this.config.gridSquaresX * this.config.squareSize;
                 this.isProgrammaticDateChange = false;
+                /* legacy SQLite — отключено
                 this.SQL = null;
                 this.currentDB = null;
                 this.dbImportData = null;
+                */
                 this.intersectionWaves = [];
                 this.intersectionResults = [];
                 this.waveOriginalColors = {};
@@ -479,9 +481,11 @@ class AppState {
         this.editingPersonGroupId = null;
         
         this.isProgrammaticDateChange = false;
+        /* legacy SQLite — отключено
         this.SQL = null;
         this.currentDB = null;
         this.dbImportData = null;
+        */
         this.intersectionWaves = [];
         this.intersectionResults = [];
         this.waveOriginalColors = {};

@@ -4,21 +4,22 @@
  * Имя полного файла: {дата}_everything.json.
  */
 class ImportExportManager {
-    /** @param {object|null} SQL — движок sql.js (legacy импорт БД) */
     constructor() {
+        /* legacy SQLite (sql.js) — отключено
         this.SQL = null;
         this.currentDB = null;
         this.dbImportData = null;
+        */
     }
 
-    /** Подключить sql.js из window.SQL, если ещё не загружен. */
+    /* legacy SQLite (sql.js) — отключено
     async initSQL() {
         if (!this.SQL && window.SQL) {
             this.SQL = window.SQL;
         }
         return this.SQL;
     }
-    
+    */
     /**
      * Проверка, что значение — положительная метка времени (мс).
      * @param {*} value
@@ -486,7 +487,7 @@ class ImportExportManager {
         });
     }
     
-    /** Очистить UI legacy-импорта из SQLite (если элементы есть на странице). */
+    /* legacy SQLite UI — отключено
     clearImportResults() {
         const textarea = window.dom.byKey('dbImportTextarea');
         if (textarea) textarea.value = '';
@@ -498,11 +499,6 @@ class ImportExportManager {
         if (status) status.innerHTML = '';
     }
     
-    /**
-     * Обновить прогресс-бар импорта БД.
-     * @param {number} percent — 0…100
-     * @param {string} [message]
-     */
     updateDBImportProgress(percent, message = '') {
         const progressBar = window.dom.byKey('dbImportProgressBar');
         const status = window.dom.byKey('dbImportStatus');
@@ -516,17 +512,13 @@ class ImportExportManager {
         }
     }
     
-    /**
-     * Показать статус импорта БД в блоке dbImportStatus.
-     * @param {string} message
-     * @param {'info'|'error'|'success'} [type]
-     */
     showDBImportStatus(message, type = 'info') {
         const status = window.dom.byKey('dbImportStatus');
         if (status) {
             status.innerHTML = `<div class="db-import-status ${type}">${message}</div>`;
         }
     }
+    */
 }
 
 window.importExport = new ImportExportManager();
