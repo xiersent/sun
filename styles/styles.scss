@@ -3,11 +3,35 @@
 @mixin ellipsis{white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 /** Кастомный чекбокс списков (как в lists.css до миграции). */
 @mixin sun-custom-checkbox-base{
-	@media(min-width: 0px){-webkit-appearance: none; appearance: none; width: 16px; height: 16px; cursor: pointer; margin: 0; flex-shrink: 0; border: 1px solid #ccc; border-radius: 2px; position: relative; background-color: white;}
+	@media(min-width: 0px){
+		-webkit-appearance: none;
+		appearance: none;
+		width: 16px;
+		height: 16px;
+		cursor: pointer;
+		margin: 0;
+		flex-shrink: 0;
+		border: 1px solid #ccc;
+		border-radius: 2px;
+		position: relative;
+		background-color: white;
+	}
 }
 /** Галочка ✓ — как в lists.css (10px, по центру ячейки). */
 @mixin sun-checkbox-checked-mark{
-	@media(min-width: 0px){content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: bold; line-height: 1; pointer-events: none;}
+	@media(min-width: 0px){
+		content: "✓";
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-size: 10px;
+		font-weight: bold;
+		line-height: 1;
+		pointer-events: none;
+	}
 }
 @mixin scrollbar{
 	&::-webkit-scrollbar{width: 12px;}
@@ -76,8 +100,114 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&graphGrayElement{
 		@media(min-width: 0px){filter: grayscale(1) !important;}
 	}
+	&graphGrayMode{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
 	&dateLabelVisible{
 		@media(min-width: 0px){display: inline-block !important;}
+	}
+	&dateName#{&}dateLabelVisible,
+		&centerDateName#{&}dateLabelVisible{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&dateName{
+		@media(min-width: 0px){display: none;}
+	}
+	&dateStar{
+		@media(min-width: 0px){display: none;}
+	}
+	&app #{&}graphSection{
+		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center;}
+	}
+	&app#{&}starsMode #{&}dateName{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}starsMode #{&}dateStar{
+		@media(min-width: 0px){display: inline-block !important;}
+	}
+	&app#{&}starsMode #{&}centerDateName{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}starsMode #{&}centerDateStar{
+		@media(min-width: 0px){display: inline-block !important;}
+	}
+	&app#{&}namesMode #{&}dateName{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&app#{&}namesMode #{&}dateStar{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}namesMode #{&}centerDateName{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&app#{&}namesMode #{&}centerDateStar{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}grayMode{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&app#{&}grayMode #{&}cornerSquare{
+		@media(min-width: 0px){filter: none;}
+	}
+	&app#{&}uiHidden #{&}interfaceContainer{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}uiHidden #{&}controlsSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}uiHidden #{&}graphSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}uiHidden #{&}panelSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}uiHidden #{&}cornerSquare{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&app#{&}graphHidden #{&}graphSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}graphGrayMode #{&}graphContainer{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&app#{&}graphGrayMode #{&}waveLabelsContainer{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&app#{&}graphGrayMode #{&}waveLabelsVerticalContainer{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&app#{&}graphGrayMode #{&}timeBarContainer{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&app#{&}graphGrayMode #{&}waveLabel{
+		@media(min-width: 0px){filter: grayscale(1) !important;}
+	}
+	&app#{&}graphGrayMode #{&}extremumLabel{
+		@media(min-width: 0px){filter: grayscale(1) !important;}
+	}
+	&app#{&}graphGrayMode #{&}waveAxisXPoint{
+		@media(min-width: 0px){filter: grayscale(1) !important;}
+	}
+	&app#{&}mobileDevice{
+		@media(min-width: 0px){overflow: hidden; height: 100vh;}
+	}
+	&app#{&}mobileDevice #{&}interfaceContainer{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}mobileDevice #{&}controlsSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}mobileDevice #{&}graphSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}mobileDevice #{&}panelSection{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&app#{&}mobileDevice #{&}cornerSquare{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&app#{&}mobileDevice #{&}warningOverlay{
+		@media(min-width: 0px){display: flex !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999;}
 	}
 	&wrapper{
 		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100vh; margin: 0; padding: var(--spacing-xl); background-color: var(--cbg); font-family: var(--font-family); font-size: var(--font-size-md); font-weight: 400; overflow-y: scroll; overflow-x: hidden; box-sizing: border-box;}
@@ -95,10 +225,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){display: none;}
 	}
 	&centerDateName{
-		@media(min-width: 0px){font-size: var(--font-size-md); color: var(--text-color); margin-top: 2px;}
+		@media(min-width: 0px){display: none;}
 	}
 	&centerDateStar{
-		@media(min-width: 0px){font-size: 22px;}
+		@media(min-width: 0px){display: none;}
 	}
 	&interfaceContainer{
 		@media(min-width: 0px){width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;}
@@ -109,17 +239,23 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarWrap{
 		@media(min-width: 0px){width: var(--gw); margin: var(--spacing-md) auto; align-self: center;}
 	}
-	&timeBarControlsSectionLayout{
-		@media(min-width: 0px){margin-bottom: 0; display: flex; flex-direction: column; gap: var(--spacing-sm);}
-	}
-	&timeBarControlsInSection{
-		@media(min-width: 0px){outline: none;}
-	}
-	&tabContainerTimeBarControls{
+	&timeBarControlsSection #{&}tabContainer{
 		@media(min-width: 0px){align-items: flex-start;}
 	}
-	&tabButtonsTimeBarControls{
+	&timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed{
+		@media(min-width: 0px){width: fit-content; max-width: 100%;}
+	}
+	&timeBarControlsSection #{&}tabButtons{
 		@media(min-width: 0px){justify-content: flex-start;}
+	}
+	&timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
+		@media(min-width: 0px){flex: 0 1 auto;}
+	}
+	&timeBarWrap > #{&}panelSection#{&}timeBarControlsSection{
+		@media(min-width: 0px){margin-bottom: 0; display: flex; flex-direction: column; gap: var(--spacing-sm);}
+	}
+	&timeBarWrap > #{&}panelSection#{&}timeBarControlsSection > #{&}timeBarControls{
+		@media(min-width: 0px){outline: none;}
 	}
 	&timeBarControls{
 		@media(min-width: 0px){background: #fafafa; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; font-size: 11px; user-select: none;}
@@ -136,19 +272,19 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarControlLabel{
 		@media(min-width: 0px){font-size: 11px; line-height: 1.1; color: var(--text-secondary); font-variant-numeric: tabular-nums;}
 	}
-	&timeBarControlLabelInGroups{
+	&timeBarControlsGroups #{&}timeBarControlLabel{
 		@media(min-width: 0px){white-space: nowrap;}
 	}
 	&timeBarControlsEmpty{
 		@media(min-width: 0px){color: var(--text-secondary);}
 	}
-	&timeBarContainerInWrap{
+	&timeBarWrap #{&}timeBarContainer{
 		@media(min-width: 0px){width: 100%; min-height: 0; height: auto; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: 0;}
 	}
 	&timeBarContainer{
-		@media(min-width: 0px){--time-bar-side-w: 72px;}
+		@media(min-width: 0px){width: var(--gw); min-height: 0; height: auto; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: var(--spacing-md) 0;}
 	}
-	&graphGrayMode{
+	&graphContainer#{&}graphGrayMode + #{&}timeBarContainer{
 		@media(min-width: 0px){filter: grayscale(1);}
 	}
 	&timeBar{
@@ -166,14 +302,14 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarHoursTrack{
 		@media(min-width: 0px){flex: 1 1 auto; position: relative; min-width: 0; min-height: 28px;}
 	}
-	&timeScaleInHoursTrack{
+	&timeBarHoursTrack #{&}timeScale{
 		@media(min-width: 0px){position: absolute; inset: 0; width: 100%; height: 100%; display: flex;}
 	}
-	&timeLabelsInHoursTrack{
+	&timeBarHoursTrack #{&}timeLabels{
 		@media(min-width: 0px){position: absolute; inset: 0; pointer-events: none;}
 	}
-	&hourMarkerInTimeBar{
-		@media(min-width: 0px){min-height: 100%; box-sizing: border-box;}
+	&timeBarContainer{
+		@media(min-width: 0px){--time-bar-side-w: 72px;}
 	}
 	&timeBarStateStack{
 		@media(min-width: 0px){display: flex; flex-direction: column; flex: 0 0 auto; position: relative; z-index: 1;}
@@ -181,64 +317,76 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarStateRow{
 		@media(min-width: 0px){display: flex; flex-direction: row; align-items: stretch; min-height: 20px; border-bottom: 1px solid #eee;}
 	}
-	&timeBarStateRowLastVisible{
+	&timeBarStateStack > #{&}timeBarStateRow:hover > #{&}timeBarStateTrack{
+		@media(min-width: 0px){background-color: rgba(0, 0, 0, 0.025);}
+	}
+	&timeBarStateStack > #{&}timeBarStateRow:not(#{&}timeBarStateRowHidden):not( :has(~ #{&}timeBarStateRow:not(#{&}timeBarStateRowHidden)) ){
 		@media(min-width: 0px){border-bottom: none;}
 	}
 	&timeBarStateRowHidden{
 		@media(min-width: 0px){display: none;}
 	}
+	&timeBarStateRow#{&}timeBarHoursRow{
+		@media(min-width: 0px){border-top: none; border-bottom: 1px solid var(--clg);}
+	}
 	&timeBarNowRow{
-		@media(min-width: 0px){display: flex; flex-shrink: 0; min-height: var(--time-bar-now-row-h); background: #fff; position: relative; z-index: 13;}
+		@media(min-width: 0px){border-top: 1px solid var(--clg); border-bottom: none;}
 	}
 	&timeBarStateSide{
 		@media(min-width: 0px){flex: 0 0 var(--time-bar-side-w, 72px); display: flex; align-items: center; gap: 4px; padding: 0 6px; border-right: 1px solid var(--clg); background: #fafafa; font-size: 11px; color: var(--text-secondary);}
 	}
 	&timeBarStateToggle{
 		@media(min-width: 0px){flex: 0 0 auto; width: 22px; height: 20px; padding: 0; border: 1px solid var(--clg); border-radius: 3px; background: #fff; cursor: pointer; font-size: 11px; line-height: 1; color: var(--text-color);}
-		&:hover{
-			@media(min-width: 0px){background: #f0f0f0;}
-		}
+	}
+	&timeBarStateToggle:hover{
+		@media(min-width: 0px){background: #f0f0f0;}
 	}
 	&timeBarStateLabel{
 		@media(min-width: 0px){font-variant-numeric: tabular-nums; font-weight: 600; min-width: 22px;}
 	}
 	&timeBarStateTrack{
 		@media(min-width: 0px){flex: 1 1 auto; position: relative; z-index: 1; min-width: 0; min-height: 28px; background: #fff; overflow: hidden;}
-		&:hover{
-			@media(min-width: 0px){z-index: 5; overflow: visible; background-color: rgba(0, 0, 0, 0.025);}
-		}
+	}
+	&timeBarStateTrack:hover{
+		@media(min-width: 0px){z-index: 5; overflow: visible;}
 	}
 	&timeBarSegmentSlot{
 		@media(min-width: 0px){position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 9; display: flex; justify-content: center; align-items: center;}
-		&:hover{
-			@media(min-width: 0px){z-index: 200 !important;}
-		}
+	}
+	&timeBarSegmentSlot:hover{
+		@media(min-width: 0px){z-index: 200 !important;}
 	}
 	&timeBarSegment{
 		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;}
 	}
-	&timeBarSegmentLabel{
+	&timeBarSegment #{&}extremumLabel#{&}timeBarSegmentLabel{
 		@media(min-width: 0px){position: relative; transform: none; bottom: auto; top: auto; margin: 0; max-width: none; pointer-events: auto; z-index: 1;}
-		&:hover{
-			@media(min-width: 0px){border-color: #000; pointer-events: auto;}
-		}
 	}
-	&extremumLabelTextInSegment{
+	&timeBarSegment #{&}extremumLabel#{&}timeBarSegmentLabel#{&}extremumLabelTop{
+		@media(min-width: 0px){bottom: auto; margin-bottom: 0;}
+	}
+	&timeBarSegment #{&}extremumLabelText{
 		@media(min-width: 0px){overflow: visible; text-overflow: clip;}
 	}
-	&extremumWaveNameInSegment{
+	&timeBarSegment #{&}extremumLabel#{&}timeBarSegmentLabel:hover{
+		@media(min-width: 0px){border-color: #000; pointer-events: auto;}
+	}
+	&timeBarSegment #{&}extremumWaveName{
 		@media(min-width: 0px){cursor: pointer; pointer-events: auto; text-decoration: none;}
 	}
-	&extremumWaveNameOnVizor{
+	&timeBarSegment #{&}extremumWaveNameOnVizor{
 		@media(min-width: 0px){text-decoration: underline; text-underline-offset: 2px;}
 	}
 	&timeBarNowVline{
 		@media(min-width: 0px){position: absolute; top: 0; bottom: var(--time-bar-now-line-anchor); left: 0; width: 0; z-index: 12; pointer-events: none;}
-		&::before{
-			@media(min-width: 0px){content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background-color: var(--danger-color); transform: translateX(-50%);}
-		}
 	}
-	&timeBarNowRowWhenStackEmpty{
+	&timeBarNowVline::before{
+		@media(min-width: 0px){content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background-color: var(--danger-color); transform: translateX(-50%);}
+	}
+	&timeBarNowRow{
+		@media(min-width: 0px){display: flex; flex-shrink: 0; min-height: var(--time-bar-now-row-h); background: #fff; position: relative; z-index: 13;}
+	}
+	&timeBarStateStack:not( :has(> #{&}timeBarStateRow:not(#{&}timeBarStateRowHidden)) ) ~ #{&}timeBarNowRow{
 		@media(min-width: 0px){border-top: none;}
 	}
 	&timeBarStateSideNow{
@@ -247,68 +395,80 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarNowTrack{
 		@media(min-width: 0px){flex: 1 1 auto; position: relative; min-width: 0; min-height: var(--time-bar-now-row-h);}
 	}
-	&timeBarNowLabel{
+	&timeBarNowMarker#{&}timeIndicator{
+		@media(min-width: 0px){position: absolute; top: 50%; left: 0; width: 0; height: 0; transform: translate(-50%, -50%); z-index: 14;}
+	}
+	&timeBarNowMarker #{&}timeBarNowLabel{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap; font-weight: 600; font-family: monospace; background-color: var(--danger-color); color: #fff;}
-		&::before{
-			@media(min-width: 0px){content: ""; display: block; position: absolute; left: 50%; top: -4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid var(--danger-color);}
-		}
-		&::after{
-			@media(min-width: 0px){display: none;}
-		}
+	}
+	&timeBarNowMarker #{&}timeBarNowLabel::before{
+		@media(min-width: 0px){content: ""; display: block; position: absolute; left: 50%; top: -4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid var(--danger-color);}
+	}
+	&timeBarNowMarker #{&}timeBarNowLabel::after{
+		@media(min-width: 0px){display: none;}
+	}
+	&timeBarHoursTrack #{&}timeScale > #{&}hourMarker{
+		@media(min-width: 0px){min-height: 100%; box-sizing: border-box;}
 	}
 	&hourMarker{
 		@media(min-width: 0px){flex: 1; border-left: 1px solid var(--clg); position: relative; cursor: pointer; box-sizing: border-box;}
-		&:first-child{
-			@media(min-width: 0px){border-left: none;}
-		}
-		&:hover{
-			@media(min-width: 0px){background-color: rgba(0, 0, 0, 0.05);}
-		}
-		&.sun-active{
-			@media(min-width: 0px){background-color: #e6f2ff;}
-		}
-		&.sun-active:hover{
-			@media(min-width: 0px){background-color: #dcecff;}
-		}
 	}
-	&hourLabelActive{
+	&hourMarker:first-child{
+		@media(min-width: 0px){border-left: none;}
+	}
+	&hourMarker:hover{
+		@media(min-width: 0px){background-color: rgba(0, 0, 0, 0.05);}
+	}
+	&hourMarker.sun-active{
+		@media(min-width: 0px){background-color: #e6f2ff;}
+	}
+	&hourMarker.sun-active:hover{
+		@media(min-width: 0px){background-color: #dcecff;}
+	}
+	&hourMarker.sun-active #{&}hourLabel{
 		@media(min-width: 0px){color: var(--cp); font-weight: 600;}
 	}
 	&hourLabel{
 		@media(min-width: 0px){position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: var(--font-size-xs); color: var(--text-secondary); white-space: nowrap; font-weight: 400; font-family: var(--font-family);}
-	}
-	&hourLabelMidnight{
-		@media(min-width: 0px){color: var(--danger-color); font-weight: 700;}
-	}
-	&hourLabelInTimeBar{
-		@media(min-width: 0px){font-size: 10px;}
 	}
 	&halfHourMarker{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 0; width: 1px; height: 30%; background-color: rgba(0, 0, 0, 0.15); transform: translateY(-50%); pointer-events: none;}
 	}
 	&timeIndicator{
 		@media(min-width: 0px){position: absolute; top: 0; width: 0; height: 100%; background-color: transparent; z-index: 10; pointer-events: none; transform: translateX(-50%);}
-		&::before{
-			@media(min-width: 0px){display: none;}
-		}
-		&::after{
-			@media(min-width: 0px){display: none;}
-		}
+	}
+	&timeIndicator::before{
+		@media(min-width: 0px){display: none;}
+	}
+	&timeIndicator::after{
+		@media(min-width: 0px){display: none;}
 	}
 	&timeIndicatorLabel{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--danger-color); color: white; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); white-space: nowrap; font-weight: 600; font-family: monospace; z-index: 11;}
-		&::before{
-			@media(min-width: 0px){content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;}
-		}
-		&::after{
-			@media(min-width: 0px){content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;}
-		}
-		&::before{
-			@media(min-width: 0px){top: -4px; border-bottom: 4px solid var(--danger-color);}
-		}
-		&::after{
-			@media(min-width: 0px){bottom: -4px; border-top: 4px solid var(--danger-color);}
-		}
+	}
+	&timeIndicatorLabel::before{
+		@media(min-width: 0px){content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;}
+	}
+	&timeIndicatorLabel::after{
+		@media(min-width: 0px){content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;}
+	}
+	&timeIndicatorLabel::before{
+		@media(min-width: 0px){top: -4px; border-bottom: 4px solid var(--danger-color);}
+	}
+	&timeIndicatorLabel::after{
+		@media(min-width: 0px){bottom: -4px; border-top: 4px solid var(--danger-color);}
+	}
+	&timeBarContainer #{&}hourLabel{
+		@media(min-width: 0px){font-size: 10px;}
+	}
+	&hourMarker#{&}clickable{
+		@media(min-width: 0px){cursor: pointer;}
+	}
+	&hourMarker#{&}midnight{
+		@media(min-width: 0px){border-left-color: var(--danger-color);}
+	}
+	&hourMarker#{&}midnight #{&}hourLabel{
+		@media(min-width: 0px){color: var(--danger-color); font-weight: 700;}
 	}
 	&controlsSection{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-lg); width: 100%;}
@@ -322,11 +482,32 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&controlPanel{
 		@media(min-width: 0px){display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-lg); width: 100%;}
 	}
-	&datesPanelInControl{
+	&controlPanel > #{&}datesPanel{
 		@media(min-width: 0px){grid-column: 1;}
 	}
-	&wavesPanelInControl{
+	&controlPanel > #{&}wavesPanel{
 		@media(min-width: 0px){grid-column: 2;}
+	}
+	&btnToday#{&}todayActive{
+		@media(min-width: 0px){background-color: var(--cp); color: #fff;}
+	}
+	&btnToday#{&}todayInactive{
+		@media(min-width: 0px){background-color: #ff9900; color: #fff;}
+	}
+	&btnToday#{&}todayInactive:hover{
+		@media(min-width: 0px){background-color: #ffad33; filter: brightness(1.1);}
+	}
+	&btnFlipH#{&}flipHActive{
+		@media(min-width: 0px){background-color: #ff9900; color: #fff;}
+	}
+	&btnFlipH#{&}flipHActive:hover{
+		@media(min-width: 0px){background-color: #ffad33; filter: brightness(1.1);}
+	}
+	&btnFlipV#{&}flipVActive{
+		@media(min-width: 0px){background-color: #ff9900; color: #fff;}
+	}
+	&btnFlipV#{&}flipVActive:hover{
+		@media(min-width: 0px){background-color: #ffad33; filter: brightness(1.1);}
 	}
 	&btnDeleteDisplayViewTemplate{
 		@media(min-width: 0px){min-width: 28px; padding-left: 6px; padding-right: 6px; text-align: center; line-height: 1;}
@@ -357,62 +538,74 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&warningOverlay{
 		@media(min-width: 0px){position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--cbg); z-index: var(--z-overlay); display: flex; justify-content: center; align-items: center; flex-direction: column; padding: var(--spacing-lg);}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
+	}
+	&warningOverlay.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
 	}
 	&warningBox{
 		@media(min-width: 0px){background: #fff; padding: var(--spacing-xl); border: 1px solid var(--clg); max-width: 525px; text-align: center; display: block;}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
+	}
+	&warningBox.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
 	}
 	&tabContainer{
 		@media(min-width: 0px){display: flex; flex-direction: column;}
 	}
 	&tabButtons{
-		@media(min-width: 0px){display: flex; padding: 0; gap: 0; flex-wrap: wrap;}
+		@media(min-width: 0px){display: flex; padding: 0; gap: 0; flex-wrap: wrap; background: #fff;}
 	}
 	&tabButton{
-		@media(min-width: 0px){padding: 0 16px; background: none; border: none; cursor: pointer; color: #495057; font-size: var(--font-size-sm); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;}
-		&:last-child{
-			@media(min-width: 0px){border-right: none;}
-		}
-		&.sun-active{
-			@media(min-width: 0px){background: var(--cp); color: #fff; font-weight: 500;}
-		}
-		&:hover:not(.sun-active){
-			@media(min-width: 0px){background: #f5f5f5;}
-		}
-		&:last-child{
-			@media(min-width: 0px){border-right: none;}
-		}
-		&.sun-active{
-			@media(min-width: 0px){background: var(--cp); color: #fff;}
-		}
+		@media(min-width: 0px){padding: 8px 16px; background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: var(--font-size-lg); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; display: flex; align-items: center; justify-content: center;}
+	}
+	&tabButton:last-child{
+		@media(min-width: 0px){border-right: none;}
+	}
+	&tabButton.sun-active{
+		@media(min-width: 0px){background: var(--cp); color: #fff; font-weight: 500;}
+	}
+	&tabButton:hover:not(.sun-active){
+		@media(min-width: 0px){background: #f5f5f5;}
+	}
+	&tabButtons#{&}tabButtonsFramed{
+		@media(min-width: 0px){border: 1px solid var(--clg); border-radius: 4px; overflow: hidden; background: #fff;}
+	}
+	&tabButtons#{&}tabButtonsFramed #{&}tabButton{
+		@media(min-width: 0px){font-size: var(--font-size-sm); padding: 6px 10px; flex: 1 1 0; font-weight: 500; display: flex; align-items: center; justify-content: center;}
+	}
+	&tabButtons#{&}tabButtonsFramed #{&}tabButton.sun-active{
+		@media(min-width: 0px){font-weight: 600;}
 	}
 	&tabContent{
-		@media(min-width: 0px){display: none;}
-		&.sun-active{
-			@media(min-width: 0px){display: block;}
-		}
-		&.sun-active{
-			@media(min-width: 0px){display: block;}
-		}
+		@media(min-width: 0px){display: none; background: #fff; border: 1px solid var(--clg); padding: var(--spacing-md);}
 	}
-	&tabPanelInner{
-		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible; outline: none;}
+	&tabContent.sun-active{
+		@media(min-width: 0px){display: block;}
 	}
-	&tabContainerInTabs{
+	&tabContent #{&}summaryPanel{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible;}
+	}
+	&tabContent #{&}intersectionPanel{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible;}
+	}
+	&tabContent #{&}dateComparePanel{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible;}
+	}
+	&tabContent #{&}analysisPanel{
+		@media(min-width: 0px){width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
+	}
+	&tabContent #{&}notesPanel{
+		@media(min-width: 0px){width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
+	}
+	&tabContent #{&}dbImportSection{
+		@media(min-width: 0px){width: 100%; max-width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
+	}
+	&tabContent #{&}panelSection{
+		@media(min-width: 0px){border: none; padding: 0; outline: none; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: visible;}
+	}
+	&tabsSection #{&}tabContainer{
 		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0;}
 	}
-	&tabContentInTabs{
+	&tabsSection #{&}tabContent{
 		@media(min-width: 0px){max-width: 100%; min-width: 0; overflow-x: hidden; overflow-y: visible; box-sizing: border-box;}
 	}
 	&inputGroup{
@@ -432,12 +625,6 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&listItem{
 		@media(min-width: 0px){padding: var(--spacing-sm); background: #fff; display: flex; align-items: center; gap: 8px; min-height: 40px; position: relative; outline: 1px solid var(--clg);}
-		&:first-child{
-			@media(min-width: 0px){overflow: hidden;}
-		}
-		&:last-child{
-			@media(min-width: 0px){overflow: hidden;}
-		}
 	}
 	&listItemClickable{
 		@media(min-width: 0px){cursor: pointer;}
@@ -447,9 +634,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&listItemDragHandle{
 		@media(min-width: 0px){cursor: move; color: #999; padding: 2px; flex-shrink: 0; user-select: none;}
-		&:hover{
-			@media(min-width: 0px){color: var(--text-color);}
-		}
+	}
+	&listItemDragHandle:hover{
+		@media(min-width: 0px){color: var(--text-color);}
 	}
 	&listItemDragging{
 		@media(min-width: 0px){opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
@@ -457,13 +644,16 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemDragOver{
 		@media(min-width: 0px){background-color: #e6f2ff; border-top: 2px solid var(--cp);}
 	}
-	&listItemSaveFlash{
-		&::before{
-			@media(min-width: 0px){content: ""; position: absolute; inset: 1px; z-index: 0; pointer-events: none; animation: list-item-save-flash 0.85s ease-out forwards;}
-		}
+	&listItemSaveFlash::before{
+		@media(min-width: 0px){content: ""; position: absolute; inset: 1px; z-index: 0; pointer-events: none; animation: list-item-save-flash 0.85s ease-out forwards;}
 	}
-	&listItemSaveFlashChild{
+	&listItemSaveFlash > *{
 		@media(min-width: 0px){position: relative; z-index: 1;}
+	}
+	@media(prefers-reduced-motion: reduce){
+		&listItemSaveFlash::before{
+			@media(min-width: 0px){animation-duration: 0.15s;}
+		}
 	}
 	&listItemContent{
 		@media(min-width: 0px){flex: 1; min-width: 0; display: flex; flex-direction: column;}
@@ -489,7 +679,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemValue{
 		@media(min-width: 0px){color: var(--text-secondary); white-space: nowrap; font-size: var(--font-size-sm);}
 	}
-	&dateGenderBadge{
+	&listItemDate #{&}dateGenderBadge{
 		@media(min-width: 0px){margin: 0 0.15em;}
 	}
 	&listItemActions{
@@ -498,28 +688,31 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemEditForm{
 		@media(min-width: 0px){display: none; flex-wrap: wrap; gap: 8px; width: 100%;}
 	}
-	&dateEditForm{
+	&listItemDate #{&}listItemEditForm{
 		@media(min-width: 0px){flex-direction: column; align-items: stretch; gap: var(--spacing-xs);}
 	}
-	&listItemEditRowDateMain{
+	&listItemDate #{&}listItemEditRowDateMain{
 		@media(min-width: 0px){display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
 	}
-	&dateNameEdit{
+	&listItemDate #{&}listItemEditRowDateMain #{&}dateNameEdit{
 		@media(min-width: 0px){flex: 1; min-width: 120px;}
 	}
-	&dateInputInListEdit{
+	&listItemDate #{&}listItemEditRowDateMain .dateInput{
 		@media(min-width: 0px){flex: 0 1 auto; min-width: 140px;}
 	}
-	&dateGenderSelect{
+	&listItemDate #{&}dateGenderSelect{
 		@media(min-width: 0px){flex: 0 0 auto; width: 42px; min-width: 42px; max-width: 42px; height: 25px; padding: 2px 4px; font-size: var(--font-size-sm); text-align: center; text-align-last: center;}
 	}
-	&listItemEditRowDateActions{
-		@media(min-width: 0px){display: flex; width: 100%; justify-content: flex-end;}
+	&listItemDate #{&}listItemEditRowDateActions{
+		@media(min-width: 0px){width: 100%; justify-content: flex-end;}
 	}
-	&listItemEditRowFull{
+	&listItemDate #{&}listItemEditRowDateActions #{&}listItemEditActions{
+		@media(min-width: 0px){width: 100%; justify-content: flex-end;}
+	}
+	&listItemDate #{&}listItemEditRowFull{
 		@media(min-width: 0px){width: 100%;}
 	}
-	&dateDescriptionEdit{
+	&listItemDate #{&}dateDescriptionEdit{
 		@media(min-width: 0px){width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: var(--font-family); font-size: var(--font-size-sm);}
 	}
 	&listItemEditRow{
@@ -534,83 +727,142 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemEditActions{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center; justify-content: flex-end;}
 	}
-	&listItemViewHidden{
+	&listItemEditing > #{&}listItemContent > #{&}listItemNormalView{
+		@media(min-width: 0px){display: none;}
+	}
+	&listItemEditing > #{&}listItemContent > #{&}listItemEditForm{
+		@media(min-width: 0px){display: flex;}
+	}
+	&listItemGroup#{&}listItemEditing #{&}groupChildren #{&}listItemWave #{&}listItemNormalView{
+		@media(min-width: 0px){display: flex !important;}
+	}
+	&listItemGroup#{&}listItemEditing #{&}groupChildren #{&}listItemWave #{&}listItemEditForm{
 		@media(min-width: 0px){display: none !important;}
 	}
-	&listItemViewShown{
-		@media(min-width: 0px){display: flex !important;}
+	&listItemWave#{&}listItemEditing #{&}listItemNormalView{
+		@media(min-width: 0px){display: none;}
 	}
-	&listItemViewForceShown{
-		@media(min-width: 0px){display: flex !important;}
+	&listItemWave#{&}listItemEditing #{&}listItemEditForm{
+		@media(min-width: 0px){display: flex;}
 	}
-	&listItemDragHandleMuted{
+	&listItemEditing > #{&}listItemDragHandle{
 		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
 	&listItemDate{
 		@media(min-width: 0px){cursor: pointer;}
-		&:hover{
-			@media(min-width: 0px){background-color: #f5f5f5;}
-		}
-		&.sun-active{
-			@media(min-width: 0px){background-color: #e6f2ff;}
-		}
 	}
-	&waveInGroup{
-		@media(min-width: 0px){cursor: default; background: #fafafa;}
-		&:hover{
-			@media(min-width: 0px){background: #f0f0f0;}
-		}
-		&:last-child{
-			@media(min-width: 0px){margin-bottom: 0;}
-		}
+	&listItemDate:hover{
+		@media(min-width: 0px){background-color: #f5f5f5;}
 	}
-	&waveControlsInline{
-		@media(min-width: 0px){display: flex; align-items: center; gap: 6px; margin-right: 8px;}
+	&listItemDate.sun-active{
+		@media(min-width: 0px){background-color: #e6f2ff;}
 	}
-	&wavePeriodBadge{
-		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 400;}
+	&listItemWave{
+		@media(min-width: 0px){cursor: default;}
 	}
-	&waveColorPreviewSmall{
+	&listItemWave:hover{
+		@media(min-width: 0px){background-color: #f5f5f5;}
+	}
+	&listItemWave #{&}waveControlsInline{
+		@media(min-width: 0px){display: flex; align-items: center; gap: 4px; margin-right: 8px;}
+	}
+	&listItemWave #{&}waveVisibilityCheck,
+	&listItemWave #{&}waveBVisibilityCheck,
+	&listItemWave #{&}waveCornerColorCheck{
+		@include sun-custom-checkbox-base;
+	}
+	&listItemWave #{&}waveCornerColorCheck{
+		@media(min-width: 0px){margin-left: 2px; margin-right: 2px;}
+	}
+	&listItemDate #{&}dateCheckbox{
+		@include sun-custom-checkbox-base;
+	}
+	&listItemWave #{&}wavePeriodBadge{
+		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); margin-left: 8px; flex-shrink: 0;}
+	}
+	&listItemWave #{&}waveColorPreviewSmall{
 		@media(min-width: 0px){width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; flex-shrink: 0; align-self: center; margin: 0;}
 	}
 	&listItemGroup{
 		@media(min-width: 0px){cursor: default;}
-		&:not(.sun-listItemExpanded):hover{
-			@media(min-width: 0px){background-color: #f5f5f5;}
-		}
-		&.sun-listItemExpanded{
-			@media(min-width: 0px){background-color: inherit;}
-		}
-		&.sun-listItemExpanded:hover{
-			@media(min-width: 0px){background-color: inherit;}
-		}
-		&.sun-active{
-			@media(min-width: 0px){background-color: #e6f2ff;}
-		}
+	}
+	&listItemGroup:not(.sun-listItemExpanded):hover{
+		@media(min-width: 0px){background-color: #f5f5f5;}
+	}
+	&listItemGroup.sun-listItemExpanded{
+		@media(min-width: 0px){background-color: inherit;}
+	}
+	&listItemGroup.sun-listItemExpanded:hover{
+		@media(min-width: 0px){background-color: inherit;}
+	}
+	&listItemGroup.sun-active{
+		@media(min-width: 0px){background-color: #e6f2ff;}
+	}
+	&listItemGroup #{&}waveGroupToggle{
+		@media(min-width: 0px){margin-right: 8px;}
+	}
+	&listItemGroup #{&}waveGroupToggle:hover{
+		@media(min-width: 0px){filter: brightness(0.9);}
 	}
 	&groupChildren{
 		@media(min-width: 0px){margin-top: var(--spacing-sm); max-height: 361px; overflow-y: scroll; border: 1px solid var(--clg);}
-		&[style*="display: block"]{
-			@media(min-width: 0px){display: block !important;}
-		}
-		&[style*="display:block"]{
-			@media(min-width: 0px){display: block !important;}
-		}
 	}
-	&groupChildrenOpen{
+	&listItemExpanded #{&}groupChildren{
 		@media(min-width: 0px){display: block;}
+	}
+	&groupChildren #{&}listItemWave{
+		@media(min-width: 0px){background: #fafafa;}
+	}
+	&groupChildren #{&}listItemWave:last-child{
+		@media(min-width: 0px){margin-bottom: 0;}
+	}
+	&groupChildren #{&}listItemWave:hover{
+		@media(min-width: 0px){background: #f0f0f0;}
+	}
+	&groupChildren #{&}waveControlsInline{
+		@media(min-width: 0px){display: flex; align-items: center; gap: 6px; margin-right: 8px;}
+	}
+	&groupChildren #{&}wavePeriodBadge{
+		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-left: 6px;}
+	}
+	&groupChildren #{&}waveColorPreviewSmall{
+		@media(min-width: 0px){width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; align-self: center; margin: 0;}
+	}
+	&groupChildren #{&}waveCornerColorCheck{
+		@media(min-width: 0px){margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
 	}
 	&listItemNote{
 		@media(min-width: 0px){cursor: default; flex-direction: column; align-items: flex-start; padding: var(--spacing-md);}
-		&:hover{
-			@media(min-width: 0px){background-color: #fff;}
-		}
+	}
+	&listItemNote:hover{
+		@media(min-width: 0px){background-color: #fff;}
+	}
+	&listItemNote #{&}noteContentWrapper{
+		@media(min-width: 0px){width: 100%; margin-bottom: 8px;}
 	}
 	&listItemNote .noteTime{
 		@media(min-width: 0px){font-weight: 700; color: var(--text-color); margin-bottom: 3px;}
 	}
 	&listItemNote .noteText{
 		@media(min-width: 0px){color: var(--text-secondary); line-height: 1.4; margin-bottom: var(--spacing-xs);}
+	}
+	&listItemIntersection#{&}exactMatch{
+		@media(min-width: 0px){background-color: #e6f7e6;}
+	}
+	&listItemIntersection#{&}closeMatch{
+		@media(min-width: 0px){background-color: #fffbe6;}
+	}
+	&listItemIntersection #{&}intersectionInfo{
+		@media(min-width: 0px){flex: 1;}
+	}
+	&listItemIntersection #{&}intersectionPeriod{
+		@media(min-width: 0px){font-weight: 700; color: var(--text-color);}
+	}
+	&listItemIntersection #{&}intersectionMatchType{
+		@media(min-width: 0px){font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 2px;}
+	}
+	&listItemIntersection #{&}intersectionControls{
+		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center; flex-shrink: 0;}
 	}
 	&listEmpty{
 		@media(min-width: 0px){padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
@@ -623,21 +875,21 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&groupStatTotal{
 		@media(min-width: 0px){color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.95; cursor: pointer; text-decoration: none;}
-		&:hover{
-			@media(min-width: 0px){text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 2px;}
-		}
+	}
+	&groupStatTotal:hover{
+		@media(min-width: 0px){text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 2px;}
 	}
 	&groupStatA{
 		@media(min-width: 0px){font-size: var(--font-size-xs); cursor: pointer; font-weight: 600; text-decoration: none; color: #1565c0;}
-		&:hover{
-			@media(min-width: 0px){color: #0d47a1; text-decoration: underline; text-decoration-color: #0d47a1; text-underline-offset: 2px;}
-		}
+	}
+	&groupStatA:hover{
+		@media(min-width: 0px){color: #0d47a1; text-decoration: underline; text-decoration-color: #0d47a1; text-underline-offset: 2px;}
 	}
 	&groupStatB{
 		@media(min-width: 0px){font-size: var(--font-size-xs); cursor: pointer; font-weight: 600; text-decoration: none; color: #ef6c00;}
-		&:hover{
-			@media(min-width: 0px){color: #e65100; text-decoration: underline; text-decoration-color: #e65100; text-underline-offset: 2px;}
-		}
+	}
+	&groupStatB:hover{
+		@media(min-width: 0px){color: #e65100; text-decoration: underline; text-decoration-color: #e65100; text-underline-offset: 2px;}
 	}
 	&groupEnabledCount{
 		@media(min-width: 0px){color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8; cursor: pointer;}
@@ -645,130 +897,218 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&groupTotalCount{
 		@media(min-width: 0px){color: var(--text-secondary); font-size: var(--font-size-xs); opacity: 0.8;}
 	}
+	&listItemGroup#{&}listItemDragging{
+		@media(min-width: 0px){opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+	}
+	&listItemGroup#{&}listItemDragOverTop::before{
+		@media(min-width: 0px){content: ""; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+	}
+	&listItemGroup#{&}listItemDragOverBottom::after{
+		@media(min-width: 0px){content: ""; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+	}
+	&listItemGroup:not(#{&}listItemEditing) #{&}listItemDragHandle{
+		@media(min-width: 0px){cursor: move;}
+	}
+	&listItemGroup#{&}listItemEditing #{&}listItemDragHandle{
+		@media(min-width: 0px){opacity: 0.3; cursor: default;}
+	}
 	&listItemPersonGroup{
 		@media(min-width: 0px){cursor: default;}
-		&:not(.sun-listItemExpanded):hover{
-			@media(min-width: 0px){background-color: #f5f5f5;}
-		}
-		&.sun-listItemExpanded{
-			@media(min-width: 0px){background-color: inherit;}
-		}
+	}
+	&listItemPersonGroup:not(.sun-listItemExpanded):hover{
+		@media(min-width: 0px){background-color: #f5f5f5;}
+	}
+	&listItemPersonGroup.sun-listItemExpanded{
+		@media(min-width: 0px){background-color: inherit;}
+	}
+	&listItemPersonGroup:not(#{&}listItemEditing) #{&}listItemDragHandle{
+		@media(min-width: 0px){cursor: move;}
+	}
+	&listItemPersonGroup#{&}listItemEditing #{&}listItemDragHandle{
+		@media(min-width: 0px){opacity: 0.3; cursor: default;}
+	}
+	&listItemPersonGroup#{&}listItemDragging{
+		@media(min-width: 0px){opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+	}
+	&listItemPersonGroup#{&}listItemDragOverTop::before{
+		@media(min-width: 0px){content: ""; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
+	}
+	&listItemPersonGroup#{&}listItemDragOverBottom::after{
+		@media(min-width: 0px){content: ""; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 	}
 	&personGroupChildren{
 		@media(min-width: 0px){margin-top: var(--spacing-sm); max-height: 361px; overflow-y: scroll; border: 1px solid var(--clg);}
 	}
-	&dateInPersonGroup{
+	&personGroupChildren #{&}listItemDate{
 		@media(min-width: 0px){background: #fafafa;}
-		&:hover{
-			@media(min-width: 0px){background: #f0f0f0;}
-		}
+	}
+	&personGroupChildren #{&}listItemDate:hover{
+		@media(min-width: 0px){background: #f0f0f0;}
+	}
+	&personGroupChildren #{&}listItemDate#{&}listItemDragOverTop{
+		@media(min-width: 0px){border-top: 2px solid var(--cp);}
+	}
+	&personGroupChildren #{&}listItemDate#{&}listItemDragOverBottom{
+		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
+	}
+	&listItemPersonGroup#{&}listItemEditing #{&}personGroupChildren #{&}listItemDate #{&}listItemNormalView{
+		@media(min-width: 0px){display: flex !important;}
+	}
+	&listItemPersonGroup#{&}listItemEditing #{&}personGroupChildren #{&}listItemDate #{&}listItemEditForm{
+		@media(min-width: 0px){display: none !important;}
 	}
 	&dateDragHandle{
 		@media(min-width: 0px){color: #999; cursor: move; padding: 2px; flex-shrink: 0; user-select: none; margin-right: 4px;}
-		&:hover{
-			@media(min-width: 0px){color: var(--text-color);}
-		}
+	}
+	&dateDragHandle:hover{
+		@media(min-width: 0px){color: var(--text-color);}
+	}
+	&listItemDate#{&}listItemEditing #{&}dateDragHandle{
+		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
 	&dropIndicator{
 		@media(min-width: 0px){position: absolute; left: 0; right: 0; height: 2px; background-color: #666; z-index: 100; pointer-events: none;}
 	}
+	&listItem:first-child{
+		@media(min-width: 0px){overflow: hidden;}
+	}
+	&listItem:last-child{
+		@media(min-width: 0px){overflow: hidden;}
+	}
+	&groupChildren #{&}listItemWave#{&}listItemDragging{
+		@media(min-width: 0px){opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
+	}
+	&groupChildren #{&}listItemWave#{&}listItemDragOverTop{
+		@media(min-width: 0px){border-top: 2px solid var(--cp);}
+	}
+	&groupChildren #{&}listItemWave#{&}listItemDragOverBottom{
+		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
+	}
+	&groupChildren #{&}listItemWave#{&}listItemDragOverTop::before{
+		@media(min-width: 0px){content: ""; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
+	}
+	&groupChildren #{&}listItemWave#{&}listItemDragOverBottom::after{
+		@media(min-width: 0px){content: ""; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
+	}
+	&groupChildren#{&}groupChildrenDragOver{
+		@media(min-width: 0px){background: rgba(0, 102, 204, 0.06); outline: 2px dashed var(--cp); outline-offset: -2px; border-radius: 4px;}
+	}
+	&personGroupChildren#{&}groupChildrenDragOver{
+		@media(min-width: 0px){background: rgba(0, 102, 204, 0.06); outline: 2px dashed var(--cp); outline-offset: -2px; border-radius: 4px;}
+	}
 	&waveDragHandle{
 		@media(min-width: 0px){color: #999; cursor: move; padding: 2px; flex-shrink: 0; user-select: none; margin-right: 4px;}
-		&:hover{
-			@media(min-width: 0px){color: var(--text-color);}
-		}
+	}
+	&waveDragHandle:hover{
+		@media(min-width: 0px){color: var(--text-color);}
+	}
+	&listItemWave#{&}listItemEditing #{&}waveDragHandle{
+		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
 	&dateCheckbox{
 		@include sun-custom-checkbox-base;
-		&[data-type="a"]:checked{
-			@media(min-width: 0px){background-color: #2196f3;}
-		}
-		&[data-type="b"]:checked{
-			@media(min-width: 0px){background-color: #ff9800;}
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
 	}
 	&waveGroupToggle{
 		@include sun-custom-checkbox-base;
-		@media(min-width: 0px){margin-right: 8px;}
-		&:hover{
-			@media(min-width: 0px){filter: brightness(0.9);}
-		}
-		&:checked{
-			@media(min-width: 0px){background-color: #2196f3;}
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
 	}
 	&waveVisibilityCheck{
 		@include sun-custom-checkbox-base;
-		&:checked{
-			@media(min-width: 0px){background-color: #2196f3;}
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
-		&:disabled{
-			@media(min-width: 0px){opacity: 0.5; cursor: not-allowed;}
-		}
 	}
 	&waveBVisibilityCheck{
 		@include sun-custom-checkbox-base;
-		&:checked{
-			@media(min-width: 0px){background-color: #ff9800;}
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
 	}
 	&waveCornerColorCheck{
 		@include sun-custom-checkbox-base;
-		@media(min-width: 0px){margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
-		&:checked{
-			@media(min-width: 0px){background-color: #2196f3;}
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
 	}
 	&timeBarStateCheck{
 		@include sun-custom-checkbox-base;
-		&:checked{
-			@media(min-width: 0px){background-color: #2196f3;}
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
 	}
 	&timeBarGroupCheck{
 		@include sun-custom-checkbox-base;
-		&:checked{
-			@media(min-width: 0px){background-color: #2196f3;}
-		}
-		&:checked::after{
-			@include sun-checkbox-checked-mark;
-		}
-		&:checked{
-			@media(min-width: 0px){border-color: transparent;}
-		}
 	}
-	&dateSelectionChecks{
+	&dateCheckbox[data-type="a"]:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
+	&dateCheckbox[data-type="b"]:checked{
+		@media(min-width: 0px){background-color: #ff9800;}
+	}
+	&waveBVisibilityCheck:checked{
+		@media(min-width: 0px){background-color: #ff9800;}
+	}
+	&waveGroupToggle:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
+	&waveVisibilityCheck:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
+	&waveCornerColorCheck:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
+	&timeBarStateCheck:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
+	&timeBarGroupCheck:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
+	&dateCheckbox:checked::after,
+	&waveGroupToggle:checked::after,
+	&waveVisibilityCheck:checked::after,
+	&waveBVisibilityCheck:checked::after,
+	&waveCornerColorCheck:checked::after,
+	&timeBarStateCheck:checked::after,
+	&timeBarGroupCheck:checked::after{
+		@include sun-checkbox-checked-mark;
+	}
+	&dateCheckbox:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&waveGroupToggle:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&waveVisibilityCheck:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&waveBVisibilityCheck:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&waveCornerColorCheck:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&timeBarStateCheck:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&timeBarGroupCheck:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&listItemDate #{&}dateSelectionChecks{
 		@media(min-width: 0px){pointer-events: auto; display: flex; align-items: center; gap: 6px;}
+	}
+	&listItemDate:has(#{&}dateCheckbox[data-type="a"]:checked){
+		@media(min-width: 0px){background-color: #e8f4fe;}
+	}
+	&listItemDate:has(#{&}dateCheckbox[data-type="b"]:checked){
+		@media(min-width: 0px){background-color: #fff4e5;}
 	}
 	&uiBtn{
 		@media(min-width: 0px){padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 	}
+	&uiBtn#{&}uiBtnToggleOff{
+		@media(min-width: 0px){opacity: 0.55;}
+	}
 	&parableBtnWrapper{
 		@media(min-width: 0px){margin-top: var(--spacing-lg); display: flex; justify-content: center; gap: 8px;}
 	}
+	&mobileWarningBox #{&}parableBtnWrapper{
+		@media(min-width: 0px){display: none;}
+	}
+	&mobileWarningBox #{&}warningActions{
+		@media(min-width: 0px){display: none;}
+	}
 	&parableBtn{
 		@media(min-width: 0px){background-color: #4a6fa5; color: #fff; font-weight: 400; padding: var(--spacing-xs) var(--spacing-sm); height: 25px;}
-		&:hover{
-			@media(min-width: 0px){filter: brightness(0.9); background-color: #3a5a8a;}
-		}
+	}
+	&parableBtn:hover{
+		@media(min-width: 0px){filter: brightness(0.9); background-color: #3a5a8a;}
 	}
 	&smallButton{
 		@media(min-width: 0px){padding: var(--spacing-xs) var(--spacing-sm);}
@@ -803,20 +1143,47 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&mobileWarningOverlay{
 		@media(min-width: 0px){background: #f0f0f0; padding: var(--spacing-lg); overflow-y: auto;}
 	}
+	&mobileWarningOverlay #{&}warningBox{
+		@media(min-width: 0px){max-width: 90%; max-height: 90vh; overflow-y: auto; padding: var(--spacing-lg); background: #fff;}
+	}
+	&mobileWarningBox #{&}warningTitle{
+		@media(min-width: 0px){font-size: var(--font-size-lg); margin-bottom: 0px; text-align: center;}
+	}
+	&mobileWarningBox #{&}warningText{
+		@media(min-width: 0px){font-size: var(--font-size-md); line-height: 1.6; margin-bottom: var(--spacing-lg); display: none;}
+	}
+	&mobileWarningBox #{&}warningText ul{
+		@media(min-width: 0px){text-align: left; margin: var(--spacing-sm) 0; padding-left: var(--spacing-lg);}
+	}
+	&mobileWarningBox #{&}warningText li{
+		@media(min-width: 0px){margin-bottom: 5px;}
+	}
+	&mobileWarningBox #{&}warningInfo{
+		@media(min-width: 0px){margin-top: var(--spacing-md);}
+	}
+	&mobileWarningBox #{&}warningInfoItem{
+		@media(min-width: 0px){margin-bottom: 8px;}
+	}
+	&mobileWarningBox #{&}warningInfoItem:last-child{
+		@media(min-width: 0px){margin-bottom: 0;}
+	}
 	&mobileRetryBtn{
 		@media(min-width: 0px){width: 100%; padding: 12px; font-size: var(--font-size-md); background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: var(--spacing-lg); display: none;}
-		&:hover{
-			@media(min-width: 0px){background: #555;}
-		}
+	}
+	&mobileRetryBtn:hover{
+		@media(min-width: 0px){background: #555;}
 	}
 	&formInput{
 		@media(min-width: 0px){padding: 3px 5px; border: 1px solid var(--clg); font-size: var(--font-size-sm);}
 	}
 	&dateInput{
-		@media(min-width: 0px){flex: 0; width: 100%; height: 25px; box-sizing: border-box; overflow: visible;}
+		@media(min-width: 0px){padding: 3px 5px; border: 1px solid var(--clg); font-size: var(--font-size-sm);}
 	}
 	&addGroupInput{
 		@media(min-width: 0px){padding: 3px 5px; border: 1px solid var(--clg); font-size: var(--font-size-sm);}
+	}
+	&dateInput{
+		@media(min-width: 0px){flex: 0; width: 100%; height: 25px; box-sizing: border-box; overflow: visible;}
 	}
 	&colorInput{
 		@media(min-width: 0px){width: 30px; height: 25px; padding: 0; border: 1px solid var(--clg); cursor: pointer; background: transparent; box-sizing: border-box; vertical-align: middle; flex-shrink: 0;}
@@ -832,12 +1199,12 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&warningInfoItem{
 		@media(min-width: 0px){display: flex; align-items: center; gap: 5px; justify-content: space-between;}
-		strong{
-			@media(min-width: 0px){font-weight: 600; color: #333;}
-		}
-		span{
-			@media(min-width: 0px){color: #666; font-weight: 400;}
-		}
+	}
+	&warningInfoItem strong{
+		@media(min-width: 0px){font-weight: 600; color: #333;}
+	}
+	&warningInfoItem span{
+		@media(min-width: 0px){color: #666; font-weight: 400;}
 	}
 	&mobileWarning{
 		@media(min-width: 0px){color: #ff0000; font-weight: bold; margin-top: var(--spacing-sm); padding: var(--spacing-sm); background: #fff3f3; border: 1px solid #ff0000; border-radius: 4px; font-size: var(--font-size-sm);}
@@ -847,15 +1214,15 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&currentDay{
 		@media(min-width: 0px){background-color: var(--cp); color: #fff; padding: var(--spacing-xs) var(--spacing-sm); display: flex; align-items: center; justify-content: center; height: 25px; max-width: 9em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; border: none; font-family: Monospace; box-sizing: border-box;}
-		&:hover{
-			@media(min-width: 0px){filter: brightness(0.9);}
-		}
+	}
+	&currentDay:hover{
+		@media(min-width: 0px){filter: brightness(0.9);}
 	}
 	&labels{
-		@media(min-width: 0px){position: absolute;}
+		@media(min-width: 0px){position: absolute; color: var(--text-secondary); z-index: 8; pointer-events: none; user-select: none;}
 	}
 	&weekdayLabel{
-		@media(min-width: 0px){bottom: var(--spacing-sm); transform: translateX(-50%);}
+		@media(min-width: 0px){font-size: var(--font-size-sm);}
 	}
 	&zoomOverlay{
 		@media(min-width: 0px){position: absolute; background: rgba(255, 255, 255, 0.8); border: 2px solid red; z-index: 100; pointer-events: none; display: none;}
@@ -866,8 +1233,20 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&spoilerContent{
 		@media(min-width: 0px){display: none; background: #f9f9f9; padding: var(--spacing-sm); margin-top: var(--spacing-xs); border: 1px solid #eee; font-size: var(--font-size-sm); color: #888;}
 	}
+	&spoilerContent#{&}show{
+		@media(min-width: 0px){display: block;}
+	}
 	&dbImportStatus{
 		@media(min-width: 0px){margin: var(--spacing-sm) 0; padding: var(--spacing-sm); border-radius: 4px;}
+	}
+	&dbImportStatus#{&}success{
+		@media(min-width: 0px){background: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+	}
+	&dbImportStatus#{&}error{
+		@media(min-width: 0px){background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+	}
+	&dbImportStatus#{&}info{
+		@media(min-width: 0px){background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;}
 	}
 	&dbImportProgress{
 		@media(min-width: 0px){width: 100%; height: var(--spacing-lg); background: #f0f0f0; border-radius: var(--spacing-sm); overflow: hidden; margin: var(--spacing-sm) 0;}
@@ -884,6 +1263,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&matchTypeClose{
 		@media(min-width: 0px){background: var(--warning-color); color: black;}
 	}
+	&waveVisibilityCheck:disabled{
+		@media(min-width: 0px){opacity: 0.5; cursor: not-allowed;}
+	}
 	&cursorTooltip{
 		@media(min-width: 0px){position: fixed; z-index: 100000; pointer-events: none; max-width: min(360px, 92vw); padding: 8px 10px; background: var(--cursor-tooltip-bg, #1e1e1e); color: var(--cursor-tooltip-fg, #f2f2f2); font-size: var(--font-size-sm); line-height: 1.4; white-space: pre-line; border: 1px solid var(--cursor-tooltip-border, rgba(255, 255, 255, 0.12)); border-radius: 4px; word-wrap: break-word; box-sizing: border-box;}
 	}
@@ -892,6 +1274,18 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&secretSchemeWrapHidden{
 		@media(min-width: 0px){display: none !important;}
+	}
+	&secretSchemeSection #{&}tabContainer{
+		@media(min-width: 0px){align-items: flex-start;}
+	}
+	&secretSchemeSection #{&}tabButtons#{&}tabButtonsFramed{
+		@media(min-width: 0px){width: fit-content; max-width: 100%;}
+	}
+	&secretSchemeSection #{&}tabButtons{
+		@media(min-width: 0px){justify-content: flex-start;}
+	}
+	&secretSchemeSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
+		@media(min-width: 0px){flex: 0 1 auto; max-width: 100%; white-space: normal; text-align: left; line-height: 1.25; padding: 6px 12px;}
 	}
 	&secretSchemeSection{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-sm); margin-bottom: 0; width: 100%;}
@@ -938,7 +1332,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&secretSchemeMiniGrid{
 		@media(min-width: 0px){display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); gap: var(--spacing-xs); align-items: stretch; width: 100%; flex: 1 1 auto; min-width: 0; aspect-ratio: 3 / 5;}
 	}
-	&secretSchemeCell{
+	&secretSchemeMiniGrid > #{&}secretSchemeCell{
 		@media(min-width: 0px){display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; width: 100%; height: 100%; padding: 0; box-sizing: border-box; background: #fff; outline: 1px solid var(--clg); transition: background-color 0.15s ease, color 0.15s ease; font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; color: var(--text-color);}
 	}
 	&secretSchemeCellAnchor{
@@ -953,11 +1347,44 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&wavesMount{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden;}
 	}
+	&wavesMount #{&}waveContainer{
+		@media(min-width: 0px){pointer-events: none;}
+	}
+	&wavesMount #{&}waveContainer svg{
+		@media(min-width: 0px){pointer-events: none;}
+	}
+	&wavesMount #{&}waveContainer #{&}wave{
+		@media(min-width: 0px){pointer-events: none;}
+	}
+	&wavesMount #{&}waveContainer #{&}wavePath{
+		@media(min-width: 0px){pointer-events: none;}
+	}
+	&graphContainer#{&}graphGrayMode{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&graphContainer#{&}graphGrayMode #{&}waveLabel{
+		@media(min-width: 0px){filter: grayscale(1) !important;}
+	}
+	&graphContainer#{&}graphGrayMode #{&}waveAxisXPoint{
+		@media(min-width: 0px){filter: grayscale(1) !important;}
+	}
+	&graphContainer#{&}graphGrayMode #{&}axis{
+		@media(min-width: 0px){filter: none;}
+	}
+	&graphContainer#{&}graphGrayMode #{&}gridLine{
+		@media(min-width: 0px){filter: none;}
+	}
+	&graphContainer#{&}graphGrayMode #{&}gridLineInner{
+		@media(min-width: 0px){filter: none;}
+	}
+	&graphContainer#{&}graphGrayMode #{&}wavePath{
+		@media(min-width: 0px){filter: none;}
+	}
 	&waveLabelsContainer{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible;}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
+	}
+	&waveLabelsContainer #{&}waveLabelsSide{
+		@media(min-width: 0px){position: absolute; top: 0; height: 100%; width: 200px;}
 	}
 	&waveLabelsLeft{
 		@media(min-width: 0px){left: -200px; text-align: right;}
@@ -967,9 +1394,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&waveLabelsVerticalContainer{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible;}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
+	}
+	&waveLabelsVerticalContainer #{&}waveLabelsSide{
+		@media(min-width: 0px){position: absolute; width: 100%; height: 30px;}
 	}
 	&waveLabelsTop{
 		@media(min-width: 0px){top: -30px;}
@@ -977,23 +1404,47 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&waveLabelsBottom{
 		@media(min-width: 0px){bottom: -30px;}
 	}
+	&waveLabelsContainer.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&waveLabelsVerticalContainer.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
+	}
 	&waveAxisXPoints{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 8;}
-		&.sun-hidden{
-			@media(min-width: 0px){display: none !important;}
-		}
+	}
+	&waveAxisXPoints.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
 	}
 	&waveAxisXPoint{
 		@media(min-width: 0px){position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #fff; box-shadow: 0 0 2px rgba(0, 0, 0, 0.3); cursor: pointer; pointer-events: auto; z-index: 9; transition: transform 0.2s, box-shadow 0.2s; transform: translate(-50%, -50%);}
-		&:hover{
-			@media(min-width: 0px){transform: translate(-50%, -50%) scale(1.3); z-index: 10; box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);}
-		}
+	}
+	&waveAxisXPoint:hover{
+		@media(min-width: 0px){transform: translate(-50%, -50%) scale(1.3); z-index: 10; box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);}
 	}
 	&waveLabel{
 		@media(min-width: 0px){position: absolute; display: inline-flex; align-items: center; width: max-content; max-width: 100%; box-sizing: border-box; white-space: nowrap; font-size: var(--font-size-sm); font-weight: 400; pointer-events: auto; cursor: default; padding: 2px 8px; color: #fff; border-radius: 3px; opacity: 0.5; z-index: 1;}
-		&:hover{
-			@media(min-width: 0px){opacity: 1; z-index: 10; filter: brightness(1.2);}
-		}
+	}
+	&waveLabel:hover{
+		@media(min-width: 0px){opacity: 1; z-index: 10; filter: brightness(1.2);}
+	}
+	&waveLabelsContainer #{&}waveLabel#{&}horizontal{
+		@media(min-width: 0px){transform: translateY(-50%); height: 20px;}
+	}
+	&waveLabelsLeft #{&}waveLabel{
+		@media(min-width: 0px){flex-direction: row-reverse; right: 0; margin-right: 10px;}
+	}
+	&waveLabelsRight #{&}waveLabel{
+		@media(min-width: 0px){flex-direction: row; left: 0; margin-left: 10px;}
+	}
+	&waveLabelsVerticalContainer #{&}waveLabel#{&}vertical{
+		@media(min-width: 0px){transform: translateX(-50%); height: 20px;}
+	}
+	&waveLabelsTop #{&}waveLabel{
+		@media(min-width: 0px){top: 0; margin-top: 5px;}
+	}
+	&waveLabelsBottom #{&}waveLabel{
+		@media(min-width: 0px){bottom: 0; margin-bottom: 5px;}
 	}
 	&waveLabelText{
 		@media(min-width: 0px){white-space: nowrap; font-weight: 400; font-size: 11px; position: relative; z-index: 2;}
@@ -1007,11 +1458,29 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&waveLabelArrow{
 		@media(min-width: 0px){position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
 	}
+	&waveLabelsContainer #{&}waveLabelArrow{
+		@media(min-width: 0px){top: 50%; transform: translateY(-50%);}
+	}
+	&waveLabelsVerticalContainer #{&}waveLabelArrow{
+		@media(min-width: 0px){left: 50%; transform: translateX(-50%);}
+	}
 	&graph{
 		@media(min-width: 0px){position: relative; width: 100%; height: 100%;}
 	}
-	&wavesTransformLayer{
+	&graph > #{&}wavesTransformLayer{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; transform-origin: 50% 50%;}
+	}
+	&graph > #{&}gridStaticContainer{
+		@media(min-width: 0px){z-index: 4; pointer-events: none;}
+	}
+	&graph > #{&}gridAbsoluteContainer{
+		@media(min-width: 0px){z-index: 4; pointer-events: none;}
+	}
+	&graph > #{&}gridAbsoluteContainer #{&}gridWrapper{
+		@media(min-width: 0px){pointer-events: auto;}
+	}
+	&graph#{&}graphAxisSwapped #{&}xAxis.sun-active{
+		@media(min-width: 0px){background-color: var(--cp) !important; z-index: 6;}
 	}
 	&axis{
 		@media(min-width: 0px){position: absolute; background-color: #c9c9c9; z-index: 5; cursor: pointer; pointer-events: none;}
@@ -1025,41 +1494,89 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&gridWrapper{
 		@media(min-width: 0px){position: absolute; width: var(--sq); height: 100%; cursor: pointer; z-index: 4;}
 	}
-	&gridWrapperInAbsolute{
-		@media(min-width: 0px){pointer-events: auto;}
+	&gridWrapper:hover #{&}gridLineInner{
+		@media(min-width: 0px){background-color: #ccc;}
 	}
 	&gridLineInner{
 		@media(min-width: 0px){position: absolute; left: 50%; width: 1px; height: 100%; background-color: #eee; z-index: 5;}
-		&.sun-active{
-			@media(min-width: 0px){background-color: var(--cp) !important; z-index: 6 !important;}
-		}
-		&.sun-hasNotes{
-			@media(min-width: 0px){background-color: var(--danger-color);}
-		}
-		&.sun-active:hover{
-			@media(min-width: 0px){background-color: var(--cp) !important;}
-		}
-		&.sun-active.sun-hasNotes{
-			@media(min-width: 0px){background-color: var(--danger-color) !important;}
-		}
+	}
+	&gridLineInner.sun-active{
+		@media(min-width: 0px){background-color: var(--cp) !important; z-index: 6 !important;}
+	}
+	&gridLineInner.sun-hasNotes{
+		@media(min-width: 0px){background-color: var(--danger-color);}
+	}
+	&gridWrapper:hover #{&}gridLineInner.sun-hasNotes{
+		@media(min-width: 0px){background-color: #ff4444;}
+	}
+	&gridLineInner.sun-active:hover{
+		@media(min-width: 0px){background-color: var(--cp) !important;}
+	}
+	&gridWrapper:hover #{&}gridLineInner.sun-active{
+		@media(min-width: 0px){background-color: var(--cp) !important;}
+	}
+	&gridLineInner.sun-active.sun-hasNotes{
+		@media(min-width: 0px){background-color: var(--danger-color) !important;}
+	}
+	&gridWrapper:hover #{&}gridLineInner.sun-active.sun-hasNotes{
+		@media(min-width: 0px){background-color: var(--danger-color) !important;}
 	}
 	&gridLine{
 		@media(min-width: 0px){position: absolute; background-color: #eee; z-index: 1;}
+	}
+	&gridLine#{&}gridLineX{
+		@media(min-width: 0px){width: 100%; height: 1px; left: 0;}
+	}
+	&gridLine#{&}gridLineY{
+		@media(min-width: 0px){width: 1px; height: 100%; top: 0; cursor: pointer; z-index: 6; background-color: #eee; transition: width 0.2s, background-color 0.2s;}
+	}
+	&gridLine#{&}gridLineY.sun-active{
+		@media(min-width: 0px){background-color: var(--cp); width: 1px; z-index: 7;}
+	}
+	&gridLine#{&}gridLineY.sun-active:hover{
+		@media(min-width: 0px){background-color: var(--cp); width: 1px;}
+	}
+	&gridLine#{&}gridLineY.sun-hasNotes{
+		@media(min-width: 0px){background-color: var(--danger-color);}
+	}
+	&gridLine#{&}gridLineY.sun-hasNotes:hover{
+		@media(min-width: 0px){background-color: #ff4444; width: 3px;}
+	}
+	&gridLine#{&}gridLineY.sun-active.sun-hasNotes{
+		@media(min-width: 0px){background-color: var(--danger-color);}
+	}
+	&gridLine#{&}gridLineY.sun-active.sun-hasNotes:hover{
+		@media(min-width: 0px){background-color: var(--danger-color); width: 1px;}
 	}
 	&xLabels{
 		@media(min-width: 0px){bottom: 10px; transform: translateX(-50%); color: var(--text-secondary);}
 	}
 	&dateLabels{
-		@media(min-width: 0px){bottom: 30px; transform: translateX(-50%);}
+		@media(min-width: 0px){bottom: 30px; transform: translateX(-50%); color: var(--text-secondary);}
 	}
 	&dateRow{
 		@media(min-width: 0px){color: var(--text-secondary); white-space: nowrap; font-size: inherit;}
 	}
+	&dateRow #{&}dateLabels{
+		@media(min-width: 0px){position: static; transform: none; bottom: auto; left: auto;}
+	}
+	&dateRow #{&}weekdayLabel{
+		@media(min-width: 0px){position: static; transform: none; bottom: auto; left: auto;}
+	}
 	&yLabels{
-		@media(min-width: 0px){left: var(--spacing-sm); transform: translateY(-50%);}
+		@media(min-width: 0px){left: 10px; transform: translateY(-50%); color: var(--text-secondary);}
 	}
 	&stateLabels{
 		@media(min-width: 0px){color: var(--text-secondary);}
+	}
+	&gridLine#{&}stateV{
+		@media(min-width: 0px){background-color: #eee; z-index: 1;}
+	}
+	&gridLine#{&}dayH{
+		@media(min-width: 0px){background-color: #eee; z-index: 1;}
+	}
+	&gridLine#{&}dayH.sun-active{
+		@media(min-width: 0px){background-color: var(--cp) !important; z-index: 6 !important;}
 	}
 	&centerDateLabel{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); user-select: none; background: rgba(255, 255, 255, 0.9); padding: var(--spacing-xs) var(--spacing-sm); z-index: 20; color: var(--text-color); text-align: center; pointer-events: none; font-weight: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; font-size: var(--font-size-md); min-height: auto;}
@@ -1069,6 +1586,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&centerDateFractional{
 		@media(min-width: 0px){font-size: var(--font-size-sm); color: var(--text-secondary); margin: 2px 0; opacity: 0.7;}
+	}
+	&centerDateName{
+		@media(min-width: 0px){font-size: var(--font-size-md); color: var(--text-color); margin-top: 2px;}
 	}
 	&centerDateMain{
 		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-bottom: 4px;}
@@ -1082,20 +1602,20 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&centerDateWeekday{
 		@media(min-width: 0px){font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: 4px; font-weight: 400;}
 	}
+	&centerDateStar{
+		@media(min-width: 0px){font-size: 22px;}
+	}
 	&waveIntersectionPoints{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9;}
 	}
 	&waveIntersectionPoint{
 		@media(min-width: 0px){position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 2px solid #fff; background-color: #ff0000; cursor: pointer; pointer-events: auto; z-index: 10; transform: translate(-50%, -50%); transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);}
-		&:hover{
-			@media(min-width: 0px){transform: translate(-50%, -50%) scale(1.3); z-index: 11; box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);}
-		}
+	}
+	&waveIntersectionPoint:hover{
+		@media(min-width: 0px){transform: translate(-50%, -50%) scale(1.3); z-index: 11; box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);}
 	}
 	&extremumLabel{
 		@media(min-width: 0px){position: absolute; font-size: 10px; font-family: var(--font-family); white-space: nowrap; padding: 2px 6px; border-radius: 3px; text-align: center; font-weight: 500; z-index: 9; pointer-events: none; transform: translateX(-50%); transition: transform 0.15s ease; background-color: rgb(192, 192, 192); color: #ffffff; border: 1px solid rgb(192, 192, 192);}
-		&:hover{
-			@media(min-width: 0px){border-color: #000; z-index: 20; pointer-events: auto;}
-		}
 	}
 	&extremumLabelTop{
 		@media(min-width: 0px){bottom: 100%; margin-bottom: 5px;}
@@ -1109,6 +1629,12 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&extremumLabelArrow{
 		@media(min-width: 0px){position: absolute; width: 0; height: 0; border-style: solid; z-index: 1; left: 50%; transform: translateX(-50%);}
 	}
+	&extremumLabelTop #{&}extremumLabelArrow{
+		@media(min-width: 0px){bottom: -6px; border-width: 6px 4px 0 4px; border-color: rgb(192, 192, 192) transparent transparent transparent;}
+	}
+	&extremumLabelBottom #{&}extremumLabelArrow{
+		@media(min-width: 0px){top: -6px; border-width: 0 4px 6px 4px; border-color: transparent transparent rgb(192, 192, 192) transparent;}
+	}
 	&extremumMarker{
 		@media(min-width: 0px){position: absolute; width: 1px; height: 15px; opacity: 0.7; z-index: 8; pointer-events: none;}
 	}
@@ -1121,14 +1647,23 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&extremumWaveName{
 		@media(min-width: 0px){cursor: pointer; pointer-events: auto;}
 	}
-	&extremumLabelArrowInSegment{
+	&extremumLabel:hover{
+		@media(min-width: 0px){border-color: #000; z-index: 20; pointer-events: auto;}
+	}
+	&timeBarSegment #{&}extremumLabelTop #{&}extremumLabelArrow{
 		@media(min-width: 0px){position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-style: solid; z-index: 1;}
 	}
-	&extremumLabelArrowTopInSegment{
+	&timeBarSegment #{&}extremumLabelTop #{&}extremumLabelArrowTop{
 		@media(min-width: 0px){top: -6px; bottom: auto; border-width: 0 4px 6px 4px; border-color: transparent transparent rgb(192, 192, 192) transparent;}
 	}
-	&extremumLabelArrowBottomInSegment{
+	&timeBarSegment #{&}extremumLabelTop #{&}extremumLabelArrowBottom{
 		@media(min-width: 0px){top: auto; bottom: -6px; border-width: 6px 4px 0 4px; border-color: rgb(192, 192, 192) transparent transparent transparent;}
+	}
+	&timeBarSegment #{&}extremumLabelTop:hover #{&}extremumLabelArrowTop{
+		@media(min-width: 0px){border-top-color: transparent; border-right-color: transparent; border-left-color: transparent; border-bottom-color: #000;}
+	}
+	&timeBarSegment #{&}extremumLabelTop:hover #{&}extremumLabelArrowBottom{
+		@media(min-width: 0px){border-top-color: #000; border-right-color: transparent; border-left-color: transparent; border-bottom-color: transparent;}
 	}
 	&waveContainer{
 		@media(min-width: 0px){position: absolute; width: 3600px; height: 100%; left: 0; top: 0; z-index: 1; pointer-events: none;}
@@ -1139,8 +1674,14 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&wave{
 		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; left: 0; top: 50%; transform: translateY(-50%);}
 	}
+	&waveContainerSwapped #{&}wave{
+		@media(min-width: 0px){top: 0; transform: none;}
+	}
 	&wavePath{
 		@media(min-width: 0px){fill: none; stroke-width: 1.5px; stroke-linecap: round;}
+	}
+	&wavePath#{&}bold{
+		@media(min-width: 0px){stroke-width: 3px;}
 	}
 	&waveSvgLayerB{
 		@media(min-width: 0px){opacity: 0.45;}
@@ -1148,95 +1689,184 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&wavePathPersonB{
 		@media(min-width: 0px){pointer-events: none;}
 	}
+	&waveLabel#{&}waveLabelPersonB{
+		@media(min-width: 0px){opacity: 0.5; font-style: italic; font-weight: 400; outline: 1px dashed rgba(255, 255, 255, 0.42); outline-offset: -1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);}
+	}
+	&waveLabel#{&}waveLabelPersonB:hover{
+		@media(min-width: 0px){opacity: 0.88;}
+	}
+	&waveLabel#{&}waveLabelPersonB #{&}waveLabelText{
+		@media(min-width: 0px){letter-spacing: 0.35px;}
+	}
+	&waveLabel#{&}waveLabelPersonB{
+		@media(min-width: 0px){overflow: visible;}
+	}
+	&waveLabelsLeft #{&}waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before,
+	&waveLabelsRight #{&}waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before{
+		@media(min-width: 0px){content: ""; position: absolute; top: 50%; width: 12px; height: 2px; margin-top: -1px; background: var(--sun-waveLabel-fill, #888); opacity: 0.95; pointer-events: none; z-index: 0; border-radius: 1px;}
+	}
+	&waveLabelsLeft #{&}waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before{
+		@media(min-width: 0px){left: 0; right: auto; transform: translateX(-100%);}
+	}
+	&waveLabelsRight #{&}waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before{
+		@media(min-width: 0px){right: 0; left: auto; transform: translateX(100%);}
+	}
+	&waveLabelsTop #{&}waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before,
+	&waveLabelsBottom #{&}waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before{
+		@media(min-width: 0px){content: ""; position: absolute; left: 50%; width: 2px; height: 10px; margin-left: -1px; background: var(--sun-waveLabel-fill, #888); opacity: 0.95; pointer-events: none; z-index: 0; border-radius: 1px;}
+	}
+	&waveLabelsTop #{&}waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before{
+		@media(min-width: 0px){top: 0; bottom: auto; transform: translate(-50%, -100%);}
+	}
+	&waveLabelsBottom #{&}waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before{
+		@media(min-width: 0px){bottom: 0; top: auto; transform: translate(-50%, 100%);}
+	}
+	&waveAxisXPoint#{&}waveAxisXPointPersonB{
+		@media(min-width: 0px){opacity: 0.45; border-style: dashed;}
+	}
+	&waveAxisXPoint#{&}waveAxisXPointPersonB:hover{
+		@media(min-width: 0px){opacity: 0.85;}
+	}
+	&wavePath#{&}solid{
+		@media(min-width: 0px){stroke-dasharray: none;}
+	}
+	&wavePath#{&}dashed{
+		@media(min-width: 0px){stroke-dasharray: 5px;}
+	}
+	&wavePath#{&}dotted{
+		@media(min-width: 0px){stroke-dasharray: 2px;}
+	}
+	&wavePath#{&}zigzag{
+		@media(min-width: 0px){stroke-linecap: butt; stroke-dasharray: 3px;}
+	}
+	&wavePath#{&}dashDot{
+		@media(min-width: 0px){stroke-dasharray: 8px 2px 2px 2px;}
+	}
+	&wavePath#{&}longDash{
+		@media(min-width: 0px){stroke-dasharray: 12px 3px;}
+	}
 	&cornerSquare{
 		@media(min-width: 0px){position: fixed; width: var(--spacing-lg); height: var(--spacing-lg); background-color: red; z-index: var(--z-corner); cursor: pointer;}
-		&#{&}cornerPosTl{
-			@media(min-width: 0px){top: 0; left: 0;}
-		}
-		&#{&}cornerPosTr{
-			@media(min-width: 0px){top: 0; right: 0;}
-		}
-		&#{&}cornerPosBl{
-			@media(min-width: 0px){bottom: 0; left: 0;}
-		}
-		&#{&}cornerPosBr{
-			@media(min-width: 0px){bottom: 0; right: 0;}
-		}
-		&#{&}cornerPosTc{
-			@media(min-width: 0px){top: 0; left: 50%; transform: translateX(-50%);}
-		}
-		&#{&}cornerPosBc{
-			@media(min-width: 0px){bottom: 0; left: 50%; transform: translateX(-50%);}
-		}
-		&#{&}cornerPosLc{
-			@media(min-width: 0px){left: 0; top: 50%; transform: translateY(-50%);}
-		}
-		&#{&}cornerPosRc{
-			@media(min-width: 0px){right: 0; top: 50%; transform: translateY(-50%);}
-		}
-		&#{&}cornerPosMt{
-			@media(min-width: 0px){top: 0; left: 25%;}
-		}
-		&#{&}cornerPosMb{
-			@media(min-width: 0px){bottom: 0; left: 25%;}
-		}
-		&#{&}cornerPosMl{
-			@media(min-width: 0px){left: 0; top: 25%;}
-		}
-		&#{&}cornerPosMr{
-			@media(min-width: 0px){right: 0; top: 25%;}
-		}
-		&#{&}cornerPosMt2{
-			@media(min-width: 0px){top: 0; left: 75%;}
-		}
-		&#{&}cornerPosMb2{
-			@media(min-width: 0px){bottom: 0; left: 75%;}
-		}
-		&#{&}cornerPosMl2{
-			@media(min-width: 0px){left: 0; top: 75%;}
-		}
-		&#{&}cornerPosMr2{
-			@media(min-width: 0px){right: 0; top: 75%;}
-		}
+	}
+	&cornerSquare#{&}cornerPosTl{
+		@media(min-width: 0px){top: 0; left: 0;}
+	}
+	&cornerSquare#{&}cornerPosTr{
+		@media(min-width: 0px){top: 0; right: 0;}
+	}
+	&cornerSquare#{&}cornerPosBl{
+		@media(min-width: 0px){bottom: 0; left: 0;}
+	}
+	&cornerSquare#{&}cornerPosBr{
+		@media(min-width: 0px){bottom: 0; right: 0;}
+	}
+	&cornerSquare#{&}cornerPosTc{
+		@media(min-width: 0px){top: 0; left: 50%; transform: translateX(-50%);}
+	}
+	&cornerSquare#{&}cornerPosBc{
+		@media(min-width: 0px){bottom: 0; left: 50%; transform: translateX(-50%);}
+	}
+	&cornerSquare#{&}cornerPosLc{
+		@media(min-width: 0px){left: 0; top: 50%; transform: translateY(-50%);}
+	}
+	&cornerSquare#{&}cornerPosRc{
+		@media(min-width: 0px){right: 0; top: 50%; transform: translateY(-50%);}
+	}
+	&cornerSquare#{&}cornerPosMt{
+		@media(min-width: 0px){top: 0; left: 25%;}
+	}
+	&cornerSquare#{&}cornerPosMb{
+		@media(min-width: 0px){bottom: 0; left: 25%;}
+	}
+	&cornerSquare#{&}cornerPosMl{
+		@media(min-width: 0px){left: 0; top: 25%;}
+	}
+	&cornerSquare#{&}cornerPosMr{
+		@media(min-width: 0px){right: 0; top: 25%;}
+	}
+	&cornerSquare#{&}cornerPosMt2{
+		@media(min-width: 0px){top: 0; left: 75%;}
+	}
+	&cornerSquare#{&}cornerPosMb2{
+		@media(min-width: 0px){bottom: 0; left: 75%;}
+	}
+	&cornerSquare#{&}cornerPosMl2{
+		@media(min-width: 0px){left: 0; top: 75%;}
+	}
+	&cornerSquare#{&}cornerPosMr2{
+		@media(min-width: 0px){right: 0; top: 75%;}
+	}
+	&panelSection{
+		@media(min-width: 0px){background: #fff; padding: var(--spacing-md); overflow: visible; min-width: 0; outline: 1px solid var(--clg);}
 	}
 	&analysisEmpty{
 		@media(min-width: 0px){padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm); background: #f9f9f9; border: 1px dashed var(--clg); border-radius: var(--border-radius);}
 	}
+	&panelSection#{&}buttonsPanel{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs);}
+	}
+	&panelSection#{&}pagelImage{
+		@media(min-width: 0px){align-self: center;}
+	}
+	&panelSection#{&}pagelImage img{
+		@media(min-width: 0px){display: block; margin: 0 auto;}
+	}
+	&wavesListContainer{
+		@media(min-width: 0px){overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 0;}
+	}
+	&wavesList{
+		@media(min-width: 0px){height: 100%; background: #fff; overflow-y: auto;}
+	}
+	&notesPanelLayout{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-lg);}
+	}
+	&notesListContainer{
+		@media(min-width: 0px){flex: 1; min-width: 200px;}
+	}
+	&noteEditorContainer{
+		@media(min-width: 0px){flex: 2; min-width: 300px;}
+	}
+	&warningOverlay{
+		@media(min-width: 0px){position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--cbg); z-index: var(--z-overlay); display: flex; justify-content: center; align-items: center; flex-direction: column; padding: var(--spacing-lg);}
+	}
+	&warningOverlay.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&warningBox{
+		@media(min-width: 0px){background: #fff; padding: var(--spacing-xl); border: 1px solid var(--clg); max-width: 525px; text-align: center; display: block;}
+	}
+	&warningBox.sun-hidden{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&tabContainer{
+		@media(min-width: 0px){display: flex; flex-direction: column;}
+	}
+	&tabButtons{
+		@media(min-width: 0px){display: flex; padding: 0; gap: 0; flex-wrap: wrap;}
+	}
+	&tabButton{
+		@media(min-width: 0px){padding: 0 16px; background: none; border: none; cursor: pointer; color: #495057; font-size: var(--font-size-sm); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;}
+	}
+	&tabButton:last-child{
+		@media(min-width: 0px){border-right: none;}
+	}
+	&tabButton.sun-active{
+		@media(min-width: 0px){background: var(--cp); color: #fff;}
+	}
+	&tabContent{
+		@media(min-width: 0px){display: none;}
+	}
+	&tabContent.sun-active{
+		@media(min-width: 0px){display: block;}
+	}
+	&inputGroup{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs); margin-bottom: var(--spacing-sm);}
+	}
+	&inputRow{
+		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center;}
+	}
 	&addCustomWaveForm{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center; margin-bottom: var(--spacing-sm); flex-wrap: wrap; font-size: var(--font-size-sm);}
-		&#{&}compact{
-			@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs); font-size: var(--font-size-sm);}
-			#{&}addGroupForm{
-				@media(min-width: 0px){display: flex; gap: var(--spacing-xs); width: 100%; align-items: center; margin-bottom: 0;}
-			}
-			#{&}addGroupInput{
-				@media(min-width: 0px){flex: 1; height: 25px; padding: 3px 5px; font-size: var(--font-size-sm); min-width: 0;}
-			}
-			#{&}addGroupBtn{
-				@media(min-width: 0px){height: 25px; flex-shrink: 0; white-space: nowrap;}
-			}
-			#{&}waveInputsRow{
-				@media(min-width: 0px){display: flex; flex-direction: row; gap: var(--spacing-xs); align-items: center; width: 100%;}
-				#{&}formInput{
-					@media(min-width: 0px){height: 25px; padding: 3px 5px; font-size: var(--font-size-sm); min-width: 120px;}
-				}
-				#{&}customWaveName{
-					@media(min-width: 0px){flex: 2; min-width: 150px;}
-				}
-				#{&}customWavePeriod{
-					@media(min-width: 0px){flex: 1; min-width: 100px;}
-				}
-				select{
-					@media(min-width: 0px){flex: 1; min-width: 120px; height: 25px;}
-				}
-				#{&}colorInput{
-					@media(min-width: 0px){width: 40px; height: 25px; padding: 0; margin: 0; align-self: center; cursor: pointer; flex-shrink: 0; box-sizing: border-box; display: block; border: 1px solid var(--clg);}
-				}
-				#{&}btnAddCustomWave{
-					@media(min-width: 0px){height: 25px; flex-shrink: 0; white-space: nowrap; margin-top: 0;}
-				}
-			}
-		}
 	}
 	&addGroupForm{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-md); align-items: center; width: 100%;}
@@ -1247,6 +1877,42 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&formLabel{
 		@media(min-width: 0px){width: 70px; font-weight: 400; flex-shrink: 0; font-size: var(--font-size-sm);}
 	}
+	&addCustomWaveForm#{&}compact{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs); font-size: var(--font-size-sm);}
+	}
+	&addCustomWaveForm#{&}compact #{&}addGroupForm{
+		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); width: 100%; align-items: center; margin-bottom: 0;}
+	}
+	&addCustomWaveForm#{&}compact #{&}addGroupInput{
+		@media(min-width: 0px){flex: 1; height: 25px; padding: 3px 5px; font-size: var(--font-size-sm); min-width: 0;}
+	}
+	&addCustomWaveForm#{&}compact #{&}addGroupBtn{
+		@media(min-width: 0px){height: 25px; flex-shrink: 0; white-space: nowrap;}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow{
+		@media(min-width: 0px){display: flex; flex-direction: row; gap: var(--spacing-xs); align-items: center; width: 100%;}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}formInput{
+		@media(min-width: 0px){height: 25px; padding: 3px 5px; font-size: var(--font-size-sm); min-width: 120px;}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}customWaveName{
+		@media(min-width: 0px){flex: 2; min-width: 150px;}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}customWavePeriod{
+		@media(min-width: 0px){flex: 1; min-width: 100px;}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow select{
+		@media(min-width: 0px){flex: 1; min-width: 120px; height: 25px;}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}colorInput{
+		@media(min-width: 0px){width: 40px; height: 25px; padding: 0; margin: 0; align-self: center; cursor: pointer; flex-shrink: 0; box-sizing: border-box; display: block; border: 1px solid var(--clg);}
+	}
+	&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}btnAddCustomWave{
+		@media(min-width: 0px){height: 25px; flex-shrink: 0; white-space: nowrap; margin-top: 0;}
+	}
+	&displayViewTemplatesBar#{&}compact{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs); font-size: var(--font-size-sm);}
+	}
 	&displayViewTemplatesSeparator{
 		@media(min-width: 0px){display: block; width: 100%; height: 1px; margin-top: var(--spacing-md); margin-bottom: var(--spacing-md); background-color: var(--clg); border: none; flex-shrink: 0;}
 	}
@@ -1255,6 +1921,15 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&displayViewTemplatesRow{
 		@media(min-width: 0px){display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
+	}
+	&displayViewTemplatesRow #{&}displayViewTemplateSelect{
+		@media(min-width: 0px){flex: 1; min-width: 160px; height: 25px; font-size: var(--font-size-sm);}
+	}
+	&displayViewTemplatesRow #{&}newDisplayViewTemplateName{
+		@media(min-width: 0px){flex: 1; min-width: 140px; height: 25px; padding: 3px 5px; font-size: var(--font-size-sm);}
+	}
+	&displayViewTemplatesRow #{&}btnDeleteDisplayViewTemplate{
+		@media(min-width: 0px){height: 25px; flex-shrink: 0; white-space: nowrap;}
 	}
 	&displayViewTemplatesDescriptionRow{
 		@media(min-width: 0px){width: 100%;}
@@ -1275,7 +1950,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-sm); align-items: center;}
 	}
 	&intersectionResults{
-		@media(min-width: 0px){display: flex; flex-direction: column;}
+		@media(min-width: 0px){display: flex; flex-direction: column; min-height: 0;}
 	}
 	&intersectionItem{
 		@media(min-width: 0px){padding: var(--spacing-sm); border-bottom: 1px solid var(--clg); display: flex; justify-content: space-between; align-items: center;}
@@ -1293,7 +1968,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){color: var(--text-secondary); margin: 0 var(--spacing-sm); white-space: nowrap;}
 	}
 	&intersectionControls{
-		@media(min-width: 0px){margin-bottom: var(--spacing-md);}
+		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center;}
 	}
 	&exactMatch{
 		@media(min-width: 0px){background-color: #e6f7e6;}
@@ -1305,10 +1980,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs);}
 	}
 	&intersectionFormRow{
-		@media(min-width: 0px){display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs);}
+		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center;}
 	}
 	&intersectionFormLabel{
-		@media(min-width: 0px){display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); cursor: pointer; white-space: nowrap;}
+		@media(min-width: 0px){width: 100px; font-weight: 400; flex-shrink: 0; user-select: none; white-space: nowrap;}
 	}
 	&intersectionFormInput{
 		@media(min-width: 0px){flex: 1; padding: var(--spacing-xs); border: 1px solid var(--clg); min-width: 0; height: 25px;}
@@ -1317,10 +1992,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); justify-content: flex-start;}
 	}
 	&intersectionStats{
-		@media(min-width: 0px){margin: var(--spacing-sm) 0; padding: var(--spacing-md); background: #e9f7ef; border: 1px solid #c3e6cb; border-radius: var(--border-radius); font-size: var(--font-size-sm); line-height: 1.4; color: #155724;}
-		strong{
-			@media(min-width: 0px){font-weight: 600; color: #0c4121;}
-		}
+		@media(min-width: 0px){margin: var(--spacing-sm) 0; padding: var(--spacing-sm); background: #f5f5f5; border: 1px solid var(--clg); font-size: var(--font-size-sm);}
 	}
 	&flex1{
 		@media(min-width: 0px){flex: 1; min-width: 0;}
@@ -1364,7 +2036,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&topControls{
 		@media(min-width: 0px){display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); flex-wrap: wrap; width: 100%; min-width: 0; overflow: visible;}
 	}
-	&topControlsItem{
+	&topControls > *{
 		@media(min-width: 0px){display: flex; align-items: center; min-height: 25px; overflow: visible;}
 	}
 	&transformControls{
@@ -1382,6 +2054,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&dateControlsButtons{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center; flex-wrap: wrap;}
 	}
+	&dateGenderSelect{
+		@media(min-width: 0px){flex: 0 0 auto; width: 42px; min-width: 42px; max-width: 42px; height: 25px; padding: 2px 4px; font-size: var(--font-size-sm); text-align: center; text-align-last: center;}
+	}
 	&dateAddDescriptionRow{
 		@media(min-width: 0px){width: 100%;}
 	}
@@ -1391,7 +2066,16 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&dateTimeInputGroup{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); flex: 1; min-width: 0; align-items: center; overflow: visible;}
 	}
-	&groupChildrenItem{
+	&topControls #{&}dateTimeInputGroup #{&}dateInput{
+		@media(min-width: 0px){overflow: visible;}
+	}
+	&groupChildren[style*="display: block"]{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&groupChildren[style*="display:block"]{
+		@media(min-width: 0px){display: block !important;}
+	}
+	&groupChildren > *{
 		@media(min-width: 0px){display: flex !important; visibility: visible !important; opacity: 1 !important;}
 	}
 	&summaryPanel{
@@ -1418,11 +2102,29 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&summarySelect{
 		@media(min-width: 0px){flex: 1 1 10em; min-width: 0; max-width: 100%; padding: var(--spacing-xs); border: 1px solid var(--clg); font-size: var(--font-size-sm); height: 25px; box-sizing: border-box;}
 	}
+	&summarySelectGroup #{&}summarySelect{
+		@media(min-width: 0px){flex: 1 1 140px; max-width: min(100%, 320px);}
+	}
+	&intersectionSelectGroup #{&}summarySelect{
+		@media(min-width: 0px){flex: 0 0 auto; width: 100%; max-width: 100%; height: 25px;}
+	}
+	&dateComparisonSelects #{&}summarySelect{
+		@media(min-width: 0px){flex: 0 0 auto; width: 100%; max-width: 100%; height: 25px;}
+	}
 	&summaryDuplicateButtons{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs);}
 	}
+	&summaryDuplicateButtons #{&}uiBtn{
+		@media(min-width: 0px){height: 25px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); white-space: nowrap;}
+	}
 	&summaryResultsContainer{
 		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; overflow-x: hidden; border: 1px solid var(--clg); background: #fff;}
+	}
+	&summaryResultsContainer #{&}summaryResults{
+		@media(min-width: 0px){overflow: visible; max-height: none;}
+	}
+	&summaryResultsContainer #{&}intersectionResults{
+		@media(min-width: 0px){overflow: visible; max-height: none;}
 	}
 	&summaryResults{
 		@media(min-width: 0px){display: flex; flex-direction: column;}
@@ -1432,9 +2134,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&summaryItem{
 		@media(min-width: 0px){display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-sm); border-bottom: 1px solid #eee; background: #fff; gap: var(--spacing-sm); cursor: pointer; transition: background-color 0.2s;}
-		&:hover{
-			@media(min-width: 0px){background-color: #f5f5f5;}
-		}
+	}
+	&summaryItem:hover{
+		@media(min-width: 0px){background-color: #f5f5f5;}
 	}
 	&summaryItemInfo{
 		@media(min-width: 0px){flex: 1; min-width: 0;}
@@ -1460,20 +2162,56 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&summaryItemActions{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); flex-shrink: 0;}
 	}
+	&summaryItemActions #{&}uiBtn{
+		@media(min-width: 0px){height: 25px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); white-space: nowrap;}
+	}
 	&summaryItemColor{
 		@media(min-width: 0px){width: 25px; height: 25px; flex-shrink: 0; border-radius: 3px;}
+	}
+	&summaryItemExact #{&}summaryItemCloseness{
+		@media(min-width: 0px){background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;}
+	}
+	&summaryItemVeryClose #{&}summaryItemCloseness{
+		@media(min-width: 0px){background: #4caf50; color: white;}
+	}
+	&summaryItemClose #{&}summaryItemCloseness{
+		@media(min-width: 0px){background: #8bc34a; color: black;}
+	}
+	&summaryItemFairlyClose #{&}summaryItemCloseness{
+		@media(min-width: 0px){background: #ffc107; color: black;}
+	}
+	&summaryItemNearby #{&}summaryItemCloseness{
+		@media(min-width: 0px){background: #ff9800; color: black;}
+	}
+	&wavePeriodBadge{
+		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 400;}
+	}
+	&intersectionControls{
+		@media(min-width: 0px){margin-bottom: var(--spacing-md);}
+	}
+	&intersectionForm{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs);}
+	}
+	&intersectionFormRow{
+		@media(min-width: 0px){display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs);}
 	}
 	&intersectionSelect{
 		@media(min-width: 0px){width: 100%; padding: var(--spacing-xs); border: 1px solid var(--clg); font-size: var(--font-size-sm); height: 25px; background: #fff;}
 	}
+	&intersectionFormLabel{
+		@media(min-width: 0px){display: flex; align-items: center; gap: var(--spacing-xs); font-size: var(--font-size-sm); cursor: pointer; white-space: nowrap;}
+	}
 	&intersectionResultsContainer{
 		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; border: 1px solid var(--clg); background: #fff;}
 	}
+	&intersectionResults{
+		@media(min-width: 0px){display: flex; flex-direction: column;}
+	}
 	&intersectionResultItem{
 		@media(min-width: 0px){display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-sm); border-bottom: 1px solid #eee; background: #fff; gap: var(--spacing-sm); cursor: pointer; transition: background-color 0.2s;}
-		&:hover{
-			@media(min-width: 0px){background-color: #f5f5f5;}
-		}
+	}
+	&intersectionResultItem:hover{
+		@media(min-width: 0px){background-color: #f5f5f5;}
 	}
 	&intersectionResultInfo{
 		@media(min-width: 0px){flex: 1; min-width: 0;}
@@ -1486,6 +2224,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&waveName{
 		@media(min-width: 0px){font-weight: 600;}
+	}
+	&wavePeriodBadge{
+		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 400;}
 	}
 	&pastWaveMarker{
 		@media(min-width: 0px){color: #999; font-style: italic; font-size: 10px;}
@@ -1502,26 +2243,65 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&intersectionResultCloseness{
 		@media(min-width: 0px){padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 500;}
 	}
+	&intersectionResultCloseness#{&}intersectionItemExact{
+		@media(min-width: 0px){background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;}
+	}
+	&intersectionResultCloseness#{&}intersectionItemVeryClose{
+		@media(min-width: 0px){background: #4caf50; color: white;}
+	}
+	&intersectionResultCloseness#{&}intersectionItemClose{
+		@media(min-width: 0px){background: #8bc34a; color: black;}
+	}
+	&intersectionResultCloseness#{&}intersectionItemFairlyClose{
+		@media(min-width: 0px){background: #ffc107; color: black;}
+	}
+	&intersectionResultCloseness#{&}intersectionItemNearby{
+		@media(min-width: 0px){background: #ff9800; color: black;}
+	}
+	&intersectionResultCloseness#{&}intersectionItemWithinTolerance{
+		@media(min-width: 0px){background: #f44336; color: white;}
+	}
 	&intersectionResultColor{
 		@media(min-width: 0px){width: 25px; height: 25px; flex-shrink: 0; border-radius: 3px;}
 	}
 	&intersectionResultActions{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); flex-shrink: 0;}
 	}
+	&intersectionResultActions #{&}uiBtn{
+		@media(min-width: 0px){height: 25px; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); white-space: nowrap;}
+	}
+	&intersectionStats{
+		@media(min-width: 0px){margin: var(--spacing-sm) 0; padding: var(--spacing-md); background: #e9f7ef; border: 1px solid #c3e6cb; border-radius: var(--border-radius); font-size: var(--font-size-sm); line-height: 1.4; color: #155724;}
+	}
+	&intersectionStats strong{
+		@media(min-width: 0px){font-weight: 600; color: #0c4121;}
+	}
 	&intersectionStatsContent{
 		@media(min-width: 0px){line-height: 1.5;}
+	}
+	&listEmpty{
+		@media(min-width: 0px){padding: var(--spacing-lg); text-align: center; color: #999; font-style: italic; font-size: var(--font-size-sm);}
 	}
 	&intersectionFormRowActions{
 		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); margin-left: auto;}
 	}
-	&intersectionFormRowActionsInForm{
+	&intersectionForm > #{&}intersectionFormRowActions{
 		@media(min-width: 0px){justify-content: flex-end; margin-left: 0; margin-top: var(--spacing-xs);}
 	}
 	&dateComparisonViewTabs{
 		@media(min-width: 0px){border: 1px solid var(--clg); border-radius: 4px; overflow: hidden; background: #fff; margin-top: var(--spacing-sm); margin-bottom: var(--spacing-md);}
 	}
-	&tabContainerWithFramedButtons{
+	&dateComparisonViewTabs + #{&}summaryResultsContainer{
+		@media(min-width: 0px){margin-top: var(--spacing-sm);}
+	}
+	&tabContainer:has(> #{&}tabButtonsFramed){
 		@media(min-width: 0px){gap: var(--spacing-sm);}
+	}
+	&dateComparisonViewTabs #{&}tabButton{
+		@media(min-width: 0px){font-size: var(--font-size-sm); padding: 6px 10px; flex: 1 1 0; font-weight: 500; display: flex; align-items: center; justify-content: center;}
+	}
+	&dateComparisonViewTabs #{&}tabButton.sun-active{
+		@media(min-width: 0px){font-weight: 600;}
 	}
 	&dateComparisonIntro{
 		@media(min-width: 0px){font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 var(--spacing-md); line-height: 1.4;}
@@ -1529,27 +2309,34 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&dateComparisonSelects{
 		@media(min-width: 0px){gap: var(--spacing-xs); align-items: flex-end;}
 	}
+	&dateComparisonSelects #{&}intersectionSelectGroup{
+		@media(min-width: 0px){flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: var(--spacing-xs);}
+	}
 	&intersectionSelectGroup{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-xs);}
 	}
 	&intersectionToolbarOneRow{
 		@media(min-width: 0px){margin-bottom: var(--spacing-sm);}
 	}
+	&intersectionToolbarOneRow #{&}intersectionSelectGroup{
+		@media(min-width: 0px){flex: 1 1 130px; min-width: 0; max-width: min(100%, 220px);}
+	}
+	&dateComparisonSelects #{&}intersectionFormLabel{
+		@media(min-width: 0px){cursor: default;}
+	}
 	&dateComparisonTable{
 		@media(min-width: 0px){width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);}
 	}
-	&dateComparisonTableHeadCell{
+	&dateComparisonTable th{
 		@media(min-width: 0px){text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--clg); background: #f8f9fa; font-weight: 600; white-space: nowrap;}
 	}
-	&dateComparisonTableCell{
+	&dateComparisonTable td{
 		@media(min-width: 0px){padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: middle;}
 	}
-	&dateComparisonTableRow{
-		&:hover{
-			@media(min-width: 0px){background-color: #f0f4f8;}
-		}
+	&dateComparisonTable tbody tr:hover{
+		@media(min-width: 0px){background-color: #f0f4f8;}
 	}
-	&dateComparisonState{
+	&dateComparisonTable td#{&}dateComparisonState{
 		@media(min-width: 0px){width: 1%; white-space: nowrap;}
 	}
 	&waveDirectionLabel{
@@ -1567,11 +2354,14 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&dateComparisonActions{
 		@media(min-width: 0px){white-space: nowrap; width: 1%;}
 	}
-	&dateComparisonActionsBtn{
+	&dateComparisonTable #{&}dateComparisonActions #{&}uiBtn{
 		@media(min-width: 0px){font-size: 11px; padding: 4px 8px;}
 	}
 	&intersectionTimeRail{
 		@media(min-width: 0px){position: fixed; inset: 0; z-index: 950; display: none; font-family: var(--font-family); color: var(--text-color);}
+	}
+	&intersectionTimeRail#{&}intersectionTimeRailOpen{
+		@media(min-width: 0px){display: block;}
 	}
 	&intersectionTimeRailBackdrop{
 		@media(min-width: 0px){position: absolute; inset: 0; background: var(--cbg); cursor: pointer;}
@@ -1594,17 +2384,21 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&intersectionTimeRailPersonLabel{
 		@media(min-width: 0px){justify-content: center; width: auto; margin: 0; padding: 0; cursor: default; font-size: var(--font-size-xs); color: var(--text-secondary); font-weight: 500;}
 	}
+	&intersectionTimeRailPersonField #{&}summarySelect,
+	&intersectionTimeRailPersonField #{&}intersectionTimeRailPersonSelect{
+		@media(min-width: 0px){flex: 0 0 auto; width: 100%; max-width: 100%; height: 25px; min-height: 25px; box-sizing: border-box;}
+	}
 	&intersectionTimeRailNowIndicator{
 		@media(min-width: 0px){position: absolute; left: 25%; top: 50%; transform: translate(-50%, -50%); z-index: 5; border: 1px solid var(--cp); background: var(--cbg); box-sizing: border-box; pointer-events: none;}
-		&::after{
-			@media(min-width: 0px){content: ""; position: absolute; left: 7px; right: 7px; height: 5px; background: var(--cbg); pointer-events: none; z-index: 1;}
-		}
-		&::before{
-			@media(min-width: 0px){top: -3px;}
-		}
-		&::after{
-			@media(min-width: 0px){bottom: -3px;}
-		}
+	}
+	&intersectionTimeRailNowIndicator::after{
+		@media(min-width: 0px){content: ""; position: absolute; left: 7px; right: 7px; height: 5px; background: var(--cbg); pointer-events: none; z-index: 1;}
+	}
+	&intersectionTimeRailNowIndicator::before{
+		@media(min-width: 0px){top: -3px;}
+	}
+	&intersectionTimeRailNowIndicator::after{
+		@media(min-width: 0px){bottom: -3px;}
 	}
 	&intersectionTimeRailNowLabel{
 		@media(min-width: 0px){position: relative; z-index: 2; display: block; padding: 8px 12px; font-size: clamp(1.125rem, 3.2vw, 1.5rem); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.15; white-space: nowrap; color: var(--text-color); background: transparent;}
@@ -1630,10 +2424,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&intersectionTimeRailMirrorStats{
 		@media(min-width: 0px){margin: 0; padding: 0;}
 	}
-	&intersectionTimeRailMirrorCountdownInStats{
+	&intersectionTimeRailMirrorStats > #{&}intersectionTimeRailMirrorCountdown{
 		@media(min-width: 0px){margin: 6px 0 0; padding: 0; font-size: var(--font-size-xs); font-weight: 500; line-height: 1.35; color: var(--text-color); font-variant-numeric: tabular-nums;}
 	}
-	&intersectionTimeRailMirrorDurationInStats{
+	&intersectionTimeRailMirrorStats > #{&}intersectionTimeRailMirrorDuration{
 		@media(min-width: 0px){margin-top: 0;}
 	}
 	&intersectionTimeRailWaveAxis{
@@ -1679,124 +2473,257 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){position: absolute; left: calc(50% + var(--cross-bar-half) + 10px); right: max(2%, 8px); top: 50%; transform: translateY(-50%); font-size: var(--font-size-sm); font-weight: 500; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;}
 	}
 	&gridAbsoluteContainer{
-		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 4; pointer-events: none;}
+		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0;}
 	}
 	&gridStaticContainer{
-		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 4; pointer-events: none;}
+		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0;}
+	}
+	&labels{
+		@media(min-width: 0px){position: absolute;}
+	}
+	&dateLabels{
+		@media(min-width: 0px){bottom: 30px; transform: translateX(-50%);}
+	}
+	&weekdayLabel{
+		@media(min-width: 0px){bottom: var(--spacing-sm); transform: translateX(-50%);}
+	}
+	&yLabels{
+		@media(min-width: 0px){left: var(--spacing-sm); transform: translateY(-50%);}
+	}
+	&waveLabel#{&}horizontal{
+		@media(min-width: 0px){position: absolute; background-color: var(--wave-color, #666); color: #fff; opacity: 0.5; z-index: 1; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-sm); transform: translateY(-50%); cursor: pointer;}
+	}
+	&waveLabel#{&}horizontal:hover{
+		@media(min-width: 0px){opacity: 1; z-index: 10;}
+	}
+	&waveLabel#{&}horizontal#{&}left{
+		@media(min-width: 0px){right: 0; margin-right: var(--spacing-sm);}
+	}
+	&waveLabel#{&}horizontal#{&}right{
+		@media(min-width: 0px){left: 0; margin-left: var(--spacing-sm);}
+	}
+	&waveLabelArrow{
+		@media(min-width: 0px){position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
+	}
+	&waveLabel#{&}vertical{
+		@media(min-width: 0px){position: absolute; background-color: var(--wave-color, #666); color: #fff; opacity: 0.5; z-index: 1; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-sm); transform: translateX(-50%); cursor: pointer;}
+	}
+	&waveLabel#{&}vertical#{&}waveLabelExtremum{
+		@media(min-width: 0px){font-family: monospace; letter-spacing: 0.5px;}
+	}
+	&waveLabel#{&}vertical#{&}waveLabelName{
+		@media(min-width: 0px){font-family: inherit; letter-spacing: normal;}
 	}
 
-	/* --- restored from styles.css --- */
-	&app &graphSection{
-		@media(min-width: 0px){display: flex;flex-direction: column;align-items: center;}
+	/* --- migration blocks from HEAD --- */
+
+	&dateComparisonActionsBtn{
+		@media(min-width: 0px){font-size: 11px; padding: 4px 8px;}
 	}
-	&dateName#{&}dateLabelVisible,
-		&centerDateName#{&}dateLabelVisible{
-		@media(min-width: 0px){display: block !important;}
+	&dateComparisonState{
+		@media(min-width: 0px){width: 1%; white-space: nowrap;}
 	}
-	&tabButtonsTimeBarControls#{&}tabButtonsFramed{
-		@media(min-width: 0px){width: -moz-fit-content;width: fit-content;max-width: 100%;}
+	&dateComparisonTableCell{
+		@media(min-width: 0px){padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: middle;}
 	}
-	&tabButtonsTimeBarControls#{&}tabButtonsFramed &tabButton{
-		@media(min-width: 0px){flex: 0 1 auto;}
+	&dateComparisonTableHeadCell{
+		@media(min-width: 0px){text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--clg); background: #f8f9fa; font-weight: 600; white-space: nowrap;}
 	}
-	&timeBarStateRow#{&}timeBarHoursRow{
-		@media(min-width: 0px){border-top: none;border-bottom: 1px solid var(--clg);}
+	&dateComparisonTableRow{
+		&:hover{
+			@media(min-width: 0px){background-color: #f0f4f8;}
+		}
 	}
-	&timeBarSegmentLabel#{&}extremumLabelTop{
-		@media(min-width: 0px){bottom: auto;margin-bottom: 0;}
+	&dateDescriptionEdit{
+		@media(min-width: 0px){width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: var(--font-family); font-size: var(--font-size-sm);}
 	}
-	&timeBarNowMarker#{&}timeIndicator{
-		@media(min-width: 0px){position: absolute;top: 50%;left: 0;width: 0;height: 0;transform: translate(-50%, -50%);z-index: 14;}
+	&dateEditForm{
+		@media(min-width: 0px){flex-direction: column; align-items: stretch; gap: var(--spacing-xs);}
 	}
-	&hourMarker#{&}clickable{
-		@media(min-width: 0px){cursor: pointer;}
+	&dateGenderBadge{
+		@media(min-width: 0px){margin: 0 0.15em;}
 	}
-	&hourMarker#{&}midnight{
-		@media(min-width: 0px){border-left-color: var(--danger-color);}
+	&dateInPersonGroup{
+		@media(min-width: 0px){background: #fafafa;}
+		&:hover{
+			@media(min-width: 0px){background: #f0f0f0;}
+		}
 	}
-	&btnToday#{&}todayActive{
-		@media(min-width: 0px){background-color: var(--cp);color: #fff;}
+	&dateInputInListEdit{
+		@media(min-width: 0px){flex: 0 1 auto; min-width: 140px;}
 	}
-	&btnToday#{&}todayInactive{
-		@media(min-width: 0px){background-color: #ff9900;color: #fff;}
+	&dateNameEdit{
+		@media(min-width: 0px){flex: 1; min-width: 120px;}
 	}
-	&btnToday#{&}todayInactive:hover{
-		@media(min-width: 0px){background-color: #ffad33;filter: brightness(1.1);}
+	&dateSelectionChecks{
+		@media(min-width: 0px){pointer-events: auto; display: flex; align-items: center; gap: 6px;}
 	}
-	&btnFlipH#{&}flipHActive{
-		@media(min-width: 0px){background-color: #ff9900;color: #fff;}
+	&datesPanelInControl{
+		@media(min-width: 0px){grid-column: 1;}
 	}
-	&btnFlipH#{&}flipHActive:hover{
-		@media(min-width: 0px){background-color: #ffad33;filter: brightness(1.1);}
+	&extremumLabelArrowBottomInSegment{
+		@media(min-width: 0px){top: auto; bottom: -6px; border-width: 6px 4px 0 4px; border-color: rgb(192, 192, 192) transparent transparent transparent;}
 	}
-	&btnFlipV#{&}flipVActive{
-		@media(min-width: 0px){background-color: #ff9900;color: #fff;}
+	&extremumLabelArrowInSegment{
+		@media(min-width: 0px){position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-style: solid; z-index: 1;}
 	}
-	&btnFlipV#{&}flipVActive:hover{
-		@media(min-width: 0px){background-color: #ffad33;filter: brightness(1.1);}
+	&extremumLabelArrowTopInSegment{
+		@media(min-width: 0px){top: -6px; bottom: auto; border-width: 0 4px 6px 4px; border-color: transparent transparent rgb(192, 192, 192) transparent;}
 	}
-	&tabButtons#{&}tabButtonsFramed{
-		@media(min-width: 0px){border: 1px solid var(--clg);border-radius: 4px;overflow: hidden;background: #fff;}
+	&extremumLabelTextInSegment{
+		@media(min-width: 0px){overflow: visible; text-overflow: clip;}
 	}
-	&tabButtons#{&}tabButtonsFramed &tabButton{
-		@media(min-width: 0px){font-size: var(--font-size-sm);padding: 6px 10px;flex: 1 1 0;font-weight: 500;display: flex;align-items: center;justify-content: center;}
+	&extremumWaveNameInSegment{
+		@media(min-width: 0px){cursor: pointer; pointer-events: auto; text-decoration: none;}
 	}
-	&tabButtons#{&}tabButtonsFramed &tabButton.sun-active{
-		@media(min-width: 0px){font-weight: 600;}
+	&extremumWaveNameOnVizor{
+		@media(min-width: 0px){text-decoration: underline; text-underline-offset: 2px;}
 	}
-	&listItemNote &noteContentWrapper{
-		@media(min-width: 0px){width: 100%;margin-bottom: 8px;}
+	&gridWrapperInAbsolute{
+		@media(min-width: 0px){pointer-events: auto;}
 	}
-	&listItemIntersection#{&}exactMatch{
-		@media(min-width: 0px){background-color: #e6f7e6;}
+	&groupChildrenItem{
+		@media(min-width: 0px){display: flex !important; visibility: visible !important; opacity: 1 !important;}
 	}
-	&listItemIntersection#{&}closeMatch{
-		@media(min-width: 0px){background-color: #fffbe6;}
+	&groupChildrenOpen{
+		@media(min-width: 0px){display: block;}
 	}
-	&listItemIntersection &intersectionInfo{
-		@media(min-width: 0px){flex: 1;}
+	&hourLabelActive{
+		@media(min-width: 0px){color: var(--cp); font-weight: 600;}
 	}
-	&listItemIntersection &intersectionPeriod{
-		@media(min-width: 0px){font-weight: 700;color: var(--text-color);}
+	&hourLabelInTimeBar{
+		@media(min-width: 0px){font-size: 10px;}
 	}
-	&listItemIntersection &intersectionMatchType{
-		@media(min-width: 0px){font-size: var(--font-size-sm);color: var(--text-secondary);margin-top: 2px;}
+	&hourLabelMidnight{
+		@media(min-width: 0px){color: var(--danger-color); font-weight: 700;}
 	}
-	&listItemIntersection &intersectionControls{
-		@media(min-width: 0px){display: flex;gap: var(--spacing-xs);align-items: center;flex-shrink: 0;}
+	&hourMarkerInTimeBar{
+		@media(min-width: 0px){min-height: 100%; box-sizing: border-box;}
 	}
-	&listItemGroup#{&}listItemDragging{
-		@media(min-width: 0px){opacity: 0.5;background-color: #f0f0f0;z-index: 10;}
+	&intersectionFormRowActionsInForm{
+		@media(min-width: 0px){justify-content: flex-end; margin-left: 0; margin-top: var(--spacing-xs);}
 	}
-	&listItemGroup#{&}listItemDragOverTop::before{
-		@media(min-width: 0px){content: "";position: absolute;left: -5px;top: -5px;width: 10px;height: 10px;background: #000;transform: rotate(45deg);z-index: 10;}
+	&intersectionTimeRailMirrorCountdownInStats{
+		@media(min-width: 0px){margin: 6px 0 0; padding: 0; font-size: var(--font-size-xs); font-weight: 500; line-height: 1.35; color: var(--text-color); font-variant-numeric: tabular-nums;}
 	}
-	&listItemGroup#{&}listItemDragOverBottom::after{
-		@media(min-width: 0px){content: "";position: absolute;left: -5px;bottom: -5px;width: 10px;height: 10px;background: #000;transform: rotate(45deg);z-index: 10;}
+	&intersectionTimeRailMirrorDurationInStats{
+		@media(min-width: 0px){margin-top: 0;}
 	}
-	&listItemPersonGroup#{&}listItemDragging{
-		@media(min-width: 0px){opacity: 0.5;background-color: #f0f0f0;z-index: 10;}
+	&listItemDragHandleMuted{
+		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
-	&listItemPersonGroup#{&}listItemDragOverTop::before{
-		@media(min-width: 0px){content: "";position: absolute;left: -5px;top: -5px;width: 10px;height: 10px;background: #000;transform: rotate(45deg);z-index: 10;}
+	&listItemEditRowDateActions{
+		@media(min-width: 0px){display: flex; width: 100%; justify-content: flex-end;}
 	}
-	&listItemPersonGroup#{&}listItemDragOverBottom::after{
-		@media(min-width: 0px){content: "";position: absolute;left: -5px;bottom: -5px;width: 10px;height: 10px;background: #000;transform: rotate(45deg);z-index: 10;}
+	&listItemEditRowDateMain{
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
 	}
-	&dateInPersonGroup#{&}listItemDragOverTop{
-		@media(min-width: 0px){border-top: 2px solid var(--cp);}
+	&listItemEditRowFull{
+		@media(min-width: 0px){width: 100%;}
 	}
-	&dateInPersonGroup#{&}listItemDragOverBottom{
-		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
+	&listItemSaveFlash{
+		&::before{
+			@media(min-width: 0px){content: ""; position: absolute; inset: 1px; z-index: 0; pointer-events: none; animation: list-item-save-flash 0.85s ease-out forwards;}
+		}
+	}
+	&listItemSaveFlashChild{
+		@media(min-width: 0px){position: relative; z-index: 1;}
+	}
+	&listItemViewForceShown{
+		@media(min-width: 0px){display: flex !important;}
+	}
+	&listItemViewHidden{
+		@media(min-width: 0px){display: none !important;}
+	}
+	&listItemViewShown{
+		@media(min-width: 0px){display: flex !important;}
+	}
+	&secretSchemeCell{
+		@media(min-width: 0px){display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; width: 100%; height: 100%; padding: 0; box-sizing: border-box; background: #fff; outline: 1px solid var(--clg); transition: background-color 0.15s ease, color 0.15s ease; font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; color: var(--text-color);}
+	}
+	&tabButtonsTimeBarControls{
+		@media(min-width: 0px){justify-content: flex-start;}
+	}
+	&tabContainerInTabs{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0;}
+	}
+	&tabContainerTimeBarControls{
+		@media(min-width: 0px){align-items: flex-start;}
+	}
+	&tabContainerWithFramedButtons{
+		@media(min-width: 0px){gap: var(--spacing-sm);}
+	}
+	&tabContentInTabs{
+		@media(min-width: 0px){max-width: 100%; min-width: 0; overflow-x: hidden; overflow-y: visible; box-sizing: border-box;}
+	}
+	&tabPanelInner{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible; outline: none;}
+	}
+	&timeBarContainerInWrap{
+		@media(min-width: 0px){width: 100%; min-height: 0; height: auto; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: 0;}
+	}
+	&timeBarControlLabelInGroups{
+		@media(min-width: 0px){white-space: nowrap;}
+	}
+	&timeBarControlsInSection{
+		@media(min-width: 0px){outline: none;}
+	}
+	&timeBarControlsSectionLayout{
+		@media(min-width: 0px){margin-bottom: 0; display: flex; flex-direction: column; gap: var(--spacing-sm);}
+	}
+	&timeBarNowLabel{
+		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap; font-weight: 600; font-family: monospace; background-color: var(--danger-color); color: #fff;}
+		&::before{
+			@media(min-width: 0px){content: ""; display: block; position: absolute; left: 50%; top: -4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid var(--danger-color);}
+		}
+		&::after{
+			@media(min-width: 0px){display: none;}
+		}
+	}
+	&timeBarNowRowWhenStackEmpty{
+		@media(min-width: 0px){border-top: none;}
+	}
+	&timeBarSegmentLabel{
+		@media(min-width: 0px){position: relative; transform: none; bottom: auto; top: auto; margin: 0; max-width: none; pointer-events: auto; z-index: 1;}
+		&:hover{
+			@media(min-width: 0px){border-color: #000; pointer-events: auto;}
+		}
+	}
+	&timeBarStateRowLastVisible{
+		@media(min-width: 0px){border-bottom: none;}
+	}
+	&timeLabelsInHoursTrack{
+		@media(min-width: 0px){position: absolute; inset: 0; pointer-events: none;}
+	}
+	&timeScaleInHoursTrack{
+		@media(min-width: 0px){position: absolute; inset: 0; width: 100%; height: 100%; display: flex;}
+	}
+	&topControlsItem{
+		@media(min-width: 0px){display: flex; align-items: center; min-height: 25px; overflow: visible;}
+	}
+	&waveColorPreviewSmall{
+		@media(min-width: 0px){width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; flex-shrink: 0; align-self: center; margin: 0;}
+	}
+	&waveControlsInline{
+		@media(min-width: 0px){display: flex; align-items: center; gap: 6px; margin-right: 8px;}
+	}
+	&waveInGroup{
+		@media(min-width: 0px){cursor: default; background: #fafafa;}
+		&:hover{
+			@media(min-width: 0px){background: #f0f0f0;}
+		}
+		&:last-child{
+			@media(min-width: 0px){margin-bottom: 0;}
+		}
+	}
+	&wavesPanelInControl{
+		@media(min-width: 0px){grid-column: 2;}
+	}
+	&wavesTransformLayer{
+		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; transform-origin: 50% 50%;}
 	}
 	&waveInGroup#{&}listItemDragging{
 		@media(min-width: 0px){opacity: 0.5;background-color: #f0f0f0;z-index: 10;}
-	}
-	&waveInGroup#{&}listItemDragOverTop{
-		@media(min-width: 0px){border-top: 2px solid var(--cp);}
-	}
-	&waveInGroup#{&}listItemDragOverBottom{
-		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
 	}
 	&waveInGroup#{&}listItemDragOverTop::before{
 		@media(min-width: 0px){content: "";position: absolute;left: -5px;top: -5px;width: 10px;height: 10px;background: var(--cp);transform: rotate(45deg);z-index: 10;}
@@ -1804,436 +2731,24 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&waveInGroup#{&}listItemDragOverBottom::after{
 		@media(min-width: 0px){content: "";position: absolute;left: -5px;bottom: -5px;width: 10px;height: 10px;background: var(--cp);transform: rotate(45deg);z-index: 10;}
 	}
+	&waveInGroup#{&}listItemDragOverTop{
+		@media(min-width: 0px){border-top: 2px solid var(--cp);}
+	}
+	&waveInGroup#{&}listItemDragOverBottom{
+		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
+	}
 	&groupChildren#{&}groupChildrenDragOver{
 		@media(min-width: 0px){background: rgba(0, 102, 204, 0.06);outline: 2px dashed var(--cp);outline-offset: -2px;border-radius: 4px;}
 	}
 	&personGroupChildren#{&}groupChildrenDragOver{
 		@media(min-width: 0px){background: rgba(0, 102, 204, 0.06);outline: 2px dashed var(--cp);outline-offset: -2px;border-radius: 4px;}
 	}
-	&dateCheckbox::after,
-		&waveGroupToggle::after,
-		&waveVisibilityCheck::after,
-		&waveBVisibilityCheck::after,
-		&waveCornerColorCheck::after,
-		&timeBarStateCheck::after,
-		&timeBarGroupCheck::after{
-		@media(min-width: 0px){content: "✓";position: absolute;inset: 0;display: flex;align-items: center;justify-content: center;color: #fff;font-size: 10px;font-weight: bold;line-height: 1;pointer-events: none;}
+	&dateInPersonGroup#{&}listItemDragOverTop{
+		@media(min-width: 0px){border-top: 2px solid var(--cp);}
 	}
-	&listItemDate#{&}dateCheckbox[data-type=a]{
-		@media(min-width: 0px){background-color: #e8f4fe;}
+	&dateInPersonGroup#{&}listItemDragOverBottom{
+		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
 	}
-	&listItemDate#{&}dateCheckbox[data-type=b]{
-		@media(min-width: 0px){background-color: #fff4e5;}
-	}
-	&uiBtn#{&}uiBtnToggleOff{
-		@media(min-width: 0px){opacity: 0.55;}
-	}
-	&mobileWarningBox &parableBtnWrapper{
-		@media(min-width: 0px){display: none;}
-	}
-	&mobileWarningBox &warningActions{
-		@media(min-width: 0px){display: none;}
-	}
-	&mobileWarningOverlay &warningBox{
-		@media(min-width: 0px){max-width: 90%;max-height: 90vh;overflow-y: auto;padding: var(--spacing-lg);background: #fff;}
-	}
-	&mobileWarningBox &warningTitle{
-		@media(min-width: 0px){font-size: var(--font-size-lg);margin-bottom: 0px;text-align: center;}
-	}
-	&mobileWarningBox &warningText{
-		@media(min-width: 0px){font-size: var(--font-size-md);line-height: 1.6;margin-bottom: var(--spacing-lg);display: none;}
-	}
-	&mobileWarningBox &warningText{
-		@media(min-width: 0px){text-align: left;margin: var(--spacing-sm) 0;padding-left: var(--spacing-lg);}
-	}
-	&mobileWarningBox &warningText{
-		@media(min-width: 0px){margin-bottom: 5px;}
-	}
-	&mobileWarningBox &warningInfo{
-		@media(min-width: 0px){margin-top: var(--spacing-md);}
-	}
-	&mobileWarningBox &warningInfoItem{
-		@media(min-width: 0px){margin-bottom: 8px;}
-	}
-	&mobileWarningBox &warningInfoItem:last-child{
-		@media(min-width: 0px){margin-bottom: 0;}
-	}
-	&spoilerContent#{&}show{
-		@media(min-width: 0px){display: block;}
-	}
-	&dbImportStatus#{&}success{
-		@media(min-width: 0px){background: #d4edda;color: #155724;border: 1px solid #c3e6cb;}
-	}
-	&dbImportStatus#{&}error{
-		@media(min-width: 0px){background: #f8d7da;color: #721c24;border: 1px solid #f5c6cb;}
-	}
-	&dbImportStatus#{&}info{
-		@media(min-width: 0px){background: #d1ecf1;color: #0c5460;border: 1px solid #bee5eb;}
-	}
-	&secretSchemeSection &tabContainer{
-		@media(min-width: 0px){align-items: flex-start;}
-	}
-	&secretSchemeSection &tabButtons#{&}tabButtonsFramed{
-		@media(min-width: 0px){width: -moz-fit-content;width: fit-content;max-width: 100%;}
-	}
-	&secretSchemeSection &tabButtons{
-		@media(min-width: 0px){justify-content: flex-start;}
-	}
-	&secretSchemeSection &tabButtons#{&}tabButtonsFramed &tabButton{
-		@media(min-width: 0px){flex: 0 1 auto;max-width: 100%;white-space: normal;text-align: left;line-height: 1.25;padding: 6px 12px;}
-	}
-	&wavesMount &waveContainer{
-		@media(min-width: 0px){pointer-events: none;}
-	}
-	&wavesMount &waveContainer{
-		@media(min-width: 0px){pointer-events: none;}
-	}
-	&wavesMount &waveContainer &wave{
-		@media(min-width: 0px){pointer-events: none;}
-	}
-	&wavesMount &waveContainer &wavePath{
-		@media(min-width: 0px){pointer-events: none;}
-	}
-	&graphContainer#{&}graphGrayMode{
-		@media(min-width: 0px){filter: grayscale(1);}
-	}
-	&graphContainer#{&}graphGrayMode &axis,
-		&graphContainer#{&}graphGrayMode &gridLine,
-		&graphContainer#{&}graphGrayMode &gridLineInner,
-		&graphContainer#{&}graphGrayMode &wavePath{
-		@media(min-width: 0px){filter: none;}
-	}
-	&waveLabelsContainer &waveLabelsSide{
-		@media(min-width: 0px){position: absolute;top: 0;height: 100%;width: 200px;}
-	}
-	&waveLabelsVerticalContainer &waveLabelsSide{
-		@media(min-width: 0px){position: absolute;width: 100%;height: 30px;}
-	}
-	&waveLabelsContainer &waveLabel#{&}horizontal{
-		@media(min-width: 0px){transform: translateY(-50%);height: 20px;}
-	}
-	&waveLabelsLeft &waveLabel{
-		@media(min-width: 0px){flex-direction: row-reverse;right: 0;margin-right: 10px;}
-	}
-	&waveLabelsRight &waveLabel{
-		@media(min-width: 0px){flex-direction: row;left: 0;margin-left: 10px;}
-	}
-	&waveLabelsVerticalContainer &waveLabel#{&}vertical{
-		@media(min-width: 0px){transform: translateX(-50%);height: 20px;}
-	}
-	&waveLabelsTop &waveLabel{
-		@media(min-width: 0px){top: 0;margin-top: 5px;}
-	}
-	&waveLabelsBottom &waveLabel{
-		@media(min-width: 0px){bottom: 0;margin-bottom: 5px;}
-	}
-	&waveLabelsContainer &waveLabelArrow{
-		@media(min-width: 0px){top: 50%;transform: translateY(-50%);}
-	}
-	&waveLabelsVerticalContainer &waveLabelArrow{
-		@media(min-width: 0px){left: 50%;transform: translateX(-50%);}
-	}
-	&graph#{&}graphAxisSwapped &xAxis.sun-active{
-		@media(min-width: 0px){background-color: var(--cp) !important;z-index: 6;}
-	}
-	&gridWrapper:hover &gridLineInner{
-		@media(min-width: 0px){background-color: #ccc;}
-	}
-	&gridWrapper:hover &gridLineInner.sun-hasNotes{
-		@media(min-width: 0px){background-color: #ff4444;}
-	}
-	&gridWrapper:hover &gridLineInner.sun-active{
-		@media(min-width: 0px){background-color: var(--cp) !important;}
-	}
-	&gridWrapper:hover &gridLineInner.sun-active.sun-hasNotes{
-		@media(min-width: 0px){background-color: var(--danger-color) !important;}
-	}
-	&gridLine#{&}gridLineX{
-		@media(min-width: 0px){width: 100%;height: 1px;left: 0;}
-	}
-	&gridLine#{&}gridLineY{
-		@media(min-width: 0px){width: 1px;height: 100%;top: 0;cursor: pointer;z-index: 6;background-color: #eee;transition: width 0.2s, background-color 0.2s;}
-	}
-	&gridLine#{&}gridLineY.sun-active{
-		@media(min-width: 0px){background-color: var(--cp);width: 1px;z-index: 7;}
-	}
-	&gridLine#{&}gridLineY.sun-active:hover{
-		@media(min-width: 0px){background-color: var(--cp);width: 1px;}
-	}
-	&gridLine#{&}gridLineY.sun-hasNotes{
-		@media(min-width: 0px){background-color: var(--danger-color);}
-	}
-	&gridLine#{&}gridLineY.sun-hasNotes:hover{
-		@media(min-width: 0px){background-color: #ff4444;width: 3px;}
-	}
-	&gridLine#{&}gridLineY.sun-active.sun-hasNotes{
-		@media(min-width: 0px){background-color: var(--danger-color);}
-	}
-	&gridLine#{&}gridLineY.sun-active.sun-hasNotes:hover{
-		@media(min-width: 0px){background-color: var(--danger-color);width: 1px;}
-	}
-	&dateRow &dateLabels{
-		@media(min-width: 0px){position: static;transform: none;bottom: auto;left: auto;}
-	}
-	&dateRow &weekdayLabel{
-		@media(min-width: 0px){position: static;transform: none;bottom: auto;left: auto;}
-	}
-	&gridLine#{&}stateV{
-		@media(min-width: 0px){background-color: #eee;z-index: 1;}
-	}
-	&gridLine#{&}dayH{
-		@media(min-width: 0px){background-color: #eee;z-index: 1;}
-	}
-	&gridLine#{&}dayH.sun-active{
-		@media(min-width: 0px){background-color: var(--cp) !important;z-index: 6 !important;}
-	}
-	&extremumLabelTop &extremumLabelArrow{
-		@media(min-width: 0px){bottom: -6px;border-width: 6px 4px 0 4px;border-color: rgb(192, 192, 192) transparent transparent transparent;}
-	}
-	&extremumLabelBottom &extremumLabelArrow{
-		@media(min-width: 0px){top: -6px;border-width: 0 4px 6px 4px;border-color: transparent transparent rgb(192, 192, 192) transparent;}
-	}
-	&timeBarSegmentLabel:hover &extremumLabelArrowTopInSegment{
-		@media(min-width: 0px){border-top-color: transparent;border-right-color: transparent;border-left-color: transparent;border-bottom-color: #000;}
-	}
-	&timeBarSegmentLabel:hover &extremumLabelArrowBottomInSegment{
-		@media(min-width: 0px){border-top-color: #000;border-right-color: transparent;border-left-color: transparent;border-bottom-color: transparent;}
-	}
-	&waveContainerSwapped &wave{
-		@media(min-width: 0px){top: 0;transform: none;}
-	}
-	&wavePath#{&}bold{
-		@media(min-width: 0px){stroke-width: 3px;}
-	}
-	&waveLabel#{&}waveLabelPersonB{
-		@media(min-width: 0px){opacity: 0.5;font-style: italic;font-weight: 400;outline: 1px dashed rgba(255, 255, 255, 0.42);outline-offset: -1px;box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);}
-	}
-	&waveLabel#{&}waveLabelPersonB:hover{
-		@media(min-width: 0px){opacity: 0.88;}
-	}
-	&waveLabel#{&}waveLabelPersonB &waveLabelText{
-		@media(min-width: 0px){letter-spacing: 0.35px;}
-	}
-	&waveLabelsLeft &waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before,
-		&waveLabelsRight &waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before{
-		@media(min-width: 0px){content: "";position: absolute;top: 50%;width: 12px;height: 2px;margin-top: -1px;background: var(--sun-waveLabel-fill, #888);opacity: 0.95;pointer-events: none;z-index: 0;border-radius: 1px;}
-	}
-	&waveLabelsLeft &waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before{
-		@media(min-width: 0px){left: 0;right: auto;transform: translateX(-100%);}
-	}
-	&waveLabelsRight &waveLabel#{&}horizontal#{&}waveLabelPersonB[data-logical-edge]::before{
-		@media(min-width: 0px){right: 0;left: auto;transform: translateX(100%);}
-	}
-	&waveLabelsTop &waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before,
-		&waveLabelsBottom &waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before{
-		@media(min-width: 0px){content: "";position: absolute;left: 50%;width: 2px;height: 10px;margin-left: -1px;background: var(--sun-waveLabel-fill, #888);opacity: 0.95;pointer-events: none;z-index: 0;border-radius: 1px;}
-	}
-	&waveLabelsTop &waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before{
-		@media(min-width: 0px){top: 0;bottom: auto;transform: translate(-50%, -100%);}
-	}
-	&waveLabelsBottom &waveLabel#{&}vertical#{&}waveLabelPersonB[data-logical-edge]::before{
-		@media(min-width: 0px){bottom: 0;top: auto;transform: translate(-50%, 100%);}
-	}
-	&waveAxisXPoint#{&}waveAxisXPointPersonB{
-		@media(min-width: 0px){opacity: 0.45;border-style: dashed;}
-	}
-	&waveAxisXPoint#{&}waveAxisXPointPersonB:hover{
-		@media(min-width: 0px){opacity: 0.85;}
-	}
-	&wavePath#{&}solid{
-		@media(min-width: 0px){stroke-dasharray: none;}
-	}
-	&wavePath#{&}dashed{
-		@media(min-width: 0px){stroke-dasharray: 5px;}
-	}
-	&wavePath#{&}dotted{
-		@media(min-width: 0px){stroke-dasharray: 2px;}
-	}
-	&wavePath#{&}zigzag{
-		@media(min-width: 0px){stroke-linecap: butt;stroke-dasharray: 3px;}
-	}
-	&wavePath#{&}dashDot{
-		@media(min-width: 0px){stroke-dasharray: 8px 2px 2px 2px;}
-	}
-	&wavePath#{&}longDash{
-		@media(min-width: 0px){stroke-dasharray: 12px 3px;}
-	}
-	&panelSection#{&}buttonsPanel{
-		@media(min-width: 0px){display: flex;flex-direction: column;gap: var(--spacing-xs);}
-	}
-	&panelSection#{&}pagelImage{
-		@media(min-width: 0px){align-self: center;}
-	}
-	&panelSection#{&}pagelImage{
-		@media(min-width: 0px){display: block;margin: 0 auto;}
-	}
-	&addCustomWaveForm#{&}compact{
-		@media(min-width: 0px){display: flex;flex-direction: column;gap: var(--spacing-xs);font-size: var(--font-size-sm);}
-	}
-	&addCustomWaveForm#{&}compact &addGroupForm{
-		@media(min-width: 0px){display: flex;gap: var(--spacing-xs);width: 100%;align-items: center;margin-bottom: 0;}
-	}
-	&addCustomWaveForm#{&}compact &addGroupInput{
-		@media(min-width: 0px){flex: 1;height: 25px;padding: 3px 5px;font-size: var(--font-size-sm);min-width: 0;}
-	}
-	&addCustomWaveForm#{&}compact &addGroupBtn{
-		@media(min-width: 0px){height: 25px;flex-shrink: 0;white-space: nowrap;}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow{
-		@media(min-width: 0px){display: flex;flex-direction: row;gap: var(--spacing-xs);align-items: center;width: 100%;}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow &formInput{
-		@media(min-width: 0px){height: 25px;padding: 3px 5px;font-size: var(--font-size-sm);min-width: 120px;}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow &customWaveName{
-		@media(min-width: 0px){flex: 2;min-width: 150px;}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow &customWavePeriod{
-		@media(min-width: 0px){flex: 1;min-width: 100px;}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow{
-		@media(min-width: 0px){flex: 1;min-width: 120px;height: 25px;}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow &colorInput{
-		@media(min-width: 0px){width: 40px;height: 25px;padding: 0;margin: 0;align-self: center;cursor: pointer;flex-shrink: 0;box-sizing: border-box;display: block;border: 1px solid var(--clg);}
-	}
-	&addCustomWaveForm#{&}compact &waveInputsRow &btnAddCustomWave{
-		@media(min-width: 0px){height: 25px;flex-shrink: 0;white-space: nowrap;margin-top: 0;}
-	}
-	&displayViewTemplatesBar#{&}compact{
-		@media(min-width: 0px){display: flex;flex-direction: column;gap: var(--spacing-xs);font-size: var(--font-size-sm);}
-	}
-	&displayViewTemplatesRow &displayViewTemplateSelect{
-		@media(min-width: 0px){flex: 1;min-width: 160px;height: 25px;font-size: var(--font-size-sm);}
-	}
-	&displayViewTemplatesRow &newDisplayViewTemplateName{
-		@media(min-width: 0px){flex: 1;min-width: 140px;height: 25px;padding: 3px 5px;font-size: var(--font-size-sm);}
-	}
-	&displayViewTemplatesRow &btnDeleteDisplayViewTemplate{
-		@media(min-width: 0px){height: 25px;flex-shrink: 0;white-space: nowrap;}
-	}
-	&topControls &dateTimeInputGroup &dateInput{
-		@media(min-width: 0px){overflow: visible;}
-	}
-	&summarySelectGroup &summarySelect{
-		@media(min-width: 0px){flex: 1 1 140px;max-width: min(100%, 320px);}
-	}
-	&intersectionSelectGroup &summarySelect{
-		@media(min-width: 0px){flex: 0 0 auto;width: 100%;max-width: 100%;height: 25px;}
-	}
-	&dateComparisonSelects &summarySelect{
-		@media(min-width: 0px){flex: 0 0 auto;width: 100%;max-width: 100%;height: 25px;}
-	}
-	&summaryDuplicateButtons &uiBtn{
-		@media(min-width: 0px){height: 25px;padding: var(--spacing-xs) var(--spacing-sm);font-size: var(--font-size-sm);white-space: nowrap;}
-	}
-	&summaryResultsContainer &summaryResults{
-		@media(min-width: 0px){overflow: visible;max-height: none;}
-	}
-	&summaryResultsContainer &intersectionResults{
-		@media(min-width: 0px){overflow: visible;max-height: none;}
-	}
-	&summaryItemActions &uiBtn{
-		@media(min-width: 0px){height: 25px;padding: var(--spacing-xs) var(--spacing-sm);font-size: var(--font-size-sm);white-space: nowrap;}
-	}
-	&summaryItemExact &summaryItemCloseness{
-		@media(min-width: 0px){background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);color: white;}
-	}
-	&summaryItemVeryClose &summaryItemCloseness{
-		@media(min-width: 0px){background: #4caf50;color: white;}
-	}
-	&summaryItemClose &summaryItemCloseness{
-		@media(min-width: 0px){background: #8bc34a;color: black;}
-	}
-	&summaryItemFairlyClose &summaryItemCloseness{
-		@media(min-width: 0px){background: #ffc107;color: black;}
-	}
-	&summaryItemNearby &summaryItemCloseness{
-		@media(min-width: 0px){background: #ff9800;color: black;}
-	}
-	&intersectionResultCloseness#{&}intersectionItemExact{
-		@media(min-width: 0px){background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);color: white;}
-	}
-	&intersectionResultCloseness#{&}intersectionItemVeryClose{
-		@media(min-width: 0px){background: #4caf50;color: white;}
-	}
-	&intersectionResultCloseness#{&}intersectionItemClose{
-		@media(min-width: 0px){background: #8bc34a;color: black;}
-	}
-	&intersectionResultCloseness#{&}intersectionItemFairlyClose{
-		@media(min-width: 0px){background: #ffc107;color: black;}
-	}
-	&intersectionResultCloseness#{&}intersectionItemNearby{
-		@media(min-width: 0px){background: #ff9800;color: black;}
-	}
-	&intersectionResultCloseness#{&}intersectionItemWithinTolerance{
-		@media(min-width: 0px){background: #f44336;color: white;}
-	}
-	&intersectionResultActions &uiBtn{
-		@media(min-width: 0px){height: 25px;padding: var(--spacing-xs) var(--spacing-sm);font-size: var(--font-size-sm);white-space: nowrap;}
-	}
-	&dateComparisonViewTabs &summaryResultsContainer{
-		@media(min-width: 0px){margin-top: var(--spacing-sm);}
-	}
-	&dateComparisonViewTabs &tabButton{
-		@media(min-width: 0px){font-size: var(--font-size-sm);padding: 6px 10px;flex: 1 1 0;font-weight: 500;display: flex;align-items: center;justify-content: center;}
-	}
-	&dateComparisonViewTabs &tabButton.sun-active{
-		@media(min-width: 0px){font-weight: 600;}
-	}
-	&dateComparisonSelects &intersectionSelectGroup{
-		@media(min-width: 0px){flex: 1;min-width: 140px;display: flex;flex-direction: column;gap: var(--spacing-xs);}
-	}
-	&intersectionToolbarOneRow &intersectionSelectGroup{
-		@media(min-width: 0px){flex: 1 1 130px;min-width: 0;max-width: min(100%, 220px);}
-	}
-	&dateComparisonSelects &intersectionFormLabel{
-		@media(min-width: 0px){cursor: default;}
-	}
-	&dateComparisonTable{
-		@media(min-width: 0px){text-align: left;padding: 8px 6px;border-bottom: 1px solid var(--clg);background: #f8f9fa;font-weight: 600;white-space: nowrap;}
-	}
-	&dateComparisonTable{
-		@media(min-width: 0px){padding: 8px 6px;border-bottom: 1px solid #eee;vertical-align: middle;}
-	}
-	&dateComparisonTable :hover{
-		@media(min-width: 0px){background-color: #f0f4f8;}
-	}
-	&dateComparisonTable &dateComparisonState{
-		@media(min-width: 0px){width: 1%;white-space: nowrap;}
-	}
-	&dateComparisonTable &dateComparisonActions &uiBtn{
-		@media(min-width: 0px){font-size: 11px;padding: 4px 8px;}
-	}
-	&intersectionTimeRail#{&}intersectionTimeRailOpen{
-		@media(min-width: 0px){display: block;}
-	}
-	&intersectionTimeRailPersonField &summarySelect,
-		&intersectionTimeRailPersonField &intersectionTimeRailPersonSelect{
-		@media(min-width: 0px){flex: 0 0 auto;width: 100%;max-width: 100%;height: 25px;min-height: 25px;box-sizing: border-box;}
-	}
-	&waveLabel#{&}horizontal{
-		@media(min-width: 0px){position: absolute;background-color: var(--wave-color, #666);color: #fff;opacity: 0.5;z-index: 1;padding: 2px 6px;border-radius: 3px;font-size: var(--font-size-sm);transform: translateY(-50%);cursor: pointer;}
-	}
-	&waveLabel#{&}horizontal:hover{
-		@media(min-width: 0px){opacity: 1;z-index: 10;}
-	}
-	&waveLabel#{&}horizontal#{&}left{
-		@media(min-width: 0px){right: 0;margin-right: var(--spacing-sm);}
-	}
-	&waveLabel#{&}horizontal#{&}right{
-		@media(min-width: 0px){left: 0;margin-left: var(--spacing-sm);}
-	}
-	&waveLabel#{&}vertical{
-		@media(min-width: 0px){position: absolute;background-color: var(--wave-color, #666);color: #fff;opacity: 0.5;z-index: 1;padding: 2px 6px;border-radius: 3px;font-size: var(--font-size-sm);transform: translateX(-50%);cursor: pointer;}
-	}
-	&waveLabel#{&}vertical#{&}waveLabelExtremum{
-		@media(min-width: 0px){font-family: monospace;letter-spacing: 0.5px;}
-	}
-	&waveLabel#{&}vertical#{&}waveLabelName{
-		@media(min-width: 0px){font-family: inherit;letter-spacing: normal;}
-	}
-
 	@media(max-width: 768px){
 		&controlPanel{
 			@media(min-width: 0px){grid-template-columns: 1fr;}
@@ -2241,7 +2756,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		&topControls{
 			@media(min-width: 0px){flex-direction: column; height: auto;}
 		}
-		&topControlsItem{
+		&topControls > *{
 			@media(min-width: 0px){height: auto; width: 100%;}
 		}
 		&transformControls{
@@ -2250,71 +2765,116 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		&formRow{
 			@media(min-width: 0px){flex-direction: column; align-items: flex-start;}
 		}
+		&editFormRow{
+			@media(min-width: 0px){flex-direction: column; align-items: flex-start;}
+		}
 		&formLabel{
+			@media(min-width: 0px){width: auto;}
+		}
+		&editFormLabel{
 			@media(min-width: 0px){width: auto;}
 		}
 		&inputRow{
 			@media(min-width: 0px){flex-direction: column; align-items: flex-start;}
+		}
+		&inputLabel{
+			@media(min-width: 0px){width: auto;}
 		}
 		&tabButtons{
 			@media(min-width: 0px){flex-direction: column;}
 		}
 		&tabButton{
 			@media(min-width: 0px){text-align: center; border-right: none; border-bottom: 1px solid #dee2e6;}
-			&:last-child{
-				@media(min-width: 0px){border-bottom: none;}
-			}
 		}
-		&listItemDate{
+		&tabButton:last-child{
+			@media(min-width: 0px){border-bottom: none;}
+		}
+		&waveControl{
+			@media(min-width: 0px){flex-wrap: wrap;}
+		}
+		&dateItem{
 			@media(min-width: 0px){flex-wrap: wrap;}
 		}
 		&dateName{
 			@media(min-width: 0px){min-width: 100%; margin-bottom: var(--spacing-xs);}
 		}
-		&cornerSquare#{&}cornerPosTc,
-		&cornerSquare#{&}cornerPosBc,
-		&cornerSquare#{&}cornerPosLc,
-		&cornerSquare#{&}cornerPosRc,
-		&cornerSquare#{&}cornerPosMt,
-		&cornerSquare#{&}cornerPosMb,
-		&cornerSquare#{&}cornerPosMl,
-		&cornerSquare#{&}cornerPosMr,
-		&cornerSquare#{&}cornerPosMt2,
-		&cornerSquare#{&}cornerPosMb2,
-		&cornerSquare#{&}cornerPosMl2,
+		&customWaveItemControls{
+			@media(min-width: 0px){flex-wrap: wrap;}
+		}
+		&cornerSquare#{&}cornerPosTc{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosBc{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosLc{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosRc{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMt{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMb{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMl{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMr{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMt2{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMb2{
+			@media(min-width: 0px){display: none;}
+		}
+		&cornerSquare#{&}cornerPosMl2{
+			@media(min-width: 0px){display: none;}
+		}
 		&cornerSquare#{&}cornerPosMr2{
 			@media(min-width: 0px){display: none;}
 		}
 		&addCustomWaveForm{
 			@media(min-width: 0px){flex-direction: column;}
-			&#{&}compact{
-				@media(min-width: 0px){flex-direction: column; gap: var(--spacing-xs);}
-				#{&}addGroupForm{
-					@media(min-width: 0px){flex-direction: column; gap: var(--spacing-xs);}
-				}
-				#{&}addGroupInput,
-				#{&}waveInputsRow #{&}formInput,
-				#{&}waveInputsRow select,
-				#{&}waveInputsRow #{&}colorInput{
-					@media(min-width: 0px){width: 100%; min-width: 0;}
-				}
-				#{&}addGroupBtn,
-				#{&}waveInputsRow #{&}btnAddCustomWave{
-					@media(min-width: 0px){width: 100%;}
-				}
-				#{&}waveInputsRow{
-					@media(min-width: 0px){flex-direction: column; gap: var(--spacing-xs);}
-				}
-			}
+		}
+		&addCustomWaveForm#{&}compact{
+			@media(min-width: 0px){flex-direction: column; gap: var(--spacing-xs);}
+		}
+		&addCustomWaveForm#{&}compact #{&}addGroupForm{
+			@media(min-width: 0px){flex-direction: column; gap: var(--spacing-xs);}
+		}
+		&addCustomWaveForm#{&}compact #{&}addGroupInput{
+			@media(min-width: 0px){width: 100%; min-width: 0;}
+		}
+		&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}formInput{
+			@media(min-width: 0px){width: 100%; min-width: 0;}
+		}
+		&addCustomWaveForm#{&}compact #{&}waveInputsRow select{
+			@media(min-width: 0px){width: 100%; min-width: 0;}
+		}
+		&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}colorInput{
+			@media(min-width: 0px){width: 100%; min-width: 0;}
+		}
+		&addCustomWaveForm#{&}compact #{&}addGroupBtn{
+			@media(min-width: 0px){width: 100%;}
+		}
+		&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}btnAddCustomWave{
+			@media(min-width: 0px){width: 100%;}
+		}
+		&addCustomWaveForm#{&}compact #{&}waveInputsRow{
+			@media(min-width: 0px){flex-direction: column; gap: var(--spacing-xs);}
 		}
 		&displayViewTemplatesRow{
 			@media(min-width: 0px){flex-direction: column; align-items: stretch;}
-			#{&}newDisplayViewTemplateName{
-				@media(min-width: 0px){width: 100%; min-width: 0;}
-			}
-			#{&}btnDeleteDisplayViewTemplate{
-				@media(min-width: 0px){width: 100%;}
-			}
+		}
+		&displayViewTemplatesRow #{&}newDisplayViewTemplateName{
+			@media(min-width: 0px){width: 100%; min-width: 0;}
+		}
+		&displayViewTemplatesRow #{&}btnDeleteDisplayViewTemplate{
+			@media(min-width: 0px){width: 100%;}
 		}
 		&displayViewTemplatesDescriptionInput{
 			@media(min-width: 0px){min-height: 56px;}
@@ -2343,28 +2903,67 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		&cornerControls{
 			@media(min-width: 0px){flex-direction: column;}
 		}
-		&listItemNormalView{
+		&waveGroupHeader{
+			@media(min-width: 0px){flex-direction: column; align-items: flex-start; gap: var(--spacing-sm);}
+		}
+		&waveGroupRight{
+			@media(min-width: 0px){margin-left: 0; width: 100%; justify-content: space-between;}
+		}
+		&waveGroupCount{
+			@media(min-width: 0px){display: none;}
+		}
+		&dateNormalView{
 			@media(min-width: 0px){flex-direction: column; align-items: stretch; gap: 8px;}
 		}
-		&listItemEditForm{
+		&editDateForm{
 			@media(min-width: 0px){flex-direction: column; align-items: stretch; gap: 8px;}
 		}
-		&groupChildren{
+		&waveGroupChildren{
 			@media(min-width: 0px){padding: var(--spacing-xs) var(--spacing-sm);}
+		}
+		&waveGroupLeft{
+			@media(min-width: 0px){flex-wrap: wrap;}
+		}
+		&waveGroupTitle{
+			@media(min-width: 0px){font-size: var(--font-size-sm);}
 		}
 	}
 	@media(max-width: 480px){
 		&mobileWarningOverlay #{&}warningBox{
 			@media(min-width: 0px){max-width: 95%; padding: var(--spacing-md);}
 		}
-		&mobileWarning #{&}warningTitle{
+		&mobileWarningBox #{&}warningTitle{
 			@media(min-width: 0px){font-size: var(--font-size-md);}
 		}
-		&mobileWarning #{&}warningText{
+		&mobileWarningBox #{&}warningText{
 			@media(min-width: 0px){font-size: var(--font-size-sm);}
 		}
 		&warningInfo{
 			@media(min-width: 0px){font-size: var(--font-size-sm);}
 		}
 	}
+	}
+
+/* Маркеры часов: алиасы без sun- у модификаторов (устаревший styles.css / кэш) */
+.sun-hourMarker.clickable,
+.sun-hourMarker.sun-clickable{
+	cursor: pointer;
+}
+.sun-hourMarker.midnight,
+.sun-hourMarker.sun-midnight{
+	border-left-color: var(--danger-color);
+}
+.sun-hourMarker.midnight .sun-hourLabel,
+.sun-hourMarker.sun-midnight .sun-hourLabel{
+	color: var(--danger-color);
+	font-weight: 700;
+}
+.sun-hourMarker.active,
+.sun-hourMarker.sun-active{
+	background-color: #e6f2ff;
+}
+.sun-hourMarker.active .sun-hourLabel,
+.sun-hourMarker.sun-active .sun-hourLabel{
+	color: var(--cp);
+	font-weight: 600;
 }
