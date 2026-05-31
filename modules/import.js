@@ -322,30 +322,8 @@ class ImportExportManager {
                             window.appState.waveIntersectionsVisible = convertedData.uiSettings.waveIntersectionsVisible !== undefined ? convertedData.uiSettings.waveIntersectionsVisible : true;
                             window.appState.extremumWaveColorHighlight = convertedData.uiSettings.extremumWaveColorHighlight !== undefined ? convertedData.uiSettings.extremumWaveColorHighlight : false;
                             
-                            if (window.appState.uiHidden) {
-                                document.body.classList.add('sun-uiHidden');
-                            } else {
-                                document.body.classList.remove('sun-uiHidden');
-                            }
-                            
-                            if (window.appState.graphHidden) {
-                                document.body.classList.add('sun-graphHidden');
-                            } else {
-                                document.body.classList.remove('sun-graphHidden');
-                            }
-                            
-                            if (window.appState.showStars) {
-                                document.body.classList.add('sun-starsMode');
-                                document.body.classList.remove('sun-namesMode');
-                            } else {
-                                document.body.classList.remove('sun-starsMode');
-                                document.body.classList.add('sun-namesMode');
-                            }
-                            
-                            if (window.appState.grayMode) {
-                                document.body.classList.add('sun-grayMode');
-                            } else {
-                                document.body.classList.remove('sun-grayMode');
+                            if (window.appClassSync) {
+                                window.appClassSync.syncFromAppState();
                             }
                             
                             const graphContainer = window.dom.byKey('graphContainer');

@@ -134,23 +134,26 @@ class UIManager {
             warningBox.classList.remove('sun-hidden');
         }
 
-        document.body.classList.add('sun-uiHidden');
+        if (window.appClassSync) {
+            window.appClassSync.applyUiHidden(true);
+        }
 
         document.querySelectorAll('.sun-cornerSquare').forEach((square) => {
             square.style.display = 'block';
         });
     }
 
-    /** Скрыть/показать панели и полосу времени (класс uiHidden на body). */
+    /** Скрыть/показать панели и полосу времени. */
     toggleUI() {
         window.appState.uiHidden = !window.appState.uiHidden;
+        if (window.appClassSync) {
+            window.appClassSync.applyUiHidden(window.appState.uiHidden);
+        }
         if (window.appState.uiHidden) {
-            document.body.classList.add('sun-uiHidden');
             if (window.timeBarManager && window.timeBarManager.container) {
                 window.timeBarManager.container.style.display = 'none';
             }
         } else {
-            document.body.classList.remove('sun-uiHidden');
             if (window.timeBarManager && window.timeBarManager.container) {
                 window.timeBarManager.container.style.display = 'block';
             }
@@ -449,46 +452,31 @@ class UIManager {
         window.appState.save();
     }
 
-    /** Скрыть/показать блок графика (graphHidden на body). */
+    /** Скрыть/показать блок графика. */
     toggleGraph() {
         window.appState.graphHidden = !window.appState.graphHidden;
-        if (window.appState.graphHidden) {
-            document.body.classList.add('sun-graphHidden');
-        } else {
-            document.body.classList.remove('sun-graphHidden');
+        if (window.appClassSync) {
+            window.appClassSync.applyGraphHidden(window.appState.graphHidden);
         }
         window.appState.save();
     }
 
-    /** Обесцветить весь интерфейс (класс grayMode). */
+    /** Обесцветить основной интерфейс. */
     toggleGrayMode() {
         window.appState.grayMode = !window.appState.grayMode;
-        if (window.appState.grayMode) {
-            document.body.classList.add('sun-grayMode');
-        } else {
-            document.body.classList.remove('sun-grayMode');
+        if (window.appClassSync) {
+            window.appClassSync.applyGrayMode(window.appState.grayMode);
         }
         window.appState.save();
     }
 
-    /** Обесцветить только график и волны (graphGrayMode). */
+    /** Обесцветить только график и волны. */
     toggleGraphGrayMode() {
         window.appState.graphGrayMode = !window.appState.graphGrayMode;
-
-        if (window.appState.graphGrayMode) {
-            document.body.classList.add('sun-graphGrayMode');
-        } else {
-            document.body.classList.remove('sun-graphGrayMode');
+        if (window.appClassSync) {
+            window.appClassSync.applyGraphGrayMode(window.appState.graphGrayMode);
         }
-
-        const graphContainer = window.dom.byKey('graphContainer');
-        if (graphContainer) {
-            if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('sun-graphGrayMode');
-            } else {
-                graphContainer.classList.remove('sun-graphGrayMode');
-            }
-        }
+        window.appState.save();
     }
 
     /** Показать/скрыть точки пересечения волн друг с другом на графике. */
@@ -508,12 +496,8 @@ class UIManager {
     /** Переключить отображение имён персон: звёздочки или полные имена в списке и центре. */
     toggleStars() {
         window.appState.showStars = !window.appState.showStars;
-        if (window.appState.showStars) {
-            document.body.classList.add('sun-starsMode');
-            document.body.classList.remove('sun-namesMode');
-        } else {
-            document.body.classList.remove('sun-starsMode');
-            document.body.classList.add('sun-namesMode');
+        if (window.appClassSync) {
+            window.appClassSync.applyDateLabelMode(window.appState.showStars);
         }
         window.grid.updateCenterDate();
         window.dataManager.updateDateList();

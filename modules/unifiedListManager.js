@@ -143,6 +143,94 @@ class UnifiedListManager {
         }, 950);
     }
 
+    /** Плоские классы режима редактирования строки (без селекторов parent > child). */
+    syncListItemEditingClasses(row, isEditing) {
+        if (!row) {
+            return;
+        }
+        row.classList.toggle('sun-listItemEditing', isEditing);
+
+        const content = row.querySelector(':scope > .sun-listItemContent');
+        const normal = content ? content.querySelector(':scope > .sun-listItemNormalView') : null;
+        const form = content ? content.querySelector(':scope > .sun-listItemEditForm') : null;
+        const handle = row.querySelector(':scope > .sun-listItemDragHandle');
+        const altHandle = row.querySelector('.sun-waveDragHandle, .sun-dateDragHandle');
+
+        if (normal) {
+            normal.classList.toggle('sun-listItemViewHidden', isEditing);
+            normal.classList.toggle('sun-listItemViewForceShown', false);
+        }
+        if (form) {
+            form.classList.toggle('sun-listItemViewShown', isEditing);
+        }
+        if (handle) {
+            handle.classList.toggle('sun-listItemDragHandleMuted', isEditing);
+        }
+        if (altHandle && altHandle !== handle) {
+            altHandle.classList.toggle('sun-listItemDragHandleMuted', isEditing);
+        }
+
+        if (row.classList.contains('sun-listItemGroup')) {
+            row.querySelectorAll('.sun-waveInGroup').forEach((waveRow) => {
+                const waveContent = waveRow.querySelector('.sun-listItemContent');
+                const waveNormal = waveContent
+                    ? waveContent.querySelector('.sun-listItemNormalView')
+                    : null;
+                const waveForm = waveContent
+                    ? waveContent.querySelector('.sun-listItemEditForm')
+                    : null;
+                if (isEditing) {
+                    if (waveNormal) {
+                        waveNormal.classList.remove('sun-listItemViewHidden');
+                        waveNormal.classList.add('sun-listItemViewForceShown');
+                    }
+                    if (waveForm) {
+                        waveForm.classList.remove('sun-listItemViewShown');
+                    }
+                } else {
+                    const waveEditing = waveRow.classList.contains('sun-listItemEditing');
+                    if (waveNormal) {
+                        waveNormal.classList.remove('sun-listItemViewForceShown');
+                        waveNormal.classList.toggle('sun-listItemViewHidden', waveEditing);
+                    }
+                    if (waveForm) {
+                        waveForm.classList.toggle('sun-listItemViewShown', waveEditing);
+                    }
+                }
+            });
+        }
+
+        if (row.classList.contains('sun-listItemPersonGroup')) {
+            row.querySelectorAll('.sun-dateInPersonGroup').forEach((dateRow) => {
+                const dateContent = dateRow.querySelector('.sun-listItemContent');
+                const dateNormal = dateContent
+                    ? dateContent.querySelector('.sun-listItemNormalView')
+                    : null;
+                const dateForm = dateContent
+                    ? dateContent.querySelector('.sun-listItemEditForm')
+                    : null;
+                if (isEditing) {
+                    if (dateNormal) {
+                        dateNormal.classList.remove('sun-listItemViewHidden');
+                        dateNormal.classList.add('sun-listItemViewForceShown');
+                    }
+                    if (dateForm) {
+                        dateForm.classList.remove('sun-listItemViewShown');
+                    }
+                } else {
+                    const dateEditing = dateRow.classList.contains('sun-listItemEditing');
+                    if (dateNormal) {
+                        dateNormal.classList.remove('sun-listItemViewForceShown');
+                        dateNormal.classList.toggle('sun-listItemViewHidden', dateEditing);
+                    }
+                    if (dateForm) {
+                        dateForm.classList.toggle('sun-listItemViewShown', dateEditing);
+                    }
+                }
+            });
+        }
+    }
+
     /** Откладывает flash list item saved в RAF. */
     scheduleFlashListItemSaved(type, id) {
         requestAnimationFrame(() => {
@@ -229,7 +317,7 @@ class UnifiedListManager {
             }
             const idStr = String(id);
             const isEditing = editingDateIdStr !== '' && idStr === editingDateIdStr;
-            row.classList.toggle('sun-listItemEditing', isEditing);
+            this.syncListItemEditingClasses(row, isEditing);
             row.classList.toggle('sun-active', idStr === activeIdStr);
 
             const dhandle = row.querySelector('.sun-dateDragHandle');
@@ -501,6 +589,7 @@ class UnifiedListManager {
             ),
             type: 'date',
             personGroupId: personGroupId != null ? personGroupId : null,
+            inPersonGroup: personGroupId != null && personGroupId !== '',
             formattedDate,
             dateForInput: window.dom.formatDateForInput(dateObj.date),
             yearsFromCurrent: yearsFromCurrent,
@@ -787,9 +876,11 @@ class UnifiedListManager {
                                 childrenContainer.innerHTML = wavesHtml;
                                 if (groupData.expanded) {
                                     childrenContainer.style.display = 'block';
+                                    childrenContainer.classList.add('sun-groupChildrenOpen');
                                     groupElement.classList.add('sun-listItemExpanded');
                                 } else {
                                     childrenContainer.style.display = 'none';
+                                    childrenContainer.classList.remove('sun-groupChildrenOpen');
                                     groupElement.classList.remove('sun-listItemExpanded');
                                 }
                             }
@@ -834,9 +925,11 @@ class UnifiedListManager {
                         childrenContainer.innerHTML = parts.join('');
                         if (groupData.expanded) {
                             childrenContainer.style.display = 'block';
+                            childrenContainer.classList.add('sun-groupChildrenOpen');
                             groupElement.classList.add('sun-listItemExpanded');
                         } else {
                             childrenContainer.style.display = 'none';
+                            childrenContainer.classList.remove('sun-groupChildrenOpen');
                             groupElement.classList.remove('sun-listItemExpanded');
                         }
                     }
@@ -886,6 +979,13 @@ class UnifiedListManager {
                     el.setAttribute('autocomplete', 'off');
                 });
             }
+            if (
+                window.appClassSync &&
+                window.appState &&
+                (itemType === 'date' || itemType === 'personGroup')
+            ) {
+                window.appClassSync.applyDateLabelMode(window.appState.showStars);
+            }
             if (typeof window.sunPerfLog === 'function' && window.__SUN_PERF_LOG !== false) {
                 window.sunPerfLog('unifiedListManager', 'renderList', {
                     containerId,
@@ -922,7 +1022,7 @@ class UnifiedListManager {
         root.querySelectorAll('.sun-listItemWave').forEach((row) => {
             const idStr = row.dataset.waveId != null ? String(row.dataset.waveId) : String(row.dataset.id);
             const isEditing = Boolean(editingId && idStr === editingId);
-            row.classList.toggle('sun-listItemEditing', isEditing);
+            this.syncListItemEditingClasses(row, isEditing);
             const handle = row.querySelector('.sun-waveDragHandle');
             if (handle) {
                 handle.setAttribute('draggable', isEditing ? 'false' : 'true');
@@ -987,7 +1087,7 @@ class UnifiedListManager {
         root.querySelectorAll('.sun-listItemGroup').forEach((row) => {
             const idStr = String(row.dataset.id);
             const isEditing = Boolean(editingId && idStr === editingId);
-            row.classList.toggle('sun-listItemEditing', isEditing);
+            this.syncListItemEditingClasses(row, isEditing);
             const handle = row.querySelector(':scope > .sun-listItemDragHandle');
             if (handle) {
                 handle.setAttribute('draggable', isEditing ? 'false' : 'true');
@@ -1856,7 +1956,7 @@ class UnifiedListManager {
         root.querySelectorAll('.sun-listItemPersonGroup').forEach((row) => {
             const idStr = String(row.dataset.id);
             const isEditing = Boolean(editingId && idStr === editingId);
-            row.classList.toggle('sun-listItemEditing', isEditing);
+            this.syncListItemEditingClasses(row, isEditing);
             const handle = row.querySelector(':scope > .sun-listItemDragHandle');
             if (handle) {
                 handle.setAttribute('draggable', isEditing ? 'false' : 'true');

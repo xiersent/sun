@@ -108,7 +108,7 @@
 
             <div class="sun-secretSchemeWrap sun-secretSchemeWrapHidden">
                 <div class="sun-panelSection sun-secretSchemeSection">
-                    <div class="sun-tabContainer">
+                    <div class="sun-tabContainer sun-tabContainerWithFramedButtons">
                         <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Секретная схема">
                             <button type="button" class="sun-tabButton sun-secretSchemeToggle" aria-expanded="false" aria-controls="secretSchemePanel">Секретная схема того, как ты думаешь через меня перебирая циферки онлайна</button>
                         </div>
@@ -120,21 +120,21 @@
             </div>
 
             <div class="sun-timeBarWrap">
-                <div class="sun-panelSection sun-timeBarControlsSection">
-                    <div class="sun-tabContainer">
-                        <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Настройки полосы времени">
+                <div class="sun-panelSection sun-timeBarControlsSection sun-timeBarControlsSectionLayout">
+                    <div class="sun-tabContainer sun-tabContainerTimeBarControls sun-tabContainerWithFramedButtons">
+                        <div class="sun-tabButtons sun-tabButtonsFramed sun-tabButtonsTimeBarControls" role="tablist" aria-label="Настройки полосы времени">
                             <button type="button" class="sun-tabButton sun-timeBarControlsToggle" aria-expanded="false" aria-controls="timeBarControls" title="Редактировать" aria-label="Редактировать">Редактировать</button>
                         </div>
                     </div>
-                    <div class="sun-timeBarControls sun-timeBarControlsCollapsed" id="timeBarControls" aria-label="Видимость полос и групп"></div>
+                    <div class="sun-timeBarControls sun-timeBarControlsCollapsed sun-timeBarControlsInSection" id="timeBarControls" aria-label="Видимость полос и групп"></div>
                 </div>
-                <div class="sun-timeBarContainer">
+                <div class="sun-timeBarContainer sun-timeBarContainerInWrap">
                 <div class="sun-timeBar sun-timeBarStacked">
                     <div class="sun-timeBarStateRow sun-timeBarHoursRow">
                         <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
                         <div class="sun-timeBarHoursTrack">
-                            <div class="sun-timeScale"></div>
-                            <div class="sun-timeLabels"></div>
+                            <div class="sun-timeScale sun-timeScaleInHoursTrack"></div>
+                            <div class="sun-timeLabels sun-timeLabelsInHoursTrack"></div>
                         </div>
                     </div>
                     <div class="sun-timeBarStateStack"></div>
@@ -153,15 +153,15 @@
 
 
             <div class="sun-panelSection sun-tabsSection">
-                <div class="sun-tabContainer">
+                    <div class="sun-tabContainer sun-tabContainerInTabs sun-tabContainerWithFramedButtons">
                     <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Разделы панели">
                         <button type="button" class="sun-tabButton" data-tab="summary" role="tab">Состояния</button>
                         <button type="button" class="sun-tabButton" data-tab="intersections" role="tab">Пересечения</button>
                         <button type="button" class="sun-tabButton" data-tab="dateCompare" role="tab">Сравнение дат</button>
                     </div>
                     
-                    <div class="sun-tabContent" data-tab-panel="summary">
-                        <div class="sun-panelSection sun-summaryPanel">
+                    <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="summary">
+                        <div class="sun-panelSection sun-summaryPanel sun-tabPanelInner">
                             <div class="sun-summaryHeader">
                                 <h3>Сводная информация о сигналах</h3>
                             </div>
@@ -192,8 +192,8 @@
                         </div>
                     </div>
                     
-                    <div class="sun-tabContent" data-tab-panel="intersections">
-                        <div class="sun-panelSection sun-intersectionPanel">
+                    <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="intersections">
+                        <div class="sun-panelSection sun-intersectionPanel sun-tabPanelInner">
                             <div class="sun-summaryHeader">
                                 <h3>Сигналы, близкие по состоянию к выбранному</h3>
                             </div>
@@ -221,7 +221,7 @@
                                             <select class="sun-summarySelect" id="intersectionWaveSelect" title="Сигнал для анализа (то же, что «Окрасить края» в списке волн)"></select>
                                         </div>
                                     </div>
-                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions">
+                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions sun-intersectionFormRowActionsInForm">
                                         <button type="button" class="sun-uiBtn sun-btnIntersectionTimeRail" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
                                             Шкала времени
                                         </button>
@@ -253,8 +253,8 @@
                         </div>
                     </div>
 
-                    <div class="sun-tabContent" data-tab-panel="dateCompare">
-                        <div class="sun-panelSection sun-dateComparePanel">
+                    <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="dateCompare">
+                        <div class="sun-panelSection sun-dateComparePanel sun-tabPanelInner">
                             <div class="sun-summaryHeader">
                                 <h3>Сравнение волн для двух дат</h3>
                             </div>
@@ -341,7 +341,7 @@
 
             <div class="sun-mainControlsPanel">
                 <div class="sun-controlPanel">
-                    <div class="sun-panelSection sun-datesPanel">
+                    <div class="sun-panelSection sun-datesPanel sun-datesPanelInControl">
                         <div class="sun-addGroupForm sun-addGroupFormMb">
                             <input type="text" class="sun-addGroupInput sun-newPersonGroupName sun-flex1" placeholder="Название группы персон">
                             <button class="sun-addGroupBtn sun-uiBtn sun-btnAddPersonGroup" type="button">Добавить группу</button>
@@ -363,7 +363,7 @@
                         </div>
                         <div class="sun-listContainer sun-dateListForDates"></div>
                     </div>
-                    <div class="sun-panelSection sun-wavesPanel">
+                    <div class="sun-panelSection sun-wavesPanel sun-wavesPanelInControl">
                         <div class="sun-displayViewTemplatesBar sun-compact">
                             <div class="sun-displayViewTemplatesLabel">Шаблоны отображения групп и сигналов</div>
                             <div class="sun-displayViewTemplatesRow">
@@ -415,6 +415,7 @@
     <script src="modules/timeUtils.js"></script>
     <script src="modules/state.js"></script>
     <script src="modules/dom.js"></script>
+    <script src="modules/appClassSync.js"></script>
     <script src="modules/cursorTooltip.js"></script>
     <script src="modules/secretScheme.js?v=fix-syntax"></script>
     <script src="modules/appCore.js"></script>

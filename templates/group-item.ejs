@@ -5,11 +5,11 @@
     draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="sun-listItemDragHandle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
+    <div class="sun-listItemDragHandle sun-listItemSaveFlashChild<%= data.editing ? ' sun-listItemDragHandleMuted' : '' %>" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
     
-    <div class="sun-listItemContent">
+    <div class="sun-listItemContent sun-listItemSaveFlashChild">
         <!-- Нормальный вид -->
-        <div class="sun-listItemNormalView">
+        <div class="sun-listItemNormalView<%= data.editing ? ' sun-listItemViewHidden' : '' %>">
             <div class="sun-listItemRow">
                 <div class="sun-listItemLeft">
                     <div class="sun-listItemTitleContainer">
@@ -59,7 +59,7 @@
         </div>
         
         <!-- Форма редактирования группы -->
-        <div class="sun-listItemEditForm">
+        <div class="sun-listItemEditForm<%= data.editing ? ' sun-listItemViewShown' : '' %>">
             <div class="sun-listItem__edit-row">
                 <input type="text" placeholder="Название группы" class="sun-listItem__edit-input" id="editGroupName<%= data.id %>" value="<%= data.name %>">
             </div>
@@ -70,11 +70,11 @@
         </div>
         
         <!-- Дочерние элементы (волны/сигналы) -->
-        <div class="sun-groupChildren" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
+        <div class="sun-groupChildren<%= data.expanded ? ' sun-groupChildrenOpen' : '' %>" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
             <% if (data.children && data.children.length > 0) { %>
                 <!--ZARAZA_WAVE_CHILDREN-->
             <% } else { %>
-                <div class="sun-noWavesMessage">
+                <div class="sun-noWavesMessage sun-groupChildrenItem">
                     <span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">
                         Нет сигналов в этой группе
                     </span>

@@ -479,7 +479,7 @@ class GridManager {
         if (!this.gridContainer) return;
         
         const wrapper = document.createElement('div');
-        wrapper.className = 'sun-gridWrapper';
+        wrapper.className = 'sun-gridWrapper sun-gridWrapperInAbsolute';
         
         const positionData = this.calculateGridPosition(offset);
         
@@ -727,6 +727,9 @@ class GridManager {
                 </div>
                 <div class="sun-centerDateWeekday">График и расчёты недоступны</div>
             `;
+            if (window.appClassSync && window.appState) {
+                window.appClassSync.applyDateLabelMode(window.appState.showStars);
+            }
             return;
         }
         
@@ -757,6 +760,9 @@ class GridManager {
             </div>
             <div class="sun-centerDateWeekday">${weekday}</div>
         `;
+        if (window.appClassSync && window.appState) {
+            window.appClassSync.applyDateLabelMode(window.appState.showStars);
+        }
     }
     
     updateGridNotesHighlight() {

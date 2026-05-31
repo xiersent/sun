@@ -4,20 +4,20 @@
 <% var _descForTitle = String(data.description || '').trim(); var _hoverFallback = String(data.name || '') + '\n-\n' + String(data.formattedDate || ''); if (_descForTitle) { _hoverFallback += '\n-\n' + _descForTitle; } var _dateTitleHover = _attrEsc(data.hoverTitle != null ? data.hoverTitle : _hoverFallback); %>
 <% var _dateTitleValue = _attrEsc(data.formattedDate + (data.yearsFromCurrent > 0 ? ' [' + data.yearsFromCurrent + ']' : '')); %>
 <% var _genderIcon = { unset: '⚥', male: '♂', female: '♀' }; var _genderTip = data.gender === 'male' ? 'Мужской' : (data.gender === 'female' ? 'Женский' : 'Не указан'); %>
-<div class="sun-listItem sun-listItemDate 
-    <%= data.active ? 'sun-active' : '' %> 
-    <%= data.editing ? 'sun-listItemEditing' : '' %>"
+<div class="sun-listItem sun-listItemDate sun-groupChildrenItem<%= data.inPersonGroup ? ' sun-dateInPersonGroup' : '' %>
+    <%= data.active ? ' sun-active' : '' %>
+    <%= data.editing ? ' sun-listItemEditing' : '' %>"
     data-id="<%= data.id %>"
     data-type="date"
     data-person-group-id="<%= data.personGroupId || '' %>"
     draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="sun-listItemDragHandle sun-dateDragHandle" draggable="<%= !data.editing %>" title="Перетащить персону">⋮⋮</div>
+    <div class="sun-listItemDragHandle sun-dateDragHandle sun-listItemSaveFlashChild<%= data.editing ? ' sun-listItemDragHandleMuted' : '' %>" draggable="<%= !data.editing %>" title="Перетащить персону">⋮⋮</div>
     
-    <div class="sun-listItemContent">
+    <div class="sun-listItemContent sun-listItemSaveFlashChild">
         <!-- Нормальный вид -->
-        <div class="sun-listItemNormalView">
+        <div class="sun-listItemNormalView<%= data.editing ? ' sun-listItemViewHidden' : '' %>">
             <div class="sun-listItemRow">
                 <div class="sun-listItemLeft">
                     <!-- Два чекбокса выделения -->
@@ -59,10 +59,10 @@
         </div>
         
         <!-- Форма редактирования -->
-        <div class="sun-listItemEditForm">
+        <div class="sun-listItemEditForm sun-dateEditForm<%= data.editing ? ' sun-listItemViewShown' : '' %>">
             <div class="sun-listItem__edit-row sun-listItemEditRowDateMain">
                 <input type="text" class="sun-listItem__edit-input sun-dateNameEdit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
-                <input type="date" class="sun-dateInput sun-listItem__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
+                <input type="date" class="sun-dateInput sun-dateInputInListEdit sun-listItem__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
                 <select class="sun-formInput sun-dateGenderSelect" id="editDateGender<%= data.id %>" aria-label="Пол" title="<%= _attrEsc(_genderTip) %>">
                     <option value="unset"<%= data.gender === 'unset' ? ' selected' : '' %> title="Не указан"><%= _genderIcon.unset %></option>
                     <option value="male"<%= data.gender === 'male' ? ' selected' : '' %> title="Мужской"><%= _genderIcon.male %></option>

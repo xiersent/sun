@@ -425,10 +425,6 @@ class SummaryManager {
 					let checkbox = null;
 					checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
 
-					if (!checkbox) {
-						checkbox = document.querySelector(`.sun-groupChildren .sun-waveVisibilityCheck[data-id="${waveId}"]`);
-					}
-
 					if (checkbox) {
 						const isChecked = checkbox.checked;
 						checkbox.checked = !isChecked;

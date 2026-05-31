@@ -46,8 +46,8 @@ class AppCore {
             this.setupEventListeners();
             this.updateCSSVariables();
 
-            if (window.appState && window.appState.graphHidden) {
-                document.body.classList.add('sun-graphHidden');
+            if (window.appState && window.appState.graphHidden && window.appClassSync) {
+                window.appClassSync.applyGraphHidden(true);
             }
 
             const isMobile = this.isMobileDevice();
@@ -55,17 +55,15 @@ class AppCore {
             if (isMobile) {
                 __lp && __lp.mark('appCore_init_mobile_early_exit');
                 this._listsHydratedOnInit = false;
-                document.body.classList.add('sun-mobileDevice');
+                if (window.appClassSync) {
+                    window.appClassSync.applyMobileDevice(true);
+                }
                 this.showMobileWarning();
                 return;
             }
 
-            if (window.appState.showStars) {
-                document.body.classList.add('sun-starsMode');
-                document.body.classList.remove('sun-namesMode');
-            } else {
-                document.body.classList.remove('sun-starsMode');
-                document.body.classList.add('sun-namesMode');
+            if (window.appClassSync) {
+                window.appClassSync.syncFromAppState();
             }
 
             const now = new Date();
@@ -197,19 +195,16 @@ class AppCore {
             warningOverlay.classList.add('sun-hidden');
             warningBox.classList.add('sun-hidden');
             document.body.style.overflow = 'auto';
-            document.body.classList.remove('sun-uiHidden');
+            if (window.appClassSync) {
+                window.appClassSync.applyUiHidden(false);
+            }
         }
     }
     
     /** Применяет классы фона graphContainer (серый режим). */
     updateGraphBackground() {
-        const graphContainer = window.dom.byKey('graphContainer');
-        if (graphContainer) {
-            if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('sun-graphGrayMode');
-            } else {
-                graphContainer.classList.remove('sun-graphGrayMode');
-            }
+        if (window.appClassSync && window.appState) {
+            window.appClassSync.applyGraphGrayMode(!!window.appState.graphGrayMode);
         }
     }
     

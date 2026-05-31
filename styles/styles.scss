@@ -85,95 +85,30 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&app #{&}graphSection{
 		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center;}
 	}
-	&app#{&}starsMode #{&}dateName{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}starsMode #{&}dateStar{
-		@media(min-width: 0px){display: inline-block !important;}
-	}
-	&app#{&}starsMode #{&}centerDateName{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}starsMode #{&}centerDateStar{
-		@media(min-width: 0px){display: inline-block !important;}
-	}
-	&app#{&}namesMode #{&}dateName{
-		@media(min-width: 0px){display: block !important;}
-	}
-	&app#{&}namesMode #{&}dateStar{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}namesMode #{&}centerDateName{
-		@media(min-width: 0px){display: block !important;}
-	}
-	&app#{&}namesMode #{&}centerDateStar{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}grayMode{
-		@media(min-width: 0px){filter: grayscale(1);}
-	}
-	&app#{&}grayMode #{&}cornerSquare{
-		@media(min-width: 0px){filter: none;}
-	}
-	&app#{&}uiHidden #{&}interfaceContainer{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}uiHidden #{&}controlsSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}uiHidden #{&}graphSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}uiHidden #{&}panelSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}uiHidden #{&}cornerSquare{
-		@media(min-width: 0px){display: block !important;}
-	}
-	&app#{&}graphHidden #{&}graphSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}graphGrayMode #{&}graphContainer{
-		@media(min-width: 0px){filter: grayscale(1);}
-	}
-	&app#{&}graphGrayMode #{&}waveLabelsContainer{
-		@media(min-width: 0px){filter: grayscale(1);}
-	}
-	&app#{&}graphGrayMode #{&}waveLabelsVerticalContainer{
-		@media(min-width: 0px){filter: grayscale(1);}
-	}
-	&app#{&}graphGrayMode #{&}timeBarContainer{
-		@media(min-width: 0px){filter: grayscale(1);}
-	}
-	&app#{&}graphGrayMode #{&}waveLabel{
-		@media(min-width: 0px){filter: grayscale(1) !important;}
-	}
-	&app#{&}graphGrayMode #{&}extremumLabel{
-		@media(min-width: 0px){filter: grayscale(1) !important;}
-	}
-	&app#{&}graphGrayMode #{&}waveAxisXPoint{
-		@media(min-width: 0px){filter: grayscale(1) !important;}
-	}
-	&app#{&}mobileDevice{
+	&mobileDeviceRoot{
 		@media(min-width: 0px){overflow: hidden; height: 100vh;}
 	}
-	&app#{&}mobileDevice #{&}interfaceContainer{
+	&layoutHidden{
 		@media(min-width: 0px){display: none !important;}
 	}
-	&app#{&}mobileDevice #{&}controlsSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}mobileDevice #{&}graphSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}mobileDevice #{&}panelSection{
-		@media(min-width: 0px){display: none !important;}
-	}
-	&app#{&}mobileDevice #{&}cornerSquare{
+	&layoutVisibleWhenUiHidden{
 		@media(min-width: 0px){display: block !important;}
 	}
-	&app#{&}mobileDevice #{&}warningOverlay{
+	&layoutMobileWarning{
 		@media(min-width: 0px){display: flex !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999;}
+	}
+	&grayFiltered{
+		@media(min-width: 0px){filter: grayscale(1);}
+	}
+	&graphGrayElement{
+		@media(min-width: 0px){filter: grayscale(1) !important;}
+	}
+	&dateLabelVisible{
+		@media(min-width: 0px){display: inline-block !important;}
+	}
+	&dateName#{&}dateLabelVisible,
+	&centerDateName#{&}dateLabelVisible{
+		@media(min-width: 0px){display: block !important;}
 	}
 	&wrapper{
 		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100vh; margin: 0; padding: var(--spacing-xl); background-color: var(--cbg); font-family: var(--font-family); font-size: var(--font-size-md); font-weight: 400; overflow-y: scroll; overflow-x: hidden; box-sizing: border-box;}
@@ -205,23 +140,23 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarWrap{
 		@media(min-width: 0px){width: var(--gw); margin: var(--spacing-md) auto; align-self: center;}
 	}
-	&timeBarControlsSection #{&}tabContainer{
-		@media(min-width: 0px){align-items: flex-start;}
-	}
-	&timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed{
-		@media(min-width: 0px){width: fit-content; max-width: 100%;}
-	}
-	&timeBarControlsSection #{&}tabButtons{
-		@media(min-width: 0px){justify-content: flex-start;}
-	}
-	&timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
-		@media(min-width: 0px){flex: 0 1 auto;}
-	}
-	&timeBarWrap > #{&}panelSection#{&}timeBarControlsSection{
+	&timeBarControlsSectionLayout{
 		@media(min-width: 0px){margin-bottom: 0; display: flex; flex-direction: column; gap: var(--spacing-sm);}
 	}
-	&timeBarWrap > #{&}panelSection#{&}timeBarControlsSection > #{&}timeBarControls{
+	&timeBarControlsInSection{
 		@media(min-width: 0px){outline: none;}
+	}
+	&tabContainerTimeBarControls{
+		@media(min-width: 0px){align-items: flex-start;}
+	}
+	&tabButtonsTimeBarControls#{&}tabButtonsFramed{
+		@media(min-width: 0px){width: fit-content; max-width: 100%;}
+	}
+	&tabButtonsTimeBarControls{
+		@media(min-width: 0px){justify-content: flex-start;}
+	}
+	&tabButtonsTimeBarControls#{&}tabButtonsFramed #{&}tabButton{
+		@media(min-width: 0px){flex: 0 1 auto;}
 	}
 	&timeBarControls{
 		@media(min-width: 0px){background: #fafafa; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; font-size: 11px; user-select: none;}
@@ -238,19 +173,19 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarControlLabel{
 		@media(min-width: 0px){font-size: 11px; line-height: 1.1; color: var(--text-secondary); font-variant-numeric: tabular-nums;}
 	}
-	&timeBarControlsGroups #{&}timeBarControlLabel{
+	&timeBarControlLabelInGroups{
 		@media(min-width: 0px){white-space: nowrap;}
 	}
 	&timeBarControlsEmpty{
 		@media(min-width: 0px){color: var(--text-secondary);}
 	}
-	&timeBarWrap #{&}timeBarContainer{
+	&timeBarContainerInWrap{
 		@media(min-width: 0px){width: 100%; min-height: 0; height: auto; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: 0;}
 	}
 	&timeBarContainer{
 		@media(min-width: 0px){width: var(--gw); min-height: 0; height: auto; background-color: #fff; outline: 1px solid var(--clg); position: relative; user-select: none; margin: var(--spacing-md) 0;}
 	}
-	&graphContainer#{&}graphGrayMode + #{&}timeBarContainer{
+	&graphGrayMode{
 		@media(min-width: 0px){filter: grayscale(1);}
 	}
 	&timeBar{
@@ -268,11 +203,14 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarHoursTrack{
 		@media(min-width: 0px){flex: 1 1 auto; position: relative; min-width: 0; min-height: 28px;}
 	}
-	&timeBarHoursTrack #{&}timeScale{
+	&timeScaleInHoursTrack{
 		@media(min-width: 0px){position: absolute; inset: 0; width: 100%; height: 100%; display: flex;}
 	}
-	&timeBarHoursTrack #{&}timeLabels{
+	&timeLabelsInHoursTrack{
 		@media(min-width: 0px){position: absolute; inset: 0; pointer-events: none;}
+	}
+	&hourMarkerInTimeBar{
+		@media(min-width: 0px){min-height: 100%; box-sizing: border-box;}
 	}
 	&timeBarContainer{
 		@media(min-width: 0px){--time-bar-side-w: 72px;}
@@ -283,10 +221,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarStateRow{
 		@media(min-width: 0px){display: flex; flex-direction: row; align-items: stretch; min-height: 20px; border-bottom: 1px solid #eee;}
 	}
-	&timeBarStateStack > #{&}timeBarStateRow:hover > #{&}timeBarStateTrack{
-		@media(min-width: 0px){background-color: rgba(0, 0, 0, 0.025);}
-	}
-	&timeBarStateStack > #{&}timeBarStateRow:not(#{&}timeBarStateRowHidden):not( :has(~ #{&}timeBarStateRow:not(#{&}timeBarStateRowHidden)) ){
+	&timeBarStateRowLastVisible{
 		@media(min-width: 0px){border-bottom: none;}
 	}
 	&timeBarStateRowHidden{
@@ -314,7 +249,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){flex: 1 1 auto; position: relative; z-index: 1; min-width: 0; min-height: 28px; background: #fff; overflow: hidden;}
 	}
 	&timeBarStateTrack:hover{
-		@media(min-width: 0px){z-index: 5; overflow: visible;}
+		@media(min-width: 0px){z-index: 5; overflow: visible; background-color: rgba(0, 0, 0, 0.025);}
 	}
 	&timeBarSegmentSlot{
 		@media(min-width: 0px){position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 9; display: flex; justify-content: center; align-items: center;}
@@ -325,22 +260,22 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarSegment{
 		@media(min-width: 0px){display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;}
 	}
-	&timeBarSegment #{&}extremumLabel#{&}timeBarSegmentLabel{
+	&timeBarSegmentLabel{
 		@media(min-width: 0px){position: relative; transform: none; bottom: auto; top: auto; margin: 0; max-width: none; pointer-events: auto; z-index: 1;}
 	}
-	&timeBarSegment #{&}extremumLabel#{&}timeBarSegmentLabel#{&}extremumLabelTop{
+	&timeBarSegmentLabel#{&}extremumLabelTop{
 		@media(min-width: 0px){bottom: auto; margin-bottom: 0;}
 	}
-	&timeBarSegment #{&}extremumLabelText{
+	&extremumLabelTextInSegment{
 		@media(min-width: 0px){overflow: visible; text-overflow: clip;}
 	}
-	&timeBarSegment #{&}extremumLabel#{&}timeBarSegmentLabel:hover{
+	&timeBarSegmentLabel:hover{
 		@media(min-width: 0px){border-color: #000; pointer-events: auto;}
 	}
-	&timeBarSegment #{&}extremumWaveName{
+	&extremumWaveNameInSegment{
 		@media(min-width: 0px){cursor: pointer; pointer-events: auto; text-decoration: none;}
 	}
-	&timeBarSegment #{&}extremumWaveNameOnVizor{
+	&extremumWaveNameOnVizor{
 		@media(min-width: 0px){text-decoration: underline; text-underline-offset: 2px;}
 	}
 	&timeBarNowVline{
@@ -352,7 +287,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarNowRow{
 		@media(min-width: 0px){display: flex; flex-shrink: 0; min-height: var(--time-bar-now-row-h); background: #fff; position: relative; z-index: 13;}
 	}
-	&timeBarStateStack:not( :has(> #{&}timeBarStateRow:not(#{&}timeBarStateRowHidden)) ) ~ #{&}timeBarNowRow{
+	&timeBarNowRowWhenStackEmpty{
 		@media(min-width: 0px){border-top: none;}
 	}
 	&timeBarStateSideNow{
@@ -364,17 +299,14 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarNowMarker#{&}timeIndicator{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 0; width: 0; height: 0; transform: translate(-50%, -50%); z-index: 14;}
 	}
-	&timeBarNowMarker #{&}timeBarNowLabel{
+	&timeBarNowLabel{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap; font-weight: 600; font-family: monospace; background-color: var(--danger-color); color: #fff;}
 	}
-	&timeBarNowMarker #{&}timeBarNowLabel::before{
+	&timeBarNowLabel::before{
 		@media(min-width: 0px){content: ""; display: block; position: absolute; left: 50%; top: -4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid var(--danger-color);}
 	}
-	&timeBarNowMarker #{&}timeBarNowLabel::after{
+	&timeBarNowLabel::after{
 		@media(min-width: 0px){display: none;}
-	}
-	&timeBarHoursTrack #{&}timeScale > #{&}hourMarker{
-		@media(min-width: 0px){min-height: 100%; box-sizing: border-box;}
 	}
 	&hourMarker{
 		@media(min-width: 0px){flex: 1; border-left: 1px solid var(--clg); position: relative; cursor: pointer; box-sizing: border-box;}
@@ -391,11 +323,17 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&hourMarker.sun-active:hover{
 		@media(min-width: 0px){background-color: #dcecff;}
 	}
-	&hourMarker.sun-active #{&}hourLabel{
+	&hourLabelActive{
 		@media(min-width: 0px){color: var(--cp); font-weight: 600;}
 	}
 	&hourLabel{
 		@media(min-width: 0px){position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: var(--font-size-xs); color: var(--text-secondary); white-space: nowrap; font-weight: 400; font-family: var(--font-family);}
+	}
+	&hourLabelMidnight{
+		@media(min-width: 0px){color: var(--danger-color); font-weight: 700;}
+	}
+	&hourLabelInTimeBar{
+		@media(min-width: 0px){font-size: 10px;}
 	}
 	&halfHourMarker{
 		@media(min-width: 0px){position: absolute; top: 50%; left: 0; width: 1px; height: 30%; background-color: rgba(0, 0, 0, 0.15); transform: translateY(-50%); pointer-events: none;}
@@ -424,17 +362,12 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeIndicatorLabel::after{
 		@media(min-width: 0px){bottom: -4px; border-top: 4px solid var(--danger-color);}
 	}
-	&timeBarContainer #{&}hourLabel{
-		@media(min-width: 0px){font-size: 10px;}
-	}
+
 	&hourMarker#{&}clickable{
 		@media(min-width: 0px){cursor: pointer;}
 	}
 	&hourMarker#{&}midnight{
 		@media(min-width: 0px){border-left-color: var(--danger-color);}
-	}
-	&hourMarker#{&}midnight #{&}hourLabel{
-		@media(min-width: 0px){color: var(--danger-color); font-weight: 700;}
 	}
 	&controlsSection{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: var(--spacing-lg); width: 100%;}
@@ -448,10 +381,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&controlPanel{
 		@media(min-width: 0px){display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-lg); width: 100%;}
 	}
-	&controlPanel > #{&}datesPanel{
+	&datesPanelInControl{
 		@media(min-width: 0px){grid-column: 1;}
 	}
-	&controlPanel > #{&}wavesPanel{
+	&wavesPanelInControl{
 		@media(min-width: 0px){grid-column: 2;}
 	}
 	&btnToday#{&}todayActive{
@@ -547,31 +480,13 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&tabContent.sun-active{
 		@media(min-width: 0px){display: block;}
 	}
-	&tabContent #{&}summaryPanel{
-		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible;}
+	&tabPanelInner{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible; outline: none;}
 	}
-	&tabContent #{&}intersectionPanel{
-		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible;}
-	}
-	&tabContent #{&}dateComparePanel{
-		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible;}
-	}
-	&tabContent #{&}analysisPanel{
-		@media(min-width: 0px){width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
-	}
-	&tabContent #{&}notesPanel{
-		@media(min-width: 0px){width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
-	}
-	&tabContent #{&}dbImportSection{
-		@media(min-width: 0px){width: 100%; max-width: 100%; margin: 0; padding: 0; border: none; background: transparent;}
-	}
-	&tabContent #{&}panelSection{
-		@media(min-width: 0px){border: none; padding: 0; outline: none; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: visible;}
-	}
-	&tabsSection #{&}tabContainer{
+	&tabContainerInTabs{
 		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0;}
 	}
-	&tabsSection #{&}tabContent{
+	&tabContentInTabs{
 		@media(min-width: 0px){max-width: 100%; min-width: 0; overflow-x: hidden; overflow-y: visible; box-sizing: border-box;}
 	}
 	&inputGroup{
@@ -613,7 +528,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemSaveFlash::before{
 		@media(min-width: 0px){content: ""; position: absolute; inset: 1px; z-index: 0; pointer-events: none; animation: list-item-save-flash 0.85s ease-out forwards;}
 	}
-	&listItemSaveFlash > *{
+	&listItemSaveFlashChild{
 		@media(min-width: 0px){position: relative; z-index: 1;}
 	}
 	@media(prefers-reduced-motion: reduce){
@@ -645,7 +560,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemValue{
 		@media(min-width: 0px){color: var(--text-secondary); white-space: nowrap; font-size: var(--font-size-sm);}
 	}
-	&listItemDate #{&}dateGenderBadge{
+	&dateGenderBadge{
 		@media(min-width: 0px){margin: 0 0.15em;}
 	}
 	&listItemActions{
@@ -654,31 +569,28 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemEditForm{
 		@media(min-width: 0px){display: none; flex-wrap: wrap; gap: 8px; width: 100%;}
 	}
-	&listItemDate #{&}listItemEditForm{
+	&dateEditForm{
 		@media(min-width: 0px){flex-direction: column; align-items: stretch; gap: var(--spacing-xs);}
 	}
-	&listItemDate #{&}listItemEditRowDateMain{
+	&listItemEditRowDateMain{
 		@media(min-width: 0px){display: flex; flex-wrap: wrap; gap: var(--spacing-xs); align-items: center; width: 100%;}
 	}
-	&listItemDate #{&}listItemEditRowDateMain #{&}dateNameEdit{
+	&dateNameEdit{
 		@media(min-width: 0px){flex: 1; min-width: 120px;}
 	}
-	&listItemDate #{&}listItemEditRowDateMain .dateInput{
+	&dateInputInListEdit{
 		@media(min-width: 0px){flex: 0 1 auto; min-width: 140px;}
 	}
-	&listItemDate #{&}dateGenderSelect{
+	&dateGenderSelect{
 		@media(min-width: 0px){flex: 0 0 auto; width: 42px; min-width: 42px; max-width: 42px; height: 25px; padding: 2px 4px; font-size: var(--font-size-sm); text-align: center; text-align-last: center;}
 	}
-	&listItemDate #{&}listItemEditRowDateActions{
-		@media(min-width: 0px){width: 100%; justify-content: flex-end;}
+	&listItemEditRowDateActions{
+		@media(min-width: 0px){display: flex; width: 100%; justify-content: flex-end;}
 	}
-	&listItemDate #{&}listItemEditRowDateActions #{&}listItemEditActions{
-		@media(min-width: 0px){width: 100%; justify-content: flex-end;}
-	}
-	&listItemDate #{&}listItemEditRowFull{
+	&listItemEditRowFull{
 		@media(min-width: 0px){width: 100%;}
 	}
-	&listItemDate #{&}dateDescriptionEdit{
+	&dateDescriptionEdit{
 		@media(min-width: 0px){width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: var(--font-family); font-size: var(--font-size-sm);}
 	}
 	&listItemEditRow{
@@ -693,25 +605,16 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemEditActions{
 		@media(min-width: 0px){display: flex; gap: var(--spacing-xs); align-items: center; justify-content: flex-end;}
 	}
-	&listItemEditing > #{&}listItemContent > #{&}listItemNormalView{
-		@media(min-width: 0px){display: none;}
-	}
-	&listItemEditing > #{&}listItemContent > #{&}listItemEditForm{
-		@media(min-width: 0px){display: flex;}
-	}
-	&listItemGroup#{&}listItemEditing #{&}groupChildren #{&}listItemWave #{&}listItemNormalView{
-		@media(min-width: 0px){display: flex !important;}
-	}
-	&listItemGroup#{&}listItemEditing #{&}groupChildren #{&}listItemWave #{&}listItemEditForm{
+	&listItemViewHidden{
 		@media(min-width: 0px){display: none !important;}
 	}
-	&listItemWave#{&}listItemEditing #{&}listItemNormalView{
-		@media(min-width: 0px){display: none;}
+	&listItemViewShown{
+		@media(min-width: 0px){display: flex !important;}
 	}
-	&listItemWave#{&}listItemEditing #{&}listItemEditForm{
-		@media(min-width: 0px){display: flex;}
+	&listItemViewForceShown{
+		@media(min-width: 0px){display: flex !important;}
 	}
-	&listItemEditing > #{&}listItemDragHandle{
+	&listItemDragHandleMuted{
 		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
 	&listItemDate{
@@ -723,30 +626,22 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemDate.sun-active{
 		@media(min-width: 0px){background-color: #e6f2ff;}
 	}
-	&listItemWave{
-		@media(min-width: 0px){cursor: default;}
+	&waveInGroup{
+		@media(min-width: 0px){cursor: default; background: #fafafa;}
 	}
-	&listItemWave:hover{
-		@media(min-width: 0px){background-color: #f5f5f5;}
+	&waveInGroup:hover{
+		@media(min-width: 0px){background: #f0f0f0;}
 	}
-	&listItemWave #{&}waveControlsInline{
-		@media(min-width: 0px){display: flex; align-items: center; gap: 4px; margin-right: 8px;}
+	&waveInGroup:last-child{
+		@media(min-width: 0px){margin-bottom: 0;}
 	}
-	&listItemWave #{&}waveVisibilityCheck,
-	&listItemWave #{&}waveBVisibilityCheck,
-	&listItemWave #{&}waveCornerColorCheck{
-		@include sun-custom-checkbox-base;
+	&waveControlsInline{
+		@media(min-width: 0px){display: flex; align-items: center; gap: 6px; margin-right: 8px;}
 	}
-	&listItemWave #{&}waveCornerColorCheck{
-		@media(min-width: 0px){margin-left: 2px; margin-right: 2px;}
+	&wavePeriodBadge{
+		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-left: 6px; flex-shrink: 0;}
 	}
-	&listItemDate #{&}dateCheckbox{
-		@include sun-custom-checkbox-base;
-	}
-	&listItemWave #{&}wavePeriodBadge{
-		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: var(--font-size-xs); margin-left: 8px; flex-shrink: 0;}
-	}
-	&listItemWave #{&}waveColorPreviewSmall{
+	&waveColorPreviewSmall{
 		@media(min-width: 0px){width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; flex-shrink: 0; align-self: center; margin: 0;}
 	}
 	&listItemGroup{
@@ -764,38 +659,11 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemGroup.sun-active{
 		@media(min-width: 0px){background-color: #e6f2ff;}
 	}
-	&listItemGroup #{&}waveGroupToggle{
-		@media(min-width: 0px){margin-right: 8px;}
-	}
-	&listItemGroup #{&}waveGroupToggle:hover{
-		@media(min-width: 0px){filter: brightness(0.9);}
-	}
 	&groupChildren{
 		@media(min-width: 0px){margin-top: var(--spacing-sm); max-height: 361px; overflow-y: scroll; border: 1px solid var(--clg);}
 	}
-	&listItemExpanded #{&}groupChildren{
+	&groupChildrenOpen{
 		@media(min-width: 0px){display: block;}
-	}
-	&groupChildren #{&}listItemWave{
-		@media(min-width: 0px){background: #fafafa;}
-	}
-	&groupChildren #{&}listItemWave:last-child{
-		@media(min-width: 0px){margin-bottom: 0;}
-	}
-	&groupChildren #{&}listItemWave:hover{
-		@media(min-width: 0px){background: #f0f0f0;}
-	}
-	&groupChildren #{&}waveControlsInline{
-		@media(min-width: 0px){display: flex; align-items: center; gap: 6px; margin-right: 8px;}
-	}
-	&groupChildren #{&}wavePeriodBadge{
-		@media(min-width: 0px){background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-left: 6px;}
-	}
-	&groupChildren #{&}waveColorPreviewSmall{
-		@media(min-width: 0px){width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 2px; cursor: pointer; align-self: center; margin: 0;}
-	}
-	&groupChildren #{&}waveCornerColorCheck{
-		@media(min-width: 0px){margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
 	}
 	&listItemNote{
 		@media(min-width: 0px){cursor: default; flex-direction: column; align-items: flex-start; padding: var(--spacing-md);}
@@ -872,12 +740,6 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItemGroup#{&}listItemDragOverBottom::after{
 		@media(min-width: 0px){content: ""; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: #000; transform: rotate(45deg); z-index: 10;}
 	}
-	&listItemGroup:not(#{&}listItemEditing) #{&}listItemDragHandle{
-		@media(min-width: 0px){cursor: move;}
-	}
-	&listItemGroup#{&}listItemEditing #{&}listItemDragHandle{
-		@media(min-width: 0px){opacity: 0.3; cursor: default;}
-	}
 	&listItemPersonGroup{
 		@media(min-width: 0px){cursor: default;}
 	}
@@ -886,12 +748,6 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&listItemPersonGroup.sun-listItemExpanded{
 		@media(min-width: 0px){background-color: inherit;}
-	}
-	&listItemPersonGroup:not(#{&}listItemEditing) #{&}listItemDragHandle{
-		@media(min-width: 0px){cursor: move;}
-	}
-	&listItemPersonGroup#{&}listItemEditing #{&}listItemDragHandle{
-		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
 	&listItemPersonGroup#{&}listItemDragging{
 		@media(min-width: 0px){opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
@@ -905,32 +761,23 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&personGroupChildren{
 		@media(min-width: 0px){margin-top: var(--spacing-sm); max-height: 361px; overflow-y: scroll; border: 1px solid var(--clg);}
 	}
-	&personGroupChildren #{&}listItemDate{
+	&dateInPersonGroup{
 		@media(min-width: 0px){background: #fafafa;}
 	}
-	&personGroupChildren #{&}listItemDate:hover{
+	&dateInPersonGroup:hover{
 		@media(min-width: 0px){background: #f0f0f0;}
 	}
-	&personGroupChildren #{&}listItemDate#{&}listItemDragOverTop{
+	&dateInPersonGroup#{&}listItemDragOverTop{
 		@media(min-width: 0px){border-top: 2px solid var(--cp);}
 	}
-	&personGroupChildren #{&}listItemDate#{&}listItemDragOverBottom{
+	&dateInPersonGroup#{&}listItemDragOverBottom{
 		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
-	}
-	&listItemPersonGroup#{&}listItemEditing #{&}personGroupChildren #{&}listItemDate #{&}listItemNormalView{
-		@media(min-width: 0px){display: flex !important;}
-	}
-	&listItemPersonGroup#{&}listItemEditing #{&}personGroupChildren #{&}listItemDate #{&}listItemEditForm{
-		@media(min-width: 0px){display: none !important;}
 	}
 	&dateDragHandle{
 		@media(min-width: 0px){color: #999; cursor: move; padding: 2px; flex-shrink: 0; user-select: none; margin-right: 4px;}
 	}
 	&dateDragHandle:hover{
 		@media(min-width: 0px){color: var(--text-color);}
-	}
-	&listItemDate#{&}listItemEditing #{&}dateDragHandle{
-		@media(min-width: 0px){opacity: 0.3; cursor: default;}
 	}
 	&dropIndicator{
 		@media(min-width: 0px){position: absolute; left: 0; right: 0; height: 2px; background-color: #666; z-index: 100; pointer-events: none;}
@@ -941,19 +788,19 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&listItem:last-child{
 		@media(min-width: 0px){overflow: hidden;}
 	}
-	&groupChildren #{&}listItemWave#{&}listItemDragging{
+	&waveInGroup#{&}listItemDragging{
 		@media(min-width: 0px){opacity: 0.5; background-color: #f0f0f0; z-index: 10;}
 	}
-	&groupChildren #{&}listItemWave#{&}listItemDragOverTop{
+	&waveInGroup#{&}listItemDragOverTop{
 		@media(min-width: 0px){border-top: 2px solid var(--cp);}
 	}
-	&groupChildren #{&}listItemWave#{&}listItemDragOverBottom{
+	&waveInGroup#{&}listItemDragOverBottom{
 		@media(min-width: 0px){border-bottom: 2px solid var(--cp);}
 	}
-	&groupChildren #{&}listItemWave#{&}listItemDragOverTop::before{
+	&waveInGroup#{&}listItemDragOverTop::before{
 		@media(min-width: 0px){content: ""; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
 	}
-	&groupChildren #{&}listItemWave#{&}listItemDragOverBottom::after{
+	&waveInGroup#{&}listItemDragOverBottom::after{
 		@media(min-width: 0px){content: ""; position: absolute; left: -5px; bottom: -5px; width: 10px; height: 10px; background: var(--cp); transform: rotate(45deg); z-index: 10;}
 	}
 	&groupChildren#{&}groupChildrenDragOver{
@@ -968,14 +815,15 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&waveDragHandle:hover{
 		@media(min-width: 0px){color: var(--text-color);}
 	}
-	&listItemWave#{&}listItemEditing #{&}waveDragHandle{
-		@media(min-width: 0px){opacity: 0.3; cursor: default;}
-	}
 	&dateCheckbox{
 		@include sun-custom-checkbox-base;
 	}
 	&waveGroupToggle{
 		@include sun-custom-checkbox-base;
+		@media(min-width: 0px){margin-right: 8px;}
+	}
+	&waveGroupToggle:hover{
+		@media(min-width: 0px){filter: brightness(0.9);}
 	}
 	&waveVisibilityCheck{
 		@include sun-custom-checkbox-base;
@@ -985,6 +833,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&waveCornerColorCheck{
 		@include sun-custom-checkbox-base;
+		@media(min-width: 0px){margin-left: 1px; margin-right: 1px; flex-shrink: 0;}
 	}
 	&timeBarStateCheck{
 		@include sun-custom-checkbox-base;
@@ -1046,7 +895,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&timeBarGroupCheck:checked{
 		@media(min-width: 0px){border-color: transparent;}
 	}
-	&listItemDate #{&}dateSelectionChecks{
+	&dateSelectionChecks{
 		@media(min-width: 0px){pointer-events: auto; display: flex; align-items: center; gap: 6px;}
 	}
 	&listItemDate:has(#{&}dateCheckbox[data-type="a"]:checked){
@@ -1298,7 +1147,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&secretSchemeMiniGrid{
 		@media(min-width: 0px){display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); gap: var(--spacing-xs); align-items: stretch; width: 100%; flex: 1 1 auto; min-width: 0; aspect-ratio: 3 / 5;}
 	}
-	&secretSchemeMiniGrid > #{&}secretSchemeCell{
+	&secretSchemeCell{
 		@media(min-width: 0px){display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; width: 100%; height: 100%; padding: 0; box-sizing: border-box; background: #fff; outline: 1px solid var(--clg); transition: background-color 0.15s ease, color 0.15s ease; font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; color: var(--text-color);}
 	}
 	&secretSchemeCellAnchor{
@@ -1328,21 +1177,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&graphContainer#{&}graphGrayMode{
 		@media(min-width: 0px){filter: grayscale(1);}
 	}
-	&graphContainer#{&}graphGrayMode #{&}waveLabel{
-		@media(min-width: 0px){filter: grayscale(1) !important;}
-	}
-	&graphContainer#{&}graphGrayMode #{&}waveAxisXPoint{
-		@media(min-width: 0px){filter: grayscale(1) !important;}
-	}
-	&graphContainer#{&}graphGrayMode #{&}axis{
-		@media(min-width: 0px){filter: none;}
-	}
-	&graphContainer#{&}graphGrayMode #{&}gridLine{
-		@media(min-width: 0px){filter: none;}
-	}
-	&graphContainer#{&}graphGrayMode #{&}gridLineInner{
-		@media(min-width: 0px){filter: none;}
-	}
+	&graphContainer#{&}graphGrayMode #{&}axis,
+	&graphContainer#{&}graphGrayMode #{&}gridLine,
+	&graphContainer#{&}graphGrayMode #{&}gridLineInner,
 	&graphContainer#{&}graphGrayMode #{&}wavePath{
 		@media(min-width: 0px){filter: none;}
 	}
@@ -1433,17 +1270,8 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&graph{
 		@media(min-width: 0px){position: relative; width: 100%; height: 100%;}
 	}
-	&graph > #{&}wavesTransformLayer{
+	&wavesTransformLayer{
 		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; transform-origin: 50% 50%;}
-	}
-	&graph > #{&}gridStaticContainer{
-		@media(min-width: 0px){z-index: 4; pointer-events: none;}
-	}
-	&graph > #{&}gridAbsoluteContainer{
-		@media(min-width: 0px){z-index: 4; pointer-events: none;}
-	}
-	&graph > #{&}gridAbsoluteContainer #{&}gridWrapper{
-		@media(min-width: 0px){pointer-events: auto;}
 	}
 	&graph#{&}graphAxisSwapped #{&}xAxis.sun-active{
 		@media(min-width: 0px){background-color: var(--cp) !important; z-index: 6;}
@@ -1459,6 +1287,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&gridWrapper{
 		@media(min-width: 0px){position: absolute; width: var(--sq); height: 100%; cursor: pointer; z-index: 4;}
+	}
+	&gridWrapperInAbsolute{
+		@media(min-width: 0px){pointer-events: auto;}
 	}
 	&gridWrapper:hover #{&}gridLineInner{
 		@media(min-width: 0px){background-color: #ccc;}
@@ -1616,19 +1447,19 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&extremumLabel:hover{
 		@media(min-width: 0px){border-color: #000; z-index: 20; pointer-events: auto;}
 	}
-	&timeBarSegment #{&}extremumLabelTop #{&}extremumLabelArrow{
+	&extremumLabelArrowInSegment{
 		@media(min-width: 0px){position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-style: solid; z-index: 1;}
 	}
-	&timeBarSegment #{&}extremumLabelTop #{&}extremumLabelArrowTop{
+	&extremumLabelArrowTopInSegment{
 		@media(min-width: 0px){top: -6px; bottom: auto; border-width: 0 4px 6px 4px; border-color: transparent transparent rgb(192, 192, 192) transparent;}
 	}
-	&timeBarSegment #{&}extremumLabelTop #{&}extremumLabelArrowBottom{
+	&extremumLabelArrowBottomInSegment{
 		@media(min-width: 0px){top: auto; bottom: -6px; border-width: 6px 4px 0 4px; border-color: rgb(192, 192, 192) transparent transparent transparent;}
 	}
-	&timeBarSegment #{&}extremumLabelTop:hover #{&}extremumLabelArrowTop{
+	&timeBarSegmentLabel:hover #{&}extremumLabelArrowTopInSegment{
 		@media(min-width: 0px){border-top-color: transparent; border-right-color: transparent; border-left-color: transparent; border-bottom-color: #000;}
 	}
-	&timeBarSegment #{&}extremumLabelTop:hover #{&}extremumLabelArrowBottom{
+	&timeBarSegmentLabel:hover #{&}extremumLabelArrowBottomInSegment{
 		@media(min-width: 0px){border-top-color: #000; border-right-color: transparent; border-left-color: transparent; border-bottom-color: transparent;}
 	}
 	&waveContainer{
@@ -2002,7 +1833,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&topControls{
 		@media(min-width: 0px){display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); flex-wrap: wrap; width: 100%; min-width: 0; overflow: visible;}
 	}
-	&topControls > *{
+	&topControlsItem{
 		@media(min-width: 0px){display: flex; align-items: center; min-height: 25px; overflow: visible;}
 	}
 	&transformControls{
@@ -2041,7 +1872,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&groupChildren[style*="display:block"]{
 		@media(min-width: 0px){display: block !important;}
 	}
-	&groupChildren > *{
+	&groupChildrenItem{
 		@media(min-width: 0px){display: flex !important; visibility: visible !important; opacity: 1 !important;}
 	}
 	&summaryPanel{
@@ -2251,7 +2082,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&intersectionFormRowActions{
 		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-xs); margin-left: auto;}
 	}
-	&intersectionForm > #{&}intersectionFormRowActions{
+	&intersectionFormRowActionsInForm{
 		@media(min-width: 0px){justify-content: flex-end; margin-left: 0; margin-top: var(--spacing-xs);}
 	}
 	&dateComparisonViewTabs{
@@ -2260,7 +2091,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&dateComparisonViewTabs + #{&}summaryResultsContainer{
 		@media(min-width: 0px){margin-top: var(--spacing-sm);}
 	}
-	&tabContainer:has(> #{&}tabButtonsFramed){
+	&tabContainerWithFramedButtons{
 		@media(min-width: 0px){gap: var(--spacing-sm);}
 	}
 	&dateComparisonViewTabs #{&}tabButton{
@@ -2390,10 +2221,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&intersectionTimeRailMirrorStats{
 		@media(min-width: 0px){margin: 0; padding: 0;}
 	}
-	&intersectionTimeRailMirrorStats > #{&}intersectionTimeRailMirrorCountdown{
+	&intersectionTimeRailMirrorCountdownInStats{
 		@media(min-width: 0px){margin: 6px 0 0; padding: 0; font-size: var(--font-size-xs); font-weight: 500; line-height: 1.35; color: var(--text-color); font-variant-numeric: tabular-nums;}
 	}
-	&intersectionTimeRailMirrorStats > #{&}intersectionTimeRailMirrorDuration{
+	&intersectionTimeRailMirrorDurationInStats{
 		@media(min-width: 0px){margin-top: 0;}
 	}
 	&intersectionTimeRailWaveAxis{
@@ -2439,10 +2270,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){position: absolute; left: calc(50% + var(--cross-bar-half) + 10px); right: max(2%, 8px); top: 50%; transform: translateY(-50%); font-size: var(--font-size-sm); font-weight: 500; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;}
 	}
 	&gridAbsoluteContainer{
-		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0;}
+		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 4; pointer-events: none;}
 	}
 	&gridStaticContainer{
-		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0;}
+		@media(min-width: 0px){position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 4; pointer-events: none;}
 	}
 	&labels{
 		@media(min-width: 0px){position: absolute;}
@@ -2487,7 +2318,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		&topControls{
 			@media(min-width: 0px){flex-direction: column; height: auto;}
 		}
-		&topControls > *{
+		&topControlsItem{
 			@media(min-width: 0px){height: auto; width: 100%;}
 		}
 		&transformControls{
@@ -2673,28 +2504,4 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 			@media(min-width: 0px){font-size: var(--font-size-sm);}
 		}
 	}
-	}
-
-/* Маркеры часов: алиасы без sun- у модификаторов (устаревший styles.css / кэш) */
-.sun-hourMarker.clickable,
-.sun-hourMarker.sun-clickable{
-	cursor: pointer;
-}
-.sun-hourMarker.midnight,
-.sun-hourMarker.sun-midnight{
-	border-left-color: var(--danger-color);
-}
-.sun-hourMarker.midnight .sun-hourLabel,
-.sun-hourMarker.sun-midnight .sun-hourLabel{
-	color: var(--danger-color);
-	font-weight: 700;
-}
-.sun-hourMarker.active,
-.sun-hourMarker.sun-active{
-	background-color: #e6f2ff;
-}
-.sun-hourMarker.active .sun-hourLabel,
-.sun-hourMarker.sun-active .sun-hourLabel{
-	color: var(--cp);
-	font-weight: 600;
 }

@@ -55,7 +55,7 @@ class TimeBarManager {
                 <div class="sun-timeBarStateRow sun-timeBarHoursRow">
                     <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
                     <div class="sun-timeBarHoursTrack">
-                        <div class="sun-timeScale" id="timeScale"></div>
+                        <div class="sun-timeScale sun-timeScaleInHoursTrack" id="timeScale"></div>
                         <div class="sun-timeLabels" id="timeLabels"></div>
                     </div>
                 </div>
@@ -66,7 +66,7 @@ class TimeBarManager {
         
         const container = document.createElement('div');
         container.id = 'timeBarContainer';
-        container.className = 'sun-timeBarContainer';
+        container.className = 'sun-timeBarContainer sun-timeBarContainerInWrap';
         container.innerHTML = timeBarHTML;
         
         const graphSection = document.querySelector('.sun-graphSection');
@@ -162,7 +162,7 @@ class TimeBarManager {
         let section = window.dom.byKey('timeBarControlsSection');
         if (!section) {
             section = document.createElement('div');
-            section.className = 'sun-panelSection sun-timeBarControlsSection';
+            section.className = 'sun-panelSection sun-timeBarControlsSection sun-timeBarControlsSectionLayout';
             section.id = 'timeBarControlsSection';
         }
         if (section.parentElement !== wrap) {
@@ -191,7 +191,7 @@ class TimeBarManager {
 
         if (!panel) {
             panel = document.createElement('div');
-            panel.className = 'sun-timeBarControls sun-timeBarControlsCollapsed';
+            panel.className = 'sun-timeBarControls sun-timeBarControlsCollapsed sun-timeBarControlsInSection';
             panel.id = 'timeBarControls';
             panel.setAttribute('aria-label', 'Видимость полос и групп');
         }
@@ -299,6 +299,26 @@ class TimeBarManager {
         return true;
     }
 
+    _syncTimeBarStackLayout() {
+        const stack = window.dom.byKey('timeBarStateStack');
+        const nowRow = document.querySelector('.sun-timeBarNowRow');
+        if (!stack) {
+            return;
+        }
+        stack.querySelectorAll('.sun-timeBarStateRow').forEach((row) => {
+            row.classList.remove('sun-timeBarStateRowLastVisible');
+        });
+        const visible = Array.from(
+            stack.querySelectorAll('.sun-timeBarStateRow:not(.sun-timeBarStateRowHidden)')
+        );
+        if (visible.length > 0) {
+            visible[visible.length - 1].classList.add('sun-timeBarStateRowLastVisible');
+        }
+        if (nowRow) {
+            nowRow.classList.toggle('sun-timeBarNowRowWhenStackEmpty', visible.length === 0);
+        }
+    }
+
     /** Внутренний метод setStateRowVisible. */
     _setStateRowVisible(state, visible) {
         const row = document.querySelector(`.sun-timeBarStateRow[data-state="${state}"]`);
@@ -310,6 +330,7 @@ class TimeBarManager {
         }
         const cb = document.querySelector(`.sun-timeBarStateCheck[data-state="${state}"]`);
         if (cb) cb.checked = visible;
+        this._syncTimeBarStackLayout();
     }
 
     /** Внутренний метод applyStateRowHiddenToRows. */
@@ -369,7 +390,7 @@ class TimeBarManager {
                 const label = document.createElement('label');
                 label.className = 'sun-timeBarControlCheck';
                 const text = document.createElement('span');
-                text.className = 'sun-timeBarControlLabel';
+                text.className = 'sun-timeBarControlLabel sun-timeBarControlLabelInGroups';
                 text.textContent = group.name || `Группа ${group.id}`;
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
@@ -461,7 +482,7 @@ class TimeBarManager {
                 <div class="sun-timeBarStateRow sun-timeBarHoursRow">
                     <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
                     <div class="sun-timeBarHoursTrack">
-                        <div class="sun-timeScale" id="timeScale"></div>
+                        <div class="sun-timeScale sun-timeScaleInHoursTrack" id="timeScale"></div>
                         <div class="sun-timeLabels" id="timeLabels"></div>
                     </div>
                 </div>
@@ -664,6 +685,7 @@ class TimeBarManager {
             row.appendChild(track);
             stack.appendChild(row);
         }
+        this._syncTimeBarStackLayout();
     }
 
     /** Метки часов 0–23 на шкале. */
@@ -675,14 +697,17 @@ class TimeBarManager {
         for (let i = 0; i <= 24; i++) {
             const hour = i % 24;
             const marker = document.createElement('div');
-            marker.className = 'sun-hourMarker sun-clickable';
+            marker.className = 'sun-hourMarker sun-clickable sun-hourMarkerInTimeBar';
             
             if (hour === 0) {
                 marker.classList.add('sun-midnight');
             }
             
             const label = document.createElement('div');
-            label.className = 'sun-hourLabel';
+            label.className = 'sun-hourLabel sun-hourLabelInTimeBar';
+            if (hour === 0) {
+                label.classList.add('sun-hourLabelMidnight');
+            }
             label.textContent = hour === 0 ? '00:00' : `${hour}:00`;
             marker.appendChild(label);
             
@@ -737,11 +762,15 @@ class TimeBarManager {
     highlightActiveHour(hour) {
         document.querySelectorAll('.sun-hourMarker.sun-active').forEach(marker => {
             marker.classList.remove('sun-active');
+            const lab = marker.querySelector('.sun-hourLabel');
+            if (lab) lab.classList.remove('sun-hourLabelActive');
         });
         
         const markers = document.querySelectorAll('.sun-hourMarker');
         if (markers[hour]) {
             markers[hour].classList.add('sun-active');
+            const lab = markers[hour].querySelector('.sun-hourLabel');
+            if (lab) lab.classList.add('sun-hourLabelActive');
         }
     }
     
@@ -814,12 +843,6 @@ class TimeBarManager {
         
         if (graphContainer) {
             this.container.style.backgroundColor = '#fff';
-            
-            if (graphContainer.classList.contains('sun-graphGrayMode')) {
-                this.container.style.filter = 'grayscale(1)';
-            } else {
-                this.container.style.filter = 'none';
-            }
         }
     }
     

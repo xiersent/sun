@@ -84,8 +84,8 @@ class IntersectionTimeRailOverlay {
                     </div>
                     <div class="sun-intersectionTimeRailMirrorSep" aria-hidden="true">────→</div>
                     <div class="sun-intersectionTimeRailMirrorStats">
-                        <div class="sun-intersectionTimeRailMirrorDuration"></div>
-                        <div class="sun-intersectionTimeRailMirrorCountdown"></div>
+                        <div class="sun-intersectionTimeRailMirrorDuration sun-intersectionTimeRailMirrorDurationInStats"></div>
+                        <div class="sun-intersectionTimeRailMirrorCountdown sun-intersectionTimeRailMirrorCountdownInStats"></div>
                     </div>
                 </div>
                 <div class="sun-intersectionTimeRailWaveAxis" aria-hidden="true"></div>

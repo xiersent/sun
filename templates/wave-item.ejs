@@ -1,5 +1,5 @@
 <!-- templates/wave-item.ejs -->
-<div class="sun-listItem sun-listItemWave <%= data.editing ? 'sun-listItemEditing' : '' %>"
+<div class="sun-listItem sun-listItemWave sun-waveInGroup sun-groupChildrenItem <%= data.editing ? 'sun-listItemEditing' : '' %>"
     data-id="<%= data.id %>"
     data-type="wave"
     <% if (data.parentGroupId) { %>
@@ -9,10 +9,10 @@
     data-index="<%= data.index %>"
     data-wave-id="<%= data.id %>">
     
-    <div class="sun-listItemDragHandle sun-waveDragHandle" draggable="<%= !data.editing %>" title="Перетащить сигнал">⋮⋮</div>
+    <div class="sun-listItemDragHandle sun-waveDragHandle sun-listItemSaveFlashChild<%= data.editing ? ' sun-listItemDragHandleMuted' : '' %>" draggable="<%= !data.editing %>" title="Перетащить сигнал">⋮⋮</div>
     
-    <div class="sun-listItemContent">
-        <div class="sun-listItemNormalView">
+    <div class="sun-listItemContent sun-listItemSaveFlashChild">
+        <div class="sun-listItemNormalView<%= data.editing ? ' sun-listItemViewHidden' : '' %>">
             <div class="sun-listItemRow">
                 <div class="sun-listItemLeft">
                     <div class="sun-waveControlsInline">
@@ -57,7 +57,7 @@
         </div>
         
         <!-- Форма редактирования -->
-        <div class="sun-listItemEditForm">
+        <div class="sun-listItemEditForm<%= data.editing ? ' sun-listItemViewShown' : '' %>">
             <div class="sun-listItem__edit-row">
                 <input type="text" class="sun-listItem__edit-input" id="editWaveName<%= data.id %>" value="<%= data.name %>">
             </div>

@@ -73,37 +73,37 @@ class EventManager {
         $(document)
             .on(
                 'dragstart',
-                '.sun-wavesList .sun-groupChildren .sun-listItemWave:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-waveDragHandle',
+                '.sun-wavesList .sun-waveInGroup:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-waveDragHandle',
                 (e) => nd.dragStart(this, e, 'wave')
             )
             .on(
                 'dragstart',
-                '.sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-dateDragHandle',
+                '.sun-dateListForDates .sun-dateInPersonGroup:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-dateDragHandle',
                 (e) => nd.dragStart(this, e, 'date')
             )
             .on(
                 'dragover',
-                '.sun-wavesList .sun-groupChildren .sun-listItemWave, .sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]',
+                '.sun-wavesList .sun-waveInGroup, .sun-dateListForDates .sun-dateInPersonGroup',
                 (e) => nd.nestedChildRowsDragOver(this, e)
             )
             .on(
                 'dragleave',
-                '.sun-wavesList .sun-groupChildren .sun-listItemWave, .sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]',
+                '.sun-wavesList .sun-waveInGroup, .sun-dateListForDates .sun-dateInPersonGroup',
                 (e) => nd.nestedChildRowsDragLeave(this, e)
             )
             .on(
                 'drop',
-                '.sun-wavesList .sun-groupChildren .sun-listItemWave, .sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]',
+                '.sun-wavesList .sun-waveInGroup, .sun-dateListForDates .sun-dateInPersonGroup',
                 (e) => nd.nestedChildRowsDrop(this, e)
             )
             .on(
                 'dragend',
-                '.sun-wavesList .sun-groupChildren .sun-listItemWave:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-waveDragHandle',
+                '.sun-wavesList .sun-waveInGroup:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-waveDragHandle',
                 (e) => nd.dragEnd(this, e, 'wave')
             )
             .on(
                 'dragend',
-                '.sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-dateDragHandle',
+                '.sun-dateListForDates .sun-dateInPersonGroup:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-dateDragHandle',
                 (e) => nd.dragEnd(this, e, 'date')
             );
 
@@ -1221,6 +1221,7 @@ class EventManager {
                             const childrenContainer = groupElement.querySelector('.sun-personGroupChildren');
                             if (childrenContainer) {
                                 childrenContainer.style.display = group.expanded ? 'block' : 'none';
+                                childrenContainer.classList.toggle('sun-groupChildrenOpen', group.expanded);
                             }
                             const expandBtn = groupElement.querySelector('.sun-expandCollapseBtn');
                             if (expandBtn) {
@@ -1243,6 +1244,7 @@ class EventManager {
                             const childrenContainer = groupElement.querySelector('.sun-groupChildren');
                             if (childrenContainer) {
                                 childrenContainer.style.display = group.expanded ? 'block' : 'none';
+                                childrenContainer.classList.toggle('sun-groupChildrenOpen', group.expanded);
                             }
                             
                             const expandBtn = groupElement.querySelector('.sun-expandCollapseBtn');

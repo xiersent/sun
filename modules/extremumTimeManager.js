@@ -249,8 +249,8 @@ class ExtremumTimeManager {
                 const waveId = waveIds[index];
                 const checked = this._isWaveVisibilityChecked(waveId);
                 const cls = checked
-                    ? 'sun-extremumWaveName sun-extremumWaveNameOnVizor'
-                    : 'sun-extremumWaveName';
+                    ? 'sun-extremumWaveName sun-extremumWaveNameInSegment sun-extremumWaveNameOnVizor'
+                    : 'sun-extremumWaveName sun-extremumWaveNameInSegment';
                 return `<span class="${cls}" data-wave-id="${waveId}">${name}</span>`;
             })
             .join(', ');
@@ -266,14 +266,14 @@ class ExtremumTimeManager {
         label.className = 'sun-extremumLabel sun-extremumLabelTop sun-timeBarSegmentLabel';
 
         const labelText = document.createElement('div');
-        labelText.className = 'sun-extremumLabelText';
+        labelText.className = 'sun-extremumLabelText sun-extremumLabelTextInSegment';
         labelText.innerHTML = namesHtml;
 
         const arrowTop = document.createElement('div');
-        arrowTop.className = 'sun-extremumLabelArrow sun-extremumLabelArrowTop';
+        arrowTop.className = 'sun-extremumLabelArrow sun-extremumLabelArrowTop sun-extremumLabelArrowInSegment sun-extremumLabelArrowTopInSegment';
 
         const arrowBottom = document.createElement('div');
-        arrowBottom.className = 'sun-extremumLabelArrow sun-extremumLabelArrowBottom';
+        arrowBottom.className = 'sun-extremumLabelArrow sun-extremumLabelArrowBottom sun-extremumLabelArrowInSegment sun-extremumLabelArrowBottomInSegment';
 
         label.appendChild(arrowTop);
         label.appendChild(labelText);

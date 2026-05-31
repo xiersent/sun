@@ -330,6 +330,7 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed {
+    width: -moz-fit-content;
     width: fit-content;
     max-width: 100%;
   }
@@ -352,7 +353,9 @@ textarea {
     flex-direction: column;
     gap: 6px;
     font-size: 11px;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
   }
 }
 @media (min-width: 0px) {
@@ -405,7 +408,9 @@ textarea {
     background-color: #fff;
     outline: 1px solid var(--clg);
     position: relative;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
     margin: 0;
   }
 }
@@ -417,7 +422,9 @@ textarea {
     background-color: #fff;
     outline: 1px solid var(--clg);
     position: relative;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
     margin: var(--spacing-md) 0;
   }
 }
@@ -1277,7 +1284,9 @@ textarea {
     color: #999;
     padding: 2px;
     flex-shrink: 0;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
   }
 }
 @media (min-width: 0px) {
@@ -1445,7 +1454,8 @@ textarea {
     padding: 2px 4px;
     font-size: var(--font-size-sm);
     text-align: center;
-    text-align-last: center;
+    -moz-text-align-last: center;
+         text-align-last: center;
   }
 }
 @media (min-width: 0px) {
@@ -1906,7 +1916,9 @@ textarea {
     cursor: move;
     padding: 2px;
     flex-shrink: 0;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
     margin-right: 4px;
   }
 }
@@ -2001,7 +2013,9 @@ textarea {
     cursor: move;
     padding: 2px;
     flex-shrink: 0;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
     margin-right: 4px;
   }
 }
@@ -2013,7 +2027,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-dateCheckbox {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2028,7 +2043,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveGroupToggle {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2053,7 +2069,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveVisibilityCheck {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2068,7 +2085,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveBVisibilityCheck {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2083,7 +2101,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveCornerColorCheck {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2105,7 +2124,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-timeBarStateCheck {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2120,7 +2140,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-timeBarGroupCheck {
     -webkit-appearance: none;
-    appearance: none;
+    -moz-appearance: none;
+         appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2576,7 +2597,9 @@ textarea {
     color: var(--text-secondary);
     z-index: 8;
     pointer-events: none;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
   }
 }
 @media (min-width: 0px) {
@@ -2730,6 +2753,7 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-secretSchemeSection .sun-tabButtons.sun-tabButtonsFramed {
+    width: -moz-fit-content;
     width: fit-content;
     max-width: 100%;
   }
@@ -3096,6 +3120,7 @@ textarea {
     position: absolute;
     display: inline-flex;
     align-items: center;
+    width: -moz-max-content;
     width: max-content;
     max-width: 100%;
     box-sizing: border-box;
@@ -3446,7 +3471,9 @@ textarea {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
     background: rgba(255, 255, 255, 0.9);
     padding: var(--spacing-xs) var(--spacing-sm);
     z-index: 20;
@@ -4471,7 +4498,9 @@ textarea {
     width: 100px;
     font-weight: 400;
     flex-shrink: 0;
-    user-select: none;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
     white-space: nowrap;
   }
 }
@@ -4654,7 +4683,8 @@ textarea {
     padding: 2px 4px;
     font-size: var(--font-size-sm);
     text-align: center;
-    text-align-last: center;
+    -moz-text-align-last: center;
+         text-align-last: center;
   }
 }
 @media (min-width: 0px) {
@@ -6259,34 +6289,4 @@ textarea {
   .sun-warningInfo {
     font-size: var(--font-size-sm);
   }
-}
-
-/* Маркеры часов: алиасы без sun- у модификаторов (устаревший styles.css / кэш) */
-.sun-hourMarker.clickable,
-.sun-hourMarker.sun-clickable {
-  cursor: pointer;
-}
-
-.sun-hourMarker.midnight,
-.sun-hourMarker.sun-midnight {
-  border-left-color: var(--danger-color);
-}
-
-.sun-hourMarker.midnight .sun-hourLabel,
-.sun-hourMarker.sun-midnight .sun-hourLabel {
-  color: var(--danger-color);
-  font-weight: 700;
-}
-
-.sun-hourMarker.active,
-.sun-hourMarker.sun-active {
-  background-color: #e6f2ff;
-}
-
-.sun-hourMarker.active .sun-hourLabel,
-.sun-hourMarker.sun-active .sun-hourLabel {
-  color: var(--cp);
-  font-weight: 600;
-}
-
-/*# sourceMappingURL=styles-compiled.css.map */
+}/*# sourceMappingURL=styles.css.map */
