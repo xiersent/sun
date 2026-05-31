@@ -1,4 +1,7 @@
-// modules/stateIntersectionManager.js - ИСПРАВЛЕННАЯ ВЕРСИЯ С СОРТИРОВКОЙ
+/**
+ * @file stateIntersectionManager.js
+ * Вкладка «Пересечения»: выбранный сигнал и пересечения с остальными.
+ */
 // Показывает пересечения ВЫБРАННОГО сигнала со всеми остальными
 
 class StateIntersectionManager {
@@ -20,6 +23,7 @@ class StateIntersectionManager {
         this.init();
     }
     
+    /** Кэширует DOM вкладки «Пересечения». */
     cacheElements() {
         const ids = [
             'intersectionPanel',
@@ -37,6 +41,7 @@ class StateIntersectionManager {
         });
     }
     
+    /** Слушатели, сортировка, зеркалирование селектов, первый расчёт. */
     init() {
         this.setupEventListeners();
         this.restoreSortSelection();  // ДОБАВЛЕНО
@@ -50,6 +55,7 @@ class StateIntersectionManager {
         }, 0);
     }
     
+    /** Сортировка, очистка, селект волны, кнопка time rail. */
     setupEventListeners() {
         // ДОБАВЛЕНО: Обработчик для селекта сортировки
         const sortSelect = this.elements.intersectionSortSelect;
@@ -103,6 +109,7 @@ class StateIntersectionManager {
         }
     }
 
+    /** Вкл/выкл кнопки открытия рельса времени. */
     syncTimeRailOverlayButton() {
         const btn = document.getElementById('btnIntersectionTimeRail');
         if (!btn) return;
@@ -114,6 +121,7 @@ class StateIntersectionManager {
         btn.disabled = !ok;
     }
     
+    /** Слушает zaraza:waveCornerSelectionChanged. */
     setupWaveSelectionObserver() {
         window.addEventListener('zaraza:waveCornerSelectionChanged', this._onWaveCornerSelectionChanged);
         window.addEventListener('beforeunload', () => {
@@ -121,6 +129,7 @@ class StateIntersectionManager {
         });
     }
 
+    /** Пересчёт при смене выбранной волны угловым квадратом. */
     _onWaveCornerSelectionChanged() {
         const currentSelectedId = this.getSelectedWaveId();
         if (currentSelectedId !== this.selectedWaveId) {
@@ -129,6 +138,7 @@ class StateIntersectionManager {
         }
     }
     
+    /** Id волны с включённым waveCornerColor. */
     getSelectedWaveId() {
         if (!window.appState || !window.appState.waveCornerColor) return null;
         
@@ -144,6 +154,7 @@ class StateIntersectionManager {
      */
     setupDateObservers() {}
 
+    /** Селекты дат A/B на вкладке пересечений. */
     setupIntersectionDateSelects() {
         const elA = this.elements.intersectionDateSelectA;
         const elB = this.elements.intersectionDateSelectB;
@@ -188,6 +199,7 @@ class StateIntersectionManager {
         }
     }
 
+    /** Внутренний метод onIntersectionDateSelectChange. */
     _onIntersectionDateSelectChange(which) {
         if (this._intersectionDateMirrorSilent) return;
         const ia = this.elements.intersectionDateSelectA;
@@ -218,6 +230,7 @@ class StateIntersectionManager {
         return m;
     }
 
+    /** Внутренний метод getBirthStartMsForDateId. */
     _getBirthStartMsForDateId(dateId) {
         if (dateId == null || String(dateId) === '') return null;
         const person = (window.appState.data.dates || []).find((d) => String(d.id) === String(dateId));
@@ -236,6 +249,7 @@ class StateIntersectionManager {
         ).getTime();
     }
 
+    /** Внутренний метод personDisplayName. */
     _personDisplayName(dateId) {
         const person = (window.appState.data.dates || []).find((d) => String(d.id) === String(dateId));
         if (!person) return '—';
@@ -286,6 +300,7 @@ class StateIntersectionManager {
         };
     }
     
+    /** RAF-отложенный updateIntersections. */
     debouncedUpdate() {
         if (this._intersectionUpdateRaf != null) {
             cancelAnimationFrame(this._intersectionUpdateRaf);
@@ -297,6 +312,7 @@ class StateIntersectionManager {
     }
     
     // ДОБАВЛЕНО: Сохранение/восстановление выбранной сортировки
+    /** Режим сортировки из localStorage. */
     restoreSortSelection() {
         const savedSort = localStorage.getItem('intersectionSelectedSort');
         if (savedSort && this.elements.intersectionSortSelect) {
@@ -305,6 +321,7 @@ class StateIntersectionManager {
         }
     }
     
+    /** Сохраняет режим сортировки пересечений. */
     saveSortSelection() {
         if (this.elements.intersectionSortSelect) {
             localStorage.setItem('intersectionSelectedSort', this.currentSortMode);
@@ -317,6 +334,7 @@ class StateIntersectionManager {
         return window.appState.data.waves;
     }
 
+    /** Внутренний метод computeIntersectionWaveListSignature. */
     _computeIntersectionWaveListSignature() {
         if (!window.appState || !window.appState.data) return '';
         const waves = this.getAllWavesFromSelectedGroup();
@@ -329,6 +347,7 @@ class StateIntersectionManager {
         return `${structure}|${ids}`;
     }
 
+    /** Внутренний метод fillIntersectionWaveSelectOptions. */
     _fillIntersectionWaveSelectOptions() {
         const sel = this.elements.intersectionWaveSelect;
         if (!sel || !window.appState || !window.appState.data) return;
@@ -405,6 +424,7 @@ class StateIntersectionManager {
         }
     }
 
+    /** Обновляет select волны при смене corner color. */
     refreshIntersectionWaveSelectIfNeeded() {
         const sel = this.elements.intersectionWaveSelect;
         if (!sel) return;
@@ -416,6 +436,7 @@ class StateIntersectionManager {
         this._syncIntersectionWaveSelectFromAppState();
     }
 
+    /** Внутренний метод syncIntersectionWaveSelectFromAppState. */
     _syncIntersectionWaveSelectFromAppState() {
         const sel = this.elements.intersectionWaveSelect;
         if (!sel) return;
@@ -433,6 +454,7 @@ class StateIntersectionManager {
         }
     }
     
+    /** Пересечения выбранной волны с остальными за день. */
     findIntersectionsWithSelectedWave(selectedWave, otherWaves, date, baseMsA, baseMsB) {
         const allIntersections = [];
         
@@ -540,6 +562,7 @@ class StateIntersectionManager {
      * @param {number} numDays целое >= 1
      * @returns {Array<{ time: Date, wave1: object, wave2: object, value: number }>}
      */
+    /** Поиск пересечений на несколько дней вперёд. */
     findIntersectionsMultiDay(selectedWave, otherWaves, firstDayDate, numDays, baseMsA, baseMsB) {
         const n = Math.max(1, Math.floor(Number(numDays) || 1));
         const bA = baseMsA != null ? baseMsA : this.lastIntersectionBaseMsA;
@@ -572,6 +595,7 @@ class StateIntersectionManager {
         return unique.sort((a, b) => a.time.getTime() - b.time.getTime());
     }
 
+    /** Расчёт пересечений выбранной волны с остальными. */
     updateIntersections() {
         if (this.isUpdating) return;
         
@@ -663,12 +687,14 @@ class StateIntersectionManager {
         }
     }
     
+    /** Объект волны по id из appState.data.waves. */
     findWaveById(waveId) {
         if (!window.appState || !window.appState.data) return null;
         return window.appState.data.waves.find(w => String(w.id) === String(waveId));
     }
     
     // ОБНОВЛЕНО: Сортировка результатов по выбранному режиму
+    /** Сортировка по period-desc или time-asc. */
     sortIntersections(intersections) {
         if (this.currentSortMode === 'time-asc') {
             // Сортировка по времени от наименьшего к наибольшему
@@ -683,6 +709,7 @@ class StateIntersectionManager {
         }
     }
     
+    /** Отрисовка списка пересечений с учётом сортировки. */
     displayResults(intersections, selectedWave, currentDate) {
         const container = this.elements.intersectionResults;
         const stats = this.elements.intersectionStats;
@@ -874,6 +901,7 @@ class StateIntersectionManager {
         this.syncTimeRailOverlayButton();
     }
     
+    /** Пустое состояние: волна не выбрана. */
     showNoWaveSelectedMessage() {
         this.lastIntersections = [];
         this.lastSelectedWave = null;
@@ -905,6 +933,7 @@ class StateIntersectionManager {
         this.syncTimeRailOverlayButton();
     }
     
+    /** Пустое состояние: пересечений нет. */
     showNoIntersectionsMessage(message) {
         const container = this.elements.intersectionResults;
         const stats = this.elements.intersectionStats;
@@ -926,6 +955,7 @@ class StateIntersectionManager {
         this.syncTimeRailOverlayButton();
     }
     
+    /** Снимает выбор волны (corner color) и очищает результаты. */
     clearSelection() {
         if (!window.appState) return;
         
@@ -954,6 +984,7 @@ class StateIntersectionManager {
         this.showNoWaveSelectedMessage();
     }
     
+    /** Форматирует Date для строки пересечения. */
     formatTime(date) {
         const hours = date.getHours().toString().padStart(2, '0');
         const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -961,6 +992,7 @@ class StateIntersectionManager {
         return `${hours}:${minutes}:${seconds}`;
     }
     
+    /** Экранирование HTML в тексте для безопасной вставки. */
     escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -968,6 +1000,7 @@ class StateIntersectionManager {
         return div.innerHTML;
     }
     
+    /** Зеркалирование селектов и полный пересчёт пересечений. */
     refresh() {
         this.mirrorCompareSelectsToIntersection();
         this.updateIntersections();

@@ -6,10 +6,12 @@ class WavesTransformLayerManager {
     static LAYER_ID = 'wavesTransformLayer';
     static MOUNT_ID = 'wavesMount';
 
+    /** DOM-контейнер #wavesTransformLayer (CSS transform слоя волн). */
     getLayerElement() {
         return document.getElementById(WavesTransformLayerManager.LAYER_ID);
     }
 
+    /** DOM #wavesMount — волны и оверлеи внутри слоя transform. */
     getMountElement() {
         return (
             document.getElementById(WavesTransformLayerManager.MOUNT_ID) ||
@@ -17,6 +19,7 @@ class WavesTransformLayerManager {
         );
     }
 
+    /** Текущие scaleX, scaleY, rotation из appState.transform. */
     getTransformState() {
         const t = window.appState && window.appState.transform;
         return {
@@ -26,14 +29,17 @@ class WavesTransformLayerManager {
         };
     }
 
+    /** Вертикальное отражение (scaleY < 0). */
     isScaleYFlipped() {
         return this.getTransformState().scaleY < 0;
     }
 
+    /** Горизонтальное отражение (scaleX < 0). */
     isScaleXFlipped() {
         return this.getTransformState().scaleX < 0;
     }
 
+    /** Угол поворота 0…359°. */
     getNormalizedRotation() {
         const rot = Number(this.getTransformState().rotation) || 0;
         return ((rot % 360) + 360) % 360;
@@ -44,6 +50,7 @@ class WavesTransformLayerManager {
         return Math.round(this.getNormalizedRotation() / 90) % 4;
     }
 
+    /** true при 90° или 270° — оси дней и состояний поменяны местами на экране. */
     isAxisSwapped() {
         return this.getRotationQuarter() % 2 === 1;
     }
@@ -68,10 +75,12 @@ class WavesTransformLayerManager {
         return this.getDayAxisScrollMultiplier() * (-Number(currentPositionPx) || 0);
     }
 
+    /** Ширина графа в логических пикселях (ось дней). */
     getLogicalGraphWidth() {
         return window.appState.graphWidth;
     }
 
+    /** Высота графа в логических пикселях (ось состояний). */
     getLogicalGraphHeight() {
         return window.appState.config.graphHeight;
     }
@@ -89,6 +98,7 @@ class WavesTransformLayerManager {
         return this.isAxisSwapped() ? lw : lh;
     }
 
+    /** Строка-сигнатура раскладки для пересоздания сетки/волн при смене transform. */
     getTransformLayoutSignature() {
         const t = this.getTransformState();
         return [this.getRotationQuarter(), t.scaleX, t.scaleY].join('|');
@@ -165,6 +175,7 @@ class WavesTransformLayerManager {
         }
     }
 
+    /** Учесть flip при отображении логической грани left/right/top/bottom. */
     mapLogicalGraphEdge(edge) {
         let e = edge;
         if (this.isScaleXFlipped()) {
@@ -220,12 +231,14 @@ class WavesTransformLayerManager {
         return row[edge] || row.left;
     }
 
+    /** Логическая Y → экранная Y внутри graph-container. */
     mapDisplayY(y, graphH) {
         const lh = graphH != null ? graphH : this.getLogicalGraphHeight();
         const lw = this.getLogicalGraphWidth();
         return this.mapGraphPointToDisplay(0, y, lw, lh).y;
     }
 
+    /** Логическая X → экранная X внутри graph-container. */
     mapDisplayX(x, graphW) {
         const lw = graphW != null ? graphW : this.getLogicalGraphWidth();
         const lh = this.getLogicalGraphHeight();
@@ -241,16 +254,19 @@ class WavesTransformLayerManager {
         document.documentElement.style.setProperty('--dgh', `${this.getDisplayGraphHeight()}px`);
     }
 
+    /** Смещение линии дня для сетки с учётом flipH. */
     mapGridDayOffset(offset) {
         const o = Number(offset) || 0;
         return this.isScaleXFlipped() ? -o : o;
     }
 
+    /** Шаг навигации ←/→ по дням с учётом flipH. */
     mapNavigationDayDelta(delta) {
         const d = Number(delta) || 0;
         return this.isScaleXFlipped() ? -d : d;
     }
 
+    /** Уровень состояния для горизонтальных линий сетки с учётом flipV. */
     mapGridYLevel(level) {
         const l = Number(level);
         if (Number.isNaN(l)) {
@@ -267,6 +283,7 @@ class WavesTransformLayerManager {
         return this.isScaleXFlipped();
     }
 
+    /** Строка CSS transform для #wavesTransformLayer (rotate 180° + scale). */
     buildCssTransform(t) {
         const parts = [];
         if (this.getRotationQuarter() === 2) {
@@ -285,6 +302,7 @@ class WavesTransformLayerManager {
         return parts.join(' ');
     }
 
+    /** Сброс inline transform у выносок вне слоя волн. */
     clearLabelPeerTransforms() {
         document.querySelectorAll('[data-waves-transform-peer]').forEach((el) => {
             el.style.transform = '';
@@ -292,6 +310,7 @@ class WavesTransformLayerManager {
         });
     }
 
+    /** Перенести волны и оверлеи из #graphElement в #wavesMount. */
     migrateWaveDomFromGraphElement() {
         const mount = this.getMountElement();
         const graph = document.getElementById('graphElement');
@@ -306,6 +325,7 @@ class WavesTransformLayerManager {
         });
     }
 
+    /** Убрать устаревший transform с #graphElement (теперь только на слое волн). */
     clearLegacyGraphElementTransform() {
         const graph = document.getElementById('graphElement');
         if (graph) {
@@ -329,6 +349,10 @@ class WavesTransformLayerManager {
         });
     }
 
+    /**
+     * Применить transform из appState: CSS слоя, переменные --dgw/--dgh,
+     * пересборка сетки/волн при смене раскладки, порядок z-index.
+     */
     applyFromAppState() {
         this.migrateWaveDomFromGraphElement();
         this.clearLegacyGraphElementTransform();

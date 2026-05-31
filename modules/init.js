@@ -1,7 +1,11 @@
-// modules/init.js
-// modules/init.js - ОБНОВЛЕННЫЙ (без notes)
+/**
+ * @file init.js
+ * Точка входа после DOMContentLoaded: загрузка appState, создание менеджеров,
+ * appCore.init, finalizeInitialization.
+ */
 const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
 
+/** Загрузка состояния, менеджеров и финальная синхронизация UI/графика. */
 document.addEventListener('DOMContentLoaded', async () => {
     __lp && __lp.mark('domcontentloaded_handler_start');
 
@@ -74,6 +78,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+/**
+ * Второй этап старта: активная персона, списки, вкладки, transform, сравнение дат A/B.
+ * Вызывается из init и может быть переиспользован после импорта.
+ */
 async function finalizeInitialization() {
     const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
 

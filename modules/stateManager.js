@@ -1,4 +1,7 @@
-// modules/stateManager.js
+/**
+ * @file stateManager.js
+ * Альтернативный менеджер состояния v2 с регистрацией путей getter/setter.
+ */
 class StateManager {
     constructor() {
         this.statePaths = {};
@@ -7,10 +10,12 @@ class StateManager {
         this.isSaving = false;
     }
     
+    /** Регистрирует getter/setter для пути состояния v2. */
     registerPath(path, getter, setter) {
         this.statePaths[path] = { getter, setter };
     }
     
+    /** Собирает объект состояния из зарегистрированных путей. */
     getState() {
         const state = {
             uiSettings: {},
@@ -26,6 +31,7 @@ class StateManager {
         return state;
     }
     
+    /** Запись appStateV2 в localStorage. */
     autoSave() {
         if (!this.autoSaveEnabled || this.isSaving) return;
         
@@ -47,6 +53,7 @@ class StateManager {
         }
     }
     
+    /** Восстановление из appStateV2. */
     restore() {
         const saved = localStorage.getItem('appStateV2');
         if (!saved) {
@@ -78,19 +85,23 @@ class StateManager {
         }
     }
     
+    /** Принудительный autoSave. */
     forceSave() {
         this.autoSaveEnabled = true;
         this.autoSave();
     }
     
+    /** Отключает автосохранение v2. */
     disableAutoSave() {
         this.autoSaveEnabled = false;
     }
     
+    /** Включает автосохранение v2. */
     enableAutoSave() {
         this.autoSaveEnabled = true;
     }
     
+    /** Запись значения по точечному пути. */
     setNestedProperty(obj, path, value) {
         const keys = path.split('.');
         let current = obj;
@@ -107,6 +118,7 @@ class StateManager {
         current[lastKey] = value;
     }
     
+    /** Чтение значения по точечному пути. */
     getNestedProperty(obj, path) {
         const keys = path.split('.');
         let current = obj;
@@ -121,6 +133,7 @@ class StateManager {
         return current;
     }
     
+    /** Перенос appData → appStateV2. */
     migrateFromV1() {
         const oldData = localStorage.getItem('appData');
         if (!oldData) return false;

@@ -1,4 +1,7 @@
-// modules/migrations.js - исправленная версия с корректной обработкой 404
+/**
+ * @file migrations.js
+ * Менеджер миграций: загрузка migrations/*.js и последовательный прогон.
+ */
 class MigrationsManager {
     constructor(appState) {
         this.appState = appState;
@@ -167,6 +170,7 @@ class MigrationsManager {
         return this.migrationLog;
     }
 
+    /** Запись строки в migrationLog и console. */
     log(message, type = 'info') {
         const prefix = '[Migrations]';
         

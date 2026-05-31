@@ -1,11 +1,17 @@
-// modules/import.js
+/**
+ * @file import.js
+ * Экспорт и импорт данных приложения в JSON (полный, только даты, только сигналы).
+ * Имя полного файла: {дата}_everything.json.
+ */
 class ImportExportManager {
+    /** @param {object|null} SQL — движок sql.js (legacy импорт БД) */
     constructor() {
         this.SQL = null;
         this.currentDB = null;
         this.dbImportData = null;
     }
-    
+
+    /** Подключить sql.js из window.SQL, если ещё не загружен. */
     async initSQL() {
         if (!this.SQL && window.SQL) {
             this.SQL = window.SQL;
@@ -13,10 +19,19 @@ class ImportExportManager {
         return this.SQL;
     }
     
+    /**
+     * Проверка, что значение — положительная метка времени (мс).
+     * @param {*} value
+     * @returns {boolean}
+     */
     isTimestamp(value) {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }
-    
+
+    /**
+     * Нормализовать даты персон после импорта: timestamp, описание, пол.
+     * @param {{ dates: object[] }} data
+     */
     convertImportedDatesToTimestamp(data) {
         data.dates.forEach(date => {
             if (date.date && !this.isTimestamp(date.date)) {
@@ -34,6 +49,7 @@ class ImportExportManager {
         });
     }
     
+    /** Скачать JSON со всеми данными, настройками UI и transform (файл *_everything.json). */
     exportAll() {
         const dataToSave = {
             ...window.appState.data
@@ -67,6 +83,7 @@ class ImportExportManager {
         URL.revokeObjectURL(url);
     }
     
+    /** Скачать JSON только с персонами и группами персон (*_dates.json). */
     exportDates() {
         const dataToSave = {
             dates: window.appState.data.dates,
@@ -88,6 +105,7 @@ class ImportExportManager {
         URL.revokeObjectURL(url);
     }
     
+    /** Скачать JSON только с сигналами и группами сигналов (*_signals.json). */
     exportWaves() {
         const dataToSave = {
             waves: window.appState.data.waves,
@@ -109,6 +127,11 @@ class ImportExportManager {
         URL.revokeObjectURL(url);
     }
     
+    /**
+     * Импорт из выбранного JSON-файла (полный / даты / сигналы).
+     * @param {File} file
+     * @returns {Promise<void>}
+     */
     importAll(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -486,6 +509,7 @@ class ImportExportManager {
         });
     }
     
+    /** Очистить UI legacy-импорта из SQLite (если элементы есть на странице). */
     clearImportResults() {
         const textarea = document.getElementById('dbImportTextarea');
         if (textarea) textarea.value = '';
@@ -497,6 +521,11 @@ class ImportExportManager {
         if (status) status.innerHTML = '';
     }
     
+    /**
+     * Обновить прогресс-бар импорта БД.
+     * @param {number} percent — 0…100
+     * @param {string} [message]
+     */
     updateDBImportProgress(percent, message = '') {
         const progressBar = document.getElementById('dbImportProgressBar');
         const status = document.getElementById('dbImportStatus');
@@ -510,6 +539,11 @@ class ImportExportManager {
         }
     }
     
+    /**
+     * Показать статус импорта БД в блоке dbImportStatus.
+     * @param {string} message
+     * @param {'info'|'error'|'success'} [type]
+     */
     showDBImportStatus(message, type = 'info') {
         const status = document.getElementById('dbImportStatus');
         if (status) {

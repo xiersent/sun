@@ -1,3 +1,8 @@
+/**
+ * @file grid.js
+ * Сетка графика: вертикальные линии дней, горизонтали состояний, подписи дат и уровней.
+ * Учитывает поворот/отражение через wavesTransformLayer.
+ */
 class GridManager {
     constructor() {
         this.gridElements = [];
@@ -6,7 +11,12 @@ class GridManager {
         /** Сигнатура раскладки; при смене — нужен полный createGrid */
         this._lastGridLayoutSignature = null;
     }
-    
+
+    /**
+     * Позиция линии/метки дня по смещению offset (клетки от currentDay).
+     * @param {number} offset
+     * @returns {{ actualOffset: number, pixelPosition: number, crossPixel: number, axisSwapped: boolean }}
+     */
     calculateGridPosition(offset) {
         const sq = window.appState.config.squareSize;
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapLogicalOffsets) {

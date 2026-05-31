@@ -1,32 +1,39 @@
-// modules/uiManager.js
-// modules/uiManager.js - ОБНОВЛЕННЫЙ (без notes)
+/**
+ * @file uiManager.js
+ * Управление интерфейсом: кнопки data-action, вкладки, видимость слоёв графика,
+ * угловые квадраты, отражение/поворот волн, экспорт и сброс настроек.
+ */
 class UIManager {
+    /** Ссылки на DOM из appCore, активная вкладка панели. */
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
         this.setupDateTimeInputs();
         this.activeTab = null;
     }
-    
+
+    /**
+     * Поля даты/времени визора: автозаполнение при фокусе, Enter → переход к дате, маска времени.
+     */
     setupDateTimeInputs() {
         const dateInput = document.getElementById('mainDateInputDate');
         const timeInput = document.getElementById('mainDateInputTime');
-        
+
         if (!dateInput || !timeInput) return;
-        
+
         dateInput.addEventListener('focus', () => {
             if (!dateInput.value) {
                 const now = new Date();
                 dateInput.value = window.timeUtils.formatForDateInput(now);
             }
         });
-        
+
         timeInput.addEventListener('focus', () => {
             if (!timeInput.value) {
                 const now = new Date();
                 timeInput.value = window.timeUtils.formatForTimeInput(now);
             }
         });
-        
+
         const handleEnter = (e) => {
             if (e.key === 'Enter') {
                 if (window.dates && window.dates.setDateFromInputs) {
@@ -34,30 +41,35 @@ class UIManager {
                 }
             }
         };
-        
+
         dateInput.addEventListener('keydown', handleEnter);
         timeInput.addEventListener('keydown', handleEnter);
-        
+
         timeInput.addEventListener('blur', () => {
             let value = timeInput.value.trim();
             if (value && value.split(':').length === 2) {
                 timeInput.value = value + ':00';
             }
         });
-        
+
         timeInput.addEventListener('input', (e) => {
             let value = e.target.value.replace(/[^\d:]/g, '');
-            
+
             if (value.length === 2 && !value.includes(':')) {
                 value = value + ':';
             } else if (value.length === 5 && value.split(':').length < 3) {
                 value = value + ':';
             }
-            
+
             e.target.value = value;
         });
     }
-    
+
+    /**
+     * Диспетчер кликов по data-action (см. index.html и eventManager).
+     * @param {string} action — имя действия
+     * @param {HTMLElement} [element] — элемент, вызвавший действие
+     */
     handleAction(action, element) {
         const actions = {
             resetWarning: () => this.resetWarning(),
@@ -66,13 +78,13 @@ class UIManager {
             today: () => window.dates.goToToday(),
             now: () => window.dates.goToNow(),
             setDate: () => window.dates.setDateFromInputs(),
-            
+
             flipH: () => this.flipHorizontal(),
             flipV: () => this.flipVertical(),
             rotateL: () => this.rotate(-90),
             rotateR: () => this.rotate(90),
             resetTransform: () => this.resetTransform(),
-            
+
             toggleUI: () => this.toggleUI(),
             toggleGraph: () => this.toggleGraph(),
             toggleWaveLabels: () => this.toggleWaveLabels(),
@@ -84,7 +96,7 @@ class UIManager {
             toggleGrayMode: () => this.toggleGrayMode(),
             toggleGraphGrayMode: () => this.toggleGraphGrayMode(),
             toggleStars: () => this.toggleStars(),
-            
+
             toggleCorners: () => this.toggleCornerSquares('corners'),
             toggleAxial: () => this.toggleCornerSquares('axial'),
             toggleVertical: () => this.toggleCornerSquares('vertical'),
@@ -96,19 +108,20 @@ class UIManager {
             toggleBottom: () => this.toggleCornerSquares('bottom'),
             toggleAllSquares: () => this.toggleAllSquares(),
             resetCorners: () => this.resetCorners(),
-            
+
             exportAll: () => window.importExport.exportAll(),
             exportDates: () => window.importExport.exportDates(),
             exportWaves: () => window.importExport.exportWaves(),
             importAll: () => document.getElementById('importAllFile').click(),
             resetAll: () => this.resetAll()
         };
-        
+
         if (actions[action]) {
             actions[action]();
         }
     }
 
+    /** Снова показать экран предупреждения и скрыть основной UI. */
     resetWarning() {
         const warningOverlay = document.getElementById('warningOverlay');
         if (warningOverlay) {
@@ -116,19 +129,20 @@ class UIManager {
             warningOverlay.classList.add('desktop-warning');
             document.body.style.overflow = 'hidden';
         }
-        
+
         const warningBox = document.querySelector('.warning-box');
         if (warningBox) {
             warningBox.classList.remove('hidden');
         }
-        
+
         document.body.classList.add('ui-hidden');
-        
-        document.querySelectorAll('.corner-square').forEach(square => {
+
+        document.querySelectorAll('.corner-square').forEach((square) => {
             square.style.display = 'block';
         });
     }
-    
+
+    /** Скрыть/показать панели и полосу времени (класс ui-hidden на body). */
     toggleUI() {
         window.appState.uiHidden = !window.appState.uiHidden;
         if (window.appState.uiHidden) {
@@ -144,7 +158,8 @@ class UIManager {
         }
         window.appState.save();
     }
-    
+
+    /** Синхронизировать кнопку «Краска экстр.» с appState.extremumWaveColorHighlight. */
     syncExtremumWaveColorHighlightButton() {
         const btn = document.getElementById('btnExtremumWaveColorHighlight');
         if (!btn) return;
@@ -155,7 +170,8 @@ class UIManager {
             : 'Окраска волн и выносок при экстремумах выключена';
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
-    
+
+    /** Вкл/выкл подсветку волн и выносок в точках экстремума (±4…±5). */
     toggleExtremumWaveColors() {
         const next = window.appState.extremumWaveColorHighlight !== true;
         window.appState.extremumWaveColorHighlight = next;
@@ -165,13 +181,14 @@ class UIManager {
         }
         window.appState.save();
     }
-    
+
+    /** Скрыть/показать боковые выноски имён волн (.wave-labels-container). */
     toggleWaveLabels() {
         const horizontalContainer = document.querySelector('.wave-labels-container');
-        
+
         if (horizontalContainer) {
             const areHidden = horizontalContainer.classList.contains('hidden');
-            
+
             if (areHidden) {
                 horizontalContainer.classList.remove('hidden');
             } else {
@@ -179,13 +196,14 @@ class UIManager {
             }
         }
     }
-    
+
+    /** Скрыть/показать верхние/нижние выноски времени экстремумов. */
     toggleExtremes() {
         const verticalContainer = document.querySelector('.wave-labels-vertical-container');
-        
+
         if (verticalContainer) {
             const areHidden = verticalContainer.classList.contains('hidden');
-            
+
             if (areHidden) {
                 verticalContainer.classList.remove('hidden');
             } else {
@@ -193,16 +211,17 @@ class UIManager {
             }
         }
     }
-    
+
+    /** Скрыть/показать точки пересечения волн с горизонтальной осью (эквилибриум). */
     toggleEquilibrium() {
         const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
-        
+
         if (axisXPointsContainer) {
             const areHidden = axisXPointsContainer.classList.contains('hidden');
-            
+
             if (areHidden) {
                 axisXPointsContainer.classList.remove('hidden');
-                
+
                 if (window.waves && window.waves.updateAxisXIntersectionPoints) {
                     window.waves.updateAxisXIntersectionPoints();
                 }
@@ -222,62 +241,86 @@ class UIManager {
             }
         }
     }
-    
+
+    /**
+     * Переключить видимость подмножества угловых квадратов.
+     * @param {string} type — corners | axial | vertical | sides | middle | left | right | top | bottom
+     */
     toggleCornerSquares(type) {
         const squares = {
-            'corners': ['.tl', '.tr', '.bl', '.br'],
-            'axial': ['.tc', '.bc', '.lc', '.rc'],
-            'vertical': ['.tc', '.bc'],
-            'sides': ['.lc', '.rc'],
-            'middle': ['.mt', '.mb', '.ml', '.mr', '.mt2', '.mb2', '.ml2', '.mr2'],
-            'left': ['.tl', '.bl', '.lc', '.ml', '.ml2'],
-            'right': ['.tr', '.br', '.rc', '.mr', '.mr2'],
-            'top': ['.tl', '.tr', '.tc', '.mt', '.mt2'],
-            'bottom': ['.bl', '.br', '.bc', '.mb', '.mb2'],
-            'all': ['.tl', '.tr', '.bl', '.br', '.tc', '.bc', '.lc', '.rc', '.mt', '.mb', '.ml', '.mr', '.mt2', '.mb2', '.ml2', '.mr2']
+            corners: ['.tl', '.tr', '.bl', '.br'],
+            axial: ['.tc', '.bc', '.lc', '.rc'],
+            vertical: ['.tc', '.bc'],
+            sides: ['.lc', '.rc'],
+            middle: ['.mt', '.mb', '.ml', '.mr', '.mt2', '.mb2', '.ml2', '.mr2'],
+            left: ['.tl', '.bl', '.lc', '.ml', '.ml2'],
+            right: ['.tr', '.br', '.rc', '.mr', '.mr2'],
+            top: ['.tl', '.tr', '.tc', '.mt', '.mt2'],
+            bottom: ['.bl', '.br', '.bc', '.mb', '.mb2'],
+            all: [
+                '.tl',
+                '.tr',
+                '.bl',
+                '.br',
+                '.tc',
+                '.bc',
+                '.lc',
+                '.rc',
+                '.mt',
+                '.mb',
+                '.ml',
+                '.mr',
+                '.mt2',
+                '.mb2',
+                '.ml2',
+                '.mr2'
+            ]
         };
         const selectors = squares[type] || squares.all;
-        selectors.forEach(selector => {
+        selectors.forEach((selector) => {
             const square = document.querySelector(`.corner-square${selector}`);
             if (square) {
                 square.style.display = square.style.display === 'none' ? 'block' : 'none';
             }
         });
     }
-    
+
+    /** Показать или скрыть все угловые квадраты разом; сохранить в appState.cornerSquaresVisible. */
     toggleAllSquares() {
         const allSquares = document.querySelectorAll('.corner-square');
-        const anyVisible = Array.from(allSquares).some(square => square.style.display !== 'none');
+        const anyVisible = Array.from(allSquares).some((square) => square.style.display !== 'none');
         const newVisibility = !anyVisible;
-        allSquares.forEach(square => {
+        allSquares.forEach((square) => {
             square.style.display = newVisibility ? 'block' : 'none';
         });
         window.appState.cornerSquaresVisible = newVisibility;
         window.appState.save();
     }
-    
+
+    /** Переключить видимость всех угловых квадратов по флагу cornerSquaresVisible. */
     toggleSquares() {
         window.appState.cornerSquaresVisible = !window.appState.cornerSquaresVisible;
         const allSquares = document.querySelectorAll('.corner-square');
-        allSquares.forEach(square => {
+        allSquares.forEach((square) => {
             square.style.display = window.appState.cornerSquaresVisible ? 'block' : 'none';
         });
         window.appState.save();
     }
-    
+
+    /** Сбросить окраску углов (waveCornerColor) для всех волн и чекбоксов в списке. */
     resetCorners() {
-        window.appState.data.waves.forEach(wave => {
+        window.appState.data.waves.forEach((wave) => {
             const waveIdStr = String(wave.id);
             window.appState.waveCornerColor[waveIdStr] = false;
         });
-        
+
         this.updateCornerSquareColors();
-        
+
         if (window.dataManager && window.dataManager.updateWavesGroups) {
             window.dataManager.updateWavesGroups();
         }
-        
-        document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
+
+        document.querySelectorAll('.wave-corner-color-check').forEach((checkbox) => {
             checkbox.checked = false;
         });
 
@@ -285,23 +328,27 @@ class UIManager {
 
         window.dispatchEvent(new CustomEvent('zaraza:waveCornerSelectionChanged'));
     }
-    
+
+    /** Вернуть угловым квадратам цвет по умолчанию (красный). */
     updateCornerSquareColors() {
-        document.querySelectorAll('.corner-square').forEach(square => {
+        document.querySelectorAll('.corner-square').forEach((square) => {
             square.style.backgroundColor = 'red';
         });
     }
-    
+
+    /** Отразить волны по горизонтали (scaleX *= −1). */
     flipHorizontal() {
         window.appState.transform.scaleX *= -1;
         this.applyTransform();
     }
-    
+
+    /** Отразить волны по вертикали (scaleY *= −1). */
     flipVertical() {
         window.appState.transform.scaleY *= -1;
         this.applyTransform();
     }
 
+    /** Обновить title и aria-pressed кнопки ↔ (flipH). */
     syncFlipHButton() {
         const btn = document.getElementById('btnFlipH');
         if (!btn) {
@@ -310,7 +357,7 @@ class UIManager {
         const flipped =
             window.wavesTransformLayer && window.wavesTransformLayer.isScaleXFlipped
                 ? window.wavesTransformLayer.isScaleXFlipped()
-                : (window.appState.transform && window.appState.transform.scaleX < 0);
+                : window.appState.transform && window.appState.transform.scaleX < 0;
         btn.classList.toggle('flip-h-active', flipped);
         btn.setAttribute('aria-pressed', flipped ? 'true' : 'false');
         btn.title = flipped
@@ -318,11 +365,13 @@ class UIManager {
             : 'Отразить волны по горизонтали';
     }
 
+    /** Синхронизировать кнопки отражения ↔ и ↕. */
     syncTransformFlipButtons() {
         this.syncFlipHButton();
         this.syncFlipVButton();
     }
 
+    /** Обновить title и aria-pressed кнопки ↕ (flipV). */
     syncFlipVButton() {
         const btn = document.getElementById('btnFlipV');
         if (!btn) {
@@ -331,19 +380,24 @@ class UIManager {
         const flipped =
             window.wavesTransformLayer && window.wavesTransformLayer.isScaleYFlipped
                 ? window.wavesTransformLayer.isScaleYFlipped()
-                : (window.appState.transform && window.appState.transform.scaleY < 0);
+                : window.appState.transform && window.appState.transform.scaleY < 0;
         btn.classList.toggle('flip-v-active', flipped);
         btn.setAttribute('aria-pressed', flipped ? 'true' : 'false');
         btn.title = flipped
             ? 'Вертикальное отражение включено'
             : 'Отразить волны по вертикали';
     }
-    
+
+    /**
+     * Повернуть раскладку графика на заданный угол (градусы, накапливается в transform.rotation).
+     * @param {number} degrees — обычно ±90
+     */
     rotate(degrees) {
         window.appState.transform.rotation += degrees;
         this.applyTransform();
     }
-    
+
+    /** Сбросить отражение и поворот к scale 1 и rotation 0. */
     resetTransform() {
         window.appState.transform = {
             scaleX: 1,
@@ -352,7 +406,8 @@ class UIManager {
         };
         this.applyTransform();
     }
-    
+
+    /** Применить transform к слою волн, сетке и кнопкам отражения; сохранить состояние. */
     applyTransform() {
         if (window.wavesTransformLayer && window.wavesTransformLayer.applyFromAppState) {
             window.wavesTransformLayer.applyFromAppState();
@@ -360,7 +415,8 @@ class UIManager {
         this.syncTransformFlipButtons();
         window.appState.save();
     }
-    
+
+    /** Скрыть/показать блок графика (graph-hidden на body). */
     toggleGraph() {
         window.appState.graphHidden = !window.appState.graphHidden;
         if (window.appState.graphHidden) {
@@ -370,7 +426,8 @@ class UIManager {
         }
         window.appState.save();
     }
-    
+
+    /** Обесцветить весь интерфейс (класс gray-mode). */
     toggleGrayMode() {
         window.appState.grayMode = !window.appState.grayMode;
         if (window.appState.grayMode) {
@@ -380,16 +437,17 @@ class UIManager {
         }
         window.appState.save();
     }
-    
+
+    /** Обесцветить только график и волны (graph-gray-mode). */
     toggleGraphGrayMode() {
         window.appState.graphGrayMode = !window.appState.graphGrayMode;
-        
+
         if (window.appState.graphGrayMode) {
             document.body.classList.add('graph-gray-mode');
         } else {
             document.body.classList.remove('graph-gray-mode');
         }
-        
+
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
             if (window.appState.graphGrayMode) {
@@ -400,10 +458,11 @@ class UIManager {
         }
     }
 
+    /** Показать/скрыть точки пересечения волн друг с другом на графике. */
     toggleWaveIntersections() {
         window.appState.waveIntersectionsVisible = !window.appState.waveIntersectionsVisible;
         window.appState.save();
-        
+
         if (window.appState.waveIntersectionsVisible) {
             if (window.waves && window.waves.renderWaveIntersectionPoints) {
                 window.waves.renderWaveIntersectionPoints();
@@ -412,7 +471,8 @@ class UIManager {
             window.waves.removeWaveIntersectionPoints();
         }
     }
-    
+
+    /** Переключить отображение имён персон: звёздочки или полные имена в списке и центре. */
     toggleStars() {
         window.appState.showStars = !window.appState.showStars;
         if (window.appState.showStars) {
@@ -426,78 +486,81 @@ class UIManager {
         window.dataManager.updateDateList();
         window.appState.save();
     }
-    
 
-	resetAll() {
-		if (!confirm('Сбросить ВСЕ настройки интерфейса к значениям по умолчанию?')) {
-			return;
-		}
-		
-		if (!confirm('ВНИМАНИЕ: Это действие нельзя отменить. Все данные будут уничтожены. Продолжить?')) {
-			return;
-		}
-		
-		// 1. Сначала очищаем localStorage
-		localStorage.clear();
-		
-		// 2. Очищаем sessionStorage
-		try {
-			sessionStorage.clear();
-		} catch(e) {}
-		
-		// 3. Очищаем данные в памяти правильно
-		if (window.appState && window.appState.data) {
-			window.appState.data.dates = [];
-			window.appState.data.waves = [];
-			window.appState.data.groups = [];
-			window.appState.data.personGroups = [];
-			window.appState.data.notes = [];
-			window.appState.activeDateId = null;
-			window.appState.currentDate = new Date();
-			window.appState.baseDate = new Date();
-			window.appState.currentDay = 0;
-			
-			// Сохраняем пустое состояние
-			window.appState.save();
-		}
-		
-		// 4. Перезагружаем страницу
-		window.location.reload();
-	}
-    
+    /** Полный сброс localStorage и данных приложения с перезагрузкой страницы (двойное подтверждение). */
+    resetAll() {
+        if (!confirm('Сбросить ВСЕ настройки интерфейса к значениям по умолчанию?')) {
+            return;
+        }
+
+        if (!confirm('ВНИМАНИЕ: Это действие нельзя отменить. Все данные будут уничтожены. Продолжить?')) {
+            return;
+        }
+
+        localStorage.clear();
+
+        try {
+            sessionStorage.clear();
+        } catch (e) {}
+
+        if (window.appState && window.appState.data) {
+            window.appState.data.dates = [];
+            window.appState.data.waves = [];
+            window.appState.data.groups = [];
+            window.appState.data.personGroups = [];
+            window.appState.data.notes = [];
+            window.appState.activeDateId = null;
+            window.appState.currentDate = new Date();
+            window.appState.baseDate = new Date();
+            window.appState.currentDay = 0;
+
+            window.appState.save();
+        }
+
+        window.location.reload();
+    }
+
+    /** Заполнить поля mainDateInputDate/Time из appState.currentDate. */
     updateDateTimeInputs() {
         const dateInput = document.getElementById('mainDateInputDate');
         const timeInput = document.getElementById('mainDateInputTime');
-        
+
         if (dateInput && timeInput && window.timeUtils) {
             const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
             dateInput.value = formatted.date;
             timeInput.value = formatted.time;
         }
     }
-    
+
+    /** Обновить списки, поля даты, волны на графике и подпись в центре. */
     updateUI() {
         window.dataManager.updateDateList();
         window.dataManager.updateWavesGroups();
-        
+
         this.updateDateTimeInputs();
-        
+
         if (document.getElementById('dateInput')) {
-            document.getElementById('dateInput').value = window.timeUtils.formatForDateInput(window.appState.currentDate);
+            document.getElementById('dateInput').value = window.timeUtils.formatForDateInput(
+                window.appState.currentDate
+            );
         }
-        
+
         window.waves.updatePosition();
         window.grid.updateCenterDate();
     }
-    
+
+    /** Очистить форму добавления пользовательского сигнала. */
     clearWaveForm() {
         document.getElementById('customWaveName').value = '';
         document.getElementById('customWavePeriod').value = '';
         document.getElementById('customWaveType').value = 'solid';
         document.getElementById('customWaveColor').value = '#666666';
     }
-    
 
+    /**
+     * Клик по вкладке: повторный клик снимает активность; при открытии — обновить пересечения/сравнение.
+     * @param {HTMLElement} tabButton — кнопка с data-tab
+     */
     handleTabClick(tabButton) {
         const tabId = tabButton.dataset.tab;
         if (!tabId) {
@@ -514,13 +577,13 @@ class UIManager {
                     this.deactivateTab(prevTabButton);
                 }
             }
-            
+
             this.activateTab(tabButton);
             this.activeTab = tabId;
         }
-        
+
         localStorage.setItem('activeTab', this.activeTab);
-        
+
         if (tabId === 'intersections' && window.stateIntersectionManager) {
             queueMicrotask(() => {
                 if (typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function') {
@@ -539,36 +602,39 @@ class UIManager {
             });
         }
     }
-    
+
+    /** Активировать вкладку: класс active на кнопке и #tabId-tab. */
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
 
         document.querySelectorAll('.tab-button[data-tab]').forEach((btn) => {
             btn.classList.remove('active');
         });
-        
-        document.querySelectorAll('.tab-content').forEach(content => {
+
+        document.querySelectorAll('.tab-content').forEach((content) => {
             content.classList.remove('active');
         });
-        
+
         tabButton.classList.add('active');
-        
+
         const tabContent = document.querySelector(`#${tabId}-tab`);
         if (tabContent) {
             tabContent.classList.add('active');
         }
     }
-    
+
+    /** Снять активность с вкладки. */
     deactivateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
-        
+
         tabButton.classList.remove('active');
         const tabContent = document.querySelector(`#${tabId}-tab`);
         if (tabContent) {
             tabContent.classList.remove('active');
         }
     }
-    
+
+    /** Восстановить последнюю вкладку из localStorage.activeTab. */
     restoreTabState() {
         const savedTab = localStorage.getItem('activeTab');
         if (savedTab) {
@@ -579,11 +645,12 @@ class UIManager {
             }
         }
     }
-    
+
+    /** Раскрыть/свернуть блок метаданных (спойлер). */
     toggleSpoiler(button) {
         const spoilerContent = button.nextElementSibling;
         const isVisible = spoilerContent.classList.contains('show');
-        
+
         if (isVisible) {
             spoilerContent.classList.remove('show');
             button.textContent = 'Показать метаданные';
@@ -592,21 +659,24 @@ class UIManager {
             button.textContent = 'Скрыть метаданные';
         }
     }
-    
-    scrollToDBImport() {
-        // Метод оставлен пустым, так как вкладка уничтожена
-    }
-    
+
+    /** Зарезервировано: вкладка импорта БД удалена. */
+    scrollToDBImport() {}
+
+    /**
+     * Включить/выключить группу сигналов (group.enabled) и перерисовать график.
+     * @param {string|number} groupId
+     */
     toggleGroup(groupId) {
-        const group = window.appState.data.groups.find(g => g.id === groupId);
+        const group = window.appState.data.groups.find((g) => g.id === groupId);
         if (group) {
             group.enabled = !group.enabled;
             window.appState.save();
-            
+
             if (window.waves) {
                 window.waves.updatePosition();
             }
-            
+
             window.dataManager.updateWavesGroups();
         }
     }

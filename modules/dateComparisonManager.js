@@ -1,4 +1,7 @@
-// modules/dateComparisonManager.js — сравнение волн для двух дат (записей из списка) в текущий момент на визоре
+/**
+ * @file dateComparisonManager.js
+ * Сравнение двух персон A/B: таблица фаз и селекты дат.
+ */
 
 /** Значение <option> «дата B = как дата A»; в dateSelections.typeB сохраняется null. */
 if (typeof window.SUN_DATE_B_SAME_AS_A === 'undefined') {
@@ -18,14 +21,17 @@ class DateComparisonManager {
         this.init();
     }
 
+    /** Внутренний метод progSelectEnter. */
     _progSelectEnter() {
         this._progSelectDepth++;
     }
 
+    /** Внутренний метод progSelectExit. */
     _progSelectExit() {
         this._progSelectDepth = Math.max(0, this._progSelectDepth - 1);
     }
 
+    /** Внутренний метод progSelectActive. */
     _progSelectActive() {
         return this._progSelectDepth > 0;
     }
@@ -54,10 +60,12 @@ class DateComparisonManager {
         return s;
     }
 
+    /** Сбрасывает кэш подписи структуры списка дат. */
     invalidateDateListSignatureCache() {
         this._cachedDateListSignature = null;
     }
 
+    /** Внутренний метод optionValueExists. */
     _optionValueExists(sel, valueStr) {
         if (!valueStr) return true;
         const opts = sel.options;
@@ -208,6 +216,7 @@ class DateComparisonManager {
         }
     }
 
+    /** Кэширует DOM-элементы модуля. */
     cacheElements() {
         this.elA = document.getElementById('dateCompareSelectA');
         this.elB = document.getElementById('dateCompareSelectB');
@@ -216,6 +225,7 @@ class DateComparisonManager {
         this.elViewTablist = document.querySelector('.date-comparison-view-tabs');
     }
 
+    /** Инициализация модуля. */
     init() {
         if (this.elA) {
             this.elA.addEventListener('change', () => {
@@ -252,6 +262,7 @@ class DateComparisonManager {
         }
     }
 
+    /** RAF-отложенное обновление сравнения дат. */
     debouncedUpdate() {
         if (this._updateRaf != null) {
             cancelAnimationFrame(this._updateRaf);
@@ -273,6 +284,7 @@ class DateComparisonManager {
         }
     }
 
+    /** Внутренний метод onSelectChange. */
     _onSelectChange(which) {
         if (this._progSelectActive()) {
             return;
@@ -312,6 +324,7 @@ class DateComparisonManager {
         }
     }
 
+    /** Внутренний метод applySelectsToDateSelections. */
     _applySelectsToDateSelections() {
         if (!window.appState.dateSelections) {
             window.appState.dateSelections = {
@@ -398,6 +411,7 @@ class DateComparisonManager {
         }
     }
 
+    /** Внутренний метод resolveDuplicateSelection. */
     _resolveDuplicateSelection(changedWhich) {
         if (!this.elA || !this.elB) return;
         const dates = window.appState.data.dates || [];
@@ -516,6 +530,7 @@ class DateComparisonManager {
         this._fillCompareSelectOptions(sel, !!isDateBSlot);
     }
 
+    /** Внутренний метод firstDateIdInCompareSelectOrder. */
     _firstDateIdInCompareSelectOrder() {
         const allDates = window.appState.data.dates || [];
         if (allDates.length === 0) {
@@ -541,6 +556,7 @@ class DateComparisonManager {
         return allDates[0].id;
     }
 
+    /** Заполняет selects. */
     populateSelects() {
         if (!this.elA || !this.elB) return;
         this._progSelectEnter();
@@ -599,6 +615,7 @@ class DateComparisonManager {
         }
     }
 
+    /** Внутренний метод matchPercent. */
     _matchPercent(stateA, stateB, dirA = 0, dirB = 0) {
         const diff = Math.abs(stateA - stateB);
         let pct = 100 * (1 - diff / 10);
@@ -608,24 +625,28 @@ class DateComparisonManager {
         return Math.max(0, Math.min(100, pct));
     }
 
+    /** Внутренний метод directionLabel. */
     _directionLabel(dir) {
         return window.waves && typeof window.waves.formatWaveDirectionLabel === 'function'
             ? window.waves.formatWaveDirectionLabel(dir)
             : '—';
     }
 
+    /** Внутренний метод directionTitle. */
     _directionTitle(dir) {
         return window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
             ? window.waves.formatWaveDirectionTitle(dir)
             : '';
     }
 
+    /** Внутренний метод dirCell. */
     _dirCell(dir) {
         const title = this._escapeHtml(this._directionTitle(dir));
         const label = this._directionLabel(dir);
         return `<td title="${title}">${label}</td>`;
     }
 
+    /** Внутренний метод matchClass. */
     _matchClass(pct) {
         if (pct >= 99.5) return 'intersection-item-exact';
         if (pct >= 85) return 'intersection-item-very-close';
@@ -643,6 +664,7 @@ class DateComparisonManager {
         return Math.max(0, Math.min(100, 100 * (1 - Math.abs(d - 5) / 5)));
     }
 
+    /** Обновляет comparison. */
     updateComparison() {
         if (!this.elTableWrap) return;
 
@@ -814,6 +836,7 @@ class DateComparisonManager {
         this.elTableWrap.innerHTML = head + body + foot;
     }
 
+    /** Внутренний метод escapeHtml. */
     _escapeHtml(s) {
         return String(s)
             .replace(/&/g, '&amp;')

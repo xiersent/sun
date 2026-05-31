@@ -1,4 +1,7 @@
-// modules/nestedListDnD.js — общая логика DnD «элемент внутри строки группы» (волны и персоны).
+/**
+ * @file nestedListDnD.js
+ * Общая логика drag-and-drop вложенных строк (волны и персоны в группах).
+ */
 (function (global) {
     const SPECS = {
         wave: {
@@ -75,11 +78,13 @@
         }
     };
 
+    /** Возвращает SPECS.wave или SPECS.date по типу payload. */
     function specForPayload(payload) {
         if (!payload || (payload.type !== 'wave' && payload.type !== 'date')) return null;
         return SPECS[payload.type === 'wave' ? 'wave' : 'date'];
     }
 
+    /** Читает nestedItemDragPayload из eventManager. */
     function resolvePayload(manager, e) {
         if (manager.nestedItemDragPayload) {
             const s = specForPayload(manager.nestedItemDragPayload);
@@ -95,6 +100,7 @@
         return null;
     }
 
+    /** Сбрасывает классы подсветки nested DnD. */
     function clearNestedDnDVisuals(manager) {
         if (manager._nestedDragOverItemEl) {
             manager._nestedDragOverItemEl.classList.remove(
@@ -109,6 +115,7 @@
         }
     }
 
+    /** Начало DnD вложенной строки (волна или персона). */
     function dragStart(manager, e, kind) {
         const spec = SPECS[kind];
         const $ = manager.$;
@@ -144,6 +151,7 @@
         });
     }
 
+    /** dragover по строке волны/персоны внутри группы. */
     function dragOverOnChildRow(manager, e, kind) {
         const spec = SPECS[kind];
         if (!manager.nestedItemDragPayload || manager.nestedItemDragPayload.type !== spec.payloadType) {
@@ -203,6 +211,7 @@
         }
     }
 
+    /** dragover по пустой зоне .group-children. */
     function childrenContainerDragOver(manager, e, kind) {
         const spec = SPECS[kind];
         if (!manager.nestedItemDragPayload || manager.nestedItemDragPayload.type !== spec.payloadType) {
@@ -235,6 +244,7 @@
         e.originalEvent.dataTransfer.dropEffect = 'move';
     }
 
+    /** dragleave с контейнера дочерних элементов. */
     function childrenContainerDragLeave(manager, e) {
         const $gc = manager.$(e.currentTarget);
         const related = e.originalEvent.relatedTarget;
@@ -244,6 +254,7 @@
         $gc.removeClass('group-children--drag-over');
     }
 
+    /** drop в пустую область списка дочерних строк. */
     function dropOnEmptyChildrenZone(manager, e, kind) {
         const spec = SPECS[kind];
         if (!manager.nestedItemDragPayload || manager.nestedItemDragPayload.type !== spec.payloadType) {
@@ -283,6 +294,7 @@
         });
     }
 
+    /** drop на строку: перестановка или перенос между группами. */
     function dropOnChildRow(manager, e, kind) {
         const spec = SPECS[kind];
         if (!manager.nestedItemDragPayload || manager.nestedItemDragPayload.type !== spec.payloadType) {
@@ -329,6 +341,7 @@
         });
     }
 
+    /** dragleave со строки вложенного элемента. */
     function dragLeaveChildRow(manager, e, kind) {
         const spec = SPECS[kind];
         if (!manager.nestedItemDragPayload || manager.nestedItemDragPayload.type !== spec.payloadType) {
@@ -347,6 +360,7 @@
         }
     }
 
+    /** Завершение DnD: очистка payload и CSS. */
     function dragEnd(manager, e, kind) {
         const spec = SPECS[kind];
         spec.logDragEnd('eventManager', { kind });
@@ -364,6 +378,7 @@
     const DATE_NESTED_CHILDREN = '#dateListForDates .person-group-children';
     const NESTED_CONTAINERS = `${WAVE_NESTED_CHILDREN}, ${DATE_NESTED_CHILDREN}`;
 
+    /** dragover по .group-children / .person-group-children. */
     function nestedContainersDragOver(manager, e) {
         const $t = manager.$(e.target);
         if ($t.closest('#wavesList').length) {
@@ -373,10 +388,12 @@
         }
     }
 
+    /** dragleave вложенного контейнера группы. */
     function nestedContainersDragLeave(manager, e) {
         childrenContainerDragLeave(manager, e);
     }
 
+    /** drop на пустую зону списка дочерних элементов. */
     function nestedContainersDrop(manager, e) {
         const $t = manager.$(e.target);
         if ($t.closest('#wavesList').length) {
@@ -386,6 +403,7 @@
         }
     }
 
+    /** dragover по строке волны/персоны внутри группы. */
     function nestedChildRowsDragOver(manager, e) {
         if (manager.$(e.currentTarget).is('.list-item--wave')) {
             dragOverOnChildRow(manager, e, 'wave');
@@ -394,6 +412,7 @@
         }
     }
 
+    /** drop на строку: перестановка или перенос между группами. */
     function nestedChildRowsDrop(manager, e) {
         if (manager.$(e.currentTarget).is('.list-item--wave')) {
             dropOnChildRow(manager, e, 'wave');
@@ -402,6 +421,7 @@
         }
     }
 
+    /** dragleave со строки вложенного элемента. */
     function nestedChildRowsDragLeave(manager, e) {
         if (manager.$(e.currentTarget).is('.list-item--wave')) {
             dragLeaveChildRow(manager, e, 'wave');

@@ -1,5 +1,7 @@
-// modules/dataManager.js
-/** Отладка списка дат / чекбоксов A|B. Отключить: window.__SUN_DEBUG_DATE_LIST = false */
+/**
+ * @file dataManager.js
+ * Обновление списков дат и групп волн через unifiedListManager.
+ */
 (function initSunDateListLog() {
     if (typeof window.sunDateListLog === 'function') {
         return;
@@ -34,6 +36,7 @@ class DataManager {
         this.elements = window.appCore ? window.appCore.elements : {};
     }
     
+    /** Полная перерисовка списка персон и синхронизация A/B. */
     async updateDateList() {
         window.sunDateListLog && window.sunDateListLog('updateDateList:enter', {
             activeDateId: window.appState.activeDateId,
@@ -122,6 +125,7 @@ class DataManager {
         }
     }
     
+    /** Перерисовка списка групп и волн на вкладке сигналов. */
     async updateWavesGroups() {
         const container = document.getElementById('wavesList');
         if (!container) {

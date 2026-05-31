@@ -1,15 +1,21 @@
+/**
+ * @file dom.js
+ * Форматирование дат, пол персон, подписи кнопок визора и утилиты DOM.
+ */
 class DOM {
     constructor() {
         this.elements = {};
         this.cacheElements();
     }
 
+    /** Форматирует timestamp как DD.MM.YYYY. */
     formatDate(timestamp) {
         return window.timeUtils.formatDate(timestamp);
     }
 
     static PERSON_GENDER_ICONS = { unset: '⚥', male: '♂', female: '♀' };
 
+    /** Приводит пол персоны к male/female/unset. */
     normalizePersonGender(value) {
         if (value === 'male' || value === 'female') {
             return value;
@@ -17,11 +23,13 @@ class DOM {
         return 'unset';
     }
 
+    /** Unicode-иконка пола персоны. */
     getPersonGenderIcon(gender) {
         const g = this.normalizePersonGender(gender);
         return DOM.PERSON_GENDER_ICONS[g] || DOM.PERSON_GENDER_ICONS.unset;
     }
 
+    /** Русская подпись пола персоны. */
     getPersonGenderLabel(gender) {
         const g = this.normalizePersonGender(gender);
         if (g === 'male') {
@@ -49,18 +57,22 @@ class DOM {
         return parts.join('\n');
     }
     
+    /** Дата и время с секундами. */
     formatDateTimeFull(timestamp) {
         return window.timeUtils.formatDateTime(timestamp);
     }
     
+    /** Текст currentDay для #currentDay. */
     formatCurrentDayWithSeconds(currentDay, currentDate = null) {
         return window.timeUtils.formatCurrentDayWithSeconds(currentDay, currentDate);
     }
     
+    /** Строка для input datetime-local. */
     formatDateForDateTimeInputWithSeconds(timestamp) {
         return window.timeUtils.formatForDateTimeInput(timestamp);
     }
     
+    /** Разница в днях между двумя датами. */
     getDaysBetweenDates(date1, date2) {
         return window.timeUtils.getDaysBetween(date1, date2);
     }
@@ -85,12 +97,14 @@ class DOM {
 		return this.getDaysBetweenDates(date1, date2);
 	}
     
+    /** Кэширует все элементы с атрибутом id. */
     cacheElements() {
         document.querySelectorAll('[id]').forEach(el => {
             this.elements[el.id] = el;
         });
     }
     
+    /** Возвращает закэшированный элемент по id. */
     get(id) {
         return this.elements[id];
     }
@@ -103,6 +117,7 @@ class DOM {
         return document.querySelectorAll(selector);
     }
     
+    /** Парсит строку даты-времени в timestamp. */
     stringFromDateTimeStringToTimestamp(dateTimeString) {
         if (window.timeUtils) {
             const date = window.timeUtils.parseStringToLocal(dateTimeString);
@@ -142,6 +157,7 @@ class DOM {
         }
     }
     
+    /** Значение для input type=date. */
     formatDateForInput(timestamp) {
         if (window.timeUtils && window.timeUtils.formatForDateInput) {
             return window.timeUtils.formatForDateInput(timestamp);
@@ -153,6 +169,7 @@ class DOM {
         return date.toISOString().split('T')[0];
     }
     
+    /** Полных лет между двумя timestamp. */
     getYearsBetweenDates(timestamp1, timestamp2) {
         if (window.timeUtils && window.timeUtils.getYearsBetween) {
             return window.timeUtils.getYearsBetween(timestamp1, timestamp2);
@@ -173,10 +190,12 @@ class DOM {
         }
     }
     
+    /** Возвращает тип линии волны (solid/dashed/…). */
     getWaveStyle(type) {
         return type;
     }
     
+    /** Человекочитаемое описание типа линии волны. */
     getWaveDescription(type) {
         const descriptions = {
             'solid': 'сплошная линия',
@@ -189,10 +208,12 @@ class DOM {
         return descriptions[type] || 'неизвестный тип';
     }
     
+    /** Текущая дата как new Date(). */
     getCurrentDate() {
         return new Date();
     }
     
+    /** Парсит строку даты в миллисекунды. */
     stringToTimestamp(dateString) {
         if (window.timeUtils) {
             const date = window.timeUtils.parseStringToLocal(dateString);
@@ -210,11 +231,13 @@ class DOM {
         }
     }
     
+    /** Проверка, что значение — корректный timestamp. */
     isTimestamp(value) {
         return window.timeUtils ? window.timeUtils.isTimestamp(value) : 
             (typeof value === 'number' && !isNaN(value) && value > 0);
     }
     
+    /** Начало локального дня для timestamp. */
     getStartOfDayLocal(timestamp) {
         if (window.timeUtils && window.timeUtils.getStartOfDay) {
             return window.timeUtils.getStartOfDay(timestamp);
@@ -236,6 +259,7 @@ class DOM {
         return isWaveVisible;
     }
 
+    /** Текст кнопки «Показать/Скрыть волну». */
     getWaveVizorToggleButtonLabel(waveId) {
         return this.isWaveShownOnVizor(waveId) ? 'Скрыть волну' : 'Показать волну';
     }
@@ -250,6 +274,7 @@ class DOM {
         return window.appState.waveBold[wid] === true;
     }
 
+    /** Текст кнопки слоя B на вкладке пересечений. */
     getIntersectionVizorToggleLabelForWaveB(waveId) {
         return this.isWaveLayerBOnVizor(waveId) ? 'Скрыть волну от даты Б' : 'Показать волну от даты Б';
     }
@@ -266,10 +291,12 @@ class DOM {
         return aOn && bOn;
     }
 
+    /** Текст кнопки A+B на вкладке сравнения дат. */
     getDateCompareVizorToggleLabel(waveId) {
         return this.isBothWaveLayersOnVizor(waveId) ? 'Скрыть A и B' : 'Показать A и B';
     }
 
+    /** Обновляет подписи всех .show-on-vizor-btn. */
     refreshShowOnVizorButtonLabels() {
         document.querySelectorAll('.show-on-vizor-btn[data-wave-id]').forEach((btn) => {
             const id = btn.dataset.waveId;
@@ -303,6 +330,7 @@ window.SUN_ACTION_LABELS = {
     collapseTitle: 'Свернуть'
 };
 
+/** Подпись и aria-label кнопки действия в списке (edit/save/destroy/cancel). */
 window.SUN_ACTION_LABELS.applyToButton = function applyToButton(btn, action, opts) {
     if (!btn || !action) return;
     const L = window.SUN_ACTION_LABELS;
@@ -327,6 +355,7 @@ window.SUN_ACTION_LABELS.applyToButton = function applyToButton(btn, action, opt
     }
 };
 
+/** Иконка и aria-expanded для кнопки разворота группы. */
 window.SUN_ACTION_LABELS.applyExpandButton = function applyExpandButton(btn, expanded) {
     if (!btn) return;
     const L = window.SUN_ACTION_LABELS;

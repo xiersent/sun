@@ -1,4 +1,7 @@
-// modules/autoSaveHandler.js
+/**
+ * @file autoSaveHandler.js
+ * Автосохранение appState при изменениях форм и перед закрытием страницы.
+ */
 class AutoSaveHandler {
     constructor() {
         this._saveRaf = null;
@@ -7,6 +10,7 @@ class AutoSaveHandler {
         this.init();
     }
 
+    /** Подписка на change/input/click и beforeunload. */
     init() {
         if (this.isInitialized) return;
 
@@ -25,6 +29,7 @@ class AutoSaveHandler {
         this.isInitialized = true;
     }
     
+    /** Делегирование событий форм для debouncedSave. */
     setupEventListeners() {
         document.addEventListener('change', (e) => {
             if (e.target.matches('input, select, textarea')) {
@@ -61,6 +66,7 @@ class AutoSaveHandler {
         });
     }
     
+    /** save в следующем animation frame. */
     debouncedSave() {
         if (this._saveRaf != null) {
             cancelAnimationFrame(this._saveRaf);
@@ -71,18 +77,21 @@ class AutoSaveHandler {
         });
     }
     
+    /** Вызывает appState.save(). */
     save() {
         if (window.appState && window.appState.save) {
             window.appState.save();
         }
     }
     
+    /** save если вкладка видима. */
     autoSave() {
         if (!document.hidden && window.appState) {
             this.save();
         }
     }
     
+    /** Немедленный save без debounce. */
     forceSave() {
         if (this._saveRaf != null) {
             cancelAnimationFrame(this._saveRaf);
@@ -91,6 +100,7 @@ class AutoSaveHandler {
         this.save();
     }
 
+    /** Отмена RAF и сброс флага инициализации. */
     destroy() {
         if (this._saveRaf != null) {
             cancelAnimationFrame(this._saveRaf);

@@ -1,4 +1,7 @@
-// modules/state.js - ОЧИЩЕННЫЙ (без начальных данных)
+/**
+ * @file state.js
+ * Глобальное состояние appState: загрузка, сохранение, миграции, uiSettings.
+ */
 class AppState {
     constructor() {
         this.config = {
@@ -62,6 +65,7 @@ class AppState {
         this.applyMemoryDefaultsFromReset({ skipSave: true });
     }
     
+    /** Timestamp начала сегодняшнего локального дня. */
     getTodayStartTimestamp() {
         const now = new Date();
         return new Date(
@@ -72,6 +76,7 @@ class AppState {
         ).getTime();
     }
     
+    /** Инициализирует пустые массивы волн для миграций. */
     createEmptyWavesArrays() {
         // Пустые массивы - миграция заполнит их
         this.waves120 = [];
@@ -91,6 +96,7 @@ class AppState {
         return vis && typeof vis === 'object' ? vis : {};
     }
     
+    /** Сериализует data и uiSettings в localStorage appData. */
     save() {
         const wrd = typeof window !== 'undefined' && window.__waveRenderDebug;
         const endSave = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('appState.save', {}) : null;
@@ -151,6 +157,7 @@ class AppState {
         }
     }
     
+    /** Отложенный save в следующем animation frame. */
     saveDebounced() {
         const wrd = typeof window !== 'undefined' && window.__waveRenderDebug;
         if (wrd && wrd.isEnabled && wrd.isEnabled()) {
@@ -165,6 +172,7 @@ class AppState {
         });
     }
 
+    /** Немедленно выполняет отложенный save. */
     flushPendingSave() {
         if (this._saveDebounceRaf != null) {
             cancelAnimationFrame(this._saveDebounceRaf);
@@ -173,6 +181,7 @@ class AppState {
         }
     }
     
+    /** Загрузка из localStorage, миграции и hydrate полей. */
     async load() {
         if (this._loadInProgress) {
             return this._loadInProgress;
@@ -185,6 +194,7 @@ class AppState {
         }
     }
 
+    /** Внутренняя реализация load(): parse, миграции, activeDate. */
     async _loadImpl() {
         const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
         __lp && __lp.mark('appState_load_impl_start');
@@ -492,10 +502,12 @@ class AppState {
         }
     }
 
+    /** Сброс к initialData и сохранение. */
     reset() {
         this.applyMemoryDefaultsFromReset({ skipSave: false });
     }
     
+    /** Приводит date-поля персон и заметок к числам. */
     convertDatesToTimestamp() {
         if (this.data.dates) {
             this.data.dates.forEach(date => {
@@ -545,6 +557,7 @@ class AppState {
         }
     }
     
+    /** Проверка числового timestamp. */
     isTimestamp(value) {
         return typeof value === 'number' && !isNaN(value) && value > 0;
     }
@@ -559,6 +572,7 @@ class AppState {
         return dates.some((d) => String(d.id) === String(id));
     }
     
+    /** Генерирует уникальный строковый id. */
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }

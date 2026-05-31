@@ -1,6 +1,6 @@
 /**
- * Шаблоны отображения: сохранённые комбинации включения групп и видимости волн.
- * Стандартный шаблон (неуничтожаемый) хранит снимок как и остальные; при первом запуске заполняется из текущего состояния.
+ * @file displayViewTemplatesManager.js
+ * Шаблоны отображения: снимки включения групп и видимости волн A/B.
  */
 (function () {
     const STANDARD_ID = '__display_standard__';
@@ -10,6 +10,7 @@
         return tpl && Object.prototype.hasOwnProperty.call(tpl, 'waveBold');
     }
 
+    /** Заполняет waveBold шаблона из текущего appState. */
     function seedTemplateWaveBoldFromAppState(tpl) {
         const next = {};
         (window.appState.data.waves || []).forEach((w) => {
@@ -24,10 +25,12 @@
             this._controlsBound = false;
         }
 
+        /** Возвращает uiSettings из appState.data. */
         getUi() {
             return window.appState.data.uiSettings;
         }
 
+        /** Снимок groupEnabled, waveVisibility и waveBold. */
         captureSnapshotFromAppState() {
             const groupEnabled = {};
             const waveVisibility = {};
@@ -43,6 +46,7 @@
             return { groupEnabled, waveVisibility, waveBold };
         }
 
+        /** Записывает снимок в объект шаблона. */
         captureIntoTemplate(tpl) {
             if (!tpl) return;
             const snap = this.captureSnapshotFromAppState();
@@ -51,6 +55,7 @@
             tpl.waveBold = { ...snap.waveBold };
         }
 
+        /** Применяет шаблон к группам и видимости волн. */
         applySnapshotToAppState(tpl) {
             const ge = tpl.groupEnabled || {};
             const wv = tpl.waveVisibility || {};
@@ -70,6 +75,7 @@
             });
         }
 
+        /** Инициализирует displayViewTemplates и стандартный шаблон. */
         ensureShape() {
             const ui = this.getUi();
             if (!Array.isArray(ui.displayViewTemplates)) {
@@ -130,6 +136,7 @@
             });
         }
 
+        /** Удаляет id групп/волн, отсутствующих в data. */
         pruneStaleIds() {
             const ui = this.getUi();
             if (!Array.isArray(ui.displayViewTemplates)) return;
@@ -162,6 +169,7 @@
             });
         }
 
+        /** Добавляет новые группы/волны во все шаблоны. */
         mergeMissingEntitiesIntoSnapshots() {
             const ui = this.getUi();
             if (!Array.isArray(ui.displayViewTemplates)) return;
@@ -199,15 +207,18 @@
             });
         }
 
+        /** Id активного шаблона отображения. */
         getActiveTemplateId() {
             const id = this.getUi().activeDisplayViewTemplateId;
             return id || STANDARD_ID;
         }
 
+        /** Объект шаблона по id. */
         getTemplateById(id) {
             return this.getUi().displayViewTemplates.find((t) => String(t.id) === String(id));
         }
 
+        /** Сохраняет текст описания в шаблон. */
         persistDescriptionToTemplate(tplId) {
             const tpl = this.getTemplateById(tplId);
             const ta = document.getElementById('displayViewTemplateDescription');
@@ -215,6 +226,7 @@
             tpl.description = ta.value;
         }
 
+        /** Заполняет textarea описания активного шаблона. */
         syncDescriptionFieldFromActive() {
             const tpl = this.getTemplateById(this.getActiveTemplateId());
             const ta = document.getElementById('displayViewTemplateDescription');
@@ -222,6 +234,7 @@
             ta.value = tpl && typeof tpl.description === 'string' ? tpl.description : '';
         }
 
+        /** Перерисовка волн и списков после apply шаблона. */
         refreshGraphAndList() {
             if (window.waves && typeof window.waves.reconcileVisibleWaveElements === 'function') {
                 window.waves.reconcileVisibleWaveElements();
@@ -266,6 +279,7 @@
             }
         }
 
+        /** Активирует шаблон: apply + save + refresh UI. */
         switchToTemplate(newId) {
             const ui = this.getUi();
             const oldId = this.getActiveTemplateId();
@@ -291,6 +305,7 @@
             this.refreshSelect();
         }
 
+        /** Новый шаблон из текущего состояния видимости. */
         addTemplateFromCurrent(name) {
             const n = (name || '').trim();
             if (!n) {
@@ -320,6 +335,7 @@
             this.refreshSelect();
         }
 
+        /** Удаляет выбранный шаблон (кроме стандартного). */
         deleteSelectedTemplate() {
             const ui = this.getUi();
             const id = this.getActiveTemplateId();
@@ -347,6 +363,7 @@
             this.refreshSelect();
         }
 
+        /** Добавляет группу во все снимки шаблонов. */
         onNewGroupAdded(group) {
             if (!group) return;
             const ui = this.getUi();
@@ -364,6 +381,7 @@
             window.appState.saveDebounced();
         }
 
+        /** Добавляет волну во все снимки шаблонов. */
         onNewWaveAdded(wave) {
             if (!wave) return;
             const ui = this.getUi();
@@ -399,6 +417,7 @@
             window.appState.saveDebounced();
         }
 
+        /** Синхронизация шаблонов после изменения структуры волн. */
         onWavesStructureChanged() {
             if (!window.appState) return;
             this.ensureShape();
@@ -407,6 +426,7 @@
             window.appState.saveDebounced();
         }
 
+        /** Слушатели select, кнопок и описания шаблонов. */
         bindControls() {
             if (this._controlsBound) return;
             this._controlsBound = true;
@@ -432,6 +452,7 @@
             });
         }
 
+        /** Перестраивает #displayViewTemplateSelect. */
         refreshSelect() {
             const sel = document.getElementById('displayViewTemplateSelect');
             if (!sel) return;
@@ -448,6 +469,7 @@
             this.syncDescriptionFieldFromActive();
         }
 
+        /** ensureShape, bindControls и refreshSelect при старте. */
         init() {
             if (!window.appState) return;
             this.ensureShape();

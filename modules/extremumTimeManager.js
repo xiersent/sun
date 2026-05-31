@@ -1,4 +1,7 @@
-// modules/extremumTimeManager.js — полосы состояний +5…−5, моменты прохождения sin(фаза)·5
+/**
+ * @file extremumTimeManager.js
+ * Маркеры прохождения состояний ±5 на временной шкале по видимым волнам.
+ */
 class ExtremumTimeManager {
     constructor() {
         this.markers = [];
@@ -7,6 +10,7 @@ class ExtremumTimeManager {
         this._visibilityRefreshQueued = false;
     }
 
+    /** Ждёт #timeBarStateStack и запускает расчёт экстремумов. */
     init() {
         const stack = document.getElementById('timeBarStateStack');
         if (!stack) {
@@ -31,6 +35,7 @@ class ExtremumTimeManager {
         return [a, b];
     }
 
+    /** Учитывается ли волна с учётом фильтра timeBarManager. */
     _isWaveRelevant(wave) {
         if (window.timeBarManager && typeof window.timeBarManager.isTimeBarGroupVisibleForWave === 'function') {
             return window.timeBarManager.isTimeBarGroupVisibleForWave(wave.id);
@@ -56,6 +61,7 @@ class ExtremumTimeManager {
         return hits;
     }
 
+    /** События состояний ±5 всех волн за сутки. */
     calculateStateEventsForDay(date) {
         if (!window.appState?.data?.waves) return [];
 
@@ -102,6 +108,7 @@ class ExtremumTimeManager {
         return events.sort((a, b) => a.time.getTime() - b.time.getTime());
     }
 
+    /** Группировка событий по уровню состояния. */
     groupEventsByState(events) {
         /** @type {Map<number, Array<{ time: Date, waves: unknown[], colors: string[] }>>} */
         const byState = new Map();
@@ -124,6 +131,7 @@ class ExtremumTimeManager {
         return grouped;
     }
 
+    /** Слияние близких по времени событий одного state. */
     _groupByTimeThreshold(extremums) {
         if (extremums.length === 0) return [];
         const groups = [];
@@ -153,15 +161,18 @@ class ExtremumTimeManager {
         return groups;
     }
 
+    /** Внутренний метод getTrackForState. */
     _getTrackForState(state) {
         return document.querySelector(`.time-bar-state-track[data-state="${state}"]`);
     }
 
+    /** Внутренний метод isRowHidden. */
     _isRowHidden(state) {
         const row = document.querySelector(`.time-bar-state-row[data-state="${state}"]`);
         return !!(row && row.classList.contains('time-bar-state-row--hidden'));
     }
 
+    /** Внутренний метод dayFractionForTime. */
     _dayFractionForTime(time, dayMs) {
         const dayStart = new Date(time);
         dayStart.setHours(0, 0, 0, 0);
@@ -176,6 +187,7 @@ class ExtremumTimeManager {
         return window.appState.waveVisibility[String(waveId)] !== false;
     }
 
+    /** Внутренний метод scheduleVisibilityRefresh. */
     _scheduleVisibilityRefresh() {
         if (this._visibilityRefreshQueued) {
             return;
@@ -224,6 +236,7 @@ class ExtremumTimeManager {
         window.appState.waveVisibility = proxy;
     }
 
+    /** Внутренний метод buildSegmentElement. */
     _buildSegmentElement(group, frac) {
         const waveNameMap = new Map();
         group.waves.forEach((wave) => {
@@ -285,6 +298,7 @@ class ExtremumTimeManager {
         return slot;
     }
 
+    /** Отрисовка маркеров экстремумов на шкале. */
     renderMarkers(groupedByState) {
         this.clearAll();
         const dayMs = 24 * 60 * 60 * 1000;
@@ -308,6 +322,7 @@ class ExtremumTimeManager {
         }
     }
 
+    /** Очищает all. */
     clearAll() {
         document.querySelectorAll('.time-bar-state-track').forEach((track) => {
             track.innerHTML = '';
@@ -316,6 +331,7 @@ class ExtremumTimeManager {
         this.labels = [];
     }
 
+    /** Перерисовка маркеров на timeBarStateStack. */
     updateExtremums() {
         if (!document.getElementById('timeBarStateStack')) return;
 
@@ -330,6 +346,7 @@ class ExtremumTimeManager {
         this.renderMarkers(grouped);
     }
 
+    /** Пересчёт при смене currentDate. */
     setupDateChangeObserver() {
         const originalCurrentDate = window.appState.currentDate;
         const desc = Object.getOwnPropertyDescriptor(window.appState, 'currentDate');

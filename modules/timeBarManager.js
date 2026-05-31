@@ -1,4 +1,7 @@
-// modules/timeBarManager.js - СКРЫВАЕМ ИНДИКАТОР ПРИ ОТЛИЧИИ ДАТЫ
+/**
+ * @file timeBarManager.js
+ * Временная шкала под графиком: часы, индикатор «сейчас», строки состояний.
+ */
 class TimeBarManager {
     constructor() {
         this.container = null;
@@ -21,6 +24,7 @@ class TimeBarManager {
         this.controlsToggle = null;
     }
     
+    /** Создаёт шкалу, панель управления и запускает тики. */
     init() {
         if (this.isInitialized) return;
         
@@ -33,6 +37,7 @@ class TimeBarManager {
         this.isInitialized = true;
     }
     
+    /** DOM временной шкалы под graph-section. */
     createTimeBar() {
         if (document.getElementById('timeBarContainer')) {
             this.container = document.getElementById('timeBarContainer');
@@ -81,6 +86,7 @@ class TimeBarManager {
         }
     }
 
+    /** Создаёт обёртку time-bar-wrap при необходимости. */
     ensureWrapper() {
         const wrap = document.getElementById('timeBarWrap');
         if (wrap) {
@@ -97,6 +103,7 @@ class TimeBarManager {
         this._ensureControlsChrome();
     }
 
+    /** Читает раскрытие панели controls из localStorage. */
     _loadControlsPanelOpen() {
         try {
             return localStorage.getItem(this._controlsOpenStorageKey) === '1';
@@ -105,6 +112,7 @@ class TimeBarManager {
         }
     }
 
+    /** Сохраняет состояние панели controls. */
     _saveControlsPanelOpen(open) {
         try {
             localStorage.setItem(this._controlsOpenStorageKey, open ? '1' : '0');
@@ -113,6 +121,7 @@ class TimeBarManager {
         }
     }
 
+    /** CSS/aria для свёрнутой/развёрнутой панели. */
     _applyControlsPanelOpen(open) {
         if (!this.controlsPanel || !this.controlsToggle) {
             return;
@@ -134,12 +143,14 @@ class TimeBarManager {
         }
     }
 
+    /** Переключает видимость панели controls. */
     _toggleControlsPanel() {
         const open = this.controlsPanel.classList.contains('time-bar-controls--collapsed');
         this._applyControlsPanelOpen(open);
         this._saveControlsPanelOpen(open);
     }
 
+    /** Кнопка toggle и шапка панели controls. */
     _ensureControlsChrome() {
         const wrap = document.getElementById('timeBarWrap');
         if (!wrap) {
@@ -223,6 +234,7 @@ class TimeBarManager {
         this._applyControlsPanelOpen(this._loadControlsPanelOpen());
     }
 
+    /** Внутренний метод loadStateRowHidden. */
     _loadStateRowHidden() {
         try {
             const raw = localStorage.getItem(this._stateRowStorageKey);
@@ -234,6 +246,7 @@ class TimeBarManager {
         }
     }
 
+    /** Внутренний метод saveStateRowHidden. */
     _saveStateRowHidden(map) {
         try {
             localStorage.setItem(this._stateRowStorageKey, JSON.stringify(map));
@@ -242,6 +255,7 @@ class TimeBarManager {
         }
     }
 
+    /** Внутренний метод loadTimeBarGroupVisible. */
     _loadTimeBarGroupVisible() {
         try {
             const raw = localStorage.getItem(this._timeBarGroupVisibleKey);
@@ -253,6 +267,7 @@ class TimeBarManager {
         }
     }
 
+    /** Внутренний метод saveTimeBarGroupVisible. */
     _saveTimeBarGroupVisible(map) {
         try {
             localStorage.setItem(this._timeBarGroupVisibleKey, JSON.stringify(map));
@@ -268,6 +283,7 @@ class TimeBarManager {
         return map[key] !== false;
     }
 
+    /** Видна ли группа волны на временной шкале. */
     isTimeBarGroupVisibleForWave(waveId) {
         if (!window.appState || !window.appState.data) return true;
         const waveIdStr = String(waveId);
@@ -284,6 +300,7 @@ class TimeBarManager {
         return true;
     }
 
+    /** Внутренний метод setStateRowVisible. */
     _setStateRowVisible(state, visible) {
         const row = document.querySelector(`.time-bar-state-row[data-state="${state}"]`);
         if (!row) return;
@@ -296,12 +313,14 @@ class TimeBarManager {
         if (cb) cb.checked = visible;
     }
 
+    /** Внутренний метод applyStateRowHiddenToRows. */
     _applyStateRowHiddenToRows(hidden) {
         for (let s = 5; s >= -5; s--) {
             this._setStateRowVisible(String(s), hidden[String(s)] !== true);
         }
     }
 
+    /** Чекбоксы видимости групп на временной шкале. */
     buildControlsPanel() {
         this.ensureWrapper();
         const panel = this.controlsPanel || document.getElementById('timeBarControls');
@@ -376,11 +395,13 @@ class TimeBarManager {
         this._applyStateRowHiddenToRows(hidden);
     }
 
+    /** Перестраивает панель чекбоксов групп на шкале. */
     refreshControlsPanel() {
         this._controlsSig = '';
         this.buildControlsPanel();
     }
 
+    /** Внутренний метод onControlsChange. */
     _onControlsChange(e) {
         const t = e.target;
         if (!t || t.tagName !== 'INPUT') return;
@@ -465,6 +486,7 @@ class TimeBarManager {
         this._ensureNowRowLayout(bar);
     }
 
+    /** HTML строки индикатора текущего времени. */
     _getNowRowHTML() {
         return `
                 <div class="time-bar-now-vline" id="timeNowVline" aria-hidden="true"></div>
@@ -478,6 +500,7 @@ class TimeBarManager {
                 </div>`;
     }
 
+    /** Внутренний метод ensureNowRowLayout. */
     _ensureNowRowLayout(bar) {
         if (!bar) return;
 
@@ -537,6 +560,7 @@ class TimeBarManager {
         }
     }
 
+    /** Ссылки на индикатор «сейчас» и вертикальную линию. */
     _bindNowIndicatorElements() {
         const bar = this.container && this.container.querySelector('.time-bar');
         if (bar) {
@@ -549,6 +573,7 @@ class TimeBarManager {
             : null;
     }
 
+    /** Внутренний метод setNowIndicatorVisible. */
     _setNowIndicatorVisible(visible) {
         const display = visible ? '' : 'none';
         if (this.timeIndicator) {
@@ -563,6 +588,7 @@ class TimeBarManager {
         }
     }
 
+    /** Внутренний метод applyNowIndicatorPosition. */
     _applyNowIndicatorPosition(frac) {
         const sideW = 'var(--time-bar-side-w, 72px)';
         const vlineLeft = `calc(${sideW} + (100% - ${sideW}) * ${frac})`;
@@ -574,6 +600,7 @@ class TimeBarManager {
         }
     }
 
+    /** Внутренний метод clearNowIndicatorPosition. */
     _clearNowIndicatorPosition() {
         if (this.container) {
             this.container.style.removeProperty('--time-now-frac');
@@ -587,6 +614,7 @@ class TimeBarManager {
         }
     }
 
+    /** Внутренний метод insertHoursRow. */
     _insertHoursRow(bar, scale, labels) {
         const hoursRow = document.createElement('div');
         hoursRow.className = 'time-bar-state-row time-bar-hours-row';
@@ -604,6 +632,7 @@ class TimeBarManager {
         else bar.insertBefore(hoursRow, bar.firstChild);
     }
 
+    /** Строки состояний +5…−5 под шкалой часов. */
     buildStateStackRows() {
         const stack = document.getElementById('timeBarStateStack');
         if (!stack || stack.children.length > 0) return;
@@ -638,6 +667,7 @@ class TimeBarManager {
         }
     }
 
+    /** Метки часов 0–23 на шкале. */
     createHourMarkers() {
         if (!this.timeScale) return;
         
@@ -704,6 +734,7 @@ class TimeBarManager {
 		}
 	}
     
+    /** Подсветка текущего часа на timeScale. */
     highlightActiveHour(hour) {
         document.querySelectorAll('.hour-marker.active').forEach(marker => {
             marker.classList.remove('active');
@@ -715,6 +746,7 @@ class TimeBarManager {
         }
     }
     
+    /** Позиция индикатора по appState.currentDate. */
     updateTimeIndicator() {
         if (!this.timeIndicator || !this.indicatorLabel) return;
         
@@ -753,6 +785,7 @@ class TimeBarManager {
         this.highlightActiveHour(currentHour);
     }
     
+    /** Проверяет: is current date today. */
     isCurrentDateToday() {
         const today = new Date();
         const vizorDate = window.appState.currentDate;
@@ -774,6 +807,7 @@ class TimeBarManager {
         return todayStart.getTime() === vizorStart.getTime();
     }
     
+    /** Обновляет time bar appearance. */
     updateTimeBarAppearance() {
         if (!this.container) return;
         
@@ -790,6 +824,7 @@ class TimeBarManager {
         }
     }
     
+    /** Интервал/RAF обновления положения индикатора. */
     setupUpdates() {
         const tick = () => {
             if (window.appState && this.isCurrentDateToday()) {
@@ -809,6 +844,7 @@ class TimeBarManager {
         this.setupDateChangeObserver();
     }
     
+    /** Устанавливает p mode observers. */
     setupModeObservers() {
         const graphContainer = document.querySelector('.graph-container');
         if (!graphContainer) return;
@@ -827,6 +863,7 @@ class TimeBarManager {
         });
     }
     
+    /** Устанавливает p date change observer. */
     setupDateChangeObserver() {
         if (window.appState && window.appState.currentDate) {
             const originalCurrentDate = window.appState.currentDate;
@@ -849,6 +886,7 @@ class TimeBarManager {
         }
     }
     
+    /** Останавливает тики и снимает слушатели. */
     destroy() {
         if (this._tickRaf != null) {
             cancelAnimationFrame(this._tickRaf);

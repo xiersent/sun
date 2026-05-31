@@ -1,4 +1,7 @@
-// modules/preciseIntersectionManager.js
+/**
+ * @file preciseIntersectionManager.js
+ * Точный численный поиск моментов пересечения двух синусоид за сутки.
+ */
 class PreciseIntersectionManager {
     constructor() {
         this.EPSILON = 1e-15; // Машинная точность
@@ -263,6 +266,7 @@ class PreciseIntersectionManager {
         return `${hours}:${minutes}:${seconds}.${milliseconds}`;
     }
     
+    /** Возвращает active waves. */
     getActiveWaves() {
         if (window.waves && typeof window.waves.waveNeedsGraphContainer === 'function') {
             return window.appState.data.waves.filter((wave) =>

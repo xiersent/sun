@@ -1,4 +1,7 @@
-// modules/cursorTooltip.js — подсказка над курсором по центру вместо нативного title
+/**
+ * @file cursorTooltip.js
+ * Подсказка над курсором (вместо нативного title): текст из data-cursor-tip или title.
+ */
 class CursorTooltip {
     constructor() {
         this.tipEl = null;
@@ -7,6 +10,7 @@ class CursorTooltip {
         this._inited = false;
     }
 
+    /** Повесить слушатели и создать DOM-пузырь подсказки. */
     init() {
         if (this._inited) {
             return;
@@ -27,6 +31,11 @@ class CursorTooltip {
         window.addEventListener('blur', () => this._deactivate());
     }
 
+    /**
+     * Текст подсказки для элемента.
+     * @param {Element} el
+     * @returns {string|null}
+     */
     _getTipText(el) {
         if (!el || el.nodeType !== 1) {
             return null;
@@ -46,6 +55,11 @@ class CursorTooltip {
         return null;
     }
 
+    /**
+     * Найти ближайший предок с подсказкой.
+     * @param {Element} from
+     * @returns {{ el: Element, text: string }|null}
+     */
     _findTarget(from) {
         let node = from;
         while (node && node.nodeType === 1 && node !== document.documentElement) {
@@ -58,6 +72,7 @@ class CursorTooltip {
         return null;
     }
 
+    /** Показать подсказку при наведении. */
     _onMouseOver(e) {
         const hit = this._findTarget(e.target);
         if (!hit) {
@@ -70,6 +85,7 @@ class CursorTooltip {
         this._activate(hit.el, hit.text, e);
     }
 
+    /** Скрыть при уходе курсора с элемента. */
     _onMouseOut(e) {
         if (!this.activeTarget) {
             return;
@@ -80,6 +96,7 @@ class CursorTooltip {
         }
     }
 
+    /** Следовать за курсором. */
     _onMouseMove(e) {
         if (!this.activeTarget) {
             return;
@@ -87,6 +104,12 @@ class CursorTooltip {
         this._position(e);
     }
 
+    /**
+     * Показать текст; временно убрать нативный title (сохранить в dataset).
+     * @param {Element} el
+     * @param {string} text
+     * @param {MouseEvent} e
+     */
     _activate(el, text, e) {
         this._deactivate();
         this.activeTarget = el;
@@ -101,6 +124,7 @@ class CursorTooltip {
         this._position(e);
     }
 
+    /** Скрыть подсказку и вернуть title на элемент. */
     _deactivate() {
         if (!this.activeTarget) {
             this.tipEl.hidden = true;
@@ -118,6 +142,7 @@ class CursorTooltip {
         this.tipEl.textContent = '';
     }
 
+    /** Позиция пузыря над курсором с учётом границ окна. */
     _position(e) {
         if (!this.tipEl || this.tipEl.hidden) {
             return;

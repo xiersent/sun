@@ -1,4 +1,7 @@
-// modules/dates.js
+/**
+ * @file dates.js
+ * Персоны (даты), визор: currentDay, навигация, baseDate, сравнение A/B, группы персон.
+ */
 class DatesManager {
     constructor() {
         this.elements = {};
@@ -11,6 +14,7 @@ class DatesManager {
         this.bindGenderSelectTitles();
     }
 
+    /** Подсказки title для select пола персоны при смене значения. */
     bindGenderSelectTitles() {
         if (this._genderSelectTitlesBound) {
             return;
@@ -27,6 +31,7 @@ class DatesManager {
         });
     }
     
+    /** Кэширует ссылки на DOM-элементы панели дат и навигации. */
     cacheElements() {
         const ids = [
             'dateInput', 'dateNameInput', 'dateGenderSelect', 'dateDescriptionInput', 'btnAddDate', 'dateListForDates',
@@ -43,6 +48,7 @@ class DatesManager {
         });
     }
     
+    /** Проверяет, совпадает ли дата на визоре с сегодняшним днём. */
     isCurrentDateOnVizor() {
         const today = window.timeUtils.now();
         const vizorDate = window.appState.currentDate;
@@ -61,6 +67,7 @@ class DatesManager {
         return todayStart.getTime() === vizorStart.getTime();
     }
     
+    /** Обновляет стиль кнопки «Сегодня» (активна / неактивна). */
     updateTodayButton() {
         const btnToday = document.getElementById('btnToday');
         if (!btnToday) return;
@@ -77,6 +84,7 @@ class DatesManager {
         btnToday.removeAttribute('title');
     }
     
+    /** Гарантирует наличие массива personGroups в data. */
     ensurePersonGroupsShape() {
         const data = window.appState.data;
         if (!Array.isArray(data.personGroups)) {
@@ -153,6 +161,7 @@ class DatesManager {
         });
     }
 
+    /** Переносит id персоны в указанную группу (убирая из других). */
     addDateIdToPersonGroup(groupId, dateId) {
         this.ensurePersonGroupsShape();
         const data = window.appState.data;
@@ -170,6 +179,7 @@ class DatesManager {
         g.dates.push(dateId);
     }
 
+    /** Добавляет персону, синхронизирует группы и делает её активной. */
     addDate(dateValue, name, description, gender) {
         let timestamp;
         
@@ -217,6 +227,7 @@ class DatesManager {
         return newDate;
     }
     
+    /** Удаляет персону после подтверждения; пересчитывает activeDate при необходимости. */
     deleteDate(dateId) {
         if (!confirm('Уничтожить эту дату?')) return;
         
@@ -262,6 +273,7 @@ class DatesManager {
         window.dataManager.updateDateList();
     }
     
+    /** Обновляет поля персоны по id и сохраняет состояние. */
     updateDate(dateId, updates) {
         const dateIdStr = String(dateId);
         const date = window.appState.data.dates.find(d => String(d.id) === dateIdStr);
@@ -275,6 +287,7 @@ class DatesManager {
         }
     }
     
+    /** Синхронизирует выделение в списке дат и селектах сравнения. */
     _syncDateListAfterActiveChange() {
         if (window.unifiedListManager && window.unifiedListManager.syncDateListSelectionVisuals) {
             window.unifiedListManager.syncDateListSelectionVisuals({ selectionOnly: true });
@@ -287,6 +300,7 @@ class DatesManager {
         }
     }
 
+    /** Активирует персону: baseDate, typeA, пересчёт currentDay и обновление UI. */
     setActiveDate(dateId, useExactTime = false) {
         const oldActiveId = window.appState.activeDateId;
         const wasProgrammatic = window.appState.isProgrammaticDateChange;
@@ -432,6 +446,7 @@ class DatesManager {
         window.appState.isProgrammaticDateChange = wasProgrammatic;
     }
     
+    /** Создаёт группу сигналов (волн) с настройками стиля по умолчанию. */
     addGroup(name) {
         if (!name.trim()) {
             alert('Пожалуйста, введите название группы');
@@ -456,6 +471,7 @@ class DatesManager {
         return group;
     }
 
+    /** Создаёт группу персон в списке дат. */
     addPersonGroup(name) {
         if (!name || !name.trim()) {
             alert('Пожалуйста, введите название группы');
@@ -473,6 +489,7 @@ class DatesManager {
         return group;
     }
 
+    /** Удаляет группу персон; персоны переносятся в группу по умолчанию. */
     deletePersonGroup(groupId) {
         const groupIdStr = String(groupId);
         if (groupIdStr === 'default-person-group') {
@@ -507,6 +524,7 @@ class DatesManager {
         return true;
     }
     
+    /** Удаляет группу сигналов вместе с её волнами после двойного confirm. */
     deleteGroup(groupId) {
         const groupIdStr = String(groupId);
         const group = window.appState.data.groups.find(g => String(g.id) === groupIdStr);
@@ -555,6 +573,7 @@ class DatesManager {
     }
     
 
+    /** Смещает currentDate на delta дней с лёгким обновлением графика. */
     navigateDay(delta) {
         if (window.wavesTransformLayer && window.wavesTransformLayer.mapNavigationDayDelta) {
             delta = window.wavesTransformLayer.mapNavigationDayDelta(delta);
@@ -590,6 +609,7 @@ class DatesManager {
         this._scheduleDayNavigationSettle();
     }
 
+    /** Откладывает полное обновление сводки после серии стрелок. */
     _scheduleDayNavigationSettle() {
         if (this._navDaySettleTimer != null) {
             clearTimeout(this._navDaySettleTimer);
@@ -630,6 +650,7 @@ class DatesManager {
         }
     }
 
+    /** Устанавливает currentDate из Date/числа/строки и обновляет график. */
     setDate(newDate, useExactTime = true) {
         window.appState.isProgrammaticDateChange = true;
         
@@ -773,6 +794,7 @@ class DatesManager {
         return window.appState.currentDay;
     }
     
+    /** Переходит на начало сегодняшнего дня (без времени суток). */
     goToToday() {
         const todayStart = window.timeUtils.getStartOfDay(new Date());
         
@@ -801,6 +823,7 @@ class DatesManager {
         this.updateDateTimeInputs();
     }
 
+    /** Переходит на текущий момент с точным временем. */
     goToNow() {
         window.appState.currentDate = new Date();
         
@@ -824,6 +847,7 @@ class DatesManager {
         this.updateDateTimeInputs();
     }
 
+    /** Читает mainDateInputDate/Time и обновляет визор. */
     setDateFromInputs() {
         const dateValue = this.elements.mainDateInputDate?.value;
         const timeValue = this.elements.mainDateInputTime?.value;
@@ -852,28 +876,34 @@ class DatesManager {
         }
     }
 
+    /** Алиас setDateFromInputs для совместимости. */
     setDateFromInput() {
         this.setDateFromInputs();
     }
     
+    /** Делегирует обновление полей даты/времени uiManager. */
     updateDateTimeInputs() {
         if (window.uiManager && window.uiManager.updateDateTimeInputs) {
             window.uiManager.updateDateTimeInputs();
         }
     }
     
+    /** Возвращает текущий момент через timeUtils.now(). */
     getCurrentDate() {
         return window.timeUtils.now();
     }
     
+    /** День недели (0–6) для даты. */
     getWeekday(date) {
         return window.timeUtils.getWeekday(date);
     }
     
+    /** Название дня недели (краткое или полное). */
     getWeekdayName(date, full = false) {
         return window.timeUtils.getWeekdayName(date, full);
     }
     
+    /** Снимает обработчики click-outside у строк в режиме редактирования. */
     cleanupEditingHandlers() {
         document.querySelectorAll('.date-item.editing').forEach(item => {
             if (item._clickOutsideHandler) {
@@ -883,6 +913,7 @@ class DatesManager {
         });
     }
     
+    /** Обновляет текст #currentDay с учётом дробной части дня. */
     updateCurrentDayElement() {
         const currentDayElement = document.getElementById('currentDay');
         if (currentDayElement) {
@@ -894,6 +925,7 @@ class DatesManager {
         }
     }
     
+    /** Принудительная инициализация даты визора после load(). */
     forceInitialize() {
         window.appState.currentDate = window.timeUtils.now();
         

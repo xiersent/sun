@@ -1,5 +1,7 @@
-// modules/eventManager.js
-/** Профилирование UI: логи в консоль с префиксом [SunPerf]. Отключить: window.__SUN_PERF_LOG = false */
+/**
+ * @file eventManager.js
+ * Глобальные обработчики кликов, DnD списков, видимость волн и чекбоксы персон.
+ */
 (function initSunPerfLog() {
     if (typeof window.sunPerfLog === 'function') return;
     window.sunPerfLog = function sunPerfLog(scope, action, detail) {
@@ -41,6 +43,7 @@ class EventManager {
         this.setupDateSelectionHandlers();
     }
     
+    /** jQuery-делегирование: клики, DnD групп и вложенных строк. */
     setupGlobalHandlers() {
         $(document).on('click', (e) => {
             this.handleClick(e);
@@ -162,6 +165,7 @@ class EventManager {
 
     }
     
+    /** Сбрасывает CSS-классы drag-over у вложенного DnD. */
     clearNestedDnDVisualState() {
         if (window.SunNestedListDnD) {
             window.SunNestedListDnD.clearNestedDnDVisuals(this);
@@ -448,6 +452,7 @@ class EventManager {
         });
     }
 
+    /** RAF: перерисовка списка дат и save после DnD. */
     scheduleDateListRefreshAndSave() {
         const coalesced = this._datesUiRefreshScheduled !== null;
         if (this._datesUiRefreshScheduled !== null) {
@@ -481,6 +486,7 @@ class EventManager {
         });
     }
     
+    /** Меняет порядок волны внутри одной группы. */
     reorderWaveInGroup(groupId, sourceIndex, targetIndex, insertBefore) {
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         
@@ -577,6 +583,7 @@ class EventManager {
         this.scheduleWavesOrderDomSyncAndSave(targetGroupId, sourceGroupId);
     }
     
+    /** Индекс вставки при DnD с учётом insertBefore. */
     calculateNewIndex(sourceIndex, targetIndex, insertBefore) {
         if (sourceIndex < targetIndex) {
             if (insertBefore) {
@@ -593,6 +600,7 @@ class EventManager {
         }
     }
     
+    /** Начало перетаскивания группы сигналов или группы персон. */
     handleDragStart(e) {
         try {
             const data = e.originalEvent.dataTransfer.getData('text/plain');
@@ -634,6 +642,7 @@ class EventManager {
         window.sunPerfLog('eventManager', 'dragstart', { type, id, index });
     }
     
+    /** Подсветка зоны drop для строки группы. */
     handleDragOver(e) {
         const nd = window.SunNestedListDnD;
         const nested = this.nestedItemDragPayload;
@@ -685,6 +694,7 @@ class EventManager {
         }
     }
     
+    /** Drop группы: перестановка в массиве groups/personGroups. */
     handleDrop(e) {
         const nested = this.nestedItemDragPayload;
         if (nested && (nested.type === 'wave' || nested.type === 'date')) {
@@ -754,6 +764,7 @@ class EventManager {
         }
     }
 
+    /** Id группы персон, содержащей дату. */
     findPersonGroupIdForDate(dateId) {
         const idStr = String(dateId);
         const groups = window.appState.data.personGroups || [];
@@ -767,6 +778,7 @@ class EventManager {
         return def ? def.id : (groups[0] && groups[0].id);
     }
 
+    /** Перенос или перестановка персоны между группами personGroups. */
     moveDateBetweenPersonGroups(sourceGroupId, targetGroupId, sourceIndex, targetIndex, insertBefore, opts = {}) {
         const { emptyOrGapDrop = false, sourceItemId } = opts;
         const groups = window.appState.data.personGroups || [];
@@ -818,6 +830,7 @@ class EventManager {
         this.scheduleDatesOrderDomSyncAndSave(targetGroupId, sourceGroupId);
     }
 
+    /** Перестановка персоны внутри одной personGroup. */
     reorderDateInPersonGroup(groupId, sourceIndex, targetIndex, insertBefore) {
         const group = (window.appState.data.personGroups || []).find(g => String(g.id) === String(groupId));
         if (!group || !Array.isArray(group.dates)) return;
@@ -831,6 +844,7 @@ class EventManager {
         this.scheduleDatesOrderDomSyncAndSave(groupId);
     }
 
+    /** Применяет перестановку групп сигналов после drop. */
     handleGroupDrop(dragData, targetIndex, insertBefore, targetId) {
         const groups = window.appState.data.groups;
         let fromIdx = Number(dragData.index);
@@ -859,6 +873,7 @@ class EventManager {
         this.scheduleGroupOrderDomSyncAndSave();
     }
 
+    /** Применяет перестановку групп персон после drop. */
     handlePersonGroupDrop(dragData, targetIndex, insertBefore, targetId) {
         const groups = window.appState.data.personGroups || [];
         let fromIdx = Number(dragData.index);
@@ -879,6 +894,7 @@ class EventManager {
         this.schedulePersonGroupOrderDomSyncAndSave();
     }
     
+    /** Убирает подсветку drag-over при уходе курсора. */
     handleDragLeave(e) {
         const $item = $(e.currentTarget);
         const el = $item[0];
@@ -893,6 +909,7 @@ class EventManager {
         }
     }
     
+    /** Очистка состояния DnD групп после завершения перетаскивания. */
     handleDragEnd(e) {
         const t = e.target;
         if (!t || !t.closest) return;
@@ -919,6 +936,7 @@ class EventManager {
         window.sunPerfLog('eventManager', 'dragend.groupOrPersonGroup', { targetTag: t.tagName });
     }
     
+    /** Клик по строке персоны активирует setActiveDate. */
     setupDateChangeObservers() {
         $(document).on('click', '.list-item--date[data-type="date"]', (e) => {
             const $target = $(e.target);
@@ -955,6 +973,7 @@ class EventManager {
         });
     }
 
+    /** Обработка чекбоксов типа A/B у персон. */
     setupDateSelectionHandlers() {
         $(document).on('click', '.date-checkbox', async (e) => {
             e.preventDefault();
@@ -1024,6 +1043,7 @@ class EventManager {
         this._pinClickedDateCheckboxVisual(clickedEl, dateId, checkboxType);
     }
 
+    /** Логика выбора персон A и B с разрешением конфликтов. */
     async handleDateCheckboxClick(dateId, checkboxType, clickedEl) {
         window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:enter', { dateId, checkboxType });
         if (checkboxType !== 'a' && checkboxType !== 'b') {
@@ -1137,6 +1157,7 @@ class EventManager {
         window.sunDateListLog && window.sunDateListLog('handleDateCheckboxClick:done');
     }
     
+    /** Центральный роутер кликов: вкладки, кнопки, волны, expand. */
     handleClick(e) {
         const $target = $(e.target);
         
@@ -1741,6 +1762,7 @@ class EventManager {
 		afterGraphUpdate();
 	}
 
+    /** Вкл/выкл всей группы сигналов и пересоздание DOM волн. */
     handleGroupToggle(groupId, isChecked) {
         if (groupId && window.appState) {
             const group = window.appState.data.groups.find(g => g.id === groupId);
@@ -1795,6 +1817,7 @@ class EventManager {
         }
     }
     
+    /** Обработка кнопок навигации, добавления групп и импорта. */
     handleButtonClicks($target, e) {
         if ($target.is('#btnAddCustomWave') || $target.closest('#btnAddCustomWave').length) {
             e.preventDefault();
@@ -1879,11 +1902,13 @@ class EventManager {
         }
     }
     
+    /** Id ближайшего .list-container для контекста редактирования. */
     getContainerId(element) {
         const $container = $(element).closest('.list-container');
         return $container.length ? $container.attr('id') : null;
     }
     
+    /** Id группы сигналов, содержащей волну. */
     findGroupForWave(waveId) {
         if (!window.appState || !window.appState.data || !window.appState.data.groups) {
             return null;
@@ -1903,6 +1928,7 @@ class EventManager {
         return null;
     }
     
+    /** Обновляет счётчики A/B в заголовке группы волны. */
     updateGroupStatsForWave(waveId, isVisible) {
         if (window.appState && window.appState.data && window.appState.data.groups) {
             window.appState.data.groups.forEach(group => {
@@ -1918,6 +1944,7 @@ class EventManager {
         }
     }
     
+    /** Полное пересоздание DOM-контейнеров волн на графике. */
     recreateAllWaveElements() {
         const wrd = window.__waveRenderDebug;
         const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('eventManager.recreateAllWaveElements', {}) : null;
@@ -1946,12 +1973,14 @@ class EventManager {
         }
     }
     
+    /** Клики на вкладке пересечений (очистка выбора). */
     setupIntersectionHandlers() {
         $(document).on('click', (e) => {
             this.handleIntersectionClick(e);
         });
     }
     
+    /** Toggle видимости волны из строки пересечения. */
     handleIntersectionClick(e) {
         const $target = $(e.target);
         

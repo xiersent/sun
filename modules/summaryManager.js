@@ -1,4 +1,7 @@
-// modules/summaryManager.js - ОБНОВЛЕННЫЙ ВЕРСИЯ
+/**
+ * @file summaryManager.js
+ * Вкладка «Сводка»: фильтр по группе и состоянию, список близких сигналов.
+ */
 class SummaryManager {
     constructor() {
         this.elements = {};
@@ -14,6 +17,7 @@ class SummaryManager {
         this.init();
     }
     
+    /** Кэширует элементы панели сводки. */
     cacheElements() {
         const ids = [
             'summaryPanel',
@@ -28,6 +32,7 @@ class SummaryManager {
         });
     }
     
+    /** Инициализация сводки: слушатели, селекты, первое обновление. */
     init() {
         this.setupEventListeners();
         this.populateGroupSelect();
@@ -37,6 +42,7 @@ class SummaryManager {
         this.setupStateObservers();
     }
     
+    /** change на группе, состоянии и «прошлые волны». */
     setupEventListeners() {
         const groupSelect = this.elements.summaryGroupSelect;
         const stateSelect = this.elements.summaryStateSelect;
@@ -68,6 +74,7 @@ class SummaryManager {
         }
     }
     
+    /** Заполняет select состояний от +5 до −5. */
     setupStateSelect() {
         const stateSelect = this.elements.summaryStateSelect;
         if (!stateSelect) return;
@@ -87,6 +94,7 @@ class SummaryManager {
         }
     }
     
+    /** Восстанавливает фильтры сводки из localStorage. */
     restoreSelections() {
         const savedGroup = localStorage.getItem('summarySelectedGroup');
         const savedState = localStorage.getItem('summarySelectedState');
@@ -118,12 +126,14 @@ class SummaryManager {
         }
     }
     
+    /** Сохраняет фильтры сводки в localStorage. */
     saveSelections() {
         localStorage.setItem('summarySelectedGroup', this.currentGroup);
         localStorage.setItem('summarySelectedState', this.currentState.toString());
         localStorage.setItem('summaryIncludePastWaves', this.includePastWaves.toString());
     }
     
+    /** Setter currentDate для debouncedUpdate сводки и пересечений. */
     setupStateObservers() {
         const originalCurrentDate = window.appState.currentDate;
         Object.defineProperty(window.appState, 'currentDate', {
@@ -152,6 +162,7 @@ class SummaryManager {
         this.setupGlobalDateObserver();
     }
 
+    /** Устанавливает p global date observer. */
     setupGlobalDateObserver() {
         const originalCurrentDay = window.appState.currentDay;
         Object.defineProperty(window.appState, 'currentDay', {
@@ -179,6 +190,7 @@ class SummaryManager {
         window.appState._currentDay = originalCurrentDay;
     }
     
+    /** RAF-отложенный updateSummary. */
     debouncedUpdate() {
         if (this._summaryUpdateRaf != null) {
             cancelAnimationFrame(this._summaryUpdateRaf);
@@ -189,6 +201,7 @@ class SummaryManager {
         });
     }
     
+    /** Опции select групп сигналов (+ «все»). */
     populateGroupSelect() {
         const select = this.elements.summaryGroupSelect;
         if (!select || !window.appState || !window.appState.data) return;
@@ -284,6 +297,7 @@ class SummaryManager {
 		return results;
 	}
     
+    /** Возвращает waves for selected group. */
     getWavesForSelectedGroup() {
         if (!window.appState || !window.appState.data) return [];
         
@@ -310,6 +324,7 @@ class SummaryManager {
     }
     
     
+    /** Проверяет: is wave in present or future. */
     isWaveInPresentOrFuture(wave, normalizedPhaseRadians) {
         const phase = normalizedPhaseRadians / (2 * Math.PI);
         const state = this.currentState;
@@ -329,6 +344,7 @@ class SummaryManager {
         return true;
     }
     
+    /** Возвращает closeness level. */
     getClosenessLevel(difference) {
         if (difference < 0.001) {
             if (this.currentState === 0) {
@@ -453,6 +469,7 @@ class SummaryManager {
 
 
     
+    /** Возвращает closeness class. */
     getClosenessClass(difference) {
         if (difference < 0.001) return 'summary-item-exact';
         if (difference < 0.1) return 'summary-item-very-close';
@@ -461,6 +478,7 @@ class SummaryManager {
         return 'summary-item-nearby';
     }
     
+    /** populateGroupSelect + updateSummary. */
     refresh() {
         this.populateGroupSelect();
         this.updateSummary();

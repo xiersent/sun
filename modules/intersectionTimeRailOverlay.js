@@ -1,10 +1,7 @@
 /**
- * Полноэкранное представление пересечений в порядке времени (как таблица при «по времени ↑»).
- * Раннее время — вверху трека, позже — внизу. Шкала тянется на несколько суток от полуночи дня визора
- * (ночь и дни после первых 24 ч). Центр экрана по вертикали — «сейчас»
- * (на сегодняшней дате визора синхронно с timeIndicator; иначе полдень первого дня на шкале).
+ * @file intersectionTimeRailOverlay.js
+ * Оверлей «рельса времени» для списка пересечений выбранного сигнала.
  */
-
 /** Сколько календарных дней показывать на рельсе (включая день визора). */
 const RAIL_TIMELINE_DAYS = 7;
 
@@ -45,6 +42,7 @@ class IntersectionTimeRailOverlay {
         this._onWaveCornerRailBound = null;
     }
 
+    /** Гарантирует dom. */
     ensureDom() {
         if (this.root) return;
         const root = document.createElement('div');
@@ -205,6 +203,7 @@ class IntersectionTimeRailOverlay {
         });
     }
 
+    /** Внутренний метод syncRailPersonSelectFromElA. */
     _syncRailPersonSelectFromElA() {
         const mgr = window.dateComparisonManager;
         if (!this.personSelectA || !mgr || !mgr.elA) {
@@ -215,6 +214,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод syncRailPersonSelectFromElB. */
     _syncRailPersonSelectFromElB() {
         const mgr = window.dateComparisonManager;
         if (!this.personSelectB || !mgr || !mgr.elB) {
@@ -225,6 +225,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод queueReopenRailFromIntersections. */
     _queueReopenRailFromIntersections() {
         if (!this._open) {
             return;
@@ -251,6 +252,7 @@ class IntersectionTimeRailOverlay {
         });
     }
 
+    /** Внутренний метод refreshRailPersonSelectIfNeeded. */
     _refreshRailPersonSelectIfNeeded() {
         const mgr = window.dateComparisonManager;
         if (!this.personSelectA || !mgr || typeof mgr._computeDateListSignature !== 'function') {
@@ -268,6 +270,7 @@ class IntersectionTimeRailOverlay {
         this._syncRailPersonSelectFromElB();
     }
 
+    /** Внутренний метод computeRailWaveListSignature. */
     _computeRailWaveListSignature() {
         const sim = window.stateIntersectionManager;
         if (!sim || !window.appState || !window.appState.data) return '';
@@ -363,6 +366,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод syncRailWaveSelectFromAppState. */
     _syncRailWaveSelectFromAppState() {
         if (!this.waveSelect || this.waveSelect.options.length === 0) return;
         const sim = window.stateIntersectionManager;
@@ -373,6 +377,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод refreshRailWaveSelectIfNeeded. */
     _refreshRailWaveSelectIfNeeded() {
         if (!this.waveSelect) return;
         const sig = this._computeRailWaveListSignature();
@@ -383,6 +388,7 @@ class IntersectionTimeRailOverlay {
         this._syncRailWaveSelectFromAppState();
     }
 
+    /** Внутренний метод formatViewportHoursRu. */
     _formatViewportHoursRu(hours) {
         const totalMin = Math.round(Number(hours) * 60);
         if (totalMin < 60) {
@@ -411,6 +417,7 @@ class IntersectionTimeRailOverlay {
         return out;
     }
 
+    /** Внутренний метод snapViewportMinutes. */
     _snapViewportMinutes(totalMin) {
         const allowed = this._getViewportMinutesOptions();
         let best = allowed[0];
@@ -426,6 +433,7 @@ class IntersectionTimeRailOverlay {
         return best;
     }
 
+    /** Внутренний метод parseStoredViewportToMinutes. */
     _parseStoredViewportToMinutes(raw) {
         if (raw == null || raw === '') {
             return null;
@@ -445,6 +453,7 @@ class IntersectionTimeRailOverlay {
         return null;
     }
 
+    /** Внутренний метод initViewportHoursSelect. */
     _initViewportHoursSelect() {
         if (!this.viewportHoursSelect || this.viewportHoursSelect.dataset.railViewportInit === '1') {
             return;
@@ -493,6 +502,7 @@ class IntersectionTimeRailOverlay {
         });
     }
 
+    /** Внутренний метод syncHoursInViewportFromSelect. */
     _syncHoursInViewportFromSelect() {
         if (!this.viewportHoursSelect) {
             return;
@@ -504,6 +514,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод updateDayHeightPx. */
     _updateDayHeightPx() {
         const vh = window.innerHeight || 600;
         if (!Number.isFinite(this._hoursInViewport) || this._hoursInViewport <= 0) {
@@ -589,6 +600,7 @@ class IntersectionTimeRailOverlay {
         return { merged, parts };
     }
 
+    /** Внутренний метод rebuildTrackForViewportChange. */
     _rebuildTrackForViewportChange() {
         if (!this.track || !this._openSortedIntersections) {
             return;
@@ -601,6 +613,7 @@ class IntersectionTimeRailOverlay {
         this._mirrorMerged = merged;
     }
 
+    /** Внутренний метод isVizorDateToday. */
     _isVizorDateToday() {
         if (window.timeBarManager && typeof window.timeBarManager.isCurrentDateToday === 'function') {
             return window.timeBarManager.isCurrentDateToday();
@@ -632,10 +645,12 @@ class IntersectionTimeRailOverlay {
         return this._dayHeightPx * frac;
     }
 
+    /** Внутренний метод pad2. */
     _pad2(n) {
         return String(n).padStart(2, '0');
     }
 
+    /** Внутренний метод formatEdgeTime. */
     _formatEdgeTime(date) {
         if (window.waves && typeof window.waves.formatExtremumTime === 'function') {
             return window.waves.formatExtremumTime(date);
@@ -667,6 +682,7 @@ class IntersectionTimeRailOverlay {
         return { prev, next };
     }
 
+    /** Внутренний метод formatMirrorCellText. */
     _formatMirrorCellText(group) {
         if (!group || !group.time) return '—';
         const waves = this._uniqueWavesInGroup(group.items || []);
@@ -691,6 +707,7 @@ class IntersectionTimeRailOverlay {
         return `${s} с`;
     }
 
+    /** Внутренний метод formatDurationStateRu. */
     _formatDurationStateRu(deltaMs) {
         const part = this._formatDeltaMsHumanRu(deltaMs);
         if (!part) return 'Длительность состояния: —';
@@ -706,6 +723,7 @@ class IntersectionTimeRailOverlay {
         return part ? `${prefix}${part}` : `${prefix}—`;
     }
 
+    /** Внутренний метод updateMirrorView. */
     _updateMirrorView() {
         if (!this.mirrorNext || !this.mirrorPrev || !this.mirrorDuration) return;
         const merged = this._mirrorMerged;
@@ -736,6 +754,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод updateNowLabel. */
     _updateNowLabel() {
         if (!this.nowLabel) return;
         if (this._isVizorDateToday()) {
@@ -751,6 +770,7 @@ class IntersectionTimeRailOverlay {
         }
     }
 
+    /** Внутренний метод escape. */
     _escape(s) {
         return String(s)
             .replace(/&/g, '&amp;')
@@ -759,6 +779,7 @@ class IntersectionTimeRailOverlay {
             .replace(/"/g, '&quot;');
     }
 
+    /** Внутренний метод sanitizeColor. */
     _sanitizeColor(c) {
         return String(c || '#888').replace(/[^#a-zA-Z0-9(),.%\s-]/g, '') || '#888';
     }
@@ -905,6 +926,7 @@ class IntersectionTimeRailOverlay {
         this._raf = requestAnimationFrame(loop);
     }
 
+    /** Закрывает оверлей рельса времени. */
     close() {
         this._open = false;
         this._openSortedIntersections = null;

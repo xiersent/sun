@@ -1,4 +1,7 @@
-// modules/appCore.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
+/**
+ * @file appCore.js
+ * Ядро приложения: инициализация, предупреждения, DOM-кэш, обработчики UI.
+ */
 class AppCore {
     constructor() {
         this.elements = {};
@@ -11,6 +14,7 @@ class AppCore {
         this._listsHydratedOnInit = false;
     }
     
+    /** Кэширует основные DOM-элементы приложения по id. */
     cacheElements() {
         const ids = [
             'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
@@ -30,6 +34,7 @@ class AppCore {
         });
     }
     
+    /** Главная инициализация: мобильная проверка, компоненты, предупреждение. */
     async init() {
         if (this.isInitializing) return;
         this.isInitializing = true;
@@ -84,6 +89,7 @@ class AppCore {
         }
     }
     
+    /** Последовательно инициализирует волны, сетку, списки и сводку. */
     async initializeAppComponents() {
         const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
 
@@ -150,12 +156,14 @@ class AppCore {
     }
     
     // Сохраняет цвет квадратиков в localStorage
+    /** Сохраняет цвет угловых квадратиков в localStorage. */
     saveCornerColor(color) {
         localStorage.setItem('corner_square_color', color);
         this.hasSelectedColor = true;
     }
     
     // Восстанавливает цвет квадратиков из localStorage
+    /** Восстанавливает сохранённый цвет угловых квадратиков. */
     restoreCornerColor() {
         const savedColor = localStorage.getItem('corner_square_color');
         if (savedColor && savedColor !== this.defaultCornerColor) {
@@ -169,6 +177,7 @@ class AppCore {
     }
     
     // Сбрасывает цвет квадратиков в красный
+    /** Сбрасывает цвет угловых квадратиков на красный по умолчанию. */
     resetCornerColor() {
         document.querySelectorAll('.corner-square').forEach(square => {
             square.style.backgroundColor = this.defaultCornerColor;
@@ -178,6 +187,7 @@ class AppCore {
     }
     
     // Закрывает предупреждение
+    /** Закрывает оверлей предупреждения при старте. */
     closeWarning() {
         const warningOverlay = document.getElementById('warningOverlay');
         const warningBox = document.querySelector('.warning-box');
@@ -190,6 +200,7 @@ class AppCore {
         }
     }
     
+    /** Применяет классы фона graphContainer (серый режим). */
     updateGraphBackground() {
         const graphContainer = document.getElementById('graphContainer');
         if (graphContainer) {
@@ -202,6 +213,7 @@ class AppCore {
         }
     }
     
+    /** Заполняет поля mainDateInputDate/Time из appState.currentDate. */
     setDateTimeInputs() {
         const mainDateInputDate = document.getElementById('mainDateInputDate');
         const mainDateInputTime = document.getElementById('mainDateInputTime');
@@ -213,6 +225,7 @@ class AppCore {
         }
     }
 
+    /** Загружает versions.json для блока информации в предупреждении. */
     async loadVersions() {
         try {
             const timestamp = new Date().getTime();
@@ -227,6 +240,7 @@ class AppCore {
         }
     }
 
+    /** Показывает десктопное предупреждение с данными окружения. */
     showDesktopWarning() {
         const warningOverlay = document.getElementById('warningOverlay');
         const warningBox = document.querySelector('.warning-box');
@@ -245,6 +259,7 @@ class AppCore {
         this.fillWarningInfo(warningBox);
     }
     
+    /** Блокирует UI на мобильных и показывает предупреждение. */
     showMobileWarning() {
         const warningOverlay = document.getElementById('warningOverlay');
         const warningBox = document.querySelector('.warning-box');
@@ -274,6 +289,7 @@ class AppCore {
         }
     }
     
+    /** Читает последние сохранённые версии компонентов из localStorage. */
     getLastVersions() {
         try {
             const saved = localStorage.getItem(this.versionStorageKey);
@@ -283,6 +299,7 @@ class AppCore {
         }
     }
     
+    /** Сохраняет снимок versions.json и сведения о браузере/ОС. */
     saveCurrentVersions(versions) {
         try {
             const versionsObj = {
@@ -299,6 +316,7 @@ class AppCore {
         } catch (error) {}
     }
     
+    /** Заполняет блок .warning-info версиями, ОС и датой. */
     async fillWarningInfo(warningBox) {
         const browserInfoEl = warningBox.querySelector('#browserInfo');
         if (browserInfoEl) {
@@ -426,6 +444,7 @@ class AppCore {
         this.saveCurrentVersions(versions);
     }
 
+    /** Контент предупреждения для мобильного устройства. */
     updateMobileWarningContent(warningBox) {
         const warningTitle = warningBox.querySelector('.warning-title');
         if (warningTitle) {
@@ -517,6 +536,7 @@ class AppCore {
         this.addMobileRetryButton(warningBox);
     }
     
+    /** Кнопка «Проверить снова» на мобильном предупреждении. */
     addMobileRetryButton(warningBox) {
         const oldButton = warningBox.querySelector('.mobile-retry-btn');
         if (oldButton) {
@@ -538,6 +558,7 @@ class AppCore {
         warningBox.appendChild(retryButton);
     }
     
+    /** Эвристика определения мобильного/планшетного устройства. */
     isMobileDevice() {
         const userAgent = navigator.userAgent.toLowerCase();
         
@@ -550,6 +571,7 @@ class AppCore {
         return isMobileUserAgent || isTouchDevice || hasMobileViewport || isTablet;
     }
     
+    /** Человекочитаемый тип мобильного устройства из userAgent. */
     getMobileDeviceType() {
         const ua = navigator.userAgent.toLowerCase();
         if (ua.includes('iphone')) return 'iPhone';
@@ -559,6 +581,7 @@ class AppCore {
         return 'Мобильное устройство';
     }
     
+    /** Строка с названием и версией браузера. */
     getBrowserInfo() {
         const ua = navigator.userAgent;
         
@@ -600,6 +623,7 @@ class AppCore {
         return "Неизвестный браузер";
     }
 
+    /** Строка с операционной системой пользователя. */
     getOSInfo() {
         const ua = navigator.userAgent.toLowerCase();
         const platform = navigator.platform?.toLowerCase() || '';
@@ -668,6 +692,7 @@ class AppCore {
         return 'Неизвестная ОС';
     }
 
+    /** Разрядность Windows из userAgent. */
     getWindowsEdition(ua) {
         if (ua.includes('wow64') || ua.includes('win64')) {
             return '(64-bit)';
@@ -681,6 +706,7 @@ class AppCore {
         return '';
     }
 
+    /** Название версии macOS по номеру. */
     getMacOSVersion(version) {
         const [major, minor] = version.split('.').map(Number);
         
@@ -712,11 +738,13 @@ class AppCore {
         return `macOS ${version} (${arch})`;
     }
 
+    /** Проверка Apple Silicon по userAgent. */
     isAppleSilicon() {
         const ua = navigator.userAgent.toLowerCase();
         return ua.includes('macintosh; arm');
     }
 
+    /** Определение дистрибутива Linux из userAgent. */
     getLinuxDistro(ua, platform) {
         const distros = [
             { pattern: 'ubuntu', name: 'Ubuntu' },
@@ -758,6 +786,7 @@ class AppCore {
         return 'Linux (неизвестный дистрибутив)';
     }
 
+    /** Версия iOS и тип устройства. */
     getIOsVersion(ua) {
         const match = ua.match(/os ([\d_]+) like mac os x/);
         const device = this.getIOsDevice(ua);
@@ -778,6 +807,7 @@ class AppCore {
         return `iOS (${device})`;
     }
 
+    /** Тип iOS-устройства (iPhone/iPad/…). */
     getIOsDevice(ua) {
         if (ua.includes('iphone')) return 'iPhone';
         if (ua.includes('ipad')) {
@@ -790,6 +820,7 @@ class AppCore {
         return 'iOS устройство';
     }
 
+    /** Версия Android с кодовым именем. */
     getAndroidVersion(ua) {
         const match = ua.match(/android ([\d.]+)/);
         if (match) {
@@ -818,6 +849,7 @@ class AppCore {
         return `Android (${this.getAndroidDevice(ua)})`;
     }
 
+    /** Производитель Android-устройства из userAgent. */
     getAndroidDevice(ua) {
         if (ua.includes('samsung') || ua.includes('sm-')) return 'Samsung';
         if (ua.includes('xiaomi') || ua.includes('mi ')) return 'Xiaomi';
@@ -838,6 +870,7 @@ class AppCore {
         return 'Android устройство';
     }
 
+    /** Архитектура CPU (x64, ARM, …). */
     getArchitecture() {
         const ua = navigator.userAgent.toLowerCase();
         if (ua.includes('x64') || ua.includes('x86_64') || ua.includes('win64')) {
@@ -858,6 +891,7 @@ class AppCore {
         return 'Неизвестно';
     }
     
+    /** Обновляет CSS-переменные --gw, --gh, --dgw, --dgh. */
     updateCSSVariables() {
         document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
         const lw = window.appState.graphWidth;
@@ -873,6 +907,7 @@ class AppCore {
         document.documentElement.style.setProperty('--dgh', `${dgh}px`);
     }
     
+    /** Сворачиваемая панель секретной схемы и её toggle. */
     setupSecretSchemePanel() {
         const toggle = document.getElementById('secretSchemeToggle');
         const panel = document.getElementById('secretSchemePanel');
@@ -905,6 +940,7 @@ class AppCore {
         }
     }
 
+    /** Глобальные слушатели: цвет, даты, импорт, стрелки. */
     setupEventListeners() {
         this.setupSecretSchemePanel();
 

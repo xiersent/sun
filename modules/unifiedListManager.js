@@ -1,4 +1,7 @@
-// modules/unifiedListManager.js
+/**
+ * @file unifiedListManager.js
+ * EJS-списки персон и волн: рендер, редактирование, DnD-синхронизация DOM.
+ */
 class UnifiedListManager {
     constructor() {
         this.templates = {
@@ -17,6 +20,7 @@ class UnifiedListManager {
         this._datesListStructureSig = null;
     }
 
+    /** Сбрасывает кэш скомпилированных EJS-шаблонов. */
     invalidateEjsRenderers() {
         this._ejsRenderers = {};
         this._datesListStructureSig = null;
@@ -25,6 +29,7 @@ class UnifiedListManager {
         }
     }
 
+    /** Сбрасывает подпись структуры списка дат. */
     invalidateDatesListStructureCache() {
         this._datesListStructureSig = null;
         if (window.dateComparisonManager && window.dateComparisonManager.invalidateDateListSignatureCache) {
@@ -32,6 +37,7 @@ class UnifiedListManager {
         }
     }
 
+    /** Внутренний метод computeDatesListStructureSignature. */
     _computeDatesListStructureSignature() {
         const pg = window.appState.data.personGroups || [];
         const dates = window.appState.data.dates || [];
@@ -49,6 +55,7 @@ class UnifiedListManager {
         return s;
     }
 
+    /** Внутренний метод canPatchDateListDom. */
     _canPatchDateListDom() {
         if (window.appState.editingDateId != null || window.appState.editingPersonGroupId != null) {
             return false;
@@ -136,6 +143,7 @@ class UnifiedListManager {
         }, 950);
     }
 
+    /** Откладывает flash list item saved в RAF. */
     scheduleFlashListItemSaved(type, id) {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -333,6 +341,7 @@ class UnifiedListManager {
         return this._ejsRenderers[templateId];
     }
     
+    /** Инициализация модуля. */
     initTemplates() {
         if (this.templatesLoaded) {
             return Promise.resolve();
@@ -376,6 +385,7 @@ class UnifiedListManager {
         return this.templatesLoadPromise;
     }
     
+    /** Создаёт emergency fallback templates. */
     createEmergencyFallbackTemplates() {
         this.templateCache['date-item-template'] = `
 <div class="list-item list-item--date" style="background:#ffe6e6;border:2px solid red;">
@@ -420,6 +430,7 @@ class UnifiedListManager {
 </div>`;
     }
     
+    /** renderList с ожиданием загрузки EJS-шаблонов. */
     async renderListWithWait(containerId, items, itemType) {
         if (!this.templatesLoaded) {
             try {
@@ -431,6 +442,7 @@ class UnifiedListManager {
         return this.renderList(containerId, items, itemType);
     }
     
+    /** Возвращает template. */
     getTemplate(templateId) {
         if (this.templateCache[templateId]) {
             return this.templateCache[templateId];
@@ -439,6 +451,7 @@ class UnifiedListManager {
         return '<div class="list-item">Элемент списка</div>';
     }
     
+    /** Отладочный лог unifiedListManager. */
     log(...args) {
         if (this.debug) {
             console.log('[UnifiedListManager]', ...args);
@@ -447,6 +460,7 @@ class UnifiedListManager {
     
 
 
+    /** DTO строки персоны для EJS dateItem. */
     prepareDateData(dateObj, index, personGroupId) {
         const currentTimestamp = window.appState.currentDate instanceof Date ? 
             window.appState.currentDate.getTime() : 
@@ -500,6 +514,7 @@ class UnifiedListManager {
         };
     }
 
+    /** DTO группы персон для EJS. */
     preparePersonGroupData(groupData, index) {
         const original = window.appState.data.personGroups.find(
             g => String(g.id) === String(groupData.id)
@@ -544,6 +559,7 @@ class UnifiedListManager {
     }
     
     // В unifiedListManager.js - в методе prepareGroupData ДОБАВИТЬ
+    /** DTO группы сигналов для EJS. */
     prepareGroupData(groupData, index, lookups) {
         const idStr = String(groupData.id);
         const originalGroup =
@@ -618,6 +634,7 @@ class UnifiedListManager {
     }
 
     // В методе prepareWaveData - ДОБАВИТЬ в возвращаемый объект
+    /** DTO строки волны для EJS. */
     prepareWaveData(wave, index) {
         const waveIdStr = String(wave.id);
         const editingWaveIdStr = window.appState.editingWaveId ? String(window.appState.editingWaveId) : null;
@@ -640,6 +657,7 @@ class UnifiedListManager {
         };
     }
     
+    /** DTO строки пересечения для шаблона. */
     prepareIntersectionData(intersectionData, index) {
         return {
             ...intersectionData,
@@ -655,6 +673,7 @@ class UnifiedListManager {
         };
     }
     
+    /** Форматирует время пересечения для списка. */
     formatIntersectionTime(timestamp) {
         if (!timestamp) return '00:00:00';
         try {
@@ -668,6 +687,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Рендер списка через EJS в контейнер. */
     renderList(containerId, items, itemType) {
         const __perfT0 = typeof performance !== 'undefined' ? performance.now() : 0;
         let container = null;
@@ -877,6 +897,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Возвращает empty message. */
     getEmptyMessage(type) {
         const messages = {
             date: 'Нет сохраненных дат',
@@ -1006,6 +1027,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Обрабатывает edit click. */
     handleEditClick(id, type, containerId) {
         if (type === 'date') {
             const idStr = String(id);
@@ -1041,6 +1063,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Обрабатывает delete click. */
     handleDeleteClick(id, type, containerId) {
         if (type === 'date') {
             window.dates.deleteDate(String(id));
@@ -1064,6 +1087,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Обрабатывает save click. */
     handleSaveClick(id, type, containerId) {
         if (type === 'date') {
             this.saveDateChanges(id);
@@ -1076,6 +1100,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Обрабатывает cancel click. */
     handleCancelClick(id, type, containerId) {
         if (type === 'date') {
             window.appState.editingDateId = null;
@@ -1092,6 +1117,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Сохраняет date changes. */
     saveDateChanges(dateId) {
         const dateObj = window.appState.data.dates.find(d => String(d.id) === String(dateId));
         if (!dateObj) {
@@ -1155,6 +1181,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Сохраняет wave changes. */
     saveWaveChanges(waveId) {
         const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
         if (!wave) {
@@ -1235,6 +1262,7 @@ class UnifiedListManager {
         });
     }
     
+    /** Сохраняет group changes. */
     saveGroupChanges(groupId) {
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
@@ -1261,6 +1289,7 @@ class UnifiedListManager {
         });
     }
 
+    /** Сохраняет person group changes. */
     savePersonGroupChanges(groupId) {
         const group = window.appState.data.personGroups.find(g => String(g.id) === String(groupId));
         if (!group) {
@@ -1284,6 +1313,7 @@ class UnifiedListManager {
         });
     }
     
+    /** Диалог смены цвета волны и save. */
     changeWaveColor(wave) {
         const colorInput = document.createElement('input');
         colorInput.type = 'color';
@@ -1463,6 +1493,7 @@ class UnifiedListManager {
     }
 
 
+    /** Обновляет waves list. */
     updateWavesList() {
         const wrd = window.__waveRenderDebug;
         const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('unifiedListManager.updateWavesList', {}) : null;
@@ -1599,6 +1630,7 @@ class UnifiedListManager {
         return true;
     }
 
+    /** Внутренний метод findSignalGroupRow. */
     _findSignalGroupRow(wavesRoot, groupId) {
         const idStr = String(groupId);
         let found = null;
@@ -1609,6 +1641,7 @@ class UnifiedListManager {
         return found;
     }
 
+    /** Внутренний метод findWaveRowInWavesList. */
     _findWaveRowInWavesList(wavesRoot, waveId) {
         const w = String(waveId);
         let found = null;
@@ -1619,6 +1652,7 @@ class UnifiedListManager {
         return found;
     }
 
+    /** Внутренний метод ensureEmptySignalGroupChildrenMessage. */
     _ensureEmptySignalGroupChildrenMessage(container) {
         if (container.querySelector('.no-waves-message')) return;
         const div = document.createElement('div');
@@ -1628,6 +1662,7 @@ class UnifiedListManager {
         container.appendChild(div);
     }
 
+    /** Внутренний метод removeEmptyPlaceholders. */
     _removeEmptyPlaceholders(container) {
         container.querySelectorAll(':scope > .no-waves-message').forEach((n) => n.remove());
     }
@@ -1684,6 +1719,7 @@ class UnifiedListManager {
         return true;
     }
 
+    /** Внутренний метод findPersonGroupRow. */
     _findPersonGroupRow(dateRoot, personGroupId) {
         const idStr = String(personGroupId);
         let found = null;
@@ -1693,6 +1729,7 @@ class UnifiedListManager {
         return found;
     }
 
+    /** Внутренний метод findDateRowInDateList. */
     _findDateRowInDateList(dateRoot, dateId) {
         const d = String(dateId);
         let found = null;
@@ -1702,6 +1739,7 @@ class UnifiedListManager {
         return found;
     }
 
+    /** Внутренний метод ensureEmptyPersonGroupChildrenMessage. */
     _ensureEmptyPersonGroupChildrenMessage(container) {
         if (container.querySelector('.no-waves-message')) return;
         const div = document.createElement('div');
@@ -1758,6 +1796,7 @@ class UnifiedListManager {
         return true;
     }
 
+    /** Синхронизирует one person group children dom. */
     syncOnePersonGroupChildrenDom(personGroupId) {
         const dateRoot = document.getElementById('dateListForDates');
         if (!dateRoot) return false;
@@ -1839,6 +1878,7 @@ class UnifiedListManager {
         if (nameInput) nameInput.value = group.name;
     }
 
+    /** Синхронизирует person group row normal view from model. */
     syncPersonGroupRowNormalViewFromModel(group) {
         const idStr = String(group.id);
         const root = document.getElementById('dateListForDates');
@@ -1877,10 +1917,12 @@ class UnifiedListManager {
         }
     }
     
+    /** Обновляет intersection results. */
     updateIntersectionResults(intersections) {
         this.renderList('intersectionResults', intersections, 'intersection');
     }
     
+    /** Обновляет group stats. */
     updateGroupStats(groupId) {
         const group = window.appState.data.groups.find(g => String(g.id) === String(groupId));
         if (!group) {
@@ -1927,6 +1969,7 @@ class UnifiedListManager {
         }
     }
     
+    /** Перезагрузка EJS-шаблонов из templates/. */
     async reloadTemplates() {
         this.invalidateEjsRenderers();
         this.templatesLoaded = false;

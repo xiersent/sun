@@ -1,3 +1,7 @@
+/**
+ * @file templates.js
+ * Устаревшие строковые HTML-шаблоны списков (до EJS unifiedListManager).
+ */
 const templates = {
     dateItem: (date) => {
         const template = date.editing ? 

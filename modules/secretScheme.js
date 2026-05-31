@@ -1,4 +1,7 @@
-// modules/secretScheme.js — 8 подъездов × 15 ячеек = 120, нумерация подряд
+/**
+ * @file secretScheme.js
+ * Секретная схема 8×15 ячеек: коды квартир, группы волн, привязка к сигналам.
+ */
 const SecretScheme = {
     floorMin: 1,
     floorMax: 5,
@@ -14,10 +17,12 @@ const SecretScheme = {
     reversed: false,
     emptyCellBg: '#ffffff',
 
+    /** Число подъездов (totalCells / cellsPerEntrance). */
     entranceCount() {
         return this.totalCells / this.cellsPerEntrance;
     },
 
+    /** Первый код ячейки подъезда. */
     entranceStart(entrance) {
         return 1 + (entrance - 1) * this.cellsPerEntrance;
     },
@@ -31,6 +36,7 @@ const SecretScheme = {
         return this.entranceStart(entrance) + (floor - 1) * this.colsPerFloor + col;
     },
 
+    /** Разбор кода ячейки в { entrance, floor, col }. */
     decodeCode(code) {
         const n = Number(code);
         if (!Number.isFinite(n) || n < 1) {
@@ -49,6 +55,7 @@ const SecretScheme = {
         return { entrance, floor, col };
     },
 
+    /** Массив номеров подъездов 1…N. */
     entrances() {
         const list = [];
         for (let e = this.entranceMin; e <= this.entranceCount(); e++) {
@@ -57,6 +64,7 @@ const SecretScheme = {
         return list;
     },
 
+    /** Подъезды с учётом reversed. */
     entrancesForDisplay() {
         const list = this.entrances();
         return this.reversed ? list.slice().reverse() : list;
@@ -73,6 +81,7 @@ const SecretScheme = {
         return this.codeAt(visualEntrance, visualFloor, col);
     },
 
+    /** Этажи сверху вниз (5…1). */
     floorsForDisplay() {
         const list = [];
         for (let f = this.floorMax; f >= this.floorMin; f--) {
@@ -81,6 +90,7 @@ const SecretScheme = {
         return list;
     },
 
+    /** Колонки 0…2 с учётом reversed. */
     colsForDisplay() {
         const list = [];
         for (let c = 0; c < this.colsPerFloor; c++) {
@@ -89,14 +99,17 @@ const SecretScheme = {
         return list;
     },
 
+    /** Внутренний метод groups. */
     _groups() {
         return window.appState?.data?.groups || [];
     },
 
+    /** Внутренний метод waves. */
     _waves() {
         return window.appState?.data?.waves || [];
     },
 
+    /** Внутренний метод selectedGroup. */
     _selectedGroup() {
         const groups = this._groups();
         const found = groups.find((g) => String(g.id) === String(this.selectedGroupId));
@@ -106,6 +119,7 @@ const SecretScheme = {
         return groups.find((g) => String(g.id) === this.defaultGroupId) || groups[0] || null;
     },
 
+    /** Внутренний метод waveIdForCode. */
     _waveIdForCode(code, group) {
         if (!group?.waves?.length) {
             return null;
@@ -131,6 +145,7 @@ const SecretScheme = {
         return null;
     },
 
+    /** Внутренний метод findWave. */
     _findWave(waveId) {
         if (waveId == null) {
             return null;
@@ -139,6 +154,7 @@ const SecretScheme = {
         return this._waves().find((w) => String(w.id) === idStr) || null;
     },
 
+    /** Цвет ячейки схемы по коду и группе волн. */
     colorForCode(code) {
         const group = this._selectedGroup();
         const waveId = this._waveIdForCode(code, group);
@@ -146,6 +162,7 @@ const SecretScheme = {
         return wave?.color || this.emptyCellBg;
     },
 
+    /** Внутренний метод cellBgOpacity. */
     _cellBgOpacity() {
         const board = document.getElementById('secretSchemeGrid');
         const root = board || document.documentElement;
@@ -156,6 +173,7 @@ const SecretScheme = {
         return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0.55;
     },
 
+    /** Внутренний метод parseHexColor. */
     _parseHexColor(hex) {
         if (!hex || typeof hex !== 'string' || hex.charAt(0) !== '#') {
             return null;
@@ -177,6 +195,7 @@ const SecretScheme = {
         return { r, g, b };
     },
 
+    /** Внутренний метод waveColorWithOpacity. */
     _waveColorWithOpacity(hex) {
         if (
             !hex ||
@@ -192,6 +211,7 @@ const SecretScheme = {
         return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
     },
 
+    /** Внутренний метод textColorForBg. */
     _textColorForBg(hex) {
         const rgb = this._parseHexColor(hex);
         if (!rgb) {
@@ -202,12 +222,14 @@ const SecretScheme = {
         return lum > 0.62 ? '#333333' : '#ffffff';
     },
 
+    /** Внутренний метод styleCell. */
     _styleCell(cell, code) {
         const waveColor = this.colorForCode(code);
         cell.style.backgroundColor = this._waveColorWithOpacity(waveColor);
         cell.style.color = this._textColorForBg(waveColor);
     },
 
+    /** Применяет цвета ячеек сетки секретной схемы. */
     applyCellColors() {
         const board = document.getElementById('secretSchemeGrid');
         if (!board) {
@@ -225,10 +247,12 @@ const SecretScheme = {
         }
     },
 
+    /** Внутренний метод maxWavesPerGroup. */
     _maxWavesPerGroup() {
         return this.totalCells;
     },
 
+    /** Внутренний метод groupsForSelect. */
     _groupsForSelect() {
         const maxWaves = this._maxWavesPerGroup();
         return this._groups().filter((g) => {
@@ -240,6 +264,7 @@ const SecretScheme = {
         });
     },
 
+    /** Внутренний метод populateGroupSelect. */
     _populateGroupSelect(select) {
         select.textContent = '';
         const groups = this._groupsForSelect();
@@ -263,6 +288,7 @@ const SecretScheme = {
         select.value = String(this.selectedGroupId);
     },
 
+    /** Внутренний метод syncAnchorHighlight. */
     _syncAnchorHighlight() {
         const board = document.getElementById('secretSchemeGrid');
         if (!board) {
@@ -278,6 +304,7 @@ const SecretScheme = {
         });
     },
 
+    /** Внутренний метод makeControl. */
     _makeControl(labelText, selectId, ariaLabel) {
         const item = document.createElement('div');
         item.className = 'secret-scheme-control';
@@ -297,6 +324,7 @@ const SecretScheme = {
         return { item, select };
     },
 
+    /** Внутренний метод buildControls. */
     _buildControls() {
         const bar = document.createElement('div');
         bar.className = 'secret-scheme-controls';
@@ -356,6 +384,7 @@ const SecretScheme = {
         return bar;
     },
 
+    /** Внутренний метод buildEntranceBlock. */
     _buildEntranceBlock(entrance) {
         const block = document.createElement('div');
         block.className = 'secret-scheme-block';
@@ -400,6 +429,7 @@ const SecretScheme = {
         return block;
     },
 
+    /** Внутренний метод buildEntranceWrap. */
     _buildEntranceWrap(entrance) {
         const wrap = document.createElement('div');
         wrap.className = 'secret-scheme-entrance';
@@ -408,6 +438,7 @@ const SecretScheme = {
         return wrap;
     },
 
+    /** Внутренний метод appendEntranceRow. */
     _appendEntranceRow(container, entranceNums) {
         const row = document.createElement('div');
         row.className = 'secret-scheme-entrances-row';
@@ -423,6 +454,7 @@ const SecretScheme = {
         container.appendChild(row);
     },
 
+    /** Внутренний метод buildBoardBody. */
     _buildBoardBody() {
         const body = document.createElement('div');
         body.className = 'secret-scheme-board-body';
@@ -440,6 +472,7 @@ const SecretScheme = {
         return body;
     },
 
+    /** Внутренний метод rebuildBoardBody. */
     _rebuildBoardBody() {
         const board = document.getElementById('secretSchemeGrid');
         if (!board) {
@@ -461,6 +494,7 @@ const SecretScheme = {
         this._syncAnchorHighlight();
     },
 
+    /** Привязка UI секретной схемы и первый render. */
     init() {
         const board = document.getElementById('secretSchemeGrid');
         if (!board) {
