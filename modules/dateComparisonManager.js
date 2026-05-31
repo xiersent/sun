@@ -643,7 +643,7 @@ class DateComparisonManager {
     _dirCell(dir) {
         const title = this._escapeHtml(this._directionTitle(dir));
         const label = this._directionLabel(dir);
-        return `<td title="${title}">${label}</td>`;
+        return `<td class="sun-dateComparisonTableCell" title="${title}">${label}</td>`;
     }
 
     /** Внутренний метод matchClass. */
@@ -783,14 +783,14 @@ class DateComparisonManager {
         const head = `
             <table class="sun-dateComparisonTable">
                 <thead>
-                    <tr>
-                        <th>Сигнал</th>
-                        <th class="sun-dateComparisonState">Сост. A</th>
-                        <th>Напр. A</th>
-                        <th class="sun-dateComparisonState">Сост. B</th>
-                        <th>Напр. B</th>
-                        <th>${metricHeader}</th>
-                        ${showBothLayersBtnCol ? '<th class="sun-dateComparisonActions">График</th>' : ''}
+                    <tr class="sun-dateComparisonTableRow">
+                        <th class="sun-dateComparisonTableHeadCell">Сигнал</th>
+                        <th class="sun-dateComparisonTableHeadCell sun-dateComparisonState">Сост. A</th>
+                        <th class="sun-dateComparisonTableHeadCell">Напр. A</th>
+                        <th class="sun-dateComparisonTableHeadCell sun-dateComparisonState">Сост. B</th>
+                        <th class="sun-dateComparisonTableHeadCell">Напр. B</th>
+                        <th class="sun-dateComparisonTableHeadCell">${metricHeader}</th>
+                        ${showBothLayersBtnCol ? '<th class="sun-dateComparisonTableHeadCell sun-dateComparisonActions">График</th>' : ''}
                     </tr>
                 </thead>
                 <tbody>
@@ -815,18 +815,18 @@ class DateComparisonManager {
                         ? window.dom.getDateCompareVizorToggleLabel(row.wave.id)
                         : 'Показать A и B';
                 const vizorCell = showBothLayersBtnCol
-                    ? `<td class="sun-dateComparisonActions"><button type="button" class="sun-uiBtn sun-showOnVizorBtn sun-dateCompareVizorBtn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
+                    ? `<td class="sun-dateComparisonTableCell sun-dateComparisonActions"><button type="button" class="sun-uiBtn sun-dateComparisonActionsBtn sun-showOnVizorBtn sun-dateCompareVizorBtn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
                     : '';
-                return `<tr>
-                    <td class="sun-dateComparisonName">
+                return `<tr class="sun-dateComparisonTableRow">
+                    <td class="sun-dateComparisonTableCell sun-dateComparisonName">
                         <span class="sun-dateComparisonColor" style="background-color:${row.wave.color || '#666'}"></span>
                         ${name}
                     </td>
-                    <td class="sun-dateComparisonState">${row.stateA.toFixed(2)}</td>
+                    <td class="sun-dateComparisonTableCell sun-dateComparisonState">${row.stateA.toFixed(2)}</td>
                     ${this._dirCell(row.dirA)}
-                    <td class="sun-dateComparisonState">${row.stateB.toFixed(2)}</td>
+                    <td class="sun-dateComparisonTableCell sun-dateComparisonState">${row.stateB.toFixed(2)}</td>
                     ${this._dirCell(row.dirB)}
-                    <td><span class="sun-intersectionResultCloseness ${cls}">${metricPct.toFixed(1)}%</span></td>
+                    <td class="sun-dateComparisonTableCell"><span class="sun-intersectionResultCloseness ${cls}">${metricPct.toFixed(1)}%</span></td>
                     ${vizorCell}
                 </tr>`;
             })

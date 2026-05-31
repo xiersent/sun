@@ -176,13 +176,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-app .sun-graphSection {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
-@media (min-width: 0px) {
   .sun-mobileDeviceRoot {
     overflow: hidden;
     height: 100vh;
@@ -222,11 +215,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-dateLabelVisible {
     display: inline-block !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateName.sun-dateLabelVisible, .sun-centerDateName.sun-dateLabelVisible {
-    display: block !important;
   }
 }
 @media (min-width: 0px) {
@@ -277,12 +265,14 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-centerDateName {
-    display: none;
+    font-size: var(--font-size-md);
+    color: var(--text-color);
+    margin-top: 2px;
   }
 }
 @media (min-width: 0px) {
   .sun-centerDateStar {
-    display: none;
+    font-size: 22px;
   }
 }
 @media (min-width: 0px) {
@@ -329,19 +319,8 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed {
-    width: fit-content;
-    max-width: 100%;
-  }
-}
-@media (min-width: 0px) {
   .sun-tabButtonsTimeBarControls {
     justify-content: flex-start;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed .sun-tabButton {
-    flex: 0 1 auto;
   }
 }
 @media (min-width: 0px) {
@@ -411,14 +390,7 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-timeBarContainer {
-    width: var(--gw);
-    min-height: 0;
-    height: auto;
-    background-color: #fff;
-    outline: 1px solid var(--clg);
-    position: relative;
-    user-select: none;
-    margin: var(--spacing-md) 0;
+    --time-bar-side-w: 72px;
   }
 }
 @media (min-width: 0px) {
@@ -485,11 +457,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarContainer {
-    --time-bar-side-w: 72px;
-  }
-}
-@media (min-width: 0px) {
   .sun-timeBarStateStack {
     display: flex;
     flex-direction: column;
@@ -518,15 +485,13 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarStateRow.sun-timeBarHoursRow {
-    border-top: none;
-    border-bottom: 1px solid var(--clg);
-  }
-}
-@media (min-width: 0px) {
   .sun-timeBarNowRow {
-    border-top: 1px solid var(--clg);
-    border-bottom: none;
+    display: flex;
+    flex-shrink: 0;
+    min-height: var(--time-bar-now-row-h);
+    background: #fff;
+    position: relative;
+    z-index: 13;
   }
 }
 @media (min-width: 0px) {
@@ -625,21 +590,15 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel.sun-extremumLabelTop {
-    bottom: auto;
-    margin-bottom: 0;
+  .sun-timeBarSegmentLabel:hover {
+    border-color: #000;
+    pointer-events: auto;
   }
 }
 @media (min-width: 0px) {
   .sun-extremumLabelTextInSegment {
     overflow: visible;
     text-overflow: clip;
-  }
-}
-@media (min-width: 0px) {
-  .sun-timeBarSegmentLabel:hover {
-    border-color: #000;
-    pointer-events: auto;
   }
 }
 @media (min-width: 0px) {
@@ -679,16 +638,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarNowRow {
-    display: flex;
-    flex-shrink: 0;
-    min-height: var(--time-bar-now-row-h);
-    background: #fff;
-    position: relative;
-    z-index: 13;
-  }
-}
-@media (min-width: 0px) {
   .sun-timeBarNowRowWhenStackEmpty {
     border-top: none;
   }
@@ -704,17 +653,6 @@ textarea {
     position: relative;
     min-width: 0;
     min-height: var(--time-bar-now-row-h);
-  }
-}
-@media (min-width: 0px) {
-  .sun-timeBarNowMarker.sun-timeIndicator {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 0;
-    height: 0;
-    transform: translate(-50%, -50%);
-    z-index: 14;
   }
 }
 @media (min-width: 0px) {
@@ -901,16 +839,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-hourMarker.sun-clickable {
-    cursor: pointer;
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourMarker.sun-midnight {
-    border-left-color: var(--danger-color);
-  }
-}
-@media (min-width: 0px) {
   .sun-controlsSection {
     display: flex;
     flex-direction: column;
@@ -953,48 +881,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-wavesPanelInControl {
     grid-column: 2;
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnToday.sun-todayActive {
-    background-color: var(--cp);
-    color: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnToday.sun-todayInactive {
-    background-color: #ff9900;
-    color: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnToday.sun-todayInactive:hover {
-    background-color: #ffad33;
-    filter: brightness(1.1);
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnFlipH.sun-flipHActive {
-    background-color: #ff9900;
-    color: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnFlipH.sun-flipHActive:hover {
-    background-color: #ffad33;
-    filter: brightness(1.1);
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnFlipV.sun-flipVActive {
-    background-color: #ff9900;
-    color: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-btnFlipV.sun-flipVActive:hover {
-    background-color: #ffad33;
-    filter: brightness(1.1);
   }
 }
 @media (min-width: 0px) {
@@ -1082,6 +968,11 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-warningOverlay.sun-hidden {
+    display: none !important;
+  }
+}
+@media (min-width: 0px) {
   .sun-warningBox {
     background: #fff;
     padding: var(--spacing-xl);
@@ -1089,6 +980,11 @@ textarea {
     max-width: 525px;
     text-align: center;
     display: block;
+  }
+}
+@media (min-width: 0px) {
+  .sun-warningBox.sun-hidden {
+    display: none !important;
   }
 }
 @media (min-width: 0px) {
@@ -1108,26 +1004,22 @@ textarea {
     padding: 0;
     gap: 0;
     flex-wrap: wrap;
-    background: #fff;
   }
 }
 @media (min-width: 0px) {
   .sun-tabButton {
-    padding: 8px 16px;
+    padding: 0 16px;
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--text-secondary);
-    font-size: var(--font-size-lg);
+    color: #495057;
+    font-size: var(--font-size-sm);
     flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-weight: 500;
   }
 }
 @media (min-width: 0px) {
@@ -1148,35 +1040,24 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-tabButtons.sun-tabButtonsFramed {
-    border: 1px solid var(--clg);
-    border-radius: 4px;
-    overflow: hidden;
-    background: #fff;
+  .sun-tabButton:last-child {
+    border-right: none;
   }
 }
 @media (min-width: 0px) {
-  .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
-    font-size: var(--font-size-sm);
-    padding: 6px 10px;
-    flex: 1 1 0;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton.sun-active {
-    font-weight: 600;
+  .sun-tabButton.sun-active {
+    background: var(--cp);
+    color: #fff;
   }
 }
 @media (min-width: 0px) {
   .sun-tabContent {
     display: none;
-    background: #fff;
-    border: 1px solid var(--clg);
-    padding: var(--spacing-md);
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabContent.sun-active {
+    display: block;
   }
 }
 @media (min-width: 0px) {
@@ -1262,6 +1143,16 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-listItem:first-child {
+    overflow: hidden;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItem:last-child {
+    overflow: hidden;
+  }
+}
+@media (min-width: 0px) {
   .sun-listItemClickable {
     cursor: pointer;
   }
@@ -1312,11 +1203,6 @@ textarea {
   .sun-listItemSaveFlashChild {
     position: relative;
     z-index: 1;
-  }
-}
-@media (prefers-reduced-motion: reduce) and (min-width: 0px) {
-  .sun-listItemSaveFlash::before {
-    animation-duration: 0.15s;
   }
 }
 @media (min-width: 0px) {
@@ -1573,9 +1459,8 @@ textarea {
     background: #e0e0e0;
     padding: 2px 6px;
     border-radius: 3px;
-    font-size: 9px;
-    margin-left: 6px;
-    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 400;
   }
 }
 @media (min-width: 0px) {
@@ -1624,6 +1509,16 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-groupChildren[style*="display: block"] {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren[style*="display:block"] {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
   .sun-groupChildrenOpen {
     display: block;
   }
@@ -1642,12 +1537,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemNote .sun-noteContentWrapper {
-    width: 100%;
-    margin-bottom: 8px;
-  }
-}
-@media (min-width: 0px) {
   .sun-listItemNote .noteTime {
     font-weight: 700;
     color: var(--text-color);
@@ -1659,42 +1548,6 @@ textarea {
     color: var(--text-secondary);
     line-height: 1.4;
     margin-bottom: var(--spacing-xs);
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemIntersection.sun-exactMatch {
-    background-color: #e6f7e6;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemIntersection.sun-closeMatch {
-    background-color: #fffbe6;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemIntersection .sun-intersectionInfo {
-    flex: 1;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemIntersection .sun-intersectionPeriod {
-    font-weight: 700;
-    color: var(--text-color);
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemIntersection .sun-intersectionMatchType {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-top: 2px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemIntersection .sun-intersectionControls {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-    flex-shrink: 0;
   }
 }
 @media (min-width: 0px) {
@@ -1792,39 +1645,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemGroup.sun-listItemDragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemGroup.sun-listItemDragOverTop::before {
-    content: "";
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemGroup.sun-listItemDragOverBottom::after {
-    content: "";
-    position: absolute;
-    left: -5px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
   .sun-listItemPersonGroup {
     cursor: default;
   }
@@ -1837,39 +1657,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-listItemPersonGroup.sun-listItemExpanded {
     background-color: inherit;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemPersonGroup.sun-listItemDragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemPersonGroup.sun-listItemDragOverTop::before {
-    content: "";
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemPersonGroup.sun-listItemDragOverBottom::after {
-    content: "";
-    position: absolute;
-    left: -5px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: #000;
-    transform: rotate(45deg);
-    z-index: 10;
   }
 }
 @media (min-width: 0px) {
@@ -1888,16 +1675,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-dateInPersonGroup:hover {
     background: #f0f0f0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateInPersonGroup.sun-listItemDragOverTop {
-    border-top: 2px solid var(--cp);
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateInPersonGroup.sun-listItemDragOverBottom {
-    border-bottom: 2px solid var(--cp);
   }
 }
 @media (min-width: 0px) {
@@ -1924,75 +1701,6 @@ textarea {
     background-color: #666;
     z-index: 100;
     pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItem:first-child {
-    overflow: hidden;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItem:last-child {
-    overflow: hidden;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragging {
-    opacity: 0.5;
-    background-color: #f0f0f0;
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverTop {
-    border-top: 2px solid var(--cp);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverBottom {
-    border-bottom: 2px solid var(--cp);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverTop::before {
-    content: "";
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 10px;
-    height: 10px;
-    background: var(--cp);
-    transform: rotate(45deg);
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveInGroup.sun-listItemDragOverBottom::after {
-    content: "";
-    position: absolute;
-    left: -5px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: var(--cp);
-    transform: rotate(45deg);
-    z-index: 10;
-  }
-}
-@media (min-width: 0px) {
-  .sun-groupChildren.sun-groupChildrenDragOver {
-    background: rgba(0, 102, 204, 0.06);
-    outline: 2px dashed var(--cp);
-    outline-offset: -2px;
-    border-radius: 4px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-personGroupChildren.sun-groupChildrenDragOver {
-    background: rgba(0, 102, 204, 0.06);
-    outline: 2px dashed var(--cp);
-    outline-offset: -2px;
-    border-radius: 4px;
   }
 }
 @media (min-width: 0px) {
@@ -2026,6 +1734,21 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-dateCheckbox[data-type=a]:checked {
+    background-color: #2196f3;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateCheckbox[data-type=b]:checked {
+    background-color: #ff9800;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateCheckbox:checked {
+    border-color: transparent;
+  }
+}
+@media (min-width: 0px) {
   .sun-waveGroupToggle {
     -webkit-appearance: none;
     appearance: none;
@@ -2051,6 +1774,16 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-waveGroupToggle:checked {
+    background-color: #2196f3;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveGroupToggle:checked {
+    border-color: transparent;
+  }
+}
+@media (min-width: 0px) {
   .sun-waveVisibilityCheck {
     -webkit-appearance: none;
     appearance: none;
@@ -2066,6 +1799,22 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-waveVisibilityCheck:checked {
+    background-color: #2196f3;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveVisibilityCheck:checked {
+    border-color: transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveVisibilityCheck:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+@media (min-width: 0px) {
   .sun-waveBVisibilityCheck {
     -webkit-appearance: none;
     appearance: none;
@@ -2078,6 +1827,16 @@ textarea {
     border-radius: 2px;
     position: relative;
     background-color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveBVisibilityCheck:checked {
+    background-color: #ff9800;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveBVisibilityCheck:checked {
+    border-color: transparent;
   }
 }
 @media (min-width: 0px) {
@@ -2103,6 +1862,16 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-waveCornerColorCheck:checked {
+    background-color: #2196f3;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveCornerColorCheck:checked {
+    border-color: transparent;
+  }
+}
+@media (min-width: 0px) {
   .sun-timeBarStateCheck {
     -webkit-appearance: none;
     appearance: none;
@@ -2115,6 +1884,16 @@ textarea {
     border-radius: 2px;
     position: relative;
     background-color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateCheck:checked {
+    background-color: #2196f3;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateCheck:checked {
+    border-color: transparent;
   }
 }
 @media (min-width: 0px) {
@@ -2133,47 +1912,12 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateCheckbox[data-type=a]:checked {
-    background-color: #2196f3;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateCheckbox[data-type=b]:checked {
-    background-color: #ff9800;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveBVisibilityCheck:checked {
-    background-color: #ff9800;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveGroupToggle:checked {
-    background-color: #2196f3;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveVisibilityCheck:checked {
-    background-color: #2196f3;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveCornerColorCheck:checked {
-    background-color: #2196f3;
-  }
-}
-@media (min-width: 0px) {
-  .sun-timeBarStateCheck:checked {
-    background-color: #2196f3;
-  }
-}
-@media (min-width: 0px) {
   .sun-timeBarGroupCheck:checked {
     background-color: #2196f3;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateCheckbox:checked::after, .sun-waveGroupToggle:checked::after, .sun-waveVisibilityCheck:checked::after, .sun-waveBVisibilityCheck:checked::after, .sun-waveCornerColorCheck:checked::after, .sun-timeBarStateCheck:checked::after, .sun-timeBarGroupCheck:checked::after {
+  .sun-timeBarGroupCheck:checked::after {
     content: "✓";
     position: absolute;
     inset: 0;
@@ -2185,36 +1929,6 @@ textarea {
     font-weight: bold;
     line-height: 1;
     pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateCheckbox:checked {
-    border-color: transparent;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveGroupToggle:checked {
-    border-color: transparent;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveVisibilityCheck:checked {
-    border-color: transparent;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveBVisibilityCheck:checked {
-    border-color: transparent;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveCornerColorCheck:checked {
-    border-color: transparent;
-  }
-}
-@media (min-width: 0px) {
-  .sun-timeBarStateCheck:checked {
-    border-color: transparent;
   }
 }
 @media (min-width: 0px) {
@@ -2231,16 +1945,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-listItemDate:has(.sun-dateCheckbox[data-type=a]:checked) {
-    background-color: #e8f4fe;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listItemDate:has(.sun-dateCheckbox[data-type=b]:checked) {
-    background-color: #fff4e5;
-  }
-}
-@media (min-width: 0px) {
   .sun-uiBtn {
     padding: var(--spacing-xs) var(--spacing-sm);
     background-color: var(--cp);
@@ -2252,26 +1956,11 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-uiBtn.sun-uiBtnToggleOff {
-    opacity: 0.55;
-  }
-}
-@media (min-width: 0px) {
   .sun-parableBtnWrapper {
     margin-top: var(--spacing-lg);
     display: flex;
     justify-content: center;
     gap: 8px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-parableBtnWrapper {
-    display: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningActions {
-    display: none;
   }
 }
 @media (min-width: 0px) {
@@ -2373,57 +2062,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-mobileWarningOverlay .sun-warningBox {
-    max-width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: var(--spacing-lg);
-    background: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningTitle {
-    font-size: var(--font-size-lg);
-    margin-bottom: 0px;
-    text-align: center;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningText {
-    font-size: var(--font-size-md);
-    line-height: 1.6;
-    margin-bottom: var(--spacing-lg);
-    display: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningText ul {
-    text-align: left;
-    margin: var(--spacing-sm) 0;
-    padding-left: var(--spacing-lg);
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningText li {
-    margin-bottom: 5px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningInfo {
-    margin-top: var(--spacing-md);
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningInfoItem {
-    margin-bottom: 8px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningInfoItem:last-child {
-    margin-bottom: 0;
-  }
-}
-@media (min-width: 0px) {
   .sun-mobileRetryBtn {
     width: 100%;
     padding: 12px;
@@ -2451,9 +2089,11 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-dateInput {
-    padding: 3px 5px;
-    border: 1px solid var(--clg);
-    font-size: var(--font-size-sm);
+    flex: 0;
+    width: 100%;
+    height: 25px;
+    box-sizing: border-box;
+    overflow: visible;
   }
 }
 @media (min-width: 0px) {
@@ -2461,15 +2101,6 @@ textarea {
     padding: 3px 5px;
     border: 1px solid var(--clg);
     font-size: var(--font-size-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateInput {
-    flex: 0;
-    width: 100%;
-    height: 25px;
-    box-sizing: border-box;
-    overflow: visible;
   }
 }
 @media (min-width: 0px) {
@@ -2573,15 +2204,12 @@ textarea {
 @media (min-width: 0px) {
   .sun-labels {
     position: absolute;
-    color: var(--text-secondary);
-    z-index: 8;
-    pointer-events: none;
-    user-select: none;
   }
 }
 @media (min-width: 0px) {
   .sun-weekdayLabel {
-    font-size: var(--font-size-sm);
+    bottom: var(--spacing-sm);
+    transform: translateX(-50%);
   }
 }
 @media (min-width: 0px) {
@@ -2617,36 +2245,10 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-spoilerContent.sun-show {
-    display: block;
-  }
-}
-@media (min-width: 0px) {
   .sun-dbImportStatus {
     margin: var(--spacing-sm) 0;
     padding: var(--spacing-sm);
     border-radius: 4px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dbImportStatus.sun-success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dbImportStatus.sun-error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dbImportStatus.sun-info {
-    background: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
   }
 }
 @media (min-width: 0px) {
@@ -2687,12 +2289,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveVisibilityCheck:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-@media (min-width: 0px) {
   .sun-cursorTooltip {
     position: fixed;
     z-index: 100000;
@@ -2721,32 +2317,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-secretSchemeWrapHidden {
     display: none !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-secretSchemeSection .sun-tabContainer {
-    align-items: flex-start;
-  }
-}
-@media (min-width: 0px) {
-  .sun-secretSchemeSection .sun-tabButtons.sun-tabButtonsFramed {
-    width: fit-content;
-    max-width: 100%;
-  }
-}
-@media (min-width: 0px) {
-  .sun-secretSchemeSection .sun-tabButtons {
-    justify-content: flex-start;
-  }
-}
-@media (min-width: 0px) {
-  .sun-secretSchemeSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
-    flex: 0 1 auto;
-    max-width: 100%;
-    white-space: normal;
-    text-align: left;
-    line-height: 1.25;
-    padding: 6px 12px;
   }
 }
 @media (min-width: 0px) {
@@ -2953,36 +2523,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-wavesMount .sun-waveContainer {
-    pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavesMount .sun-waveContainer svg {
-    pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavesMount .sun-waveContainer .sun-wave {
-    pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavesMount .sun-waveContainer .sun-wavePath {
-    pointer-events: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-graphContainer.sun-graphGrayMode {
-    filter: grayscale(1);
-  }
-}
-@media (min-width: 0px) {
-  .sun-graphContainer.sun-graphGrayMode .sun-axis, .sun-graphContainer.sun-graphGrayMode .sun-gridLine, .sun-graphContainer.sun-graphGrayMode .sun-gridLineInner, .sun-graphContainer.sun-graphGrayMode .sun-wavePath {
-    filter: none;
-  }
-}
-@media (min-width: 0px) {
   .sun-waveLabelsContainer {
     position: absolute;
     top: 0;
@@ -2995,11 +2535,8 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveLabelsContainer .sun-waveLabelsSide {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 200px;
+  .sun-waveLabelsContainer.sun-hidden {
+    display: none !important;
   }
 }
 @media (min-width: 0px) {
@@ -3027,10 +2564,8 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveLabelsVerticalContainer .sun-waveLabelsSide {
-    position: absolute;
-    width: 100%;
-    height: 30px;
+  .sun-waveLabelsVerticalContainer.sun-hidden {
+    display: none !important;
   }
 }
 @media (min-width: 0px) {
@@ -3041,16 +2576,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveLabelsBottom {
     bottom: -30px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsContainer.sun-hidden {
-    display: none !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsVerticalContainer.sun-hidden {
-    display: none !important;
   }
 }
 @media (min-width: 0px) {
@@ -3119,44 +2644,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveLabelsContainer .sun-waveLabel.sun-horizontal {
-    transform: translateY(-50%);
-    height: 20px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsLeft .sun-waveLabel {
-    flex-direction: row-reverse;
-    right: 0;
-    margin-right: 10px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsRight .sun-waveLabel {
-    flex-direction: row;
-    left: 0;
-    margin-left: 10px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsVerticalContainer .sun-waveLabel.sun-vertical {
-    transform: translateX(-50%);
-    height: 20px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsTop .sun-waveLabel {
-    top: 0;
-    margin-top: 5px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsBottom .sun-waveLabel {
-    bottom: 0;
-    margin-bottom: 5px;
-  }
-}
-@media (min-width: 0px) {
   .sun-waveLabelText {
     white-space: nowrap;
     font-weight: 400;
@@ -3187,18 +2674,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveLabelsContainer .sun-waveLabelArrow {
-    top: 50%;
-    transform: translateY(-50%);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsVerticalContainer .sun-waveLabelArrow {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-}
-@media (min-width: 0px) {
   .sun-graph {
     position: relative;
     width: 100%;
@@ -3215,12 +2690,6 @@ textarea {
     pointer-events: none;
     z-index: 10;
     transform-origin: 50% 50%;
-  }
-}
-@media (min-width: 0px) {
-  .sun-graph.sun-graphAxisSwapped .sun-xAxis.sun-active {
-    background-color: var(--cp) !important;
-    z-index: 6;
   }
 }
 @media (min-width: 0px) {
@@ -3263,11 +2732,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-gridWrapper:hover .sun-gridLineInner {
-    background-color: #ccc;
-  }
-}
-@media (min-width: 0px) {
   .sun-gridLineInner {
     position: absolute;
     left: 50%;
@@ -3289,17 +2753,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-gridWrapper:hover .sun-gridLineInner.sun-hasNotes {
-    background-color: #ff4444;
-  }
-}
-@media (min-width: 0px) {
   .sun-gridLineInner.sun-active:hover {
-    background-color: var(--cp) !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridWrapper:hover .sun-gridLineInner.sun-active {
     background-color: var(--cp) !important;
   }
 }
@@ -3309,68 +2763,10 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-gridWrapper:hover .sun-gridLineInner.sun-active.sun-hasNotes {
-    background-color: var(--danger-color) !important;
-  }
-}
-@media (min-width: 0px) {
   .sun-gridLine {
     position: absolute;
     background-color: #eee;
     z-index: 1;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineX {
-    width: 100%;
-    height: 1px;
-    left: 0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY {
-    width: 1px;
-    height: 100%;
-    top: 0;
-    cursor: pointer;
-    z-index: 6;
-    background-color: #eee;
-    transition: width 0.2s, background-color 0.2s;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY.sun-active {
-    background-color: var(--cp);
-    width: 1px;
-    z-index: 7;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY.sun-active:hover {
-    background-color: var(--cp);
-    width: 1px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY.sun-hasNotes {
-    background-color: var(--danger-color);
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY.sun-hasNotes:hover {
-    background-color: #ff4444;
-    width: 3px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY.sun-active.sun-hasNotes {
-    background-color: var(--danger-color);
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-gridLineY.sun-active.sun-hasNotes:hover {
-    background-color: var(--danger-color);
-    width: 1px;
   }
 }
 @media (min-width: 0px) {
@@ -3384,7 +2780,6 @@ textarea {
   .sun-dateLabels {
     bottom: 30px;
     transform: translateX(-50%);
-    color: var(--text-secondary);
   }
 }
 @media (min-width: 0px) {
@@ -3395,49 +2790,14 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateRow .sun-dateLabels {
-    position: static;
-    transform: none;
-    bottom: auto;
-    left: auto;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateRow .sun-weekdayLabel {
-    position: static;
-    transform: none;
-    bottom: auto;
-    left: auto;
-  }
-}
-@media (min-width: 0px) {
   .sun-yLabels {
-    left: 10px;
+    left: var(--spacing-sm);
     transform: translateY(-50%);
-    color: var(--text-secondary);
   }
 }
 @media (min-width: 0px) {
   .sun-stateLabels {
     color: var(--text-secondary);
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-stateV {
-    background-color: #eee;
-    z-index: 1;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-dayH {
-    background-color: #eee;
-    z-index: 1;
-  }
-}
-@media (min-width: 0px) {
-  .sun-gridLine.sun-dayH.sun-active {
-    background-color: var(--cp) !important;
-    z-index: 6 !important;
   }
 }
 @media (min-width: 0px) {
@@ -3479,13 +2839,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-centerDateName {
-    font-size: var(--font-size-md);
-    color: var(--text-color);
-    margin-top: 2px;
-  }
-}
-@media (min-width: 0px) {
   .sun-centerDateMain {
     display: flex;
     flex-direction: column;
@@ -3517,11 +2870,6 @@ textarea {
     color: var(--text-secondary);
     margin-top: 4px;
     font-weight: 400;
-  }
-}
-@media (min-width: 0px) {
-  .sun-centerDateStar {
-    font-size: 22px;
   }
 }
 @media (min-width: 0px) {
@@ -3578,6 +2926,13 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-extremumLabel:hover {
+    border-color: #000;
+    z-index: 20;
+    pointer-events: auto;
+  }
+}
+@media (min-width: 0px) {
   .sun-extremumLabelTop {
     bottom: 100%;
     margin-bottom: 5px;
@@ -3608,20 +2963,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-extremumLabelTop .sun-extremumLabelArrow {
-    bottom: -6px;
-    border-width: 6px 4px 0 4px;
-    border-color: rgb(192, 192, 192) transparent transparent transparent;
-  }
-}
-@media (min-width: 0px) {
-  .sun-extremumLabelBottom .sun-extremumLabelArrow {
-    top: -6px;
-    border-width: 0 4px 6px 4px;
-    border-color: transparent transparent rgb(192, 192, 192) transparent;
-  }
-}
-@media (min-width: 0px) {
   .sun-extremumMarker {
     position: absolute;
     width: 1px;
@@ -3644,13 +2985,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-extremumWaveName {
     cursor: pointer;
-    pointer-events: auto;
-  }
-}
-@media (min-width: 0px) {
-  .sun-extremumLabel:hover {
-    border-color: #000;
-    z-index: 20;
     pointer-events: auto;
   }
 }
@@ -3682,22 +3016,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarSegmentLabel:hover .sun-extremumLabelArrowTopInSegment {
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-left-color: transparent;
-    border-bottom-color: #000;
-  }
-}
-@media (min-width: 0px) {
-  .sun-timeBarSegmentLabel:hover .sun-extremumLabelArrowBottomInSegment {
-    border-top-color: #000;
-    border-right-color: transparent;
-    border-left-color: transparent;
-    border-bottom-color: transparent;
-  }
-}
-@media (min-width: 0px) {
   .sun-waveContainer {
     position: absolute;
     width: 3600px;
@@ -3725,21 +3043,10 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveContainerSwapped .sun-wave {
-    top: 0;
-    transform: none;
-  }
-}
-@media (min-width: 0px) {
   .sun-wavePath {
     fill: none;
     stroke-width: 1.5px;
     stroke-linecap: round;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-bold {
-    stroke-width: 3px;
   }
 }
 @media (min-width: 0px) {
@@ -3753,131 +3060,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-waveLabel.sun-waveLabelPersonB {
-    opacity: 0.5;
-    font-style: italic;
-    font-weight: 400;
-    outline: 1px dashed rgba(255, 255, 255, 0.42);
-    outline-offset: -1px;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabel.sun-waveLabelPersonB:hover {
-    opacity: 0.88;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabel.sun-waveLabelPersonB .sun-waveLabelText {
-    letter-spacing: 0.35px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabel.sun-waveLabelPersonB {
-    overflow: visible;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsLeft .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before, .sun-waveLabelsRight .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 12px;
-    height: 2px;
-    margin-top: -1px;
-    background: var(--sun-waveLabel-fill, #888);
-    opacity: 0.95;
-    pointer-events: none;
-    z-index: 0;
-    border-radius: 1px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsLeft .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before {
-    left: 0;
-    right: auto;
-    transform: translateX(-100%);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsRight .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before {
-    right: 0;
-    left: auto;
-    transform: translateX(100%);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsTop .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before, .sun-waveLabelsBottom .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    width: 2px;
-    height: 10px;
-    margin-left: -1px;
-    background: var(--sun-waveLabel-fill, #888);
-    opacity: 0.95;
-    pointer-events: none;
-    z-index: 0;
-    border-radius: 1px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsTop .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before {
-    top: 0;
-    bottom: auto;
-    transform: translate(-50%, -100%);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelsBottom .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before {
-    bottom: 0;
-    top: auto;
-    transform: translate(-50%, 100%);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveAxisXPoint.sun-waveAxisXPointPersonB {
-    opacity: 0.45;
-    border-style: dashed;
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveAxisXPoint.sun-waveAxisXPointPersonB:hover {
-    opacity: 0.85;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-solid {
-    stroke-dasharray: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-dashed {
-    stroke-dasharray: 5px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-dotted {
-    stroke-dasharray: 2px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-zigzag {
-    stroke-linecap: butt;
-    stroke-dasharray: 3px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-dashDot {
-    stroke-dasharray: 8px 2px 2px 2px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePath.sun-longDash {
-    stroke-dasharray: 12px 3px;
-  }
-}
-@media (min-width: 0px) {
   .sun-cornerSquare {
     position: fixed;
     width: var(--spacing-lg);
@@ -3888,112 +3070,103 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosTl {
+  .sun-cornerSquare.sun-cornerSquarecornerPosTl {
     top: 0;
     left: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosTr {
+  .sun-cornerSquare.sun-cornerSquarecornerPosTr {
     top: 0;
     right: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosBl {
+  .sun-cornerSquare.sun-cornerSquarecornerPosBl {
     bottom: 0;
     left: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosBr {
+  .sun-cornerSquare.sun-cornerSquarecornerPosBr {
     bottom: 0;
     right: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosTc {
+  .sun-cornerSquare.sun-cornerSquarecornerPosTc {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosBc {
+  .sun-cornerSquare.sun-cornerSquarecornerPosBc {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosLc {
+  .sun-cornerSquare.sun-cornerSquarecornerPosLc {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosRc {
+  .sun-cornerSquare.sun-cornerSquarecornerPosRc {
     right: 0;
     top: 50%;
     transform: translateY(-50%);
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMt {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMt {
     top: 0;
     left: 25%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMb {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMb {
     bottom: 0;
     left: 25%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMl {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMl {
     left: 0;
     top: 25%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMr {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMr {
     right: 0;
     top: 25%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMt2 {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMt2 {
     top: 0;
     left: 75%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMb2 {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMb2 {
     bottom: 0;
     left: 75%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMl2 {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMl2 {
     left: 0;
     top: 75%;
   }
 }
 @media (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMr2 {
+  .sun-cornerSquare.sun-cornerSquarecornerPosMr2 {
     right: 0;
     top: 75%;
-  }
-}
-@media (min-width: 0px) {
-  .sun-panelSection {
-    background: #fff;
-    padding: var(--spacing-md);
-    overflow: visible;
-    min-width: 0;
-    outline: 1px solid var(--clg);
   }
 }
 @media (min-width: 0px) {
@@ -4009,161 +3182,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-panelSection.sun-buttonsPanel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-}
-@media (min-width: 0px) {
-  .sun-panelSection.sun-pagelImage {
-    align-self: center;
-  }
-}
-@media (min-width: 0px) {
-  .sun-panelSection.sun-pagelImage img {
-    display: block;
-    margin: 0 auto;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavesListContainer {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavesList {
-    height: 100%;
-    background: #fff;
-    overflow-y: auto;
-  }
-}
-@media (min-width: 0px) {
-  .sun-notesPanelLayout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-  }
-}
-@media (min-width: 0px) {
-  .sun-notesListContainer {
-    flex: 1;
-    min-width: 200px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-noteEditorContainer {
-    flex: 2;
-    min-width: 300px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-warningOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--cbg);
-    z-index: var(--z-overlay);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: var(--spacing-lg);
-  }
-}
-@media (min-width: 0px) {
-  .sun-warningOverlay.sun-hidden {
-    display: none !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-warningBox {
-    background: #fff;
-    padding: var(--spacing-xl);
-    border: 1px solid var(--clg);
-    max-width: 525px;
-    text-align: center;
-    display: block;
-  }
-}
-@media (min-width: 0px) {
-  .sun-warningBox.sun-hidden {
-    display: none !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabContainer {
-    display: flex;
-    flex-direction: column;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButtons {
-    display: flex;
-    padding: 0;
-    gap: 0;
-    flex-wrap: wrap;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButton {
-    padding: 0 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #495057;
-    font-size: var(--font-size-sm);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 500;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButton:last-child {
-    border-right: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabButton.sun-active {
-    background: var(--cp);
-    color: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabContent {
-    display: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-tabContent.sun-active {
-    display: block;
-  }
-}
-@media (min-width: 0px) {
-  .sun-inputGroup {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-inputRow {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-  }
-}
-@media (min-width: 0px) {
   .sun-addCustomWaveForm {
     display: flex;
     gap: var(--spacing-xs);
@@ -4171,6 +3189,97 @@ textarea {
     margin-bottom: var(--spacing-sm);
     flex-wrap: wrap;
     font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactaddGroupForm {
+    display: flex;
+    gap: var(--spacing-xs);
+    width: 100%;
+    align-items: center;
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactaddGroupInput {
+    flex: 1;
+    height: 25px;
+    padding: 3px 5px;
+    font-size: var(--font-size-sm);
+    min-width: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactaddGroupBtn {
+    height: 25px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-xs);
+    align-items: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRowformInput {
+    height: 25px;
+    padding: 3px 5px;
+    font-size: var(--font-size-sm);
+    min-width: 120px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRowcustomWaveName {
+    flex: 2;
+    min-width: 150px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRowcustomWavePeriod {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow select {
+    flex: 1;
+    min-width: 120px;
+    height: 25px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRowcolorInput {
+    width: 40px;
+    height: 25px;
+    padding: 0;
+    margin: 0;
+    align-self: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    display: block;
+    border: 1px solid var(--clg);
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRowbtnAddCustomWave {
+    height: 25px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-top: 0;
   }
 }
 @media (min-width: 0px) {
@@ -4199,105 +3308,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupForm {
-    display: flex;
-    gap: var(--spacing-xs);
-    width: 100%;
-    align-items: center;
-    margin-bottom: 0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupInput {
-    flex: 1;
-    height: 25px;
-    padding: 3px 5px;
-    font-size: var(--font-size-sm);
-    min-width: 0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupBtn {
-    height: 25px;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow {
-    display: flex;
-    flex-direction: row;
-    gap: var(--spacing-xs);
-    align-items: center;
-    width: 100%;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-formInput {
-    height: 25px;
-    padding: 3px 5px;
-    font-size: var(--font-size-sm);
-    min-width: 120px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-customWaveName {
-    flex: 2;
-    min-width: 150px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-customWavePeriod {
-    flex: 1;
-    min-width: 100px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow select {
-    flex: 1;
-    min-width: 120px;
-    height: 25px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-colorInput {
-    width: 40px;
-    height: 25px;
-    padding: 0;
-    margin: 0;
-    align-self: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    display: block;
-    border: 1px solid var(--clg);
-  }
-}
-@media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-btnAddCustomWave {
-    height: 25px;
-    flex-shrink: 0;
-    white-space: nowrap;
-    margin-top: 0;
-  }
-}
-@media (min-width: 0px) {
-  .sun-displayViewTemplatesBar.sun-compact {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
-  }
-}
-@media (min-width: 0px) {
   .sun-displayViewTemplatesSeparator {
     display: block;
     width: 100%;
@@ -4322,30 +3332,6 @@ textarea {
     gap: var(--spacing-xs);
     align-items: center;
     width: 100%;
-  }
-}
-@media (min-width: 0px) {
-  .sun-displayViewTemplatesRow .sun-displayViewTemplateSelect {
-    flex: 1;
-    min-width: 160px;
-    height: 25px;
-    font-size: var(--font-size-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-displayViewTemplatesRow .sun-newDisplayViewTemplateName {
-    flex: 1;
-    min-width: 140px;
-    height: 25px;
-    padding: 3px 5px;
-    font-size: var(--font-size-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-displayViewTemplatesRow .sun-btnDeleteDisplayViewTemplate {
-    height: 25px;
-    flex-shrink: 0;
-    white-space: nowrap;
   }
 }
 @media (min-width: 0px) {
@@ -4398,7 +3384,6 @@ textarea {
   .sun-intersectionResults {
     display: flex;
     flex-direction: column;
-    min-height: 0;
   }
 }
 @media (min-width: 0px) {
@@ -4437,9 +3422,7 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-intersectionControls {
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
+    margin-bottom: var(--spacing-md);
   }
 }
 @media (min-width: 0px) {
@@ -4462,16 +3445,18 @@ textarea {
 @media (min-width: 0px) {
   .sun-intersectionFormRow {
     display: flex;
-    gap: var(--spacing-xs);
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
   }
 }
 @media (min-width: 0px) {
   .sun-intersectionFormLabel {
-    width: 100px;
-    font-weight: 400;
-    flex-shrink: 0;
-    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
     white-space: nowrap;
   }
 }
@@ -4494,10 +3479,19 @@ textarea {
 @media (min-width: 0px) {
   .sun-intersectionStats {
     margin: var(--spacing-sm) 0;
-    padding: var(--spacing-sm);
-    background: #f5f5f5;
-    border: 1px solid var(--clg);
+    padding: var(--spacing-md);
+    background: #e9f7ef;
+    border: 1px solid #c3e6cb;
+    border-radius: var(--border-radius);
     font-size: var(--font-size-sm);
+    line-height: 1.4;
+    color: #155724;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionStats strong {
+    font-weight: 600;
+    color: #0c4121;
   }
 }
 @media (min-width: 0px) {
@@ -4645,19 +3639,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateGenderSelect {
-    flex: 0 0 auto;
-    width: 42px;
-    min-width: 42px;
-    max-width: 42px;
-    height: 25px;
-    padding: 2px 4px;
-    font-size: var(--font-size-sm);
-    text-align: center;
-    text-align-last: center;
-  }
-}
-@media (min-width: 0px) {
   .sun-dateAddDescriptionRow {
     width: 100%;
   }
@@ -4682,21 +3663,6 @@ textarea {
     min-width: 0;
     align-items: center;
     overflow: visible;
-  }
-}
-@media (min-width: 0px) {
-  .sun-topControls .sun-dateTimeInputGroup .sun-dateInput {
-    overflow: visible;
-  }
-}
-@media (min-width: 0px) {
-  .sun-groupChildren[style*="display: block"] {
-    display: block !important;
-  }
-}
-@media (min-width: 0px) {
-  .sun-groupChildren[style*="display:block"] {
-    display: block !important;
   }
 }
 @media (min-width: 0px) {
@@ -4786,39 +3752,9 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-summarySelectGroup .sun-summarySelect {
-    flex: 1 1 140px;
-    max-width: min(100%, 320px);
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionSelectGroup .sun-summarySelect {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 100%;
-    height: 25px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateComparisonSelects .sun-summarySelect {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 100%;
-    height: 25px;
-  }
-}
-@media (min-width: 0px) {
   .sun-summaryDuplicateButtons {
     display: flex;
     gap: var(--spacing-xs);
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryDuplicateButtons .sun-uiBtn {
-    height: 25px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
   }
 }
 @media (min-width: 0px) {
@@ -4829,18 +3765,6 @@ textarea {
     overflow-x: hidden;
     border: 1px solid var(--clg);
     background: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryResultsContainer .sun-summaryResults {
-    overflow: visible;
-    max-height: none;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryResultsContainer .sun-intersectionResults {
-    overflow: visible;
-    max-height: none;
   }
 }
 @media (min-width: 0px) {
@@ -4936,78 +3860,11 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-summaryItemActions .sun-uiBtn {
-    height: 25px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
-  }
-}
-@media (min-width: 0px) {
   .sun-summaryItemColor {
     width: 25px;
     height: 25px;
     flex-shrink: 0;
     border-radius: 3px;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryItemExact .sun-summaryItemCloseness {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryItemVeryClose .sun-summaryItemCloseness {
-    background: #4caf50;
-    color: white;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryItemClose .sun-summaryItemCloseness {
-    background: #8bc34a;
-    color: black;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryItemFairlyClose .sun-summaryItemCloseness {
-    background: #ffc107;
-    color: black;
-  }
-}
-@media (min-width: 0px) {
-  .sun-summaryItemNearby .sun-summaryItemCloseness {
-    background: #ff9800;
-    color: black;
-  }
-}
-@media (min-width: 0px) {
-  .sun-wavePeriodBadge {
-    background: #e0e0e0;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 400;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionControls {
-    margin-bottom: var(--spacing-md);
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionForm {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionFormRow {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
   }
 }
 @media (min-width: 0px) {
@@ -5021,28 +3878,12 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionFormLabel {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    white-space: nowrap;
-  }
-}
-@media (min-width: 0px) {
   .sun-intersectionResultsContainer {
     max-height: 400px;
     min-height: 200px;
     overflow-y: auto;
     border: 1px solid var(--clg);
     background: #fff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionResults {
-    display: flex;
-    flex-direction: column;
   }
 }
 @media (min-width: 0px) {
@@ -5092,15 +3933,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-wavePeriodBadge {
-    background: #e0e0e0;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 400;
-  }
-}
-@media (min-width: 0px) {
   .sun-pastWaveMarker {
     color: #999;
     font-style: italic;
@@ -5136,42 +3968,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionResultCloseness.sun-intersectionItemExact {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionResultCloseness.sun-intersectionItemVeryClose {
-    background: #4caf50;
-    color: white;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionResultCloseness.sun-intersectionItemClose {
-    background: #8bc34a;
-    color: black;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionResultCloseness.sun-intersectionItemFairlyClose {
-    background: #ffc107;
-    color: black;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionResultCloseness.sun-intersectionItemNearby {
-    background: #ff9800;
-    color: black;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionResultCloseness.sun-intersectionItemWithinTolerance {
-    background: #f44336;
-    color: white;
-  }
-}
-@media (min-width: 0px) {
   .sun-intersectionResultColor {
     width: 25px;
     height: 25px;
@@ -5187,43 +3983,8 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionResultActions .sun-uiBtn {
-    height: 25px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionStats {
-    margin: var(--spacing-sm) 0;
-    padding: var(--spacing-md);
-    background: #e9f7ef;
-    border: 1px solid #c3e6cb;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    line-height: 1.4;
-    color: #155724;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionStats strong {
-    font-weight: 600;
-    color: #0c4121;
-  }
-}
-@media (min-width: 0px) {
   .sun-intersectionStatsContent {
     line-height: 1.5;
-  }
-}
-@media (min-width: 0px) {
-  .sun-listEmpty {
-    padding: var(--spacing-lg);
-    text-align: center;
-    color: #999;
-    font-style: italic;
-    font-size: var(--font-size-sm);
   }
 }
 @media (min-width: 0px) {
@@ -5253,29 +4014,8 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonViewTabs + .sun-summaryResultsContainer {
-    margin-top: var(--spacing-sm);
-  }
-}
-@media (min-width: 0px) {
   .sun-tabContainerWithFramedButtons {
     gap: var(--spacing-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateComparisonViewTabs .sun-tabButton {
-    font-size: var(--font-size-sm);
-    padding: 6px 10px;
-    flex: 1 1 0;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateComparisonViewTabs .sun-tabButton.sun-active {
-    font-weight: 600;
   }
 }
 @media (min-width: 0px) {
@@ -5293,15 +4033,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonSelects .sun-intersectionSelectGroup {
-    flex: 1;
-    min-width: 140px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-}
-@media (min-width: 0px) {
   .sun-intersectionSelectGroup {
     display: flex;
     flex-direction: column;
@@ -5314,18 +4045,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionToolbarOneRow .sun-intersectionSelectGroup {
-    flex: 1 1 130px;
-    min-width: 0;
-    max-width: min(100%, 220px);
-  }
-}
-@media (min-width: 0px) {
-  .sun-dateComparisonSelects .sun-intersectionFormLabel {
-    cursor: default;
-  }
-}
-@media (min-width: 0px) {
   .sun-dateComparisonTable {
     width: 100%;
     border-collapse: collapse;
@@ -5333,7 +4052,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonTable th {
+  .sun-dateComparisonTableHeadCell {
     text-align: left;
     padding: 8px 6px;
     border-bottom: 1px solid var(--clg);
@@ -5343,19 +4062,19 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonTable td {
+  .sun-dateComparisonTableCell {
     padding: 8px 6px;
     border-bottom: 1px solid #eee;
     vertical-align: middle;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonTable tbody tr:hover {
+  .sun-dateComparisonTableRow:hover {
     background-color: #f0f4f8;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonTable td.sun-dateComparisonState {
+  .sun-dateComparisonState {
     width: 1%;
     white-space: nowrap;
   }
@@ -5395,7 +4114,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-dateComparisonTable .sun-dateComparisonActions .sun-uiBtn {
+  .sun-dateComparisonActionsBtn {
     font-size: 11px;
     padding: 4px 8px;
   }
@@ -5408,11 +4127,6 @@ textarea {
     display: none;
     font-family: var(--font-family);
     color: var(--text-color);
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionTimeRail.sun-intersectionTimeRailOpen {
-    display: block;
   }
 }
 @media (min-width: 0px) {
@@ -5495,16 +4209,6 @@ textarea {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-weight: 500;
-  }
-}
-@media (min-width: 0px) {
-  .sun-intersectionTimeRailPersonField .sun-summarySelect, .sun-intersectionTimeRailPersonField .sun-intersectionTimeRailPersonSelect {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 100%;
-    height: 25px;
-    min-height: 25px;
-    box-sizing: border-box;
   }
 }
 @media (min-width: 0px) {
@@ -5829,27 +4533,1181 @@ textarea {
     pointer-events: none;
   }
 }
+.sun- {
+  /* --- restored from styles.css --- */
+}
 @media (min-width: 0px) {
-  .sun-labels {
+  .sun-app .sun-graphSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateName.sun-dateLabelVisible, .sun-centerDateName.sun-dateLabelVisible {
+    display: block !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed {
+    width: -moz-fit-content;
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabButtonsTimeBarControls.sun-tabButtonsFramed .sun-tabButton {
+    flex: 0 1 auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateRow.sun-timeBarHoursRow {
+    border-top: none;
+    border-bottom: 1px solid var(--clg);
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarSegmentLabel.sun-extremumLabelTop {
+    bottom: auto;
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarNowMarker.sun-timeIndicator {
     position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    z-index: 14;
   }
 }
 @media (min-width: 0px) {
-  .sun-dateLabels {
-    bottom: 30px;
-    transform: translateX(-50%);
+  .sun-hourMarker.sun-clickable {
+    cursor: pointer;
   }
 }
 @media (min-width: 0px) {
-  .sun-weekdayLabel {
-    bottom: var(--spacing-sm);
-    transform: translateX(-50%);
+  .sun-hourMarker.sun-midnight {
+    border-left-color: var(--danger-color);
   }
 }
 @media (min-width: 0px) {
-  .sun-yLabels {
-    left: var(--spacing-sm);
+  .sun-btnToday.sun-todayActive {
+    background-color: var(--cp);
+    color: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-btnToday.sun-todayInactive {
+    background-color: #ff9900;
+    color: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-btnToday.sun-todayInactive:hover {
+    background-color: #ffad33;
+    filter: brightness(1.1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-btnFlipH.sun-flipHActive {
+    background-color: #ff9900;
+    color: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-btnFlipH.sun-flipHActive:hover {
+    background-color: #ffad33;
+    filter: brightness(1.1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-btnFlipV.sun-flipVActive {
+    background-color: #ff9900;
+    color: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-btnFlipV.sun-flipVActive:hover {
+    background-color: #ffad33;
+    filter: brightness(1.1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabButtons.sun-tabButtonsFramed {
+    border: 1px solid var(--clg);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
+    font-size: var(--font-size-sm);
+    padding: 6px 10px;
+    flex: 1 1 0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton.sun-active {
+    font-weight: 600;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemNote .sun-noteContentWrapper {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemIntersection.sun-exactMatch {
+    background-color: #e6f7e6;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemIntersection.sun-closeMatch {
+    background-color: #fffbe6;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemIntersection .sun-intersectionInfo {
+    flex: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemIntersection .sun-intersectionPeriod {
+    font-weight: 700;
+    color: var(--text-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemIntersection .sun-intersectionMatchType {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemIntersection .sun-intersectionControls {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+    flex-shrink: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup.sun-listItemDragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup.sun-listItemDragOverTop::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemGroup.sun-listItemDragOverBottom::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup.sun-listItemDragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup.sun-listItemDragOverTop::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemPersonGroup.sun-listItemDragOverBottom::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: #000;
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInPersonGroup.sun-listItemDragOverTop {
+    border-top: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateInPersonGroup.sun-listItemDragOverBottom {
+    border-bottom: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragging {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverTop {
+    border-top: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverBottom {
+    border-bottom: 2px solid var(--cp);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverTop::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--cp);
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveInGroup.sun-listItemDragOverBottom::after {
+    content: "";
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--cp);
+    transform: rotate(45deg);
+    z-index: 10;
+  }
+}
+@media (min-width: 0px) {
+  .sun-groupChildren.sun-groupChildrenDragOver {
+    background: rgba(0, 102, 204, 0.06);
+    outline: 2px dashed var(--cp);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-personGroupChildren.sun-groupChildrenDragOver {
+    background: rgba(0, 102, 204, 0.06);
+    outline: 2px dashed var(--cp);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateCheckbox::after, .sun-waveGroupToggle::after, .sun-waveVisibilityCheck::after, .sun-waveBVisibilityCheck::after, .sun-waveCornerColorCheck::after, .sun-timeBarStateCheck::after, .sun-timeBarGroupCheck::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 1;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemDate.sun-dateCheckbox[data-type=a] {
+    background-color: #e8f4fe;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemDate.sun-dateCheckbox[data-type=b] {
+    background-color: #fff4e5;
+  }
+}
+@media (min-width: 0px) {
+  .sun-uiBtn.sun-uiBtnToggleOff {
+    opacity: 0.55;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-parableBtnWrapper {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningActions {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningOverlay .sun-warningBox {
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+    background: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningTitle {
+    font-size: var(--font-size-lg);
+    margin-bottom: 0px;
+    text-align: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningText {
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-lg);
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningText {
+    text-align: left;
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningText {
+    margin-bottom: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningInfo {
+    margin-top: var(--spacing-md);
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningInfoItem {
+    margin-bottom: 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-mobileWarningBox .sun-warningInfoItem:last-child {
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-spoilerContent.sun-show {
+    display: block;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dbImportStatus.sun-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dbImportStatus.sun-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dbImportStatus.sun-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+}
+@media (min-width: 0px) {
+  .sun-secretSchemeSection .sun-tabContainer {
+    align-items: flex-start;
+  }
+}
+@media (min-width: 0px) {
+  .sun-secretSchemeSection .sun-tabButtons.sun-tabButtonsFramed {
+    width: -moz-fit-content;
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-secretSchemeSection .sun-tabButtons {
+    justify-content: flex-start;
+  }
+}
+@media (min-width: 0px) {
+  .sun-secretSchemeSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
+    flex: 0 1 auto;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.25;
+    padding: 6px 12px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesMount .sun-waveContainer {
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesMount .sun-waveContainer {
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesMount .sun-waveContainer .sun-wave {
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesMount .sun-waveContainer .sun-wavePath {
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode {
+    filter: grayscale(1);
+  }
+}
+@media (min-width: 0px) {
+  .sun-graphContainer.sun-graphGrayMode .sun-axis, .sun-graphContainer.sun-graphGrayMode .sun-gridLine, .sun-graphContainer.sun-graphGrayMode .sun-gridLineInner, .sun-graphContainer.sun-graphGrayMode .sun-wavePath {
+    filter: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsContainer .sun-waveLabelsSide {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 200px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsVerticalContainer .sun-waveLabelsSide {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsContainer .sun-waveLabel.sun-horizontal {
     transform: translateY(-50%);
+    height: 20px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsLeft .sun-waveLabel {
+    flex-direction: row-reverse;
+    right: 0;
+    margin-right: 10px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsRight .sun-waveLabel {
+    flex-direction: row;
+    left: 0;
+    margin-left: 10px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsVerticalContainer .sun-waveLabel.sun-vertical {
+    transform: translateX(-50%);
+    height: 20px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsTop .sun-waveLabel {
+    top: 0;
+    margin-top: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsBottom .sun-waveLabel {
+    bottom: 0;
+    margin-bottom: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsContainer .sun-waveLabelArrow {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsVerticalContainer .sun-waveLabelArrow {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+@media (min-width: 0px) {
+  .sun-graph.sun-graphAxisSwapped .sun-xAxis.sun-active {
+    background-color: var(--cp) !important;
+    z-index: 6;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridWrapper:hover .sun-gridLineInner {
+    background-color: #ccc;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridWrapper:hover .sun-gridLineInner.sun-hasNotes {
+    background-color: #ff4444;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridWrapper:hover .sun-gridLineInner.sun-active {
+    background-color: var(--cp) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridWrapper:hover .sun-gridLineInner.sun-active.sun-hasNotes {
+    background-color: var(--danger-color) !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineX {
+    width: 100%;
+    height: 1px;
+    left: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY {
+    width: 1px;
+    height: 100%;
+    top: 0;
+    cursor: pointer;
+    z-index: 6;
+    background-color: #eee;
+    transition: width 0.2s, background-color 0.2s;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY.sun-active {
+    background-color: var(--cp);
+    width: 1px;
+    z-index: 7;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY.sun-active:hover {
+    background-color: var(--cp);
+    width: 1px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY.sun-hasNotes {
+    background-color: var(--danger-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY.sun-hasNotes:hover {
+    background-color: #ff4444;
+    width: 3px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY.sun-active.sun-hasNotes {
+    background-color: var(--danger-color);
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-gridLineY.sun-active.sun-hasNotes:hover {
+    background-color: var(--danger-color);
+    width: 1px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateRow .sun-dateLabels {
+    position: static;
+    transform: none;
+    bottom: auto;
+    left: auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateRow .sun-weekdayLabel {
+    position: static;
+    transform: none;
+    bottom: auto;
+    left: auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-stateV {
+    background-color: #eee;
+    z-index: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-dayH {
+    background-color: #eee;
+    z-index: 1;
+  }
+}
+@media (min-width: 0px) {
+  .sun-gridLine.sun-dayH.sun-active {
+    background-color: var(--cp) !important;
+    z-index: 6 !important;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumLabelTop .sun-extremumLabelArrow {
+    bottom: -6px;
+    border-width: 6px 4px 0 4px;
+    border-color: rgb(192, 192, 192) transparent transparent transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-extremumLabelBottom .sun-extremumLabelArrow {
+    top: -6px;
+    border-width: 0 4px 6px 4px;
+    border-color: transparent transparent rgb(192, 192, 192) transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarSegmentLabel:hover .sun-extremumLabelArrowTopInSegment {
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: #000;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarSegmentLabel:hover .sun-extremumLabelArrowBottomInSegment {
+    border-top-color: #000;
+    border-right-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveContainerSwapped .sun-wave {
+    top: 0;
+    transform: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-bold {
+    stroke-width: 3px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabel.sun-waveLabelPersonB {
+    opacity: 0.5;
+    font-style: italic;
+    font-weight: 400;
+    outline: 1px dashed rgba(255, 255, 255, 0.42);
+    outline-offset: -1px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabel.sun-waveLabelPersonB:hover {
+    opacity: 0.88;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabel.sun-waveLabelPersonB .sun-waveLabelText {
+    letter-spacing: 0.35px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsLeft .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before, .sun-waveLabelsRight .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 2px;
+    margin-top: -1px;
+    background: var(--sun-waveLabel-fill, #888);
+    opacity: 0.95;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 1px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsLeft .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before {
+    left: 0;
+    right: auto;
+    transform: translateX(-100%);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsRight .sun-waveLabel.sun-horizontal.sun-waveLabelPersonB[data-logical-edge]::before {
+    right: 0;
+    left: auto;
+    transform: translateX(100%);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsTop .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before, .sun-waveLabelsBottom .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 2px;
+    height: 10px;
+    margin-left: -1px;
+    background: var(--sun-waveLabel-fill, #888);
+    opacity: 0.95;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 1px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsTop .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before {
+    top: 0;
+    bottom: auto;
+    transform: translate(-50%, -100%);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveLabelsBottom .sun-waveLabel.sun-vertical.sun-waveLabelPersonB[data-logical-edge]::before {
+    bottom: 0;
+    top: auto;
+    transform: translate(-50%, 100%);
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveAxisXPoint.sun-waveAxisXPointPersonB {
+    opacity: 0.45;
+    border-style: dashed;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveAxisXPoint.sun-waveAxisXPointPersonB:hover {
+    opacity: 0.85;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-solid {
+    stroke-dasharray: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-dashed {
+    stroke-dasharray: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-dotted {
+    stroke-dasharray: 2px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-zigzag {
+    stroke-linecap: butt;
+    stroke-dasharray: 3px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-dashDot {
+    stroke-dasharray: 8px 2px 2px 2px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavePath.sun-longDash {
+    stroke-dasharray: 12px 3px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-panelSection.sun-buttonsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+}
+@media (min-width: 0px) {
+  .sun-panelSection.sun-pagelImage {
+    align-self: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-panelSection.sun-pagelImage {
+    display: block;
+    margin: 0 auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-addGroupForm {
+    display: flex;
+    gap: var(--spacing-xs);
+    width: 100%;
+    align-items: center;
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-addGroupInput {
+    flex: 1;
+    height: 25px;
+    padding: 3px 5px;
+    font-size: var(--font-size-sm);
+    min-width: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-addGroupBtn {
+    height: 25px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-xs);
+    align-items: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-formInput {
+    height: 25px;
+    padding: 3px 5px;
+    font-size: var(--font-size-sm);
+    min-width: 120px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-customWaveName {
+    flex: 2;
+    min-width: 150px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-customWavePeriod {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow {
+    flex: 1;
+    min-width: 120px;
+    height: 25px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-colorInput {
+    width: 40px;
+    height: 25px;
+    padding: 0;
+    margin: 0;
+    align-self: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    display: block;
+    border: 1px solid var(--clg);
+  }
+}
+@media (min-width: 0px) {
+  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-btnAddCustomWave {
+    height: 25px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-top: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-displayViewTemplatesBar.sun-compact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-displayViewTemplatesRow .sun-displayViewTemplateSelect {
+    flex: 1;
+    min-width: 160px;
+    height: 25px;
+    font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-displayViewTemplatesRow .sun-newDisplayViewTemplateName {
+    flex: 1;
+    min-width: 140px;
+    height: 25px;
+    padding: 3px 5px;
+    font-size: var(--font-size-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-displayViewTemplatesRow .sun-btnDeleteDisplayViewTemplate {
+    height: 25px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-topControls .sun-dateTimeInputGroup .sun-dateInput {
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summarySelectGroup .sun-summarySelect {
+    flex: 1 1 140px;
+    max-width: min(100%, 320px);
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionSelectGroup .sun-summarySelect {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: 25px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonSelects .sun-summarySelect {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: 25px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryDuplicateButtons .sun-uiBtn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryResultsContainer .sun-summaryResults {
+    overflow: visible;
+    max-height: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryResultsContainer .sun-intersectionResults {
+    overflow: visible;
+    max-height: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryItemActions .sun-uiBtn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryItemExact .sun-summaryItemCloseness {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryItemVeryClose .sun-summaryItemCloseness {
+    background: #4caf50;
+    color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryItemClose .sun-summaryItemCloseness {
+    background: #8bc34a;
+    color: black;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryItemFairlyClose .sun-summaryItemCloseness {
+    background: #ffc107;
+    color: black;
+  }
+}
+@media (min-width: 0px) {
+  .sun-summaryItemNearby .sun-summaryItemCloseness {
+    background: #ff9800;
+    color: black;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultCloseness.sun-intersectionItemExact {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultCloseness.sun-intersectionItemVeryClose {
+    background: #4caf50;
+    color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultCloseness.sun-intersectionItemClose {
+    background: #8bc34a;
+    color: black;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultCloseness.sun-intersectionItemFairlyClose {
+    background: #ffc107;
+    color: black;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultCloseness.sun-intersectionItemNearby {
+    background: #ff9800;
+    color: black;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultCloseness.sun-intersectionItemWithinTolerance {
+    background: #f44336;
+    color: white;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionResultActions .sun-uiBtn {
+    height: 25px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonViewTabs .sun-summaryResultsContainer {
+    margin-top: var(--spacing-sm);
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonViewTabs .sun-tabButton {
+    font-size: var(--font-size-sm);
+    padding: 6px 10px;
+    flex: 1 1 0;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonViewTabs .sun-tabButton.sun-active {
+    font-weight: 600;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonSelects .sun-intersectionSelectGroup {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionToolbarOneRow .sun-intersectionSelectGroup {
+    flex: 1 1 130px;
+    min-width: 0;
+    max-width: min(100%, 220px);
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonSelects .sun-intersectionFormLabel {
+    cursor: default;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTable {
+    text-align: left;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--clg);
+    background: #f8f9fa;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTable {
+    padding: 8px 6px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTable :hover {
+    background-color: #f0f4f8;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTable .sun-dateComparisonState {
+    width: 1%;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonTable .sun-dateComparisonActions .sun-uiBtn {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionTimeRail.sun-intersectionTimeRailOpen {
+    display: block;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionTimeRailPersonField .sun-summarySelect, .sun-intersectionTimeRailPersonField .sun-intersectionTimeRailPersonSelect {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: 25px;
+    min-height: 25px;
+    box-sizing: border-box;
   }
 }
 @media (min-width: 0px) {
@@ -5882,15 +5740,6 @@ textarea {
   .sun-waveLabel.sun-horizontal.sun-right {
     left: 0;
     margin-left: var(--spacing-sm);
-  }
-}
-@media (min-width: 0px) {
-  .sun-waveLabelArrow {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    z-index: 1;
   }
 }
 @media (min-width: 0px) {
@@ -5948,18 +5797,7 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-editFormRow {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
   .sun-formLabel {
-    width: auto;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-editFormLabel {
     width: auto;
   }
 }
@@ -5967,11 +5805,6 @@ textarea {
   .sun-inputRow {
     flex-direction: column;
     align-items: flex-start;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-inputLabel {
-    width: auto;
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
@@ -5992,12 +5825,7 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveControl {
-    flex-wrap: wrap;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-dateItem {
+  .sun-listItemDate {
     flex-wrap: wrap;
   }
 }
@@ -6008,67 +5836,7 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-customWaveItemControls {
-    flex-wrap: wrap;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosTc {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosBc {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosLc {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosRc {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMt {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMb {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMl {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMr {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMt2 {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMb2 {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMl2 {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-cornerSquare.sun-cornerPosMr2 {
+  .sun-cornerSquare.sun-cornerPosTc, .sun-cornerSquare.sun-cornerPosBc, .sun-cornerSquare.sun-cornerPosLc, .sun-cornerSquare.sun-cornerPosRc, .sun-cornerSquare.sun-cornerPosMt, .sun-cornerSquare.sun-cornerPosMb, .sun-cornerSquare.sun-cornerPosMl, .sun-cornerSquare.sun-cornerPosMr, .sun-cornerSquare.sun-cornerPosMt2, .sun-cornerSquare.sun-cornerPosMb2, .sun-cornerSquare.sun-cornerPosMl2, .sun-cornerSquare.sun-cornerPosMr2 {
     display: none;
   }
 }
@@ -6078,53 +5846,34 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact {
     flex-direction: column;
     gap: var(--spacing-xs);
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupForm {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactaddGroupForm {
     flex-direction: column;
     gap: var(--spacing-xs);
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupInput {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactaddGroupInput,
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompactformInput,
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow select,
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompactcolorInput {
     width: 100%;
     min-width: 0;
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-formInput {
-    width: 100%;
-    min-width: 0;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow select {
-    width: 100%;
-    min-width: 0;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-colorInput {
-    width: 100%;
-    min-width: 0;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupBtn {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactaddGroupBtn,
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow .sun-addCustomWaveForm.sun-addCustomWaveFormcompactbtnAddCustomWave {
     width: 100%;
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow .sun-btnAddCustomWave {
-    width: 100%;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-waveInputsRow {
+  .sun-addCustomWaveForm.sun-addCustomWaveFormcompact .sun-addCustomWaveForm.sun-addCustomWaveFormcompactwaveInputsRow {
     flex-direction: column;
     gap: var(--spacing-xs);
   }
@@ -6136,13 +5885,13 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-displayViewTemplatesRow .sun-newDisplayViewTemplateName {
+  .sun-displayViewTemplatesRow .sun-displayViewTemplatesRownewDisplayViewTemplateName {
     width: 100%;
     min-width: 0;
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-displayViewTemplatesRow .sun-btnDeleteDisplayViewTemplate {
+  .sun-displayViewTemplatesRow .sun-displayViewTemplatesRowbtnDeleteDisplayViewTemplate {
     width: 100%;
   }
 }
@@ -6192,51 +5941,22 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveGroupHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveGroupRight {
-    margin-left: 0;
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveGroupCount {
-    display: none;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-dateNormalView {
+  .sun-listItemNormalView {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-editDateForm {
+  .sun-listItemEditForm {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveGroupChildren {
+  .sun-groupChildren {
     padding: var(--spacing-xs) var(--spacing-sm);
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveGroupLeft {
-    flex-wrap: wrap;
-  }
-}
-@media (max-width: 768px) and (min-width: 0px) {
-  .sun-waveGroupTitle {
-    font-size: var(--font-size-sm);
   }
 }
 @media (max-width: 480px) and (min-width: 0px) {
@@ -6246,12 +5966,12 @@ textarea {
   }
 }
 @media (max-width: 480px) and (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningTitle {
+  .sun-mobileWarning .sun-warningTitle {
     font-size: var(--font-size-md);
   }
 }
 @media (max-width: 480px) and (min-width: 0px) {
-  .sun-mobileWarningBox .sun-warningText {
+  .sun-mobileWarning .sun-warningText {
     font-size: var(--font-size-sm);
   }
 }
@@ -6259,34 +5979,6 @@ textarea {
   .sun-warningInfo {
     font-size: var(--font-size-sm);
   }
-}
-
-/* Маркеры часов: алиасы без sun- у модификаторов (устаревший styles.css / кэш) */
-.sun-hourMarker.clickable,
-.sun-hourMarker.sun-clickable {
-  cursor: pointer;
-}
-
-.sun-hourMarker.midnight,
-.sun-hourMarker.sun-midnight {
-  border-left-color: var(--danger-color);
-}
-
-.sun-hourMarker.midnight .sun-hourLabel,
-.sun-hourMarker.sun-midnight .sun-hourLabel {
-  color: var(--danger-color);
-  font-weight: 700;
-}
-
-.sun-hourMarker.active,
-.sun-hourMarker.sun-active {
-  background-color: #e6f2ff;
-}
-
-.sun-hourMarker.active .sun-hourLabel,
-.sun-hourMarker.sun-active .sun-hourLabel {
-  color: var(--cp);
-  font-weight: 600;
 }
 
 /*# sourceMappingURL=styles-compiled.css.map */
