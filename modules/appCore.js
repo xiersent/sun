@@ -12,6 +12,8 @@ class AppCore {
         this.hasSelectedColor = false; // Флаг, был ли выбран цвет
         /** true после initializeAppComponents (десктоп); для init.js — не дублировать списки в finalize */
         this._listsHydratedOnInit = false;
+        /** Один in-flight запрос versions.json на сессию */
+        this._loadVersionsPromise = null;
     }
     
     /** Кэширует основные DOM-элементы приложения по id. */
@@ -222,17 +224,23 @@ class AppCore {
 
     /** Загружает versions.json для блока информации в предупреждении. */
     async loadVersions() {
-        try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(`versions.json?t=${timestamp}`);
-            if (response.ok) {
-                return await response.json();
-            }
-            return [];
-        } catch (error) {
-            console.error('Error loading versions:', error);
-            return [];
+        if (this._loadVersionsPromise) {
+            return this._loadVersionsPromise;
         }
+        this._loadVersionsPromise = (async () => {
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`versions.json?t=${timestamp}`);
+                if (response.ok) {
+                    return await response.json();
+                }
+                return [];
+            } catch (error) {
+                console.error('Error loading versions:', error);
+                return [];
+            }
+        })();
+        return this._loadVersionsPromise;
     }
 
     /** Показывает десктопное предупреждение с данными окружения. */

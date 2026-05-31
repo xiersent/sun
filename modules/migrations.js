@@ -3,57 +3,75 @@
  * Менеджер миграций: загрузка migrations/*.js и последовательный прогон.
  */
 class MigrationsManager {
+    /** Последняя версия схемы (= номер последнего migrations/NNN.js). Увеличить при добавлении 005.js */
+    static SCHEMA_VERSION = 4;
+
+    /** Известные файлы миграций (без HEAD-опроса) */
+    static KNOWN_MIGRATION_IDS = ['001', '002', '003', '004'];
+
     constructor(appState) {
         this.appState = appState;
         this.migrationLog = [];
         this.migrations = [];
     }
 
-    /**
-     * Автоматическая загрузка всех файлов миграций из папки migrations/
-     */
-    async loadMigrationsFromFolder() {
-        this.log('Поиск миграций в папке migrations/...');
-        
-        const migrationFiles = [];
-        let index = 1;
-        
-        while (true) {
-            const paddedIndex = index.toString().padStart(3, '0');
-            const url = `migrations/${paddedIndex}.js`;
-            
-            this.log(`Проверка ${url}...`);
-            
-            try {
-                // Сначала проверяем существование файла через fetch
-                const response = await fetch(url, { method: 'HEAD' });
-                
-                if (response.ok) {
-                    // Файл существует - загружаем
-                    await this.loadScript(url);
-                    migrationFiles.push(paddedIndex);
-                    this.log(`Загружена миграция ${paddedIndex}`, 'success');
-                    index++;
-                } else {
-                    // Файл не найден - прекращаем поиск
-                    this.log(`Миграции закончились на ${paddedIndex-1}`, 'info');
-                    break;
-                }
-                
-            } catch (error) {
-                // Ошибка сети или файл не найден
-                this.log(`Миграции закончились на ${paddedIndex-1}`, 'info');
-                break;
-            }
+    /** Версия схемы, уже применённая к сохранённым данным. */
+    getStoredSchemaVersion() {
+        const v = this.appState?.data?.uiSettings?.migrationsSchemaVersion;
+        const n = Number(v);
+        return Number.isFinite(n) && n >= 0 ? n : 0;
+    }
+
+    /** Данные уже на актуальной схеме — не грузим migrations/*.js. */
+    shouldSkipMigrations() {
+        return this.getStoredSchemaVersion() >= MigrationsManager.SCHEMA_VERSION;
+    }
+
+    /** Записать версию схемы; save() — в конце load() после hydrate. */
+    markSchemaVersionApplied() {
+        if (!this.appState.data.uiSettings) {
+            this.appState.data.uiSettings = {};
         }
-        
-        this.log(`Загружено миграций: ${migrationFiles.length}`);
-        return migrationFiles.length > 0;
+        this.appState.data.uiSettings.migrationsSchemaVersion = MigrationsManager.SCHEMA_VERSION;
+        this.appState._migrateNeedsSaveAfterLoadHydrate = true;
+    }
+
+    migrationClassName(id) {
+        return `Migration${id}`;
+    }
+
+    isMigrationScriptLoaded(id) {
+        return typeof window[this.migrationClassName(id)] === 'function';
     }
 
     /**
-     * Динамическая загрузка скрипта
+     * Параллельная подгрузка только отсутствующих migrations/NNN.js (без HEAD).
      */
+    async ensureMigrationScriptsLoaded() {
+        const ids = MigrationsManager.KNOWN_MIGRATION_IDS;
+        const missing = ids.filter((id) => !this.isMigrationScriptLoaded(id));
+
+        if (missing.length === 0) {
+            this.log(`Скрипты миграций уже в памяти (${ids.length})`, 'info');
+            return ids.length > 0;
+        }
+
+        this.log(`Загрузка миграций: ${missing.join(', ')}...`);
+        await Promise.all(
+            missing.map((id) => this.loadScript(`migrations/${id}.js`).then(() => {
+                this.log(`Загружена миграция ${id}`, 'success');
+            }))
+        );
+        return ids.length > 0;
+    }
+
+    /**
+     * @deprecated Используй ensureMigrationScriptsLoaded
+     */
+    async loadMigrationsFromFolder() {
+        return this.ensureMigrationScriptsLoaded();
+    }
+
     loadScript(url) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -68,76 +86,76 @@ class MigrationsManager {
         });
     }
 
-    /**
-     * Поиск всех загруженных классов миграций
-     */
     discoverLoadedMigrations() {
         const migrations = [];
-        
-        for (const key in window) {
-            // Исключаем сам менеджер и другие служебные классы
-            if (key.startsWith('Migration') && 
-                key !== 'MigrationsManager' && 
-                typeof window[key] === 'function') {
-                const id = key.replace('Migration', '');
+
+        for (const id of MigrationsManager.KNOWN_MIGRATION_IDS) {
+            const name = this.migrationClassName(id);
+            if (typeof window[name] === 'function') {
                 migrations.push({
-                    id: id,
-                    name: key,
-                    class: window[key]
+                    id,
+                    name,
+                    class: window[name]
                 });
             }
         }
-        
-        // Сортируем по ID
-        migrations.sort((a, b) => {
-            return parseInt(a.id) - parseInt(b.id);
-        });
-        
+
         this.migrations = migrations;
         return migrations;
     }
 
-    /**
-     * Запуск всех обнаруженных миграций
-     */
     async runAllMigrations() {
+        const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
+
+        if (this.shouldSkipMigrations()) {
+            this.log(
+                `Схема v${this.getStoredSchemaVersion()} актуальна (v${MigrationsManager.SCHEMA_VERSION}), миграции пропущены`,
+                'success'
+            );
+            __lp && __lp.mark('appState_migrations_skipped', {
+                reason: 'schema_version',
+                stored: this.getStoredSchemaVersion(),
+                latest: MigrationsManager.SCHEMA_VERSION
+            });
+            return [];
+        }
+
         this.log('=== ЗАПУСК МЕНЕДЖЕРА МИГРАЦИЙ ===');
-        
-        // Шаг 1: Автоматически загружаем все файлы миграций
-        this.log('Шаг 1: Автоматическая загрузка файлов миграций...');
-        const loaded = await this.loadMigrationsFromFolder();
-        
+
+        this.log('Шаг 1: Загрузка файлов миграций...');
+        const loaded = await this.ensureMigrationScriptsLoaded();
+
         if (!loaded) {
             this.log('Миграции не найдены', 'warning');
             return [];
         }
-        
-        // Шаг 2: Поиск загруженных классов миграций
-        this.log('Шаг 2: Поиск загруженных классов миграций...');
+
+        this.log('Шаг 2: Поиск классов миграций...');
         const discovered = this.discoverLoadedMigrations();
-        
+
         if (discovered.length === 0) {
             this.log('Классы миграций не найдены', 'warning');
             return [];
         }
-        
+
         this.log(`Найдено классов миграций: ${discovered.length}`);
-        discovered.forEach(m => {
+        discovered.forEach((m) => {
             this.log(`  - ${m.name}`);
         });
-        
-        // Шаг 3: Запуск миграций
+
         this.log('Шаг 3: Запуск миграций...');
-        
+
         let anyMigrationApplied = false;
+        let hadError = false;
+
         for (const migration of discovered) {
             try {
                 const instance = new migration.class(this.appState);
-                
+
                 if (instance.shouldApply && instance.shouldApply()) {
                     this.log(`Применение ${migration.name}...`, 'info');
                     const startTime = Date.now();
-                    
+
                     if (instance.up) {
                         await instance.up();
                         anyMigrationApplied = true;
@@ -151,30 +169,31 @@ class MigrationsManager {
                     this.log(`${migration.name}: не требуется`, 'info');
                     this.migrationLog.push(`${migration.name}: пропущена`);
                 }
-                
             } catch (error) {
+                hadError = true;
                 this.log(`${migration.name}: ОШИБКА - ${error.message}`, 'error');
                 console.error(error);
                 this.migrationLog.push(`${migration.name}: ОШИБКА - ${error.message}`);
             }
         }
-        
+
         this.log(`=== МИГРАЦИИ ЗАВЕРШЕНЫ (${this.migrationLog.length} операций) ===`);
-        
-        // Не вызывать save() здесь: поля AppState ещё не восстановлены из JSON — получится
-        // перезапись localStorage дефолтами из конструктора. Сохранение — в конце load().
+
+        if (!hadError) {
+            this.markSchemaVersionApplied();
+        }
+
         if (anyMigrationApplied) {
             this.appState._migrateNeedsSaveAfterLoadHydrate = true;
         }
-        
+
         return this.migrationLog;
     }
 
-    /** Запись строки в migrationLog и console. */
     log(message, type = 'info') {
         const prefix = '[Migrations]';
-        
-        switch(type) {
+
+        switch (type) {
             case 'success':
                 console.log(`%c${prefix} ${message}`, 'color: #4CAF50; font-weight: bold');
                 break;

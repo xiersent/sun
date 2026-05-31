@@ -430,47 +430,97 @@ class UnifiedListManager {
     }
     
     /** Инициализация модуля. */
+    /** Версия кэша EJS в sessionStorage — увеличить при изменении templates/*.ejs */
+    static EJS_TEMPLATES_CACHE_VERSION = 1;
+    static EJS_TEMPLATES_CACHE_KEY = 'sun_ejs_templates_cache';
+
     initTemplates() {
         if (this.templatesLoaded) {
             return Promise.resolve();
         }
-        
+
         if (this.templatesLoadPromise) {
             return this.templatesLoadPromise;
         }
-        
-        this.templatesLoadPromise = new Promise(async (resolve, reject) => {
+
+        this.templatesLoadPromise = new Promise(async (resolve) => {
             try {
-                const templateIds = ['date-item-template', 'wave-item-template', 'group-item-template', 'person-group-item-template', 'intersection-item-template'];
-                let loadedCount = 0;
-                
+                const templateIds = [
+                    'date-item-template',
+                    'wave-item-template',
+                    'group-item-template',
+                    'person-group-item-template',
+                    'intersection-item-template'
+                ];
+
+                if (this._hydrateTemplatesFromSessionCache(templateIds)) {
+                    this.templatesLoaded = true;
+                    resolve();
+                    return;
+                }
+
                 const loadPromises = templateIds.map(async (templateId) => {
                     try {
                         const url = `templates/${templateId.replace('-template', '')}.ejs`;
-                        
                         const response = await fetch(url);
-                        
                         if (response.ok) {
-                            const templateText = await response.text();
-                            this.templateCache[templateId] = templateText;
-                            loadedCount++;
+                            this.templateCache[templateId] = await response.text();
                         }
                     } catch (error) {
+                        /* ignore */
                     }
                 });
-                
+
                 await Promise.allSettled(loadPromises);
-                
+                this._persistTemplatesToSessionCache(templateIds);
                 this.templatesLoaded = true;
                 resolve();
-                
             } catch (error) {
                 this.templatesLoaded = true;
                 resolve();
             }
         });
-        
+
         return this.templatesLoadPromise;
+    }
+
+    _hydrateTemplatesFromSessionCache(templateIds) {
+        try {
+            const raw = sessionStorage.getItem(UnifiedListManager.EJS_TEMPLATES_CACHE_KEY);
+            if (!raw) return false;
+            const parsed = JSON.parse(raw);
+            if (parsed.v !== UnifiedListManager.EJS_TEMPLATES_CACHE_VERSION) return false;
+            const templates = parsed.templates;
+            if (!templates || typeof templates !== 'object') return false;
+            for (const id of templateIds) {
+                if (!templates[id]) return false;
+                this.templateCache[id] = templates[id];
+            }
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    _persistTemplatesToSessionCache(templateIds) {
+        try {
+            const templates = {};
+            for (const id of templateIds) {
+                if (this.templateCache[id]) {
+                    templates[id] = this.templateCache[id];
+                }
+            }
+            if (Object.keys(templates).length === 0) return;
+            sessionStorage.setItem(
+                UnifiedListManager.EJS_TEMPLATES_CACHE_KEY,
+                JSON.stringify({
+                    v: UnifiedListManager.EJS_TEMPLATES_CACHE_VERSION,
+                    templates
+                })
+            );
+        } catch (e) {
+            /* quota / private mode */
+        }
     }
     
     /** Создаёт emergency fallback templates. */
