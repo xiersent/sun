@@ -50,18 +50,18 @@ class EventManager {
         });
 
         $(document)
-            .on('dragstart', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragStart.bind(this))
-            .on('dragover', '.list-item--group[data-type="group"]', this.handleDragOver.bind(this))
-            .on('dragleave', '.list-item--group[data-type="group"]', this.handleDragLeave.bind(this))
-            .on('drop', '.list-item--group[data-type="group"]', this.handleDrop.bind(this))
-            .on('dragend', '.list-item--group[data-type="group"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragEnd.bind(this));
+            .on('dragstart', '.sun-listItemGroup[data-type="group"]:not(.sun-listItemEditing) > .sun-listItemDragHandle', this.handleDragStart.bind(this))
+            .on('dragover', '.sun-listItemGroup[data-type="group"]', this.handleDragOver.bind(this))
+            .on('dragleave', '.sun-listItemGroup[data-type="group"]', this.handleDragLeave.bind(this))
+            .on('drop', '.sun-listItemGroup[data-type="group"]', this.handleDrop.bind(this))
+            .on('dragend', '.sun-listItemGroup[data-type="group"]:not(.sun-listItemEditing) > .sun-listItemDragHandle', this.handleDragEnd.bind(this));
 
         $(document)
-            .on('dragstart', '.list-item--person-group[data-type="personGroup"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragStart.bind(this))
-            .on('dragover', '.list-item--person-group[data-type="personGroup"]', this.handleDragOver.bind(this))
-            .on('dragleave', '.list-item--person-group[data-type="personGroup"]', this.handleDragLeave.bind(this))
-            .on('drop', '.list-item--person-group[data-type="personGroup"]', this.handleDrop.bind(this))
-            .on('dragend', '.list-item--person-group[data-type="personGroup"]:not(.list-item--editing) > .list-item__drag-handle', this.handleDragEnd.bind(this));
+            .on('dragstart', '.sun-listItemPersonGroup[data-type="personGroup"]:not(.sun-listItemEditing) > .sun-listItemDragHandle', this.handleDragStart.bind(this))
+            .on('dragover', '.sun-listItemPersonGroup[data-type="personGroup"]', this.handleDragOver.bind(this))
+            .on('dragleave', '.sun-listItemPersonGroup[data-type="personGroup"]', this.handleDragLeave.bind(this))
+            .on('drop', '.sun-listItemPersonGroup[data-type="personGroup"]', this.handleDrop.bind(this))
+            .on('dragend', '.sun-listItemPersonGroup[data-type="personGroup"]:not(.sun-listItemEditing) > .sun-listItemDragHandle', this.handleDragEnd.bind(this));
             
         const nd = window.SunNestedListDnD;
         const nestedContainers = nd.NESTED_CONTAINERS;
@@ -73,37 +73,37 @@ class EventManager {
         $(document)
             .on(
                 'dragstart',
-                '#wavesList .group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle',
+                '.sun-wavesList .sun-groupChildren .sun-listItemWave:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-waveDragHandle',
                 (e) => nd.dragStart(this, e, 'wave')
             )
             .on(
                 'dragstart',
-                '#dateListForDates .person-group-children .list-item--date[data-type="date"]:not(.list-item--editing) > .list-item__drag-handle.date-drag-handle',
+                '.sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-dateDragHandle',
                 (e) => nd.dragStart(this, e, 'date')
             )
             .on(
                 'dragover',
-                '#wavesList .group-children .list-item--wave, #dateListForDates .person-group-children .list-item--date[data-type="date"]',
+                '.sun-wavesList .sun-groupChildren .sun-listItemWave, .sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]',
                 (e) => nd.nestedChildRowsDragOver(this, e)
             )
             .on(
                 'dragleave',
-                '#wavesList .group-children .list-item--wave, #dateListForDates .person-group-children .list-item--date[data-type="date"]',
+                '.sun-wavesList .sun-groupChildren .sun-listItemWave, .sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]',
                 (e) => nd.nestedChildRowsDragLeave(this, e)
             )
             .on(
                 'drop',
-                '#wavesList .group-children .list-item--wave, #dateListForDates .person-group-children .list-item--date[data-type="date"]',
+                '.sun-wavesList .sun-groupChildren .sun-listItemWave, .sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]',
                 (e) => nd.nestedChildRowsDrop(this, e)
             )
             .on(
                 'dragend',
-                '#wavesList .group-children .list-item--wave:not(.list-item--editing) > .list-item__drag-handle.wave-drag-handle',
+                '.sun-wavesList .sun-groupChildren .sun-listItemWave:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-waveDragHandle',
                 (e) => nd.dragEnd(this, e, 'wave')
             )
             .on(
                 'dragend',
-                '#dateListForDates .person-group-children .list-item--date[data-type="date"]:not(.list-item--editing) > .list-item__drag-handle.date-drag-handle',
+                '.sun-dateListForDates .sun-personGroupChildren .sun-listItemDate[data-type="date"]:not(.sun-listItemEditing) > .sun-listItemDragHandle.sun-dateDragHandle',
                 (e) => nd.dragEnd(this, e, 'date')
             );
 
@@ -130,33 +130,33 @@ class EventManager {
 			if (window.summaryManager) window.summaryManager.updateSummary();
 		};
 
-		$(document).on('click', '.group-stat-total', (e) => {
+		$(document).on('click', '.sun-groupStatTotal', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
 			window.sunPerfLog('eventManager', 'click.groupStat', { target: 'total' });
-			const $groupItem = $(e.target).closest('.list-item--group');
+			const $groupItem = $(e.target).closest('.sun-listItemGroup');
 			if (!$groupItem.length) return;
 			const groupId = $groupItem.data('id');
 			if (!groupId) return;
 			disableGroupWaveLayers(groupId, 'all');
 		});
 
-		$(document).on('click', '.group-stat-a', (e) => {
+		$(document).on('click', '.sun-groupStatA', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
 			window.sunPerfLog('eventManager', 'click.groupStat', { target: 'layerA' });
-			const $groupItem = $(e.target).closest('.list-item--group');
+			const $groupItem = $(e.target).closest('.sun-listItemGroup');
 			if (!$groupItem.length) return;
 			const groupId = $groupItem.data('id');
 			if (!groupId) return;
 			disableGroupWaveLayers(groupId, 'a');
 		});
 
-		$(document).on('click', '.group-stat-b', (e) => {
+		$(document).on('click', '.sun-groupStatB', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
 			window.sunPerfLog('eventManager', 'click.groupStat', { target: 'layerB' });
-			const $groupItem = $(e.target).closest('.list-item--group');
+			const $groupItem = $(e.target).closest('.sun-listItemGroup');
 			if (!$groupItem.length) return;
 			const groupId = $groupItem.data('id');
 			if (!groupId) return;
@@ -278,7 +278,7 @@ class EventManager {
     }
 
     /**
-     * После DnD порядка колосков: синхронизация .group-children затронутых групп без полного EJS.
+     * После DnD порядка колосков: синхронизация .sun-groupChildren затронутых групп без полного EJS.
      * Аргументы — порядок вызова syncOne (например целевая группа, затем исходная при переносе).
      */
     scheduleWavesOrderDomSyncAndSave(...orderedGroupIds) {
@@ -391,7 +391,7 @@ class EventManager {
         });
     }
 
-    /** DnD персон внутри / между группами персон: .person-group-children без полного EJS. */
+    /** DnD персон внутри / между группами персон: .sun-personGroupChildren без полного EJS. */
     scheduleDatesOrderDomSyncAndSave(...orderedPersonGroupIds) {
         this._datesOrderDomQueue.push(...orderedPersonGroupIds.map(String));
         const coalesced = this._datesOrderDomRefreshScheduled !== null;
@@ -516,7 +516,7 @@ class EventManager {
     /**
      * Переставляет волну внутри группы или переносит в другую группу.
      * @param {object} [opts]
-     * @param {boolean} [opts.emptyOrGapDrop] — сброс на пустую область .group-children (в конец списка цели)
+     * @param {boolean} [opts.emptyOrGapDrop] — сброс на пустую область .sun-groupChildren (в конец списка цели)
      * @param {*} [opts.sourceItemId] — id волны в payload DnD: пересчитать индекс в группе-источнике (индекс из dragstart часто устаревает)
      */
     moveWaveBetweenGroups(sourceGroupId, targetGroupId, sourceIndex, targetIndex, insertBefore, opts = {}) {
@@ -613,7 +613,7 @@ class EventManager {
             }
         } catch (error) {}
         
-        const $item = $(e.currentTarget).closest('.list-item--group, .list-item--person-group');
+        const $item = $(e.currentTarget).closest('.sun-listItemGroup, .sun-listItemPersonGroup');
         if (!$item.length) {
             e.preventDefault();
             return;
@@ -638,7 +638,7 @@ class EventManager {
         };
         e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(payload));
         
-        $item.addClass('list-item--dragging');
+        $item.addClass('sun-listItemDragging');
         window.sunPerfLog('eventManager', 'dragstart', { type, id, index });
     }
     
@@ -679,18 +679,18 @@ class EventManager {
         
         if (this._dragOverListItemEl && this._dragOverListItemEl !== el) {
             this._dragOverListItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
+                'sun-listItemDragOverTop',
+                'sun-listItemDragOverBottom'
             );
         }
         this._dragOverListItemEl = el;
     
         if (insertPosition === 'before') {
-            $item.addClass('list-item--drag-over-top');
-            $item.removeClass('list-item--drag-over-bottom');
+            $item.addClass('sun-listItemDragOverTop');
+            $item.removeClass('sun-listItemDragOverBottom');
         } else {
-            $item.addClass('list-item--drag-over-bottom');
-            $item.removeClass('list-item--drag-over-top');
+            $item.addClass('sun-listItemDragOverBottom');
+            $item.removeClass('sun-listItemDragOverTop');
         }
     }
     
@@ -712,7 +712,7 @@ class EventManager {
         const $item = $(e.currentTarget);
         e.preventDefault();
         
-        $('.list-item').removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+        $('.sun-listItem').removeClass('sun-listItemDragOverTop sun-listItemDragOverBottom');
         
         try {
             const dragData = JSON.parse(e.originalEvent.dataTransfer.getData('text/plain'));
@@ -902,7 +902,7 @@ class EventManager {
         if (e.originalEvent.relatedTarget && 
             !el.contains(e.originalEvent.relatedTarget)) {
             
-            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            $item.removeClass('sun-listItemDragOverTop sun-listItemDragOverBottom');
             if (this._dragOverListItemEl === el) {
                 this._dragOverListItemEl = null;
             }
@@ -913,13 +913,13 @@ class EventManager {
     handleDragEnd(e) {
         const t = e.target;
         if (!t || !t.closest) return;
-        if (t.closest('.list-item--wave')) {
+        if (t.closest('.sun-listItemWave')) {
             return;
         }
-        if (t.closest('#dateListForDates .date-drag-handle')) {
+        if (t.closest('.sun-dateListForDates .sun-dateDragHandle')) {
             return;
         }
-        const $row = $(t).closest('.list-item--group[data-type="group"], .list-item--person-group[data-type="personGroup"]');
+        const $row = $(t).closest('.sun-listItemGroup[data-type="group"], .sun-listItemPersonGroup[data-type="personGroup"]');
         if (!$row.length) {
             return;
         }
@@ -927,30 +927,30 @@ class EventManager {
         this.clearNestedDnDVisualState();
         if (this._dragOverListItemEl) {
             this._dragOverListItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
+                'sun-listItemDragOverTop',
+                'sun-listItemDragOverBottom'
             );
             this._dragOverListItemEl = null;
         }
-        $('.list-item').removeClass('list-item--dragging list-item--drag-over-top list-item--drag-over-bottom');
+        $('.sun-listItem').removeClass('sun-listItemDragging sun-listItemDragOverTop sun-listItemDragOverBottom');
         window.sunPerfLog('eventManager', 'dragend.groupOrPersonGroup', { targetTag: t.tagName });
     }
     
     /** Клик по строке персоны активирует setActiveDate. */
     setupDateChangeObservers() {
-        $(document).on('click', '.list-item--date[data-type="date"]', (e) => {
+        $(document).on('click', '.sun-listItemDate[data-type="date"]', (e) => {
             const $target = $(e.target);
-            const $item = $target.closest('.list-item--date');
+            const $item = $target.closest('.sun-listItemDate');
             
-            if ($target.is('.date-checkbox') || $target.closest('.date-checkbox').length) {
+            if ($target.is('.sun-dateCheckbox') || $target.closest('.sun-dateCheckbox').length) {
                 return;
             }
             
-            if ($target.is('button, input, textarea, select, .list-item__drag-handle, .date-drag-handle, .delete-date-btn, .edit-btn')) {
+            if ($target.is('button, input, textarea, select, .sun-listItemDragHandle, .sun-dateDragHandle, .sun-deleteDateBtn, .sun-editBtn')) {
                 return;
             }
             
-            if ($item.hasClass('list-item--editing')) {
+            if ($item.hasClass('sun-listItemEditing')) {
                 return;
             }
             
@@ -975,7 +975,7 @@ class EventManager {
 
     /** Обработка чекбоксов типа A/B у персон. */
     setupDateSelectionHandlers() {
-        $(document).on('click', '.date-checkbox', async (e) => {
+        $(document).on('click', '.sun-dateCheckbox', async (e) => {
             e.preventDefault();
             e.stopPropagation();
             
@@ -1161,8 +1161,8 @@ class EventManager {
     handleClick(e) {
         const $target = $(e.target);
         
-        if ($target.is('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate') || 
-            $target.closest('#btnPrevDay, #btnNextDay, #btnToday, #btnNow, #btnSetDate').length) {
+        if ($target.is('.sun-btnPrevDay, .sun-btnNextDay, .sun-btnToday, .sun-btnNow, .sun-btnSetDate') ||
+            $target.closest('.sun-btnPrevDay, .sun-btnNextDay, .sun-btnToday, .sun-btnNow, .sun-btnSetDate').length) {
             e.preventDefault();
         }
 
@@ -1192,8 +1192,8 @@ class EventManager {
             }
         }
         
-        // Только верхние вкладки панели ([data-tab]); не подвкладки сравнения дат (.date-comparison-view-tab).
-        if ($target.hasClass('tab-button') && $target.is('[data-tab]')) {
+        // Только верхние вкладки панели ([data-tab]); не подвкладки сравнения дат (.dateComparisonViewTab).
+        if ($target.hasClass('sun-tabButton') && $target.is('[data-tab]')) {
             e.preventDefault();
             e.stopPropagation();
             if (window.uiManager) {
@@ -1202,7 +1202,7 @@ class EventManager {
             return;
         }
         
-        const $expandBtn = $target.closest('.expand-collapse-btn');
+        const $expandBtn = $target.closest('.sun-expandCollapseBtn');
         if ($expandBtn.length) {
             e.preventDefault();
             e.stopPropagation();
@@ -1215,14 +1215,14 @@ class EventManager {
                     if (group) {
                         group.expanded = !group.expanded;
                         window.appState.save();
-                        const groupElement = document.querySelector(`.list-item--person-group[data-id="${id}"]`);
+                        const groupElement = document.querySelector(`.sun-listItemPersonGroup[data-id="${id}"]`);
                         if (groupElement) {
-                            groupElement.classList.toggle('list-item--expanded');
-                            const childrenContainer = groupElement.querySelector('.person-group-children');
+                            groupElement.classList.toggle('sun-listItemExpanded');
+                            const childrenContainer = groupElement.querySelector('.sun-personGroupChildren');
                             if (childrenContainer) {
                                 childrenContainer.style.display = group.expanded ? 'block' : 'none';
                             }
-                            const expandBtn = groupElement.querySelector('.expand-collapse-btn');
+                            const expandBtn = groupElement.querySelector('.sun-expandCollapseBtn');
                             if (expandBtn) {
                                 if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyExpandButton) {
                                     window.SUN_ACTION_LABELS.applyExpandButton(expandBtn, group.expanded);
@@ -1236,16 +1236,16 @@ class EventManager {
                         group.expanded = !group.expanded;
                         window.appState.save();
                         
-                        const groupElement = document.querySelector(`.list-item--group[data-id="${id}"]`);
+                        const groupElement = document.querySelector(`.sun-listItemGroup[data-id="${id}"]`);
                         if (groupElement) {
-                            groupElement.classList.toggle('list-item--expanded');
+                            groupElement.classList.toggle('sun-listItemExpanded');
                             
-                            const childrenContainer = groupElement.querySelector('.group-children');
+                            const childrenContainer = groupElement.querySelector('.sun-groupChildren');
                             if (childrenContainer) {
                                 childrenContainer.style.display = group.expanded ? 'block' : 'none';
                             }
                             
-                            const expandBtn = groupElement.querySelector('.expand-collapse-btn');
+                            const expandBtn = groupElement.querySelector('.sun-expandCollapseBtn');
                             if (expandBtn) {
                                 if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyExpandButton) {
                                     window.SUN_ACTION_LABELS.applyExpandButton(expandBtn, group.expanded);
@@ -1258,7 +1258,7 @@ class EventManager {
             return;
         }
         
-        const $groupDeleteBtn = $target.closest('.delete-date-btn[data-type="group"]');
+        const $groupDeleteBtn = $target.closest('.sun-deleteDateBtn[data-type="group"]');
         if ($groupDeleteBtn.length) {
             e.preventDefault();
             e.stopPropagation();
@@ -1270,7 +1270,7 @@ class EventManager {
             return;
         }
         
-        const $editBtn = $target.closest('.edit-btn');
+        const $editBtn = $target.closest('.sun-editBtn');
         if ($editBtn.length) {
             e.preventDefault();
             e.stopPropagation();
@@ -1284,9 +1284,9 @@ class EventManager {
             return;
         }
         
-        const $deleteBtn = $target.closest('.delete-date-btn, .delete-btn');
+        const $deleteBtn = $target.closest('.sun-deleteDateBtn, .sun-deleteBtn');
         if ($deleteBtn.length && 
-            !$target.closest('.list-item--note').length && 
+            !$target.closest('.sun-listItemNote').length && 
             $deleteBtn.data('type') !== 'group') {
             e.preventDefault();
             e.stopPropagation();
@@ -1298,7 +1298,7 @@ class EventManager {
             return;
         }
         
-        const $saveBtn = $target.closest('.save-btn');
+        const $saveBtn = $target.closest('.sun-saveBtn');
         if ($saveBtn.length) {
             e.preventDefault();
             e.stopPropagation();
@@ -1311,7 +1311,7 @@ class EventManager {
             return;
         }
         
-        const $cancelBtn = $target.closest('.cancel-btn');
+        const $cancelBtn = $target.closest('.sun-cancelBtn');
         if ($cancelBtn.length) {
             e.preventDefault();
             e.stopPropagation();
@@ -1324,7 +1324,7 @@ class EventManager {
             return;
         }
         
-        if ($target.hasClass('wave-visibility-check')) {
+        if ($target.hasClass('sun-waveVisibilityCheck')) {
             e.stopPropagation();
             const waveId = $target.data('id');
             const isChecked = $target.prop('checked');
@@ -1333,7 +1333,7 @@ class EventManager {
             return;
         }
         
-        if ($target.hasClass('wave-b-visibility-check')) {
+        if ($target.hasClass('sun-waveBVisibilityCheck')) {
             e.stopPropagation();
             const waveId = $target.data('id');
             const isChecked = $target.prop('checked');
@@ -1341,7 +1341,7 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('wave-color-preview-small')) {
+        if ($target.hasClass('sun-waveColorPreviewSmall')) {
             e.stopPropagation();
             const waveId = $target.data('id');
             
@@ -1358,7 +1358,7 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('wave-corner-color-check')) {
+        if ($target.hasClass('sun-waveCornerColorCheck')) {
             e.stopPropagation();
             const waveId = $target.data('id');
             
@@ -1372,7 +1372,7 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('wave-group-toggle')) {
+        if ($target.hasClass('sun-waveGroupToggle')) {
             e.stopPropagation();
             const groupId = $target.data('groupId');
             const isChecked = $target.prop('checked');
@@ -1382,16 +1382,16 @@ class EventManager {
         }
 
         if (
-            $target.hasClass('show-on-vizor-btn') &&
-            !$target.hasClass('date-compare-vizor-btn') &&
-            !$target.hasClass('intersection-vizor-b-btn')
+            $target.hasClass('sun-showOnVizorBtn') &&
+            !$target.hasClass('sun-dateCompareVizorBtn') &&
+            !$target.hasClass('sun-intersectionVizorBBtn')
         ) {
             e.preventDefault();
             e.stopPropagation();
             
             const waveId = $target.data('wave-id');
             
-            const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
+            const checkbox = $(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
             if (checkbox.length) {
                 const isChecked = !checkbox.prop('checked');
                 checkbox.prop('checked', isChecked);
@@ -1402,7 +1402,7 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('date-compare-vizor-btn')) {
+        if ($target.hasClass('sun-dateCompareVizorBtn')) {
             e.preventDefault();
             e.stopPropagation();
             const waveId = $target.data('wave-id');
@@ -1418,7 +1418,7 @@ class EventManager {
 
 
 	/**
-	 * Общая логика .wave-visibility-check (слой A) и .wave-b-visibility-check (слой B): одно правило для выключенной группы.
+	 * Общая логика .sun-waveVisibilityCheck (слой A) и .sun-waveBVisibilityCheck (слой B): одно правило для выключенной группы.
 	 * @param {'a'|'b'} layer — 'a' → waveVisibility; 'b' → waveBold (ключ в данных исторический).
 	 */
 	handleWaveLayerToggle(waveId, isChecked, $checkbox, layer) {
@@ -1461,7 +1461,7 @@ class EventManager {
 									window.unifiedListManager.updateWavesList();
 								}
 
-								document.querySelectorAll('.wave-group-toggle').forEach((el) => {
+								document.querySelectorAll('.sun-waveGroupToggle').forEach((el) => {
 									if (String(el.getAttribute('data-group-id')) === String(groupId)) {
 										el.checked = true;
 									}
@@ -1571,9 +1571,9 @@ class EventManager {
 
 	/** Есть ли выбранная персона B (чекбокс типа B в списке дат). */
 	_isPersonBDateSelected() {
-		const root = document.getElementById('dateListForDates');
+		const root = window.dom.byKey('dateListForDates');
 		if (root) {
-			const bChecked = root.querySelector('input.date-checkbox[data-type="b"]:checked');
+			const bChecked = root.querySelector('input.sun-dateCheckbox[data-type="b"]:checked');
 			if (bChecked) {
 				return true;
 			}
@@ -1582,7 +1582,7 @@ class EventManager {
 		return !!(ds && ds.typeB != null && String(ds.typeB) !== '');
 	}
 
-	/** Пара handleWaveVisibilityChange: слой B, чекбокс .wave-b-visibility-check. */
+	/** Пара handleWaveVisibilityChange: слой B, чекбокс .sun-waveBVisibilityCheck. */
 	handleWavePersonBVisibilityChange(waveId, isChecked, $checkbox) {
 		if (isChecked && !this._isPersonBDateSelected()) {
 			alert('Волна не появится, пока не будет включена персона B.');
@@ -1597,18 +1597,18 @@ class EventManager {
 	_readWaveLayerCheckboxStates(wid) {
 		const idStr = String(wid);
 		const matchId = (cb) => String(cb.getAttribute('data-id') || '') === idStr;
-		const root = document.getElementById('wavesList');
+		const root = window.dom.byKey('wavesList');
 		let elA = root
-			? Array.from(root.querySelectorAll('.wave-visibility-check')).find(matchId)
+			? Array.from(root.querySelectorAll('.sun-waveVisibilityCheck')).find(matchId)
 			: null;
 		let elB = root
-			? Array.from(root.querySelectorAll('.wave-b-visibility-check')).find(matchId)
+			? Array.from(root.querySelectorAll('.sun-waveBVisibilityCheck')).find(matchId)
 			: null;
 		if (!elA) {
-			elA = Array.from(document.querySelectorAll('.wave-visibility-check')).find(matchId) || null;
+			elA = Array.from(document.querySelectorAll('.sun-waveVisibilityCheck')).find(matchId) || null;
 		}
 		if (!elB) {
-			elB = Array.from(document.querySelectorAll('.wave-b-visibility-check')).find(matchId) || null;
+			elB = Array.from(document.querySelectorAll('.sun-waveBVisibilityCheck')).find(matchId) || null;
 		}
 		const aChecked = elA
 			? elA.checked
@@ -1625,12 +1625,12 @@ class EventManager {
 	_syncWaveABCheckboxesDom(wid, checked) {
 		const idStr = String(wid);
 		const match = (cb) => String(cb.getAttribute('data-id') || '') === idStr;
-		document.querySelectorAll('.wave-visibility-check').forEach((cb) => {
+		document.querySelectorAll('.sun-waveVisibilityCheck').forEach((cb) => {
 			if (match(cb)) {
 				cb.checked = checked;
 			}
 		});
-		document.querySelectorAll('.wave-b-visibility-check').forEach((cb) => {
+		document.querySelectorAll('.sun-waveBVisibilityCheck').forEach((cb) => {
 			if (match(cb)) {
 				cb.checked = checked;
 			}
@@ -1712,7 +1712,7 @@ class EventManager {
 				} else if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
 					window.unifiedListManager.updateWavesList();
 				}
-				document.querySelectorAll('.wave-group-toggle').forEach((el) => {
+				document.querySelectorAll('.sun-waveGroupToggle').forEach((el) => {
 					if (String(el.getAttribute('data-group-id')) === String(groupId)) {
 						el.checked = true;
 					}
@@ -1775,7 +1775,7 @@ class EventManager {
                 }
 
                 requestAnimationFrame(() => {
-                    $('.wave-container').remove();
+                    $('.sun-waveContainer').remove();
                     if (window.waves) {
                         window.waves.clearWaveDomReferences();
                     }
@@ -1819,23 +1819,23 @@ class EventManager {
     
     /** Обработка кнопок навигации, добавления групп и импорта. */
     handleButtonClicks($target, e) {
-        if ($target.is('#btnAddCustomWave') || $target.closest('#btnAddCustomWave').length) {
+        if ($target.is('.sun-btnAddCustomWave') || $target.closest('.sun-btnAddCustomWave').length) {
             e.preventDefault();
             e.stopPropagation();
             
-            const name = $('#customWaveName').val();
-            const period = $('#customWavePeriod').val();
-            const type = $('#customWaveType').val();
-            const color = $('#customWaveColor').val();
+            const name = window.dom.jq('customWaveName').val();
+            const period = window.dom.jq('customWavePeriod').val();
+            const type = window.dom.jq('customWaveType').val();
+            const color = window.dom.jq('customWaveColor').val();
             
             if (name && period) {
                 const newWave = window.waves.addCustomWave(name, period, type, color);
                 if (newWave && window.unifiedListManager) {
                     window.unifiedListManager.updateWavesList();
                     
-                    $('#customWaveName').val('');
-                    $('#customWavePeriod').val('');
-                    $('#customWaveColor').val('#666666');
+                    window.dom.jq('customWaveName').val('');
+                    window.dom.jq('customWavePeriod').val('');
+                    window.dom.jq('customWaveColor').val('#666666');
                     
                     const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
                     if (defaultGroup && window.unifiedListManager.updateGroupStats) {
@@ -1850,34 +1850,34 @@ class EventManager {
             return;
         }
 
-        if ($target.is('#btnPrevDay') || $target.closest('#btnPrevDay').length) {
+        if ($target.is('.sun-btnPrevDay') || $target.closest('.sun-btnPrevDay').length) {
             e.preventDefault();
             if (window.dates) window.dates.navigateDay(-1);
             return;
         }
         
-        if ($target.is('#btnNextDay') || $target.closest('#btnNextDay').length) {
+        if ($target.is('.sun-btnNextDay') || $target.closest('.sun-btnNextDay').length) {
             e.preventDefault();
             if (window.dates) window.dates.navigateDay(1);
             return;
         }
         
-        if ($target.is('#btnSetDate') || $target.closest('#btnSetDate').length) {
+        if ($target.is('.sun-btnSetDate') || $target.closest('.sun-btnSetDate').length) {
             e.preventDefault();
             if (window.dates) window.dates.setDateFromInput();
             return;
         }
         
-        if ($target.is('#btnAddGroup') || $target.closest('#btnAddGroup').length) {
+        if ($target.is('.sun-btnAddGroup') || $target.closest('.sun-btnAddGroup').length) {
             e.preventDefault();
-            const groupName = $('#newGroupName').val();
+            const groupName = window.dom.jq('newGroupName').val();
             if (groupName && window.dates) {
                 const newGroup = window.dates.addGroup(groupName);
                 if (window.displayViewTemplatesManager && newGroup) {
                     window.displayViewTemplatesManager.onNewGroupAdded(newGroup);
                 }
                 if (window.dataManager) window.dataManager.updateWavesGroups();
-                $('#newGroupName').val('');
+                window.dom.jq('newGroupName').val('');
                 
                 if (window.summaryManager && window.summaryManager.updateSummary) {
                     window.summaryManager.updateSummary();
@@ -1888,11 +1888,11 @@ class EventManager {
 
         if ($target.is('[data-action="importAll"]')) {
             e.preventDefault();
-            $('#importAllFile').click();
+            window.dom.jq('importAllFile').click();
             return;
         }
         
-        if ($target.hasClass('spoiler-toggle')) {
+        if ($target.hasClass('sun-spoilerToggle')) {
             e.preventDefault();
             e.stopPropagation();
             if (window.uiManager && window.uiManager.toggleSpoiler) {
@@ -1902,10 +1902,19 @@ class EventManager {
         }
     }
     
-    /** Id ближайшего .list-container для контекста редактирования. */
+    /** Id ближайшего .sun-listContainer для контекста редактирования. */
     getContainerId(element) {
-        const $container = $(element).closest('.list-container');
-        return $container.length ? $container.attr('id') : null;
+        const $container = $(element).closest('.sun-listContainer');
+        if (!$container.length) {
+            return null;
+        }
+        if ($container.hasClass('sun-dateListForDates')) {
+            return 'dateListForDates';
+        }
+        if ($container.hasClass('sun-wavesList')) {
+            return 'wavesList';
+        }
+        return null;
     }
     
     /** Id группы сигналов, содержащей волну. */
@@ -1950,7 +1959,7 @@ class EventManager {
         const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('eventManager.recreateAllWaveElements', {}) : null;
         let recreated = 0;
         try {
-            $('.wave-container').remove();
+            $('.sun-waveContainer').remove();
             if (window.waves) {
                 window.waves.clearWaveDomReferences();
             }
@@ -1984,7 +1993,7 @@ class EventManager {
     handleIntersectionClick(e) {
         const $target = $(e.target);
         
-        if ($target.is('#btnClearWaveSelection') || $target.closest('#btnClearWaveSelection').length) {
+        if ($target.is('.sun-btnClearWaveSelection') || $target.closest('.sun-btnClearWaveSelection').length) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -1994,19 +2003,19 @@ class EventManager {
             return;
         }
         
-        const $intersectionItem = $target.closest('.summary-item');
+        const $intersectionItem = $target.closest('.sun-summaryItem');
         if ($intersectionItem.length && 
             !$target.is('button') && 
-            !$target.hasClass('show-on-vizor-btn')) {
+            !$target.hasClass('sun-showOnVizorBtn')) {
             
             e.preventDefault();
             e.stopPropagation();
             
-            const waveId = $intersectionItem.find('.show-on-vizor-btn').data('wave-id');
+            const waveId = $intersectionItem.find('.sun-showOnVizorBtn').data('wave-id');
             if (waveId && window.waves) {
                 const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
                 if (wave) {
-                    const checkbox = $(`.wave-visibility-check[data-id="${waveId}"]`);
+                    const checkbox = $(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
                     if (checkbox.length) {
                         const isChecked = !checkbox.prop('checked');
                         checkbox.prop('checked', isChecked);

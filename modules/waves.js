@@ -10,7 +10,7 @@ function __waveDbg() {
 
 /**
  * Если true — `waveBold` снова добавляет класс .bold (stroke-width в CSS).
- * Сейчас false: `appState.waveBold` — флаг видимости слоя B (пара `waveVisibility` для A); UI — .wave-b-visibility-check.
+ * Сейчас false: `appState.waveBold` — флаг видимости слоя B (пара `waveVisibility` для A); UI — .sun-waveBVisibilityCheck.
  */
 const WAVE_BOLD_STROKE_VISUAL_ENABLED = false;
 
@@ -122,10 +122,10 @@ class WavesManager {
     /** Возвращает DOM-контейнер полосы выносок по слоту (left, right, top, bottom). */
     _getWaveLabelContainer(slot) {
         const map = {
-            left: '.wave-labels-left',
-            right: '.wave-labels-right',
-            top: '.wave-labels-top',
-            bottom: '.wave-labels-bottom'
+            left: '.sun-waveLabelsLeft',
+            right: '.sun-waveLabelsRight',
+            top: '.sun-waveLabelsTop',
+            bottom: '.sun-waveLabelsBottom'
         };
         return document.querySelector(map[slot]);
     }
@@ -146,12 +146,12 @@ class WavesManager {
 
     /** Имя волны (боковые выноски; при повороте могут оказаться в полосах top/bottom). */
     _applyWaveNameTypography(el) {
-        el.classList.remove('wave-label--extremum');
-        el.classList.add('wave-label--name');
+        el.classList.remove('sun-waveLabelExtremum');
+        el.classList.add('sun-waveLabelName');
         el.style.fontFamily = '';
         el.style.letterSpacing = '';
         el.style.textAlign = '';
-        const textEl = el.querySelector('.wave-label-text');
+        const textEl = el.querySelector('.sun-waveLabelText');
         if (textEl) {
             textEl.style.textAlign = '';
         }
@@ -159,11 +159,11 @@ class WavesManager {
 
     /** Время экстремума (верх/низ или боковые полосы после поворота). */
     _applyExtremumTimeTypography(el) {
-        el.classList.remove('wave-label--name');
-        el.classList.add('wave-label--extremum');
+        el.classList.remove('sun-waveLabelName');
+        el.classList.add('sun-waveLabelExtremum');
         el.style.fontFamily = '';
         el.style.letterSpacing = '';
-        const textEl = el.querySelector('.wave-label-text');
+        const textEl = el.querySelector('.sun-waveLabelText');
         if (textEl) {
             textEl.style.textAlign = 'center';
         }
@@ -194,13 +194,13 @@ class WavesManager {
     /** Удаляет устаревшие элементы выносок из всех четырёх полос. */
     _cleanupWaveLabelContainers(activeDomIds) {
         [
-            document.querySelector('.wave-labels-left'),
-            document.querySelector('.wave-labels-right'),
-            document.querySelector('.wave-labels-top'),
-            document.querySelector('.wave-labels-bottom')
+            document.querySelector('.sun-waveLabelsLeft'),
+            document.querySelector('.sun-waveLabelsRight'),
+            document.querySelector('.sun-waveLabelsTop'),
+            document.querySelector('.sun-waveLabelsBottom')
         ].forEach((container) => {
             if (container) {
-                this._removeStaleLabelElements(container, '.wave-label', activeDomIds);
+                this._removeStaleLabelElements(container, '.sun-waveLabel', activeDomIds);
             }
         });
     }
@@ -257,12 +257,12 @@ class WavesManager {
                 this.calculateRequiredPeriods(periodPx);
             const swapped = this._isWaveAxisSwapped();
             if (swapped) {
-                container.classList.add('wave-container--swapped');
+                container.classList.add('sun-waveContainerSwapped');
                 const containerHeight = periodPx * totalPeriods;
                 container.style.width = '100%';
                 container.style.height = `${containerHeight}px`;
             } else {
-                container.classList.remove('wave-container--swapped');
+                container.classList.remove('sun-waveContainerSwapped');
                 const containerWidth = periodPx * totalPeriods;
                 container.style.width = `${containerWidth}px`;
                 container.style.height = '100%';
@@ -284,7 +284,7 @@ class WavesManager {
                 return mount;
             }
         }
-        return document.getElementById('graphElement');
+        return window.dom.byKey('graphElement');
     }
 
     /** См. WAVE_BOLD_STROKE_VISUAL_ENABLED — для внешних модулей (например сохранение стиля волны). */
@@ -427,12 +427,11 @@ class WavesManager {
      * Видимость A не обязательна, если рисуется только B.
      */
     waveNeedsGraphContainer(waveId) {
-        const waveIdStr = String(waveId);
         if (!this.isWaveGroupEnabled(waveId)) {
             return false;
         }
-        const isWaveVisible = window.appState.waveVisibility[waveIdStr] !== false;
-        if (isWaveVisible) {
+        const waveIdStr = String(waveId);
+        if (window.appState.waveVisibility[waveIdStr] !== false) {
             return true;
         }
         return this._shouldDrawSecondPersonWave(waveIdStr);
@@ -465,10 +464,10 @@ class WavesManager {
         let createdCount = 0;
         try {
             const endClear = d && d.t('waves.createVisibleWaveElements.clearDom', {});
-            document.querySelectorAll('.wave-container').forEach(c => c.remove());
-            document.querySelectorAll('.wave-label').forEach(l => l.remove());
+            document.querySelectorAll('.sun-waveContainer').forEach(c => c.remove());
+            document.querySelectorAll('.sun-waveLabel').forEach(l => l.remove());
             
-            const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+            const axisXPointsContainer = document.querySelector('.sun-waveAxisXPoints');
             if (axisXPointsContainer) {
                 axisXPointsContainer.innerHTML = '';
             }
@@ -506,9 +505,9 @@ class WavesManager {
         const end = d && d.t('waves.reconcileVisibleWaveElements', {});
         try {
             if (!window.appState.hasActivePerson()) {
-                document.querySelectorAll('.wave-container').forEach((c) => c.remove());
-                document.querySelectorAll('.wave-label').forEach((l) => l.remove());
-                const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+                document.querySelectorAll('.sun-waveContainer').forEach((c) => c.remove());
+                document.querySelectorAll('.sun-waveLabel').forEach((l) => l.remove());
+                const axisXPointsContainer = document.querySelector('.sun-waveAxisXPoints');
                 if (axisXPointsContainer) {
                     axisXPointsContainer.innerHTML = '';
                 }
@@ -540,16 +539,16 @@ class WavesManager {
                         delete window.appState.periods[wave.id];
                         delete window.appState.periods[waveIdStr];
 
-                        const leftLabel = document.getElementById(`waveLabel${waveIdStr}-left`);
-                        const rightLabel = document.getElementById(`waveLabel${waveIdStr}-right`);
-                        const leftB = document.getElementById(`waveLabel${waveIdStr}-left-person-b`);
-                        const rightB = document.getElementById(`waveLabel${waveIdStr}-right-person-b`);
+                        const leftLabel = window.dom.byKey(`waveLabel${waveIdStr}-left`);
+                        const rightLabel = window.dom.byKey(`waveLabel${waveIdStr}-right`);
+                        const leftB = window.dom.byKey(`waveLabel${waveIdStr}-left-person-b`);
+                        const rightB = window.dom.byKey(`waveLabel${waveIdStr}-right-person-b`);
                         if (leftLabel) leftLabel.remove();
                         if (rightLabel) rightLabel.remove();
                         if (leftB) leftB.remove();
                         if (rightB) rightB.remove();
                         document
-                            .querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"]`)
+                            .querySelectorAll(`.sun-waveLabel.sun-vertical[data-wave-id="${waveIdStr}"]`)
                             .forEach((el) => el.remove());
 
                         delete this.waveLabelElements[`${waveIdStr}-left`];
@@ -579,9 +578,9 @@ class WavesManager {
         try {
         const container = document.createElement('div');
         const swapped = this._isWaveAxisSwapped();
-        container.className = 'wave-container';
+        container.className = 'sun-waveContainer';
         if (swapped) {
-            container.classList.add('wave-container--swapped');
+            container.classList.add('sun-waveContainerSwapped');
         }
         container.id = `waveContainer${wave.id}`;
         
@@ -603,7 +602,7 @@ class WavesManager {
         container.dataset.waveId = wave.id;
         
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.classList.add('wave');
+        svg.classList.add('sun-wave');
         svg.setAttribute('preserveAspectRatio', 'none');
         const { w: dw, h: dh } = this._getDisplayGraphSize();
         const lh = window.appState.config.graphHeight;
@@ -615,12 +614,12 @@ class WavesManager {
         svg.style.height = '100%';
         
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.classList.add('wave-path');
+        path.classList.add('sun-wavePath');
         path.id = `wavePath${wave.id}`;
         path.style.stroke = wave.color;
 
         const pathB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        pathB.classList.add('wave-path', 'wave-path--person-b');
+        pathB.classList.add('sun-wavePath', 'sun-wavePathPersonB');
         pathB.style.stroke = wave.color;
 
         let waveType = wave.type;
@@ -648,13 +647,13 @@ class WavesManager {
 
         const waveIdStr = String(wave.id);
         if (WAVE_BOLD_STROKE_VISUAL_ENABLED && window.appState.waveBold[waveIdStr]) {
-            path.classList.add('bold');
+            path.classList.add('sun-bold');
         }
 
         const gA = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        gA.classList.add('wave-svg-layer', 'wave-svg-layer--a');
+        gA.classList.add('sun-waveSvgLayer', 'sun-waveSvgLayerA');
         const gB = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        gB.classList.add('wave-svg-layer', 'wave-svg-layer--b');
+        gB.classList.add('sun-waveSvgLayer', 'sun-waveSvgLayerB');
         gB.setAttribute('display', 'none');
 
         gA.appendChild(path);
@@ -702,7 +701,7 @@ class WavesManager {
         const amplitude = window.appState.config.amplitude;
         const scrollOriginY = this._getWavePathScrollOriginY();
 
-        const waveSvg = waveContainer.querySelector('.wave');
+        const waveSvg = waveContainer.querySelector('.sun-wave');
         if (waveSvg) {
             waveSvg.setAttribute(
                 'viewBox',
@@ -958,7 +957,7 @@ class WavesManager {
                     const path = this.wavePaths[wave.id] || this.wavePaths[waveIdStr];
                     if (path) {
                         path.classList.toggle(
-                            'bold',
+                            'sun-bold',
                             !!(WAVE_BOLD_STROKE_VISUAL_ENABLED && window.appState.waveBold[waveIdStr])
                         );
                     }
@@ -976,9 +975,9 @@ class WavesManager {
                         layers = null;
                     }
                     if ((!layers || !layers.a || !layers.b) && container.querySelector) {
-                        const svg = container.querySelector('svg.wave');
-                        const gA = svg && svg.querySelector('.wave-svg-layer--a');
-                        const gB = svg && svg.querySelector('.wave-svg-layer--b');
+                        const svg = container.querySelector('svg.sun-wave');
+                        const gA = svg && svg.querySelector('.sun-waveSvgLayerA');
+                        const gB = svg && svg.querySelector('.sun-waveSvgLayerB');
                         if (gA && gB) {
                             layerBRepairedFromDom = true;
                             layers = { a: gA, b: gB };
@@ -1152,7 +1151,7 @@ class WavesManager {
         const textColor = this.getContrastTextColor(color);
         el.style.backgroundColor = color;
         el.style.color = textColor;
-        const arrow = el.querySelector('.wave-label-arrow');
+        const arrow = el.querySelector('.sun-waveLabelArrow');
         if (!arrow) return;
         const side = el.dataset.side;
         if (side === 'left') {
@@ -1176,21 +1175,21 @@ class WavesManager {
         if (!wave) return;
 
         if (hasLayerA) {
-            const leftA = document.getElementById(`waveLabel${waveIdStr}-left`);
-            const rightA = document.getElementById(`waveLabel${waveIdStr}-right`);
+            const leftA = window.dom.byKey(`waveLabel${waveIdStr}-left`);
+            const rightA = window.dom.byKey(`waveLabel${waveIdStr}-right`);
             if (leftA) this._applyLabelColors(leftA, wave, isExtremumA);
             if (rightA) this._applyLabelColors(rightA, wave, isExtremumA);
             document
-                .querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"][data-wave-layer="a"]`)
+                .querySelectorAll(`.sun-waveLabel.sun-vertical[data-wave-id="${waveIdStr}"][data-wave-layer="a"]`)
                 .forEach((label) => this._applyLabelColors(label, wave, isExtremumA));
         }
         if (hasLayerB) {
-            const leftB = document.getElementById(`waveLabel${waveIdStr}-left-person-b`);
-            const rightB = document.getElementById(`waveLabel${waveIdStr}-right-person-b`);
+            const leftB = window.dom.byKey(`waveLabel${waveIdStr}-left-person-b`);
+            const rightB = window.dom.byKey(`waveLabel${waveIdStr}-right-person-b`);
             if (leftB) this._applyLabelColors(leftB, wave, isExtremumB);
             if (rightB) this._applyLabelColors(rightB, wave, isExtremumB);
             document
-                .querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"][data-wave-layer="b"]`)
+                .querySelectorAll(`.sun-waveLabel.sun-vertical[data-wave-id="${waveIdStr}"][data-wave-layer="b"]`)
                 .forEach((label) => this._applyLabelColors(label, wave, isExtremumB));
         }
     }
@@ -1255,7 +1254,7 @@ class WavesManager {
         delete el.dataset.visualBand;
         delete el.dataset.position;
 
-        const textEl = el.querySelector('.wave-label-text');
+        const textEl = el.querySelector('.sun-waveLabelText');
         if (textEl) {
             textEl.textContent = wave.name;
         }
@@ -1272,7 +1271,7 @@ class WavesManager {
 
     /** Сброс боковых выносок при смене раскладки (поворот/сброс transform). */
     clearSideWaveLabelsAfterLayoutChange() {
-        document.querySelectorAll('.wave-label[data-logical-edge]').forEach((el) => {
+        document.querySelectorAll('.sun-waveLabel[data-logical-edge]').forEach((el) => {
             if (el.id && el.id.startsWith('waveLabel')) {
                 delete this.waveLabelElements[el.id.slice('waveLabel'.length)];
             }
@@ -1283,10 +1282,10 @@ class WavesManager {
 
     /** Определяет визуальную сторону (left/right) боковой выноски по DOM-родителю. */
     _sideFromLabelElement(el) {
-        if (el.closest('.wave-labels-left')) {
+        if (el.closest('.sun-waveLabelsLeft')) {
             return 'left';
         }
-        if (el.closest('.wave-labels-right')) {
+        if (el.closest('.sun-waveLabelsRight')) {
             return 'right';
         }
         return el.dataset.visualSide || el.dataset.side || 'left';
@@ -1301,8 +1300,8 @@ class WavesManager {
         const layerKey = el.dataset.waveLayer || 'a';
         el.className =
             layerKey === 'b'
-                ? `wave-label horizontal ${side} wave-label--person-b`
-                : `wave-label horizontal ${side}`;
+                ? `sun-waveLabel sun-horizontal sun-${side} sun-waveLabelPersonB`
+                : `sun-waveLabel sun-horizontal sun-${side}`;
         el.dataset.visualSide = side;
         el.dataset.side = side;
 
@@ -1311,10 +1310,10 @@ class WavesManager {
         el.style.marginLeft = '';
         el.style.marginRight = '';
 
-        let arrow = el.querySelector('.wave-label-arrow');
+        let arrow = el.querySelector('.sun-waveLabelArrow');
         if (!arrow) {
             arrow = document.createElement('div');
-            arrow.className = 'wave-label-arrow';
+            arrow.className = 'sun-waveLabelArrow';
             el.appendChild(arrow);
         }
 
@@ -1343,8 +1342,8 @@ class WavesManager {
             arrow.style.borderColor = `transparent ${color} transparent transparent`;
         }
 
-        el.style.setProperty('--wave-label-fill', color);
-        arrow.style.setProperty('--wave-label-fill', color);
+        el.style.setProperty('--sun-waveLabel-fill', color);
+        arrow.style.setProperty('--sun-waveLabel-fill', color);
     }
 
     /** Обновляет текст, позицию и стиль вертикальной выноски времени экстремума. */
@@ -1365,7 +1364,7 @@ class WavesManager {
         el.dataset.refX = String(x);
         const extremumTime = this.calculateTimeFromXCoordinate(wave, x, effDay, layerKey);
         el.dataset.extremumTime = String(extremumTime.getTime());
-        const textEl = el.querySelector('.wave-label-text');
+        const textEl = el.querySelector('.sun-waveLabelText');
         if (textEl) {
             textEl.textContent = this.formatExtremumTime(extremumTime);
         }
@@ -1380,10 +1379,10 @@ class WavesManager {
 
     /** Определяет логическую полосу (top/bottom) вертикальной выноски по DOM. */
     _bandFromLabelElement(el) {
-        if (el.closest('.wave-labels-top')) {
+        if (el.closest('.sun-waveLabelsTop')) {
             return 'top';
         }
-        if (el.closest('.wave-labels-bottom')) {
+        if (el.closest('.sun-waveLabelsBottom')) {
             return 'bottom';
         }
         return el.dataset.visualBand || el.dataset.position || 'top';
@@ -1398,8 +1397,8 @@ class WavesManager {
         const layerKey = el.dataset.waveLayer || 'a';
         el.className =
             layerKey === 'b'
-                ? `wave-label vertical ${band} wave-label--person-b`
-                : `wave-label vertical ${band}`;
+                ? `sun-waveLabel sun-vertical sun-${band} sun-waveLabelPersonB`
+                : `sun-waveLabel sun-vertical sun-${band}`;
         el.dataset.visualBand = band;
         el.dataset.position = band;
 
@@ -1408,10 +1407,10 @@ class WavesManager {
         el.style.marginTop = '';
         el.style.marginBottom = '';
 
-        let arrow = el.querySelector('.wave-label-arrow');
+        let arrow = el.querySelector('.sun-waveLabelArrow');
         if (!arrow) {
             arrow = document.createElement('div');
-            arrow.className = 'wave-label-arrow';
+            arrow.className = 'sun-waveLabelArrow';
             el.appendChild(arrow);
         }
 
@@ -1440,8 +1439,8 @@ class WavesManager {
             arrow.style.borderColor = `transparent transparent ${color} transparent`;
         }
 
-        el.style.setProperty('--wave-label-fill', color);
-        arrow.style.setProperty('--wave-label-fill', color);
+        el.style.setProperty('--sun-waveLabel-fill', color);
+        arrow.style.setProperty('--sun-waveLabel-fill', color);
     }
 
     /** Позиционирует DOM-точку пересечения с осью X в координатах слоя волн. */
@@ -1458,14 +1457,14 @@ class WavesManager {
         }
     }
 
-    /** Создаёт или возвращает контейнер .wave-intersection-points в #wavesMount. */
+    /** Создаёт или возвращает контейнер .sun-waveIntersectionPoints в #wavesMount. */
     _ensureWaveIntersectionPointsContainer() {
-        let container = document.querySelector('.wave-intersection-points');
+        let container = document.querySelector('.sun-waveIntersectionPoints');
         if (container) {
             return container;
         }
         container = document.createElement('div');
-        container.className = 'wave-intersection-points';
+        container.className = 'sun-waveIntersectionPoints';
         container.style.position = 'absolute';
         container.style.width = '100%';
         container.style.height = '100%';
@@ -1495,7 +1494,7 @@ class WavesManager {
     /** Создаёт кликабельный DOM-элемент маркера пересечения двух волн. */
     _createWaveIntersectionPointElement(point) {
         const pointElement = document.createElement('div');
-        pointElement.className = 'wave-intersection-point';
+        pointElement.className = 'sun-waveIntersectionPoint';
         pointElement.dataset.time = point.time.toISOString();
         pointElement.dataset.wavePair = point.wavePair;
         pointElement.title = this._buildWaveIntersectionPointTitle(point);
@@ -1588,7 +1587,7 @@ class WavesManager {
                         const displayPoint = this._mapLabelPointForViewport(graphX, y);
                         const domId = this._horizontalWaveLabelDomId(wave.id, side, layer.key);
                         activeDomIds.add(domId);
-                        let el = document.getElementById(domId);
+                        let el = window.dom.byKey(domId);
                         if (!el) {
                             el = this.createHorizontalWaveLabel(
                                 wave,
@@ -1623,8 +1622,8 @@ class WavesManager {
         } finally {
             end &&
                 end({
-                    leftLabels: document.querySelector('.wave-labels-left')?.children.length,
-                    rightLabels: document.querySelector('.wave-labels-right')?.children.length
+                    leftLabels: document.querySelector('.sun-waveLabelsLeft')?.children.length,
+                    rightLabels: document.querySelector('.sun-waveLabelsRight')?.children.length
                 });
         }
     }
@@ -1632,8 +1631,8 @@ class WavesManager {
     /** Обновляет верхние/нижние выноски времени экстремумов. */
     updateVerticalWaveLabels(opts = {}) {
         const d = __waveDbg();
-        const topContainer = document.querySelector('.wave-labels-top');
-        const bottomContainer = document.querySelector('.wave-labels-bottom');
+        const topContainer = document.querySelector('.sun-waveLabelsTop');
+        const bottomContainer = document.querySelector('.sun-waveLabelsBottom');
         
         if (!topContainer || !bottomContainer) {
             d && d.log('waves.updateVerticalWaveLabels.skip', { reason: 'noContainers' });
@@ -1677,7 +1676,7 @@ class WavesManager {
                                 layer.key
                             );
                             activeDomIds.add(domId);
-                            let el = document.getElementById(domId);
+                            let el = window.dom.byKey(domId);
                             if (!el) {
                                 this.createVerticalWaveLabel(
                                     wave,
@@ -1724,10 +1723,10 @@ class WavesManager {
     /** Синхронизирует DOM-точки пересечения волн с горизонтальной осью (y = centerY). */
     updateAxisXIntersectionPoints() {
         const d = __waveDbg();
-        let axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+        let axisXPointsContainer = document.querySelector('.sun-waveAxisXPoints');
         if (!axisXPointsContainer) {
             axisXPointsContainer = document.createElement('div');
-            axisXPointsContainer.className = 'wave-axis-x-points';
+            axisXPointsContainer.className = 'sun-waveAxisXPoints';
             axisXPointsContainer.style.position = 'absolute';
             axisXPointsContainer.style.width = '100%';
             axisXPointsContainer.style.height = '100%';
@@ -1742,7 +1741,7 @@ class WavesManager {
             }
         }
         
-        if (axisXPointsContainer.classList.contains('hidden')) {
+        if (axisXPointsContainer.classList.contains('sun-hidden')) {
             axisXPointsContainer.innerHTML = '';
             d && d.log('waves.updateAxisXIntersectionPoints.skip', { reason: 'hidden' });
             return;
@@ -1782,7 +1781,7 @@ class WavesManager {
                 }
             });
 
-            axisXPointsContainer.querySelectorAll('.wave-axis-x-point').forEach((el) => {
+            axisXPointsContainer.querySelectorAll('.sun-waveAxisXPoint').forEach((el) => {
                 if (!activeKeys.has(el.dataset.axisKey)) {
                     el.remove();
                 }
@@ -1844,8 +1843,8 @@ class WavesManager {
         const point = document.createElement('div');
         point.className =
             layerKey === 'b'
-                ? 'wave-axis-x-point wave-axis-x-point--person-b'
-                : 'wave-axis-x-point';
+                ? 'sun-waveAxisXPoint sun-waveAxisXPointPersonB'
+                : 'sun-waveAxisXPoint';
         point.dataset.waveId = wave.id;
         point.dataset.x = x;
         point.dataset.waveLayer = layerKey;
@@ -2019,7 +2018,7 @@ class WavesManager {
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
-        labelElement.style.setProperty('--wave-label-fill', waveColor);
+        labelElement.style.setProperty('--sun-waveLabel-fill', waveColor);
         if (layerKey !== 'b') {
             labelElement.style.opacity = '0.7';
         }
@@ -2032,7 +2031,7 @@ class WavesManager {
         labelElement.style.whiteSpace = 'nowrap';
         
         const text = document.createElement('div');
-        text.className = 'wave-label-text';
+        text.className = 'sun-waveLabelText';
         text.textContent = wave.name;
         text.style.position = 'relative';
         text.style.zIndex = '2';
@@ -2117,7 +2116,7 @@ class WavesManager {
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
-        labelElement.style.setProperty('--wave-label-fill', waveColor);
+        labelElement.style.setProperty('--sun-waveLabel-fill', waveColor);
         if (layerKey !== 'b') {
             labelElement.style.opacity = '0.7';
         }
@@ -2130,7 +2129,7 @@ class WavesManager {
         labelElement.style.whiteSpace = 'nowrap';
         
         const text = document.createElement('div');
-        text.className = 'wave-label-text';
+        text.className = 'sun-waveLabelText';
         text.textContent = timeString;
         
         labelElement.appendChild(text);
@@ -2166,7 +2165,7 @@ class WavesManager {
     }
 
     
-    /** Клик по боковой выноске слоя B — тот же путь, что чекбокс .wave-b-visibility-check (см. handleWavePersonBVisibilityChange). */
+    /** Клик по боковой выноске слоя B — тот же путь, что чекбокс .sun-waveBVisibilityCheck (см. handleWavePersonBVisibilityChange). */
     onHorizontalWaveLabelBClick(waveId) {
         const waveIdStr = String(waveId);
         const wasLayerBOn = window.appState.waveBold[waveIdStr] === true;
@@ -2199,7 +2198,7 @@ class WavesManager {
         ) {
             const $ = window.jQuery;
             if ($) {
-                const $bVis = $(`.wave-b-visibility-check[data-id="${waveIdStr}"]`);
+                const $bVis = $(`.sun-waveBVisibilityCheck[data-id="${waveIdStr}"]`);
                 window.eventManager.handleWavePersonBVisibilityChange(
                     waveId,
                     newChecked,
@@ -2213,7 +2212,7 @@ class WavesManager {
         }
 
         const applied = window.appState.waveBold[waveIdStr] === true;
-        document.querySelectorAll(`.wave-b-visibility-check[data-id="${waveIdStr}"]`).forEach((el) => {
+        document.querySelectorAll(`.sun-waveBVisibilityCheck[data-id="${waveIdStr}"]`).forEach((el) => {
             el.checked = applied;
         });
     }
@@ -2233,7 +2232,7 @@ class WavesManager {
         // Тот же путь, что и чекбокс «Видимость»: без updateWavesList() — иначе полный EJS-рендер списка даёт сотни мс задержки.
         if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
             window.eventManager.handleWaveVisibilityChange(waveId, newChecked, $());
-            const $vis = $(`.wave-visibility-check[data-id="${waveIdStr}"]`);
+            const $vis = $(`.sun-waveVisibilityCheck[data-id="${waveIdStr}"]`);
             if ($vis.length) {
                 $vis.prop('checked', newChecked);
             }
@@ -2342,7 +2341,7 @@ class WavesManager {
     /** Обновляет текст времени на всех вертикальных выносках при сдвиге визора. */
     updateVerticalWaveLabelsTime() {
         const d = __waveDbg();
-        const labels = document.querySelectorAll('.wave-label.vertical');
+        const labels = document.querySelectorAll('.sun-waveLabel.sun-vertical');
         const end = d && d.t('waves.updateVerticalWaveLabelsTime', { count: labels.length });
         try {
         labels.forEach(label => {
@@ -2369,7 +2368,7 @@ class WavesManager {
                 : this.calculateExtremumTime(wave, label.dataset.position);
             const timeString = this.formatExtremumTime(extremumTime);
             
-            const textElement = label.querySelector('.wave-label-text');
+            const textElement = label.querySelector('.sun-waveLabelText');
             if (textElement) {
                 textElement.textContent = timeString;
             }
@@ -2631,17 +2630,17 @@ class WavesManager {
             delete this.wavePathLayerGroups[waveIdStr];
         }
         
-        const leftLabel = document.getElementById(`waveLabel${waveIdStr}-left`);
-        const rightLabel = document.getElementById(`waveLabel${waveIdStr}-right`);
-        const leftB = document.getElementById(`waveLabel${waveIdStr}-left-person-b`);
-        const rightB = document.getElementById(`waveLabel${waveIdStr}-right-person-b`);
+        const leftLabel = window.dom.byKey(`waveLabel${waveIdStr}-left`);
+        const rightLabel = window.dom.byKey(`waveLabel${waveIdStr}-right`);
+        const leftB = window.dom.byKey(`waveLabel${waveIdStr}-left-person-b`);
+        const rightB = window.dom.byKey(`waveLabel${waveIdStr}-right-person-b`);
         
         if (leftLabel) leftLabel.remove();
         if (rightLabel) rightLabel.remove();
         if (leftB) leftB.remove();
         if (rightB) rightB.remove();
         
-        document.querySelectorAll(`.wave-label.vertical[data-wave-id="${waveIdStr}"]`).forEach(el => el.remove());
+        document.querySelectorAll(`.sun-waveLabel.sun-vertical[data-wave-id="${waveIdStr}"]`).forEach(el => el.remove());
         
         delete this.waveLabelElements[`${waveIdStr}-left`];
         delete this.waveLabelElements[`${waveIdStr}-right`];
@@ -2674,7 +2673,7 @@ class WavesManager {
             }
         });
         
-        document.querySelectorAll('.corner-square').forEach(square => {
+        document.querySelectorAll('.sun-cornerSquare').forEach(square => {
             if (hasActiveWave) {
                 square.style.backgroundColor = activeColor;
             } else {
@@ -2700,7 +2699,7 @@ class WavesManager {
         
         this.updateCornerSquareColors();
         
-        document.querySelectorAll('.wave-corner-color-check').forEach(checkbox => {
+        document.querySelectorAll('.sun-waveCornerColorCheck').forEach(checkbox => {
             const checkboxWaveIdStr = String(checkbox.dataset.id);
             if (checkboxWaveIdStr === waveIdStr) {
                 checkbox.checked = enabled;
@@ -2825,7 +2824,7 @@ class WavesManager {
         window.appState.save();
         
         const milliseconds = targetDate.getMilliseconds();
-        document.getElementById('currentDay').textContent = 
+        window.dom.byKey('currentDay').textContent = 
             window.appState.currentDay.toFixed(5) + 
             ` (${milliseconds}ms)`;
         if (window.dates) {
@@ -3011,7 +3010,7 @@ class WavesManager {
         return filteredPoints;
     }
 
-    /** Рендерит до 50 маркеров пересечений волн в .wave-intersection-points. */
+    /** Рендерит до 50 маркеров пересечений волн в .sun-waveIntersectionPoints. */
     renderWaveIntersectionPoints() {
         const d = __waveDbg();
         if (window.appState && window.appState.waveIntersectionsVisible === false) {
@@ -3063,7 +3062,7 @@ class WavesManager {
             }
         });
 
-        container.querySelectorAll('.wave-intersection-point').forEach((el) => {
+        container.querySelectorAll('.sun-waveIntersectionPoint').forEach((el) => {
             if (!activeKeys.has(el.dataset.intersectionKey)) {
                 el.remove();
             }
@@ -3074,10 +3073,10 @@ class WavesManager {
         return container;
     }
 
-    /** Удаляет все DOM-слои .wave-intersection-points с графа. */
+    /** Удаляет все DOM-слои .sun-waveIntersectionPoints с графа. */
     removeWaveIntersectionPoints() {
         const d = __waveDbg();
-        const nodes = document.querySelectorAll('.wave-intersection-points');
+        const nodes = document.querySelectorAll('.sun-waveIntersectionPoints');
         if (d && nodes.length) {
             d.log('waves.removeWaveIntersectionPoints', { layers: nodes.length });
         }

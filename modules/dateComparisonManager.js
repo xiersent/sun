@@ -218,11 +218,11 @@ class DateComparisonManager {
 
     /** Кэширует DOM-элементы модуля. */
     cacheElements() {
-        this.elA = document.getElementById('dateCompareSelectA');
-        this.elB = document.getElementById('dateCompareSelectB');
-        this.elTableWrap = document.getElementById('dateCompareResults');
-        this.elHint = document.getElementById('dateCompareVizorHint');
-        this.elViewTablist = document.querySelector('.date-comparison-view-tabs');
+        this.elA = window.dom.byKey('dateCompareSelectA');
+        this.elB = window.dom.byKey('dateCompareSelectB');
+        this.elTableWrap = window.dom.byKey('dateCompareResults');
+        this.elHint = window.dom.byKey('dateCompareVizorHint');
+        this.elViewTablist = document.querySelector('.sun-dateComparisonViewTabs');
     }
 
     /** Инициализация модуля. */
@@ -245,16 +245,16 @@ class DateComparisonManager {
         }
         if (this.elViewTablist) {
             this.elViewTablist.addEventListener('click', (e) => {
-                const btn = e.target.closest('.date-comparison-view-tab');
+                const btn = e.target.closest('.sun-dateComparisonViewTab');
                 if (!btn || !this.elViewTablist.contains(btn)) return;
                 const mode = btn.getAttribute('data-date-compare-view');
                 if (!mode || mode === this._compareTabMode) return;
                 this._compareTabMode = mode;
-                const tabs = this.elViewTablist.querySelectorAll('.date-comparison-view-tab');
+                const tabs = this.elViewTablist.querySelectorAll('.sun-dateComparisonViewTab');
                 for (let i = 0; i < tabs.length; i++) {
                     const t = tabs[i];
                     const on = t === btn;
-                    t.classList.toggle('active', on);
+                    t.classList.toggle('sun-active', on);
                     t.setAttribute('aria-selected', on ? 'true' : 'false');
                 }
                 this.updateComparison();
@@ -648,12 +648,12 @@ class DateComparisonManager {
 
     /** Внутренний метод matchClass. */
     _matchClass(pct) {
-        if (pct >= 99.5) return 'intersection-item-exact';
-        if (pct >= 85) return 'intersection-item-very-close';
-        if (pct >= 65) return 'intersection-item-close';
-        if (pct >= 45) return 'intersection-item-fairly-close';
-        if (pct >= 25) return 'intersection-item-nearby';
-        return 'intersection-item-within-tolerance';
+        if (pct >= 99.5) return 'sun-intersectionItemExact';
+        if (pct >= 85) return 'sun-intersectionItemVeryClose';
+        if (pct >= 65) return 'sun-intersectionItemClose';
+        if (pct >= 45) return 'sun-intersectionItemFairlyClose';
+        if (pct >= 25) return 'sun-intersectionItemNearby';
+        return 'sun-intersectionItemWithinTolerance';
     }
 
     /**
@@ -678,7 +678,7 @@ class DateComparisonManager {
 
         if (dates.length < 2) {
             this.elTableWrap.innerHTML =
-                '<div class="summary-empty">Добавьте в список как минимум две даты, чтобы сравнить волны.</div>';
+                '<div class="sun-summaryEmpty">Добавьте в список как минимум две даты, чтобы сравнить волны.</div>';
             return;
         }
 
@@ -693,31 +693,31 @@ class DateComparisonManager {
         const idB = rawB === sameVal ? '' : rawB;
         if (!idA) {
             this.elTableWrap.innerHTML =
-                '<div class="summary-empty">Выберите дату A в списке выше.</div>';
+                '<div class="sun-summaryEmpty">Выберите дату A в списке выше.</div>';
             return;
         }
         if (!idB) {
             this.elTableWrap.innerHTML =
                 rawB === sameVal
-                    ? '<div class="summary-empty">Для отчёта по двум датам выберите в «Дата B» другую персону. Режим «Сравнение с той же датой» используется на вкладке «Пересечения» (фазы всех сигналов от даты A).</div>'
-                    : '<div class="summary-empty">Выберите две разные даты в списках выше.</div>';
+                    ? '<div class="sun-summaryEmpty">Для отчёта по двум датам выберите в «Дата B» другую персону. Режим «Сравнение с той же датой» используется на вкладке «Пересечения» (фазы всех сигналов от даты A).</div>'
+                    : '<div class="sun-summaryEmpty">Выберите две разные даты в списках выше.</div>';
             return;
         }
         if (String(idA) === String(idB)) {
             this.elTableWrap.innerHTML =
-                '<div class="summary-empty">Выберите две разные даты в списках выше.</div>';
+                '<div class="sun-summaryEmpty">Выберите две разные даты в списках выше.</div>';
             return;
         }
 
         if (!window.waves || typeof window.waves.calculateWaveStateAtDay !== 'function') {
-            this.elTableWrap.innerHTML = '<div class="summary-empty">Загрузка модулей…</div>';
+            this.elTableWrap.innerHTML = '<div class="sun-summaryEmpty">Загрузка модулей…</div>';
             return;
         }
 
         const personA = dates.find((d) => String(d.id) === String(idA));
         const personB = dates.find((d) => String(d.id) === String(idB));
         if (!personA || !personB) {
-            this.elTableWrap.innerHTML = '<div class="summary-empty">Не удалось найти выбранные даты.</div>';
+            this.elTableWrap.innerHTML = '<div class="sun-summaryEmpty">Не удалось найти выбранные даты.</div>';
             return;
         }
 
@@ -767,7 +767,7 @@ class DateComparisonManager {
         }
 
         if (rows.length === 0) {
-            this.elTableWrap.innerHTML = '<div class="summary-empty">Нет волн с положительным периодом.</div>';
+            this.elTableWrap.innerHTML = '<div class="sun-summaryEmpty">Нет волн с положительным периодом.</div>';
             return;
         }
 
@@ -781,16 +781,16 @@ class DateComparisonManager {
         const showBothLayersBtnCol = true;
 
         const head = `
-            <table class="date-comparison-table">
+            <table class="sun-dateComparisonTable">
                 <thead>
                     <tr>
                         <th>Сигнал</th>
-                        <th class="date-comparison-state">Сост. A</th>
+                        <th class="sun-dateComparisonState">Сост. A</th>
                         <th>Напр. A</th>
-                        <th class="date-comparison-state">Сост. B</th>
+                        <th class="sun-dateComparisonState">Сост. B</th>
                         <th>Напр. B</th>
                         <th>${metricHeader}</th>
-                        ${showBothLayersBtnCol ? '<th class="date-comparison-actions">График</th>' : ''}
+                        ${showBothLayersBtnCol ? '<th class="sun-dateComparisonActions">График</th>' : ''}
                     </tr>
                 </thead>
                 <tbody>
@@ -809,24 +809,24 @@ class DateComparisonManager {
                     metricPct = row.pct;
                     cls = this._matchClass(row.pct);
                 }
-                const name = `${this._escapeHtml(row.wave.name || '')} <span class="date-comparison-period">(${row.wave.period} дн.)</span>`;
+                const name = `${this._escapeHtml(row.wave.name || '')} <span class="sun-dateComparisonPeriod">(${row.wave.period} дн.)</span>`;
                 const vizorLabel =
                     window.dom && typeof window.dom.getDateCompareVizorToggleLabel === 'function'
                         ? window.dom.getDateCompareVizorToggleLabel(row.wave.id)
                         : 'Показать A и B';
                 const vizorCell = showBothLayersBtnCol
-                    ? `<td class="date-comparison-actions"><button type="button" class="ui-btn show-on-vizor-btn date-compare-vizor-btn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
+                    ? `<td class="sun-dateComparisonActions"><button type="button" class="sun-uiBtn sun-showOnVizorBtn sun-dateCompareVizorBtn" data-wave-id="${row.wave.id}">${this._escapeHtml(vizorLabel)}</button></td>`
                     : '';
                 return `<tr>
-                    <td class="date-comparison-name">
-                        <span class="date-comparison-color" style="background-color:${row.wave.color || '#666'}"></span>
+                    <td class="sun-dateComparisonName">
+                        <span class="sun-dateComparisonColor" style="background-color:${row.wave.color || '#666'}"></span>
                         ${name}
                     </td>
-                    <td class="date-comparison-state">${row.stateA.toFixed(2)}</td>
+                    <td class="sun-dateComparisonState">${row.stateA.toFixed(2)}</td>
                     ${this._dirCell(row.dirA)}
-                    <td class="date-comparison-state">${row.stateB.toFixed(2)}</td>
+                    <td class="sun-dateComparisonState">${row.stateB.toFixed(2)}</td>
                     ${this._dirCell(row.dirB)}
-                    <td><span class="intersection-result-closeness ${cls}">${metricPct.toFixed(1)}%</span></td>
+                    <td><span class="sun-intersectionResultCloseness ${cls}">${metricPct.toFixed(1)}%</span></td>
                     ${vizorCell}
                 </tr>`;
             })

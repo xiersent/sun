@@ -22,7 +22,7 @@ class DatesManager {
         this._genderSelectTitlesBound = true;
         document.addEventListener('change', (e) => {
             const sel = e.target;
-            if (!sel || !sel.classList || !sel.classList.contains('date-gender-select')) {
+            if (!sel || !sel.classList || !sel.matches('.sun-dateGenderSelect, .sun-dateGenderSelect')) {
                 return;
             }
             if (window.dom && typeof window.dom.getPersonGenderLabel === 'function') {
@@ -43,7 +43,7 @@ class DatesManager {
         ];
         
         ids.forEach(id => {
-            const el = document.getElementById(id);
+            const el = window.dom.byKey(id);
             if (el) this.elements[id] = el;
         });
     }
@@ -69,17 +69,17 @@ class DatesManager {
     
     /** Обновляет стиль кнопки «Сегодня» (активна / неактивна). */
     updateTodayButton() {
-        const btnToday = document.getElementById('btnToday');
+        const btnToday = window.dom.byKey('btnToday');
         if (!btnToday) return;
         
         const isCurrent = this.isCurrentDateOnVizor();
         
         if (isCurrent) {
-            btnToday.classList.remove('today-inactive');
-            btnToday.classList.add('today-active');
+            btnToday.classList.remove('sun-todayInactive');
+            btnToday.classList.add('sun-todayActive');
         } else {
-            btnToday.classList.remove('today-active');
-            btnToday.classList.add('today-inactive');
+            btnToday.classList.remove('sun-todayActive');
+            btnToday.classList.add('sun-todayInactive');
         }
         btnToday.removeAttribute('title');
     }
@@ -366,7 +366,7 @@ class DatesManager {
         if (oldActiveId !== dateId && window.waves) {
             const hasWaveDom =
                 Object.keys(window.waves.waveContainers || {}).length > 0 ||
-                !!document.querySelector('.wave-container');
+                !!document.querySelector('.sun-waveContainer');
             if (!hasWaveDom && window.waves.createVisibleWaveElements) {
                 const wrd = window.__waveRenderDebug;
                 const end =
@@ -552,7 +552,7 @@ class DatesManager {
         window.appState.data.groups = window.appState.data.groups.filter(g => String(g.id) !== groupIdStr);
 
         if (window.waves) {
-            document.querySelectorAll('.wave-container').forEach(c => c.remove());
+            document.querySelectorAll('.sun-waveContainer').forEach(c => c.remove());
             window.waves.clearWaveDomReferences();
             window.appState.periods = {};
 
@@ -905,7 +905,7 @@ class DatesManager {
     
     /** Снимает обработчики click-outside у строк в режиме редактирования. */
     cleanupEditingHandlers() {
-        document.querySelectorAll('.date-item.editing').forEach(item => {
+        document.querySelectorAll('.sun-listItemDate.sun-listItemEditing').forEach(item => {
             if (item._clickOutsideHandler) {
                 document.removeEventListener('click', item._clickOutsideHandler);
                 delete item._clickOutsideHandler;
@@ -915,7 +915,7 @@ class DatesManager {
     
     /** Обновляет текст #currentDay с учётом дробной части дня. */
     updateCurrentDayElement() {
-        const currentDayElement = document.getElementById('currentDay');
+        const currentDayElement = window.dom.byKey('currentDay');
         if (currentDayElement) {
             const currentDayValue = window.appState.currentDay || 0;
             currentDayElement.textContent = window.timeUtils.formatCurrentDayWithSeconds(

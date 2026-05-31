@@ -4,79 +4,79 @@
 <% var _descForTitle = String(data.description || '').trim(); var _hoverFallback = String(data.name || '') + '\n-\n' + String(data.formattedDate || ''); if (_descForTitle) { _hoverFallback += '\n-\n' + _descForTitle; } var _dateTitleHover = _attrEsc(data.hoverTitle != null ? data.hoverTitle : _hoverFallback); %>
 <% var _dateTitleValue = _attrEsc(data.formattedDate + (data.yearsFromCurrent > 0 ? ' [' + data.yearsFromCurrent + ']' : '')); %>
 <% var _genderIcon = { unset: '⚥', male: '♂', female: '♀' }; var _genderTip = data.gender === 'male' ? 'Мужской' : (data.gender === 'female' ? 'Женский' : 'Не указан'); %>
-<div class="list-item list-item--date 
-    <%= data.active ? 'active' : '' %> 
-    <%= data.editing ? 'list-item--editing' : '' %>"
+<div class="sun-listItem sun-listItemDate 
+    <%= data.active ? 'sun-active' : '' %> 
+    <%= data.editing ? 'sun-listItemEditing' : '' %>"
     data-id="<%= data.id %>"
     data-type="date"
     data-person-group-id="<%= data.personGroupId || '' %>"
     draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="list-item__drag-handle date-drag-handle" draggable="<%= !data.editing %>" title="Перетащить персону">⋮⋮</div>
+    <div class="sun-listItemDragHandle sun-dateDragHandle" draggable="<%= !data.editing %>" title="Перетащить персону">⋮⋮</div>
     
-    <div class="list-item__content">
+    <div class="sun-listItemContent">
         <!-- Нормальный вид -->
-        <div class="list-item__normal-view">
-            <div class="list-item__row">
-                <div class="list-item__left">
+        <div class="sun-listItemNormalView">
+            <div class="sun-listItemRow">
+                <div class="sun-listItemLeft">
                     <!-- Два чекбокса выделения -->
-                    <div class="date-selection-checks">
-                        <input type="checkbox" class="date-checkbox" autocomplete="off"
+                    <div class="sun-dateSelectionChecks">
+                        <input type="checkbox" class="sun-dateCheckbox" autocomplete="off"
                                <%= data.selectedTypeA ? 'checked' : '' %>
                                data-id="<%= data.id %>" 
                                data-type="a"
                                title="Выделение типа A">
-                        <input type="checkbox" class="date-checkbox" autocomplete="off"
+                        <input type="checkbox" class="sun-dateCheckbox" autocomplete="off"
                                <%= data.selectedTypeB ? 'checked' : '' %>
                                data-id="<%= data.id %>" 
                                data-type="b"
                                title="Выделение типа B">
                     </div>
                     
-                    <div class="list-item__title-container">
-                        <div class="list-item__title date-name" title="<%= _dateTitleHover %>">
+                    <div class="sun-listItemTitleContainer">
+                        <div class="sun-listItemTitle sun-dateName" title="<%= _dateTitleHover %>">
                             <%= data.name %>
                         </div>
-                        <span class="list-item__icon date-star" title="<%= _dateTitleHover %>">★</span>
+                        <span class="sun-listItem__icon sun-dateStar" title="<%= _dateTitleHover %>">★</span>
                     </div>
                 </div>
                 
-                <div class="list-item__right">
-                    <div class="list-item__value" title="<%= _dateTitleValue %>">
+                <div class="sun-listItemRight">
+                    <div class="sun-listItemValue" title="<%= _dateTitleValue %>">
                         <%= data.formattedDate %>
-                        <span class="date-gender-badge" title="<%= _attrEsc(_genderTip) %>">[<%= data.genderIcon %>]</span>
+                        <span class="sun-dateGenderBadge" title="<%= _attrEsc(_genderTip) %>">[<%= data.genderIcon %>]</span>
                         <% if (data.yearsFromCurrent > 0) { %>
                             [<%= data.yearsFromCurrent %>]
                         <% } %>
                     </div>
-                    <div class="list-item__actions">
-                        <button type="button" class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="date" title="Редактировать" aria-label="Редактировать">✎</button>
-                        <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
+                    <div class="sun-listItemActions">
+                        <button type="button" class="sun-uiBtn sun-editBtn" data-id="<%= data.id %>" data-type="date" title="Редактировать" aria-label="Редактировать">✎</button>
+                        <button type="button" class="sun-uiBtn sun-deleteDateBtn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Форма редактирования -->
-        <div class="list-item__edit-form">
-            <div class="list-item__edit-row list-item__edit-row--date-main">
-                <input type="text" class="list-item__edit-input date-name-edit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
-                <input type="date" class="date-input list-item__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
-                <select class="form-input date-gender-select" id="editDateGender<%= data.id %>" aria-label="Пол" title="<%= _attrEsc(_genderTip) %>">
+        <div class="sun-listItemEditForm">
+            <div class="sun-listItem__edit-row sun-listItemEditRowDateMain">
+                <input type="text" class="sun-listItem__edit-input sun-dateNameEdit" id="editDateName<%= data.id %>" value="<%= data.name %>" placeholder="Название">
+                <input type="date" class="sun-dateInput sun-listItem__edit-input" id="editDateValue<%= data.id %>" value="<%= data.dateForInput %>">
+                <select class="sun-formInput sun-dateGenderSelect" id="editDateGender<%= data.id %>" aria-label="Пол" title="<%= _attrEsc(_genderTip) %>">
                     <option value="unset"<%= data.gender === 'unset' ? ' selected' : '' %> title="Не указан"><%= _genderIcon.unset %></option>
                     <option value="male"<%= data.gender === 'male' ? ' selected' : '' %> title="Мужской"><%= _genderIcon.male %></option>
                     <option value="female"<%= data.gender === 'female' ? ' selected' : '' %> title="Женский"><%= _genderIcon.female %></option>
                 </select>
             </div>
-            <div class="list-item__edit-row list-item__edit-row--full">
-                <textarea class="list-item__edit-input date-description-edit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"><%= _textEsc(data.description || '') %></textarea>
+            <div class="sun-listItem__edit-row sun-listItemEditRowFull">
+                <textarea class="sun-listItem__edit-input sun-dateDescriptionEdit" id="editDateDescription<%= data.id %>" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"><%= _textEsc(data.description || '') %></textarea>
             </div>
-            <div class="list-item__edit-row list-item__edit-row--date-actions">
-                <div class="list-item__edit-actions">
-                    <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
-                    <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Сохранить" aria-label="Сохранить">💾</button>
-                    <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="date" title="Отмена" aria-label="Отмена">↩</button>
+            <div class="sun-listItem__edit-row sun-listItemEditRowDateActions">
+                <div class="sun-listItemEditActions">
+                    <button type="button" class="sun-uiBtn sun-deleteDateBtn" data-id="<%= data.id %>" data-type="date" title="Уничтожить" aria-label="Уничтожить">⨯</button>
+                    <button type="button" class="sun-saveBtn sun-uiBtn" data-id="<%= data.id %>" data-type="date" title="Сохранить" aria-label="Сохранить">💾</button>
+                    <button type="button" class="sun-cancelBtn sun-uiBtn" data-id="<%= data.id %>" data-type="date" title="Отмена" aria-label="Отмена">↩</button>
                 </div>
             </div>
         </div>

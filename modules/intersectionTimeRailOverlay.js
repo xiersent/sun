@@ -47,68 +47,68 @@ class IntersectionTimeRailOverlay {
         if (this.root) return;
         const root = document.createElement('div');
         root.id = 'intersectionTimeRailOverlay';
-        root.className = 'intersection-time-rail';
+        root.className = 'sun-intersectionTimeRail';
         root.setAttribute('aria-hidden', 'true');
         root.innerHTML = `
-            <div class="intersection-time-rail__backdrop" data-time-rail-close="1"></div>
-            <button type="button" class="ui-btn intersection-time-rail__close" data-time-rail-close="1">Закрыть</button>
-            <div class="intersection-time-rail__panel">
-                <div class="intersection-time-rail__now-line" aria-hidden="true"></div>
-                <div class="intersection-time-rail__person-row">
-                    <div class="intersection-time-rail__person-field">
-                        <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailPersonA">Дата A</label>
-                        <select id="intersectionTimeRailPersonA" class="summary-select intersection-time-rail__person-select" title="Активная персона (как «Дата A» на вкладке сравнения дат)"></select>
+            <div class="sun-intersectionTimeRailBackdrop" data-time-rail-close="1"></div>
+            <button type="button" class="sun-uiBtn sun-intersectionTimeRailClose" data-time-rail-close="1">Закрыть</button>
+            <div class="sun-intersectionTimeRailPanel">
+                <div class="sun-intersectionTimeRailNowLine" aria-hidden="true"></div>
+                <div class="sun-intersectionTimeRailPersonRow">
+                    <div class="sun-intersectionTimeRailPersonField">
+                        <label class="sun-intersectionFormLabel sun-intersectionTimeRailPersonLabel" for="intersectionTimeRailPersonA">Дата A</label>
+                        <select id="intersectionTimeRailPersonA" class="sun-summarySelect sun-intersectionTimeRailPersonSelect" title="Активная персона (как «Дата A» на вкладке сравнения дат)"></select>
                     </div>
-                    <div class="intersection-time-rail__person-field">
-                        <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailPersonB">Дата B</label>
-                        <select id="intersectionTimeRailPersonB" class="summary-select intersection-time-rail__person-select" title="Фаза остальных сигналов (как «Дата B»; можно «Сравнение с той же датой»)"></select>
+                    <div class="sun-intersectionTimeRailPersonField">
+                        <label class="sun-intersectionFormLabel sun-intersectionTimeRailPersonLabel" for="intersectionTimeRailPersonB">Дата B</label>
+                        <select id="intersectionTimeRailPersonB" class="sun-summarySelect sun-intersectionTimeRailPersonSelect" title="Фаза остальных сигналов (как «Дата B»; можно «Сравнение с той же датой»)"></select>
                     </div>
-                    <div class="intersection-time-rail__person-field">
-                        <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailViewportHours">Обзор</label>
-                        <select id="intersectionTimeRailViewportHours" class="summary-select intersection-time-rail__person-select" title="Видимый интервал суток по вертикали экрана"></select>
+                    <div class="sun-intersectionTimeRailPersonField">
+                        <label class="sun-intersectionFormLabel sun-intersectionTimeRailPersonLabel" for="intersectionTimeRailViewportHours">Обзор</label>
+                        <select id="intersectionTimeRailViewportHours" class="sun-summarySelect sun-intersectionTimeRailPersonSelect" title="Видимый интервал суток по вертикали экрана"></select>
                     </div>
-                    <div class="intersection-time-rail__person-field">
-                        <label class="intersection-form-label intersection-time-rail__person-label" for="intersectionTimeRailWave">Волна</label>
-                        <select id="intersectionTimeRailWave" class="summary-select intersection-time-rail__person-select" title="Сигнал для анализа пересечений (как выбор «окраски углов» в списке волн)"></select>
-                    </div>
-                </div>
-                <div class="intersection-time-rail__now-indicator" aria-hidden="true">
-                    <span class="intersection-time-rail__now-label"></span>
-                </div>
-                <div class="intersection-time-rail__mirror" aria-hidden="true">
-                    <div class="intersection-time-rail__mirror-title">Зеркальное представление</div>
-                    <div class="intersection-time-rail__mirror-row">
-                        <span class="intersection-time-rail__mirror-prev" title="Последнее пересечение (раньше по времени)"></span>
-                        <span class="intersection-time-rail__mirror-head" title="Голова, смотрящая вперёд на пользователя">👤</span>
-                        <span class="intersection-time-rail__mirror-next" title="Следующее пересечение (позже по времени)"></span>
-                    </div>
-                    <div class="intersection-time-rail__mirror-sep" aria-hidden="true">────→</div>
-                    <div class="intersection-time-rail__mirror-stats">
-                        <div class="intersection-time-rail__mirror-duration"></div>
-                        <div class="intersection-time-rail__mirror-countdown"></div>
+                    <div class="sun-intersectionTimeRailPersonField">
+                        <label class="sun-intersectionFormLabel sun-intersectionTimeRailPersonLabel" for="intersectionTimeRailWave">Волна</label>
+                        <select id="intersectionTimeRailWave" class="sun-summarySelect sun-intersectionTimeRailPersonSelect" title="Сигнал для анализа пересечений (как выбор «окраски углов» в списке волн)"></select>
                     </div>
                 </div>
-                <div class="intersection-time-rail__wave-axis" aria-hidden="true"></div>
-                <div class="intersection-time-rail__viewport">
-                    <div class="intersection-time-rail__track"></div>
+                <div class="sun-intersectionTimeRailNowIndicator" aria-hidden="true">
+                    <span class="sun-intersectionTimeRailNowLabel"></span>
+                </div>
+                <div class="sun-intersectionTimeRailMirror" aria-hidden="true">
+                    <div class="sun-intersectionTimeRailMirrorTitle">Зеркальное представление</div>
+                    <div class="sun-intersectionTimeRailMirrorRow">
+                        <span class="sun-intersectionTimeRailMirrorPrev" title="Последнее пересечение (раньше по времени)"></span>
+                        <span class="sun-intersectionTimeRailMirrorHead" title="Голова, смотрящая вперёд на пользователя">👤</span>
+                        <span class="sun-intersectionTimeRailMirrorNext" title="Следующее пересечение (позже по времени)"></span>
+                    </div>
+                    <div class="sun-intersectionTimeRailMirrorSep" aria-hidden="true">────→</div>
+                    <div class="sun-intersectionTimeRailMirrorStats">
+                        <div class="sun-intersectionTimeRailMirrorDuration"></div>
+                        <div class="sun-intersectionTimeRailMirrorCountdown"></div>
+                    </div>
+                </div>
+                <div class="sun-intersectionTimeRailWaveAxis" aria-hidden="true"></div>
+                <div class="sun-intersectionTimeRailViewport">
+                    <div class="sun-intersectionTimeRailTrack"></div>
                 </div>
             </div>
         `;
         document.body.appendChild(root);
         this.root = root;
-        this.backdrop = root.querySelector('.intersection-time-rail__backdrop');
-        this.viewport = root.querySelector('.intersection-time-rail__viewport');
-        this.track = root.querySelector('.intersection-time-rail__track');
-        this.waveAxis = root.querySelector('.intersection-time-rail__wave-axis');
-        this.nowLabel = root.querySelector('.intersection-time-rail__now-label');
+        this.backdrop = root.querySelector('.sun-intersectionTimeRailBackdrop');
+        this.viewport = root.querySelector('.sun-intersectionTimeRailViewport');
+        this.track = root.querySelector('.sun-intersectionTimeRailTrack');
+        this.waveAxis = root.querySelector('.sun-intersectionTimeRailWaveAxis');
+        this.nowLabel = root.querySelector('.sun-intersectionTimeRailNowLabel');
         this.personSelectA = root.querySelector('#intersectionTimeRailPersonA');
         this.personSelectB = root.querySelector('#intersectionTimeRailPersonB');
         this.viewportHoursSelect = root.querySelector('#intersectionTimeRailViewportHours');
         this.waveSelect = root.querySelector('#intersectionTimeRailWave');
-        this.mirrorNext = root.querySelector('.intersection-time-rail__mirror-next');
-        this.mirrorPrev = root.querySelector('.intersection-time-rail__mirror-prev');
-        this.mirrorDuration = root.querySelector('.intersection-time-rail__mirror-duration');
-        this.mirrorCountdown = root.querySelector('.intersection-time-rail__mirror-countdown');
+        this.mirrorNext = root.querySelector('.sun-intersectionTimeRailMirrorNext');
+        this.mirrorPrev = root.querySelector('.sun-intersectionTimeRailMirrorPrev');
+        this.mirrorDuration = root.querySelector('.sun-intersectionTimeRailMirrorDuration');
+        this.mirrorCountdown = root.querySelector('.sun-intersectionTimeRailMirrorCountdown');
 
         root.addEventListener('click', (e) => {
             if (e.target.closest('[data-time-rail-close="1"]')) {
@@ -147,7 +147,7 @@ class IntersectionTimeRailOverlay {
                 this._queueReopenRailFromIntersections();
             });
         }
-        const elCompareA = document.getElementById('dateCompareSelectA');
+        const elCompareA = window.dom.byKey('dateCompareSelectA');
         if (elCompareA && !this._onCompareElAChangeBound) {
             this._onCompareElAChangeBound = () => {
                 if (!this._open || !this.personSelectA) {
@@ -157,7 +157,7 @@ class IntersectionTimeRailOverlay {
             };
             elCompareA.addEventListener('change', this._onCompareElAChangeBound);
         }
-        const elCompareB = document.getElementById('dateCompareSelectB');
+        const elCompareB = window.dom.byKey('dateCompareSelectB');
         if (elCompareB && !this._onCompareElBChangeBound) {
             this._onCompareElBChangeBound = () => {
                 if (!this._open || !this.personSelectB) {
@@ -541,9 +541,9 @@ class IntersectionTimeRailOverlay {
             const label = this._formatRulerTickLabel(tickMs);
             const esc = this._escape(label);
             parts.push(
-                `<div class="intersection-time-rail__hour" style="top:${y}px"></div>` +
-                    `<div class="intersection-time-rail__hour-label intersection-time-rail__hour-label--start" style="top:${y}px">${esc}</div>` +
-                    `<div class="intersection-time-rail__hour-label intersection-time-rail__hour-label--end" style="top:${y}px">${esc}</div>`
+                `<div class="sun-intersectionTimeRailHour" style="top:${y}px"></div>` +
+                    `<div class="sun-intersectionTimeRailHourLabel sun-intersectionTimeRailHourLabelStart" style="top:${y}px">${esc}</div>` +
+                    `<div class="sun-intersectionTimeRailHourLabel sun-intersectionTimeRailHourLabelEnd" style="top:${y}px">${esc}</div>`
             );
         }
 
@@ -571,9 +571,9 @@ class IntersectionTimeRailOverlay {
             const frac = key / spanMs;
             const yb = this._yFromTopForFraction(Math.min(0.999999999, frac));
             parts.push(
-                `<div class="intersection-time-rail__cross-window" style="top:${yb}px">` +
-                    `<span class="intersection-time-rail__cross-window-time">${timeStr}</span>` +
-                    `<span class="intersection-time-rail__cross-window-bar" style="background:${bg}"></span>` +
+                `<div class="sun-intersectionTimeRailCrossWindow" style="top:${yb}px">` +
+                    `<span class="sun-intersectionTimeRailCrossWindowTime">${timeStr}</span>` +
+                    `<span class="sun-intersectionTimeRailCrossWindowBar" style="background:${bg}"></span>` +
                     `</div>`
             );
         }
@@ -589,10 +589,10 @@ class IntersectionTimeRailOverlay {
             const namesHtml = nameParts.length ? nameParts.join(', ') : '—';
             const timeHtml = this._escape(this._formatEdgeTime(group.time));
             parts.push(
-                `<div class="intersection-time-rail__cross" style="top:${y}px">` +
-                    `<span class="intersection-time-rail__cross-time">${timeHtml}</span>` +
-                    `<span class="intersection-time-rail__cross-bar" style="background:${bg}"></span>` +
-                    `<span class="intersection-time-rail__cross-names">${namesHtml}</span>` +
+                `<div class="sun-intersectionTimeRailCross" style="top:${y}px">` +
+                    `<span class="sun-intersectionTimeRailCrossTime">${timeHtml}</span>` +
+                    `<span class="sun-intersectionTimeRailCrossBar" style="background:${bg}"></span>` +
+                    `<span class="sun-intersectionTimeRailCrossNames">${namesHtml}</span>` +
                     `</div>`
             );
         }
@@ -901,7 +901,8 @@ class IntersectionTimeRailOverlay {
         this._mirrorMerged = merged;
 
         this._open = true;
-        this.root.classList.add('intersection-time-rail--open');
+        this.root.classList.remove('intersection-time-rail', 'intersection-time-rail--open');
+        this.root.classList.add('sun-intersectionTimeRailOpen');
         this.root.setAttribute('aria-hidden', 'false');
 
         if (this._raf != null) {
@@ -936,7 +937,7 @@ class IntersectionTimeRailOverlay {
             this._raf = null;
         }
         if (this.root) {
-            this.root.classList.remove('intersection-time-rail--open');
+            this.root.classList.remove('sun-intersectionTimeRailOpen', 'intersection-time-rail--open');
             this.root.setAttribute('aria-hidden', 'true');
         }
     }

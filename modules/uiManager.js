@@ -15,8 +15,8 @@ class UIManager {
      * Поля даты/времени визора: автозаполнение при фокусе, Enter → переход к дате, маска времени.
      */
     setupDateTimeInputs() {
-        const dateInput = document.getElementById('mainDateInputDate');
-        const timeInput = document.getElementById('mainDateInputTime');
+        const dateInput = window.dom.byKey('mainDateInputDate');
+        const timeInput = window.dom.byKey('mainDateInputTime');
 
         if (!dateInput || !timeInput) return;
 
@@ -112,7 +112,7 @@ class UIManager {
             exportAll: () => window.importExport.exportAll(),
             exportDates: () => window.importExport.exportDates(),
             exportWaves: () => window.importExport.exportWaves(),
-            importAll: () => document.getElementById('importAllFile').click(),
+            importAll: () => window.dom.byKey('importAllFile').click(),
             resetAll: () => this.resetAll()
         };
 
@@ -123,35 +123,34 @@ class UIManager {
 
     /** Снова показать экран предупреждения и скрыть основной UI. */
     resetWarning() {
-        const warningOverlay = document.getElementById('warningOverlay');
+        const warningOverlay = window.dom.byKey('warningOverlay');
         if (warningOverlay) {
-            warningOverlay.classList.remove('hidden');
-            warningOverlay.classList.add('desktop-warning');
+            warningOverlay.classList.remove('sun-hidden');
             document.body.style.overflow = 'hidden';
         }
 
-        const warningBox = document.querySelector('.warning-box');
+        const warningBox = document.querySelector('.sun-warningBox');
         if (warningBox) {
-            warningBox.classList.remove('hidden');
+            warningBox.classList.remove('sun-hidden');
         }
 
-        document.body.classList.add('ui-hidden');
+        document.body.classList.add('sun-uiHidden');
 
-        document.querySelectorAll('.corner-square').forEach((square) => {
+        document.querySelectorAll('.sun-cornerSquare').forEach((square) => {
             square.style.display = 'block';
         });
     }
 
-    /** Скрыть/показать панели и полосу времени (класс ui-hidden на body). */
+    /** Скрыть/показать панели и полосу времени (класс uiHidden на body). */
     toggleUI() {
         window.appState.uiHidden = !window.appState.uiHidden;
         if (window.appState.uiHidden) {
-            document.body.classList.add('ui-hidden');
+            document.body.classList.add('sun-uiHidden');
             if (window.timeBarManager && window.timeBarManager.container) {
                 window.timeBarManager.container.style.display = 'none';
             }
         } else {
-            document.body.classList.remove('ui-hidden');
+            document.body.classList.remove('sun-uiHidden');
             if (window.timeBarManager && window.timeBarManager.container) {
                 window.timeBarManager.container.style.display = 'block';
             }
@@ -161,10 +160,11 @@ class UIManager {
 
     /** Синхронизировать кнопку «Краска экстр.» с appState.extremumWaveColorHighlight. */
     syncExtremumWaveColorHighlightButton() {
-        const btn = document.getElementById('btnExtremumWaveColorHighlight');
+        const btn = window.dom.byKey('btnExtremumWaveColorHighlight');
         if (!btn) return;
         const on = window.appState.extremumWaveColorHighlight === true;
-        btn.classList.toggle('ui-btn-toggle-off', !on);
+        btn.classList.remove('uiBtnToggleOff', 'sun-uiBtnToggleOff');
+        btn.classList.toggle('sun-uiBtnToggleOff', !on);
         btn.title = on
             ? 'Окраска волн и выносок при экстремумах включена'
             : 'Окраска волн и выносок при экстремумах выключена';
@@ -182,60 +182,60 @@ class UIManager {
         window.appState.save();
     }
 
-    /** Скрыть/показать боковые выноски имён волн (.wave-labels-container). */
+    /** Скрыть/показать боковые выноски имён волн (.sun-waveLabelsContainer). */
     toggleWaveLabels() {
-        const horizontalContainer = document.querySelector('.wave-labels-container');
+        const horizontalContainer = document.querySelector('.sun-waveLabelsContainer');
 
         if (horizontalContainer) {
-            const areHidden = horizontalContainer.classList.contains('hidden');
+            const areHidden = horizontalContainer.classList.contains('sun-hidden');
 
             if (areHidden) {
-                horizontalContainer.classList.remove('hidden');
+                horizontalContainer.classList.remove('sun-hidden');
             } else {
-                horizontalContainer.classList.add('hidden');
+                horizontalContainer.classList.add('sun-hidden');
             }
         }
     }
 
     /** Скрыть/показать верхние/нижние выноски времени экстремумов. */
     toggleExtremes() {
-        const verticalContainer = document.querySelector('.wave-labels-vertical-container');
+        const verticalContainer = document.querySelector('.sun-waveLabelsVerticalContainer');
 
         if (verticalContainer) {
-            const areHidden = verticalContainer.classList.contains('hidden');
+            const areHidden = verticalContainer.classList.contains('sun-hidden');
 
             if (areHidden) {
-                verticalContainer.classList.remove('hidden');
+                verticalContainer.classList.remove('sun-hidden');
             } else {
-                verticalContainer.classList.add('hidden');
+                verticalContainer.classList.add('sun-hidden');
             }
         }
     }
 
     /** Скрыть/показать точки пересечения волн с горизонтальной осью (эквилибриум). */
     toggleEquilibrium() {
-        const axisXPointsContainer = document.querySelector('.wave-axis-x-points');
+        const axisXPointsContainer = document.querySelector('.sun-waveAxisXPoints');
 
         if (axisXPointsContainer) {
-            const areHidden = axisXPointsContainer.classList.contains('hidden');
+            const areHidden = axisXPointsContainer.classList.contains('sun-hidden');
 
             if (areHidden) {
-                axisXPointsContainer.classList.remove('hidden');
+                axisXPointsContainer.classList.remove('sun-hidden');
 
                 if (window.waves && window.waves.updateAxisXIntersectionPoints) {
                     window.waves.updateAxisXIntersectionPoints();
                 }
             } else {
-                axisXPointsContainer.classList.add('hidden');
+                axisXPointsContainer.classList.add('sun-hidden');
             }
         } else {
             if (window.waves && window.waves.updateAxisXIntersectionPoints) {
                 window.waves.updateAxisXIntersectionPoints();
 
                 requestAnimationFrame(() => {
-                    const newContainer = document.querySelector('.wave-axis-x-points');
+                    const newContainer = document.querySelector('.sun-waveAxisXPoints');
                     if (newContainer) {
-                        newContainer.classList.remove('hidden');
+                        newContainer.classList.remove('sun-hidden');
                     }
                 });
             }
@@ -248,37 +248,70 @@ class UIManager {
      */
     toggleCornerSquares(type) {
         const squares = {
-            corners: ['.tl', '.tr', '.bl', '.br'],
-            axial: ['.tc', '.bc', '.lc', '.rc'],
-            vertical: ['.tc', '.bc'],
-            sides: ['.lc', '.rc'],
-            middle: ['.mt', '.mb', '.ml', '.mr', '.mt2', '.mb2', '.ml2', '.mr2'],
-            left: ['.tl', '.bl', '.lc', '.ml', '.ml2'],
-            right: ['.tr', '.br', '.rc', '.mr', '.mr2'],
-            top: ['.tl', '.tr', '.tc', '.mt', '.mt2'],
-            bottom: ['.bl', '.br', '.bc', '.mb', '.mb2'],
+            corners: ['.sun-cornerPosTl', '.sun-cornerPosTr', '.sun-cornerPosBl', '.sun-cornerPosBr'],
+            axial: ['.sun-cornerPosTc', '.sun-cornerPosBc', '.sun-cornerPosLc', '.sun-cornerPosRc'],
+            vertical: ['.sun-cornerPosTc', '.sun-cornerPosBc'],
+            sides: ['.sun-cornerPosLc', '.sun-cornerPosRc'],
+            middle: [
+                '.sun-cornerPosMt',
+                '.sun-cornerPosMb',
+                '.sun-cornerPosMl',
+                '.sun-cornerPosMr',
+                '.sun-cornerPosMt2',
+                '.sun-cornerPosMb2',
+                '.sun-cornerPosMl2',
+                '.sun-cornerPosMr2'
+            ],
+            left: [
+                '.sun-cornerPosTl',
+                '.sun-cornerPosBl',
+                '.sun-cornerPosLc',
+                '.sun-cornerPosMl',
+                '.sun-cornerPosMl2'
+            ],
+            right: [
+                '.sun-cornerPosTr',
+                '.sun-cornerPosBr',
+                '.sun-cornerPosRc',
+                '.sun-cornerPosMr',
+                '.sun-cornerPosMr2'
+            ],
+            top: [
+                '.sun-cornerPosTl',
+                '.sun-cornerPosTr',
+                '.sun-cornerPosTc',
+                '.sun-cornerPosMt',
+                '.sun-cornerPosMt2'
+            ],
+            bottom: [
+                '.sun-cornerPosBl',
+                '.sun-cornerPosBr',
+                '.sun-cornerPosBc',
+                '.sun-cornerPosMb',
+                '.sun-cornerPosMb2'
+            ],
             all: [
-                '.tl',
-                '.tr',
-                '.bl',
-                '.br',
-                '.tc',
-                '.bc',
-                '.lc',
-                '.rc',
-                '.mt',
-                '.mb',
-                '.ml',
-                '.mr',
-                '.mt2',
-                '.mb2',
-                '.ml2',
-                '.mr2'
+                '.sun-cornerPosTl',
+                '.sun-cornerPosTr',
+                '.sun-cornerPosBl',
+                '.sun-cornerPosBr',
+                '.sun-cornerPosTc',
+                '.sun-cornerPosBc',
+                '.sun-cornerPosLc',
+                '.sun-cornerPosRc',
+                '.sun-cornerPosMt',
+                '.sun-cornerPosMb',
+                '.sun-cornerPosMl',
+                '.sun-cornerPosMr',
+                '.sun-cornerPosMt2',
+                '.sun-cornerPosMb2',
+                '.sun-cornerPosMl2',
+                '.sun-cornerPosMr2'
             ]
         };
         const selectors = squares[type] || squares.all;
         selectors.forEach((selector) => {
-            const square = document.querySelector(`.corner-square${selector}`);
+            const square = document.querySelector(`.sun-cornerSquare${selector}`);
             if (square) {
                 square.style.display = square.style.display === 'none' ? 'block' : 'none';
             }
@@ -287,7 +320,7 @@ class UIManager {
 
     /** Показать или скрыть все угловые квадраты разом; сохранить в appState.cornerSquaresVisible. */
     toggleAllSquares() {
-        const allSquares = document.querySelectorAll('.corner-square');
+        const allSquares = document.querySelectorAll('.sun-cornerSquare');
         const anyVisible = Array.from(allSquares).some((square) => square.style.display !== 'none');
         const newVisibility = !anyVisible;
         allSquares.forEach((square) => {
@@ -300,7 +333,7 @@ class UIManager {
     /** Переключить видимость всех угловых квадратов по флагу cornerSquaresVisible. */
     toggleSquares() {
         window.appState.cornerSquaresVisible = !window.appState.cornerSquaresVisible;
-        const allSquares = document.querySelectorAll('.corner-square');
+        const allSquares = document.querySelectorAll('.sun-cornerSquare');
         allSquares.forEach((square) => {
             square.style.display = window.appState.cornerSquaresVisible ? 'block' : 'none';
         });
@@ -320,7 +353,7 @@ class UIManager {
             window.dataManager.updateWavesGroups();
         }
 
-        document.querySelectorAll('.wave-corner-color-check').forEach((checkbox) => {
+        document.querySelectorAll('.sun-waveCornerColorCheck').forEach((checkbox) => {
             checkbox.checked = false;
         });
 
@@ -331,7 +364,7 @@ class UIManager {
 
     /** Вернуть угловым квадратам цвет по умолчанию (красный). */
     updateCornerSquareColors() {
-        document.querySelectorAll('.corner-square').forEach((square) => {
+        document.querySelectorAll('.sun-cornerSquare').forEach((square) => {
             square.style.backgroundColor = 'red';
         });
     }
@@ -350,7 +383,7 @@ class UIManager {
 
     /** Обновить title и aria-pressed кнопки ↔ (flipH). */
     syncFlipHButton() {
-        const btn = document.getElementById('btnFlipH');
+        const btn = window.dom.byKey('btnFlipH');
         if (!btn) {
             return;
         }
@@ -358,7 +391,7 @@ class UIManager {
             window.wavesTransformLayer && window.wavesTransformLayer.isScaleXFlipped
                 ? window.wavesTransformLayer.isScaleXFlipped()
                 : window.appState.transform && window.appState.transform.scaleX < 0;
-        btn.classList.toggle('flip-h-active', flipped);
+        btn.classList.toggle('sun-flipHActive', flipped);
         btn.setAttribute('aria-pressed', flipped ? 'true' : 'false');
         btn.title = flipped
             ? 'Горизонтальное отражение включено'
@@ -373,7 +406,7 @@ class UIManager {
 
     /** Обновить title и aria-pressed кнопки ↕ (flipV). */
     syncFlipVButton() {
-        const btn = document.getElementById('btnFlipV');
+        const btn = window.dom.byKey('btnFlipV');
         if (!btn) {
             return;
         }
@@ -381,7 +414,7 @@ class UIManager {
             window.wavesTransformLayer && window.wavesTransformLayer.isScaleYFlipped
                 ? window.wavesTransformLayer.isScaleYFlipped()
                 : window.appState.transform && window.appState.transform.scaleY < 0;
-        btn.classList.toggle('flip-v-active', flipped);
+        btn.classList.toggle('sun-flipVActive', flipped);
         btn.setAttribute('aria-pressed', flipped ? 'true' : 'false');
         btn.title = flipped
             ? 'Вертикальное отражение включено'
@@ -416,44 +449,44 @@ class UIManager {
         window.appState.save();
     }
 
-    /** Скрыть/показать блок графика (graph-hidden на body). */
+    /** Скрыть/показать блок графика (graphHidden на body). */
     toggleGraph() {
         window.appState.graphHidden = !window.appState.graphHidden;
         if (window.appState.graphHidden) {
-            document.body.classList.add('graph-hidden');
+            document.body.classList.add('sun-graphHidden');
         } else {
-            document.body.classList.remove('graph-hidden');
+            document.body.classList.remove('sun-graphHidden');
         }
         window.appState.save();
     }
 
-    /** Обесцветить весь интерфейс (класс gray-mode). */
+    /** Обесцветить весь интерфейс (класс grayMode). */
     toggleGrayMode() {
         window.appState.grayMode = !window.appState.grayMode;
         if (window.appState.grayMode) {
-            document.body.classList.add('gray-mode');
+            document.body.classList.add('sun-grayMode');
         } else {
-            document.body.classList.remove('gray-mode');
+            document.body.classList.remove('sun-grayMode');
         }
         window.appState.save();
     }
 
-    /** Обесцветить только график и волны (graph-gray-mode). */
+    /** Обесцветить только график и волны (graphGrayMode). */
     toggleGraphGrayMode() {
         window.appState.graphGrayMode = !window.appState.graphGrayMode;
 
         if (window.appState.graphGrayMode) {
-            document.body.classList.add('graph-gray-mode');
+            document.body.classList.add('sun-graphGrayMode');
         } else {
-            document.body.classList.remove('graph-gray-mode');
+            document.body.classList.remove('sun-graphGrayMode');
         }
 
-        const graphContainer = document.getElementById('graphContainer');
+        const graphContainer = window.dom.byKey('graphContainer');
         if (graphContainer) {
             if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('graph-gray-mode');
+                graphContainer.classList.add('sun-graphGrayMode');
             } else {
-                graphContainer.classList.remove('graph-gray-mode');
+                graphContainer.classList.remove('sun-graphGrayMode');
             }
         }
     }
@@ -476,11 +509,11 @@ class UIManager {
     toggleStars() {
         window.appState.showStars = !window.appState.showStars;
         if (window.appState.showStars) {
-            document.body.classList.add('stars-mode');
-            document.body.classList.remove('names-mode');
+            document.body.classList.add('sun-starsMode');
+            document.body.classList.remove('sun-namesMode');
         } else {
-            document.body.classList.remove('stars-mode');
-            document.body.classList.add('names-mode');
+            document.body.classList.remove('sun-starsMode');
+            document.body.classList.add('sun-namesMode');
         }
         window.grid.updateCenterDate();
         window.dataManager.updateDateList();
@@ -522,8 +555,8 @@ class UIManager {
 
     /** Заполнить поля mainDateInputDate/Time из appState.currentDate. */
     updateDateTimeInputs() {
-        const dateInput = document.getElementById('mainDateInputDate');
-        const timeInput = document.getElementById('mainDateInputTime');
+        const dateInput = window.dom.byKey('mainDateInputDate');
+        const timeInput = window.dom.byKey('mainDateInputTime');
 
         if (dateInput && timeInput && window.timeUtils) {
             const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
@@ -539,8 +572,8 @@ class UIManager {
 
         this.updateDateTimeInputs();
 
-        if (document.getElementById('dateInput')) {
-            document.getElementById('dateInput').value = window.timeUtils.formatForDateInput(
+        if (window.dom.byKey('dateInput')) {
+            window.dom.byKey('dateInput').value = window.timeUtils.formatForDateInput(
                 window.appState.currentDate
             );
         }
@@ -551,10 +584,10 @@ class UIManager {
 
     /** Очистить форму добавления пользовательского сигнала. */
     clearWaveForm() {
-        document.getElementById('customWaveName').value = '';
-        document.getElementById('customWavePeriod').value = '';
-        document.getElementById('customWaveType').value = 'solid';
-        document.getElementById('customWaveColor').value = '#666666';
+        window.dom.byKey('customWaveName').value = '';
+        window.dom.byKey('customWavePeriod').value = '';
+        window.dom.byKey('customWaveType').value = 'solid';
+        window.dom.byKey('customWaveColor').value = '#666666';
     }
 
     /**
@@ -603,23 +636,23 @@ class UIManager {
         }
     }
 
-    /** Активировать вкладку: класс active на кнопке и #tabId-tab. */
+    /** Активировать вкладку: класс active на кнопке и панели data-tab-panel. */
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
 
-        document.querySelectorAll('.tab-button[data-tab]').forEach((btn) => {
-            btn.classList.remove('active');
+        document.querySelectorAll('.sun-tabButton[data-tab]').forEach((btn) => {
+            btn.classList.remove('sun-active');
         });
 
-        document.querySelectorAll('.tab-content').forEach((content) => {
-            content.classList.remove('active');
+        document.querySelectorAll('.sun-tabContent').forEach((content) => {
+            content.classList.remove('sun-active');
         });
 
-        tabButton.classList.add('active');
+        tabButton.classList.add('sun-active');
 
-        const tabContent = document.querySelector(`#${tabId}-tab`);
+        const tabContent = document.querySelector(`.sun-tabContent[data-tab-panel="${tabId}"]`);
         if (tabContent) {
-            tabContent.classList.add('active');
+            tabContent.classList.add('sun-active');
         }
     }
 
@@ -627,10 +660,10 @@ class UIManager {
     deactivateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
 
-        tabButton.classList.remove('active');
-        const tabContent = document.querySelector(`#${tabId}-tab`);
+        tabButton.classList.remove('sun-active');
+        const tabContent = document.querySelector(`.sun-tabContent[data-tab-panel="${tabId}"]`);
         if (tabContent) {
-            tabContent.classList.remove('active');
+            tabContent.classList.remove('sun-active');
         }
     }
 
@@ -649,13 +682,13 @@ class UIManager {
     /** Раскрыть/свернуть блок метаданных (спойлер). */
     toggleSpoiler(button) {
         const spoilerContent = button.nextElementSibling;
-        const isVisible = spoilerContent.classList.contains('show');
+        const isVisible = spoilerContent.classList.contains('sun-show');
 
         if (isVisible) {
-            spoilerContent.classList.remove('show');
+            spoilerContent.classList.remove('sun-show');
             button.textContent = 'Показать метаданные';
         } else {
-            spoilerContent.classList.add('show');
+            spoilerContent.classList.add('sun-show');
             button.textContent = 'Скрыть метаданные';
         }
     }

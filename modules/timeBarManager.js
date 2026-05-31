@@ -39,63 +39,63 @@ class TimeBarManager {
     
     /** DOM временной шкалы под graph-section. */
     createTimeBar() {
-        if (document.getElementById('timeBarContainer')) {
-            this.container = document.getElementById('timeBarContainer');
+        if (window.dom.byKey('timeBarContainer')) {
+            this.container = window.dom.byKey('timeBarContainer');
             this.ensureStackedTimeBarLayout();
             this.ensureWrapper();
-            this.timeScale = document.getElementById('timeScale');
-            this.timeLabels = document.getElementById('timeLabels');
+            this.timeScale = window.dom.byKey('timeScale');
+            this.timeLabels = window.dom.byKey('timeLabels');
             this._bindNowIndicatorElements();
             this.buildStateStackRows();
             return;
         }
 
         const timeBarHTML = `
-            <div class="time-bar time-bar--stacked">
-                <div class="time-bar-state-row time-bar-hours-row">
-                    <div class="time-bar-state-side time-bar-state-side--hours" aria-hidden="true"></div>
-                    <div class="time-bar-hours-track">
-                        <div class="time-scale" id="timeScale"></div>
-                        <div class="time-labels" id="timeLabels"></div>
+            <div class="sun-timeBar sun-timeBarStacked">
+                <div class="sun-timeBarStateRow sun-timeBarHoursRow">
+                    <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
+                    <div class="sun-timeBarHoursTrack">
+                        <div class="sun-timeScale" id="timeScale"></div>
+                        <div class="sun-timeLabels" id="timeLabels"></div>
                     </div>
                 </div>
-                <div class="time-bar-state-stack" id="timeBarStateStack"></div>
+                <div class="sun-timeBarStateStack" id="timeBarStateStack"></div>
                 ${this._getNowRowHTML()}
             </div>
         `;
         
         const container = document.createElement('div');
         container.id = 'timeBarContainer';
-        container.className = 'time-bar-container';
+        container.className = 'sun-timeBarContainer';
         container.innerHTML = timeBarHTML;
         
-        const graphSection = document.querySelector('.graph-section');
-        const graphViewport = document.querySelector('.graph-viewport');
-        const graphContainer = document.querySelector('.graph-container');
+        const graphSection = document.querySelector('.sun-graphSection');
+        const graphViewport = document.querySelector('.sun-graphViewport');
+        const graphContainer = document.querySelector('.sun-graphContainer');
         const insertBeforeEl = graphViewport || graphContainer;
         
         if (insertBeforeEl && graphSection) {
             graphSection.insertBefore(container, insertBeforeEl);
             
             this.container = container;
-            this.timeScale = document.getElementById('timeScale');
-            this.timeLabels = document.getElementById('timeLabels');
+            this.timeScale = window.dom.byKey('timeScale');
+            this.timeLabels = window.dom.byKey('timeLabels');
             this._bindNowIndicatorElements();
             this.ensureWrapper();
             this.buildStateStackRows();
         }
     }
 
-    /** Создаёт обёртку time-bar-wrap при необходимости. */
+    /** Создаёт обёртку sun-timeBarWrap при необходимости. */
     ensureWrapper() {
-        const wrap = document.getElementById('timeBarWrap');
+        const wrap = window.dom.byKey('timeBarWrap');
         if (wrap) {
             this._ensureControlsChrome();
             return;
         }
         if (!this.container || !this.container.parentNode) return;
         const wrapper = document.createElement('div');
-        wrapper.className = 'time-bar-wrap';
+        wrapper.className = 'sun-timeBarWrap';
         wrapper.id = 'timeBarWrap';
         const parent = this.container.parentNode;
         parent.insertBefore(wrapper, this.container);
@@ -127,42 +127,42 @@ class TimeBarManager {
             return;
         }
         if (open) {
-            this.controlsPanel.classList.remove('time-bar-controls--collapsed');
+            this.controlsPanel.classList.remove('sun-timeBarControlsCollapsed');
             this.controlsToggle.setAttribute('aria-expanded', 'true');
             this.controlsToggle.textContent = 'Скрыть';
-            this.controlsToggle.classList.add('active');
+            this.controlsToggle.classList.add('sun-active');
         } else {
-            this.controlsPanel.classList.add('time-bar-controls--collapsed');
+            this.controlsPanel.classList.add('sun-timeBarControlsCollapsed');
             this.controlsToggle.setAttribute('aria-expanded', 'false');
             const L = window.SUN_ACTION_LABELS;
             const editLabel = L && L.editTitle ? L.editTitle : 'Редактировать';
             this.controlsToggle.textContent = editLabel;
             this.controlsToggle.title = editLabel;
             this.controlsToggle.setAttribute('aria-label', editLabel);
-            this.controlsToggle.classList.remove('active');
+            this.controlsToggle.classList.remove('sun-active');
         }
     }
 
     /** Переключает видимость панели controls. */
     _toggleControlsPanel() {
-        const open = this.controlsPanel.classList.contains('time-bar-controls--collapsed');
+        const open = this.controlsPanel.classList.contains('sun-timeBarControlsCollapsed');
         this._applyControlsPanelOpen(open);
         this._saveControlsPanelOpen(open);
     }
 
     /** Кнопка toggle и шапка панели controls. */
     _ensureControlsChrome() {
-        const wrap = document.getElementById('timeBarWrap');
+        const wrap = window.dom.byKey('timeBarWrap');
         if (!wrap) {
             return;
         }
 
-        wrap.querySelector('.time-bar-controls-head')?.remove();
+        wrap.querySelector('.sun-timeBarControls-head')?.remove();
 
-        let section = document.getElementById('timeBarControlsSection');
+        let section = window.dom.byKey('timeBarControlsSection');
         if (!section) {
             section = document.createElement('div');
-            section.className = 'panel-section time-bar-controls-section';
+            section.className = 'sun-panelSection sun-timeBarControlsSection';
             section.id = 'timeBarControlsSection';
         }
         if (section.parentElement !== wrap) {
@@ -171,27 +171,27 @@ class TimeBarManager {
             wrap.insertBefore(section, wrap.firstChild);
         }
 
-        let tabContainer = section.querySelector('.tab-container');
+        let tabContainer = section.querySelector('.sun-tabContainer');
         if (!tabContainer) {
             tabContainer = document.createElement('div');
-            tabContainer.className = 'tab-container';
+            tabContainer.className = 'sun-tabContainer';
             section.appendChild(tabContainer);
         }
 
-        let tabButtons = tabContainer.querySelector('.tab-buttons.tab-buttons--framed');
+        let tabButtons = tabContainer.querySelector('.sun-tabButtons.sun-tabButtonsFramed');
         if (!tabButtons) {
             tabButtons = document.createElement('div');
-            tabButtons.className = 'tab-buttons tab-buttons--framed';
+            tabButtons.className = 'sun-tabButtons sun-tabButtonsFramed';
             tabButtons.setAttribute('role', 'tablist');
             tabButtons.setAttribute('aria-label', 'Настройки полосы времени');
             tabContainer.appendChild(tabButtons);
         }
 
-        let panel = document.getElementById('timeBarControls');
+        let panel = window.dom.byKey('timeBarControls');
 
         if (!panel) {
             panel = document.createElement('div');
-            panel.className = 'time-bar-controls time-bar-controls--collapsed';
+            panel.className = 'sun-timeBarControls sun-timeBarControlsCollapsed';
             panel.id = 'timeBarControls';
             panel.setAttribute('aria-label', 'Видимость полос и групп');
         }
@@ -201,11 +201,11 @@ class TimeBarManager {
             section.insertBefore(panel, tabContainer.nextElementSibling);
         }
 
-        let btn = document.getElementById('timeBarControlsToggle');
+        let btn = window.dom.byKey('timeBarControlsToggle');
         if (!btn) {
             btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'tab-button time-bar-controls-toggle';
+            btn.className = 'sun-tabButton';
             btn.id = 'timeBarControlsToggle';
             const L = window.SUN_ACTION_LABELS;
             const editLabel = L && L.editTitle ? L.editTitle : 'Редактировать';
@@ -216,8 +216,7 @@ class TimeBarManager {
             btn.setAttribute('aria-controls', 'timeBarControls');
             tabButtons.appendChild(btn);
         } else {
-            btn.classList.remove('ui-btn');
-            btn.classList.add('tab-button', 'time-bar-controls-toggle');
+            btn.classList.remove('sun-uiBtn');
             if (btn.parentElement !== tabButtons) {
                 tabButtons.appendChild(btn);
             }
@@ -276,7 +275,7 @@ class TimeBarManager {
         }
     }
 
-    /** Видимость группы только на шкале time-bar (не связана с group.enabled). */
+    /** Видимость группы только на шкале sun-timeBar (не связана с group.enabled). */
     isTimeBarGroupVisible(groupId) {
         const map = this._loadTimeBarGroupVisible();
         const key = String(groupId);
@@ -302,14 +301,14 @@ class TimeBarManager {
 
     /** Внутренний метод setStateRowVisible. */
     _setStateRowVisible(state, visible) {
-        const row = document.querySelector(`.time-bar-state-row[data-state="${state}"]`);
+        const row = document.querySelector(`.sun-timeBarStateRow[data-state="${state}"]`);
         if (!row) return;
         if (visible) {
-            row.classList.remove('time-bar-state-row--hidden');
+            row.classList.remove('sun-timeBarStateRowHidden');
         } else {
-            row.classList.add('time-bar-state-row--hidden');
+            row.classList.add('sun-timeBarStateRowHidden');
         }
-        const cb = document.querySelector(`.time-bar-state-check[data-state="${state}"]`);
+        const cb = document.querySelector(`.sun-timeBarStateCheck[data-state="${state}"]`);
         if (cb) cb.checked = visible;
     }
 
@@ -323,7 +322,7 @@ class TimeBarManager {
     /** Чекбоксы видимости групп на временной шкале. */
     buildControlsPanel() {
         this.ensureWrapper();
-        const panel = this.controlsPanel || document.getElementById('timeBarControls');
+        const panel = this.controlsPanel || window.dom.byKey('timeBarControls');
         if (!panel) return;
 
         const groups = (window.appState && window.appState.data && window.appState.data.groups) || [];
@@ -338,17 +337,17 @@ class TimeBarManager {
         panel.innerHTML = '';
 
         const statesRow = document.createElement('div');
-        statesRow.className = 'time-bar-controls-row time-bar-controls-states';
+        statesRow.className = 'sun-timeBarControlsRow sun-timeBarControlsStates';
 
         for (let s = -5; s <= 5; s++) {
             const label = document.createElement('label');
-            label.className = 'time-bar-control-check';
+            label.className = 'sun-timeBarControlCheck';
             const text = document.createElement('span');
-            text.className = 'time-bar-control-label';
+            text.className = 'sun-timeBarControlLabel';
             text.textContent = s > 0 ? `+${s}` : String(s);
             const cb = document.createElement('input');
             cb.type = 'checkbox';
-            cb.className = 'time-bar-state-check';
+            cb.className = 'sun-timeBarStateCheck';
             cb.dataset.state = String(s);
             cb.checked = hidden[String(s)] !== true;
             cb.autocomplete = 'off';
@@ -358,23 +357,23 @@ class TimeBarManager {
         }
 
         const groupsRow = document.createElement('div');
-        groupsRow.className = 'time-bar-controls-row time-bar-controls-groups';
+        groupsRow.className = 'sun-timeBarControlsRow sun-timeBarControlsGroups';
 
         if (groups.length === 0) {
             const empty = document.createElement('span');
-            empty.className = 'time-bar-controls-empty';
+            empty.className = 'sun-timeBarControlsEmpty';
             empty.textContent = '—';
             groupsRow.appendChild(empty);
         } else {
             groups.forEach((group) => {
                 const label = document.createElement('label');
-                label.className = 'time-bar-control-check';
+                label.className = 'sun-timeBarControlCheck';
                 const text = document.createElement('span');
-                text.className = 'time-bar-control-label';
+                text.className = 'sun-timeBarControlLabel';
                 text.textContent = group.name || `Группа ${group.id}`;
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
-                cb.className = 'time-bar-group-check';
+                cb.className = 'sun-timeBarGroupCheck';
                 cb.dataset.groupId = String(group.id);
                 cb.checked = this.isTimeBarGroupVisible(group.id);
                 cb.autocomplete = 'off';
@@ -406,7 +405,7 @@ class TimeBarManager {
         const t = e.target;
         if (!t || t.tagName !== 'INPUT') return;
 
-        if (t.classList.contains('time-bar-state-check')) {
+        if (t.classList.contains('sun-timeBarStateCheck')) {
             const st = t.dataset.state;
             if (st == null) return;
             const hidden = this._loadStateRowHidden();
@@ -423,7 +422,7 @@ class TimeBarManager {
             return;
         }
 
-        if (t.classList.contains('time-bar-group-check')) {
+        if (t.classList.contains('sun-timeBarGroupCheck')) {
             const groupId = t.dataset.groupId;
             if (!groupId) return;
 
@@ -445,37 +444,37 @@ class TimeBarManager {
      * Миграция старой вёрстки (одна шкала без полос состояний).
      */
     ensureStackedTimeBarLayout() {
-        const bar = this.container && this.container.querySelector('.time-bar');
+        const bar = this.container && this.container.querySelector('.sun-timeBar');
         if (!bar) return;
 
-        bar.classList.add('time-bar--stacked');
+        bar.classList.add('sun-timeBarStacked');
 
-        if (bar.querySelector('.time-bar-ruler-row')) {
-            const scale = document.getElementById('timeScale');
-            const labels = document.getElementById('timeLabels');
-            bar.querySelector('.time-bar-ruler-row')?.remove();
+        if (bar.querySelector('.sun-timeBarRulerRow')) {
+            const scale = window.dom.byKey('timeScale');
+            const labels = window.dom.byKey('timeLabels');
+            bar.querySelector('.sun-timeBarRulerRow')?.remove();
             this._insertHoursRow(bar, scale, labels);
         }
 
-        if (!bar.querySelector('#timeBarStateStack')) {
+        if (!bar.querySelector('.sun-timeBarStateStack')) {
             bar.innerHTML = `
-                <div class="time-bar-state-row time-bar-hours-row">
-                    <div class="time-bar-state-side time-bar-state-side--hours" aria-hidden="true"></div>
-                    <div class="time-bar-hours-track">
-                        <div class="time-scale" id="timeScale"></div>
-                        <div class="time-labels" id="timeLabels"></div>
+                <div class="sun-timeBarStateRow sun-timeBarHoursRow">
+                    <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
+                    <div class="sun-timeBarHoursTrack">
+                        <div class="sun-timeScale" id="timeScale"></div>
+                        <div class="sun-timeLabels" id="timeLabels"></div>
                     </div>
                 </div>
-                <div class="time-bar-state-stack" id="timeBarStateStack"></div>
+                <div class="sun-timeBarStateStack" id="timeBarStateStack"></div>
                 ${this._getNowRowHTML()}
             `;
         } else {
             this._ensureNowRowLayout(bar);
         }
 
-        if (!bar.querySelector('.time-bar-hours-row')) {
-            const scale = document.getElementById('timeScale');
-            const labels = document.getElementById('timeLabels');
+        if (!bar.querySelector('.sun-timeBarHoursRow')) {
+            const scale = window.dom.byKey('timeScale');
+            const labels = window.dom.byKey('timeLabels');
             if (scale) {
                 scale.remove();
                 labels?.remove();
@@ -489,12 +488,12 @@ class TimeBarManager {
     /** HTML строки индикатора текущего времени. */
     _getNowRowHTML() {
         return `
-                <div class="time-bar-now-vline" id="timeNowVline" aria-hidden="true"></div>
-                <div class="time-bar-now-row">
-                    <div class="time-bar-state-side time-bar-state-side--now" aria-hidden="true"></div>
-                    <div class="time-bar-now-track">
-                        <div class="time-indicator time-bar-now-marker" id="timeIndicator" title="">
-                            <div class="time-indicator-label time-bar-now-label"></div>
+                <div class="sun-timeBarNowVline" id="timeNowVline" aria-hidden="true"></div>
+                <div class="sun-timeBarNowRow">
+                    <div class="sun-timeBarStateSide sun-timeBarStateSideNow" aria-hidden="true"></div>
+                    <div class="sun-timeBarNowTrack">
+                        <div class="sun-timeIndicator sun-timeBarNowMarker" id="timeIndicator" title="">
+                            <div class="sun-timeIndicatorLabel sun-timeBarNowLabel"></div>
                         </div>
                     </div>
                 </div>`;
@@ -504,50 +503,50 @@ class TimeBarManager {
     _ensureNowRowLayout(bar) {
         if (!bar) return;
 
-        let nowRow = bar.querySelector('.time-bar-now-row');
-        let indicator = bar.querySelector('#timeIndicator');
+        let nowRow = bar.querySelector('.sun-timeBarNowRow');
+        let indicator = bar.querySelector('.sun-timeBarNowMarker');
 
         if (!nowRow) {
             nowRow = document.createElement('div');
-            nowRow.className = 'time-bar-now-row';
+            nowRow.className = 'sun-timeBarNowRow';
             const side = document.createElement('div');
-            side.className = 'time-bar-state-side time-bar-state-side--now';
+            side.className = 'sun-timeBarStateSide sun-timeBarStateSideNow';
             side.setAttribute('aria-hidden', 'true');
             const track = document.createElement('div');
-            track.className = 'time-bar-now-track';
+            track.className = 'sun-timeBarNowTrack';
             nowRow.appendChild(side);
             nowRow.appendChild(track);
 
             if (indicator && indicator.parentElement !== track) {
-                indicator.classList.remove('time-bar-now-line');
-                indicator.classList.add('time-bar-now-marker');
+                indicator.classList.remove('sun-timeBarNowMarker');
+                indicator.classList.add('sun-timeBarNowMarker');
                 track.appendChild(indicator);
             } else if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'timeIndicator';
-                indicator.className = 'time-indicator time-bar-now-marker';
+                indicator.className = 'sun-timeIndicator sun-timeBarNowMarker';
                 indicator.title = '';
                 const lab = document.createElement('div');
-                lab.className = 'time-indicator-label time-bar-now-label';
+                lab.className = 'sun-timeIndicatorLabel sun-timeBarNowLabel';
                 indicator.appendChild(lab);
                 track.appendChild(indicator);
             }
 
             bar.appendChild(nowRow);
         } else {
-            const track = nowRow.querySelector('.time-bar-now-track');
+            const track = nowRow.querySelector('.sun-timeBarNowTrack');
             if (indicator && track && !track.contains(indicator)) {
-                indicator.classList.remove('time-bar-now-line');
-                indicator.classList.add('time-bar-now-marker');
+                indicator.classList.remove('sun-timeBarNowMarker');
+                indicator.classList.add('sun-timeBarNowMarker');
                 track.appendChild(indicator);
             }
         }
 
-        let vline = bar.querySelector('#timeNowVline');
+        let vline = bar.querySelector('.sun-timeBarNowVline');
         if (!vline) {
             vline = document.createElement('div');
             vline.id = 'timeNowVline';
-            vline.className = 'time-bar-now-vline';
+            vline.className = 'sun-timeBarNowVline';
             vline.setAttribute('aria-hidden', 'true');
             bar.insertBefore(vline, nowRow);
         } else if (vline.nextElementSibling !== nowRow) {
@@ -555,21 +554,21 @@ class TimeBarManager {
         }
 
         if (indicator) {
-            indicator.classList.remove('time-bar-now-line');
-            indicator.classList.add('time-bar-now-marker');
+            indicator.classList.remove('sun-timeBarNowMarker');
+            indicator.classList.add('sun-timeBarNowMarker');
         }
     }
 
     /** Ссылки на индикатор «сейчас» и вертикальную линию. */
     _bindNowIndicatorElements() {
-        const bar = this.container && this.container.querySelector('.time-bar');
+        const bar = this.container && this.container.querySelector('.sun-timeBar');
         if (bar) {
             this._ensureNowRowLayout(bar);
         }
-        this.timeIndicator = document.getElementById('timeIndicator');
-        this.timeNowVline = document.getElementById('timeNowVline');
+        this.timeIndicator = window.dom.byKey('timeIndicator');
+        this.timeNowVline = window.dom.byKey('timeNowVline');
         this.indicatorLabel = this.timeIndicator
-            ? this.timeIndicator.querySelector('.time-indicator-label, .time-bar-now-label')
+            ? this.timeIndicator.querySelector('.sun-timeIndicatorLabel, .sun-timeBarNowLabel')
             : null;
     }
 
@@ -582,7 +581,7 @@ class TimeBarManager {
         if (this.timeNowVline) {
             this.timeNowVline.style.display = display;
         }
-        const nowRow = this.container && this.container.querySelector('.time-bar-now-row');
+        const nowRow = this.container && this.container.querySelector('.sun-timeBarNowRow');
         if (nowRow) {
             nowRow.style.display = '';
         }
@@ -590,7 +589,7 @@ class TimeBarManager {
 
     /** Внутренний метод applyNowIndicatorPosition. */
     _applyNowIndicatorPosition(frac) {
-        const sideW = 'var(--time-bar-side-w, 72px)';
+        const sideW = 'var(--sun-timeBar-side-w, 72px)';
         const vlineLeft = `calc(${sideW} + (100% - ${sideW}) * ${frac})`;
         if (this.timeNowVline) {
             this.timeNowVline.style.left = vlineLeft;
@@ -617,48 +616,48 @@ class TimeBarManager {
     /** Внутренний метод insertHoursRow. */
     _insertHoursRow(bar, scale, labels) {
         const hoursRow = document.createElement('div');
-        hoursRow.className = 'time-bar-state-row time-bar-hours-row';
+        hoursRow.className = 'sun-timeBarStateRow sun-timeBarHoursRow';
         const side = document.createElement('div');
-        side.className = 'time-bar-state-side time-bar-state-side--hours';
+        side.className = 'sun-timeBarStateSide sun-timeBarStateSideHours';
         side.setAttribute('aria-hidden', 'true');
         const track = document.createElement('div');
-        track.className = 'time-bar-hours-track';
+        track.className = 'sun-timeBarHoursTrack';
         if (scale) track.appendChild(scale);
         if (labels) track.appendChild(labels);
         hoursRow.appendChild(side);
         hoursRow.appendChild(track);
-        const stack = bar.querySelector('#timeBarStateStack');
+        const stack = bar.querySelector('.sun-timeBarStateStack');
         if (stack) bar.insertBefore(hoursRow, stack);
         else bar.insertBefore(hoursRow, bar.firstChild);
     }
 
     /** Строки состояний +5…−5 под шкалой часов. */
     buildStateStackRows() {
-        const stack = document.getElementById('timeBarStateStack');
+        const stack = window.dom.byKey('timeBarStateStack');
         if (!stack || stack.children.length > 0) return;
 
         const hidden = this._loadStateRowHidden();
 
         for (let s = 5; s >= -5; s--) {
             const row = document.createElement('div');
-            row.className = 'time-bar-state-row';
+            row.className = 'sun-timeBarStateRow';
             row.dataset.state = String(s);
 
             const side = document.createElement('div');
-            side.className = 'time-bar-state-side';
+            side.className = 'sun-timeBarStateSide';
 
             const lab = document.createElement('span');
-            lab.className = 'time-bar-state-label';
+            lab.className = 'sun-timeBarStateLabel';
             lab.textContent = s > 0 ? `+${s}` : String(s);
 
             if (hidden[String(s)] === true) {
-                row.classList.add('time-bar-state-row--hidden');
+                row.classList.add('sun-timeBarStateRowHidden');
             }
 
             side.appendChild(lab);
 
             const track = document.createElement('div');
-            track.className = 'time-bar-state-track';
+            track.className = 'sun-timeBarStateTrack';
             track.dataset.state = String(s);
 
             row.appendChild(side);
@@ -676,20 +675,20 @@ class TimeBarManager {
         for (let i = 0; i <= 24; i++) {
             const hour = i % 24;
             const marker = document.createElement('div');
-            marker.className = 'hour-marker clickable';
+            marker.className = 'sun-hourMarker sun-clickable';
             
             if (hour === 0) {
-                marker.classList.add('midnight');
+                marker.classList.add('sun-midnight');
             }
             
             const label = document.createElement('div');
-            label.className = 'hour-label';
+            label.className = 'sun-hourLabel';
             label.textContent = hour === 0 ? '00:00' : `${hour}:00`;
             marker.appendChild(label);
             
             if (i < 24) {
                 const halfMarker = document.createElement('div');
-                halfMarker.className = 'half-hour-marker';
+                halfMarker.className = 'sun-halfHourMarker';
                 halfMarker.style.left = '50%';
                 marker.appendChild(halfMarker);
             }
@@ -736,13 +735,13 @@ class TimeBarManager {
     
     /** Подсветка текущего часа на timeScale. */
     highlightActiveHour(hour) {
-        document.querySelectorAll('.hour-marker.active').forEach(marker => {
-            marker.classList.remove('active');
+        document.querySelectorAll('.sun-hourMarker.sun-active').forEach(marker => {
+            marker.classList.remove('sun-active');
         });
         
-        const markers = document.querySelectorAll('.hour-marker');
+        const markers = document.querySelectorAll('.sun-hourMarker');
         if (markers[hour]) {
-            markers[hour].classList.add('active');
+            markers[hour].classList.add('sun-active');
         }
     }
     
@@ -811,12 +810,12 @@ class TimeBarManager {
     updateTimeBarAppearance() {
         if (!this.container) return;
         
-        const graphContainer = document.querySelector('.graph-container');
+        const graphContainer = document.querySelector('.sun-graphContainer');
         
         if (graphContainer) {
             this.container.style.backgroundColor = '#fff';
             
-            if (graphContainer.classList.contains('graph-gray-mode')) {
+            if (graphContainer.classList.contains('sun-graphGrayMode')) {
                 this.container.style.filter = 'grayscale(1)';
             } else {
                 this.container.style.filter = 'none';
@@ -846,7 +845,7 @@ class TimeBarManager {
     
     /** Устанавливает p mode observers. */
     setupModeObservers() {
-        const graphContainer = document.querySelector('.graph-container');
+        const graphContainer = document.querySelector('.sun-graphContainer');
         if (!graphContainer) return;
         
         const observer = new MutationObserver((mutations) => {
@@ -902,7 +901,7 @@ class TimeBarManager {
 
     /** flipV: зеркало стека −5…+5 (как mapGridDayOffset / flipH для дат). */
     applyFlipState() {
-        const stack = document.getElementById('timeBarStateStack');
+        const stack = window.dom.byKey('timeBarStateStack');
         if (!stack) {
             return;
         }

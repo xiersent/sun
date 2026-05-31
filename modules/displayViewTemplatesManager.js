@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file displayViewTemplatesManager.js
  * Шаблоны отображения: снимки включения групп и видимости волн A/B.
  */
@@ -221,7 +221,7 @@
         /** Сохраняет текст описания в шаблон. */
         persistDescriptionToTemplate(tplId) {
             const tpl = this.getTemplateById(tplId);
-            const ta = document.getElementById('displayViewTemplateDescription');
+            const ta = window.dom.byKey('displayViewTemplateDescription');
             if (!tpl || !ta) return;
             tpl.description = ta.value;
         }
@@ -229,7 +229,7 @@
         /** Заполняет textarea описания активного шаблона. */
         syncDescriptionFieldFromActive() {
             const tpl = this.getTemplateById(this.getActiveTemplateId());
-            const ta = document.getElementById('displayViewTemplateDescription');
+            const ta = window.dom.byKey('displayViewTemplateDescription');
             if (!ta) return;
             ta.value = tpl && typeof tpl.description === 'string' ? tpl.description : '';
         }
@@ -241,7 +241,7 @@
             } else if (window.eventManager && window.eventManager.recreateAllWaveElements) {
                 window.eventManager.recreateAllWaveElements();
             } else if (window.waves) {
-                document.querySelectorAll('.wave-container').forEach((c) => c.remove());
+                document.querySelectorAll('.sun-waveContainer').forEach((c) => c.remove());
                 window.waves.clearWaveDomReferences();
                 window.appState.data.waves.forEach((wave) => {
                     if (
@@ -432,21 +432,21 @@
             this._controlsBound = true;
             const $ = window.jQuery;
             if (!$) return;
-            $(document).on('change', '#displayViewTemplateSelect', (e) => {
+            $(document).on('change', '.sun-displayViewTemplateSelect', (e) => {
                 const val = $(e.target).val();
                 if (val) this.switchToTemplate(val);
             });
-            $(document).on('click', '#btnAddDisplayViewTemplate', (e) => {
+            $(document).on('click', '.sun-btnAddDisplayViewTemplate', (e) => {
                 e.preventDefault();
-                const name = $('#newDisplayViewTemplateName').val();
+                const name = window.dom.jq('newDisplayViewTemplateName').val();
                 this.addTemplateFromCurrent(name);
-                $('#newDisplayViewTemplateName').val('');
+                window.dom.jq('newDisplayViewTemplateName').val('');
             });
-            $(document).on('click', '#btnDeleteDisplayViewTemplate', (e) => {
+            $(document).on('click', '.sun-btnDeleteDisplayViewTemplate', (e) => {
                 e.preventDefault();
                 this.deleteSelectedTemplate();
             });
-            $(document).on('blur', '#displayViewTemplateDescription', () => {
+            $(document).on('blur', '.sun-displayViewTemplateDescription', () => {
                 this.persistDescriptionToTemplate(this.getActiveTemplateId());
                 window.appState.saveDebounced();
             });
@@ -454,7 +454,7 @@
 
         /** Перестраивает #displayViewTemplateSelect. */
         refreshSelect() {
-            const sel = document.getElementById('displayViewTemplateSelect');
+            const sel = window.dom.byKey('displayViewTemplateSelect');
             if (!sel) return;
             const ui = this.getUi();
             const active = this.getActiveTemplateId();

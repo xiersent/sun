@@ -34,7 +34,7 @@ class WavesDebugger {
     }
 
     /**
-     * Нарисовать вертикальные линии границ периодов поверх .wave-container.
+     * Нарисовать вертикальные линии границ периодов поверх .sun-waveContainer.
      * @param {HTMLElement} waveContainer
      */
     addPeriodMarkers(waveContainer) {
@@ -75,7 +75,7 @@ window.debugWaves = function () {
 
 /** Консоль: маркеры периодов на всех контейнерах волн. */
 window.showPeriodMarkers = function () {
-    document.querySelectorAll('.wave-container').forEach((container) => {
+    document.querySelectorAll('.sun-waveContainer').forEach((container) => {
         window.wavesDebugger.addPeriodMarkers(container);
     });
 };

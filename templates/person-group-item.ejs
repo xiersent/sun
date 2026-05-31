@@ -1,45 +1,45 @@
 <!-- templates/person-group-item.ejs — группа персон (только порядок и сворачивание) -->
 <% var _attrEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }; %>
-<div class="list-item list-item--person-group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
+<div class="sun-listItem sun-listItemPersonGroup <%= data.editing ? 'sun-listItemEditing' : '' %> <%= data.expanded ? 'sun-listItemExpanded' : '' %>"
     data-id="<%= data.id %>"
     data-type="personGroup"
     draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="list-item__drag-handle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
+    <div class="sun-listItemDragHandle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
     
-    <div class="list-item__content">
-        <div class="list-item__normal-view">
-            <div class="list-item__row">
-                <div class="list-item__left">
-                    <div class="list-item__title-container">
-                        <div class="list-item__title" title="<%= _attrEsc(data.name) %>">
+    <div class="sun-listItemContent">
+        <div class="sun-listItemNormalView">
+            <div class="sun-listItemRow">
+                <div class="sun-listItemLeft">
+                    <div class="sun-listItemTitleContainer">
+                        <div class="sun-listItemTitle" title="<%= _attrEsc(data.name) %>">
                             <%= data.name %>
                         </div>
                     </div>
                 </div>
                 
-                <div class="list-item__right">
-                    <div class="list-item__value">
-                        <span class="group-stats">
-                            <span class="group-total-count" title="Персон в группе">
+                <div class="sun-listItemRight">
+                    <div class="sun-listItemValue">
+                        <span class="sun-groupStats">
+                            <span class="sun-groupTotalCount" title="Персон в группе">
                                 Персон: <%= data.dateCount %>
                             </span>
                         </span>
                     </div>
-                    <div class="list-item__actions">
-                        <button type="button" class="ui-btn expand-collapse-btn person-group-expand-btn" 
+                    <div class="sun-listItemActions">
+                        <button type="button" class="sun-uiBtn sun-expandCollapseBtn personGroupExpandBtn" 
                                 data-id="<%= data.id %>" 
                                 data-type="personGroup"
                                 title="<%= data.expanded ? 'Свернуть' : 'Развернуть' %>"
                                 aria-label="<%= data.expanded ? 'Свернуть' : 'Развернуть' %>"
                                 aria-expanded="<%= data.expanded ? 'true' : 'false' %>"><%= data.expanded ? '▼' : '▶' %></button>
-                        <button type="button" class="ui-btn edit-btn" 
+                        <button type="button" class="sun-uiBtn sun-editBtn" 
                                 data-id="<%= data.id %>" 
                                 data-type="personGroup"
                                 title="<%= data.editing ? 'Редактирование…' : 'Редактировать' %>"
                                 aria-label="<%= data.editing ? 'Редактирование…' : 'Редактировать' %>">✎</button>
-                        <button type="button" class="ui-btn delete-date-btn" 
+                        <button type="button" class="sun-uiBtn sun-deleteDateBtn" 
                                 data-id="<%= data.id %>" 
                                 data-type="personGroup"
                                 title="Уничтожить"
@@ -49,20 +49,20 @@
             </div>
         </div>
         
-        <div class="list-item__edit-form">
-            <div class="list-item__edit-row">
-                <input type="text" placeholder="Название группы" class="list-item__edit-input" id="editPersonGroupName<%= data.id %>" value="<%= data.name %>">
+        <div class="sun-listItemEditForm">
+            <div class="sun-listItem__edit-row">
+                <input type="text" placeholder="Название группы" class="sun-listItem__edit-input" id="editPersonGroupName<%= data.id %>" value="<%= data.name %>">
             </div>
-            <div class="list-item__edit-actions">
-                <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup" title="Сохранить" aria-label="Сохранить">💾</button>
-                <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="personGroup" title="Отмена" aria-label="Отмена">↩</button>
+            <div class="sun-listItemEditActions">
+                <button type="button" class="sun-saveBtn sun-uiBtn" data-id="<%= data.id %>" data-type="personGroup" title="Сохранить" aria-label="Сохранить">💾</button>
+                <button type="button" class="sun-cancelBtn sun-uiBtn" data-id="<%= data.id %>" data-type="personGroup" title="Отмена" aria-label="Отмена">↩</button>
             </div>
         </div>
         
-        <div class="group-children person-group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
+        <div class="sun-groupChildren sun-personGroupChildren" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
             <% if (data.children && data.children.length > 0) { %>
             <% } else { %>
-                <div class="no-waves-message">
+                <div class="sun-noWavesMessage">
                     <span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">
                         Нет персон в этой группе
                     </span>

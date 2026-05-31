@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="sun-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -17,136 +17,133 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     
     <title>Зараза</title>
-    <link rel="stylesheet" href="styles/variables.css">
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/styles-compiled.css">
     <script src="modules/loadPerf.js"></script>
     <script src="modules/waveRenderDebug.js"></script>
 </head>
-<body>
-    <div class="warning-overlay" id="warningOverlay">
-        <div class="warning-box hidden">
-            <div class="warning-title">ПРЕДУПРЕЖДЕНИЕ</div>
-            <div class="warning-text">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
+<body class="sun-app">
+    <div class="sun-warningOverlay">
+        <div class="sun-warningBox sun-hidden">
+            <div class="sun-warningTitle">ПРЕДУПРЕЖДЕНИЕ</div>
+            <div class="sun-warningText">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
 
-            <div class="warning-info" id="dynamicVersionContainer">
-                <div class="warning-info-item">
+            <div class="sun-warningInfo sun-dynamicVersionContainer">
+                <div class="sun-warningInfoItem">
                     <strong>Браузер:</strong>
-                    <span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
-                    <span id="browserInfo">Загрузка...</span>
+                    <span class="sun-warningInfoStretch"></span>
+                    <span class="sun-browserInfo">Загрузка...</span>
                 </div>
-                <div class="warning-info-item">
+                <div class="sun-warningInfoItem">
                     <strong>Сейчас:</strong>
-                    <span style="flex: 1; border-bottom: 1px dotted; align-self: stretch;"></span>
-                    <span id="todayInfo">Загрузка...</span>
+                    <span class="sun-warningInfoStretch"></span>
+                    <span class="sun-todayInfo">Загрузка...</span>
                 </div>
             </div>
 
-            <div style="height: 32px; display: flex; justify-content: center; margin-top: 20px; max-width: 100%; overflow: hidden;">
-                <div style="width: 216px;"><iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1HPF67CTO38.260515&" width="330" height="50" frameborder="0" allowtransparency="true" scrolling="no"></iframe></div>
+            <div class="sun-warningDonateRow">
+                <div class="sun-warningDonateFrame"><iframe src="https://yoomoney.ru/quickpay/fundraise/button?billNumber=1HPF67CTO38.260515&" width="330" height="50" frameborder="0" allowtransparency="true" scrolling="no"></iframe></div>
             </div>
 
-            <div class="parable-btn-wrapper">
-                <button data-action="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
-                <button id="colorPickerBtn" class="ui-btn parable-btn">Программа</button>
-                <button data-action="acceptWarning" class="ui-btn">Согласиться и продолжить</button>
+            <div class="sun-parableBtnWrapper">
+                <button type="button" class="sun-uiBtn sun-parableBtn sun-colorPickerBtn">Программа</button>
             </div>
 
             <!-- Скрытый инпут для выбора цвета -->
-            <input type="color" id="hiddenColorPicker" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+            <input type="color" class="sun-hiddenColorPicker sun-hiddenColorPickerPos">
         </div>
     </div>
     
-    <div class="corner-square tl" data-action="toggleUI"></div>
-    <div class="corner-square tr" data-action="toggleUI"></div>
-    <div class="corner-square bl" data-action="toggleUI"></div>
-    <div class="corner-square br" data-action="toggleUI"></div>
-    <div class="corner-square tc" data-action="toggleUI"></div>
-    <div class="corner-square bc" data-action="toggleUI"></div>
-    <div class="corner-square lc" data-action="toggleUI"></div>
-    <div class="corner-square rc" data-action="toggleUI"></div>
-    <div class="corner-square mt" data-action="toggleUI"></div>
-    <div class="corner-square mb" data-action="toggleUI"></div>
-    <div class="corner-square ml" data-action="toggleUI"></div>
-    <div class="corner-square mr" data-action="toggleUI"></div>
-    <div class="corner-square mt2" data-action="toggleUI"></div>
-    <div class="corner-square mb2" data-action="toggleUI"></div>
-    <div class="corner-square ml2" data-action="toggleUI"></div>
-    <div class="corner-square mr2" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosTl" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosTr" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosBl" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosBr" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosTc" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosBc" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosLc" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosRc" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMt" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMb" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMl" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMr" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMt2" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMb2" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMl2" data-action="toggleUI"></div>
+    <div class="sun-cornerSquare sun-cornerPosMr2" data-action="toggleUI"></div>
     
-    <div class="interface-container">
-        <div class="container">
+    <div class="sun-interfaceContainer">
+        <div class="sun-container">
 
-            <div class="panel-section buttons-panel">
-                <div class="corner-controls">
-                    <button class="ui-btn" data-action="toggleCorners">Угловые</button>
-                    <button class="ui-btn" data-action="toggleAxial">Осевые</button>
-                    <button class="ui-btn" data-action="toggleVertical">Вертикальные</button>
-                    <button class="ui-btn" data-action="toggleSides">Боковые</button>
-                    <button class="ui-btn" data-action="toggleMiddle">Средние</button>
-                    <button class="ui-btn" data-action="toggleLeft">Левые</button>
-                    <button class="ui-btn" data-action="toggleRight">Правые</button>
-                    <button class="ui-btn" data-action="toggleTop">Верхние</button>
-                    <button class="ui-btn" data-action="toggleBottom">Нижние</button>
-                    <button class="ui-btn" data-action="toggleAllSquares">Все</button>
-                    <button class="ui-btn" data-action="resetCorners">Сброс цвета краев</button>
+            <div class="sun-panelSection sun-buttonsPanel">
+                <div class="sun-cornerControls">
+                    <button class="sun-uiBtn" data-action="toggleCorners">Угловые</button>
+                    <button class="sun-uiBtn" data-action="toggleAxial">Осевые</button>
+                    <button class="sun-uiBtn" data-action="toggleVertical">Вертикальные</button>
+                    <button class="sun-uiBtn" data-action="toggleSides">Боковые</button>
+                    <button class="sun-uiBtn" data-action="toggleMiddle">Средние</button>
+                    <button class="sun-uiBtn" data-action="toggleLeft">Левые</button>
+                    <button class="sun-uiBtn" data-action="toggleRight">Правые</button>
+                    <button class="sun-uiBtn" data-action="toggleTop">Верхние</button>
+                    <button class="sun-uiBtn" data-action="toggleBottom">Нижние</button>
+                    <button class="sun-uiBtn" data-action="toggleAllSquares">Все</button>
+                    <button class="sun-uiBtn" data-action="resetCorners">Сброс цвета краев</button>
                 </div>
-                <div class="transform-row">
-                    <button class="ui-btn" data-action="toggleUI">Переключить UI</button>
-                    <button class="ui-btn" data-action="toggleGraph">Визор</button>
-                    <button class="ui-btn" data-action="toggleSquares">Квадратики</button>
-                    <button class="ui-btn" data-action="toggleGrayMode">Обесцветить</button>
-                    <button class="ui-btn" data-action="toggleStars">Звездочки</button>
-                    <button class="ui-btn" data-action="exportDates">Экспорт дат</button>
-                    <button class="ui-btn" data-action="exportWaves">Экспорт сигналов</button>
-                    <button class="ui-btn" data-action="exportAll">Экспорт всего</button>
-                    <button class="ui-btn" data-action="importAll">Импорт</button>
-                    <input type="file" id="importAllFile" accept=".json" style="display:none">
-                    <button class="ui-btn" data-action="resetAll">Сброс всего</button>
+                <div class="sun-transformRow">
+                    <button class="sun-uiBtn" data-action="toggleUI">Переключить UI</button>
+                    <button class="sun-uiBtn" data-action="toggleGraph">Визор</button>
+                    <button class="sun-uiBtn" data-action="toggleSquares">Квадратики</button>
+                    <button class="sun-uiBtn" data-action="toggleGrayMode">Обесцветить</button>
+                    <button class="sun-uiBtn" data-action="toggleStars">Звездочки</button>
+                    <button class="sun-uiBtn" data-action="exportDates">Экспорт дат</button>
+                    <button class="sun-uiBtn" data-action="exportWaves">Экспорт сигналов</button>
+                    <button class="sun-uiBtn" data-action="exportAll">Экспорт всего</button>
+                    <button class="sun-uiBtn" data-action="importAll">Импорт</button>
+                    <input type="file" class="sun-importAllFile sun-uHidden" accept=".json">
+                    <button class="sun-uiBtn" data-action="resetAll">Сброс всего</button>
                 </div>
-                <div class="corner-controls">
-                    <button class="ui-btn" data-action="resetWarning">Передумать</button>
+                <div class="sun-cornerControls">
+                    <button class="sun-uiBtn" data-action="resetWarning">Передумать</button>
                 </div>
             </div>
 
 
-            <div class="secret-scheme-wrap secret-scheme-wrap--hidden" id="secretSchemeWrap">
-                <div class="panel-section secret-scheme-section" id="secretSchemeSection">
-                    <div class="tab-container">
-                        <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Секретная схема">
-                            <button type="button" class="tab-button secret-scheme-toggle" id="secretSchemeToggle" aria-expanded="false" aria-controls="secretSchemePanel">Секретная схема того, как ты думаешь через меня перебирая циферки онлайна</button>
+            <div class="sun-secretSchemeWrap sun-secretSchemeWrapHidden">
+                <div class="sun-panelSection sun-secretSchemeSection">
+                    <div class="sun-tabContainer">
+                        <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Секретная схема">
+                            <button type="button" class="sun-tabButton sun-secretSchemeToggle" aria-expanded="false" aria-controls="secretSchemePanel">Секретная схема того, как ты думаешь через меня перебирая циферки онлайна</button>
                         </div>
                     </div>
-                    <div class="secret-scheme-panel secret-scheme-panel--collapsed" id="secretSchemePanel">
-                        <div class="secret-scheme-grid" id="secretSchemeGrid" role="grid"></div>
+                    <div class="sun-secretSchemePanel sun-secretSchemePanelCollapsed" id="secretSchemePanel">
+                        <div class="sun-secretSchemeGrid" role="grid"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="time-bar-wrap" id="timeBarWrap">
-                <div class="panel-section time-bar-controls-section" id="timeBarControlsSection">
-                    <div class="tab-container">
-                        <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Настройки полосы времени">
-                            <button type="button" class="tab-button time-bar-controls-toggle" id="timeBarControlsToggle" aria-expanded="false" aria-controls="timeBarControls" title="Редактировать" aria-label="Редактировать">Редактировать</button>
+            <div class="sun-timeBarWrap">
+                <div class="sun-panelSection sun-timeBarControlsSection">
+                    <div class="sun-tabContainer">
+                        <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Настройки полосы времени">
+                            <button type="button" class="sun-tabButton sun-timeBarControlsToggle" aria-expanded="false" aria-controls="timeBarControls" title="Редактировать" aria-label="Редактировать">Редактировать</button>
                         </div>
                     </div>
-                    <div class="time-bar-controls time-bar-controls--collapsed" id="timeBarControls" aria-label="Видимость полос и групп"></div>
+                    <div class="sun-timeBarControls sun-timeBarControlsCollapsed" id="timeBarControls" aria-label="Видимость полос и групп"></div>
                 </div>
-                <div class="time-bar-container" id="timeBarContainer">
-                <div class="time-bar time-bar--stacked">
-                    <div class="time-bar-state-row time-bar-hours-row">
-                        <div class="time-bar-state-side time-bar-state-side--hours" aria-hidden="true"></div>
-                        <div class="time-bar-hours-track">
-                            <div class="time-scale" id="timeScale"></div>
-                            <div class="time-labels" id="timeLabels"></div>
+                <div class="sun-timeBarContainer">
+                <div class="sun-timeBar sun-timeBarStacked">
+                    <div class="sun-timeBarStateRow sun-timeBarHoursRow">
+                        <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
+                        <div class="sun-timeBarHoursTrack">
+                            <div class="sun-timeScale"></div>
+                            <div class="sun-timeLabels"></div>
                         </div>
                     </div>
-                    <div class="time-bar-state-stack" id="timeBarStateStack"></div>
-                    <div class="time-bar-now-vline" id="timeNowVline" aria-hidden="true"></div>
-                    <div class="time-bar-now-row">
-                        <div class="time-bar-state-side time-bar-state-side--now" aria-hidden="true"></div>
-                        <div class="time-bar-now-track">
-                            <div class="time-indicator time-bar-now-marker" id="timeIndicator" title="">
-                                <div class="time-indicator-label time-bar-now-label"></div>
+                    <div class="sun-timeBarStateStack"></div>
+                    <div class="sun-timeBarNowVline" aria-hidden="true"></div>
+                    <div class="sun-timeBarNowRow">
+                        <div class="sun-timeBarStateSide sun-timeBarStateSideNow" aria-hidden="true"></div>
+                        <div class="sun-timeBarNowTrack">
+                            <div class="sun-timeIndicator sun-timeBarNowMarker" title="">
+                                <div class="sun-timeIndicatorLabel sun-timeBarNowLabel"></div>
                             </div>
                         </div>
                     </div>
@@ -155,33 +152,33 @@
             </div>
 
 
-            <div class="panel-section tabs-section" id="tabs-section">
-                <div class="tab-container">
-                    <div class="tab-buttons tab-buttons--framed" role="tablist" aria-label="Разделы панели">
-                        <button type="button" class="tab-button" data-tab="summary" role="tab">Состояния</button>
-                        <button type="button" class="tab-button" data-tab="intersections" role="tab">Пересечения</button>
-                        <button type="button" class="tab-button" data-tab="dateCompare" role="tab">Сравнение дат</button>
+            <div class="sun-panelSection sun-tabsSection">
+                <div class="sun-tabContainer">
+                    <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Разделы панели">
+                        <button type="button" class="sun-tabButton" data-tab="summary" role="tab">Состояния</button>
+                        <button type="button" class="sun-tabButton" data-tab="intersections" role="tab">Пересечения</button>
+                        <button type="button" class="sun-tabButton" data-tab="dateCompare" role="tab">Сравнение дат</button>
                     </div>
                     
-                    <div class="tab-content" id="summary-tab">
-                        <div class="panel-section summary-panel" id="summaryPanel">
-                            <div class="summary-header">
+                    <div class="sun-tabContent" data-tab-panel="summary">
+                        <div class="sun-panelSection sun-summaryPanel">
+                            <div class="sun-summaryHeader">
                                 <h3>Сводная информация о сигналах</h3>
                             </div>
                             
-                            <div class="summary-controls">
-                                <div class="summary-select-row">
-                                    <div class="summary-select-group">
-                                        <select class="summary-select" id="summaryGroupSelect">
+                            <div class="sun-summaryControls">
+                                <div class="sun-summarySelectRow">
+                                    <div class="sun-summarySelectGroup">
+                                        <select class="sun-summarySelect sun-summaryGroupSelect">
                                             <option value="all">Все доступные группы с сигналами</option>
                                         </select>
-                                        <select class="summary-select" id="summaryStateSelect"></select>
-                                        <div class="summary-duplicate-buttons">
-                                            <button class="ui-btn" data-action="today">Сегодня</button>
-                                            <button class="ui-btn" data-action="now">Сейчас</button>
+                                        <select class="sun-summarySelect sun-summaryStateSelect"></select>
+                                        <div class="sun-summaryDuplicateButtons">
+                                            <button class="sun-uiBtn" data-action="today">Сегодня</button>
+                                            <button class="sun-uiBtn" data-action="now">Сейчас</button>
                                         </div>
-                                        <label class="intersection-form-label" style="margin-left: 10px;">
-                                            <input type="checkbox" id="includePastWaves" autocomplete="off"
+                                        <label class="sun-intersectionFormLabel sun-intersectionLabelSpaced">
+                                            <input type="checkbox" class="sun-includePastWaves" autocomplete="off"
                                                 onchange="if (window.summaryManager) window.summaryManager.updateSummary()">
                                             Учитывать прошедшие
                                         </label>
@@ -189,64 +186,64 @@
                                 </div>
                             </div>
                             
-                            <div class="summary-results-container">
-                                <div class="summary-results" id="summaryResults"></div>
+                            <div class="sun-summaryResultsContainer">
+                                <div class="sun-summaryResults"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="tab-content" id="intersections-tab">
-                        <div class="panel-section" id="intersectionPanel">
-                            <div class="summary-header">
+                    <div class="sun-tabContent" data-tab-panel="intersections">
+                        <div class="sun-panelSection sun-intersectionPanel">
+                            <div class="sun-summaryHeader">
                                 <h3>Сигналы, близкие по состоянию к выбранному</h3>
                             </div>
                             
-                            <div class="summary-controls">
-                                <div class="intersection-form">
-                                    <div class="intersection-form-row intersection-toolbar-one-row date-comparison-selects">
-                                        <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="intersectionSortSelect">Сортировка</label>
-                                            <select class="summary-select" id="intersectionSortSelect" title="Порядок строк в таблице пересечений">
+                            <div class="sun-summaryControls">
+                                <div class="sun-intersectionForm">
+                                    <div class="sun-intersectionFormRow sun-intersectionToolbarOneRow sun-dateComparisonSelects">
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="intersectionSortSelect">Сортировка</label>
+                                            <select class="sun-summarySelect" id="intersectionSortSelect" title="Порядок строк в таблице пересечений">
                                                 <option value="period-desc">По периоду ↓ (большие сначала)</option>
                                                 <option value="time-asc">По времени ↑ (ранние сначала)</option>
                                             </select>
                                         </div>
-                                        <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="intersectionDateSelectA">Дата А</label>
-                                            <select class="summary-select" id="intersectionDateSelectA" title="Фаза выбранного сигнала (окраска углов)"></select>
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="intersectionDateSelectA">Дата А</label>
+                                            <select class="sun-summarySelect" id="intersectionDateSelectA" title="Фаза выбранного сигнала (окраска углов)"></select>
                                         </div>
-                                        <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="intersectionDateSelectB">Дата Б</label>
-                                            <select class="summary-select" id="intersectionDateSelectB" title="Фаза остальных сигналов (кроме выбранного)"></select>
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="intersectionDateSelectB">Дата Б</label>
+                                            <select class="sun-summarySelect" id="intersectionDateSelectB" title="Фаза остальных сигналов (кроме выбранного)"></select>
                                         </div>
-                                        <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="intersectionWaveSelect">Сигнал</label>
-                                            <select class="summary-select" id="intersectionWaveSelect" title="Сигнал для анализа (то же, что «Окрасить края» в списке волн)"></select>
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="intersectionWaveSelect">Сигнал</label>
+                                            <select class="sun-summarySelect" id="intersectionWaveSelect" title="Сигнал для анализа (то же, что «Окрасить края» в списке волн)"></select>
                                         </div>
                                     </div>
-                                    <div class="intersection-form-row intersection-form-row-actions">
-                                        <button type="button" id="btnIntersectionTimeRail" class="ui-btn" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
+                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions">
+                                        <button type="button" class="sun-uiBtn sun-btnIntersectionTimeRail" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
                                             Шкала времени
                                         </button>
-                                        <button id="btnClearWaveSelection" class="ui-btn" data-action="clearWaveSelection">
+                                        <button type="button" class="sun-uiBtn sun-btnClearWaveSelection" data-action="clearWaveSelection">
                                             Сбросить выбор сигнала
                                         </button>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="intersection-stats" id="intersectionStats" style="display:none"></div>
+                            <div class="sun-intersectionStats sun-uHidden"></div>
                             
-                            <div class="summary-results-container">
-                                <div class="summary-results" id="intersectionResults">
-                                    <div class="list-empty">
-                                        <div style="text-align: center; padding: 20px;">
-                                            <div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
+                            <div class="sun-summaryResultsContainer">
+                                <div class="sun-summaryResults sun-intersectionResults">
+                                    <div class="sun-listEmpty">
+                                        <div class="sun-intersectionEmpty">
+                                            <div class="sun-intersectionEmptyIcon">🎯</div>
                                             <div>Выберите сигнал для анализа</div>
-                                            <div style="font-size: 11px; color: #666; margin-top: 8px;">
+                                            <div class="sun-intersectionEmptyHint">
                                                 Выберите сигнал в списке <strong>«Сигнал»</strong> выше или чекбокс <strong>«Окрасить края»</strong> в списке волн
                                             </div>
-                                            <div style="font-size: 11px; color: #666; margin-top: 4px;">
+                                            <div class="sun-intersectionEmptyHintTight">
                                                 Рекомендация: используйте один из сигналов из экспериментальной группы.
                                             </div>
                                         </div>
@@ -256,139 +253,139 @@
                         </div>
                     </div>
 
-                    <div class="tab-content" id="dateCompare-tab">
-                        <div class="panel-section" id="dateComparePanel">
-                            <div class="summary-header">
+                    <div class="sun-tabContent" data-tab-panel="dateCompare">
+                        <div class="sun-panelSection sun-dateComparePanel">
+                            <div class="sun-summaryHeader">
                                 <h3>Сравнение волн для двух дат</h3>
                             </div>
-                            <p class="date-comparison-intro" id="dateCompareVizorHint"></p>
-                            <div class="summary-controls">
-                                <div class="intersection-form">
-                                    <div class="intersection-form-row date-comparison-selects">
-                                        <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="dateCompareSelectA">Дата A</label>
-                                            <select class="summary-select" id="dateCompareSelectA"></select>
+                            <p class="sun-dateComparisonIntro sun-dateCompareVizorHint"></p>
+                            <div class="sun-summaryControls">
+                                <div class="sun-intersectionForm">
+                                    <div class="sun-intersectionFormRow sun-dateComparisonSelects">
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="dateCompareSelectA">Дата A</label>
+                                            <select class="sun-summarySelect" id="dateCompareSelectA"></select>
                                         </div>
-                                        <div class="intersection-select-group">
-                                            <label class="intersection-form-label" for="dateCompareSelectB">Дата B</label>
-                                            <select class="summary-select" id="dateCompareSelectB"></select>
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="dateCompareSelectB">Дата B</label>
+                                            <select class="sun-summarySelect" id="dateCompareSelectB"></select>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="date-comparison-view-tabs tab-buttons tab-buttons--framed" role="tablist" aria-label="Вид отчёта сравнения">
-                                <button type="button" class="tab-button date-comparison-view-tab active" data-date-compare-view="phaseMatch" role="tab" aria-selected="true">Совпадение фаз</button>
-                                <button type="button" class="tab-button date-comparison-view-tab" data-date-compare-view="phaseGap" role="tab" aria-selected="false">Разность фаз</button>
-                                <button type="button" class="tab-button date-comparison-view-tab" data-date-compare-view="quadrature" role="tab" aria-selected="false">Квадратура фаз</button>
+                            <div class="sun-dateComparisonViewTabs sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Вид отчёта сравнения">
+                                <button type="button" class="sun-tabButton sun-dateComparisonViewTab sun-active" data-date-compare-view="phaseMatch" role="tab" aria-selected="true">Совпадение фаз</button>
+                                <button type="button" class="sun-tabButton sun-dateComparisonViewTab" data-date-compare-view="phaseGap" role="tab" aria-selected="false">Разность фаз</button>
+                                <button type="button" class="sun-tabButton sun-dateComparisonViewTab" data-date-compare-view="quadrature" role="tab" aria-selected="false">Квадратура фаз</button>
                             </div>
-                            <div class="summary-results-container intersection-results-container">
-                                <div class="summary-results" id="dateCompareResults"></div>
+                            <div class="sun-summaryResultsContainer sun-intersectionResultsContainer">
+                                <div class="sun-summaryResults sun-dateCompareResults"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="panel-section buttons-panel">
-                <div class="top-controls">
-                    <button type="button" class="ui-btn ui-btn-toggle-off" id="btnExtremumWaveColorHighlight" data-action="toggleExtremumWaveColors" aria-pressed="false" title="Окраска волн и выносок при экстремумах выключена">Краска экстр.</button>
-                    <button class="ui-btn" data-action="toggleWaveLabels">Выноски</button>
-                    <button class="ui-btn" data-action="toggleExtremes">Экстр.</button>
-                    <button class="ui-btn" data-action="toggleEquilibrium">Эквил.</button>
-                    <button class="ui-btn" data-action="toggleWaveIntersections">Пересечения</button>
-                    <button class="ui-btn" data-action="toggleGraphGrayMode">Цвет</button>
-                    <button type="button" class="ui-btn" id="btnFlipH" data-action="flipH" aria-pressed="false" title="Отразить волны по горизонтали">↔</button>
-                    <button type="button" class="ui-btn" id="btnFlipV" data-action="flipV" aria-pressed="false" title="Отразить волны по вертикали">↕</button>
-                    <button class="ui-btn" data-action="rotateL">↶</button>
-                    <button class="ui-btn" data-action="rotateR">↷</button>
-                    <button class="ui-btn" data-action="resetTransform">⟲</button>
-                    <button id="btnPrevDay" class="ui-btn">←</button>
-                    <button class="current-day ui-btn" id="currentDay">0.00000</button>
-                    <button id="btnNextDay" class="ui-btn">→</button>
-                    <button id="btnToday" class="ui-btn" data-action="today">Сегодня</button>
-                    <button id="btnNow" class="ui-btn" data-action="now">Сейчас</button>
+            <div class="sun-panelSection sun-buttonsPanel">
+                <div class="sun-topControls">
+                    <button type="button" class="sun-uiBtn sun-uiBtnToggleOff sun-btnExtremumWaveColorHighlight" data-action="toggleExtremumWaveColors" aria-pressed="false" title="Окраска волн и выносок при экстремумах выключена">Краска экстр.</button>
+                    <button class="sun-uiBtn" data-action="toggleWaveLabels">Выноски</button>
+                    <button class="sun-uiBtn" data-action="toggleExtremes">Экстр.</button>
+                    <button class="sun-uiBtn" data-action="toggleEquilibrium">Эквил.</button>
+                    <button class="sun-uiBtn" data-action="toggleWaveIntersections">Пересечения</button>
+                    <button class="sun-uiBtn" data-action="toggleGraphGrayMode">Цвет</button>
+                    <button type="button" class="sun-uiBtn sun-btnFlipH" data-action="flipH" aria-pressed="false" title="Отразить волны по горизонтали">↔</button>
+                    <button type="button" class="sun-uiBtn sun-btnFlipV" data-action="flipV" aria-pressed="false" title="Отразить волны по вертикали">↕</button>
+                    <button class="sun-uiBtn" data-action="rotateL">↶</button>
+                    <button class="sun-uiBtn" data-action="rotateR">↷</button>
+                    <button class="sun-uiBtn" data-action="resetTransform">⟲</button>
+                    <button type="button" class="sun-uiBtn sun-btnPrevDay">←</button>
+                    <button type="button" class="sun-currentDay sun-uiBtn">0.00000</button>
+                    <button type="button" class="sun-uiBtn sun-btnNextDay">→</button>
+                    <button type="button" class="sun-uiBtn sun-btnToday" data-action="today">Сегодня</button>
+                    <button type="button" class="sun-uiBtn sun-btnNow" data-action="now">Сейчас</button>
                     
-                    <div class="date-time-input-group">
-                        <input type="date" class="date-input" id="mainDateInputDate" style="flex: 1;">
-                        <input type="time" class="date-input" id="mainDateInputTime" step="1" value="00:00:00">
+                    <div class="sun-dateTimeInputGroup">
+                        <input type="date" class="sun-dateInput sun-mainDateInputDate sun-flex1">
+                        <input type="time" class="sun-dateInput sun-mainDateInputTime" step="1" value="00:00:00">
                     </div>
                     
-                    <button id="btnSetDate" class="ui-btn">Перейти</button>
+                    <button type="button" class="sun-uiBtn sun-btnSetDate">Перейти</button>
                 </div>
             </div>
 
-            <div class="graph-section">
-                <div class="graph-viewport">
-                <div class="graph-container" id="graphContainer">
-                    <div class="graph" id="graphElement">
-                        <div class="axis x-axis"></div>
-                        <div class="axis y-axis"></div>
-                        <div class="center-date-label" id="centerDateLabel"></div>
-                        <div class="zoom-overlay" id="zoomOverlay"></div>
-                        <div id="wavesTransformLayer" class="waves-transform-layer">
-                            <div id="wavesMount" class="waves-mount"></div>
+            <div class="sun-graphSection">
+                <div class="sun-graphViewport">
+                <div class="sun-graphContainer">
+                    <div class="sun-graph">
+                        <div class="sun-axis sun-xAxis"></div>
+                        <div class="sun-axis sun-yAxis"></div>
+                        <div class="sun-centerDateLabel"></div>
+                        <div class="sun-zoomOverlay"></div>
+                        <div class="sun-wavesTransformLayer">
+                            <div class="sun-wavesMount"></div>
                         </div>
                     </div>
                 </div>
-                <div class="wave-labels-container" id="waveLabelsContainer">
-                    <div class="wave-labels-side wave-labels-left"></div>
-                    <div class="wave-labels-side wave-labels-right"></div>
+                <div class="sun-waveLabelsContainer">
+                    <div class="sun-waveLabelsSide sun-waveLabelsLeft"></div>
+                    <div class="sun-waveLabelsSide sun-waveLabelsRight"></div>
                 </div>
-                <div class="wave-labels-vertical-container" id="waveLabelsVerticalContainer">
-                    <div class="wave-labels-side wave-labels-top"></div>
-                    <div class="wave-labels-side wave-labels-bottom"></div>
+                <div class="sun-waveLabelsVerticalContainer">
+                    <div class="sun-waveLabelsSide sun-waveLabelsTop"></div>
+                    <div class="sun-waveLabelsSide sun-waveLabelsBottom"></div>
                 </div>
                 </div>
             </div>
 
 
-            <div class="main-controls-panel">
-                <div class="control-panel">
-                    <div class="panel-section" id="dates-panel">
-                        <div class="add-group-form" style="margin-bottom: var(--spacing-sm);">
-                            <input type="text" class="add-group-input" id="newPersonGroupName" placeholder="Название группы персон" style="flex: 1">
-                            <button class="add-group-btn ui-btn" id="btnAddPersonGroup" type="button">Добавить группу</button>
+            <div class="sun-mainControlsPanel">
+                <div class="sun-controlPanel">
+                    <div class="sun-panelSection sun-datesPanel">
+                        <div class="sun-addGroupForm sun-addGroupFormMb">
+                            <input type="text" class="sun-addGroupInput sun-newPersonGroupName sun-flex1" placeholder="Название группы персон">
+                            <button class="sun-addGroupBtn sun-uiBtn sun-btnAddPersonGroup" type="button">Добавить группу</button>
                         </div>
-                        <div class="date-add-form">
-                            <div class="date-controls-buttons">
-                                <input type="date" class="date-input" id="dateInput">
-                                <input type="text" class="date-input" id="dateNameInput" placeholder="Название" style="flex:1">
-                                <select class="form-input date-gender-select" id="dateGenderSelect" aria-label="Пол" title="Не указан">
+                        <div class="sun-dateAddForm">
+                            <div class="sun-dateControlsButtons">
+                                <input type="date" class="sun-dateInput sun-dateInputPerson">
+                                <input type="text" class="sun-dateInput sun-dateNameInput sun-flex1" placeholder="Название">
+                                <select class="sun-formInput sun-dateGenderSelect" aria-label="Пол" title="Не указан">
                                     <option value="unset" selected title="Не указан">⚥</option>
                                     <option value="male" title="Мужской">♂</option>
                                     <option value="female" title="Женский">♀</option>
                                 </select>
-                                <button id="btnAddDate" class="ui-btn">Добавить персону</button>
+                                <button type="button" class="sun-uiBtn sun-btnAddDate">Добавить персону</button>
                             </div>
-                            <div class="date-add-description-row">
-                                <textarea id="dateDescriptionInput" class="form-input date-add-description-input" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"></textarea>
+                            <div class="sun-dateAddDescriptionRow">
+                                <textarea class="sun-formInput sun-dateAddDescriptionInput sun-dateDescriptionInput" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"></textarea>
                             </div>
                         </div>
-                        <div class="list-container" id="dateListForDates"></div>
+                        <div class="sun-listContainer sun-dateListForDates"></div>
                     </div>
-                    <div class="panel-section" id="waves-panel">
-                        <div class="display-view-templates-bar compact" id="displayViewTemplatesBar">
-                            <div class="display-view-templates-label">Шаблоны отображения групп и сигналов</div>
-                            <div class="display-view-templates-row">
-                                <select id="displayViewTemplateSelect" class="form-input summary-select" title="Переключение сохранённой комбинации включения групп и видимости сигналов"></select>
-                                <input type="text" id="newDisplayViewTemplateName" class="form-input" placeholder="Название нового шаблона">
-                                <button type="button" class="ui-btn" id="btnAddDisplayViewTemplate">Добавить шаблон</button>
-                                <button type="button" class="ui-btn" id="btnDeleteDisplayViewTemplate" title="Уничтожить выбранный пользовательский шаблон" aria-label="Уничтожить">⨯</button>
+                    <div class="sun-panelSection sun-wavesPanel">
+                        <div class="sun-displayViewTemplatesBar sun-compact">
+                            <div class="sun-displayViewTemplatesLabel">Шаблоны отображения групп и сигналов</div>
+                            <div class="sun-displayViewTemplatesRow">
+                                <select class="sun-formInput sun-summarySelect sun-displayViewTemplateSelect" title="Переключение сохранённой комбинации включения групп и видимости сигналов"></select>
+                                <input type="text" class="sun-formInput sun-newDisplayViewTemplateName" placeholder="Название нового шаблона">
+                                <button type="button" class="sun-uiBtn sun-btnAddDisplayViewTemplate">Добавить шаблон</button>
+                                <button type="button" class="sun-uiBtn sun-btnDeleteDisplayViewTemplate" title="Уничтожить выбранный пользовательский шаблон" aria-label="Уничтожить">⨯</button>
                             </div>
-                            <div class="display-view-templates-description-row">
-                                <textarea id="displayViewTemplateDescription" class="form-input display-view-templates-description-input" rows="2" placeholder="Заметка к выбранному шаблону видимости…" aria-label="Описание шаблона видимости"></textarea>
+                            <div class="sun-displayViewTemplatesDescriptionRow">
+                                <textarea class="sun-formInput sun-displayViewTemplatesDescriptionInput sun-displayViewTemplateDescription" rows="2" placeholder="Заметка к выбранному шаблону видимости…" aria-label="Описание шаблона видимости"></textarea>
                             </div>
                         </div>
-                        <div class="display-view-templates-separator" role="separator" aria-hidden="true"></div>
-                        <div class="add-custom-wave-form compact">
-                            <div class="add-group-form">
-                                <input type="text" class="add-group-input" id="newGroupName" placeholder="Название новой группы" style="flex: 1">
-                                <button class="add-group-btn ui-btn" id="btnAddGroup">Добавить группу</button>
+                        <div class="sun-displayViewTemplatesSeparator" role="separator" aria-hidden="true"></div>
+                        <div class="sun-addCustomWaveForm sun-compact">
+                            <div class="sun-addGroupForm">
+                                <input type="text" class="sun-addGroupInput sun-newGroupName sun-flex1" placeholder="Название новой группы">
+                                <button type="button" class="sun-addGroupBtn sun-uiBtn sun-btnAddGroup">Добавить группу</button>
                             </div>
-                            <div class="wave-inputs-row">
-                                <input type="text" class="form-input" id="customWaveName" placeholder="Название сигнала" style="flex:2">
-                                <input type="number" class="form-input" id="customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
-                                <select class="form-input" id="customWaveType">
+                            <div class="sun-waveInputsRow">
+                                <input type="text" class="sun-formInput sun-customWaveName sun-flex2" placeholder="Название сигнала">
+                                <input type="number" class="sun-formInput sun-customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
+                                <select class="sun-formInput sun-customWaveType">
                                     <option value="solid">Сплошная</option>
                                     <option value="dashed">Пунктирная</option>
                                     <option value="dotted">Точечная</option>
@@ -396,12 +393,12 @@
                                     <option value="dash-dot">Штрих-линия</option>
                                     <option value="long-dash">Длинный штрих</option>
                                 </select>
-                                <input type="color" class="color-input" id="customWaveColor" value="#666666" title="Выберить цвет">
-                                <button id="btnAddCustomWave" class="ui-btn">Добавить сигнал</button>
+                                <input type="color" class="sun-colorInput sun-customWaveColor" value="#666666" title="Выберить цвет">
+                                <button type="button" class="sun-uiBtn sun-btnAddCustomWave">Добавить сигнал</button>
                             </div>
                         </div>
-                        <div class="waves-list-container">
-                            <div class="list-container" id="wavesList"></div>
+                        <div class="sun-wavesListContainer">
+                            <div class="sun-listContainer sun-wavesList"></div>
                         </div>
                     </div>
                 </div>

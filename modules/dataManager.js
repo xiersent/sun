@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file dataManager.js
  * Обновление списков дат и групп волн через unifiedListManager.
  */
@@ -127,7 +127,7 @@ class DataManager {
     
     /** Перерисовка списка групп и волн на вкладке сигналов. */
     async updateWavesGroups() {
-        const container = document.getElementById('wavesList');
+        const container = window.dom.byKey('wavesList');
         if (!container) {
             return;
         }

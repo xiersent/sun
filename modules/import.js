@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file import.js
  * Экспорт и импорт данных приложения в JSON (полный, только даты, только сигналы).
  * Имя полного файла: {дата}_everything.json.
@@ -323,38 +323,37 @@ class ImportExportManager {
                             window.appState.extremumWaveColorHighlight = convertedData.uiSettings.extremumWaveColorHighlight !== undefined ? convertedData.uiSettings.extremumWaveColorHighlight : false;
                             
                             if (window.appState.uiHidden) {
-                                document.body.classList.add('ui-hidden');
+                                document.body.classList.add('sun-uiHidden');
                             } else {
-                                document.body.classList.remove('ui-hidden');
+                                document.body.classList.remove('sun-uiHidden');
                             }
                             
                             if (window.appState.graphHidden) {
-                                document.body.classList.add('graph-hidden');
+                                document.body.classList.add('sun-graphHidden');
                             } else {
-                                document.body.classList.remove('graph-hidden');
+                                document.body.classList.remove('sun-graphHidden');
                             }
                             
                             if (window.appState.showStars) {
-                                document.body.classList.add('stars-mode');
-                                document.body.classList.remove('names-mode');
+                                document.body.classList.add('sun-starsMode');
+                                document.body.classList.remove('sun-namesMode');
                             } else {
-                                document.body.classList.remove('stars-mode');
-                                document.body.classList.add('names-mode');
+                                document.body.classList.remove('sun-starsMode');
+                                document.body.classList.add('sun-namesMode');
                             }
                             
                             if (window.appState.grayMode) {
-                                document.body.classList.add('gray-mode');
+                                document.body.classList.add('sun-grayMode');
                             } else {
-                                document.body.classList.remove('gray-mode');
+                                document.body.classList.remove('sun-grayMode');
                             }
                             
-                            const graphContainer = document.getElementById('graphContainer');
+                            const graphContainer = window.dom.byKey('graphContainer');
                             if (graphContainer) {
-                                graphContainer.classList.remove('dark-mode');
                                 graphContainer.style.backgroundColor = '';
                             }
                             
-                            const allSquares = document.querySelectorAll('.corner-square');
+                            const allSquares = document.querySelectorAll('.sun-cornerSquare');
                             allSquares.forEach(square => {
                                 square.style.display = window.appState.cornerSquaresVisible ? 'block' : 'none';
                             });
@@ -376,7 +375,7 @@ class ImportExportManager {
                                 }
                             });
                             
-                            document.querySelectorAll('.wave-container').forEach(container => {
+                            document.querySelectorAll('.sun-waveContainer').forEach(container => {
                                 container.remove();
                             });
                             
@@ -477,7 +476,7 @@ class ImportExportManager {
                                 window.appState.waveCornerColor[waveIdStr] = wave.cornerColor || false;
                             });
                             
-                            document.querySelectorAll('.wave-container').forEach(container => {
+                            document.querySelectorAll('.sun-waveContainer').forEach(container => {
                                 container.remove();
                             });
                             
@@ -511,13 +510,13 @@ class ImportExportManager {
     
     /** Очистить UI legacy-импорта из SQLite (если элементы есть на странице). */
     clearImportResults() {
-        const textarea = document.getElementById('dbImportTextarea');
+        const textarea = window.dom.byKey('dbImportTextarea');
         if (textarea) textarea.value = '';
-        const progress = document.getElementById('dbImportProgress');
+        const progress = window.dom.byKey('dbImportProgress');
         if (progress) progress.style.display = 'none';
-        const progressBar = document.getElementById('dbImportProgressBar');
+        const progressBar = window.dom.byKey('dbImportProgressBar');
         if (progressBar) progressBar.style.width = '0%';
-        const status = document.getElementById('dbImportStatus');
+        const status = window.dom.byKey('dbImportStatus');
         if (status) status.innerHTML = '';
     }
     
@@ -527,8 +526,8 @@ class ImportExportManager {
      * @param {string} [message]
      */
     updateDBImportProgress(percent, message = '') {
-        const progressBar = document.getElementById('dbImportProgressBar');
-        const status = document.getElementById('dbImportStatus');
+        const progressBar = window.dom.byKey('dbImportProgressBar');
+        const status = window.dom.byKey('dbImportStatus');
         
         if (progressBar) {
             progressBar.style.width = percent + '%';
@@ -545,7 +544,7 @@ class ImportExportManager {
      * @param {'info'|'error'|'success'} [type]
      */
     showDBImportStatus(message, type = 'info') {
-        const status = document.getElementById('dbImportStatus');
+        const status = window.dom.byKey('dbImportStatus');
         if (status) {
             status.innerHTML = `<div class="db-import-status ${type}">${message}</div>`;
         }

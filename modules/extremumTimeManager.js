@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file extremumTimeManager.js
  * Маркеры прохождения состояний ±5 на временной шкале по видимым волнам.
  */
@@ -12,7 +12,7 @@ class ExtremumTimeManager {
 
     /** Ждёт #timeBarStateStack и запускает расчёт экстремумов. */
     init() {
-        const stack = document.getElementById('timeBarStateStack');
+        const stack = window.dom.byKey('timeBarStateStack');
         if (!stack) {
             requestAnimationFrame(() => this.init());
             return;
@@ -163,13 +163,13 @@ class ExtremumTimeManager {
 
     /** Внутренний метод getTrackForState. */
     _getTrackForState(state) {
-        return document.querySelector(`.time-bar-state-track[data-state="${state}"]`);
+        return document.querySelector(`.sun-timeBarStateTrack[data-state="${state}"]`);
     }
 
     /** Внутренний метод isRowHidden. */
     _isRowHidden(state) {
-        const row = document.querySelector(`.time-bar-state-row[data-state="${state}"]`);
-        return !!(row && row.classList.contains('time-bar-state-row--hidden'));
+        const row = document.querySelector(`.sun-timeBarStateRow[data-state="${state}"]`);
+        return !!(row && row.classList.contains('sun-timeBarStateRowHidden'));
     }
 
     /** Внутренний метод dayFractionForTime. */
@@ -249,31 +249,31 @@ class ExtremumTimeManager {
                 const waveId = waveIds[index];
                 const checked = this._isWaveVisibilityChecked(waveId);
                 const cls = checked
-                    ? 'extremum-wave-name extremum-wave-name--on-vizor'
-                    : 'extremum-wave-name';
+                    ? 'sun-extremumWaveName sun-extremumWaveNameOnVizor'
+                    : 'sun-extremumWaveName';
                 return `<span class="${cls}" data-wave-id="${waveId}">${name}</span>`;
             })
             .join(', ');
 
         const slot = document.createElement('div');
-        slot.className = 'time-bar-segment-slot';
+        slot.className = 'sun-timeBarSegmentSlot';
         slot.style.left = `${Math.max(0, Math.min(100, frac * 100))}%`;
 
         const seg = document.createElement('div');
-        seg.className = 'time-bar-segment';
+        seg.className = 'sun-timeBarSegment';
 
         const label = document.createElement('div');
-        label.className = 'extremum-label extremum-label-top time-bar-segment-label';
+        label.className = 'sun-extremumLabel sun-extremumLabelTop sun-timeBarSegmentLabel';
 
         const labelText = document.createElement('div');
-        labelText.className = 'extremum-label-text';
+        labelText.className = 'sun-extremumLabelText';
         labelText.innerHTML = namesHtml;
 
         const arrowTop = document.createElement('div');
-        arrowTop.className = 'extremum-label-arrow extremum-label-arrow-top';
+        arrowTop.className = 'sun-extremumLabelArrow sun-extremumLabelArrowTop';
 
         const arrowBottom = document.createElement('div');
-        arrowBottom.className = 'extremum-label-arrow extremum-label-arrow-bottom';
+        arrowBottom.className = 'sun-extremumLabelArrow sun-extremumLabelArrowBottom';
 
         label.appendChild(arrowTop);
         label.appendChild(labelText);
@@ -282,13 +282,13 @@ class ExtremumTimeManager {
         slot.appendChild(seg);
 
         queueMicrotask(() => {
-            labelText.querySelectorAll('.extremum-wave-name').forEach((span) => {
+            labelText.querySelectorAll('.sun-extremumWaveName').forEach((span) => {
                 span.addEventListener('click', (ev) => {
                     ev.preventDefault();
                     ev.stopPropagation();
                     const waveId = span.dataset.waveId;
                     if (waveId) {
-                        const checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+                        const checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
                         if (checkbox) checkbox.click();
                     }
                 });
@@ -324,7 +324,7 @@ class ExtremumTimeManager {
 
     /** Очищает all. */
     clearAll() {
-        document.querySelectorAll('.time-bar-state-track').forEach((track) => {
+        document.querySelectorAll('.sun-timeBarStateTrack').forEach((track) => {
             track.innerHTML = '';
         });
         this.markers = [];
@@ -333,7 +333,7 @@ class ExtremumTimeManager {
 
     /** Перерисовка маркеров на timeBarStateStack. */
     updateExtremums() {
-        if (!document.getElementById('timeBarStateStack')) return;
+        if (!window.dom.byKey('timeBarStateStack')) return;
 
         if (!window.appState.hasActivePerson()) {
             this.renderMarkers(new Map());

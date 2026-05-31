@@ -1,5 +1,5 @@
 <!-- templates/wave-item.ejs -->
-<div class="list-item list-item--wave <%= data.editing ? 'list-item--editing' : '' %>"
+<div class="sun-listItem sun-listItemWave <%= data.editing ? 'sun-listItemEditing' : '' %>"
     data-id="<%= data.id %>"
     data-type="wave"
     <% if (data.parentGroupId) { %>
@@ -9,63 +9,63 @@
     data-index="<%= data.index %>"
     data-wave-id="<%= data.id %>">
     
-    <div class="list-item__drag-handle wave-drag-handle" draggable="<%= !data.editing %>" title="Перетащить сигнал">⋮⋮</div>
+    <div class="sun-listItemDragHandle sun-waveDragHandle" draggable="<%= !data.editing %>" title="Перетащить сигнал">⋮⋮</div>
     
-    <div class="list-item__content">
-        <div class="list-item__normal-view">
-            <div class="list-item__row">
-                <div class="list-item__left">
-                    <div class="wave-controls-inline">
-                        <input type="checkbox" class="wave-visibility-check" autocomplete="off"
+    <div class="sun-listItemContent">
+        <div class="sun-listItemNormalView">
+            <div class="sun-listItemRow">
+                <div class="sun-listItemLeft">
+                    <div class="sun-waveControlsInline">
+                        <input type="checkbox" class="sun-waveVisibilityCheck" autocomplete="off"
                                <%= data.visible ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
                                title="Видимость">
                         
-                        <input type="checkbox" class="wave-b-visibility-check" autocomplete="off"
+                        <input type="checkbox" class="sun-waveBVisibilityCheck" autocomplete="off"
                                <%= data.bold ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
                                title="Видимость слоя B (вторая персона), как левый чекбокс — для слоя A">
                         
-                        <div class="wave-color-preview-small" 
+                        <div class="sun-waveColorPreviewSmall" 
                              style="background-color: <%= data.color || '#666666' %>;" 
                              data-id="<%= String(data.id) %>" 
                              title="Редактировать цвет"></div>
                         
-                        <input type="checkbox" class="wave-corner-color-check" autocomplete="off"
+                        <input type="checkbox" class="sun-waveCornerColorCheck" autocomplete="off"
                                <%= data.cornerColor ? 'checked' : '' %> 
                                data-id="<%= data.id %>" 
                                title="Окрасить края в цвет сигнала">
                     </div>
-                    <div class="list-item__title-container">
-                        <div class="list-item__title">
+                    <div class="sun-listItemTitleContainer">
+                        <div class="sun-listItemTitle">
                             <%= data.name %>
-                            <span class="wave-period-badge"><%= data.period %> дней</span>
+                            <span class="sun-wavePeriodBadge"><%= data.period %> дней</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="list-item__right">
-                    <div class="list-item__value">
+                <div class="sun-listItemRight">
+                    <div class="sun-listItemValue">
                         <%= data.description || 'Сигнал' %>
                     </div>
-                    <div class="list-item__actions">
-                        <button type="button" class="ui-btn edit-btn" data-id="<%= data.id %>" data-type="wave" title="Редактировать" aria-label="Редактировать">✎</button>
-                        <button type="button" class="ui-btn delete-date-btn" data-id="<%= data.id %>" data-type="wave" title="Уничтожить" aria-label="Уничтожить">⨯</button>
+                    <div class="sun-listItemActions">
+                        <button type="button" class="sun-uiBtn sun-editBtn" data-id="<%= data.id %>" data-type="wave" title="Редактировать" aria-label="Редактировать">✎</button>
+                        <button type="button" class="sun-uiBtn sun-deleteDateBtn" data-id="<%= data.id %>" data-type="wave" title="Уничтожить" aria-label="Уничтожить">⨯</button>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Форма редактирования -->
-        <div class="list-item__edit-form">
-            <div class="list-item__edit-row">
-                <input type="text" class="list-item__edit-input" id="editWaveName<%= data.id %>" value="<%= data.name %>">
+        <div class="sun-listItemEditForm">
+            <div class="sun-listItem__edit-row">
+                <input type="text" class="sun-listItem__edit-input" id="editWaveName<%= data.id %>" value="<%= data.name %>">
             </div>
-            <div class="list-item__edit-row">
-                <input type="number" class="list-item__edit-input" id="editWavePeriod<%= data.id %>" value="<%= data.period %>" min="0.1" step="0.1">
+            <div class="sun-listItem__edit-row">
+                <input type="number" class="sun-listItem__edit-input" id="editWavePeriod<%= data.id %>" value="<%= data.period %>" min="0.1" step="0.1">
             </div>
-            <div class="list-item__edit-row">
-                <select class="list-item__edit-input" id="editWaveType<%= data.id %>">
+            <div class="sun-listItem__edit-row">
+                <select class="sun-listItem__edit-input" id="editWaveType<%= data.id %>">
                     <option value="solid" <%= data.typeValue === 'solid' ? 'selected' : '' %>>Сплошная</option>
                     <option value="dashed" <%= data.typeValue === 'dashed' ? 'selected' : '' %>>Пунктирная</option>
                     <option value="dotted" <%= data.typeValue === 'dotted' ? 'selected' : '' %>>Точечная</option>
@@ -74,13 +74,13 @@
                     <option value="long-dash" <%= data.typeValue === 'long-dash' ? 'selected' : '' %>>Длинный штрих</option>
                 </select>
             </div>
-            <div class="list-item__edit-row">
-                <label class="list-item__edit-label">Цвет:</label>
-                <input type="color" class="color-input" id="editWaveColor<%= data.id %>" value="<%= data.color %>">
+            <div class="sun-listItem__edit-row">
+                <label class="sun-listItem__edit-label">Цвет:</label>
+                <input type="color" class="sun-colorInput" id="editWaveColor<%= data.id %>" value="<%= data.color %>">
             </div>
-            <div class="list-item__edit-actions">
-                <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="wave" title="Сохранить" aria-label="Сохранить">💾</button>
-                <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="wave" title="Отмена" aria-label="Отмена">↩</button>
+            <div class="sun-listItemEditActions">
+                <button type="button" class="sun-saveBtn sun-uiBtn" data-id="<%= data.id %>" data-type="wave" title="Сохранить" aria-label="Сохранить">💾</button>
+                <button type="button" class="sun-cancelBtn sun-uiBtn" data-id="<%= data.id %>" data-type="wave" title="Отмена" aria-label="Отмена">↩</button>
             </div>
         </div>
     </div>

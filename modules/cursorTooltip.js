@@ -18,7 +18,7 @@ class CursorTooltip {
         this._inited = true;
 
         this.tipEl = document.createElement('div');
-        this.tipEl.className = 'cursor-tooltip';
+        this.tipEl.className = 'sun-cursorTooltip';
         this.tipEl.setAttribute('role', 'tooltip');
         this.tipEl.hidden = true;
         document.body.appendChild(this.tipEl);

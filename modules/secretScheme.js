@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file secretScheme.js
  * Секретная схема 8×15 ячеек: коды квартир, группы волн, привязка к сигналам.
  */
@@ -164,7 +164,7 @@ const SecretScheme = {
 
     /** Внутренний метод cellBgOpacity. */
     _cellBgOpacity() {
-        const board = document.getElementById('secretSchemeGrid');
+        const board = window.dom.byKey('secretSchemeGrid');
         const root = board || document.documentElement;
         const raw = getComputedStyle(root)
             .getPropertyValue('--secret-scheme-cell-bg-opacity')
@@ -231,11 +231,11 @@ const SecretScheme = {
 
     /** Применяет цвета ячеек сетки секретной схемы. */
     applyCellColors() {
-        const board = document.getElementById('secretSchemeGrid');
+        const board = window.dom.byKey('secretSchemeGrid');
         if (!board) {
             return;
         }
-        board.querySelectorAll('.secret-scheme-cell').forEach((cell) => {
+        board.querySelectorAll('.sun-secretSchemeCell').forEach((cell) => {
             const code = Number(cell.dataset.code);
             if (Number.isFinite(code)) {
                 this._styleCell(cell, code);
@@ -290,15 +290,15 @@ const SecretScheme = {
 
     /** Внутренний метод syncAnchorHighlight. */
     _syncAnchorHighlight() {
-        const board = document.getElementById('secretSchemeGrid');
+        const board = window.dom.byKey('secretSchemeGrid');
         if (!board) {
             return;
         }
         const anchor = Number(this.anchorCode);
-        board.querySelectorAll('.secret-scheme-cell').forEach((cell) => {
+        board.querySelectorAll('.sun-secretSchemeCell').forEach((cell) => {
             const code = Number(cell.dataset.code);
             cell.classList.toggle(
-                'secret-scheme-cell--anchor',
+                'sun-secretSchemeCellAnchor',
                 Number.isFinite(code) && code === anchor
             );
         });
@@ -307,16 +307,14 @@ const SecretScheme = {
     /** Внутренний метод makeControl. */
     _makeControl(labelText, selectId, ariaLabel) {
         const item = document.createElement('div');
-        item.className = 'secret-scheme-control';
-
         const label = document.createElement('label');
-        label.className = 'secret-scheme-control__label';
+        label.className = 'sun-secretSchemeControlLabel';
         label.htmlFor = selectId;
         label.append(`${labelText} `);
 
         const select = document.createElement('select');
         select.id = selectId;
-        select.className = 'secret-scheme-control__select form-input';
+        select.className = 'sun-secretSchemeControlSelect sun-formInput';
         select.setAttribute('aria-label', ariaLabel);
 
         label.append(select);
@@ -327,7 +325,7 @@ const SecretScheme = {
     /** Внутренний метод buildControls. */
     _buildControls() {
         const bar = document.createElement('div');
-        bar.className = 'secret-scheme-controls';
+        bar.className = 'sun-secretSchemeControls';
 
         const group = this._makeControl(
             'Группа волн:',
@@ -387,19 +385,19 @@ const SecretScheme = {
     /** Внутренний метод buildEntranceBlock. */
     _buildEntranceBlock(entrance) {
         const block = document.createElement('div');
-        block.className = 'secret-scheme-block';
+        block.className = 'sun-secretSchemeBlock';
         block.dataset.entrance = String(entrance);
 
         const start = this.entranceStart(entrance);
         const end = start + this.cellsPerEntrance - 1;
 
         const title = document.createElement('div');
-        title.className = 'secret-scheme-block-title';
+        title.className = 'sun-secretSchemeBlockTitle';
         title.textContent = `${entrance} подъезд (${start}–${end})`;
         block.appendChild(title);
 
         const mini = document.createElement('div');
-        mini.className = 'secret-scheme-mini-grid';
+        mini.className = 'sun-secretSchemeMiniGrid';
         mini.setAttribute('role', 'grid');
         mini.setAttribute('aria-label', `Подъезд ${entrance}, этажи 1–5`);
 
@@ -410,9 +408,9 @@ const SecretScheme = {
                 const code = this.codeForVisualSlot(entrance, floor, col);
                 const loc = this.decodeCode(code);
                 const cell = document.createElement('div');
-                cell.className = 'secret-scheme-cell';
+                cell.className = 'sun-secretSchemeCell';
                 if (code === this.anchorCode) {
-                    cell.classList.add('secret-scheme-cell--anchor');
+                    cell.classList.add('sun-secretSchemeCellAnchor');
                 }
                 cell.setAttribute('role', 'gridcell');
                 cell.dataset.entrance = String(loc ? loc.entrance : entrance);
@@ -432,7 +430,7 @@ const SecretScheme = {
     /** Внутренний метод buildEntranceWrap. */
     _buildEntranceWrap(entrance) {
         const wrap = document.createElement('div');
-        wrap.className = 'secret-scheme-entrance';
+        wrap.className = 'sun-secretSchemeEntrance';
         wrap.dataset.entrance = String(entrance);
         wrap.appendChild(this._buildEntranceBlock(entrance));
         return wrap;
@@ -441,11 +439,11 @@ const SecretScheme = {
     /** Внутренний метод appendEntranceRow. */
     _appendEntranceRow(container, entranceNums) {
         const row = document.createElement('div');
-        row.className = 'secret-scheme-entrances-row';
+        row.className = 'sun-secretSchemeEntrancesRow';
         entranceNums.forEach((ent, idx) => {
             if (idx > 0) {
                 const divider = document.createElement('div');
-                divider.className = 'secret-scheme-vline';
+                divider.className = 'sun-secretSchemeVline';
                 divider.setAttribute('aria-hidden', 'true');
                 row.appendChild(divider);
             }
@@ -457,10 +455,10 @@ const SecretScheme = {
     /** Внутренний метод buildBoardBody. */
     _buildBoardBody() {
         const body = document.createElement('div');
-        body.className = 'secret-scheme-board-body';
+        body.className = 'sun-secretSchemeBoardBody';
 
         const entrances = document.createElement('div');
-        entrances.className = 'secret-scheme-entrances';
+        entrances.className = 'sun-secretSchemeEntrances';
         const displayEntrances = this.entrancesForDisplay();
         for (let i = 0; i < displayEntrances.length; i += this.entrancesPerRow) {
             this._appendEntranceRow(
@@ -474,18 +472,18 @@ const SecretScheme = {
 
     /** Внутренний метод rebuildBoardBody. */
     _rebuildBoardBody() {
-        const board = document.getElementById('secretSchemeGrid');
+        const board = window.dom.byKey('secretSchemeGrid');
         if (!board) {
             return;
         }
-        const oldBody = board.querySelector('.secret-scheme-board-body');
+        const oldBody = board.querySelector('.sun-secretSchemeBoardBody');
         if (oldBody) {
             oldBody.remove();
         }
         board.appendChild(this._buildBoardBody());
         board.dataset.reversed = this.reversed ? '1' : '0';
 
-        const reverseSelect = document.getElementById('secretSchemeReverseSelect');
+        const reverseSelect = window.dom.byKey('secretSchemeReverseSelect');
         if (reverseSelect) {
             reverseSelect.value = this.reversed ? 'reversed' : 'normal';
         }
@@ -496,13 +494,13 @@ const SecretScheme = {
 
     /** Привязка UI секретной схемы и первый render. */
     init() {
-        const board = document.getElementById('secretSchemeGrid');
+        const board = window.dom.byKey('secretSchemeGrid');
         if (!board) {
             return;
         }
         const all = this.entrances();
         board.textContent = '';
-        board.className = 'secret-scheme-board';
+        board.className = 'sun-secretSchemeBoard';
         board.dataset.entrances = String(all.length);
         board.dataset.cells = String(this.totalCells);
         board.dataset.reversed = this.reversed ? '1' : '0';
@@ -518,7 +516,7 @@ const SecretScheme = {
         this.applyCellColors();
         this._syncAnchorHighlight();
 
-        const built = board.querySelectorAll('.secret-scheme-cell').length;
+        const built = board.querySelectorAll('.sun-secretSchemeCell').length;
         board.dataset.cellsBuilt = String(built);
         if (built !== this.totalCells) {
             console.warn(

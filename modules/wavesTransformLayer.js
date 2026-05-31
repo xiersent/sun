@@ -8,13 +8,13 @@ class WavesTransformLayerManager {
 
     /** DOM-контейнер #wavesTransformLayer (CSS transform слоя волн). */
     getLayerElement() {
-        return document.getElementById(WavesTransformLayerManager.LAYER_ID);
+        return window.dom.byKey(WavesTransformLayerManager.LAYER_ID);
     }
 
     /** DOM #wavesMount — волны и оверлеи внутри слоя transform. */
     getMountElement() {
         return (
-            document.getElementById(WavesTransformLayerManager.MOUNT_ID) ||
+            window.dom.byKey(WavesTransformLayerManager.MOUNT_ID) ||
             this.getLayerElement()
         );
     }
@@ -313,11 +313,11 @@ class WavesTransformLayerManager {
     /** Перенести волны и оверлеи из #graphElement в #wavesMount. */
     migrateWaveDomFromGraphElement() {
         const mount = this.getMountElement();
-        const graph = document.getElementById('graphElement');
+        const graph = window.dom.byKey('graphElement');
         if (!mount || !graph) {
             return;
         }
-        const selectors = ['.wave-container', '.wave-axis-x-points', '.wave-intersection-points'];
+        const selectors = ['.sun-waveContainer', '.sun-waveAxisXPoints', '.sun-waveIntersectionPoints'];
         selectors.forEach((sel) => {
             graph.querySelectorAll(sel).forEach((el) => {
                 mount.appendChild(el);
@@ -327,7 +327,7 @@ class WavesTransformLayerManager {
 
     /** Убрать устаревший transform с #graphElement (теперь только на слое волн). */
     clearLegacyGraphElementTransform() {
-        const graph = document.getElementById('graphElement');
+        const graph = window.dom.byKey('graphElement');
         if (graph) {
             graph.style.transform = '';
         }
@@ -335,7 +335,7 @@ class WavesTransformLayerManager {
 
     /** Слой волн поверх сетки (z-index) и последним в DOM после пересоздания grid. */
     ensureWavesLayerAboveGrid() {
-        const graph = document.getElementById('graphElement');
+        const graph = window.dom.byKey('graphElement');
         const layer = this.getLayerElement();
         if (!graph || !layer) {
             return;
@@ -344,7 +344,7 @@ class WavesTransformLayerManager {
             graph.appendChild(layer);
         }
         layer.style.zIndex = '10';
-        graph.querySelectorAll('.grid-static-container, .grid-absolute-container').forEach((el) => {
+        graph.querySelectorAll('.sun-gridStaticContainer, .sun-gridAbsoluteContainer').forEach((el) => {
             el.style.zIndex = '4';
         });
     }

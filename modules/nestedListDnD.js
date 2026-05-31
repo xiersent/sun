@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file nestedListDnD.js
  * Общая логика drag-and-drop вложенных строк (волны и персоны в группах).
  */
@@ -6,9 +6,9 @@
     const SPECS = {
         wave: {
             payloadType: 'wave',
-            itemSelector: '.list-item--wave',
-            parentSelector: '.list-item--group[data-type="group"]',
-            childRowSelector: '.list-item--wave',
+            itemSelector: '.sun-listItemWave',
+            parentSelector: '.sun-listItemGroup[data-type="group"]',
+            childRowSelector: '.sun-listItemWave',
             move(manager, sourceG, targetG, fromIdx, toIdx, insertBefore, opts) {
                 return manager.moveWaveBetweenGroups(
                     sourceG,
@@ -41,9 +41,9 @@
         },
         date: {
             payloadType: 'date',
-            itemSelector: '.list-item--date[data-type="date"]',
-            parentSelector: '.list-item--person-group[data-type="personGroup"]',
-            childRowSelector: '.list-item--date[data-type="date"]',
+            itemSelector: '.sun-listItemDate[data-type="date"]',
+            parentSelector: '.sun-listItemPersonGroup[data-type="personGroup"]',
+            childRowSelector: '.sun-listItemDate[data-type="date"]',
             move(manager, sourceG, targetG, fromIdx, toIdx, insertBefore, opts) {
                 return manager.moveDateBetweenPersonGroups(
                     sourceG,
@@ -104,13 +104,13 @@
     function clearNestedDnDVisuals(manager) {
         if (manager._nestedDragOverItemEl) {
             manager._nestedDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
+                'sun-listItemDragOverTop',
+                'sun-listItemDragOverBottom'
             );
             manager._nestedDragOverItemEl = null;
         }
         if (manager._nestedChildrenDropEl) {
-            manager._nestedChildrenDropEl.classList.remove('group-children--drag-over');
+            manager._nestedChildrenDropEl.classList.remove('sun-groupChildrenDragOver');
             manager._nestedChildrenDropEl = null;
         }
     }
@@ -142,7 +142,7 @@
         e.originalEvent.dataTransfer.effectAllowed = 'move';
         e.originalEvent.dataTransfer.setData('text/plain', JSON.stringify(manager.nestedItemDragPayload));
 
-        $item.addClass('list-item--dragging');
+        $item.addClass('sun-listItemDragging');
         spec.logDragStart('eventManager', {
             kind,
             id,
@@ -169,7 +169,7 @@
         const targetGroupId = $group.data('id');
 
         if (manager._nestedChildrenDropEl) {
-            manager._nestedChildrenDropEl.classList.remove('group-children--drag-over');
+            manager._nestedChildrenDropEl.classList.remove('sun-groupChildrenDragOver');
             manager._nestedChildrenDropEl = null;
         }
 
@@ -180,8 +180,8 @@
             e.originalEvent.dataTransfer.dropEffect = 'move';
             if (manager._nestedDragOverItemEl && manager._nestedDragOverItemEl !== itemEl) {
                 manager._nestedDragOverItemEl.classList.remove(
-                    'list-item--drag-over-top',
-                    'list-item--drag-over-bottom'
+                    'sun-listItemDragOverTop',
+                    'sun-listItemDragOverBottom'
                 );
                 manager._nestedDragOverItemEl = null;
             }
@@ -196,22 +196,22 @@
 
         if (manager._nestedDragOverItemEl && manager._nestedDragOverItemEl !== itemEl) {
             manager._nestedDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
+                'sun-listItemDragOverTop',
+                'sun-listItemDragOverBottom'
             );
         }
         manager._nestedDragOverItemEl = itemEl;
 
         if (insertPosition === 'before') {
-            $item.addClass('list-item--drag-over-top');
-            $item.removeClass('list-item--drag-over-bottom');
+            $item.addClass('sun-listItemDragOverTop');
+            $item.removeClass('sun-listItemDragOverBottom');
         } else {
-            $item.addClass('list-item--drag-over-bottom');
-            $item.removeClass('list-item--drag-over-top');
+            $item.addClass('sun-listItemDragOverBottom');
+            $item.removeClass('sun-listItemDragOverTop');
         }
     }
 
-    /** dragover по пустой зоне .group-children. */
+    /** dragover по пустой зоне .sun-groupChildren. */
     function childrenContainerDragOver(manager, e, kind) {
         const spec = SPECS[kind];
         if (!manager.nestedItemDragPayload || manager.nestedItemDragPayload.type !== spec.payloadType) {
@@ -229,18 +229,18 @@
 
         if (manager._nestedDragOverItemEl) {
             manager._nestedDragOverItemEl.classList.remove(
-                'list-item--drag-over-top',
-                'list-item--drag-over-bottom'
+                'sun-listItemDragOverTop',
+                'sun-listItemDragOverBottom'
             );
             manager._nestedDragOverItemEl = null;
         }
 
         const gc = e.currentTarget;
         if (manager._nestedChildrenDropEl && manager._nestedChildrenDropEl !== gc) {
-            manager._nestedChildrenDropEl.classList.remove('group-children--drag-over');
+            manager._nestedChildrenDropEl.classList.remove('sun-groupChildrenDragOver');
         }
         manager._nestedChildrenDropEl = gc;
-        gc.classList.add('group-children--drag-over');
+        gc.classList.add('sun-groupChildrenDragOver');
         e.originalEvent.dataTransfer.dropEffect = 'move';
     }
 
@@ -251,7 +251,7 @@
         if (related && $gc[0].contains(related)) {
             return;
         }
-        $gc.removeClass('group-children--drag-over');
+        $gc.removeClass('sun-groupChildrenDragOver');
     }
 
     /** drop в пустую область списка дочерних строк. */
@@ -353,7 +353,7 @@
             e.originalEvent.relatedTarget &&
             !el.contains(e.originalEvent.relatedTarget)
         ) {
-            $item.removeClass('list-item--drag-over-top list-item--drag-over-bottom');
+            $item.removeClass('sun-listItemDragOverTop sun-listItemDragOverBottom');
             if (manager._nestedDragOverItemEl === el) {
                 manager._nestedDragOverItemEl = null;
             }
@@ -369,21 +369,21 @@
         const src =
             e.target && e.target.closest ? e.target.closest(spec.itemSelector) : null;
         if (src) {
-            src.classList.remove('list-item--dragging');
+            src.classList.remove('sun-listItemDragging');
         }
     }
 
-    /** Контейнеры вложенного списка: только своя панель (без пересечения с .group-children групп волн). */
-    const WAVE_NESTED_CHILDREN = '#wavesList .list-item--group[data-type="group"] .group-children';
-    const DATE_NESTED_CHILDREN = '#dateListForDates .person-group-children';
+    /** Контейнеры вложенного списка: только своя панель (без пересечения с .sun-groupChildren групп волн). */
+    const WAVE_NESTED_CHILDREN = '.sun-wavesList .sun-listItemGroup[data-type="group"] .sun-groupChildren';
+    const DATE_NESTED_CHILDREN = '.sun-dateListForDates .sun-personGroupChildren';
     const NESTED_CONTAINERS = `${WAVE_NESTED_CHILDREN}, ${DATE_NESTED_CHILDREN}`;
 
-    /** dragover по .group-children / .person-group-children. */
+    /** dragover по .sun-groupChildren / .sun-personGroupChildren. */
     function nestedContainersDragOver(manager, e) {
         const $t = manager.$(e.target);
-        if ($t.closest('#wavesList').length) {
+        if ($t.closest('.sun-wavesList').length) {
             childrenContainerDragOver(manager, e, 'wave');
-        } else if ($t.closest('#dateListForDates').length) {
+        } else if ($t.closest('.sun-dateListForDates').length) {
             childrenContainerDragOver(manager, e, 'date');
         }
     }
@@ -396,16 +396,16 @@
     /** drop на пустую зону списка дочерних элементов. */
     function nestedContainersDrop(manager, e) {
         const $t = manager.$(e.target);
-        if ($t.closest('#wavesList').length) {
+        if ($t.closest('.sun-wavesList').length) {
             dropOnEmptyChildrenZone(manager, e, 'wave');
-        } else if ($t.closest('#dateListForDates').length) {
+        } else if ($t.closest('.sun-dateListForDates').length) {
             dropOnEmptyChildrenZone(manager, e, 'date');
         }
     }
 
     /** dragover по строке волны/персоны внутри группы. */
     function nestedChildRowsDragOver(manager, e) {
-        if (manager.$(e.currentTarget).is('.list-item--wave')) {
+        if (manager.$(e.currentTarget).is('.sun-listItemWave')) {
             dragOverOnChildRow(manager, e, 'wave');
         } else {
             dragOverOnChildRow(manager, e, 'date');
@@ -414,7 +414,7 @@
 
     /** drop на строку: перестановка или перенос между группами. */
     function nestedChildRowsDrop(manager, e) {
-        if (manager.$(e.currentTarget).is('.list-item--wave')) {
+        if (manager.$(e.currentTarget).is('.sun-listItemWave')) {
             dropOnChildRow(manager, e, 'wave');
         } else {
             dropOnChildRow(manager, e, 'date');
@@ -423,7 +423,7 @@
 
     /** dragleave со строки вложенного элемента. */
     function nestedChildRowsDragLeave(manager, e) {
-        if (manager.$(e.currentTarget).is('.list-item--wave')) {
+        if (manager.$(e.currentTarget).is('.sun-listItemWave')) {
             dragLeaveChildRow(manager, e, 'wave');
         } else {
             dragLeaveChildRow(manager, e, 'date');

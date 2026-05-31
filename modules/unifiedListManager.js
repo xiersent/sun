@@ -60,14 +60,14 @@ class UnifiedListManager {
         if (window.appState.editingDateId != null || window.appState.editingPersonGroupId != null) {
             return false;
         }
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) {
             return false;
         }
-        if (root.querySelector('.list-empty') && root.textContent && root.textContent.indexOf('Загрузка') !== -1) {
+        if (root.querySelector('.sun-listEmpty') && root.textContent && root.textContent.indexOf('Загрузка') !== -1) {
             return false;
         }
-        const dateRows = root.querySelectorAll('.list-item--date[data-type="date"]');
+        const dateRows = root.querySelectorAll('.sun-listItemDate[data-type="date"]');
         const n = dateRows.length;
         const dataDates = window.appState.data.dates || [];
         if (n !== dataDates.length) {
@@ -85,7 +85,7 @@ class UnifiedListManager {
                 }
             }
         }
-        const groupRows = root.querySelectorAll('.list-item--person-group');
+        const groupRows = root.querySelectorAll('.sun-listItemPersonGroup');
         const pg = window.appState.data.personGroups || [];
         if (groupRows.length !== pg.length) {
             return false;
@@ -94,12 +94,12 @@ class UnifiedListManager {
     }
 
     static LIST_ITEM_SAVE_FLASH = {
-        date: { rootId: 'dateListForDates', rowClass: 'list-item--date', dataType: 'date' },
-        wave: { rootId: 'wavesList', rowClass: 'list-item--wave', dataType: 'wave' },
-        group: { rootId: 'wavesList', rowClass: 'list-item--group', dataType: 'group' },
+        date: { rootId: 'dateListForDates', rowClass: 'sun-listItemDate', dataType: 'date' },
+        wave: { rootId: 'wavesList', rowClass: 'sun-listItemWave', dataType: 'wave' },
+        group: { rootId: 'wavesList', rowClass: 'sun-listItemGroup', dataType: 'group' },
         personGroup: {
             rootId: 'dateListForDates',
-            rowClass: 'list-item--person-group',
+            rowClass: 'sun-listItemPersonGroup',
             dataType: 'personGroup'
         }
     };
@@ -114,7 +114,7 @@ class UnifiedListManager {
         if (!cfg || id == null) {
             return;
         }
-        const root = document.getElementById(cfg.rootId);
+        const root = window.dom.byKey(cfg.rootId);
         if (!root) {
             return;
         }
@@ -129,16 +129,16 @@ class UnifiedListManager {
         }
 
         const done = () => {
-            row.classList.remove('list-item--save-flash');
+            row.classList.remove('sun-listItemSaveFlash');
         };
 
-        row.classList.remove('list-item--save-flash');
+        row.classList.remove('sun-listItemSaveFlash');
         void row.offsetWidth;
-        row.classList.add('list-item--save-flash');
+        row.classList.add('sun-listItemSaveFlash');
         row.addEventListener('animationend', done, { once: true });
         window.setTimeout(() => {
-            if (row.classList.contains('list-item--save-flash')) {
-                row.classList.remove('list-item--save-flash');
+            if (row.classList.contains('sun-listItemSaveFlash')) {
+                row.classList.remove('sun-listItemSaveFlash');
             }
         }, 950);
     }
@@ -169,18 +169,18 @@ class UnifiedListManager {
         const genderLabel = window.dom.getPersonGenderLabel(gender);
         const yearsFromCurrent = window.dom.getYearsBetweenDates(dateObj.date, currentTimestamp);
 
-        const nameEl = row.querySelector('.date-name');
+        const nameEl = row.querySelector('.sun-dateName');
         if (nameEl) {
             nameEl.textContent = dateObj.name;
         }
 
-        const valueEl = row.querySelector('.list-item__value');
+        const valueEl = row.querySelector('.sun-listItemValue');
         if (valueEl) {
             valueEl.textContent = '';
             valueEl.appendChild(document.createTextNode(formatted));
             valueEl.appendChild(document.createTextNode(' '));
             const badge = document.createElement('span');
-            badge.className = 'date-gender-badge';
+            badge.className = 'sun-dateGenderBadge';
             badge.title = genderLabel;
             badge.textContent = `[${icon}]`;
             valueEl.appendChild(badge);
@@ -195,11 +195,11 @@ class UnifiedListManager {
     /**
      * Только активная дата и чекбоксы A/B — без перерисовки списка (скролл не сбрасывается).
      * Подсветка A/B на строке — через CSS :has(:checked), классы на строке не ставим.
-     * Чекбоксы — по всем input.date-checkbox в контейнере (надёжнее, чем поиск от строки).
+     * Чекбоксы — по всем input.sun-dateCheckbox в контейнере (надёжнее, чем поиск от строки).
      */
     syncDateListSelectionVisuals(opts = {}) {
         const selectionOnly = opts.selectionOnly === true;
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) {
             window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:no #dateListForDates');
             return;
@@ -212,7 +212,7 @@ class UnifiedListManager {
         const editingDateIdStr =
             window.appState.editingDateId != null ? String(window.appState.editingDateId) : '';
 
-        const rows = root.querySelectorAll('.list-item--date[data-type="date"]');
+        const rows = root.querySelectorAll('.sun-listItemDate[data-type="date"]');
         window.sunDateListLog && window.sunDateListLog('syncDateListSelectionVisuals:start', {
             rowCount: rows.length,
             activeIdStr,
@@ -229,10 +229,10 @@ class UnifiedListManager {
             }
             const idStr = String(id);
             const isEditing = editingDateIdStr !== '' && idStr === editingDateIdStr;
-            row.classList.toggle('list-item--editing', isEditing);
-            row.classList.toggle('active', idStr === activeIdStr);
+            row.classList.toggle('sun-listItemEditing', isEditing);
+            row.classList.toggle('sun-active', idStr === activeIdStr);
 
-            const dhandle = row.querySelector('.date-drag-handle');
+            const dhandle = row.querySelector('.sun-dateDragHandle');
             if (dhandle) {
                 dhandle.setAttribute('draggable', isEditing ? 'false' : 'true');
             }
@@ -255,8 +255,8 @@ class UnifiedListManager {
                     description,
                     gender
                 );
-                const nameEl = row.querySelector('.date-name');
-                const starEl = row.querySelector('.date-star');
+                const nameEl = row.querySelector('.sun-dateName');
+                const starEl = row.querySelector('.sun-dateStar');
                 if (nameEl) {
                     nameEl.setAttribute('title', hoverTitle);
                 }
@@ -266,7 +266,7 @@ class UnifiedListManager {
             }
         });
 
-        root.querySelectorAll('input.date-checkbox').forEach((inp) => {
+        root.querySelectorAll('input.sun-dateCheckbox').forEach((inp) => {
             const t = inp.getAttribute('data-type');
             const rid = inp.getAttribute('data-id');
             if (!rid || (t !== 'a' && t !== 'b')) {
@@ -282,7 +282,7 @@ class UnifiedListManager {
 
         if (window.sunDateListLog) {
             const snap = [];
-            root.querySelectorAll('input.date-checkbox').forEach((inp) => {
+            root.querySelectorAll('input.sun-dateCheckbox').forEach((inp) => {
                 const idStr = String(inp.getAttribute('data-id') || '');
                 const t = inp.getAttribute('data-type');
                 const wantA = t === 'a' && typeAStr !== '' && idStr === typeAStr;
@@ -388,8 +388,8 @@ class UnifiedListManager {
     /** Создаёт emergency fallback templates. */
     createEmergencyFallbackTemplates() {
         this.templateCache['date-item-template'] = `
-<div class="list-item list-item--date" style="background:#ffe6e6;border:2px solid red;">
-    <div class="list-item__content">
+<div class="sun-listItem sun-listItemDate" style="background:#ffe6e6;border:2px solid red;">
+    <div class="sun-listItemContent">
         <div style="color:red;padding:10px;">
             ❌ ОШИБКА: Шаблон не загружен!<br>
             Проверьте файл templates/date-item.ejs
@@ -398,8 +398,8 @@ class UnifiedListManager {
 </div>`;
         
         this.templateCache['wave-item-template'] = `
-<div class="list-item list-item--wave" style="background:#ffe6e6;border:2px solid red;">
-    <div class="list-item__content">
+<div class="sun-listItem sun-listItemWave" style="background:#ffe6e6;border:2px solid red;">
+    <div class="sun-listItemContent">
         <div style="color:red;padding:10px;">
             ❌ ОШИБКА: Шаблон не загружен!<br>
             Проверьте файл templates/wave-item.ejs
@@ -408,8 +408,8 @@ class UnifiedListManager {
 </div>`;
         
         this.templateCache['group-item-template'] = `
-<div class="list-item list-item--group" style="background:#ffe6e6;border:2px solid red;">
-    <div class="list-item__content">
+<div class="sun-listItem sun-listItemGroup" style="background:#ffe6e6;border:2px solid red;">
+    <div class="sun-listItemContent">
         <div style="color:red;padding:10px;">
             ❌ ОШИБКА: Шаблон не загружен!<br>
             Проверьте файл templates/group-item.ejs
@@ -418,8 +418,8 @@ class UnifiedListManager {
 </div>`;
         
         this.templateCache['person-group-item-template'] = `
-<div class="list-item list-item--person-group" style="background:#ffe6e6;border:2px solid red;">
-    <div class="list-item__content"><div style="color:red;padding:10px;">Шаблон person-group-item.ejs не загружен</div></div>
+<div class="sun-listItem sun-listItemPersonGroup" style="background:#ffe6e6;border:2px solid red;">
+    <div class="sun-listItemContent"><div style="color:red;padding:10px;">Шаблон person-group-item.ejs не загружен</div></div>
 </div>`;
         
         this.templateCache['intersection-item-template'] = `
@@ -448,7 +448,7 @@ class UnifiedListManager {
             return this.templateCache[templateId];
         }
         
-        return '<div class="list-item">Элемент списка</div>';
+        return '<div class="sun-listItem">Элемент списка</div>';
     }
     
     /** Отладочный лог unifiedListManager. */
@@ -648,7 +648,7 @@ class UnifiedListManager {
             typeValue: wave.type,
             description: window.dom.getWaveDescription(wave.type),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
-            // UI: .wave-b-visibility-check; в appState ключ waveBold (историческое имя поля)
+            // UI: .sun-waveBVisibilityCheck; в appState ключ waveBold (историческое имя поля)
             bold: window.appState.waveBold[waveIdStr] || false,
             cornerColor: window.appState.waveCornerColor[waveIdStr] || false,
             editing: editingWaveIdStr === waveIdStr,
@@ -692,13 +692,13 @@ class UnifiedListManager {
         const __perfT0 = typeof performance !== 'undefined' ? performance.now() : 0;
         let container = null;
         try {
-        container = document.getElementById(containerId);
+        container = window.dom.byKey(containerId);
         if (!container) {
             return;
         }
         
         if (!this.templatesLoaded) {
-            container.innerHTML = '<div class="list-empty">Загрузка шаблонов...</div>';
+            container.innerHTML = '<div class="sun-listEmpty">Загрузка шаблонов...</div>';
 
             void this.initTemplates().then(() => {
                 this.renderList(containerId, items, itemType);
@@ -710,7 +710,7 @@ class UnifiedListManager {
         
         if (!items || items.length === 0) {
             const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'list-empty';
+            emptyMessage.className = 'sun-listEmpty';
             emptyMessage.textContent = this.getEmptyMessage(itemType);
             container.appendChild(emptyMessage);
             return;
@@ -781,16 +781,16 @@ class UnifiedListManager {
                             tempDiv.innerHTML = renderedGroup;
                             const groupElement = tempDiv.firstElementChild;
                             const childrenContainer = groupElement
-                                ? groupElement.querySelector('.group-children')
+                                ? groupElement.querySelector('.sun-groupChildren')
                                 : null;
                             if (childrenContainer) {
                                 childrenContainer.innerHTML = wavesHtml;
                                 if (groupData.expanded) {
                                     childrenContainer.style.display = 'block';
-                                    groupElement.classList.add('list-item--expanded');
+                                    groupElement.classList.add('sun-listItemExpanded');
                                 } else {
                                     childrenContainer.style.display = 'none';
-                                    groupElement.classList.remove('list-item--expanded');
+                                    groupElement.classList.remove('sun-listItemExpanded');
                                 }
                             }
                             renderedGroup = tempDiv.innerHTML;
@@ -818,7 +818,7 @@ class UnifiedListManager {
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = renderedGroup;
                     const groupElement = tempDiv.firstElementChild;
-                    const childrenContainer = groupElement.querySelector('.person-group-children');
+                    const childrenContainer = groupElement.querySelector('.sun-personGroupChildren');
                     if (childrenContainer && groupData.children && groupData.children.length > 0) {
                         const parts = [];
                         for (let ci = 0; ci < groupData.children.length; ci++) {
@@ -834,10 +834,10 @@ class UnifiedListManager {
                         childrenContainer.innerHTML = parts.join('');
                         if (groupData.expanded) {
                             childrenContainer.style.display = 'block';
-                            groupElement.classList.add('list-item--expanded');
+                            groupElement.classList.add('sun-listItemExpanded');
                         } else {
                             childrenContainer.style.display = 'none';
-                            groupElement.classList.remove('list-item--expanded');
+                            groupElement.classList.remove('sun-listItemExpanded');
                         }
                     }
                     frag.appendChild(groupElement);
@@ -911,19 +911,19 @@ class UnifiedListManager {
     }
 
     /**
-     * Режим редактирования волны: класс list-item--editing и поля формы уже в разметке —
+     * Режим редактирования волны: класс sun-listItemEditing и поля формы уже в разметке —
      * переключаем без полного EJS updateWavesList() (сотни мс на больших списках).
      */
     syncWaveListEditingVisuals() {
         const editingId = window.appState.editingWaveId != null ? String(window.appState.editingWaveId) : null;
-        const root = document.getElementById('wavesList');
+        const root = window.dom.byKey('wavesList');
         if (!root) return;
 
-        root.querySelectorAll('.list-item--wave').forEach((row) => {
+        root.querySelectorAll('.sun-listItemWave').forEach((row) => {
             const idStr = row.dataset.waveId != null ? String(row.dataset.waveId) : String(row.dataset.id);
             const isEditing = Boolean(editingId && idStr === editingId);
-            row.classList.toggle('list-item--editing', isEditing);
-            const handle = row.querySelector('.wave-drag-handle');
+            row.classList.toggle('sun-listItemEditing', isEditing);
+            const handle = row.querySelector('.sun-waveDragHandle');
             if (handle) {
                 handle.setAttribute('draggable', isEditing ? 'false' : 'true');
             }
@@ -934,10 +934,10 @@ class UnifiedListManager {
         const wave = window.appState.data.waves.find((w) => String(w.id) === editingId);
         if (!wave) return;
 
-        const nameInput = document.getElementById(`editWaveName${editingId}`);
-        const periodInput = document.getElementById(`editWavePeriod${editingId}`);
-        const typeInput = document.getElementById(`editWaveType${editingId}`);
-        const colorInput = document.getElementById(`editWaveColor${editingId}`);
+        const nameInput = window.dom.byKey(`editWaveName${editingId}`);
+        const periodInput = window.dom.byKey(`editWavePeriod${editingId}`);
+        const typeInput = window.dom.byKey(`editWaveType${editingId}`);
+        const colorInput = window.dom.byKey(`editWaveColor${editingId}`);
         if (nameInput) nameInput.value = wave.name;
         if (periodInput) periodInput.value = wave.period;
         if (typeInput) typeInput.value = wave.type;
@@ -947,18 +947,18 @@ class UnifiedListManager {
     /** Строка списка после сохранения формы: название, период, описание типа, превью цвета. */
     syncWaveListRowNormalViewFromModel(wave) {
         const idStr = String(wave.id);
-        const root = document.getElementById('wavesList');
+        const root = window.dom.byKey('wavesList');
         if (!root) return;
 
         let row = null;
-        root.querySelectorAll('.list-item--wave').forEach((el) => {
+        root.querySelectorAll('.sun-listItemWave').forEach((el) => {
             const rid = el.dataset.waveId != null ? String(el.dataset.waveId) : String(el.dataset.id);
             if (rid === idStr) row = el;
         });
         if (!row) return;
 
-        const titleEl = row.querySelector('.list-item__title');
-        const badge = titleEl && titleEl.querySelector('.wave-period-badge');
+        const titleEl = row.querySelector('.sun-listItemTitle');
+        const badge = titleEl && titleEl.querySelector('.sun-wavePeriodBadge');
         if (titleEl && badge) {
             while (titleEl.firstChild && titleEl.firstChild !== badge) {
                 titleEl.removeChild(titleEl.firstChild);
@@ -967,12 +967,12 @@ class UnifiedListManager {
             badge.textContent = `${wave.period} дней`;
         }
 
-        const valueEl = row.querySelector('.list-item__value');
+        const valueEl = row.querySelector('.sun-listItemValue');
         if (valueEl && window.dom && typeof window.dom.getWaveDescription === 'function') {
             valueEl.textContent = window.dom.getWaveDescription(wave.type);
         }
 
-        const preview = row.querySelector('.wave-color-preview-small');
+        const preview = row.querySelector('.sun-waveColorPreviewSmall');
         if (preview) {
             preview.style.backgroundColor = wave.color || '#666666';
         }
@@ -981,18 +981,18 @@ class UnifiedListManager {
     /** Режим редактирования группы сигналов — без полного updateWavesList(). */
     syncGroupListEditingVisuals() {
         const editingId = window.appState.editingGroupId != null ? String(window.appState.editingGroupId) : null;
-        const root = document.getElementById('wavesList');
+        const root = window.dom.byKey('wavesList');
         if (!root) return;
 
-        root.querySelectorAll('.list-item--group').forEach((row) => {
+        root.querySelectorAll('.sun-listItemGroup').forEach((row) => {
             const idStr = String(row.dataset.id);
             const isEditing = Boolean(editingId && idStr === editingId);
-            row.classList.toggle('list-item--editing', isEditing);
-            const handle = row.querySelector(':scope > .list-item__drag-handle');
+            row.classList.toggle('sun-listItemEditing', isEditing);
+            const handle = row.querySelector(':scope > .sun-listItemDragHandle');
             if (handle) {
                 handle.setAttribute('draggable', isEditing ? 'false' : 'true');
             }
-            const editBtn = row.querySelector('.edit-btn[data-type="group"]');
+            const editBtn = row.querySelector('.sun-editBtn[data-type="group"]');
             if (editBtn) {
                 if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyToButton) {
                     window.SUN_ACTION_LABELS.applyToButton(editBtn, 'edit', { editing: isEditing });
@@ -1005,23 +1005,23 @@ class UnifiedListManager {
         const group = window.appState.data.groups.find((g) => String(g.id) === editingId);
         if (!group) return;
 
-        const nameInput = document.getElementById(`editGroupName${editingId}`);
+        const nameInput = window.dom.byKey(`editGroupName${editingId}`);
         if (nameInput) nameInput.value = group.name;
     }
 
     /** Заголовок группы в списке после сохранения имени. */
     syncGroupListRowNormalViewFromModel(group) {
         const idStr = String(group.id);
-        const root = document.getElementById('wavesList');
+        const root = window.dom.byKey('wavesList');
         if (!root) return;
 
         let row = null;
-        root.querySelectorAll('.list-item--group').forEach((el) => {
+        root.querySelectorAll('.sun-listItemGroup').forEach((el) => {
             if (String(el.dataset.id) === idStr) row = el;
         });
         if (!row) return;
 
-        const titleEl = row.querySelector('.list-item__normal-view .list-item__title');
+        const titleEl = row.querySelector('.sun-listItemNormalView .sun-listItemTitle');
         if (titleEl) {
             titleEl.textContent = group.name;
         }
@@ -1126,10 +1126,10 @@ class UnifiedListManager {
             return;
         }
         
-        const nameInput = document.getElementById(`editDateName${dateId}`);
-        const dateInput = document.getElementById(`editDateValue${dateId}`);
-        const descriptionInput = document.getElementById(`editDateDescription${dateId}`);
-        const genderSelect = document.getElementById(`editDateGender${dateId}`);
+        const nameInput = window.dom.byKey(`editDateName${dateId}`);
+        const dateInput = window.dom.byKey(`editDateValue${dateId}`);
+        const descriptionInput = window.dom.byKey(`editDateDescription${dateId}`);
+        const genderSelect = window.dom.byKey(`editDateGender${dateId}`);
         
         if (!nameInput || !dateInput) {
             window.appState.editingDateId = null;
@@ -1190,10 +1190,10 @@ class UnifiedListManager {
             return;
         }
         
-        const newName = document.getElementById(`editWaveName${waveId}`).value.trim();
-        const newPeriod = parseFloat(document.getElementById(`editWavePeriod${waveId}`).value);
-        const newType = document.getElementById(`editWaveType${waveId}`).value;
-        const newColor = document.getElementById(`editWaveColor${waveId}`).value;
+        const newName = window.dom.byKey(`editWaveName${waveId}`).value.trim();
+        const newPeriod = parseFloat(window.dom.byKey(`editWavePeriod${waveId}`).value);
+        const newType = window.dom.byKey(`editWaveType${waveId}`).value;
+        const newColor = window.dom.byKey(`editWaveColor${waveId}`).value;
         
         if (!newName) {
             alert('Пожалуйста, введите название сигнала');
@@ -1222,23 +1222,23 @@ class UnifiedListManager {
             window.waves.wavePaths[waveId].style.stroke = newColor;
 
             const path = window.waves.wavePaths[waveId];
-            path.classList.remove('solid', 'dashed', 'dotted', 'zigzag', 'dash-dot', 'long-dash');
+            path.classList.remove('sun-solid', 'sun-dashed', 'sun-dotted', 'sun-zigzag', 'sun-dashDot', 'sun-longDash');
             if (newType !== 'solid') {
-                path.classList.add(newType);
+                path.classList.add(window.dom.getWaveStyle(newType));
             }
 
             const boldOn =
                 typeof window.waves.isBoldStrokeVisualEnabled === 'function' &&
                 window.waves.isBoldStrokeVisualEnabled() &&
                 window.appState.waveBold[waveId];
-            path.classList.toggle('bold', !!boldOn);
+            path.classList.toggle('sun-bold', !!boldOn);
         }
         if (window.waves.waveBPaths && window.waves.waveBPaths[waveId]) {
             const pathB = window.waves.waveBPaths[waveId];
             pathB.style.stroke = newColor;
-            pathB.classList.remove('solid', 'dashed', 'dotted', 'zigzag', 'dash-dot', 'long-dash');
+            pathB.classList.remove('sun-solid', 'sun-dashed', 'sun-dotted', 'sun-zigzag', 'sun-dashDot', 'sun-longDash');
             if (newType !== 'solid') {
-                pathB.classList.add(newType);
+                pathB.classList.add(window.dom.getWaveStyle(newType));
             }
         }
         
@@ -1271,7 +1271,7 @@ class UnifiedListManager {
             return;
         }
         
-        const newName = document.getElementById(`editGroupName${groupId}`)?.value.trim();
+        const newName = window.dom.byKey(`editGroupName${groupId}`)?.value.trim();
         
         if (!newName) {
             alert('Пожалуйста, введите название группы');
@@ -1297,7 +1297,7 @@ class UnifiedListManager {
             this.syncPersonGroupListEditingVisuals();
             return;
         }
-        const el = document.getElementById(`editPersonGroupName${groupId}`);
+        const el = window.dom.byKey(`editPersonGroupName${groupId}`);
         const newName = el ? el.value.trim() : '';
         if (!newName) {
             alert('Пожалуйста, введите название группы');
@@ -1338,7 +1338,7 @@ class UnifiedListManager {
 
             // ИСПРАВЛЕНИЕ: Найти превью по разным типам ID
             const waveIdStr = String(wave.id);
-            document.querySelectorAll(`.wave-color-preview-small`).forEach(preview => {
+            document.querySelectorAll(`.sun-waveColorPreviewSmall`).forEach(preview => {
                 const previewId = preview.getAttribute('data-id');
                 // Сравниваем и как строки, и как числа
                 if (String(previewId) === waveIdStr || String(previewId) === String(wave.id)) {
@@ -1369,20 +1369,20 @@ class UnifiedListManager {
     }
 
     /**
-     * Сохраняет скролл списка дат и вложенных .person-group-children до полной перерисовки EJS.
+     * Сохраняет скролл списка дат и вложенных .sun-personGroupChildren до полной перерисовки EJS.
      */
     _captureDateListScrollState() {
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) {
             return null;
         }
         const nested = [];
-        root.querySelectorAll('.list-item--person-group').forEach((row) => {
+        root.querySelectorAll('.sun-listItemPersonGroup').forEach((row) => {
             const gid = row.getAttribute('data-id');
             if (!gid) {
                 return;
             }
-            const ch = row.querySelector('.person-group-children');
+            const ch = row.querySelector('.sun-personGroupChildren');
             if (ch) {
                 nested.push({ groupId: gid, top: ch.scrollTop });
             }
@@ -1401,7 +1401,7 @@ class UnifiedListManager {
         if (!state) {
             return;
         }
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) {
             return;
         }
@@ -1409,13 +1409,13 @@ class UnifiedListManager {
             const maxRoot = Math.max(0, root.scrollHeight - root.clientHeight);
             root.scrollTop = Math.min(state.rootTop, maxRoot);
             root.scrollLeft = state.rootLeft;
-            const rows = root.querySelectorAll('.list-item--person-group');
+            const rows = root.querySelectorAll('.sun-listItemPersonGroup');
             for (let n = 0; n < state.nested.length; n++) {
                 const { groupId, top } = state.nested[n];
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
                     if (row.getAttribute('data-id') === groupId) {
-                        const ch = row.querySelector('.person-group-children');
+                        const ch = row.querySelector('.sun-personGroupChildren');
                         if (ch) {
                             const maxN = Math.max(0, ch.scrollHeight - ch.clientHeight);
                             ch.scrollTop = Math.min(top, maxN);
@@ -1443,9 +1443,9 @@ class UnifiedListManager {
         const structureUnchanged =
             this._datesListStructureSig !== null && this._datesListStructureSig === sig;
 
-        const rootProbe = document.getElementById('dateListForDates');
+        const rootProbe = window.dom.byKey('dateListForDates');
         const dateRowCount = rootProbe
-            ? rootProbe.querySelectorAll('.list-item--date[data-type="date"]').length
+            ? rootProbe.querySelectorAll('.sun-listItemDate[data-type="date"]').length
             : 0;
         const dataDatesLen = (window.appState.data.dates || []).length;
         const canPatch = this._canPatchDateListDom();
@@ -1469,11 +1469,11 @@ class UnifiedListManager {
             const scrollState = this._captureDateListScrollState();
             this.renderList('dateListForDates', allGroups, 'personGroup');
 
-            const root = document.getElementById('dateListForDates');
+            const root = window.dom.byKey('dateListForDates');
             if (
                 root &&
-                (root.querySelector('.list-item--person-group') ||
-                    (allGroups.length === 0 && root.querySelector('.list-empty')))
+                (root.querySelector('.sun-listItemPersonGroup') ||
+                    (allGroups.length === 0 && root.querySelector('.sun-listEmpty')))
             ) {
                 this._datesListStructureSig = sig;
             }
@@ -1499,7 +1499,7 @@ class UnifiedListManager {
         const end = wrd && wrd.isEnabled && wrd.isEnabled() ? wrd.t('unifiedListManager.updateWavesList', {}) : null;
         let endDetail = { skipped: true };
         try {
-            const container = document.getElementById('wavesList');
+            const container = window.dom.byKey('wavesList');
             if (!container) {
                 wrd && wrd.log('unifiedListManager.updateWavesList.skip', { reason: 'noContainer' });
                 endDetail = { skipped: true, reason: 'noContainer' };
@@ -1537,33 +1537,33 @@ class UnifiedListManager {
     }
 
     /**
-     * Чекбоксы «группа вкл», «видимость A» (.wave-visibility-check) и «видимость B» (.wave-b-visibility-check) из appState без полного EJS.
+     * Чекбоксы «группа вкл», «видимость A» (.sun-waveVisibilityCheck) и «видимость B» (.sun-waveBVisibilityCheck) из appState без полного EJS.
      * Используется при переключении шаблонов отображения (порядок десятков мс вместо сотен на длинных списках).
      * @returns {boolean} false, если контейнера списка нет
      */
     syncWavesListVisibilityFromAppState() {
-        const root = document.getElementById('wavesList');
+        const root = window.dom.byKey('wavesList');
         if (!root) {
             return false;
         }
 
-        root.querySelectorAll('.list-item--group[data-type="group"]').forEach((row) => {
+        root.querySelectorAll('.sun-listItemGroup[data-type="group"]').forEach((row) => {
             const gid = String(row.dataset.id);
             const group = (window.appState.data.groups || []).find((g) => String(g.id) === gid);
             if (!group) return;
-            const toggle = row.querySelector('.wave-group-toggle');
+            const toggle = row.querySelector('.sun-waveGroupToggle');
             if (toggle) {
                 toggle.checked = !!group.enabled;
             }
         });
 
-        root.querySelectorAll('.wave-visibility-check').forEach((cb) => {
+        root.querySelectorAll('.sun-waveVisibilityCheck').forEach((cb) => {
             const wid = String(cb.dataset.id);
             if (!wid) return;
             cb.checked = window.appState.waveVisibility[wid] !== false;
         });
 
-        root.querySelectorAll('.wave-b-visibility-check').forEach((cb) => {
+        root.querySelectorAll('.sun-waveBVisibilityCheck').forEach((cb) => {
             const wid = String(cb.dataset.id);
             if (!wid) return;
             cb.checked = window.appState.waveBold[wid] === true;
@@ -1587,12 +1587,12 @@ class UnifiedListManager {
      * Возвращает false, если разметка не совпадает с ожидаемым числом видимых групп — тогда нужен updateWavesList().
      */
     reorderGroupsInWavesListDom() {
-        const container = document.getElementById('wavesList');
+        const container = window.dom.byKey('wavesList');
         if (!container) return false;
 
         const visibleGroups = window.appState.data.groups.filter((g) => !g.hidden);
         const rows = Array.from(container.children).filter(
-            (el) => el.classList && el.classList.contains('list-item--group')
+            (el) => el.classList && el.classList.contains('sun-listItemGroup')
         );
 
         if (visibleGroups.length === 0) {
@@ -1619,7 +1619,7 @@ class UnifiedListManager {
         }
         container.appendChild(frag);
 
-        container.querySelectorAll(':scope > .list-item--group').forEach((el) => {
+        container.querySelectorAll(':scope > .sun-listItemGroup').forEach((el) => {
             const idStr = String(el.dataset.id);
             const fullIdx = window.appState.data.groups.findIndex((g) => String(g.id) === idStr);
             if (fullIdx >= 0) {
@@ -1634,7 +1634,7 @@ class UnifiedListManager {
     _findSignalGroupRow(wavesRoot, groupId) {
         const idStr = String(groupId);
         let found = null;
-        wavesRoot.querySelectorAll('.list-item--group').forEach((el) => {
+        wavesRoot.querySelectorAll('.sun-listItemGroup').forEach((el) => {
             if (String(el.dataset.type) !== 'group') return;
             if (String(el.dataset.id) === idStr) found = el;
         });
@@ -1645,7 +1645,7 @@ class UnifiedListManager {
     _findWaveRowInWavesList(wavesRoot, waveId) {
         const w = String(waveId);
         let found = null;
-        wavesRoot.querySelectorAll('.list-item--wave').forEach((el) => {
+        wavesRoot.querySelectorAll('.sun-listItemWave').forEach((el) => {
             const id = String(el.dataset.waveId != null ? el.dataset.waveId : el.dataset.id);
             if (id === w) found = el;
         });
@@ -1654,9 +1654,9 @@ class UnifiedListManager {
 
     /** Внутренний метод ensureEmptySignalGroupChildrenMessage. */
     _ensureEmptySignalGroupChildrenMessage(container) {
-        if (container.querySelector('.no-waves-message')) return;
+        if (container.querySelector('.sun-noWavesMessage')) return;
         const div = document.createElement('div');
-        div.className = 'no-waves-message';
+        div.className = 'sun-noWavesMessage';
         div.innerHTML =
             '<span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">Нет сигналов в этой группе</span>';
         container.appendChild(div);
@@ -1664,15 +1664,15 @@ class UnifiedListManager {
 
     /** Внутренний метод removeEmptyPlaceholders. */
     _removeEmptyPlaceholders(container) {
-        container.querySelectorAll(':scope > .no-waves-message').forEach((n) => n.remove());
+        container.querySelectorAll(':scope > .sun-noWavesMessage').forEach((n) => n.remove());
     }
 
     /**
-     * Синхронизировать .group-children одной группы сигналов с appState (перестановка / перенос колоска без EJS).
+     * Синхронизировать .sun-groupChildren одной группы сигналов с appState (перестановка / перенос колоска без EJS).
      * Сначала обычно вызывают для целевой группы, затем для исходной (перенос между группами).
      */
     syncOneSignalGroupChildrenDom(groupId) {
-        const wavesRoot = document.getElementById('wavesList');
+        const wavesRoot = window.dom.byKey('wavesList');
         if (!wavesRoot) return false;
 
         const group = window.appState.data.groups.find((g) => String(g.id) === String(groupId));
@@ -1681,7 +1681,7 @@ class UnifiedListManager {
         const groupEl = this._findSignalGroupRow(wavesRoot, groupId);
         if (!groupEl) return false;
 
-        const container = groupEl.querySelector('.group-children');
+        const container = groupEl.querySelector('.sun-groupChildren');
         if (!container) return false;
 
         const desired = group.waves.map(String);
@@ -1689,7 +1689,7 @@ class UnifiedListManager {
 
         for (const wid of desired) {
             let row = null;
-            Array.from(container.querySelectorAll(':scope > .list-item--wave')).forEach((el) => {
+            Array.from(container.querySelectorAll(':scope > .sun-listItemWave')).forEach((el) => {
                 const id = String(el.dataset.waveId != null ? el.dataset.waveId : el.dataset.id);
                 if (id === wid) row = el;
             });
@@ -1712,7 +1712,7 @@ class UnifiedListManager {
             this._ensureEmptySignalGroupChildrenMessage(container);
         }
 
-        Array.from(container.querySelectorAll(':scope > .list-item--wave')).forEach((row, i) => {
+        Array.from(container.querySelectorAll(':scope > .sun-listItemWave')).forEach((row, i) => {
             row.setAttribute('data-index', String(i));
         });
 
@@ -1723,7 +1723,7 @@ class UnifiedListManager {
     _findPersonGroupRow(dateRoot, personGroupId) {
         const idStr = String(personGroupId);
         let found = null;
-        dateRoot.querySelectorAll('.list-item--person-group').forEach((el) => {
+        dateRoot.querySelectorAll('.sun-listItemPersonGroup').forEach((el) => {
             if (String(el.dataset.id) === idStr) found = el;
         });
         return found;
@@ -1733,7 +1733,7 @@ class UnifiedListManager {
     _findDateRowInDateList(dateRoot, dateId) {
         const d = String(dateId);
         let found = null;
-        dateRoot.querySelectorAll('.list-item--date').forEach((el) => {
+        dateRoot.querySelectorAll('.sun-listItemDate').forEach((el) => {
             if (String(el.dataset.id) === d) found = el;
         });
         return found;
@@ -1741,9 +1741,9 @@ class UnifiedListManager {
 
     /** Внутренний метод ensureEmptyPersonGroupChildrenMessage. */
     _ensureEmptyPersonGroupChildrenMessage(container) {
-        if (container.querySelector('.no-waves-message')) return;
+        if (container.querySelector('.sun-noWavesMessage')) return;
         const div = document.createElement('div');
-        div.className = 'no-waves-message';
+        div.className = 'sun-noWavesMessage';
         div.innerHTML =
             '<span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">Нет персон в этой группе</span>';
         container.appendChild(div);
@@ -1753,12 +1753,12 @@ class UnifiedListManager {
      * Порядок групп персон в #dateListForDates по appState.data.personGroups (без EJS).
      */
     reorderPersonGroupsInDateListDom() {
-        const container = document.getElementById('dateListForDates');
+        const container = window.dom.byKey('dateListForDates');
         if (!container) return false;
 
         const pg = window.appState.data.personGroups || [];
         const rows = Array.from(container.children).filter(
-            (el) => el.classList && el.classList.contains('list-item--person-group')
+            (el) => el.classList && el.classList.contains('sun-listItemPersonGroup')
         );
 
         if (pg.length === 0) {
@@ -1785,7 +1785,7 @@ class UnifiedListManager {
         }
         container.appendChild(frag);
 
-        container.querySelectorAll(':scope > .list-item--person-group').forEach((el) => {
+        container.querySelectorAll(':scope > .sun-listItemPersonGroup').forEach((el) => {
             const idStr = String(el.dataset.id);
             const fullIdx = pg.findIndex((g) => String(g.id) === idStr);
             if (fullIdx >= 0) {
@@ -1798,7 +1798,7 @@ class UnifiedListManager {
 
     /** Синхронизирует one person group children dom. */
     syncOnePersonGroupChildrenDom(personGroupId) {
-        const dateRoot = document.getElementById('dateListForDates');
+        const dateRoot = window.dom.byKey('dateListForDates');
         if (!dateRoot) return false;
 
         const pg = (window.appState.data.personGroups || []).find((g) => String(g.id) === String(personGroupId));
@@ -1807,7 +1807,7 @@ class UnifiedListManager {
         const groupEl = this._findPersonGroupRow(dateRoot, personGroupId);
         if (!groupEl) return false;
 
-        const container = groupEl.querySelector('.person-group-children');
+        const container = groupEl.querySelector('.sun-personGroupChildren');
         if (!container) return false;
 
         const desired = pg.dates.map(String);
@@ -1815,7 +1815,7 @@ class UnifiedListManager {
 
         for (const did of desired) {
             let row = null;
-            Array.from(container.querySelectorAll(':scope > .list-item--date')).forEach((el) => {
+            Array.from(container.querySelectorAll(':scope > .sun-listItemDate')).forEach((el) => {
                 if (String(el.dataset.id) === did) row = el;
             });
             if (!row) {
@@ -1839,7 +1839,7 @@ class UnifiedListManager {
             this._ensureEmptyPersonGroupChildrenMessage(container);
         }
 
-        Array.from(container.querySelectorAll(':scope > .list-item--date')).forEach((row, i) => {
+        Array.from(container.querySelectorAll(':scope > .sun-listItemDate')).forEach((row, i) => {
             row.setAttribute('data-index', String(i));
         });
 
@@ -1850,18 +1850,18 @@ class UnifiedListManager {
     syncPersonGroupListEditingVisuals() {
         const editingId =
             window.appState.editingPersonGroupId != null ? String(window.appState.editingPersonGroupId) : null;
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) return;
 
-        root.querySelectorAll('.list-item--person-group').forEach((row) => {
+        root.querySelectorAll('.sun-listItemPersonGroup').forEach((row) => {
             const idStr = String(row.dataset.id);
             const isEditing = Boolean(editingId && idStr === editingId);
-            row.classList.toggle('list-item--editing', isEditing);
-            const handle = row.querySelector(':scope > .list-item__drag-handle');
+            row.classList.toggle('sun-listItemEditing', isEditing);
+            const handle = row.querySelector(':scope > .sun-listItemDragHandle');
             if (handle) {
                 handle.setAttribute('draggable', isEditing ? 'false' : 'true');
             }
-            const editBtn = row.querySelector('.edit-btn[data-type="personGroup"]');
+            const editBtn = row.querySelector('.sun-editBtn[data-type="personGroup"]');
             if (editBtn) {
                 if (window.SUN_ACTION_LABELS && window.SUN_ACTION_LABELS.applyToButton) {
                     window.SUN_ACTION_LABELS.applyToButton(editBtn, 'edit', { editing: isEditing });
@@ -1874,28 +1874,28 @@ class UnifiedListManager {
         const group = (window.appState.data.personGroups || []).find((g) => String(g.id) === editingId);
         if (!group) return;
 
-        const nameInput = document.getElementById(`editPersonGroupName${editingId}`);
+        const nameInput = window.dom.byKey(`editPersonGroupName${editingId}`);
         if (nameInput) nameInput.value = group.name;
     }
 
     /** Синхронизирует person group row normal view from model. */
     syncPersonGroupRowNormalViewFromModel(group) {
         const idStr = String(group.id);
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) return;
 
         let row = null;
-        root.querySelectorAll('.list-item--person-group').forEach((el) => {
+        root.querySelectorAll('.sun-listItemPersonGroup').forEach((el) => {
             if (String(el.dataset.id) === idStr) row = el;
         });
         if (!row) return;
 
-        const titleEl = row.querySelector('.list-item__normal-view .list-item__title');
+        const titleEl = row.querySelector('.sun-listItemNormalView .sun-listItemTitle');
         if (titleEl) {
             titleEl.textContent = group.name;
         }
 
-        const countEl = row.querySelector('.list-item__value .group-total-count');
+        const countEl = row.querySelector('.sun-listItemValue .sun-groupTotalCount');
         if (countEl && Array.isArray(group.dates)) {
             countEl.textContent = `Персон: ${group.dates.length}`;
         }
@@ -1903,14 +1903,14 @@ class UnifiedListManager {
 
     /** Обновить счётчики «Персон: N» у всех групп персон (после DnD без полного рендера). */
     syncAllPersonGroupDateCountsFromModel() {
-        const root = document.getElementById('dateListForDates');
+        const root = window.dom.byKey('dateListForDates');
         if (!root) return;
         const pg = window.appState.data.personGroups || [];
         for (let i = 0; i < pg.length; i++) {
             const g = pg[i];
             const row = this._findPersonGroupRow(root, g.id);
             if (!row) continue;
-            const countEl = row.querySelector('.list-item__value .group-total-count');
+            const countEl = row.querySelector('.sun-listItemValue .sun-groupTotalCount');
             if (countEl && Array.isArray(g.dates)) {
                 countEl.textContent = `Персон: ${g.dates.length}`;
             }
@@ -1929,7 +1929,7 @@ class UnifiedListManager {
             return;
         }
         
-        const groupElement = document.querySelector(`.list-item--group[data-id="${groupId}"]`);
+        const groupElement = document.querySelector(`.sun-listItemGroup[data-id="${groupId}"]`);
         if (!groupElement) {
             return;
         }
@@ -1950,19 +1950,19 @@ class UnifiedListManager {
             });
         }
         
-        const statsElement = groupElement.querySelector('.list-item__value .group-stats');
+        const statsElement = groupElement.querySelector('.sun-listItemValue .sun-groupStats');
         if (statsElement) {
             const parts = [
-                `<span class="group-stat-total" title="Отключить все слои (A и B) у всех сигналов группы">Всего: ${waveCount}</span>`
+                `<span class="sun-groupStatTotal" title="Отключить все слои (A и B) у всех сигналов группы">Всего: ${waveCount}</span>`
             ];
             if (enabledCountA > 0) {
                 parts.push(
-                    `<span class="group-stat-a" title="Отключить слой A у всех сигналов группы">Включено: ${enabledCountA}</span>`
+                    `<span class="sun-groupStatA" title="Отключить слой A у всех сигналов группы">Включено: ${enabledCountA}</span>`
                 );
             }
             if (enabledCountB > 0) {
                 parts.push(
-                    `<span class="group-stat-b" title="Отключить слой B у всех сигналов группы">Включено: ${enabledCountB}</span>`
+                    `<span class="sun-groupStatB" title="Отключить слой B у всех сигналов группы">Включено: ${enabledCountB}</span>`
                 );
             }
             statsElement.innerHTML = parts.join('');

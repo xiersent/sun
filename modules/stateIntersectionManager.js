@@ -36,7 +36,7 @@ class StateIntersectionManager {
         ];
         
         ids.forEach(id => {
-            const el = document.getElementById(id);
+            const el = window.dom.byKey(id);
             if (el) this.elements[id] = el;
         });
     }
@@ -67,7 +67,7 @@ class StateIntersectionManager {
             });
         }
         
-        const clearBtn = document.getElementById('btnClearWaveSelection');
+        const clearBtn = window.dom.byKey('btnClearWaveSelection');
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
                 this.clearSelection();
@@ -89,7 +89,7 @@ class StateIntersectionManager {
             });
         }
 
-        const railBtn = document.getElementById('btnIntersectionTimeRail');
+        const railBtn = window.dom.byKey('btnIntersectionTimeRail');
         if (railBtn) {
             railBtn.addEventListener('click', () => {
                 if (
@@ -111,7 +111,7 @@ class StateIntersectionManager {
 
     /** Вкл/выкл кнопки открытия рельса времени. */
     syncTimeRailOverlayButton() {
-        const btn = document.getElementById('btnIntersectionTimeRail');
+        const btn = window.dom.byKey('btnIntersectionTimeRail');
         if (!btn) return;
         const ok =
             this.lastIntersections &&
@@ -173,8 +173,8 @@ class StateIntersectionManager {
         const ia = this.elements.intersectionDateSelectA;
         const ib = this.elements.intersectionDateSelectB;
         if (!ia || !ib) return;
-        const ca = document.getElementById('dateCompareSelectA');
-        const cb = document.getElementById('dateCompareSelectB');
+        const ca = window.dom.byKey('dateCompareSelectA');
+        const cb = window.dom.byKey('dateCompareSelectB');
         const dcm = window.dateComparisonManager;
         if (!dcm || typeof dcm.fillCompareSelectOptions !== 'function') {
             return;
@@ -204,8 +204,8 @@ class StateIntersectionManager {
         if (this._intersectionDateMirrorSilent) return;
         const ia = this.elements.intersectionDateSelectA;
         const ib = this.elements.intersectionDateSelectB;
-        const ca = document.getElementById('dateCompareSelectA');
-        const cb = document.getElementById('dateCompareSelectB');
+        const ca = window.dom.byKey('dateCompareSelectA');
+        const cb = window.dom.byKey('dateCompareSelectB');
         const dcm = window.dateComparisonManager;
         if (!dcm || !ca || !cb) return;
         if (which === 'a' && ia) {
@@ -727,13 +727,13 @@ class StateIntersectionManager {
                     `Выбранный сигнал «<strong>${waveName}</strong>» — фаза <strong>А</strong> (${this.escapeHtml(inf.labelA)}); ` +
                     `остальные сигналы — фаза <strong>Б</strong> (${this.escapeHtml(inf.labelB)}).`;
             }
-            stats.innerHTML = `<div class="intersection-stats-content">${body}</div>`;
+            stats.innerHTML = `<div class="sun-intersectionStatsContent">${body}</div>`;
             stats.style.display = 'block';
         }
         
         if (intersections.length === 0) {
             container.innerHTML = `
-                <div class="list-empty">
+                <div class="sun-listEmpty">
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
                         <div>Нет пересечений сигнала <strong>${this.escapeHtml(selectedWave.name)}</strong> в выбранный день</div>
@@ -772,7 +772,7 @@ class StateIntersectionManager {
                 window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
                     ? window.waves.formatWaveDirectionTitle(dirAtInter)
                     : '';
-            const vizorBtnClass = useLayerB ? 'ui-btn show-on-vizor-btn intersection-vizor-b-btn' : 'ui-btn show-on-vizor-btn';
+            const vizorBtnClass = useLayerB ? 'sun-uiBtn sun-showOnVizorBtn sun-intersectionVizorBBtn' : 'sun-uiBtn sun-showOnVizorBtn';
             const vizorLabel =
                 window.dom && useLayerB
                     ? window.dom.getIntersectionVizorToggleLabelForWaveB(wave.id)
@@ -781,22 +781,22 @@ class StateIntersectionManager {
                       : 'Показать волну';
             
             return `
-                <div class="summary-item">
-                    <div class="summary-item-info">
-                        <div class="summary-item-name">
-                            <span class="summary-item-index">${index + 1}.</span>
+                <div class="sun-summaryItem">
+                    <div class="sun-summaryItemInfo">
+                        <div class="sun-summaryItemName">
+                            <span class="sun-summaryItemIndex">${index + 1}.</span>
                             <span style="color: ${wave.color || '#666'}">
                                 ${this.escapeHtml(wave.name)}
                             </span>
-                            <span class="wave-period-badge">${wave.period} дней</span>
+                            <span class="sun-wavePeriodBadge">${wave.period} дней</span>
                         </div>
-                        <div class="summary-item-details">
-                            <span class="summary-item-state">🕐 ${timeStr}</span>
-                            <span class="summary-item-difference">Состояние: ${stateAtInter.toFixed(2)} <span class="wave-direction-label" title="${this.escapeHtml(dirTitle)}">${dirLabel}</span></span>
+                        <div class="sun-summaryItemDetails">
+                            <span class="sun-summaryItemState">🕐 ${timeStr}</span>
+                            <span class="sun-summaryItemDifference">Состояние: ${stateAtInter.toFixed(2)} <span class="sun-waveDirectionLabel" title="${this.escapeHtml(dirTitle)}">${dirLabel}</span></span>
                         </div>
                     </div>
-                    <div class="summary-item-color" style="background-color: ${wave.color || '#666'}"></div>
-                    <div class="summary-item-actions">
+                    <div class="sun-summaryItemColor" style="background-color: ${wave.color || '#666'}"></div>
+                    <div class="sun-summaryItemActions">
                         <button type="button" class="${vizorBtnClass}" data-wave-id="${wave.id}">
                             ${vizorLabel}
                         </button>
@@ -808,11 +808,11 @@ class StateIntersectionManager {
         container.innerHTML = resultsHTML;
 
         queueMicrotask(() => {
-            container.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
+            container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
                 btn.replaceWith(btn.cloneNode(true));
             });
 
-            container.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
+            container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -820,9 +820,9 @@ class StateIntersectionManager {
                     const waveId = btn.dataset.waveId;
                     if (!waveId) return;
 
-                    if (btn.classList.contains('intersection-vizor-b-btn')) {
+                    if (btn.classList.contains('sun-intersectionVizorBBtn')) {
                         let bCheckbox = null;
-                        document.querySelectorAll('.wave-b-visibility-check').forEach((cb) => {
+                        document.querySelectorAll('.sun-waveBVisibilityCheck').forEach((cb) => {
                             if (String(cb.getAttribute('data-id') || '') === String(waveId)) {
                                 bCheckbox = cb;
                             }
@@ -853,11 +853,11 @@ class StateIntersectionManager {
                         }
                     } else {
                         let checkbox = null;
-                        checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+                        checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
 
                         if (!checkbox) {
                             checkbox = document.querySelector(
-                                `.group-children .wave-visibility-check[data-id="${waveId}"]`
+                                `.sun-groupChildren .sun-waveVisibilityCheck[data-id="${waveId}"]`
                             );
                         }
 
@@ -911,7 +911,7 @@ class StateIntersectionManager {
         
         if (container) {
             container.innerHTML = `
-                <div class="list-empty">
+                <div class="sun-listEmpty">
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 10px;">🎯</div>
                         <div>Выберите сигнал для анализа пересечений</div>
@@ -944,7 +944,7 @@ class StateIntersectionManager {
         
         if (container) {
             container.innerHTML = `
-                <div class="list-empty">
+                <div class="sun-listEmpty">
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
                         <div>${message || 'Нет пересечений'}</div>

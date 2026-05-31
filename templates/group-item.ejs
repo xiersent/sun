@@ -1,54 +1,54 @@
 <!-- templates/group-item.ejs -->
-<div class="list-item list-item--group <%= data.editing ? 'list-item--editing' : '' %> <%= data.expanded ? 'list-item--expanded' : '' %>"
+<div class="sun-listItem sun-listItemGroup <%= data.editing ? 'sun-listItemEditing' : '' %> <%= data.expanded ? 'sun-listItemExpanded' : '' %>"
     data-id="<%= data.id %>"
     data-type="group"
     draggable="false"
     data-index="<%= data.index %>">
     
-    <div class="list-item__drag-handle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
+    <div class="sun-listItemDragHandle" draggable="<%= !data.editing %>" title="Перетащить группу">⋮⋮</div>
     
-    <div class="list-item__content">
+    <div class="sun-listItemContent">
         <!-- Нормальный вид -->
-        <div class="list-item__normal-view">
-            <div class="list-item__row">
-                <div class="list-item__left">
-                    <div class="list-item__title-container">
-                        <input type="checkbox" class="wave-group-toggle" autocomplete="off"
+        <div class="sun-listItemNormalView">
+            <div class="sun-listItemRow">
+                <div class="sun-listItemLeft">
+                    <div class="sun-listItemTitleContainer">
+                        <input type="checkbox" class="sun-waveGroupToggle" autocomplete="off"
                                <%= data.enabled ? 'checked' : '' %> 
                                data-group-id="<%= data.id %>" 
                                title="Включить/выключить группу">
                         
-                        <div class="list-item__title">
+                        <div class="sun-listItemTitle">
                             <%= data.name %>
                         </div>
                     </div>
                 </div>
                 
-                <div class="list-item__right">
-                    <div class="list-item__value">
-                        <span class="group-stats">
-                            <span class="group-stat-total" title="Отключить все слои (A и B) у всех сигналов группы">Всего: <%= data.waveCount %></span>
+                <div class="sun-listItemRight">
+                    <div class="sun-listItemValue">
+                        <span class="sun-groupStats">
+                            <span class="sun-groupStatTotal" title="Отключить все слои (A и B) у всех сигналов группы">Всего: <%= data.waveCount %></span>
                             <% var _a = typeof data.enabledCountA !== 'undefined' ? data.enabledCountA : (data.enabledCount || 0); if (_a > 0) { %>
-                            <span class="group-stat-a" title="Отключить слой A у всех сигналов группы">Включено: <%= _a %></span>
+                            <span class="sun-groupStatA" title="Отключить слой A у всех сигналов группы">Включено: <%= _a %></span>
                             <% } %>
                             <% var _b = typeof data.enabledCountB !== 'undefined' ? data.enabledCountB : 0; if (_b > 0) { %>
-                            <span class="group-stat-b" title="Отключить слой B у всех сигналов группы">Включено: <%= _b %></span>
+                            <span class="sun-groupStatB" title="Отключить слой B у всех сигналов группы">Включено: <%= _b %></span>
                             <% } %>
                         </span>
                     </div>
-                    <div class="list-item__actions">
-                        <button type="button" class="ui-btn expand-collapse-btn" 
+                    <div class="sun-listItemActions">
+                        <button type="button" class="sun-uiBtn sun-expandCollapseBtn" 
                                 data-id="<%= data.id %>" 
                                 data-type="group"
                                 title="<%= data.expanded ? 'Свернуть' : 'Развернуть' %>"
                                 aria-label="<%= data.expanded ? 'Свернуть' : 'Развернуть' %>"
                                 aria-expanded="<%= data.expanded ? 'true' : 'false' %>"><%= data.expanded ? '▼' : '▶' %></button>
-                        <button type="button" class="ui-btn edit-btn" 
+                        <button type="button" class="sun-uiBtn sun-editBtn" 
                                 data-id="<%= data.id %>" 
                                 data-type="group"
                                 title="<%= data.editing ? 'Редактирование…' : 'Редактировать' %>"
                                 aria-label="<%= data.editing ? 'Редактирование…' : 'Редактировать' %>">✎</button>
-                        <button type="button" class="ui-btn delete-date-btn" 
+                        <button type="button" class="sun-uiBtn sun-deleteDateBtn" 
                                 data-id="<%= data.id %>" 
                                 data-type="group"
                                 title="Уничтожить"
@@ -59,22 +59,22 @@
         </div>
         
         <!-- Форма редактирования группы -->
-        <div class="list-item__edit-form">
-            <div class="list-item__edit-row">
-                <input type="text" placeholder="Название группы" class="list-item__edit-input" id="editGroupName<%= data.id %>" value="<%= data.name %>">
+        <div class="sun-listItemEditForm">
+            <div class="sun-listItem__edit-row">
+                <input type="text" placeholder="Название группы" class="sun-listItem__edit-input" id="editGroupName<%= data.id %>" value="<%= data.name %>">
             </div>
-            <div class="list-item__edit-actions">
-                <button type="button" class="save-btn ui-btn" data-id="<%= data.id %>" data-type="group" title="Сохранить" aria-label="Сохранить">💾</button>
-                <button type="button" class="cancel-btn ui-btn" data-id="<%= data.id %>" data-type="group" title="Отмена" aria-label="Отмена">↩</button>
+            <div class="sun-listItemEditActions">
+                <button type="button" class="sun-saveBtn sun-uiBtn" data-id="<%= data.id %>" data-type="group" title="Сохранить" aria-label="Сохранить">💾</button>
+                <button type="button" class="sun-cancelBtn sun-uiBtn" data-id="<%= data.id %>" data-type="group" title="Отмена" aria-label="Отмена">↩</button>
             </div>
         </div>
         
         <!-- Дочерние элементы (волны/сигналы) -->
-        <div class="group-children" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
+        <div class="sun-groupChildren" style="<%= data.expanded ? 'display: block;' : 'display: none;' %>">
             <% if (data.children && data.children.length > 0) { %>
                 <!--ZARAZA_WAVE_CHILDREN-->
             <% } else { %>
-                <div class="no-waves-message">
+                <div class="sun-noWavesMessage">
                     <span style="color: #999; font-style: italic; font-size: 11px; padding: 10px;">
                         Нет сигналов в этой группе
                     </span>

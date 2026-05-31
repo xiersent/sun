@@ -2,6 +2,106 @@
  * @file dom.js
  * Форматирование дат, пол персон, подписи кнопок визора и утилиты DOM.
  */
+
+/** Статическая разметка: классы sun-* (без id в стилях). Значения с # — только где id оставлен по a11y. */
+window.SUN_SELECTORS = {
+    warningOverlay: '.sun-warningOverlay',
+    warningBox: '.sun-warningOverlay .sun-warningBox',
+    browserInfo: '.sun-browserInfo',
+    todayInfo: '.sun-todayInfo',
+    dynamicVersionContainer: '.sun-dynamicVersionContainer',
+    colorPickerBtn: '.sun-colorPickerBtn',
+    hiddenColorPicker: '.sun-hiddenColorPicker',
+    importAllFile: '.sun-importAllFile',
+    secretSchemeWrap: '.sun-secretSchemeWrap',
+    secretSchemeSection: '.sun-secretSchemeSection',
+    secretSchemeToggle: '.sun-secretSchemeToggle',
+    secretSchemePanel: '#secretSchemePanel',
+    secretSchemeGrid: '.sun-secretSchemeGrid',
+    secretSchemeGroupSelect: '#secretSchemeGroupSelect',
+    secretSchemeAnchorSelect: '#secretSchemeAnchorSelect',
+    secretSchemeReverseSelect: '#secretSchemeReverseSelect',
+    timeBarWrap: '.sun-timeBarWrap',
+    timeBarControlsSection: '.sun-timeBarControlsSection',
+    timeBarControlsToggle: '.sun-timeBarControlsToggle',
+    timeBarControls: '#timeBarControls',
+    timeBarContainer: '.sun-timeBarContainer',
+    timeScale: '.sun-timeScale',
+    timeLabels: '.sun-timeLabels',
+    timeBarStateStack: '.sun-timeBarStateStack',
+    timeNowVline: '.sun-timeBarNowVline',
+    timeIndicator: '.sun-timeBarNowMarker',
+    tabsSection: '.sun-tabsSection',
+    summaryPanel: '.sun-summaryPanel',
+    summaryGroupSelect: '.sun-summaryGroupSelect',
+    summaryStateSelect: '.sun-summaryStateSelect',
+    includePastWaves: '.sun-includePastWaves',
+    summaryResults: '.sun-summaryResults',
+    intersectionPanel: '.sun-intersectionPanel',
+    intersectionSortSelect: '#intersectionSortSelect',
+    intersectionDateSelectA: '#intersectionDateSelectA',
+    intersectionDateSelectB: '#intersectionDateSelectB',
+    intersectionWaveSelect: '#intersectionWaveSelect',
+    btnIntersectionTimeRail: '.sun-btnIntersectionTimeRail',
+    btnClearWaveSelection: '.sun-btnClearWaveSelection',
+    intersectionStats: '.sun-intersectionStats',
+    intersectionResults: '.sun-intersectionResults',
+    dateComparePanel: '.sun-dateComparePanel',
+    dateCompareVizorHint: '.sun-dateCompareVizorHint',
+    dateCompareSelectA: '#dateCompareSelectA',
+    dateCompareSelectB: '#dateCompareSelectB',
+    dateCompareResults: '.sun-dateCompareResults',
+    btnExtremumWaveColorHighlight: '.sun-btnExtremumWaveColorHighlight',
+    btnFlipH: '.sun-btnFlipH',
+    btnFlipV: '.sun-btnFlipV',
+    btnPrevDay: '.sun-btnPrevDay',
+    currentDay: '.sun-currentDay',
+    btnNextDay: '.sun-btnNextDay',
+    btnToday: '.sun-btnToday',
+    btnNow: '.sun-btnNow',
+    mainDateInputDate: '.sun-mainDateInputDate',
+    mainDateInputTime: '.sun-mainDateInputTime',
+    btnSetDate: '.sun-btnSetDate',
+    graphContainer: '.sun-graphContainer',
+    graphElement: '.sun-graph',
+    centerDateLabel: '.sun-centerDateLabel',
+    zoomOverlay: '.sun-zoomOverlay',
+    wavesTransformLayer: '.sun-wavesTransformLayer',
+    wavesMount: '.sun-wavesMount',
+    waveLabelsContainer: '.sun-waveLabelsContainer',
+    waveLabelsVerticalContainer: '.sun-waveLabelsVerticalContainer',
+    datesPanel: '.sun-datesPanel',
+    newPersonGroupName: '.sun-newPersonGroupName',
+    btnAddPersonGroup: '.sun-btnAddPersonGroup',
+    dateInput: '.sun-dateInputPerson',
+    dateNameInput: '.sun-dateNameInput',
+    dateGenderSelect: '.sun-dateGenderSelect',
+    btnAddDate: '.sun-btnAddDate',
+    dateDescriptionInput: '.sun-dateDescriptionInput',
+    dateListForDates: '.sun-dateListForDates',
+    wavesPanel: '.sun-wavesPanel',
+    displayViewTemplatesBar: '.sun-displayViewTemplatesBar',
+    displayViewTemplateSelect: '.sun-displayViewTemplateSelect',
+    newDisplayViewTemplateName: '.sun-newDisplayViewTemplateName',
+    btnAddDisplayViewTemplate: '.sun-btnAddDisplayViewTemplate',
+    btnDeleteDisplayViewTemplate: '.sun-btnDeleteDisplayViewTemplate',
+    displayViewTemplateDescription: '.sun-displayViewTemplateDescription',
+    newGroupName: '.sun-newGroupName',
+    btnAddGroup: '.sun-btnAddGroup',
+    customWaveName: '.sun-customWaveName',
+    customWavePeriod: '.sun-customWavePeriod',
+    customWaveType: '.sun-customWaveType',
+    customWaveColor: '.sun-customWaveColor',
+    btnAddCustomWave: '.sun-btnAddCustomWave',
+    wavesList: '.sun-wavesList',
+    dbImportTextarea: '.sun-dbImportTextarea',
+    dbImportProgress: '.sun-dbImportProgress',
+    dbImportProgressBar: '.sun-dbImportProgressBar',
+    dbImportStatus: '.sun-dbImportStatus',
+    osInfoItem: '#osInfoItem',
+    archInfoItem: '#archInfoItem'
+};
+
 class DOM {
     constructor() {
         this.elements = {};
@@ -97,20 +197,42 @@ class DOM {
 		return this.getDaysBetweenDates(date1, date2);
 	}
     
-    /** Кэширует все элементы с атрибутом id. */
+    /** Кэширует узлы из SUN_SELECTORS (ключ → элемент). */
     cacheElements() {
-        document.querySelectorAll('[id]').forEach(el => {
-            this.elements[el.id] = el;
+        Object.keys(window.SUN_SELECTORS).forEach((key) => {
+            const el = this.byKey(key);
+            if (el) {
+                this.elements[key] = el;
+            }
         });
     }
-    
-    /** Возвращает закэшированный элемент по id. */
-    get(id) {
-        return this.elements[id];
+
+    /**
+     * Узел по ключу SUN_SELECTORS (.sun-*) или по id (динамические waveLabel*, osInfoItem и т.д.).
+     * @param {string} key
+     * @returns {Element|null}
+     */
+    byKey(key) {
+        const sel = window.SUN_SELECTORS[key];
+        if (sel) {
+            return document.querySelector(sel);
+        }
+        return document.getElementById(key);
+    }
+
+    /** @deprecated Используйте byKey(key). */
+    get(key) {
+        return this.elements[key] || this.byKey(key);
     }
     
     $(selector) {
         return document.querySelector(selector);
+    }
+
+    /** jQuery-обёртка по ключу SUN_SELECTORS. */
+    jq(key) {
+        const sel = window.SUN_SELECTORS[key];
+        return sel ? $(sel) : $(key);
     }
     
     $$(selector) {
@@ -192,7 +314,15 @@ class DOM {
     
     /** Возвращает тип линии волны (solid/dashed/…). */
     getWaveStyle(type) {
-        return type;
+        const map = {
+            solid: 'sun-solid',
+            dashed: 'sun-dashed',
+            dotted: 'sun-dotted',
+            zigzag: 'sun-zigzag',
+            'dash-dot': 'sun-dashDot',
+            'long-dash': 'sun-longDash'
+        };
+        return map[type] || (type && String(type).startsWith('sun-') ? type : `sun-${type}`);
     }
     
     /** Человекочитаемое описание типа линии волны. */
@@ -296,14 +426,14 @@ class DOM {
         return this.isBothWaveLayersOnVizor(waveId) ? 'Скрыть A и B' : 'Показать A и B';
     }
 
-    /** Обновляет подписи всех .show-on-vizor-btn. */
+    /** Обновляет подписи всех .sun-showOnVizorBtn. */
     refreshShowOnVizorButtonLabels() {
-        document.querySelectorAll('.show-on-vizor-btn[data-wave-id]').forEach((btn) => {
+        document.querySelectorAll('.sun-showOnVizorBtn[data-wave-id]').forEach((btn) => {
             const id = btn.dataset.waveId;
             if (!id) return;
-            if (btn.classList.contains('date-compare-vizor-btn')) {
+            if (btn.classList.contains('sun-dateCompareVizorBtn')) {
                 btn.textContent = this.getDateCompareVizorToggleLabel(id);
-            } else if (btn.classList.contains('intersection-vizor-b-btn')) {
+            } else if (btn.classList.contains('sun-intersectionVizorBBtn')) {
                 btn.textContent = this.getIntersectionVizorToggleLabelForWaveB(id);
             } else {
                 btn.textContent = this.getWaveVizorToggleButtonLabel(id);

@@ -17,7 +17,7 @@ class AppCore {
     /** Кэширует основные DOM-элементы приложения по id. */
     cacheElements() {
         const ids = [
-            'warningOverlay', 'acceptWarning', 'browserInfo', 'versionInfo', 'todayInfo',
+            'warningOverlay', 'browserInfo', 'versionInfo', 'todayInfo',
             'graphContainer', 'graphElement', 'wavesTransformLayer', 'wavesMount', 'centerDateLabel',
             'dateListForDates', 'wavesList',
             'dbImportTextarea', 'dbImportProgress', 'dbImportProgressBar',
@@ -29,7 +29,7 @@ class AppCore {
         ];
         
         ids.forEach(id => {
-            const el = document.getElementById(id);
+            const el = window.dom.byKey(id);
             if (el) this.elements[id] = el;
         });
     }
@@ -47,7 +47,7 @@ class AppCore {
             this.updateCSSVariables();
 
             if (window.appState && window.appState.graphHidden) {
-                document.body.classList.add('graph-hidden');
+                document.body.classList.add('sun-graphHidden');
             }
 
             const isMobile = this.isMobileDevice();
@@ -55,17 +55,17 @@ class AppCore {
             if (isMobile) {
                 __lp && __lp.mark('appCore_init_mobile_early_exit');
                 this._listsHydratedOnInit = false;
-                document.body.classList.add('mobile-device');
+                document.body.classList.add('sun-mobileDevice');
                 this.showMobileWarning();
                 return;
             }
 
             if (window.appState.showStars) {
-                document.body.classList.add('stars-mode');
-                document.body.classList.remove('names-mode');
+                document.body.classList.add('sun-starsMode');
+                document.body.classList.remove('sun-namesMode');
             } else {
-                document.body.classList.remove('stars-mode');
-                document.body.classList.add('names-mode');
+                document.body.classList.remove('sun-starsMode');
+                document.body.classList.add('sun-namesMode');
             }
 
             const now = new Date();
@@ -167,7 +167,7 @@ class AppCore {
     restoreCornerColor() {
         const savedColor = localStorage.getItem('corner_square_color');
         if (savedColor && savedColor !== this.defaultCornerColor) {
-            document.querySelectorAll('.corner-square').forEach(square => {
+            document.querySelectorAll('.sun-cornerSquare').forEach(square => {
                 square.style.backgroundColor = savedColor;
             });
             this.hasSelectedColor = true;
@@ -179,7 +179,7 @@ class AppCore {
     // Сбрасывает цвет квадратиков в красный
     /** Сбрасывает цвет угловых квадратиков на красный по умолчанию. */
     resetCornerColor() {
-        document.querySelectorAll('.corner-square').forEach(square => {
+        document.querySelectorAll('.sun-cornerSquare').forEach(square => {
             square.style.backgroundColor = this.defaultCornerColor;
         });
         localStorage.removeItem('corner_square_color');
@@ -189,34 +189,34 @@ class AppCore {
     // Закрывает предупреждение
     /** Закрывает оверлей предупреждения при старте. */
     closeWarning() {
-        const warningOverlay = document.getElementById('warningOverlay');
-        const warningBox = document.querySelector('.warning-box');
+        const warningOverlay = window.dom.byKey('warningOverlay');
+        const warningBox = document.querySelector('.sun-warningBox');
         if (warningOverlay && warningBox) {
-            warningOverlay.classList.remove('desktop-warning', 'mobile-warning-overlay');
-            warningOverlay.classList.add('hidden');
-            warningBox.classList.add('hidden');
+            warningOverlay.classList.remove('sun-mobileWarningOverlay');
+            warningBox.classList.remove('sun-mobileWarningBox');
+            warningOverlay.classList.add('sun-hidden');
+            warningBox.classList.add('sun-hidden');
             document.body.style.overflow = 'auto';
-            document.body.classList.remove('ui-hidden');
+            document.body.classList.remove('sun-uiHidden');
         }
     }
     
     /** Применяет классы фона graphContainer (серый режим). */
     updateGraphBackground() {
-        const graphContainer = document.getElementById('graphContainer');
+        const graphContainer = window.dom.byKey('graphContainer');
         if (graphContainer) {
-            graphContainer.classList.remove('dark-mode');
             if (window.appState.graphGrayMode) {
-                graphContainer.classList.add('graph-gray-mode');
+                graphContainer.classList.add('sun-graphGrayMode');
             } else {
-                graphContainer.classList.remove('graph-gray-mode');
+                graphContainer.classList.remove('sun-graphGrayMode');
             }
         }
     }
     
     /** Заполняет поля mainDateInputDate/Time из appState.currentDate. */
     setDateTimeInputs() {
-        const mainDateInputDate = document.getElementById('mainDateInputDate');
-        const mainDateInputTime = document.getElementById('mainDateInputTime');
+        const mainDateInputDate = window.dom.byKey('mainDateInputDate');
+        const mainDateInputTime = window.dom.byKey('mainDateInputTime');
         
         if (mainDateInputDate && mainDateInputTime && window.timeUtils) {
             const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);
@@ -242,18 +242,16 @@ class AppCore {
 
     /** Показывает десктопное предупреждение с данными окружения. */
     showDesktopWarning() {
-        const warningOverlay = document.getElementById('warningOverlay');
-        const warningBox = document.querySelector('.warning-box');
+        const warningOverlay = window.dom.byKey('warningOverlay');
+        const warningBox = document.querySelector('.sun-warningBox');
         
         if (!warningOverlay || !warningBox) return;
         
         // Всегда показываем предупреждение
-        warningOverlay.classList.remove('hidden');
-        warningOverlay.classList.add('desktop-warning');
+        warningOverlay.classList.remove('sun-hidden');
         document.body.style.overflow = 'hidden';
         
-        // Показываем плашку
-        warningBox.classList.remove('hidden');
+        warningBox.classList.remove('sun-hidden');
         
         // Заполняем информацию
         this.fillWarningInfo(warningBox);
@@ -261,29 +259,24 @@ class AppCore {
     
     /** Блокирует UI на мобильных и показывает предупреждение. */
     showMobileWarning() {
-        const warningOverlay = document.getElementById('warningOverlay');
-        const warningBox = document.querySelector('.warning-box');
+        const warningOverlay = window.dom.byKey('warningOverlay');
+        const warningBox = document.querySelector('.sun-warningBox');
         
         if (!warningOverlay || !warningBox) return;
         
-        document.querySelectorAll('.interface-container, .corner-square').forEach(el => {
+        document.querySelectorAll('.sun-interfaceContainer, .sun-cornerSquare').forEach(el => {
             el.style.display = 'none';
         });
         
-        warningOverlay.classList.add('mobile-warning-overlay');
+        warningOverlay.classList.add('sun-mobileWarningOverlay');
         document.body.style.overflow = 'hidden';
         
-        warningBox.classList.remove('hidden');
-        warningBox.classList.add('mobile-warning-box');
+        warningBox.classList.remove('sun-hidden');
+        warningBox.classList.add('sun-mobileWarningBox');
         
         this.updateMobileWarningContent(warningBox);
         
-        const acceptButtons = warningBox.querySelectorAll('[data-action="acceptWarning"]');
-        acceptButtons.forEach(btn => {
-            btn.style.display = 'none';
-        });
-        
-        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        const colorPickerBtn = window.dom.byKey('colorPickerBtn');
         if (colorPickerBtn) {
             colorPickerBtn.style.display = 'none';
         }
@@ -318,13 +311,13 @@ class AppCore {
     
     /** Заполняет блок .warning-info версиями, ОС и датой. */
     async fillWarningInfo(warningBox) {
-        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        const browserInfoEl = warningBox.querySelector('.sun-browserInfo');
         if (browserInfoEl) {
             browserInfoEl.textContent = this.getBrowserInfo();
         }
 
         const osInfoEl = document.createElement('div');
-        osInfoEl.className = 'warning-info-item';
+        osInfoEl.className = 'sun-warningInfoItem';
         osInfoEl.id = 'osInfoItem';
         
         const osTitleSpan = document.createElement('strong');
@@ -347,7 +340,7 @@ class AppCore {
         let archEl = null;
         if (archInfo) {
             archEl = document.createElement('div');
-            archEl.className = 'warning-info-item';
+            archEl.className = 'sun-warningInfoItem';
             archEl.id = 'archInfoItem';
             
             const archTitleSpan = document.createElement('strong');
@@ -366,7 +359,7 @@ class AppCore {
             archEl.appendChild(archValueSpan);
         }
 
-        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        const todayInfoEl = warningBox.querySelector('.sun-todayInfo');
         if (todayInfoEl) {
             const today = new Date();
             todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
@@ -374,10 +367,10 @@ class AppCore {
 
         const versions = await this.loadVersions();
         
-        const container = warningBox.querySelector('#dynamicVersionContainer');
+        const container = warningBox.querySelector('.sun-dynamicVersionContainer');
         if (!container) return;
 
-        const items = container.querySelectorAll('.warning-info-item');
+        const items = container.querySelectorAll('.sun-warningInfoItem');
         const todayItem = items[items.length - 1];
         const browserItem = items[0];
         
@@ -388,17 +381,17 @@ class AppCore {
         }
 
         if (browserItem && browserItem.parentNode === container) {
-            if (!document.getElementById('osInfoItem')) {
+            if (!window.dom.byKey('osInfoItem')) {
                 container.insertBefore(osInfoEl, browserItem.nextSibling);
             }
         } else if (!browserItem) {
-            if (!document.getElementById('osInfoItem')) {
+            if (!window.dom.byKey('osInfoItem')) {
                 container.insertBefore(osInfoEl, container.firstChild);
             }
         }
 
-        if (archEl && !document.getElementById('archInfoItem')) {
-            const osItem = document.getElementById('osInfoItem');
+        if (archEl && !window.dom.byKey('archInfoItem')) {
+            const osItem = window.dom.byKey('osInfoItem');
             if (osItem && osItem.parentNode === container) {
                 container.insertBefore(archEl, osItem.nextSibling);
             } else if (browserItem && browserItem.parentNode === container) {
@@ -408,7 +401,7 @@ class AppCore {
 
         versions.forEach(entry => {
             const item = document.createElement('div');
-            item.className = 'warning-info-item';
+            item.className = 'sun-warningInfoItem';
             item.dataset.versionId = entry.id;
             
             const titleSpan = document.createElement('strong');
@@ -446,18 +439,18 @@ class AppCore {
 
     /** Контент предупреждения для мобильного устройства. */
     updateMobileWarningContent(warningBox) {
-        const warningTitle = warningBox.querySelector('.warning-title');
+        const warningTitle = warningBox.querySelector('.sun-warningTitle');
         if (warningTitle) {
             warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
         }
         
-        const browserInfoEl = warningBox.querySelector('#browserInfo');
+        const browserInfoEl = warningBox.querySelector('.sun-browserInfo');
         if (browserInfoEl) {
             browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
         }
         
         const osInfoEl = document.createElement('div');
-        osInfoEl.className = 'warning-info-item';
+        osInfoEl.className = 'sun-warningInfoItem';
         
         const osTitleSpan = document.createElement('strong');
         osTitleSpan.textContent = 'Операционная система:';
@@ -474,27 +467,27 @@ class AppCore {
         osInfoEl.appendChild(osSeparatorSpan);
         osInfoEl.appendChild(osValueSpan);
         
-        const todayInfoEl = warningBox.querySelector('#todayInfo');
+        const todayInfoEl = warningBox.querySelector('.sun-todayInfo');
         if (todayInfoEl) {
             const today = new Date();
             todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
         }
         
-        const warningInfo = warningBox.querySelector('.warning-info');
+        const warningInfo = warningBox.querySelector('.sun-warningInfo');
         if (warningInfo) {
             warningInfo.style.display = 'flex';
             
-            const browserItem = warningBox.querySelector('#browserInfo')?.closest('.warning-info-item');
+            const browserItem = warningBox.querySelector('.sun-browserInfo')?.closest('.sun-warningInfoItem');
             if (browserItem) {
                 browserItem.parentNode.insertBefore(osInfoEl, browserItem.nextSibling);
             }
         }
         
         this.loadVersions().then(versions => {
-            const container = warningBox.querySelector('#dynamicVersionContainer');
+            const container = warningBox.querySelector('.sun-dynamicVersionContainer');
             if (!container) return;
             
-            const items = container.querySelectorAll('.warning-info-item');
+            const items = container.querySelectorAll('.sun-warningInfoItem');
             const todayItem = items[items.length - 1];
             const browserItem = items[0];
             
@@ -506,7 +499,7 @@ class AppCore {
             
             versions.forEach(entry => {
                 const item = document.createElement('div');
-                item.className = 'warning-info-item';
+                item.className = 'sun-warningInfoItem';
                 
                 const titleSpan = document.createElement('strong');
                 titleSpan.textContent = entry.title;
@@ -538,13 +531,13 @@ class AppCore {
     
     /** Кнопка «Проверить снова» на мобильном предупреждении. */
     addMobileRetryButton(warningBox) {
-        const oldButton = warningBox.querySelector('.mobile-retry-btn');
+        const oldButton = warningBox.querySelector('.sun-mobileRetryBtn');
         if (oldButton) {
             oldButton.remove();
         }
         
         const retryButton = document.createElement('button');
-        retryButton.className = 'ui-btn mobile-retry-btn';
+        retryButton.className = 'sun-uiBtn sun-mobileRetryBtn';
         retryButton.textContent = 'Проверить снова (если вы на компьютере)';
         retryButton.style.marginTop = '20px';
         retryButton.style.backgroundColor = '#666';
@@ -909,26 +902,26 @@ class AppCore {
     
     /** Сворачиваемая панель секретной схемы и её toggle. */
     setupSecretSchemePanel() {
-        const toggle = document.getElementById('secretSchemeToggle');
-        const panel = document.getElementById('secretSchemePanel');
+        const toggle = window.dom.byKey('secretSchemeToggle');
+        const panel = window.dom.byKey('secretSchemePanel');
         if (!toggle || !panel) {
             return;
         }
         const title =
             'Секретная схема того, как ты думаешь через меня перебирая циферки онлайна';
         const applyOpen = (open) => {
-            panel.classList.toggle('secret-scheme-panel--collapsed', !open);
+            panel.classList.toggle('sun-secretSchemePanelCollapsed', !open);
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
             if (open) {
                 toggle.textContent = 'Скрыть';
-                toggle.classList.add('active');
+                toggle.classList.add('sun-active');
             } else {
                 toggle.textContent = title;
-                toggle.classList.remove('active');
+                toggle.classList.remove('sun-active');
             }
         };
         toggle.addEventListener('click', () => {
-            const willOpen = panel.classList.contains('secret-scheme-panel--collapsed');
+            const willOpen = panel.classList.contains('sun-secretSchemePanelCollapsed');
             applyOpen(willOpen);
             if (willOpen && window.SecretScheme && typeof window.SecretScheme.init === 'function') {
                 window.SecretScheme.init();
@@ -945,7 +938,7 @@ class AppCore {
         this.setupSecretSchemePanel();
 
         // Обработчик для кнопки "Программа"
-        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        const colorPickerBtn = window.dom.byKey('colorPickerBtn');
         if (colorPickerBtn) {
             const newBtn = colorPickerBtn.cloneNode(true);
             colorPickerBtn.parentNode.replaceChild(newBtn, colorPickerBtn);
@@ -959,7 +952,7 @@ class AppCore {
                     this.closeWarning();
                 } else {
                     // Если цвет не выбран - открываем выбор цвета
-                    const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+                    const hiddenColorPicker = window.dom.byKey('hiddenColorPicker');
                     if (hiddenColorPicker) {
                         hiddenColorPicker.click();
                     }
@@ -968,7 +961,7 @@ class AppCore {
         }
         
         // Обработчик для скрытого выбора цвета
-        const hiddenColorPicker = document.getElementById('hiddenColorPicker');
+        const hiddenColorPicker = window.dom.byKey('hiddenColorPicker');
         if (hiddenColorPicker) {
             const newPicker = hiddenColorPicker.cloneNode(true);
             hiddenColorPicker.parentNode.replaceChild(newPicker, hiddenColorPicker);
@@ -977,7 +970,7 @@ class AppCore {
                 const selectedColor = e.target.value;
                 
                 // Окрашиваем все угловые квадратики в выбранный цвет
-                document.querySelectorAll('.corner-square').forEach(square => {
+                document.querySelectorAll('.sun-cornerSquare').forEach(square => {
                     square.style.backgroundColor = selectedColor;
                 });
                 
@@ -990,16 +983,6 @@ class AppCore {
                 console.log(`Квадратики окрашены в цвет: ${selectedColor}`);
             });
         }
-        
-        // Обработчик для кнопок "Согласиться и продолжить"
-        document.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target.matches('[data-action="acceptWarning"]')) {
-                this.closeWarning();
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        });
         
         // Обработчик для кнопки "Передумать" (сбрасывает цвет)
         const resetWarningBtn = document.querySelector('[data-action="resetWarning"]');
@@ -1015,24 +998,23 @@ class AppCore {
                 this.resetCornerColor();
                 
                 // Показываем предупреждение снова
-                const warningOverlay = document.getElementById('warningOverlay');
-                const warningBox = document.querySelector('.warning-box');
+                const warningOverlay = window.dom.byKey('warningOverlay');
+                const warningBox = document.querySelector('.sun-warningBox');
                 if (warningOverlay && warningBox) {
-                    warningOverlay.classList.remove('hidden');
-                    warningOverlay.classList.add('desktop-warning');
-                    warningBox.classList.remove('hidden');
+                    warningOverlay.classList.remove('sun-hidden');
+                    warningBox.classList.remove('sun-hidden');
                     document.body.style.overflow = 'hidden';
                 }
             });
         }
         
-        const btnAddCustomWave = document.getElementById('btnAddCustomWave');
+        const btnAddCustomWave = window.dom.byKey('btnAddCustomWave');
         if (btnAddCustomWave) {
             btnAddCustomWave.addEventListener('click', () => {
-                const name = document.getElementById('customWaveName').value;
-                const period = document.getElementById('customWavePeriod').value;
-                const type = document.getElementById('customWaveType').value;
-                const color = document.getElementById('customWaveColor').value;
+                const name = window.dom.byKey('customWaveName').value;
+                const period = window.dom.byKey('customWavePeriod').value;
+                const type = window.dom.byKey('customWaveType').value;
+                const color = window.dom.byKey('customWaveColor').value;
                 
                 if (name && period) {
                     if (window.waves && window.waves.addCustomWave) {
@@ -1054,14 +1036,14 @@ class AppCore {
             });
         }
         
-        const btnAddDate = document.getElementById('btnAddDate');
+        const btnAddDate = window.dom.byKey('btnAddDate');
         if (btnAddDate) {
             btnAddDate.addEventListener('click', () => {
-                const dateValue = document.getElementById('dateInput').value;
-                const name = document.getElementById('dateNameInput').value || 'Новая дата';
-                const descEl = document.getElementById('dateDescriptionInput');
+                const dateValue = window.dom.byKey('dateInput').value;
+                const name = window.dom.byKey('dateNameInput').value || 'Новая дата';
+                const descEl = window.dom.byKey('dateDescriptionInput');
                 const description = descEl ? String(descEl.value) : '';
-                const genderEl = document.getElementById('dateGenderSelect');
+                const genderEl = window.dom.byKey('dateGenderSelect');
                 const gender = genderEl ? genderEl.value : 'unset';
                 
                 if (dateValue) {
@@ -1076,10 +1058,10 @@ class AppCore {
             });
         }
 
-        const btnAddPersonGroup = document.getElementById('btnAddPersonGroup');
+        const btnAddPersonGroup = window.dom.byKey('btnAddPersonGroup');
         if (btnAddPersonGroup) {
             btnAddPersonGroup.addEventListener('click', () => {
-                const input = document.getElementById('newPersonGroupName');
+                const input = window.dom.byKey('newPersonGroupName');
                 const name = input ? input.value : '';
                 if (window.dates && window.dates.addPersonGroup) {
                     const g = window.dates.addPersonGroup(name || '');
@@ -1093,7 +1075,7 @@ class AppCore {
             });
         }
         
-        const importAllFile = document.getElementById('importAllFile');
+        const importAllFile = window.dom.byKey('importAllFile');
         
         if (importAllFile) {
             importAllFile.addEventListener('change', (e) => {

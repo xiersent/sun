@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file init.js
  * Точка входа после DOMContentLoaded: загрузка appState, создание менеджеров,
  * appCore.init, finalizeInitialization.
@@ -9,7 +9,7 @@ const __lp = typeof window !== 'undefined' ? window.__loadPerf : null;
 document.addEventListener('DOMContentLoaded', async () => {
     __lp && __lp.mark('domcontentloaded_handler_start');
 
-    const graphElement = document.getElementById('graphElement');
+    const graphElement = window.dom.byKey('graphElement');
     if (!graphElement) {
         __lp && __lp.mark('init_abort', { reason: 'no_graphElement' });
         return;
@@ -168,8 +168,8 @@ async function finalizeInitialization() {
         __lp && __lp.phaseEnd('finalize_summary');
     }
 
-    const mainDateInputDate = document.getElementById('mainDateInputDate');
-    const mainDateInputTime = document.getElementById('mainDateInputTime');
+    const mainDateInputDate = window.dom.byKey('mainDateInputDate');
+    const mainDateInputTime = window.dom.byKey('mainDateInputTime');
 
     if (mainDateInputDate && mainDateInputTime && window.timeUtils) {
         const formatted = window.timeUtils.formatForDateTimeInputs(window.appState.currentDate);

@@ -27,7 +27,7 @@ class SummaryManager {
         ];
         
         ids.forEach(id => {
-            const el = document.getElementById(id);
+            const el = window.dom.byKey(id);
             if (el) this.elements[id] = el;
         });
     }
@@ -63,7 +63,7 @@ class SummaryManager {
             });
         }
         
-        const includePastCheckbox = document.getElementById('includePastWaves');
+        const includePastCheckbox = window.dom.byKey('includePastWaves');
         if (includePastCheckbox) {
             // УСТАНАВЛИВАЕМ ОБРАБОТЧИК СОБЫТИЯ
             includePastCheckbox.addEventListener('change', (e) => {
@@ -119,7 +119,7 @@ class SummaryManager {
         // ВОССТАНАВЛИВАЕМ СОСТОЯНИЕ ЧЕКБОКСА
         if (savedIncludePast !== null) {
             this.includePastWaves = savedIncludePast === 'true';
-            const includePastCheckbox = document.getElementById('includePastWaves');
+            const includePastCheckbox = window.dom.byKey('includePastWaves');
             if (includePastCheckbox) {
                 includePastCheckbox.checked = this.includePastWaves;
             }
@@ -233,7 +233,7 @@ class SummaryManager {
 				const resultsElement = this.elements.summaryResults;
 				if (resultsElement) {
 					resultsElement.innerHTML =
-						'<div class="summary-empty">Выберите персону в списке дат — сводка по состояниям сигналов строится от выбранной даты рождения.</div>';
+						'<div class="sun-summaryEmpty">Выберите персону в списке дат — сводка по состояниям сигналов строится от выбранной даты рождения.</div>';
 				}
 				return;
 			}
@@ -366,7 +366,7 @@ class SummaryManager {
 		if (!resultsElement) return;
 		
 		if (stateWaves.length === 0) {
-			resultsElement.innerHTML = '<div class="summary-empty">Нет сигналов в выбранном состоянии</div>';
+			resultsElement.innerHTML = '<div class="sun-summaryEmpty">Нет сигналов в выбранном состоянии</div>';
 			return;
 		}
 		
@@ -385,21 +385,21 @@ class SummaryManager {
 			const pastWaveMarker = item.isPastWave ? '<span style="color: #666; font-style: italic;"> (прошедшая)</span>' : '';
 			
 			return `
-				<div class="summary-item ${closenessClass}">
-					<div class="summary-item-info">
-						<div class="summary-item-name">
-							<span class="summary-item-index">${index + 1}.</span>
+				<div class="sun-summaryItem ${closenessClass}">
+					<div class="sun-summaryItemInfo">
+						<div class="sun-summaryItemName">
+							<span class="sun-summaryItemIndex">${index + 1}.</span>
 							${item.wave.name} (${item.wave.period} дней)${pastWaveMarker}
 						</div>
-						<div class="summary-item-details">
-							<span class="summary-item-state">Состояние: ${stateValue} <span class="wave-direction-label" title="${dirTitle}">${dirLabel}</span></span>
-							<span class="summary-item-difference">Разница: ${item.difference.toFixed(2)}</span>
-							<span class="summary-item-closeness">${item.closeness}</span>
+						<div class="sun-summaryItemDetails">
+							<span class="sun-summaryItemState">Состояние: ${stateValue} <span class="sun-waveDirectionLabel" title="${dirTitle}">${dirLabel}</span></span>
+							<span class="sun-summaryItemDifference">Разница: ${item.difference.toFixed(2)}</span>
+							<span class="sun-summaryItemCloseness">${item.closeness}</span>
 						</div>
 					</div>
-					<div class="summary-item-color" style="background-color: ${item.wave.color || '#666666'}"></div>
-					<div class="summary-item-actions">
-						<button class="ui-btn show-on-vizor-btn" data-wave-id="${item.wave.id}">
+					<div class="sun-summaryItemColor" style="background-color: ${item.wave.color || '#666666'}"></div>
+					<div class="sun-summaryItemActions">
+						<button class="sun-uiBtn sun-showOnVizorBtn" data-wave-id="${item.wave.id}">
 							${window.dom ? window.dom.getWaveVizorToggleButtonLabel(item.wave.id) : 'Показать волну'}
 						</button>
 					</div>
@@ -410,11 +410,11 @@ class SummaryManager {
 		resultsElement.innerHTML = resultsHTML;
 
 		queueMicrotask(() => {
-			resultsElement.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
+			resultsElement.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
 				btn.replaceWith(btn.cloneNode(true));
 			});
 
-			resultsElement.querySelectorAll('.show-on-vizor-btn:not(.date-compare-vizor-btn)').forEach(btn => {
+			resultsElement.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
 				btn.addEventListener('click', (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -423,10 +423,10 @@ class SummaryManager {
 					if (!waveId) return;
 
 					let checkbox = null;
-					checkbox = document.querySelector(`.wave-visibility-check[data-id="${waveId}"]`);
+					checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
 
 					if (!checkbox) {
-						checkbox = document.querySelector(`.group-children .wave-visibility-check[data-id="${waveId}"]`);
+						checkbox = document.querySelector(`.sun-groupChildren .sun-waveVisibilityCheck[data-id="${waveId}"]`);
 					}
 
 					if (checkbox) {
@@ -471,11 +471,11 @@ class SummaryManager {
     
     /** Возвращает closeness class. */
     getClosenessClass(difference) {
-        if (difference < 0.001) return 'summary-item-exact';
-        if (difference < 0.1) return 'summary-item-very-close';
-        if (difference < 0.3) return 'summary-item-close';
-        if (difference < 0.5) return 'summary-item-fairly-close';
-        return 'summary-item-nearby';
+        if (difference < 0.001) return 'sun-summaryItemExact';
+        if (difference < 0.1) return 'sun-summaryItemVeryClose';
+        if (difference < 0.3) return 'sun-summaryItemClose';
+        if (difference < 0.5) return 'sun-summaryItemFairlyClose';
+        return 'sun-summaryItemNearby';
     }
     
     /** populateGroupSelect + updateSummary. */

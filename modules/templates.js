@@ -9,7 +9,7 @@ const templates = {
             templates.dateView(date);
         
         return `
-        <div class="date-item ${date.active ? 'active' : ''} ${date.editing ? 'editing' : ''}" 
+        <div class="date-item ${date.active ? 'sun-active' : ''} ${date.editing ? 'editing' : ''}" 
              data-id="${date.id}" draggable="${!date.editing}">
             ${template}
         </div>`;
@@ -20,8 +20,8 @@ const templates = {
             <div class="date-header flex items-center gap-sm">
                 <div class="drag-handle">⋮⋮</div>
                 <div class="date-name-container flex items-center gap-xs">
-                    <div class="date-name">${date.name}</div>
-                    <span class="date-star">★</span>
+                    <div class="sun-dateName">${date.name}</div>
+                    <span class="sun-dateStar">★</span>
                 </div>
             </div>
             <div class="date-info-actions flex items-center gap-sm">
@@ -39,7 +39,7 @@ const templates = {
     
     dateEditForm: (date) => `
         <div class="edit-date-form flex items-center justify-between gap-sm">
-            <input type="text" class="form-input date-name-edit" value="${date.name}" placeholder="Название">
+            <input type="text" class="form-input sun-dateNameEdit" value="${date.name}" placeholder="Название">
             <div class="date-info-actions flex items-center gap-xs">
                 <input type="date" class="form-input" value="${date.dateForInput}">
                 <div class="date-actions flex gap-xs">

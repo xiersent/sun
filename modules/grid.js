@@ -107,7 +107,7 @@ class GridManager {
         this._ensureGridContainerRefs();
         if (this.staticElementsContainer && !this.staticElementsContainer.querySelector('[data-y-level]')) {
             this.staticElementsContainer
-                .querySelectorAll('.grid-line.x, .grid-line.state-v, .labels.y-labels, .labels.state-labels')
+                .querySelectorAll('.sun-gridLine.sun-gridLineX, .sun-gridLine.sun-stateV, .sun-labels.sun-yLabels, .sun-labels.sun-stateLabels')
                 .forEach((el) => el.remove());
             if (this._isAxisSwapped()) {
                 this.createStateGridLines();
@@ -122,32 +122,32 @@ class GridManager {
         this._syncGraphAxesVisibility();
     }
 
-    /** При 90°/270° центральная горизонталь — .axis.x-axis (day-h offset 0 не рисуем). */
+    /** При 90°/270° центральная горизонталь — .sun-axis.sun-xAxis (dayH offset 0 не рисуем). */
     _syncGraphAxesVisibility() {
-        const graph = document.getElementById('graphElement');
+        const graph = window.dom.byKey('graphElement');
         if (!graph) {
             return;
         }
         const swapped = this._isAxisSwapped();
-        graph.classList.toggle('graph--axis-swapped', swapped);
-        const xAxis = graph.querySelector('.axis.x-axis');
+        graph.classList.toggle('sun-graphAxisSwapped', swapped);
+        const xAxis = graph.querySelector('.sun-axis.sun-xAxis');
         if (xAxis && !swapped) {
-            xAxis.classList.remove('active');
+            xAxis.classList.remove('sun-active');
             xAxis.style.backgroundColor = '';
         }
     }
 
-    /** При ↷/↶ линия offset 0 совпадает с фиксированной .axis.x-axis. */
+    /** При ↷/↶ линия offset 0 совпадает с фиксированной .sun-axis.sun-xAxis. */
     _isDayGridLineOnCentralAxis(offset) {
         return this._isAxisSwapped() && Number(offset) === 0;
     }
 
     _applyDayPosition(el, offset) {
         if (
-            el.classList.contains('date-labels') ||
-            el.classList.contains('weekday-label')
+            el.classList.contains('sun-dateLabels') ||
+            el.classList.contains('sun-weekdayLabel')
         ) {
-            if (el.closest('.date-row')) {
+            if (el.closest('.sun-dateRow')) {
                 return;
             }
         }
@@ -159,7 +159,7 @@ class GridManager {
         el.style.marginLeft = '';
         el.style.marginTop = '';
         if (pos.axisSwapped) {
-            if (el.classList.contains('date-row')) {
+            if (el.classList.contains('sun-dateRow')) {
                 el.style.left = '10px';
                 el.style.top = `calc(50% + ${pos.pixelPosition}px)`;
                 el.style.transform = 'translateY(-50%)';
@@ -198,7 +198,7 @@ class GridManager {
                     this._applyDayPosition(el, offset);
                 }
             });
-            this.gridContainer.querySelectorAll('.grid-wrapper[data-day-offset]').forEach((wrapper) => {
+            this.gridContainer.querySelectorAll('.sun-gridWrapper[data-day-offset]').forEach((wrapper) => {
                 const offset = parseInt(wrapper.getAttribute('data-day-offset'), 10);
                 if (!Number.isNaN(offset)) {
                     this._applyDayPosition(wrapper, offset);
@@ -212,10 +212,10 @@ class GridManager {
                     return;
                 }
                 const pos = this.calculateGridYPosition(level);
-                if (el.classList.contains('y-labels') || el.classList.contains('state-labels')) {
+                if (el.classList.contains('sun-yLabels') || el.classList.contains('sun-stateLabels')) {
                     this._applyStateLabelPosition(el, pos);
                     el.textContent = String(level);
-                } else if (el.classList.contains('grid-line')) {
+                } else if (el.classList.contains('sun-gridLine')) {
                     el.style.top = '';
                     el.style.bottom = '';
                     el.style.left = '';
@@ -266,10 +266,10 @@ class GridManager {
 
     _ensureGridContainerRefs() {
         if (!this.gridContainer || !this.gridContainer.isConnected) {
-            this.gridContainer = document.querySelector('.grid-absolute-container');
+            this.gridContainer = document.querySelector('.sun-gridAbsoluteContainer');
         }
         if (!this.staticElementsContainer || !this.staticElementsContainer.isConnected) {
-            this.staticElementsContainer = document.querySelector('.grid-static-container');
+            this.staticElementsContainer = document.querySelector('.sun-gridStaticContainer');
         }
     }
 
@@ -326,7 +326,7 @@ class GridManager {
 		const timeOffsetPx = fractionalOffset * window.appState.config.squareSize;
 		
 		this.gridContainer = document.createElement('div');
-		this.gridContainer.className = 'grid-absolute-container';
+		this.gridContainer.className = 'sun-gridAbsoluteContainer';
 		this.gridContainer.style.position = 'absolute';
 		this.gridContainer.style.width = '100%';
 		this.gridContainer.style.height = '100%';
@@ -337,7 +337,7 @@ class GridManager {
 		this.gridContainer.style.transition = 'none';
 		
 		this.staticElementsContainer = document.createElement('div');
-		this.staticElementsContainer.className = 'grid-static-container';
+		this.staticElementsContainer.className = 'sun-gridStaticContainer';
 		this.staticElementsContainer.style.position = 'absolute';
 		this.staticElementsContainer.style.width = '100%';
 		this.staticElementsContainer.style.height = '100%';
@@ -367,7 +367,7 @@ class GridManager {
 			this.createYAxisLabels();
 		}
 		
-		const graphElement = document.getElementById('graphElement');
+		const graphElement = window.dom.byKey('graphElement');
 		if (graphElement) {
 			graphElement.appendChild(this.staticElementsContainer);
 			graphElement.appendChild(this.gridContainer);
@@ -433,10 +433,10 @@ class GridManager {
         this.gridElements.forEach((el) => {
             let line = null;
             let offsetAttr = null;
-            if (el.classList && el.classList.contains('grid-wrapper')) {
-                line = el.querySelector('.grid-line-inner');
+            if (el.classList && el.classList.contains('sun-gridWrapper')) {
+                line = el.querySelector('.sun-gridLineInner');
                 offsetAttr = el.getAttribute('data-day-offset');
-            } else if (el.classList && el.classList.contains('day-h')) {
+            } else if (el.classList && el.classList.contains('sun-dayH')) {
                 line = el;
                 offsetAttr = el.getAttribute('data-day-offset');
             }
@@ -448,8 +448,8 @@ class GridManager {
                 return;
             }
             const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
-            line.classList.toggle('active', isExactlyOnLine);
-            if (line.classList.contains('has-notes')) {
+            line.classList.toggle('sun-active', isExactlyOnLine);
+            if (line.classList.contains('sun-hasNotes')) {
                 return;
             }
             if (isExactlyOnLine) {
@@ -459,19 +459,19 @@ class GridManager {
             }
         });
 
-        const graph = document.getElementById('graphElement');
-        const xAxis = graph && graph.querySelector('.axis.x-axis');
+        const graph = window.dom.byKey('graphElement');
+        const xAxis = graph && graph.querySelector('.sun-axis.sun-xAxis');
         if (!xAxis) {
             return;
         }
         if (!this._isAxisSwapped()) {
-            xAxis.classList.remove('active');
+            xAxis.classList.remove('sun-active');
             xAxis.style.backgroundColor = '';
             return;
         }
         const onCentralDayLine =
             Math.abs(fractionalPart) < 0.001 && integerPart === 0;
-        xAxis.classList.toggle('active', onCentralDayLine);
+        xAxis.classList.toggle('sun-active', onCentralDayLine);
         xAxis.style.backgroundColor = onCentralDayLine ? '' : '';
     }
     
@@ -479,7 +479,7 @@ class GridManager {
         if (!this.gridContainer) return;
         
         const wrapper = document.createElement('div');
-        wrapper.className = 'grid-wrapper';
+        wrapper.className = 'sun-gridWrapper';
         
         const positionData = this.calculateGridPosition(offset);
         
@@ -491,7 +491,7 @@ class GridManager {
         wrapper.setAttribute('data-day-offset', offset);
         
         const line = document.createElement('div');
-        line.className = 'grid-line-inner';
+        line.className = 'sun-gridLineInner';
         
         const currentDay = window.appState.currentDay || 0;
         const integerPart = Math.floor(currentDay);
@@ -500,7 +500,7 @@ class GridManager {
         const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
         
         if (isExactlyOnLine) {
-            line.classList.add('active');
+            line.classList.add('sun-active');
             line.style.backgroundColor = '#666';
         }
         
@@ -514,11 +514,11 @@ class GridManager {
             
             e.stopPropagation();
             
-            document.querySelectorAll('.grid-line-inner').forEach(line => {
-                line.classList.remove('active');
+            document.querySelectorAll('.sun-gridLineInner').forEach(line => {
+                line.classList.remove('sun-active');
             });
             
-            line.classList.add('active');
+            line.classList.add('sun-active');
             
             if (window.summaryManager && window.summaryManager.updateSummary) {
                 window.summaryManager.updateSummary();
@@ -537,16 +537,16 @@ class GridManager {
         const swapped = positionData.axisSwapped;
         
         const label = document.createElement('span');
-        label.className = 'labels date-labels';
+        label.className = 'sun-labels sun-dateLabels';
         label.textContent = date.getDate();
         
         const weekday = document.createElement('span');
-        weekday.className = 'labels x-labels weekday-label';
+        weekday.className = 'sun-labels sun-xLabels sun-weekdayLabel';
         weekday.textContent = window.dom.getWeekdayName(date);
         
         if (swapped) {
             const row = document.createElement('div');
-            row.className = 'labels date-row';
+            row.className = 'sun-labels sun-dateRow';
             row.style.position = 'absolute';
             row.style.display = 'flex';
             row.style.flexDirection = 'row';
@@ -583,7 +583,7 @@ class GridManager {
 
         const pos = this.calculateGridPosition(offset);
         const line = document.createElement('div');
-        line.className = 'grid-line day-h';
+        line.className = 'sun-gridLine sun-dayH';
         line.style.position = 'absolute';
         line.style.width = '100%';
         line.style.height = '1px';
@@ -596,7 +596,7 @@ class GridManager {
         const fractionalPart = currentDay - integerPart;
         const isExactlyOnLine = Math.abs(fractionalPart) < 0.001 && offset === integerPart;
         if (isExactlyOnLine) {
-            line.classList.add('active');
+            line.classList.add('sun-active');
             line.style.backgroundColor = '#666';
         }
 
@@ -614,7 +614,7 @@ class GridManager {
                 }
                 const pos = this.calculateGridYPosition(level);
                 const line = document.createElement('div');
-                line.className = 'grid-line state-v';
+                line.className = 'sun-gridLine sun-stateV';
                 line.style.position = 'absolute';
                 line.style.height = '100%';
                 line.style.width = '1px';
@@ -632,7 +632,7 @@ class GridManager {
         const add = (level) => {
             const pos = this.calculateGridYPosition(level);
             const el = document.createElement('div');
-            el.className = 'labels state-labels';
+            el.className = 'sun-labels sun-stateLabels';
             el.style.position = 'absolute';
             el.setAttribute('data-y-level', String(level));
             el.textContent = String(level);
@@ -657,7 +657,7 @@ class GridManager {
 			[i, -i].forEach((level) => {
 				const pos = this.calculateGridYPosition(level);
 				const line = document.createElement('div');
-				line.className = 'grid-line x';
+				line.className = 'sun-gridLine sun-gridLineX';
 				line.style.position = 'absolute';
 				line.style.width = '100%';
 				line.style.height = '1px';
@@ -675,7 +675,7 @@ class GridManager {
 		const add = (level) => {
 			const pos = this.calculateGridYPosition(level);
 			const el = document.createElement('div');
-			el.className = 'labels y-labels';
+			el.className = 'sun-labels sun-yLabels';
 			el.style.position = 'absolute';
 			el.style.left = '10px';
 			el.style.top = pos.labelTop;
@@ -693,12 +693,12 @@ class GridManager {
 	}
     
     clearGrid() {
-        const oldContainer = document.querySelector('.grid-absolute-container');
+        const oldContainer = document.querySelector('.sun-gridAbsoluteContainer');
         if (oldContainer) {
             oldContainer.remove();
         }
         
-        const oldStatic = document.querySelector('.grid-static-container');
+        const oldStatic = document.querySelector('.sun-gridStaticContainer');
         if (oldStatic) {
             oldStatic.remove();
         }
@@ -708,24 +708,24 @@ class GridManager {
         this.staticElementsContainer = null;
         this._lastGridLayoutSignature = null;
 
-        document.querySelectorAll('.labels:not(.center-date-label), .grid-line, .grid-line-inner, .grid-wrapper').forEach(el => {
+        document.querySelectorAll('.sun-labels:not(.sun-centerDateLabel), .sun-gridLine, .sun-gridLineInner, .sun-gridWrapper').forEach(el => {
             el.remove();
         });
     }
     
     updateCenterDate() {
-        const element = document.getElementById('centerDateLabel');
+        const element = window.dom.byKey('centerDateLabel');
         if (!element) return;
         
         if (!window.appState.hasActivePerson()) {
             element.innerHTML = `
-                <div class="center-date-main">
-                    <div class="center-date-datetime" style="opacity:0.85">Нет выбранной персоны</div>
-                    <div class="center-name-container">
-                        <div class="center-date-name">Выберите персону в списке дат</div>
+                <div class="sun-centerDateMain">
+                    <div class="sun-centerDateDatetime" style="opacity:0.85">Нет выбранной персоны</div>
+                    <div class="sun-centerNameContainer">
+                        <div class="sun-centerDateName">Выберите персону в списке дат</div>
                     </div>
                 </div>
-                <div class="center-date-weekday">График и расчёты недоступны</div>
+                <div class="sun-centerDateWeekday">График и расчёты недоступны</div>
             `;
             return;
         }
@@ -748,14 +748,14 @@ class GridManager {
         const name = activeDate?.name || 'Новая дата';
         
         element.innerHTML = `
-            <div class="center-date-main">
-                <div class="center-date-datetime">${dateTimeStr}</div>
-                <div class="center-name-container">
-                    <div class="center-date-name">${name}</div>
-                    <div class="center-date-star">☼</div>
+            <div class="sun-centerDateMain">
+                <div class="sun-centerDateDatetime">${dateTimeStr}</div>
+                <div class="sun-centerNameContainer">
+                    <div class="sun-centerDateName">${name}</div>
+                    <div class="sun-centerDateStar">☼</div>
                 </div>
             </div>
-            <div class="center-date-weekday">${weekday}</div>
+            <div class="sun-centerDateWeekday">${weekday}</div>
         `;
     }
     
@@ -764,10 +764,10 @@ class GridManager {
         
         this.gridElements.forEach(wrapper => {
             const offset = parseInt(wrapper.dataset.dayOffset);
-            const line = wrapper.querySelector('.grid-line-inner');
+            const line = wrapper.querySelector('.sun-gridLineInner');
             if (!line) return;
             
-            line.classList.remove('has-notes');
+            line.classList.remove('sun-hasNotes');
             
             const currentDay = window.appState.currentDay || 0;
             const integerDays = Math.floor(currentDay);
@@ -781,7 +781,7 @@ class GridManager {
             });
             
             if (notesForDate.length > 0) {
-                line.classList.add('has-notes');
+                line.classList.add('sun-hasNotes');
                 line.style.backgroundColor = '#ff0000';
             }
         });
@@ -794,7 +794,7 @@ class GridManager {
     updateDateLabels() {
         if (!this.gridContainer) return;
 
-        const dateRows = this.gridContainer.querySelectorAll('.date-row[data-day-offset]');
+        const dateRows = this.gridContainer.querySelectorAll('.sun-dateRow[data-day-offset]');
         if (dateRows.length > 0) {
             const currentDay = window.appState.currentDay || 0;
             const integerDays = Math.floor(currentDay);
@@ -805,8 +805,8 @@ class GridManager {
                 }
                 const date = new Date(window.appState.baseDate);
                 date.setDate(date.getDate() + integerDays + offset);
-                const label = row.querySelector('.date-labels');
-                const weekday = row.querySelector('.weekday-label');
+                const label = row.querySelector('.sun-dateLabels');
+                const weekday = row.querySelector('.sun-weekdayLabel');
                 if (label) {
                     label.textContent = date.getDate();
                 }
@@ -817,7 +817,7 @@ class GridManager {
             return;
         }
 
-        const dateLabels = this.gridContainer.querySelectorAll('.date-labels[data-day-offset]');
+        const dateLabels = this.gridContainer.querySelectorAll('.sun-dateLabels[data-day-offset]');
         if (dateLabels.length > 0) {
             const currentDay = window.appState.currentDay || 0;
             const integerDays = Math.floor(currentDay);
@@ -830,7 +830,7 @@ class GridManager {
                 date.setDate(date.getDate() + integerDays + offset);
                 label.textContent = date.getDate();
                 const weekday = this.gridContainer.querySelector(
-                    `.weekday-label[data-day-offset="${offset}"]`
+                    `.sun-weekdayLabel[data-day-offset="${offset}"]`
                 );
                 if (weekday) {
                     weekday.textContent = window.dom.getWeekdayName(date);
@@ -839,7 +839,7 @@ class GridManager {
             return;
         }
 
-        this.gridContainer.querySelectorAll('.date-row, .date-labels, .weekday-label').forEach((el) => el.remove());
+        this.gridContainer.querySelectorAll('.sun-dateRow, .sun-dateLabels, .sun-weekdayLabel').forEach((el) => el.remove());
 
         const { min: minOffset, max: maxOffset } = this._getDayLabelOffsetRange();
         for (let i = minOffset; i <= maxOffset; i++) {
