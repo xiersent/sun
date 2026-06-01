@@ -1083,9 +1083,6 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&uiBtn{
 		@media(min-width: 0px){padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 	}
-	&expandCollapseBtn{
-		@media(min-width: 0px){box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 25px; min-width: 25px; max-width: 25px; padding-left: 0; padding-right: 0; flex-shrink: 0;}
-	}
 	&uiBtn#{&}uiBtnToggleOff{
 		@media(min-width: 0px){opacity: 0.55;}
 	}
@@ -1115,6 +1112,11 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&editBtn{
 		@media(min-width: 0px){background-color: var(--cp); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm);}
+	}
+	&expandCollapseBtn,
+	&editBtn,
+	&deleteDateBtn{
+		@media(min-width: 0px){box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 30px; min-width: 30px; max-width: 30px; padding-left: 0; padding-right: 0; flex-shrink: 0;}
 	}
 	&deleteGroupBtn{
 		@media(min-width: 0px){background-color: var(--cp); padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm);}
