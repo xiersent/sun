@@ -887,20 +887,25 @@ class AppCore {
         return 'Неизвестно';
     }
     
-    /** Обновляет CSS-переменные --gw, --gh, --dgw, --dgh. */
+    /** Размеры графа/таймбара через #sun-runtime-layout (без CSS-переменных на DOM). */
     updateCSSVariables() {
-        document.documentElement.style.setProperty('--gsx', window.appState.config.gridSquaresX);
+        if (!window.dom || !window.dom.applySunRuntimeLayoutCss) {
+            return;
+        }
         const lw = window.appState.graphWidth;
         const lh = window.appState.config.graphHeight;
-        document.documentElement.style.setProperty('--gw', `${lw}px`);
-        document.documentElement.style.setProperty('--gh', `${lh}px`);
         const wtl = window.wavesTransformLayer;
         const dgw =
             wtl && wtl.getDisplayGraphWidth ? wtl.getDisplayGraphWidth() : lw;
         const dgh =
             wtl && wtl.getDisplayGraphHeight ? wtl.getDisplayGraphHeight() : lh;
-        document.documentElement.style.setProperty('--dgw', `${dgw}px`);
-        document.documentElement.style.setProperty('--dgh', `${dgh}px`);
+        window.dom.applySunRuntimeLayoutCss({
+            gw: `${lw}px`,
+            gh: `${lh}px`,
+            dgw: `${dgw}px`,
+            dgh: `${dgh}px`,
+            sq: `${window.appState.config.squareSize}px`
+        });
     }
     
     /** Сворачиваемая панель секретной схемы и её toggle. */

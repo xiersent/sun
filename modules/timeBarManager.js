@@ -610,7 +610,7 @@ class TimeBarManager {
 
     /** Внутренний метод applyNowIndicatorPosition. */
     _applyNowIndicatorPosition(frac) {
-        const sideW = 'var(--sun-timeBar-side-w, 72px)';
+        const sideW = '72px';
         const vlineLeft = `calc(${sideW} + (100% - ${sideW}) * ${frac})`;
         if (this.timeNowVline) {
             this.timeNowVline.style.left = vlineLeft;

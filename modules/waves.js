@@ -1328,7 +1328,7 @@ class WavesManager {
         arrow.style.zIndex = '1';
         arrow.style.transform = 'translateY(-50%)';
 
-        const edgeGap = 'var(--sun-wave-label-edge-gap, 6px)';
+        const edgeGap = '6px';
 
         if (side === 'left') {
             el.style.right = '0';
@@ -1344,8 +1344,6 @@ class WavesManager {
             arrow.style.borderColor = `transparent ${color} transparent transparent`;
         }
 
-        el.style.setProperty('--sun-waveLabel-fill', color);
-        arrow.style.setProperty('--sun-waveLabel-fill', color);
     }
 
     /** Обновляет текст, позицию и стиль вертикальной выноски времени экстремума. */
@@ -1425,7 +1423,7 @@ class WavesManager {
         arrow.style.zIndex = '1';
         arrow.style.transform = 'translateX(-50%)';
 
-        const edgeGap = 'var(--sun-wave-label-edge-gap, 6px)';
+        const edgeGap = '6px';
 
         if (band === 'top') {
             el.style.top = '';
@@ -1447,8 +1445,6 @@ class WavesManager {
             arrow.style.borderColor = `transparent transparent ${color} transparent`;
         }
 
-        el.style.setProperty('--sun-waveLabel-fill', color);
-        arrow.style.setProperty('--sun-waveLabel-fill', color);
     }
 
     /** Позиционирует DOM-точку пересечения с осью X в координатах слоя волн. */
@@ -2026,7 +2022,6 @@ class WavesManager {
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
-        labelElement.style.setProperty('--sun-waveLabel-fill', waveColor);
         if (layerKey !== 'b') {
             labelElement.style.opacity = '0.7';
         }
@@ -2124,7 +2119,6 @@ class WavesManager {
         labelElement.style.width = 'auto';
         labelElement.style.backgroundColor = waveColor;
         labelElement.style.color = textColor;
-        labelElement.style.setProperty('--sun-waveLabel-fill', waveColor);
         if (layerKey !== 'b') {
             labelElement.style.opacity = '0.7';
         }

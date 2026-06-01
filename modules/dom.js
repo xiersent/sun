@@ -498,3 +498,83 @@ window.SUN_ACTION_LABELS.applyExpandButton = function applyExpandButton(btn, exp
 };
 
 window.dom = new DOM();
+
+const SUN_LAYOUT_LEGACY_VAR_NAMES = [
+    '--gsx',
+    '--gw',
+    '--gh',
+    '--dgw',
+    '--dgh',
+    '--sun-waveLabel-fill',
+    '--time-now-frac',
+    '--time-row-frac',
+    '--time-bar-side-w',
+    '--time-bar-now-row-h',
+    '--time-bar-now-line-anchor',
+    '--secret-scheme-cell-bg-opacity',
+    '--sun-wave-label-edge-gap',
+    '--cross-bar-half',
+    '--cross-window-half'
+];
+
+/** Снимает legacy custom properties с узлов разметки. */
+window.dom.clearSunLayoutVarsFromMarkup = function clearSunLayoutVarsFromMarkup() {
+    const nodes = [
+        document.documentElement,
+        document.body,
+        document.querySelector('.sun-app'),
+        document.querySelector('.sun-graphViewport'),
+        document.querySelector('.sun-graphContainer')
+    ];
+    nodes.forEach((node) => {
+        if (!node) {
+            return;
+        }
+        SUN_LAYOUT_LEGACY_VAR_NAMES.forEach((name) => {
+            node.style.removeProperty(name);
+        });
+    });
+};
+
+/** <style id="sun-runtime-layout"> — размеры графа без CSS-переменных на DOM. */
+window.dom.ensureSunRuntimeLayoutStyle = function ensureSunRuntimeLayoutStyle() {
+    let node = document.getElementById('sun-runtime-layout');
+    if (!node) {
+        node = document.createElement('style');
+        node.id = 'sun-runtime-layout';
+        document.head.appendChild(node);
+    }
+    return node;
+};
+
+/** Прямые width/height на классах (не :root, не custom properties). */
+window.dom.applySunRuntimeLayoutCss = function applySunRuntimeLayoutCss(vars) {
+    window.dom.clearSunLayoutVarsFromMarkup();
+    const sheet = window.dom.ensureSunRuntimeLayoutStyle();
+    const gw = vars.gw || '1200px';
+    const gh = vars.gh || '500px';
+    const dgw = vars.dgw || gw;
+    const dgh = vars.dgh || gh;
+    const rules = [
+        `.sun-timeBarWrap,
+.sun-timeBarContainer {
+  width: ${gw};
+}`,
+        `.sun-secretSchemeWrap {
+  width: ${gw};
+}`,
+        `.sun-graphViewport {
+  width: ${dgw};
+}`,
+        `.sun-graphContainer {
+  width: ${dgw};
+  height: ${dgh};
+}`
+    ];
+    if (vars.sq != null) {
+        rules.push(`.sun-gridWrapper {
+  width: ${vars.sq};
+}`);
+    }
+    sheet.textContent = rules.join('\n');
+};

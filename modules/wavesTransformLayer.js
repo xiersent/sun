@@ -250,8 +250,9 @@ class WavesTransformLayerManager {
         if (typeof document === 'undefined') {
             return;
         }
-        document.documentElement.style.setProperty('--dgw', `${this.getDisplayGraphWidth()}px`);
-        document.documentElement.style.setProperty('--dgh', `${this.getDisplayGraphHeight()}px`);
+        if (window.appCore && typeof window.appCore.updateCSSVariables === 'function') {
+            window.appCore.updateCSSVariables();
+        }
     }
 
     /** Смещение линии дня для сетки с учётом flipH. */

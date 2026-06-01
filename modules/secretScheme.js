@@ -164,13 +164,7 @@ const SecretScheme = {
 
     /** Внутренний метод cellBgOpacity. */
     _cellBgOpacity() {
-        const board = window.dom.byKey('secretSchemeGrid');
-        const root = board || document.documentElement;
-        const raw = getComputedStyle(root)
-            .getPropertyValue('--secret-scheme-cell-bg-opacity')
-            .trim();
-        const n = parseFloat(raw);
-        return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0.55;
+        return 0.55;
     },
 
     /** Внутренний метод parseHexColor. */
@@ -215,7 +209,7 @@ const SecretScheme = {
     _textColorForBg(hex) {
         const rgb = this._parseHexColor(hex);
         if (!rgb) {
-            return 'var(--text-color)';
+            return '#333333';
         }
         const lum =
             (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
