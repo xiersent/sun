@@ -758,22 +758,6 @@ class TimeBarManager {
 		}
 	}
     
-    /** Подсветка текущего часа на timeScale. */
-    highlightActiveHour(hour) {
-        document.querySelectorAll('.sun-hourMarker.sun-active').forEach(marker => {
-            marker.classList.remove('sun-active');
-            const lab = marker.querySelector('.sun-hourLabel');
-            if (lab) lab.classList.remove('sun-hourLabelActive');
-        });
-        
-        const markers = document.querySelectorAll('.sun-hourMarker');
-        if (markers[hour]) {
-            markers[hour].classList.add('sun-active');
-            const lab = markers[hour].querySelector('.sun-hourLabel');
-            if (lab) lab.classList.add('sun-hourLabelActive');
-        }
-    }
-    
     /** Позиция индикатора по appState.currentDate. */
     updateTimeIndicator() {
         if (!this.timeIndicator || !this.indicatorLabel) return;
@@ -809,8 +793,6 @@ class TimeBarManager {
         const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:${currentSecond.toString().padStart(2, '0')}`;
         this.indicatorLabel.textContent = timeString;
         this.timeIndicator.title = `Текущее время: ${timeString}`;
-        
-        this.highlightActiveHour(currentHour);
     }
     
     /** Проверяет: is current date today. */

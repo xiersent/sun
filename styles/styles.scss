@@ -419,15 +419,6 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&hourMarker:hover{
 		@media(min-width: 0px){background-color: rgba(0, 0, 0, 0.05);}
 	}
-	&hourMarker.sun-active{
-		@media(min-width: 0px){background-color: #e6f2ff;}
-	}
-	&hourMarker.sun-active:hover{
-		@media(min-width: 0px){background-color: #dcecff;}
-	}
-	&hourMarker.sun-active #{&}hourLabel{
-		@media(min-width: 0px){color: var(--cp); font-weight: 600;}
-	}
 	&hourLabel{
 		@media(min-width: 0px){position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: var(--font-size-xs); color: var(--text-secondary); white-space: nowrap; font-weight: 400; font-family: var(--font-family);}
 	}
@@ -1092,6 +1083,9 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	&uiBtn{
 		@media(min-width: 0px){padding: var(--spacing-xs) var(--spacing-sm); background-color: var(--cp); color: #fff; border: none; cursor: pointer; font-size: var(--font-size-sm); height: 25px;}
 	}
+	&expandCollapseBtn{
+		@media(min-width: 0px){box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 25px; min-width: 25px; max-width: 25px; padding-left: 0; padding-right: 0; flex-shrink: 0;}
+	}
 	&uiBtn#{&}uiBtnToggleOff{
 		@media(min-width: 0px){opacity: 0.55;}
 	}
@@ -1180,7 +1174,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){padding: 3px 5px; border: 1px solid var(--clg); font-size: var(--font-size-sm);}
 	}
 	&addGroupInput{
-		@media(min-width: 0px){padding: 3px 5px; border: 1px solid var(--clg); font-size: var(--font-size-sm);}
+		@media(min-width: 0px){border: 1px solid var(--clg); font-size: var(--font-size-sm);}
 	}
 	&dateInput{
 		@media(min-width: 0px){flex: 0; width: 100%; height: 25px; box-sizing: border-box; overflow: visible;}
@@ -1381,7 +1375,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){filter: none;}
 	}
 	&waveLabelsContainer{
-		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible;}
+		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible; --sun-wave-label-edge-gap: calc(var(--spacing-xs) + 1px);}
 	}
 	&waveLabelsContainer #{&}waveLabelsSide{
 		@media(min-width: 0px){position: absolute; top: 0; height: 100%; width: 200px;}
@@ -1393,7 +1387,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){right: -200px; text-align: left;}
 	}
 	&waveLabelsVerticalContainer{
-		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible;}
+		@media(min-width: 0px){position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: visible; --sun-wave-label-edge-gap: calc(var(--spacing-xs) + 1px);}
 	}
 	&waveLabelsVerticalContainer #{&}waveLabelsSide{
 		@media(min-width: 0px){position: absolute; width: 100%; height: 30px;}
@@ -1432,19 +1426,19 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){transform: translateY(-50%); height: 20px;}
 	}
 	&waveLabelsLeft #{&}waveLabel{
-		@media(min-width: 0px){flex-direction: row-reverse; right: 0; margin-right: 10px;}
+		@media(min-width: 0px){flex-direction: row-reverse; right: 0; margin-right: var(--sun-wave-label-edge-gap, var(--spacing-xs));}
 	}
 	&waveLabelsRight #{&}waveLabel{
-		@media(min-width: 0px){flex-direction: row; left: 0; margin-left: 10px;}
+		@media(min-width: 0px){flex-direction: row; left: 0; margin-left: var(--sun-wave-label-edge-gap, var(--spacing-xs));}
 	}
 	&waveLabelsVerticalContainer #{&}waveLabel#{&}vertical{
 		@media(min-width: 0px){transform: translateX(-50%); height: 20px;}
 	}
 	&waveLabelsTop #{&}waveLabel{
-		@media(min-width: 0px){top: 0; margin-top: 5px;}
+		@media(min-width: 0px){top: auto; bottom: 0; margin-top: 0; margin-bottom: var(--sun-wave-label-edge-gap, var(--spacing-xs));}
 	}
 	&waveLabelsBottom #{&}waveLabel{
-		@media(min-width: 0px){bottom: 0; margin-bottom: 5px;}
+		@media(min-width: 0px){bottom: auto; top: 0; margin-bottom: 0; margin-top: var(--sun-wave-label-edge-gap, var(--spacing-xs));}
 	}
 	&waveLabelText{
 		@media(min-width: 0px){white-space: nowrap; font-weight: 400; font-size: 11px; position: relative; z-index: 2;}
@@ -2001,7 +1995,7 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){flex: 2; min-width: 0;}
 	}
 	&addGroupFormMb{
-		@media(min-width: 0px){margin-bottom: var(--spacing-sm);}
+		@media(min-width: 0px){margin-bottom: var(--spacing-xs);}
 	}
 	&uHidden{
 		@media(min-width: 0px){display: none !important;}
@@ -2497,10 +2491,10 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 		@media(min-width: 0px){opacity: 1; z-index: 10;}
 	}
 	&waveLabel#{&}horizontal#{&}left{
-		@media(min-width: 0px){right: 0; margin-right: var(--spacing-sm);}
+		@media(min-width: 0px){right: 0; margin-right: var(--sun-wave-label-edge-gap, var(--spacing-xs));}
 	}
 	&waveLabel#{&}horizontal#{&}right{
-		@media(min-width: 0px){left: 0; margin-left: var(--spacing-sm);}
+		@media(min-width: 0px){left: 0; margin-left: var(--sun-wave-label-edge-gap, var(--spacing-xs));}
 	}
 	&waveLabelArrow{
 		@media(min-width: 0px){position: absolute; width: 0; height: 0; border-style: solid; z-index: 1;}
@@ -2587,9 +2581,6 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 	}
 	&groupChildrenOpen{
 		@media(min-width: 0px){display: block;}
-	}
-	&hourLabelActive{
-		@media(min-width: 0px){color: var(--cp); font-weight: 600;}
 	}
 	&hourLabelInTimeBar{
 		@media(min-width: 0px){font-size: 10px;}
@@ -2957,13 +2948,4 @@ textarea{padding: var(--spacing-sm); border: 1px solid var(--clg); font-family: 
 .sun-hourMarker.sun-midnight .sun-hourLabel{
 	color: var(--danger-color);
 	font-weight: 700;
-}
-.sun-hourMarker.active,
-.sun-hourMarker.sun-active{
-	background-color: #e6f2ff;
-}
-.sun-hourMarker.active .sun-hourLabel,
-.sun-hourMarker.sun-active .sun-hourLabel{
-	color: var(--cp);
-	font-weight: 600;
 }

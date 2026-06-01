@@ -1328,15 +1328,17 @@ class WavesManager {
         arrow.style.zIndex = '1';
         arrow.style.transform = 'translateY(-50%)';
 
+        const edgeGap = 'var(--sun-wave-label-edge-gap, 6px)';
+
         if (side === 'left') {
             el.style.right = '0';
-            el.style.marginRight = '10px';
+            el.style.marginRight = edgeGap;
             arrow.style.right = '-6px';
             arrow.style.borderWidth = '4px 0 4px 6px';
             arrow.style.borderColor = `transparent transparent transparent ${color}`;
         } else {
             el.style.left = '0';
-            el.style.marginLeft = '10px';
+            el.style.marginLeft = edgeGap;
             arrow.style.left = '-6px';
             arrow.style.borderWidth = '4px 6px 4px 0';
             arrow.style.borderColor = `transparent ${color} transparent transparent`;
@@ -1423,16 +1425,22 @@ class WavesManager {
         arrow.style.zIndex = '1';
         arrow.style.transform = 'translateX(-50%)';
 
+        const edgeGap = 'var(--sun-wave-label-edge-gap, 6px)';
+
         if (band === 'top') {
-            el.style.top = '0';
-            el.style.marginTop = '5px';
+            el.style.top = '';
+            el.style.marginTop = '';
+            el.style.bottom = '0';
+            el.style.marginBottom = edgeGap;
             arrow.style.top = '';
             arrow.style.bottom = '-6px';
             arrow.style.borderWidth = '6px 4px 0 4px';
             arrow.style.borderColor = `${color} transparent transparent transparent`;
         } else {
-            el.style.bottom = '0';
-            el.style.marginBottom = '5px';
+            el.style.top = '0';
+            el.style.marginTop = edgeGap;
+            el.style.bottom = '';
+            el.style.marginBottom = '';
             arrow.style.top = '-6px';
             arrow.style.bottom = '';
             arrow.style.borderWidth = '0 4px 6px 4px';

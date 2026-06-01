@@ -489,7 +489,6 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed {
-    width: -moz-fit-content;
     width: fit-content;
     max-width: 100%;
   }
@@ -525,9 +524,7 @@ textarea {
     flex-direction: column;
     gap: 6px;
     font-size: 11px;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
   }
 }
 @media (min-width: 0px) {
@@ -580,9 +577,7 @@ textarea {
     background-color: #fff;
     outline: 1px solid var(--clg);
     position: relative;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     margin: 0;
   }
 }
@@ -594,9 +589,7 @@ textarea {
     background-color: #fff;
     outline: 1px solid var(--clg);
     position: relative;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     margin: var(--spacing-md) 0;
   }
 }
@@ -954,22 +947,6 @@ textarea {
 @media (min-width: 0px) {
   .sun-hourMarker:hover {
     background-color: rgba(0, 0, 0, 0.05);
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourMarker.sun-active {
-    background-color: #e6f2ff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourMarker.sun-active:hover {
-    background-color: #dcecff;
-  }
-}
-@media (min-width: 0px) {
-  .sun-hourMarker.sun-active .sun-hourLabel {
-    color: var(--cp);
-    font-weight: 600;
   }
 }
 @media (min-width: 0px) {
@@ -1524,9 +1501,7 @@ textarea {
     color: #999;
     padding: 2px;
     flex-shrink: 0;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
   }
 }
 @media (min-width: 0px) {
@@ -1694,8 +1669,7 @@ textarea {
     padding: 2px 4px;
     font-size: var(--font-size-sm);
     text-align: center;
-    -moz-text-align-last: center;
-         text-align-last: center;
+    text-align-last: center;
   }
 }
 @media (min-width: 0px) {
@@ -1835,8 +1809,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-listItemWave .sun-waveVisibilityCheck, .sun-listItemWave .sun-waveBVisibilityCheck, .sun-listItemWave .sun-waveCornerColorCheck {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -1857,8 +1830,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-listItemDate .sun-dateCheckbox {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2300,9 +2272,7 @@ textarea {
     cursor: move;
     padding: 2px;
     flex-shrink: 0;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     margin-right: 4px;
   }
 }
@@ -2403,9 +2373,7 @@ textarea {
     cursor: move;
     padding: 2px;
     flex-shrink: 0;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     margin-right: 4px;
   }
 }
@@ -2423,8 +2391,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-dateCheckbox {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2439,8 +2406,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveGroupToggle {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2455,8 +2421,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveVisibilityCheck {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2471,8 +2436,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveBVisibilityCheck {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2487,8 +2451,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveCornerColorCheck {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2503,8 +2466,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-timeBarStateCheck {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2519,8 +2481,7 @@ textarea {
 @media (min-width: 0px) {
   .sun-timeBarGroupCheck {
     -webkit-appearance: none;
-    -moz-appearance: none;
-         appearance: none;
+    appearance: none;
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2649,6 +2610,20 @@ textarea {
     cursor: pointer;
     font-size: var(--font-size-sm);
     height: 25px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-expandCollapseBtn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    min-width: 25px;
+    max-width: 25px;
+    padding-left: 0;
+    padding-right: 0;
+    flex-shrink: 0;
   }
 }
 @media (min-width: 0px) {
@@ -2858,7 +2833,6 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-addGroupInput {
-    padding: 3px 5px;
     border: 1px solid var(--clg);
     font-size: var(--font-size-sm);
   }
@@ -2976,9 +2950,7 @@ textarea {
     color: var(--text-secondary);
     z-index: 8;
     pointer-events: none;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
   }
 }
 @media (min-width: 0px) {
@@ -3132,7 +3104,6 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-secretSchemeSection .sun-tabButtons.sun-tabButtonsFramed {
-    width: -moz-fit-content;
     width: fit-content;
     max-width: 100%;
   }
@@ -3420,6 +3391,7 @@ textarea {
     pointer-events: none;
     z-index: 10;
     overflow: visible;
+    --sun-wave-label-edge-gap: calc(var(--spacing-xs) + 1px);
   }
 }
 @media (min-width: 0px) {
@@ -3452,6 +3424,7 @@ textarea {
     pointer-events: none;
     z-index: 10;
     overflow: visible;
+    --sun-wave-label-edge-gap: calc(var(--spacing-xs) + 1px);
   }
 }
 @media (min-width: 0px) {
@@ -3524,7 +3497,6 @@ textarea {
     position: absolute;
     display: inline-flex;
     align-items: center;
-    width: -moz-max-content;
     width: max-content;
     max-width: 100%;
     box-sizing: border-box;
@@ -3557,14 +3529,14 @@ textarea {
   .sun-waveLabelsLeft .sun-waveLabel {
     flex-direction: row-reverse;
     right: 0;
-    margin-right: 10px;
+    margin-right: var(--sun-wave-label-edge-gap, var(--spacing-xs));
   }
 }
 @media (min-width: 0px) {
   .sun-waveLabelsRight .sun-waveLabel {
     flex-direction: row;
     left: 0;
-    margin-left: 10px;
+    margin-left: var(--sun-wave-label-edge-gap, var(--spacing-xs));
   }
 }
 @media (min-width: 0px) {
@@ -3575,14 +3547,18 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-waveLabelsTop .sun-waveLabel {
-    top: 0;
-    margin-top: 5px;
+    top: auto;
+    bottom: 0;
+    margin-top: 0;
+    margin-bottom: var(--sun-wave-label-edge-gap, var(--spacing-xs));
   }
 }
 @media (min-width: 0px) {
   .sun-waveLabelsBottom .sun-waveLabel {
-    bottom: 0;
-    margin-bottom: 5px;
+    bottom: auto;
+    top: 0;
+    margin-bottom: 0;
+    margin-top: var(--sun-wave-label-edge-gap, var(--spacing-xs));
   }
 }
 @media (min-width: 0px) {
@@ -3887,9 +3863,7 @@ textarea {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     background: rgba(255, 255, 255, 0.9);
     padding: var(--spacing-xs) var(--spacing-sm);
     z-index: 20;
@@ -4914,9 +4888,7 @@ textarea {
     width: 100px;
     font-weight: 400;
     flex-shrink: 0;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     white-space: nowrap;
   }
 }
@@ -4959,7 +4931,7 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-addGroupFormMb {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
   }
 }
 @media (min-width: 0px) {
@@ -5099,8 +5071,7 @@ textarea {
     padding: 2px 4px;
     font-size: var(--font-size-sm);
     text-align: center;
-    -moz-text-align-last: center;
-         text-align-last: center;
+    text-align-last: center;
   }
 }
 @media (min-width: 0px) {
@@ -6317,13 +6288,13 @@ textarea {
 @media (min-width: 0px) {
   .sun-waveLabel.sun-horizontal.sun-left {
     right: 0;
-    margin-right: var(--spacing-sm);
+    margin-right: var(--sun-wave-label-edge-gap, var(--spacing-xs));
   }
 }
 @media (min-width: 0px) {
   .sun-waveLabel.sun-horizontal.sun-right {
     left: 0;
-    margin-left: var(--spacing-sm);
+    margin-left: var(--sun-wave-label-edge-gap, var(--spacing-xs));
   }
 }
 @media (min-width: 0px) {
@@ -6523,12 +6494,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-hourLabelActive {
-    color: var(--cp);
-    font-weight: 600;
-  }
-}
-@media (min-width: 0px) {
   .sun-hourLabelInTimeBar {
     font-size: 10px;
   }
@@ -6698,9 +6663,7 @@ textarea {
     background-color: #fff;
     outline: 1px solid var(--clg);
     position: relative;
-    -webkit-user-select: none;
-       -moz-user-select: none;
-            user-select: none;
+    user-select: none;
     margin: 0;
   }
 }
@@ -7291,14 +7254,3 @@ textarea {
   color: var(--danger-color);
   font-weight: 700;
 }
-
-.sun-hourMarker.active,
-.sun-hourMarker.sun-active {
-  background-color: #e6f2ff;
-}
-
-.sun-hourMarker.active .sun-hourLabel,
-.sun-hourMarker.sun-active .sun-hourLabel {
-  color: var(--cp);
-  font-weight: 600;
-}/*# sourceMappingURL=styles.css.map */
