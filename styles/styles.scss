@@ -615,6 +615,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&tabButtons#{&}tabButtonsFramed #{&}tabButton:hover:not(.sun-active){
 		@media(min-width: 0px){background: #e5e5e5;}
 	}
+	&tabNewMark{
+		@media(min-width: 0px){color: #{$danger-color}; font-size: 0.9em; margin-left: 4px; font-weight: 400;}
+	}
+	&tabButton.sun-active #{&}tabNewMark{
+		@media(min-width: 0px){color: #ffe082;}
+	}
 	&tabContent{
 		@media(min-width: 0px){display: none; background: #fff; border: 1px solid #{$clg}; padding: #{$spacing-md};}
 	}
