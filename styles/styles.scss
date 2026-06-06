@@ -2406,10 +2406,10 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){flex: 2 1 180px;}
 	}
 	&stateSearchConditionPerson{
-		@media(min-width: 0px){flex: 0 0 auto; min-width: 56px; max-width: 72px;}
+		@media(min-width: 0px){flex: 1 1 140px; min-width: 110px; max-width: 220px;}
 	}
 	&stateSearchConditionPerson #{&}summarySelect{
-		@media(min-width: 0px){min-width: 52px; padding-left: 4px; padding-right: 4px;}
+		@media(min-width: 0px){min-width: 110px; max-width: 100%; padding-left: 4px; padding-right: 4px;}
 	}
 	&stateSearchRemoveCondition{
 		@media(min-width: 0px){flex-shrink: 0; align-self: flex-end; min-width: 28px; padding: 5px 8px;}

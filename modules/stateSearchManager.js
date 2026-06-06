@@ -341,14 +341,67 @@ class StateSearchManager {
         return this._getPersonBirthMs(personLayer) != null;
     }
 
+    _getPersonDateId(personLayer) {
+        if (!window.appState) {
+            return null;
+        }
+        const layer = this._normalizePersonLayer(personLayer);
+        if (layer === 'a') {
+            const active = window.appState.activeDateId;
+            if (active != null && String(active) !== '') {
+                return String(active);
+            }
+            const ds = window.appState.dateSelections;
+            if (ds && ds.typeA != null && String(ds.typeA) !== '') {
+                return String(ds.typeA);
+            }
+            return null;
+        }
+        const ds = window.appState.dateSelections;
+        if (!ds || ds.typeB == null || String(ds.typeB) === '') {
+            return null;
+        }
+        const idB = String(ds.typeB);
+        const idA =
+            window.appState.activeDateId != null && String(window.appState.activeDateId) !== ''
+                ? String(window.appState.activeDateId)
+                : '';
+        if (idB === idA) {
+            return null;
+        }
+        return idB;
+    }
+
+    _getPersonDisplayName(personLayer) {
+        const id = this._getPersonDateId(personLayer);
+        if (!id) {
+            return '';
+        }
+        const dates = window.appState.data && window.appState.data.dates;
+        if (!dates) {
+            return '';
+        }
+        const person = dates.find((d) => String(d.id) === id);
+        if (!person) {
+            return '';
+        }
+        return person.name || 'Без названия';
+    }
+
+    _getPersonSelectLabel(personLayer) {
+        const letter = this._normalizePersonLayer(personLayer) === 'b' ? 'B' : 'A';
+        const name = this._getPersonDisplayName(personLayer);
+        return name ? `${letter} · ${name}` : letter;
+    }
+
     _buildPersonSelectOptions(selectedLayer) {
         const layer = this._normalizePersonLayer(selectedLayer);
         const bAvailable = this._isPersonLayerAvailable('b');
         const opts = [
-            { value: 'a', label: 'A' },
+            { value: 'a', label: this._getPersonSelectLabel('a') },
             {
                 value: 'b',
-                label: 'B',
+                label: this._getPersonSelectLabel('b'),
                 disabled: !bAvailable && layer !== 'b'
             }
         ];
@@ -361,8 +414,10 @@ class StateSearchManager {
                         ? ' title="Выберите дату B"'
                         : o.value === 'b' && !bAvailable && layer === 'b'
                           ? ' title="Дата B не выбрана — поиск не выполнится"'
-                          : '';
-                return `<option value="${o.value}"${sel}${dis}${title}>${o.label}</option>`;
+                          : o.label !== (o.value === 'b' ? 'B' : 'A')
+                            ? ` title="${this._escapeHtml(o.label)}"`
+                            : '';
+                return `<option value="${o.value}"${sel}${dis}${title}>${this._escapeHtml(o.label)}</option>`;
             })
             .join('');
     }
