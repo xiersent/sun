@@ -35,6 +35,13 @@ class DataManager {
     constructor() {
         this.elements = window.appCore ? window.appCore.elements : {};
     }
+
+    /** Обновить подписи A/B во вкладке «Поиск состояний». */
+    refreshStateSearchPersonSelects() {
+        if (window.stateSearchManager && typeof window.stateSearchManager.refreshPersonSelects === 'function') {
+            window.stateSearchManager.refreshPersonSelects();
+        }
+    }
     
     /** Полная перерисовка списка персон и синхронизация A/B. */
     async updateDateList() {
@@ -122,9 +129,6 @@ class DataManager {
         }
         if (window.dateComparisonManager && window.dateComparisonManager.debouncedUpdate) {
             window.dateComparisonManager.debouncedUpdate();
-        }
-        if (window.stateSearchManager && typeof window.stateSearchManager.refreshPersonSelects === 'function') {
-            window.stateSearchManager.refreshPersonSelects();
         }
     }
     

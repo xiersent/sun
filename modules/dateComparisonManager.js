@@ -81,6 +81,9 @@ class DateComparisonManager {
     ensureSelectsSyncedWithDateList() {
         if (!this.elA || !this.elB) {
             window.sunDateListLog && window.sunDateListLog('ensureSelects:skip no elA/elB');
+            if (window.dataManager && typeof window.dataManager.refreshStateSearchPersonSelects === 'function') {
+                window.dataManager.refreshStateSearchPersonSelects();
+            }
             return;
         }
         const sig = this._computeDateListSignature();
@@ -96,6 +99,9 @@ class DateComparisonManager {
             this.populateSelects();
         } else {
             this.applySelectValuesFromDateSelections();
+        }
+        if (window.dataManager && typeof window.dataManager.refreshStateSearchPersonSelects === 'function') {
+            window.dataManager.refreshStateSearchPersonSelects();
         }
     }
 
@@ -408,9 +414,6 @@ class DateComparisonManager {
         }
         if (window.stateIntersectionManager && typeof window.stateIntersectionManager.updateIntersections === 'function') {
             window.stateIntersectionManager.updateIntersections();
-        }
-        if (window.stateSearchManager && typeof window.stateSearchManager.refreshPersonSelects === 'function') {
-            window.stateSearchManager.refreshPersonSelects();
         }
     }
 

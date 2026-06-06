@@ -1640,6 +1640,9 @@ class UnifiedListManager {
         if (window.waves && typeof window.waves.updatePosition === 'function') {
             window.waves.updatePosition();
         }
+        if (window.dataManager && typeof window.dataManager.refreshStateSearchPersonSelects === 'function') {
+            window.dataManager.refreshStateSearchPersonSelects();
+        }
     }
 
 
