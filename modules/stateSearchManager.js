@@ -772,16 +772,10 @@ class StateSearchManager {
     }
 
     _formatResultDate(date) {
-        if (window.timeUtils && typeof window.timeUtils.formatDateTime === 'function') {
-            const hours = date.getHours();
-            const minutes = date.getMinutes();
-            const seconds = date.getSeconds();
-            if (hours === 0 && minutes === 0 && seconds === 0) {
-                return window.timeUtils.formatDate(date.getTime());
-            }
-            return window.timeUtils.formatDateTime(date.getTime());
+        if (window.timeUtils && typeof window.timeUtils.formatDate === 'function') {
+            return window.timeUtils.formatDate(date.getTime());
         }
-        return date.toLocaleString('ru-RU');
+        return date.toLocaleDateString('ru-RU');
     }
 
     runSearch() {
