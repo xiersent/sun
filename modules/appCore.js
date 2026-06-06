@@ -312,131 +312,67 @@ class AppCore {
         } catch (error) {}
     }
     
-    /** Заполняет блок .warning-info версиями, ОС и датой. */
+    /** Запись «версия от» из versions.json. */
+    _getVersionFromEntry(versions) {
+        if (!Array.isArray(versions)) {
+            return null;
+        }
+        return versions.find((entry) => entry && String(entry.id) === 'version') || null;
+    }
+
+    _createWarningInfoItem(title, content) {
+        const item = document.createElement('div');
+        item.className = 'sun-warningInfoItem';
+
+        const titleSpan = document.createElement('strong');
+        titleSpan.textContent = title;
+
+        const separatorSpan = document.createElement('span');
+        separatorSpan.className = 'sun-warningInfoStretch';
+
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'sun-versionInfoValue';
+        if (content && String(content).includes('\n')) {
+            valueSpan.innerHTML = String(content).replace(/\n/g, '<br>');
+            valueSpan.style.whiteSpace = 'pre-wrap';
+            valueSpan.style.textAlign = 'left';
+        } else {
+            valueSpan.textContent = content || 'неизвестно';
+        }
+
+        item.appendChild(titleSpan);
+        item.appendChild(separatorSpan);
+        item.appendChild(valueSpan);
+        return item;
+    }
+
+    /** Показывает в блоке предупреждения только строку «версия от». */
+    _fillVersionFromContainer(container, versions) {
+        if (!container) {
+            return;
+        }
+        container.classList.remove('sun-hidden');
+        container.innerHTML = '';
+
+        const entry = this._getVersionFromEntry(versions);
+        if (!entry) {
+            return;
+        }
+
+        const item = this._createWarningInfoItem(entry.title, entry.content);
+        item.dataset.versionId = entry.id;
+        container.appendChild(item);
+    }
+
+    /** Заполняет блок версий в предупреждении. */
     async fillWarningInfo(warningBox) {
-        const browserInfoEl = warningBox.querySelector('.sun-browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = this.getBrowserInfo();
-        }
-
-        const osInfoEl = document.createElement('div');
-        osInfoEl.className = 'sun-warningInfoItem';
-        osInfoEl.id = 'osInfoItem';
-        
-        const osTitleSpan = document.createElement('strong');
-        osTitleSpan.textContent = 'Операционная система:';
-        
-        const osSeparatorSpan = document.createElement('span');
-        osSeparatorSpan.style.flex = '1';
-        osSeparatorSpan.style.borderBottom = '1px dotted';
-        osSeparatorSpan.style.alignSelf = 'stretch';
-        
-        const osValueSpan = document.createElement('span');
-        osValueSpan.id = 'osInfo';
-        osValueSpan.textContent = this.getOSInfo();
-        
-        osInfoEl.appendChild(osTitleSpan);
-        osInfoEl.appendChild(osSeparatorSpan);
-        osInfoEl.appendChild(osValueSpan);
-
-        const archInfo = this.getArchitecture();
-        let archEl = null;
-        if (archInfo) {
-            archEl = document.createElement('div');
-            archEl.className = 'sun-warningInfoItem';
-            archEl.id = 'archInfoItem';
-            
-            const archTitleSpan = document.createElement('strong');
-            archTitleSpan.textContent = 'Архитектура:';
-            
-            const archSeparatorSpan = document.createElement('span');
-            archSeparatorSpan.style.flex = '1';
-            archSeparatorSpan.style.borderBottom = '1px dotted';
-            archSeparatorSpan.style.alignSelf = 'stretch';
-            
-            const archValueSpan = document.createElement('span');
-            archValueSpan.textContent = archInfo;
-            
-            archEl.appendChild(archTitleSpan);
-            archEl.appendChild(archSeparatorSpan);
-            archEl.appendChild(archValueSpan);
-        }
-
-        const todayInfoEl = warningBox.querySelector('.sun-todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
+        const container = warningBox.querySelector('.sun-dynamicVersionContainer');
+        if (!container) {
+            return;
         }
 
         const versions = await this.loadVersions();
-        
-        const container = warningBox.querySelector('.sun-dynamicVersionContainer');
-        if (!container) return;
-
-        const items = container.querySelectorAll('.sun-warningInfoItem');
-        const todayItem = items[items.length - 1];
-        const browserItem = items[0];
-        
-        for (let i = items.length - 1; i >= 0; i--) {
-            if (items[i] !== todayItem && items[i] !== browserItem) {
-                items[i].remove();
-            }
-        }
-
-        if (browserItem && browserItem.parentNode === container) {
-            if (!window.dom.byKey('osInfoItem')) {
-                container.insertBefore(osInfoEl, browserItem.nextSibling);
-            }
-        } else if (!browserItem) {
-            if (!window.dom.byKey('osInfoItem')) {
-                container.insertBefore(osInfoEl, container.firstChild);
-            }
-        }
-
-        if (archEl && !window.dom.byKey('archInfoItem')) {
-            const osItem = window.dom.byKey('osInfoItem');
-            if (osItem && osItem.parentNode === container) {
-                container.insertBefore(archEl, osItem.nextSibling);
-            } else if (browserItem && browserItem.parentNode === container) {
-                container.insertBefore(archEl, browserItem.nextSibling);
-            }
-        }
-
-        versions.forEach(entry => {
-            const item = document.createElement('div');
-            item.className = 'sun-warningInfoItem';
-            item.dataset.versionId = entry.id;
-            
-            const titleSpan = document.createElement('strong');
-            titleSpan.textContent = entry.title;
-            
-            const separatorSpan = document.createElement('span');
-            separatorSpan.style.flex = '1';
-            separatorSpan.style.borderBottom = '1px dotted';
-            separatorSpan.style.alignSelf = 'stretch';
-            
-            const valueSpan = document.createElement('span');
-            valueSpan.className = 'version-value';
-            
-            if (entry.content && entry.content.includes('\n')) {
-                valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
-                valueSpan.style.whiteSpace = 'pre-wrap';
-                valueSpan.style.textAlign = 'left';
-            } else {
-                valueSpan.textContent = entry.content || 'неизвестно';
-            }
-            
-            item.appendChild(titleSpan);
-            item.appendChild(separatorSpan);
-            item.appendChild(valueSpan);
-            
-            if (todayItem && todayItem.parentNode === container) {
-                container.insertBefore(item, todayItem);
-            } else {
-                container.appendChild(item);
-            }
-        });
-
+        this._fillVersionFromContainer(container, versions);
         this.saveCurrentVersions(versions);
     }
 
@@ -446,89 +382,12 @@ class AppCore {
         if (warningTitle) {
             warningTitle.textContent = 'НЕДОСТУПНО НА МОБИЛЬНЫХ УСТРОЙСТВАХ';
         }
-        
-        const browserInfoEl = warningBox.querySelector('.sun-browserInfo');
-        if (browserInfoEl) {
-            browserInfoEl.textContent = `Мобильное устройство (${this.getMobileDeviceType()})`;
-        }
-        
-        const osInfoEl = document.createElement('div');
-        osInfoEl.className = 'sun-warningInfoItem';
-        
-        const osTitleSpan = document.createElement('strong');
-        osTitleSpan.textContent = 'Операционная система:';
-        
-        const osSeparatorSpan = document.createElement('span');
-        osSeparatorSpan.style.flex = '1';
-        osSeparatorSpan.style.borderBottom = '1px dotted';
-        osSeparatorSpan.style.alignSelf = 'stretch';
-        
-        const osValueSpan = document.createElement('span');
-        osValueSpan.textContent = this.getOSInfo();
-        
-        osInfoEl.appendChild(osTitleSpan);
-        osInfoEl.appendChild(osSeparatorSpan);
-        osInfoEl.appendChild(osValueSpan);
-        
-        const todayInfoEl = warningBox.querySelector('.sun-todayInfo');
-        if (todayInfoEl) {
-            const today = new Date();
-            todayInfoEl.textContent = window.timeUtils.formatDateTime(today);
-        }
-        
-        const warningInfo = warningBox.querySelector('.sun-warningInfo');
-        if (warningInfo) {
-            warningInfo.style.display = 'flex';
-            
-            const browserItem = warningBox.querySelector('.sun-browserInfo')?.closest('.sun-warningInfoItem');
-            if (browserItem) {
-                browserItem.parentNode.insertBefore(osInfoEl, browserItem.nextSibling);
-            }
-        }
-        
-        this.loadVersions().then(versions => {
+
+        this.loadVersions().then((versions) => {
             const container = warningBox.querySelector('.sun-dynamicVersionContainer');
-            if (!container) return;
-            
-            const items = container.querySelectorAll('.sun-warningInfoItem');
-            const todayItem = items[items.length - 1];
-            const browserItem = items[0];
-            
-            for (let i = items.length - 1; i >= 0; i--) {
-                if (items[i] !== todayItem && items[i] !== browserItem) {
-                    items[i].remove();
-                }
-            }
-            
-            versions.forEach(entry => {
-                const item = document.createElement('div');
-                item.className = 'sun-warningInfoItem';
-                
-                const titleSpan = document.createElement('strong');
-                titleSpan.textContent = entry.title;
-                
-                const separatorSpan = document.createElement('span');
-                separatorSpan.style.flex = '1';
-                separatorSpan.style.borderBottom = '1px dotted';
-                separatorSpan.style.alignSelf = 'stretch';
-                
-                const valueSpan = document.createElement('span');
-                
-                if (entry.content && entry.content.includes('\n')) {
-                    valueSpan.innerHTML = entry.content.replace(/\n/g, '<br>');
-                    valueSpan.style.whiteSpace = 'pre-wrap';
-                } else {
-                    valueSpan.textContent = entry.content || 'неизвестно';
-                }
-                
-                item.appendChild(titleSpan);
-                item.appendChild(separatorSpan);
-                item.appendChild(valueSpan);
-                
-                container.insertBefore(item, todayItem);
-            });
+            this._fillVersionFromContainer(container, versions);
         });
-        
+
         this.addMobileRetryButton(warningBox);
     }
     
