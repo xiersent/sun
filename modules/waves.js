@@ -2078,6 +2078,15 @@ class WavesManager {
         }
     }
 
+    /** Убирает дробные мс от float-арифметики дней (04:59:59.999 → 05:00:00). */
+    _snapTimeToSecond(value) {
+        const ms = value instanceof Date ? value.getTime() : Number(value);
+        if (!Number.isFinite(ms)) {
+            return new Date();
+        }
+        return new Date(Math.round(ms / 1000) * 1000);
+    }
+
     /** Начало локального дня рождения: A — activeDate (baseDate), B — дата B из сравнения. */
     _getBaseDateMsForWaveLayer(layerKey) {
         if (layerKey === 'b') {
@@ -2129,9 +2138,7 @@ class WavesManager {
         const targetDay = ref + daysFromCenter;
 
         const baseMs = this._getBaseDateMsForWaveLayer(layerKey);
-        const pointTime = new Date(baseMs + targetDay * 24 * 3600 * 1000);
-
-        return pointTime;
+        return this._snapTimeToSecond(baseMs + targetDay * 24 * 3600 * 1000);
     }
 
     /** Нормализованная фаза волны [0, 1) для заданного календарного времени. */
@@ -2424,6 +2431,12 @@ class WavesManager {
 
     /** Клик по вертикальной выноске — навигация к времени экстремума. */
     onVerticalWaveLabelClick(labelElement) {
+        const storedMs = labelElement.dataset.extremumTime;
+        if (storedMs !== undefined && storedMs !== '' && Number.isFinite(Number(storedMs))) {
+            this.navigateToExtremumTime(Number(storedMs));
+            return;
+        }
+
         const waveId = labelElement.dataset.waveId;
         const wave = window.appState.data.waves.find((w) => String(w.id) === String(waveId));
         if (!wave) return;
@@ -2444,7 +2457,7 @@ class WavesManager {
 
     /** Устанавливает дату визора на время экстремума через dates.setDate. */
     navigateToExtremumTime(timestamp) {
-        const extremumDate = new Date(timestamp);
+        const extremumDate = this._snapTimeToSecond(timestamp);
         
         if (window.dates && window.dates.setDate) {
             window.dates.setDate(extremumDate, true);
@@ -2496,18 +2509,19 @@ class WavesManager {
         rightDate.setDate(rightDate.getDate() + window.appState.config.gridSquaresX);
         
         if (extremumTime >= leftDate && extremumTime <= rightDate) {
-            return extremumTime;
+            return this._snapTimeToSecond(extremumTime);
         }
         
         const nextExtremumTime = new Date(extremumTime.getTime() + (wave.period * 24 * 3600 * 1000));
-        return nextExtremumTime;
+        return this._snapTimeToSecond(nextExtremumTime);
     }
 
     /** Форматирует время экстремума как HH:MM:SS для подписи выноски. */
     formatExtremumTime(date) {
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const seconds = date.getSeconds().toString().padStart(2, '0');
+        const snapped = this._snapTimeToSecond(date);
+        const hours = snapped.getHours().toString().padStart(2, '0');
+        const minutes = snapped.getMinutes().toString().padStart(2, '0');
+        const seconds = snapped.getSeconds().toString().padStart(2, '0');
         
         return `${hours}:${minutes}:${seconds}`;
     }
@@ -2540,13 +2554,14 @@ class WavesManager {
             const extremumTime = refX !== undefined && refX !== ''
                 ? this.calculateTimeFromXCoordinate(wave, parseFloat(refX, 10), refDay, layerKey)
                 : this.calculateExtremumTime(wave, label.dataset.position);
+            const snappedMs = extremumTime.getTime();
             const timeString = this.formatExtremumTime(extremumTime);
             
             const textElement = label.querySelector('.sun-waveLabelText');
             if (textElement) {
                 textElement.textContent = timeString;
             }
-            label.dataset.extremumTime = String(extremumTime.getTime());
+            label.dataset.extremumTime = String(snappedMs);
             this._applyExtremumTimeTypography(label);
         });
         } finally {

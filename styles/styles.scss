@@ -2199,7 +2199,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){height: 25px; padding: #{$spacing-xs} #{$spacing-sm}; font-size: #{$font-size-sm}; white-space: nowrap;}
 	}
 	&summaryResultsContainer{
-		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; overflow-x: hidden; border: 1px solid #{$clg}; background: #fff;}
+		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; overflow-x: hidden; background: #fff;}
 	}
 	&summaryResultsContainer #{&}summaryResults{
 		@media(min-width: 0px){overflow: visible; max-height: none;}
@@ -2434,9 +2434,6 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	}
 	&stateSearchNote{
 		@media(min-width: 0px){font-size: #{$font-size-sm}; color: #{$danger-color}; margin: 0 0 #{$spacing-sm};}
-	}
-	&stateSearchTable{
-		@media(min-width: 0px){margin: -1px;}
 	}
 	&dateComparisonSelects{
 		@media(min-width: 0px){gap: #{$spacing-xs}; align-items: flex-end;}
