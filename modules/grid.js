@@ -10,6 +10,8 @@ class GridManager {
         this.staticElementsContainer = null;
         /** Сигнатура раскладки; при смене — нужен полный createGrid */
         this._lastGridLayoutSignature = null;
+        /** Ручное выделение линии дня (offset от центра визора); null — авто по позиции. */
+        this._selectedDayLineOffset = null;
     }
 
     /**
@@ -426,10 +428,95 @@ class GridManager {
         this._syncGraphAxesVisibility();
     }
 
+    _findDayLineElementByOffset(offset) {
+        this._ensureGridContainerRefs();
+        if (!this.gridContainer) {
+            return null;
+        }
+        const wrapper = this.gridContainer.querySelector(
+            `.sun-gridWrapper[data-day-offset="${offset}"]`
+        );
+        if (wrapper) {
+            return wrapper.querySelector('.sun-gridLineInner');
+        }
+        return this.gridContainer.querySelector(`.sun-gridLine.sun-dayH[data-day-offset="${offset}"]`);
+    }
+
+    _forEachDayLineElement(callback) {
+        this._ensureGridContainerRefs();
+        if (!this.gridContainer) {
+            return;
+        }
+        this.gridContainer.querySelectorAll('.sun-gridLineInner').forEach(callback);
+        this.gridContainer.querySelectorAll('.sun-gridLine.sun-dayH').forEach(callback);
+    }
+
+    _setDayLineActive(line, active) {
+        if (!line) {
+            return;
+        }
+        line.classList.toggle('sun-active', !!active);
+        if (line.classList.contains('sun-hasNotes')) {
+            return;
+        }
+        line.style.backgroundColor = active ? '#666' : '';
+    }
+
+    _syncXAxisActive(active) {
+        const graph = window.dom.byKey('graphElement');
+        const xAxis = graph && graph.querySelector('.sun-axis.sun-xAxis');
+        if (!xAxis || !this._isAxisSwapped()) {
+            return;
+        }
+        xAxis.classList.toggle('sun-active', !!active);
+        xAxis.style.backgroundColor = active ? '' : '';
+    }
+
+    _onDayGridLineClick(offset) {
+        if (window.appState.isProgrammaticDateChange) {
+            return;
+        }
+        const n = Number(offset);
+        if (this._selectedDayLineOffset === n) {
+            this._selectedDayLineOffset = null;
+        } else {
+            this._selectedDayLineOffset = n;
+        }
+        this._syncGridLineActivesForVizor();
+        if (window.summaryManager && window.summaryManager.updateSummary) {
+            window.summaryManager.updateSummary();
+        }
+    }
+
     _syncGridLineActivesForVizor() {
         const currentDay = window.appState.currentDay || 0;
         const integerPart = Math.floor(currentDay);
         const fractionalPart = currentDay - integerPart;
+
+        if (this._selectedDayLineOffset != null) {
+            this._forEachDayLineElement((line) => {
+                let offsetAttr = null;
+                if (line.classList.contains('sun-dayH')) {
+                    offsetAttr = line.getAttribute('data-day-offset');
+                } else {
+                    const wrapper = line.closest('.sun-gridWrapper');
+                    offsetAttr = wrapper && wrapper.getAttribute('data-day-offset');
+                }
+                if (offsetAttr == null) {
+                    return;
+                }
+                const offset = parseInt(offsetAttr, 10);
+                if (Number.isNaN(offset)) {
+                    return;
+                }
+                this._setDayLineActive(line, offset === this._selectedDayLineOffset);
+            });
+            this._syncXAxisActive(
+                this._isAxisSwapped() && this._selectedDayLineOffset === 0
+            );
+            return;
+        }
+
         this.gridElements.forEach((el) => {
             let line = null;
             let offsetAttr = null;
@@ -510,19 +597,8 @@ class GridManager {
         this.gridElements.push(wrapper);
         
         wrapper.addEventListener('click', (e) => {
-            if (window.appState.isProgrammaticDateChange) return;
-            
             e.stopPropagation();
-            
-            document.querySelectorAll('.sun-gridLineInner').forEach(line => {
-                line.classList.remove('sun-active');
-            });
-            
-            line.classList.add('sun-active');
-            
-            if (window.summaryManager && window.summaryManager.updateSummary) {
-                window.summaryManager.updateSummary();
-            }
+            this._onDayGridLineClick(offset);
         });
     }
     
@@ -599,6 +675,12 @@ class GridManager {
             line.classList.add('sun-active');
             line.style.backgroundColor = '#666';
         }
+
+        line.style.cursor = 'pointer';
+        line.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._onDayGridLineClick(offset);
+        });
 
         this.gridContainer.appendChild(line);
         this.gridElements.push(line);
@@ -707,6 +789,7 @@ class GridManager {
         this.gridContainer = null;
         this.staticElementsContainer = null;
         this._lastGridLayoutSignature = null;
+        this._selectedDayLineOffset = null;
 
         document.querySelectorAll('.sun-labels:not(.sun-centerDateLabel), .sun-gridLine, .sun-gridLineInner, .sun-gridWrapper').forEach(el => {
             el.remove();
