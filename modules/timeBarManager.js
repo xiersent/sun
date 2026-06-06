@@ -19,6 +19,7 @@ class TimeBarManager {
         this._stateRowStorageKey = 'timeBarStateRowHidden';
         this._timeBarGroupVisibleKey = 'timeBarGroupVisible';
         this._controlsOpenStorageKey = 'timeBarControlsOpen';
+        this._segmentLabelModeKey = 'timeBarSegmentLabelMode';
         this._controlsChangeBound = false;
         this._controlsToggleBound = false;
         this.controlsToggle = null;
@@ -275,6 +276,25 @@ class TimeBarManager {
         }
     }
 
+    /** Режим подписей колосков timeBar: period | name. */
+    getSegmentLabelMode() {
+        try {
+            const raw = localStorage.getItem(this._segmentLabelModeKey);
+            return raw === 'name' ? 'name' : 'period';
+        } catch {
+            return 'period';
+        }
+    }
+
+    /** Внутренний метод saveSegmentLabelMode. */
+    _saveSegmentLabelMode(mode) {
+        try {
+            localStorage.setItem(this._segmentLabelModeKey, mode === 'name' ? 'name' : 'period');
+        } catch {
+            /* ignore */
+        }
+    }
+
     /** Видимость группы только на шкале sun-timeBar (не связана с group.enabled). */
     isTimeBarGroupVisible(groupId) {
         const map = this._loadTimeBarGroupVisible();
@@ -348,7 +368,8 @@ class TimeBarManager {
 
         const groups = (window.appState && window.appState.data && window.appState.data.groups) || [];
         const groupVisible = this._loadTimeBarGroupVisible();
-        const sig = groups.map((g) => `${g.id}:${groupVisible[String(g.id)] === false ? 0 : 1}:${g.name || ''}`).join('|');
+        const labelMode = this.getSegmentLabelMode();
+        const sig = `${labelMode}|${groups.map((g) => `${g.id}:${groupVisible[String(g.id)] === false ? 0 : 1}:${g.name || ''}`).join('|')}`;
         if (sig === this._controlsSig && panel.children.length > 0) {
             return;
         }
@@ -356,6 +377,27 @@ class TimeBarManager {
 
         const hidden = this._loadStateRowHidden();
         panel.innerHTML = '';
+
+        const labelModeRow = document.createElement('div');
+        labelModeRow.className = 'sun-timeBarControlsRow sun-timeBarControlsLabelMode';
+
+        const labelModeSelect = document.createElement('select');
+        labelModeSelect.className = 'sun-timeBarSegmentLabelModeSelect';
+        labelModeSelect.setAttribute('aria-label', 'Режим отображения колосков');
+        labelModeSelect.autocomplete = 'off';
+
+        const optPeriod = document.createElement('option');
+        optPeriod.value = 'period';
+        optPeriod.textContent = 'Показывать периоды';
+        const optName = document.createElement('option');
+        optName.value = 'name';
+        optName.textContent = 'Показывать названия';
+        labelModeSelect.appendChild(optPeriod);
+        labelModeSelect.appendChild(optName);
+        labelModeSelect.value = labelMode;
+
+        labelModeRow.appendChild(labelModeSelect);
+        panel.appendChild(labelModeRow);
 
         const statesRow = document.createElement('div');
         statesRow.className = 'sun-timeBarControlsRow sun-timeBarControlsStates';
@@ -424,7 +466,17 @@ class TimeBarManager {
     /** Внутренний метод onControlsChange. */
     _onControlsChange(e) {
         const t = e.target;
-        if (!t || t.tagName !== 'INPUT') return;
+        if (!t) return;
+
+        if (t.tagName === 'SELECT' && t.classList.contains('sun-timeBarSegmentLabelModeSelect')) {
+            this._saveSegmentLabelMode(t.value);
+            if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+                window.extremumTimeManager.updateExtremums();
+            }
+            return;
+        }
+
+        if (t.tagName !== 'INPUT') return;
 
         if (t.classList.contains('sun-timeBarStateCheck')) {
             const st = t.dataset.state;

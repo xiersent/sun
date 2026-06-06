@@ -75,31 +75,35 @@ class ExtremumTimeManager {
                 ? window.appState.baseDate
                 : new Date(window.appState.baseDate);
 
-        const dayMs = 24 * 60 * 60 * 1000;
         const events = [];
+
+        const birthDayIndex = window.timeUtils
+            ? window.timeUtils.getDaysBetween(baseDate, dayStart)
+            : 0;
 
         window.appState.data.waves.forEach((wave) => {
             if (!wave.period || wave.period <= 0) return;
             if (!this._isWaveRelevant(wave)) return;
-
-            const daysFromBaseToStart = window.timeUtils.getDaysBetween(baseDate, dayStart);
-            let p0 = (daysFromBaseToStart % wave.period) / wave.period;
-            if (p0 < 0) p0 += 1;
+            if (!window.waves || typeof window.waves.findStateHitTimestampsOnBirthDay !== 'function') {
+                return;
+            }
 
             for (let k = 5; k >= -5; k--) {
-                const targets = this._cycleFractionsForState(k);
-                for (const targetF of targets) {
-                    const dayFracs = this._dayFractionsForCycleTarget(p0, wave.period, targetF);
-                    for (const d of dayFracs) {
-                        const t = new Date(dayStart.getTime() + d * dayMs);
-                        if (t >= dayStart && t <= dayEnd) {
-                            events.push({
-                                time: t,
-                                wave,
-                                state: k,
-                                color: wave.color || '#666666'
-                            });
-                        }
+                const hitMsList = window.waves.findStateHitTimestampsOnBirthDay(
+                    wave,
+                    birthDayIndex,
+                    k,
+                    null
+                );
+                for (let hi = 0; hi < hitMsList.length; hi++) {
+                    const t = new Date(hitMsList[hi]);
+                    if (t >= dayStart && t <= dayEnd) {
+                        events.push({
+                            time: t,
+                            wave,
+                            state: k,
+                            color: wave.color || '#666666'
+                        });
                     }
                 }
             }
@@ -236,22 +240,46 @@ class ExtremumTimeManager {
         window.appState.waveVisibility = proxy;
     }
 
+    /** Подпись периода волны для выносок timeBar. */
+    _formatWavePeriodLabel(wave) {
+        const period = Number(wave.period);
+        if (!Number.isFinite(period) || period <= 0) {
+            return '—';
+        }
+        const text = Number.isInteger(period) ? String(period) : String(Math.round(period * 10) / 10);
+        return text;
+    }
+
     /** Внутренний метод buildSegmentElement. */
     _buildSegmentElement(group, frac) {
-        const waveNameMap = new Map();
-        group.waves.forEach((wave) => {
-            waveNameMap.set(wave.name, wave.id);
-        });
-        const uniqueNames = Array.from(waveNameMap.keys());
-        const waveIds = Array.from(waveNameMap.values());
-        const namesHtml = uniqueNames
-            .map((name, index) => {
-                const waveId = waveIds[index];
-                const checked = this._isWaveVisibilityChecked(waveId);
+        const labelMode = (window.timeBarManager && typeof window.timeBarManager.getSegmentLabelMode === 'function')
+            ? window.timeBarManager.getSegmentLabelMode()
+            : 'period';
+
+        let wavesForLabels;
+        if (labelMode === 'name') {
+            wavesForLabels = group.waves;
+        } else {
+            const waveByPeriod = new Map();
+            group.waves.forEach((wave) => {
+                const periodKey = String(wave.period);
+                if (!waveByPeriod.has(periodKey)) {
+                    waveByPeriod.set(periodKey, wave);
+                }
+            });
+            wavesForLabels = Array.from(waveByPeriod.values());
+        }
+
+        const labelsHtml = wavesForLabels
+            .map((wave) => {
+                const checked = this._isWaveVisibilityChecked(wave.id);
                 const cls = checked
                     ? 'sun-extremumWaveName sun-extremumWaveNameInSegment sun-extremumWaveNameOnVizor'
                     : 'sun-extremumWaveName sun-extremumWaveNameInSegment';
-                return `<span class="${cls}" data-wave-id="${waveId}">${name}</span>`;
+                const label = labelMode === 'name'
+                    ? (wave.name || '—')
+                    : this._formatWavePeriodLabel(wave);
+                return `<span class="${cls}" data-wave-id="${wave.id}">${label}</span>`;
             })
             .join(', ');
 
@@ -267,7 +295,7 @@ class ExtremumTimeManager {
 
         const labelText = document.createElement('div');
         labelText.className = 'sun-extremumLabelText sun-extremumLabelTextInSegment';
-        labelText.innerHTML = namesHtml;
+        labelText.innerHTML = labelsHtml;
 
         const arrowTop = document.createElement('div');
         arrowTop.className = 'sun-extremumLabelArrow sun-extremumLabelArrowTop sun-extremumLabelArrowInSegment sun-extremumLabelArrowTopInSegment';

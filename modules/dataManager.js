@@ -123,6 +123,9 @@ class DataManager {
         if (window.dateComparisonManager && window.dateComparisonManager.debouncedUpdate) {
             window.dateComparisonManager.debouncedUpdate();
         }
+        if (window.stateSearchManager && typeof window.stateSearchManager.refreshPersonSelects === 'function') {
+            window.stateSearchManager.refreshPersonSelects();
+        }
     }
     
     /** Перерисовка списка групп и волн на вкладке сигналов. */

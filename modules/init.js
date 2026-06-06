@@ -168,6 +168,10 @@ async function finalizeInitialization() {
         __lp && __lp.phaseEnd('finalize_summary');
     }
 
+    if (window.stateSearchManager && window.stateSearchManager.syncAfterDataReady) {
+        window.stateSearchManager.syncAfterDataReady();
+    }
+
     const mainDateInputDate = window.dom.byKey('mainDateInputDate');
     const mainDateInputTime = window.dom.byKey('mainDateInputTime');
 

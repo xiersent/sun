@@ -158,6 +158,7 @@
                         <button type="button" class="sun-tabButton" data-tab="summary" role="tab">Состояния</button>
                         <button type="button" class="sun-tabButton" data-tab="intersections" role="tab">Пересечения</button>
                         <button type="button" class="sun-tabButton" data-tab="dateCompare" role="tab">Сравнение дат</button>
+                        <button type="button" class="sun-tabButton" data-tab="stateSearch" role="tab">Поиск состояний</button>
                     </div>
                     
                     <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="summary">
@@ -280,6 +281,34 @@
                             </div>
                             <div class="sun-summaryResultsContainer sun-intersectionResultsContainer">
                                 <div class="sun-summaryResults sun-dateCompareResults"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="stateSearch">
+                        <div class="sun-panelSection sun-stateSearchPanel sun-tabPanelInner">
+                            <div class="sun-summaryHeader">
+                                <h3>Поиск состояний</h3>
+                            </div>
+                            <p class="sun-stateSearchIntro">Добавьте сигналы с условиями состояния и направления. Поиск находит дни, когда все условия выполняются одновременно (логическое И).</p>
+                            <div class="sun-summaryControls">
+                                <div class="sun-intersectionForm">
+                                    <div class="sun-stateSearchConditions" id="stateSearchConditions" aria-label="Условия поиска"></div>
+                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions">
+                                        <button type="button" class="sun-uiBtn" id="btnStateSearchAddCondition">Добавить сигнал</button>
+                                    </div>
+                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions sun-stateSearchActionsRow">
+                                        <div class="sun-intersectionSelectGroup sun-stateSearchLimitGroup">
+                                            <label class="sun-intersectionFormLabel" for="stateSearchLimitYears">Лимит поиска, лет</label>
+                                            <input type="number" class="sun-intersectionFormInput sun-stateSearchLimitInput" id="stateSearchLimitYears" value="100" min="1" max="500" step="1" title="Сколько лет от даты рождения активной персоны сканировать">
+                                        </div>
+                                        <button type="button" class="sun-uiBtn" id="btnStateSearchRun">Искать</button>
+                                        <button type="button" class="sun-uiBtn" id="btnStateSearchShowWaves">Показать сигналы из поиска</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sun-summaryResultsContainer">
+                                <div class="sun-summaryResults sun-stateSearchResults" id="stateSearchResults"></div>
                             </div>
                         </div>
                     </div>
@@ -430,7 +459,7 @@
     <script src="modules/debugState.js"></script>
     <script src="modules/nestedListDnD.js"></script>
     <script src="modules/eventManager.js"></script>
-    <script src="modules/extremumTimeManager.js"></script>
+    <script src="modules/extremumTimeManager.js?v=2"></script>
     <script src="modules/grid.js"></script>
     <script src="modules/import.js"></script>
     <script src="modules/migrations.js"></script>
@@ -444,8 +473,9 @@
     <script src="modules/wavesTransformLayer.js"></script>
     <script src="modules/uiManager.js"></script>
     <script src="modules/unifiedListManager.js"></script>
-    <script src="modules/waves.js"></script>
+    <script src="modules/waves.js?v=6"></script>
     <script src="modules/dateComparisonManager.js"></script>
+    <script src="modules/stateSearchManager.js?v=8"></script>
     <script src="modules/init.js"></script>
     <script>window.__loadPerf && window.__loadPerf.mark('local_modules_parse_done');</script>
 

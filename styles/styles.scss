@@ -309,6 +309,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarControlsRow{
 		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 6px 12px;}
 	}
+	&timeBarControlsLabelMode{
+		@media(min-width: 0px){justify-content: center; width: 100%;}
+	}
+	&timeBarSegmentLabelModeSelect{
+		@media(min-width: 0px){width: 100%; max-width: 220px;}
+	}
 	&timeBarControlCheck{
 		@media(min-width: 0px){display: inline-flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; text-align: center;}
 	}
@@ -439,7 +445,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){position: absolute; top: 50%; left: 0; width: 0; height: 0; transform: translate(-50%, -50%); z-index: 14;}
 	}
 	&timeBarNowMarker #{&}timeBarNowLabel{
-		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; font-size: 10px; white-space: nowrap; font-weight: 400; font-family: monospace; background-color: #{$danger-color}; color: #fff;}
+		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap; font-weight: 400; font-family: monospace; background-color: #{$danger-color}; color: #fff;}
 	}
 	&timeBarNowMarker #{&}timeBarNowLabel::before{
 		@media(min-width: 0px){content: ""; display: block; position: absolute; left: 50%; top: -4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid #{$danger-color};}
@@ -475,7 +481,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){display: none;}
 	}
 	&timeIndicatorLabel{
-		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #{$danger-color}; color: white; padding: 2px 6px; font-size: #{$font-size-xs}; white-space: nowrap; font-weight: 400; font-family: monospace; z-index: 11;}
+		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #{$danger-color}; color: white; padding: 2px 6px; border-radius: 3px; font-size: #{$font-size-xs}; white-space: nowrap; font-weight: 400; font-family: monospace; z-index: 11;}
 	}
 	&timeIndicatorLabel::before{
 		@media(min-width: 0px){content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;}
@@ -1680,7 +1686,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){transform: translate(-50%, -50%) scale(1.3); z-index: 11; box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);}
 	}
 	&extremumLabel{
-		@media(min-width: 0px){position: absolute; font-size: 10px; font-family: #{$font-family}; white-space: nowrap; padding: 2px 6px; text-align: center; font-weight: 400; z-index: 9; pointer-events: none; transform: translateX(-50%); transition: transform 0.15s ease; background-color: rgb(192, 192, 192); color: #ffffff; border: 1px solid rgb(192, 192, 192);}
+		@media(min-width: 0px){position: absolute; font-size: 10px; font-family: #{$font-family}; white-space: nowrap; padding: 2px 6px; border-radius: 3px; text-align: center; font-weight: 400; z-index: 9; pointer-events: none; transform: translateX(-50%); transition: transform 0.15s ease; background-color: rgb(192, 192, 192); color: #ffffff; border: 1px solid rgb(192, 192, 192);}
 	}
 	&extremumLabelTop{
 		@media(min-width: 0px){bottom: 100%; margin-bottom: 5px;}
@@ -2375,6 +2381,57 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&dateComparisonIntro{
 		@media(min-width: 0px){font-size: #{$font-size-sm}; color: #{$text-secondary}; margin: 0 0 #{$spacing-md}; line-height: 1.4;}
 	}
+	&stateSearchIntro{
+		@media(min-width: 0px){font-size: #{$font-size-sm}; color: #{$text-secondary}; margin: 0 0 #{$spacing-md}; line-height: 1.4;}
+	}
+	&stateSearchConditions{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-sm};}
+	}
+	&stateSearchConditionRow{
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: flex-end; gap: #{$spacing-xs}; padding: #{$spacing-xs} 0; border-bottom: 1px solid #{$clg};}
+	}
+	&stateSearchConditionRow:last-child{
+		@media(min-width: 0px){border-bottom: none;}
+	}
+	&stateSearchConditionRow #{&}intersectionSelectGroup{
+		@media(min-width: 0px){flex: 1 1 140px; min-width: 120px;}
+	}
+	&stateSearchConditionWave{
+		@media(min-width: 0px){flex: 2 1 180px;}
+	}
+	&stateSearchConditionPerson{
+		@media(min-width: 0px){flex: 0 0 auto; min-width: 56px; max-width: 72px;}
+	}
+	&stateSearchConditionPerson #{&}summarySelect{
+		@media(min-width: 0px){min-width: 52px; padding-left: 4px; padding-right: 4px;}
+	}
+	&stateSearchRemoveCondition{
+		@media(min-width: 0px){flex-shrink: 0; align-self: flex-end; min-width: 28px; padding: 5px 8px;}
+	}
+	&stateSearchDayInput{
+		@media(min-width: 0px){width: 100%; max-width: 120px;}
+	}
+	&stateSearchLimitInput{
+		@media(min-width: 0px){width: 100%; max-width: 120px;}
+	}
+	&stateSearchActionsRow{
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: flex-end; gap: #{$spacing-xs}; margin-left: 0; margin-top: #{$spacing-xs}; justify-content: flex-start;}
+	}
+	&stateSearchLimitGroup{
+		@media(min-width: 0px){flex: 0 0 auto;}
+	}
+	&stateSearchConditionsSummary{
+		@media(min-width: 0px){font-size: #{$font-size-sm}; color: #{$text-secondary}; margin: 0 0 #{$spacing-sm}; line-height: 1.4;}
+	}
+	&stateSearchCount{
+		@media(min-width: 0px){font-size: #{$font-size-sm}; color: #{$text-secondary}; margin: #{$spacing-sm} 0 0;}
+	}
+	&stateSearchNote{
+		@media(min-width: 0px){font-size: #{$font-size-sm}; color: #{$danger-color}; margin: 0 0 #{$spacing-sm};}
+	}
+	&stateSearchTable{
+		@media(min-width: 0px){margin: -1px;}
+	}
 	&dateComparisonSelects{
 		@media(min-width: 0px){gap: #{$spacing-xs}; align-items: flex-end;}
 	}
@@ -2740,7 +2797,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){margin-bottom: 0; display: flex; flex-direction: column; gap: #{$spacing-sm};}
 	}
 	&timeBarNowLabel{
-		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; font-size: 10px; white-space: nowrap; font-weight: 400; font-family: monospace; background-color: #{$danger-color}; color: #fff;}
+		@media(min-width: 0px){position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; padding: 2px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap; font-weight: 400; font-family: monospace; background-color: #{$danger-color}; color: #fff;}
 		&::before{
 			@media(min-width: 0px){content: ""; display: block; position: absolute; left: 50%; top: -4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid #{$danger-color};}
 		}

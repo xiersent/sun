@@ -771,49 +771,67 @@ class WavesManager {
     
     // ========== НОВЫЕ МЕТОДЫ ДЛЯ ПОДСВЕТКИ ЭКСТРЕМУМОВ ==========
     
-    /** Фаза волны в днях с учётом phaseOffsetDays (как на графике). */
-    _wavePhaseInPeriod(wave, effDay) {
-        if (!wave.period || wave.period <= 0) {
+    /** Состояние сигнала (−5…+5) в центре графа — то, что видно после «Перейти к дате». */
+    calculateWaveStateAtGraphCenter(wave, effDay) {
+        const graphW = window.appState.graphWidth;
+        const y = this.calculateWaveYAtXForDay(wave, graphW / 2, effDay);
+        const centerY = window.appState.config.graphHeight / 2;
+        const amplitude = window.appState.config.amplitude;
+        if (!amplitude) {
             return 0;
         }
-        const period = wave.period;
-        const phaseOffset = window.appState.config.phaseOffsetDays || 0;
-        let phase = (effDay + phaseOffset) % period;
-        if (phase < 0) {
-            phase += period;
+        return -((y - centerY) / amplitude) * 5;
+    }
+
+    /** Направление сигнала в центре графа. */
+    calculateWaveDirectionAtGraphCenter(wave, effDay) {
+        const f = this._getVisualCycleFractionAtGraphCenter(wave, effDay);
+        const deriv = Math.cos(f * 2 * Math.PI);
+        const flatEps = 0.08;
+        if (Math.abs(deriv) < flatEps) {
+            return 0;
         }
-        return phase;
+        return deriv > 0 ? 1 : -1;
+    }
+
+    /** Доля цикла в центре графа (фаза для поиска моментов внутри суток). */
+    _getVisualCycleFractionAtGraphCenter(wave, effDay) {
+        const sq = window.appState.config.squareSize;
+        const wavePeriodPixels =
+            window.appState.periods[wave.id] || wave.period * sq;
+        if (!wavePeriodPixels || wavePeriodPixels <= 0) {
+            return 0;
+        }
+        const graphW = window.appState.graphWidth;
+        const phaseOffsetPixels = (window.appState.config.phaseOffsetDays || 0) * sq;
+        let currentOffsetPx = (effDay * sq) % wavePeriodPixels;
+        if (currentOffsetPx < 0) {
+            currentOffsetPx += wavePeriodPixels;
+        }
+        const relativeX = graphW / 2 + currentOffsetPx;
+        return this._normalizeCycleFraction((relativeX + phaseOffsetPixels) / wavePeriodPixels);
     }
 
     /**
      * Значение sin-волны в точке дня (амplitude × sin), шкала ±5.
+     * Совпадает с центром графа (не использует phaseOffsetDays в формуле дней).
      * @returns {number}
      */
     calculateWaveStateAtDay(wave, currentDay) {
         if (!wave.period || wave.period <= 0) {
             return 0;
         }
-        const phase = this._wavePhaseInPeriod(wave, currentDay);
-        const normalizedPhase = (phase / wave.period) * 2 * Math.PI;
-        return Math.sin(normalizedPhase) * 5;
+        return this.calculateWaveStateAtGraphCenter(wave, currentDay);
     }
 
     /**
      * Направление волны в моменте day: +1 восходящая, −1 низходящая, 0 у экстремума (плоско).
-     * Совпадает со знаком d/dt от sin(фаза)·5 по оси дней.
      */
     calculateWaveDirectionAtDay(wave, currentDay) {
         if (!wave.period || wave.period <= 0) {
             return 0;
         }
-        const phase = this._wavePhaseInPeriod(wave, currentDay);
-        const normalizedPhase = (phase / wave.period) * 2 * Math.PI;
-        const deriv = Math.cos(normalizedPhase);
-        const flatEps = 0.08;
-        if (Math.abs(deriv) < flatEps) {
-            return 0;
-        }
-        return deriv > 0 ? 1 : -1;
+        return this.calculateWaveDirectionAtGraphCenter(wave, currentDay);
     }
 
     /** Символ направления волны для UI: ↑, ↓ или —. */
@@ -828,6 +846,160 @@ class WavesManager {
         if (dir > 0) return 'восходящая';
         if (dir < 0) return 'низходящая';
         return 'экстремум';
+    }
+
+    /** Доли цикла [0,1), где 5·sin(2πf) = k (целое −5…5). */
+    getCycleFractionsForIntegerState(k) {
+        k = Math.round(Number(k));
+        if (k === 5) {
+            return [0.25];
+        }
+        if (k === -5) {
+            return [0.75];
+        }
+        if (k === 0) {
+            return [0, 0.5];
+        }
+        if (k > 5 || k < -5) {
+            return [];
+        }
+        const s = k / 5;
+        const a = Math.asin(s) / (2 * Math.PI);
+        const b = (Math.PI - Math.asin(s)) / (2 * Math.PI);
+        return [a, b];
+    }
+
+    _normalizeCycleFraction(f) {
+        let x = f % 1;
+        if (x < 0) {
+            x += 1;
+        }
+        return x;
+    }
+
+    /**
+     * Доли суток [0,1), когда fract(p0 + d/P) = targetF (p0 — доля цикла в полночь).
+     */
+    getDayFractionsForCycleTarget(p0, periodDays, targetF) {
+        const hits = [];
+        const p = periodDays;
+        const tf = this._normalizeCycleFraction(targetF);
+        const from = -Math.ceil(p) - 3;
+        const to = Math.ceil(p) + 3;
+        for (let m = from; m <= to; m++) {
+            const d = p * (m + tf - p0);
+            if (d >= 0 && d < 1 - 1e-12) {
+                hits.push(d);
+            }
+        }
+        return hits;
+    }
+
+    /** effDay от даты рождения (как recalculateCurrentDay). @param {number} [birthTimeMs] */
+    getEffDayFromTimestamp(timestamp, birthTimeMs) {
+        const birthMs =
+            birthTimeMs != null
+                ? birthTimeMs
+                : typeof window.appState.baseDate === 'number'
+                  ? window.appState.baseDate
+                  : new Date(window.appState.baseDate).getTime();
+        if (window.dates && typeof window.dates.computeDayOffsetFromBirth === 'function') {
+            return window.dates.computeDayOffsetFromBirth(birthMs, timestamp, true);
+        }
+        return (timestamp - birthMs) / (24 * 60 * 60 * 1000);
+    }
+
+    /** effDay в полночь birthDayIndex-го календарного дня от birthTimeMs. */
+    getEffDayAtBirthCalendarDay(birthDayIndex, birthTimeMs) {
+        const d = this.getCalendarDateFromBirthDayIndex(birthDayIndex, 0, birthTimeMs);
+        return this.getEffDayFromTimestamp(d.getTime(), birthTimeMs);
+    }
+
+    /** Календарная дата: birth + birthDayIndex суток + доля суток. @param {number} [birthTimeMs] */
+    getCalendarDateFromBirthDayIndex(birthDayIndex, dayFraction, birthTimeMs) {
+        const baseMs =
+            birthTimeMs != null
+                ? birthTimeMs
+                : typeof window.appState.baseDate === 'number'
+                  ? window.appState.baseDate
+                  : new Date(window.appState.baseDate).getTime();
+        const baseDate = new Date(baseMs);
+        const d = new Date(baseDate);
+        d.setDate(d.getDate() + Math.floor(birthDayIndex));
+        d.setHours(0, 0, 0, 0);
+        if (dayFraction != null && Number.isFinite(dayFraction)) {
+            const totalSeconds = Math.round(dayFraction * 24 * 60 * 60);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            d.setHours(hours, minutes, seconds, 0);
+        }
+        return d;
+    }
+
+    /** Совпадение sin-состояния с целым уровнем −5…5. */
+    stateMatchesIntegerTarget(state, target, epsilon) {
+        const eps = epsilon != null ? epsilon : 0.02;
+        const t = Math.round(Number(target));
+        if (t === 5) {
+            return state > 0 && Math.abs(state - 5) <= eps;
+        }
+        if (t === -5) {
+            return state < 0 && Math.abs(state + 5) <= eps;
+        }
+        if (t === 0) {
+            return Math.abs(state) <= eps;
+        }
+        if (t > 0) {
+            return state > 0 && Math.abs(state - t) <= eps;
+        }
+        if (t < 0) {
+            return state < 0 && Math.abs(state - t) <= eps;
+        }
+        return Math.abs(state - t) <= eps;
+    }
+
+    /**
+     * Точные моменты (ms) внутри birthDayIndex-го дня, когда сигнал в targetState.
+     * @param {number|null} direction +1, −1, 0 или null (любое)
+     * @param {number} [birthTimeMs] дата рождения персоны (по умолчанию baseDate / A)
+     * @returns {number[]}
+     */
+    findStateHitTimestampsOnBirthDay(wave, birthDayIndex, targetState, direction, birthTimeMs) {
+        if (!wave.period || wave.period <= 0) {
+            return [];
+        }
+        const effDayStart = this.getEffDayAtBirthCalendarDay(birthDayIndex, birthTimeMs);
+        const p0 = this._getVisualCycleFractionAtGraphCenter(wave, effDayStart);
+        const targetFractions = this.getCycleFractionsForIntegerState(targetState);
+        const hits = [];
+
+        for (let ti = 0; ti < targetFractions.length; ti++) {
+            const targetF = this._normalizeCycleFraction(targetFractions[ti]);
+            const dayFracs = this.getDayFractionsForCycleTarget(p0, wave.period, targetF);
+            for (let di = 0; di < dayFracs.length; di++) {
+                const ts = this.getCalendarDateFromBirthDayIndex(
+                    birthDayIndex,
+                    dayFracs[di],
+                    birthTimeMs
+                ).getTime();
+                const effDay = this.getEffDayFromTimestamp(ts, birthTimeMs);
+                const state = this.calculateWaveStateAtDay(wave, effDay);
+                if (!this.stateMatchesIntegerTarget(state, targetState)) {
+                    continue;
+                }
+                if (direction != null) {
+                    const dir = this.calculateWaveDirectionAtDay(wave, effDay);
+                    if (dir !== direction) {
+                        continue;
+                    }
+                }
+                hits.push(ts);
+            }
+        }
+
+        hits.sort((a, b) => a - b);
+        return hits;
     }
 
     /** Включена ли подсветка экстремумов красным цветом stroke и выносок. */

@@ -409,6 +409,9 @@ class DateComparisonManager {
         if (window.stateIntersectionManager && typeof window.stateIntersectionManager.updateIntersections === 'function') {
             window.stateIntersectionManager.updateIntersections();
         }
+        if (window.stateSearchManager && typeof window.stateSearchManager.refreshPersonSelects === 'function') {
+            window.stateSearchManager.refreshPersonSelects();
+        }
     }
 
     /** Внутренний метод resolveDuplicateSelection. */
