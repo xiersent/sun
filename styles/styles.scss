@@ -654,6 +654,21 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&tabsSection #{&}tabContent{
 		@media(min-width: 0px){max-width: 100%; min-width: 0; overflow-x: hidden; overflow-y: visible; box-sizing: border-box;}
 	}
+	&tabsSection #{&}timeBarWrap{
+		@media(min-width: 0px){margin: 0; align-self: stretch; width: 100%;}
+	}
+	&tabsSection #{&}tabContent[data-tab-panel="timeBar"]{
+		@media(min-width: 0px){padding: 0;}
+	}
+	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection{
+		@media(min-width: 0px){padding: #{$spacing-md} #{$spacing-md} 0; border: none; outline: none; background: transparent;}
+	}
+	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
+		@media(min-width: 0px){flex: 0 1 auto; padding: #{$spacing-sm} #{$spacing-md};}
+	}
+	&tabContent #{&}buttonsPanel{
+		@media(min-width: 0px){width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 0; border: none; background: transparent; box-sizing: border-box; overflow: visible; outline: none;}
+	}
 	&inputGroup{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; margin-bottom: #{$spacing-sm};}
 	}

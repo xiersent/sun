@@ -574,6 +574,11 @@ class UIManager {
         window.dom.byKey('customWaveColor').value = '#666666';
     }
 
+    /** Корень основных вкладок панели. */
+    _getTabsRoot() {
+        return document.querySelector('.sun-tabsSection');
+    }
+
     /**
      * Клик по вкладке: повторный клик снимает активность; при открытии — обновить пересечения/сравнение.
      * @param {HTMLElement} tabButton — кнопка с data-tab
@@ -589,7 +594,10 @@ class UIManager {
             this.activeTab = null;
         } else {
             if (this.activeTab) {
-                const prevTabButton = document.querySelector(`[data-tab="${this.activeTab}"]`);
+                const tabsRoot = this._getTabsRoot();
+                const prevTabButton = tabsRoot
+                    ? tabsRoot.querySelector(`[data-tab="${this.activeTab}"]`)
+                    : document.querySelector(`[data-tab="${this.activeTab}"]`);
                 if (prevTabButton) {
                     this.deactivateTab(prevTabButton);
                 }
@@ -600,6 +608,17 @@ class UIManager {
         }
 
         localStorage.setItem('activeTab', this.activeTab);
+
+        if (tabId === 'timeBar' && window.timeBarManager) {
+            queueMicrotask(() => {
+                if (typeof window.timeBarManager.createHourMarkers === 'function') {
+                    window.timeBarManager.createHourMarkers();
+                }
+                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
+                    window.timeBarManager.updateTimeIndicator();
+                }
+            });
+        }
 
         if (tabId === 'intersections' && window.stateIntersectionManager) {
             queueMicrotask(() => {
@@ -623,18 +642,20 @@ class UIManager {
     /** Активировать вкладку: класс active на кнопке и панели data-tab-panel. */
     activateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
+        const tabsRoot = this._getTabsRoot();
+        const scope = tabsRoot || document;
 
-        document.querySelectorAll('.sun-tabButton[data-tab]').forEach((btn) => {
+        scope.querySelectorAll('.sun-tabButton[data-tab]').forEach((btn) => {
             btn.classList.remove('sun-active');
         });
 
-        document.querySelectorAll('.sun-tabContent').forEach((content) => {
+        scope.querySelectorAll('.sun-tabContent[data-tab-panel]').forEach((content) => {
             content.classList.remove('sun-active');
         });
 
         tabButton.classList.add('sun-active');
 
-        const tabContent = document.querySelector(`.sun-tabContent[data-tab-panel="${tabId}"]`);
+        const tabContent = scope.querySelector(`.sun-tabContent[data-tab-panel="${tabId}"]`);
         if (tabContent) {
             tabContent.classList.add('sun-active');
         }
@@ -643,23 +664,46 @@ class UIManager {
     /** Снять активность с вкладки. */
     deactivateTab(tabButton) {
         const tabId = tabButton.dataset.tab;
+        const tabsRoot = this._getTabsRoot();
+        const scope = tabsRoot || document;
 
         tabButton.classList.remove('sun-active');
-        const tabContent = document.querySelector(`.sun-tabContent[data-tab-panel="${tabId}"]`);
+        const tabContent = scope.querySelector(`.sun-tabContent[data-tab-panel="${tabId}"]`);
         if (tabContent) {
             tabContent.classList.remove('sun-active');
         }
     }
 
-    /** Восстановить последнюю вкладку из localStorage.activeTab. */
+    /** Восстановить вкладку из localStorage.activeTab; по умолчанию — «Интерфейс». */
     restoreTabState() {
+        const tabsRoot = this._getTabsRoot();
+        if (!tabsRoot) {
+            return;
+        }
+
         const savedTab = localStorage.getItem('activeTab');
-        if (savedTab) {
-            const tabButton = document.querySelector(`[data-tab="${savedTab}"]`);
-            if (tabButton) {
-                this.activateTab(tabButton);
-                this.activeTab = savedTab;
-            }
+        let tabId = savedTab || 'uiControls';
+        let tabButton = tabsRoot.querySelector(`[data-tab="${tabId}"]`);
+        if (!tabButton) {
+            tabId = 'uiControls';
+            tabButton = tabsRoot.querySelector(`[data-tab="${tabId}"]`);
+        }
+        if (!tabButton) {
+            return;
+        }
+
+        this.activateTab(tabButton);
+        this.activeTab = tabId;
+
+        if (tabId === 'timeBar' && window.timeBarManager) {
+            queueMicrotask(() => {
+                if (typeof window.timeBarManager.createHourMarkers === 'function') {
+                    window.timeBarManager.createHourMarkers();
+                }
+                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
+                    window.timeBarManager.updateTimeIndicator();
+                }
+            });
         }
     }
 
