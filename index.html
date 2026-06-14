@@ -214,14 +214,14 @@
                                             <label class="sun-intersectionFormLabel" for="intersectionWaveSelect">Сигнал</label>
                                             <select class="sun-summarySelect" id="intersectionWaveSelect" title="Сигнал для анализа (то же, что «Окрасить края» в списке волн)"></select>
                                         </div>
-                                    </div>
-                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions sun-intersectionFormRowActionsInForm">
-                                        <button type="button" class="sun-uiBtn sun-btnIntersectionTimeRail" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
-                                            Шкала времени
-                                        </button>
-                                        <button type="button" class="sun-uiBtn sun-btnClearWaveSelection" data-action="clearWaveSelection">
-                                            Сбросить выбор сигнала
-                                        </button>
+                                        <div class="sun-intersectionFormRowActions sun-intersectionFormRowActionsInForm">
+                                            <button type="button" class="sun-uiBtn sun-btnIntersectionTimeRail" disabled title="То же, что таблица при сортировке «по времени ↑»: шкала суток, центр — сейчас">
+                                                Шкала времени
+                                            </button>
+                                            <button type="button" class="sun-uiBtn sun-btnClearWaveSelection" data-action="clearWaveSelection">
+                                                Сбросить выбор сигнала
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -272,7 +272,7 @@
                                 <button type="button" class="sun-tabButton sun-dateComparisonViewTab" data-date-compare-view="phaseGap" role="tab" aria-selected="false">Разность фаз</button>
                                 <button type="button" class="sun-tabButton sun-dateComparisonViewTab" data-date-compare-view="quadrature" role="tab" aria-selected="false">Квадратура фаз</button>
                             </div>
-                            <div class="sun-summaryResultsContainer sun-intersectionResultsContainer">
+                            <div class="sun-summaryResultsContainer">
                                 <div class="sun-summaryResults sun-dateCompareResults"></div>
                             </div>
                         </div>
@@ -287,10 +287,8 @@
                             <div class="sun-summaryControls">
                                 <div class="sun-intersectionForm">
                                     <div class="sun-stateSearchConditions" id="stateSearchConditions" aria-label="Условия поиска"></div>
-                                    <div class="sun-intersectionFormRow sun-intersectionFormRowActions">
-                                        <button type="button" class="sun-uiBtn" id="btnStateSearchAddCondition">Добавить сигнал</button>
-                                    </div>
                                     <div class="sun-intersectionFormRow sun-intersectionFormRowActions sun-stateSearchActionsRow">
+                                        <button type="button" class="sun-uiBtn" id="btnStateSearchAddCondition">Добавить сигнал</button>
                                         <div class="sun-intersectionSelectGroup sun-stateSearchLimitGroup">
                                             <label class="sun-intersectionFormLabel" for="stateSearchLimitYears">Лимит поиска, лет</label>
                                             <input type="number" class="sun-intersectionFormInput sun-stateSearchLimitInput" id="stateSearchLimitYears" value="100" min="1" max="500" step="1" title="Сколько лет от даты рождения активной персоны сканировать">
@@ -364,23 +362,29 @@
             <div class="sun-mainControlsPanel">
                 <div class="sun-controlPanel">
                     <div class="sun-panelSection sun-datesPanel sun-datesPanelInControl">
-                        <div class="sun-addGroupForm sun-addGroupFormMb">
-                            <input type="text" class="sun-addGroupInput sun-newPersonGroupName sun-flex1" placeholder="Название группы персон">
-                            <button class="sun-addGroupBtn sun-uiBtn sun-btnAddPersonGroup" type="button">Добавить группу</button>
-                        </div>
-                        <div class="sun-dateAddForm">
-                            <div class="sun-dateControlsButtons">
-                                <input type="date" class="sun-dateInput sun-dateInputPerson">
-                                <input type="text" class="sun-dateInput sun-dateNameInput sun-flex1" placeholder="Название">
-                                <select class="sun-formInput sun-dateGenderSelect" aria-label="Пол" title="Не указан">
-                                    <option value="unset" selected title="Не указан">⚥</option>
-                                    <option value="male" title="Мужской">♂</option>
-                                    <option value="female" title="Женский">♀</option>
-                                </select>
-                                <button type="button" class="sun-uiBtn sun-btnAddDate">Добавить персону</button>
+                        <div class="sun-datesPanelAddActions">
+                            <div class="sun-datesPanelAddToggles">
+                                <button type="button" class="sun-addGroupToggle sun-uiBtn sun-btnToggleAddPersonGroup" aria-expanded="false" aria-controls="addPersonGroupFormFields">Добавить группу</button>
+                                <button type="button" class="sun-addGroupToggle sun-uiBtn sun-btnToggleAddDate" aria-expanded="false" aria-controls="dateAddFormFields">Добавить персону</button>
                             </div>
-                            <div class="sun-dateAddDescriptionRow">
-                                <textarea class="sun-formInput sun-dateAddDescriptionInput sun-dateDescriptionInput" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"></textarea>
+                            <div class="sun-addGroupFormFields sun-addGroupFormFieldsCollapsed" id="addPersonGroupFormFields">
+                                <input type="text" class="sun-addGroupInput sun-newPersonGroupName sun-flex1" placeholder="Название группы персон">
+                                <button type="button" class="sun-addGroupBtn sun-uiBtn sun-btnAddPersonGroup">Создать</button>
+                            </div>
+                            <div class="sun-dateAddFormFields sun-addGroupFormFieldsCollapsed" id="dateAddFormFields">
+                                <div class="sun-dateControlsButtons">
+                                    <input type="date" class="sun-dateInput sun-dateInputPerson">
+                                    <input type="text" class="sun-dateInput sun-dateNameInput sun-flex1" placeholder="Название">
+                                    <select class="sun-formInput sun-dateGenderSelect" aria-label="Пол" title="Не указан">
+                                        <option value="unset" selected title="Не указан">⚥</option>
+                                        <option value="male" title="Мужской">♂</option>
+                                        <option value="female" title="Женский">♀</option>
+                                    </select>
+                                    <button type="button" class="sun-uiBtn sun-btnAddDate">Создать</button>
+                                </div>
+                                <div class="sun-dateAddDescriptionRow">
+                                    <textarea class="sun-formInput sun-dateAddDescriptionInput sun-dateDescriptionInput" rows="2" placeholder="Заметка к выбранной персоне…" aria-label="Заметка к выбранной персоне"></textarea>
+                                </div>
                             </div>
                         </div>
                         <div class="sun-listContainer sun-dateListForDates"></div>
@@ -400,23 +404,34 @@
                         </div>
                         <div class="sun-displayViewTemplatesSeparator" role="separator" aria-hidden="true"></div>
                         <div class="sun-addCustomWaveForm sun-compact">
-                            <div class="sun-addGroupForm">
-                                <input type="text" class="sun-addGroupInput sun-newGroupName sun-flex1" placeholder="Название новой группы">
-                                <button type="button" class="sun-addGroupBtn sun-uiBtn sun-btnAddGroup">Добавить группу</button>
-                            </div>
-                            <div class="sun-waveInputsRow">
-                                <input type="text" class="sun-formInput sun-customWaveName sun-flex2" placeholder="Название сигнала">
-                                <input type="number" class="sun-formInput sun-customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
-                                <select class="sun-formInput sun-customWaveType">
-                                    <option value="solid">Сплошная</option>
-                                    <option value="dashed">Пунктирная</option>
-                                    <option value="dotted">Точечная</option>
-                                    <option value="zigzag">Зигзагообразная</option>
-                                    <option value="dash-dot">Штрих-линия</option>
-                                    <option value="long-dash">Длинный штрих</option>
-                                </select>
-                                <input type="color" class="sun-colorInput sun-customWaveColor" value="#666666" title="Выберить цвет">
-                                <button type="button" class="sun-uiBtn sun-btnAddCustomWave">Добавить сигнал</button>
+                            <div class="sun-wavesPanelAddActions">
+                                <div class="sun-wavesPanelAddToggles">
+                                    <button type="button" class="sun-addGroupToggle sun-uiBtn sun-btnToggleAddWaveGroup" aria-expanded="false" aria-controls="addWaveGroupFormFields">Добавить группу</button>
+                                    <button type="button" class="sun-addGroupToggle sun-uiBtn sun-btnToggleAddWave" aria-expanded="false" aria-controls="addWaveFormFields">Добавить сигнал</button>
+                                </div>
+                                <div class="sun-addGroupFormFields sun-addGroupFormFieldsCollapsed" id="addWaveGroupFormFields">
+                                    <input type="text" class="sun-addGroupInput sun-newGroupName sun-flex1" placeholder="Название новой группы">
+                                    <button type="button" class="sun-addGroupBtn sun-uiBtn sun-btnAddGroup">Создать</button>
+                                </div>
+                                <div class="sun-waveAddFormFields sun-addGroupFormFieldsCollapsed" id="addWaveFormFields">
+                                    <div class="sun-waveInputsRow">
+                                        <input type="text" class="sun-formInput sun-customWaveName sun-flex2" placeholder="Название сигнала">
+                                        <input type="number" class="sun-formInput sun-customWavePeriod" placeholder="Период (дней)" min="0.1" step="0.1">
+                                        <select class="sun-formInput sun-customWaveType">
+                                            <option value="solid">Сплошная</option>
+                                            <option value="dashed">Пунктирная</option>
+                                            <option value="dotted">Точечная</option>
+                                            <option value="zigzag">Зигзагообразная</option>
+                                            <option value="dash-dot">Штрих-линия</option>
+                                            <option value="long-dash">Длинный штрих</option>
+                                        </select>
+                                        <input type="color" class="sun-colorInput sun-customWaveColor" value="#666666" title="Выберить цвет">
+                                        <button type="button" class="sun-uiBtn sun-btnAddCustomWave">Создать</button>
+                                    </div>
+                                    <div class="sun-waveAddDescriptionRow">
+                                        <textarea class="sun-formInput sun-waveAddDescriptionInput sun-customWaveNote" rows="2" placeholder="Заметка к выбранному сигналу…" aria-label="Заметка к выбранному сигналу"></textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="sun-wavesListContainer">

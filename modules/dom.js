@@ -79,7 +79,11 @@ window.SUN_SELECTORS = {
     waveLabelsVerticalContainer: '.sun-waveLabelsVerticalContainer',
     datesPanel: '.sun-datesPanel',
     newPersonGroupName: '.sun-newPersonGroupName',
+    btnToggleAddPersonGroup: '.sun-btnToggleAddPersonGroup',
+    addPersonGroupFormFields: '#addPersonGroupFormFields',
     btnAddPersonGroup: '.sun-btnAddPersonGroup',
+    btnToggleAddDate: '.sun-btnToggleAddDate',
+    dateAddFormFields: '#dateAddFormFields',
     dateInput: '.sun-dateInputPerson',
     dateNameInput: '.sun-dateNameInput',
     dateGenderSelect: '.sun-dateGenderSelect',
@@ -94,11 +98,16 @@ window.SUN_SELECTORS = {
     btnDeleteDisplayViewTemplate: '.sun-btnDeleteDisplayViewTemplate',
     displayViewTemplateDescription: '.sun-displayViewTemplateDescription',
     newGroupName: '.sun-newGroupName',
+    btnToggleAddWaveGroup: '.sun-btnToggleAddWaveGroup',
+    addWaveGroupFormFields: '#addWaveGroupFormFields',
+    btnToggleAddWave: '.sun-btnToggleAddWave',
+    addWaveFormFields: '#addWaveFormFields',
     btnAddGroup: '.sun-btnAddGroup',
     customWaveName: '.sun-customWaveName',
     customWavePeriod: '.sun-customWavePeriod',
     customWaveType: '.sun-customWaveType',
     customWaveColor: '.sun-customWaveColor',
+    customWaveNote: '.sun-customWaveNote',
     btnAddCustomWave: '.sun-btnAddCustomWave',
     wavesList: '.sun-wavesList',
     dbImportTextarea: '.sun-dbImportTextarea',
@@ -157,6 +166,21 @@ class DOM {
         const parts = [n, '-', d];
         if (g !== 'unset') {
             parts.push('-', this.getPersonGenderLabel(g));
+        }
+        if (desc) {
+            parts.push('-', desc);
+        }
+        return parts.join('\n');
+    }
+
+    /** Тултип строки сигнала: имя, период, заметка (через «-» на отдельных строках). */
+    formatWaveHoverTitle(name, period, note) {
+        const n = String(name == null ? '' : name);
+        const p = period != null && period !== '' ? `${period} дней` : '';
+        const desc = typeof note === 'string' ? note.trim() : '';
+        const parts = [n];
+        if (p) {
+            parts.push('-', p);
         }
         if (desc) {
             parts.push('-', desc);
@@ -411,9 +435,9 @@ class DOM {
         return window.appState.waveBold[wid] === true;
     }
 
-    /** Текст кнопки слоя B на вкладке пересечений. */
+    /** @deprecated Используй getDateCompareVizorToggleLabel — пересечения с иной датой Б показывают A+B. */
     getIntersectionVizorToggleLabelForWaveB(waveId) {
-        return this.isWaveLayerBOnVizor(waveId) ? 'Скрыть волну от даты Б' : 'Показать волну от даты Б';
+        return this.getDateCompareVizorToggleLabel(waveId);
     }
 
     /** Слои A и B сигнала видны на графике (группа вкл, видимость A и B). */
@@ -441,7 +465,7 @@ class DOM {
             if (btn.classList.contains('sun-dateCompareVizorBtn')) {
                 btn.textContent = this.getDateCompareVizorToggleLabel(id);
             } else if (btn.classList.contains('sun-intersectionVizorBBtn')) {
-                btn.textContent = this.getIntersectionVizorToggleLabelForWaveB(id);
+                btn.textContent = this.getDateCompareVizorToggleLabel(id);
             } else {
                 btn.textContent = this.getWaveVizorToggleButtonLabel(id);
             }

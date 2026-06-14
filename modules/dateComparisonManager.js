@@ -787,7 +787,7 @@ class DateComparisonManager {
         const showBothLayersBtnCol = true;
 
         const head = `
-            <table class="sun-dateComparisonTable">
+            <table class="sun-dateComparisonTable sun-stateSearchTable">
                 <thead>
                     <tr class="sun-dateComparisonTableRow">
                         <th class="sun-dateComparisonTableHeadCell">Сигнал</th>

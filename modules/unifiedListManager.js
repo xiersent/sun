@@ -777,6 +777,7 @@ class UnifiedListManager {
     prepareWaveData(wave, index) {
         const waveIdStr = String(wave.id);
         const editingWaveIdStr = window.appState.editingWaveId ? String(window.appState.editingWaveId) : null;
+        const note = typeof wave.note === 'string' ? wave.note : '';
         
         return {
             id: wave.id,
@@ -786,6 +787,8 @@ class UnifiedListManager {
             color: wave.color,
             typeValue: wave.type,
             description: window.dom.getWaveDescription(wave.type),
+            note,
+            hoverTitle: window.dom.formatWaveHoverTitle(wave.name, wave.period, note),
             visible: window.appState.waveVisibility[waveIdStr] !== false,
             // UI: .sun-waveBVisibilityCheck; в appState ключ waveBold (историческое имя поля)
             bold: window.appState.waveBold[waveIdStr] || false,
@@ -1088,10 +1091,12 @@ class UnifiedListManager {
         const periodInput = window.dom.byKey(`editWavePeriod${editingId}`);
         const typeInput = window.dom.byKey(`editWaveType${editingId}`);
         const colorInput = window.dom.byKey(`editWaveColor${editingId}`);
+        const noteInput = window.dom.byKey(`editWaveNote${editingId}`);
         if (nameInput) nameInput.value = wave.name;
         if (periodInput) periodInput.value = wave.period;
         if (typeInput) typeInput.value = wave.type;
         if (colorInput) colorInput.value = wave.color || '#666666';
+        if (noteInput) noteInput.value = typeof wave.note === 'string' ? wave.note : '';
     }
 
     /** Строка списка после сохранения формы: название, период, описание типа, превью цвета. */
@@ -1120,6 +1125,15 @@ class UnifiedListManager {
         const valueEl = row.querySelector('.sun-listItemValue');
         if (valueEl && window.dom && typeof window.dom.getWaveDescription === 'function') {
             valueEl.textContent = window.dom.getWaveDescription(wave.type);
+        }
+
+        const titleElHover = titleEl;
+        if (titleElHover && window.dom && typeof window.dom.formatWaveHoverTitle === 'function') {
+            const note = typeof wave.note === 'string' ? wave.note : '';
+            titleElHover.setAttribute(
+                'title',
+                window.dom.formatWaveHoverTitle(wave.name, wave.period, note)
+            );
         }
 
         const preview = row.querySelector('.sun-waveColorPreviewSmall');
@@ -1344,6 +1358,7 @@ class UnifiedListManager {
         const newPeriod = parseFloat(window.dom.byKey(`editWavePeriod${waveId}`).value);
         const newType = window.dom.byKey(`editWaveType${waveId}`).value;
         const newColor = window.dom.byKey(`editWaveColor${waveId}`).value;
+        const noteInput = window.dom.byKey(`editWaveNote${waveId}`);
         
         if (!newName) {
             alert('Пожалуйста, введите название сигнала');
@@ -1357,6 +1372,7 @@ class UnifiedListManager {
         wave.name = newName;
         wave.period = newPeriod;
         wave.type = newType;
+        wave.note = noteInput ? String(noteInput.value) : '';
         
         // Проверяем, изменился ли цвет
         if (wave.color !== newColor) {

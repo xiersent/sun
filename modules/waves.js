@@ -2736,7 +2736,7 @@ class WavesManager {
     }
 
     /** Добавляет пользовательскую волну в appState, группу default и DOM. */
-    addCustomWave(name, period, type, color) {
+    addCustomWave(name, period, type, color, note) {
         if (!name || !period) {
             alert('Пожалуйста, введите название и период сигнала');
             return null;
@@ -2748,6 +2748,7 @@ class WavesManager {
             period: parseFloat(period),
             type: type,
             color: color,
+            note: typeof note === 'string' ? note : '',
             visible: true,
             bold: false,
             cornerColor: false

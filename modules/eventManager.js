@@ -1404,7 +1404,7 @@ class EventManager {
             return;
         }
 
-        if ($target.hasClass('sun-dateCompareVizorBtn')) {
+        if ($target.hasClass('sun-dateCompareVizorBtn') || $target.hasClass('sun-intersectionVizorBBtn')) {
             e.preventDefault();
             e.stopPropagation();
             const waveId = $target.data('wave-id');
@@ -1819,39 +1819,8 @@ class EventManager {
         }
     }
     
-    /** Обработка кнопок навигации, добавления групп и импорта. */
+    /** Обработка кнопок навигации и импорта. */
     handleButtonClicks($target, e) {
-        if ($target.is('.sun-btnAddCustomWave') || $target.closest('.sun-btnAddCustomWave').length) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const name = window.dom.jq('customWaveName').val();
-            const period = window.dom.jq('customWavePeriod').val();
-            const type = window.dom.jq('customWaveType').val();
-            const color = window.dom.jq('customWaveColor').val();
-            
-            if (name && period) {
-                const newWave = window.waves.addCustomWave(name, period, type, color);
-                if (newWave && window.unifiedListManager) {
-                    window.unifiedListManager.updateWavesList();
-                    
-                    window.dom.jq('customWaveName').val('');
-                    window.dom.jq('customWavePeriod').val('');
-                    window.dom.jq('customWaveColor').val('#666666');
-                    
-                    const defaultGroup = window.appState.data.groups.find(g => g.id === 'default-group');
-                    if (defaultGroup && window.unifiedListManager.updateGroupStats) {
-                        window.unifiedListManager.updateGroupStats('default-group');
-                    }
-                    
-                    if (window.summaryManager && window.summaryManager.updateSummary) {
-                        window.summaryManager.updateSummary();
-                    }
-                }
-            }
-            return;
-        }
-
         if ($target.is('.sun-btnPrevDay') || $target.closest('.sun-btnPrevDay').length) {
             e.preventDefault();
             if (window.dates) window.dates.navigateDay(-1);
@@ -1867,24 +1836,6 @@ class EventManager {
         if ($target.is('.sun-btnSetDate') || $target.closest('.sun-btnSetDate').length) {
             e.preventDefault();
             if (window.dates) window.dates.setDateFromInput();
-            return;
-        }
-        
-        if ($target.is('.sun-btnAddGroup') || $target.closest('.sun-btnAddGroup').length) {
-            e.preventDefault();
-            const groupName = window.dom.jq('newGroupName').val();
-            if (groupName && window.dates) {
-                const newGroup = window.dates.addGroup(groupName);
-                if (window.displayViewTemplatesManager && newGroup) {
-                    window.displayViewTemplatesManager.onNewGroupAdded(newGroup);
-                }
-                if (window.dataManager) window.dataManager.updateWavesGroups();
-                window.dom.jq('newGroupName').val('');
-                
-                if (window.summaryManager && window.summaryManager.updateSummary) {
-                    window.summaryManager.updateSummary();
-                }
-            }
             return;
         }
 
@@ -2005,15 +1956,15 @@ class EventManager {
             return;
         }
         
-        const $intersectionItem = $target.closest('.sun-summaryItem');
-        if ($intersectionItem.length && 
-            !$target.is('button') && 
-            !$target.hasClass('sun-showOnVizorBtn')) {
+        const $row = $target.closest('.sun-intersectionResults .sun-dateComparisonTableRow');
+        if ($row.length &&
+            !$target.is('button') &&
+            !$target.closest('button').length) {
             
             e.preventDefault();
             e.stopPropagation();
             
-            const waveId = $intersectionItem.find('.sun-showOnVizorBtn').data('wave-id');
+            const waveId = $row.data('wave-id') || $row.find('.sun-showOnVizorBtn').data('wave-id');
             if (waveId && window.waves) {
                 const wave = window.appState.data.waves.find(w => String(w.id) === String(waveId));
                 if (wave) {

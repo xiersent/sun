@@ -1442,7 +1442,7 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] .sun-timeBarControlsSection {
-    padding: 15px 15px 0;
+    padding: 15px;
     border: none;
     outline: none;
     background: transparent;
@@ -1722,6 +1722,20 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-listItemDate .sun-dateDescriptionEdit {
+    width: 100%;
+    min-height: 44px;
+    max-height: 160px;
+    resize: vertical;
+    height: auto;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    line-height: 1.35;
+    font-family: Tahoma, sans-serif;
+    font-size: 11px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-listItemWave .sun-waveNoteEdit {
     width: 100%;
     min-height: 44px;
     max-height: 160px;
@@ -4818,7 +4832,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupForm {
+  .sun-addCustomWaveForm.sun-compact .sun-addGroupFormFields {
     display: flex;
     gap: 5px;
     width: 100%;
@@ -4898,6 +4912,23 @@ textarea {
     flex-shrink: 0;
     white-space: nowrap;
     margin-top: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveAddDescriptionRow {
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveAddDescriptionInput {
+    width: 100%;
+    min-height: 44px;
+    max-height: 160px;
+    resize: vertical;
+    font-size: 11px;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    line-height: 1.35;
   }
 }
 @media (min-width: 0px) {
@@ -5066,15 +5097,25 @@ textarea {
 @media (min-width: 0px) {
   .sun-intersectionForm {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
     gap: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionForm > .sun-stateSearchConditions {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
   }
 }
 @media (min-width: 0px) {
   .sun-intersectionFormRow {
     display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
     gap: 5px;
-    align-items: center;
   }
 }
 @media (min-width: 0px) {
@@ -5124,8 +5165,81 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-datesPanelAddActions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesPanelAddActions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-datesPanelAddToggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-wavesPanelAddToggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
   .sun-addGroupFormMb {
     margin-bottom: 5px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addGroupToggle {
+    flex-shrink: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addGroupFormFields {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateAddFormFields {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-waveAddFormFields {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-addGroupFormFieldsCollapsed {
+    display: none !important;
   }
 }
 @media (min-width: 0px) {
@@ -5440,6 +5554,9 @@ textarea {
     overflow-x: hidden;
     background: #fff;
   }
+  .sun-summaryResultsContainer, .sun-summaryResultsContainer * {
+    transition: none;
+  }
 }
 @media (min-width: 0px) {
   .sun-summaryResultsContainer .sun-summaryResults {
@@ -5478,7 +5595,6 @@ textarea {
     background: #fff;
     gap: 10px;
     cursor: pointer;
-    transition: background-color 0.2s;
   }
 }
 @media (min-width: 0px) {
@@ -5606,14 +5722,23 @@ textarea {
 @media (min-width: 0px) {
   .sun-intersectionForm {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
     gap: 5px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionForm > .sun-stateSearchConditions {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
   }
 }
 @media (min-width: 0px) {
   .sun-intersectionFormRow {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     flex-wrap: wrap;
     gap: 5px;
   }
@@ -5646,6 +5771,9 @@ textarea {
     border: 1px solid #ddd;
     background: #fff;
   }
+  .sun-intersectionResultsContainer, .sun-intersectionResultsContainer * {
+    transition: none;
+  }
 }
 @media (min-width: 0px) {
   .sun-intersectionResults {
@@ -5663,7 +5791,6 @@ textarea {
     background: #fff;
     gap: 10px;
     cursor: pointer;
-    transition: background-color 0.2s;
   }
 }
 @media (min-width: 0px) {
@@ -5838,13 +5965,27 @@ textarea {
     align-items: center;
     gap: 5px;
     margin-left: auto;
+    flex-shrink: 0;
   }
 }
 @media (min-width: 0px) {
   .sun-intersectionForm > .sun-intersectionFormRowActions {
     justify-content: flex-end;
-    margin-left: 0;
-    margin-top: 5px;
+    margin-left: auto;
+    margin-top: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionToolbarOneRow {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-intersectionToolbarOneRow .sun-intersectionFormRowActions {
+    margin-left: auto;
   }
 }
 @media (min-width: 0px) {
@@ -5973,8 +6114,10 @@ textarea {
     align-items: flex-end;
     gap: 5px;
     margin-left: 0;
-    margin-top: 5px;
+    margin-top: 0;
     justify-content: flex-start;
+    flex: 1 1 100%;
+    width: 100%;
   }
 }
 @media (min-width: 0px) {
@@ -6027,11 +6170,6 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-intersectionToolbarOneRow {
-    margin-bottom: 10px;
-  }
-}
-@media (min-width: 0px) {
   .sun-intersectionToolbarOneRow .sun-intersectionSelectGroup {
     flex: 1 1 130px;
     min-width: 0;
@@ -6049,6 +6187,9 @@ textarea {
     border-collapse: collapse;
     font-size: 11px;
     border: 1px solid #ddd;
+  }
+  .sun-dateComparisonTable, .sun-dateComparisonTable * {
+    transition: none;
   }
 }
 @media (min-width: 0px) {
@@ -6815,8 +6956,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-intersectionFormRowActionsInForm {
     justify-content: flex-end;
-    margin-left: 0;
-    margin-top: 5px;
+    margin-left: auto;
+    margin-top: 0;
   }
 }
 @media (min-width: 0px) {
@@ -7360,7 +7501,7 @@ textarea {
   }
 }
 @media (max-width: 768px) and (min-width: 0px) {
-  .sun-addCustomWaveForm.sun-compact .sun-addGroupForm {
+  .sun-addCustomWaveForm.sun-compact .sun-addGroupFormFields {
     flex-direction: column;
     gap: 5px;
   }
@@ -7575,3 +7716,5 @@ textarea {
 .sun-root h6 {
   font-weight: 400;
 }
+
+/*# sourceMappingURL=styles.css.map */

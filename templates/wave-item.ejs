@@ -1,4 +1,7 @@
 <!-- templates/wave-item.ejs -->
+<% var _attrEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }; %>
+<% var _textEsc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }; %>
+<% var _noteForTitle = String(data.note || '').trim(); var _hoverFallback = String(data.name || '') + '\n-\n' + String(data.period || '') + ' дней'; if (_noteForTitle) { _hoverFallback += '\n-\n' + _noteForTitle; } var _waveTitleHover = _attrEsc(data.hoverTitle != null ? data.hoverTitle : _hoverFallback); %>
 <div class="sun-listItem sun-listItemWave sun-waveInGroup sun-groupChildrenItem <%= data.editing ? 'sun-listItemEditing' : '' %>"
     data-id="<%= data.id %>"
     data-type="wave"
@@ -37,7 +40,7 @@
                                title="Окрасить края в цвет сигнала">
                     </div>
                     <div class="sun-listItemTitleContainer">
-                        <div class="sun-listItemTitle">
+                        <div class="sun-listItemTitle" title="<%= _waveTitleHover %>">
                             <%= data.name %>
                             <span class="sun-wavePeriodBadge"><%= data.period %> дней</span>
                         </div>
@@ -77,6 +80,9 @@
             <div class="sun-listItem__edit-row">
                 <label class="sun-listItem__edit-label">Цвет:</label>
                 <input type="color" class="sun-colorInput" id="editWaveColor<%= data.id %>" value="<%= data.color %>">
+            </div>
+            <div class="sun-listItem__edit-row sun-listItemEditRowFull">
+                <textarea class="sun-listItem__edit-input sun-waveNoteEdit" id="editWaveNote<%= data.id %>" rows="2" placeholder="Заметка к выбранному сигналу…" aria-label="Заметка к выбранному сигналу"><%= _textEsc(data.note || '') %></textarea>
             </div>
             <div class="sun-listItemEditActions">
                 <button type="button" class="sun-saveBtn sun-uiBtn" data-id="<%= data.id %>" data-type="wave" title="Сохранить" aria-label="Сохранить">💾</button>

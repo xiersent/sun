@@ -572,6 +572,10 @@ class UIManager {
         window.dom.byKey('customWavePeriod').value = '';
         window.dom.byKey('customWaveType').value = 'solid';
         window.dom.byKey('customWaveColor').value = '#666666';
+        const noteEl = window.dom.byKey('customWaveNote');
+        if (noteEl) {
+            noteEl.value = '';
+        }
     }
 
     /** Корень основных вкладок панели. */

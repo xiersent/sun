@@ -752,7 +752,8 @@ class StateIntersectionManager {
         const msPerDay = 24 * 60 * 60 * 1000;
         const baseMsB = this.lastIntersectionBaseMsB != null ? this.lastIntersectionBaseMsB : this._getIntersectionPhaseBases().baseMsB;
 
-        const resultsHTML = sortedIntersections.map((inter, index) => {
+        const body = sortedIntersections
+            .map((inter) => {
             const wave = inter.wave2;
             const timeStr = this.formatTime(inter.time);
             const dayAtInter = (inter.time.getTime() - baseMsB) / msPerDay;
@@ -772,47 +773,60 @@ class StateIntersectionManager {
                 window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
                     ? window.waves.formatWaveDirectionTitle(dirAtInter)
                     : '';
-            const vizorBtnClass = useLayerB ? 'sun-uiBtn sun-showOnVizorBtn sun-intersectionVizorBBtn' : 'sun-uiBtn sun-showOnVizorBtn';
+            const vizorBtnClass = useLayerB
+                ? 'sun-uiBtn sun-showOnVizorBtn sun-dateCompareVizorBtn sun-dateComparisonActionsBtn'
+                : 'sun-uiBtn sun-showOnVizorBtn sun-dateComparisonActionsBtn';
             const vizorLabel =
                 window.dom && useLayerB
-                    ? window.dom.getIntersectionVizorToggleLabelForWaveB(wave.id)
+                    ? window.dom.getDateCompareVizorToggleLabel(wave.id)
                     : window.dom
                       ? window.dom.getWaveVizorToggleButtonLabel(wave.id)
                       : 'Показать волну';
-            
-            return `
-                <div class="sun-summaryItem">
-                    <div class="sun-summaryItemInfo">
-                        <div class="sun-summaryItemName">
-                            <span class="sun-summaryItemIndex">${index + 1}.</span>
-                            <span style="color: ${wave.color || '#666'}">
-                                ${this.escapeHtml(wave.name)}
-                            </span>
-                            <span class="sun-wavePeriodBadge">${wave.period} дней</span>
-                        </div>
-                        <div class="sun-summaryItemDetails">
-                            <span class="sun-summaryItemState">🕐 ${timeStr}</span>
-                            <span class="sun-summaryItemDifference">Состояние: ${stateAtInter.toFixed(2)} <span class="sun-waveDirectionLabel" title="${this.escapeHtml(dirTitle)}">${dirLabel}</span></span>
-                        </div>
-                    </div>
-                    <div class="sun-summaryItemColor" style="background-color: ${wave.color || '#666'}"></div>
-                    <div class="sun-summaryItemActions">
-                        <button type="button" class="${vizorBtnClass}" data-wave-id="${wave.id}">
-                            ${vizorLabel}
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        container.innerHTML = resultsHTML;
+
+            return `<tr class="sun-dateComparisonTableRow" data-wave-id="${wave.id}">
+                <td class="sun-dateComparisonTableCell sun-dateComparisonName">
+                    <span class="sun-dateComparisonColor" style="background-color:${wave.color || '#666'}"></span>
+                    ${this.escapeHtml(wave.name)} <span class="sun-dateComparisonPeriod">(${wave.period} дн.)</span>
+                </td>
+                <td class="sun-dateComparisonTableCell sun-dateComparisonState">${timeStr}</td>
+                <td class="sun-dateComparisonTableCell sun-dateComparisonState">${stateAtInter.toFixed(2)}</td>
+                <td class="sun-dateComparisonTableCell" title="${this.escapeHtml(dirTitle)}">${dirLabel}</td>
+                <td class="sun-dateComparisonTableCell sun-dateComparisonActions">
+                    <button type="button" class="${vizorBtnClass}" data-wave-id="${wave.id}">${this.escapeHtml(vizorLabel)}</button>
+                </td>
+            </tr>`;
+        })
+            .join('');
+
+        container.innerHTML = `
+            <table class="sun-dateComparisonTable sun-stateSearchTable">
+                <thead>
+                    <tr class="sun-dateComparisonTableRow">
+                        <th class="sun-dateComparisonTableHeadCell">Сигнал</th>
+                        <th class="sun-dateComparisonTableHeadCell sun-dateComparisonState">Время</th>
+                        <th class="sun-dateComparisonTableHeadCell sun-dateComparisonState">Состояние</th>
+                        <th class="sun-dateComparisonTableHeadCell">Напр.</th>
+                        <th class="sun-dateComparisonTableHeadCell sun-dateComparisonActions">График</th>
+                    </tr>
+                </thead>
+                <tbody>${body}</tbody>
+            </table>
+        `;
+
+        this._bindIntersectionVizorButtons(container);
+        this.syncTimeRailOverlayButton();
+    }
+
+    /** Кнопки показа волн в таблице пересечений. */
+    _bindIntersectionVizorButtons(container) {
+        if (!container) return;
 
         queueMicrotask(() => {
-            container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
+            container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach((btn) => {
                 btn.replaceWith(btn.cloneNode(true));
             });
 
-            container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
+            container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach((btn) => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -820,70 +834,34 @@ class StateIntersectionManager {
                     const waveId = btn.dataset.waveId;
                     if (!waveId) return;
 
-                    if (btn.classList.contains('sun-intersectionVizorBBtn')) {
-                        let bCheckbox = null;
-                        document.querySelectorAll('.sun-waveBVisibilityCheck').forEach((cb) => {
-                            if (String(cb.getAttribute('data-id') || '') === String(waveId)) {
-                                bCheckbox = cb;
-                            }
+                    const checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
+
+                    if (checkbox) {
+                        const isChecked = checkbox.checked;
+                        checkbox.checked = !isChecked;
+
+                        const changeEvent = new Event('change', {
+                            bubbles: true,
+                            cancelable: true
                         });
-                        if (bCheckbox) {
-                            const isChecked = bCheckbox.checked;
-                            bCheckbox.checked = !isChecked;
-                            bCheckbox.dispatchEvent(
-                                new Event('change', {
-                                    bubbles: true,
-                                    cancelable: true
-                                })
-                            );
-                            if (window.eventManager && window.eventManager.handleWavePersonBVisibilityChange) {
-                                window.eventManager.handleWavePersonBVisibilityChange(
-                                    waveId,
-                                    !isChecked,
-                                    $(bCheckbox)
-                                );
-                            }
-                        } else if (window.eventManager && window.eventManager.handleWavePersonBVisibilityChange) {
-                            const wid = String(waveId);
-                            const cur = window.appState.waveBold[wid] === true;
-                            const next = !cur;
-                            const $fake = $('<input type="checkbox" />');
-                            $fake.prop('checked', next);
-                            window.eventManager.handleWavePersonBVisibilityChange(waveId, next, $fake);
+                        checkbox.dispatchEvent(changeEvent);
+
+                        if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
+                            const $checkbox = $(checkbox);
+                            window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
                         }
-                    } else {
-                        let checkbox = null;
-                        checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
+                    } else if (window.appState && window.appState.waveVisibility) {
+                        const waveIdStr = String(waveId);
+                        const currentState = window.appState.waveVisibility[waveIdStr];
+                        window.appState.waveVisibility[waveIdStr] = currentState === false;
+                        window.appState.save();
 
-                        if (checkbox) {
-                            const isChecked = checkbox.checked;
-                            checkbox.checked = !isChecked;
+                        if (window.waves && window.waves.updatePosition) {
+                            window.waves.updatePosition();
+                        }
 
-                            const changeEvent = new Event('change', {
-                                bubbles: true,
-                                cancelable: true
-                            });
-                            checkbox.dispatchEvent(changeEvent);
-
-                            if (window.eventManager && window.eventManager.handleWaveVisibilityChange) {
-                                const $checkbox = $(checkbox);
-                                window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
-                            }
-                        } else {
-                            if (window.appState && window.appState.waveVisibility) {
-                                const waveIdStr = String(waveId);
-                                const currentState = window.appState.waveVisibility[waveIdStr];
-                                window.appState.waveVisibility[waveIdStr] = currentState === false;
-                                window.appState.save();
-
-                                if (window.waves && window.waves.updatePosition) {
-                                    window.waves.updatePosition();
-                                }
-
-                                if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-                                    window.unifiedListManager.updateWavesList();
-                                }
-                            }
+                        if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+                            window.unifiedListManager.updateWavesList();
                         }
                     }
                     if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
@@ -892,7 +870,6 @@ class StateIntersectionManager {
                 });
             });
         });
-        this.syncTimeRailOverlayButton();
     }
     
     /** Пустое состояние: волна не выбрана. */

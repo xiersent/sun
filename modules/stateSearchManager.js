@@ -874,6 +874,73 @@ class StateSearchManager {
         window.dates.setDate(new Date(timestamp), true);
     }
 
+    /** Спросить включение отключённых групп для сигналов поиска; отфильтровать те, что нельзя показать. */
+    _confirmGroupsForSearchWaves(idsA, idsB) {
+        if (!window.appState || !window.waves || !window.appState.data.groups) {
+            return { idsA, idsB, enabledGroupIds: [] };
+        }
+
+        const wavesToShow = new Set([...idsA, ...idsB]);
+        const disabledGroups = new Map();
+
+        for (const wid of wavesToShow) {
+            if (window.waves.isWaveGroupEnabled(wid)) {
+                continue;
+            }
+            for (let gi = 0; gi < window.appState.data.groups.length; gi++) {
+                const group = window.appState.data.groups[gi];
+                if (group.enabled) {
+                    continue;
+                }
+                if (group.waves && group.waves.some((wId) => String(wId) === String(wid))) {
+                    disabledGroups.set(String(group.id), group);
+                }
+            }
+        }
+
+        const enabledGroupIds = [];
+        for (const [groupId, group] of disabledGroups) {
+            const shouldEnable = window.confirm(
+                `Группа "${group.name}" отключена. Включить её для отображения сигнала?`
+            );
+            if (shouldEnable) {
+                group.enabled = true;
+                enabledGroupIds.push(groupId);
+            }
+        }
+
+        if (enabledGroupIds.length > 0) {
+            enabledGroupIds.forEach((groupId) => {
+                document.querySelectorAll('.sun-waveGroupToggle').forEach((el) => {
+                    if (String(el.getAttribute('data-group-id')) === String(groupId)) {
+                        el.checked = true;
+                    }
+                });
+                if (
+                    window.unifiedListManager &&
+                    typeof window.unifiedListManager.updateGroupStats === 'function'
+                ) {
+                    window.unifiedListManager.updateGroupStats(groupId);
+                }
+            });
+        }
+
+        const filteredA = new Set(idsA);
+        const filteredB = new Set(idsB);
+        for (const wid of filteredA) {
+            if (!window.waves.isWaveGroupEnabled(wid)) {
+                filteredA.delete(wid);
+            }
+        }
+        for (const wid of filteredB) {
+            if (!window.waves.isWaveGroupEnabled(wid)) {
+                filteredB.delete(wid);
+            }
+        }
+
+        return { idsA: filteredA, idsB: filteredB, enabledGroupIds };
+    }
+
     /** Скрыть все сигналы и включить только из условий поиска. */
     showSearchWavesOnGraph() {
         const conditions = this._readConditions();
@@ -882,8 +949,8 @@ class StateSearchManager {
             return;
         }
 
-        const idsA = new Set();
-        const idsB = new Set();
+        let idsA = new Set();
+        let idsB = new Set();
         for (let ci = 0; ci < conditions.length; ci++) {
             const c = conditions[ci];
             const wid = String(c.wave.id);
@@ -893,6 +960,11 @@ class StateSearchManager {
                 idsA.add(wid);
             }
         }
+
+        const groupResult = this._confirmGroupsForSearchWaves(idsA, idsB);
+        idsA = groupResult.idsA;
+        idsB = groupResult.idsB;
+        const enabledGroupIds = groupResult.enabledGroupIds;
 
         const waves = window.appState && window.appState.data && window.appState.data.waves;
         if (!waves || !waves.length) {
@@ -917,7 +989,9 @@ class StateSearchManager {
         ) {
             window.unifiedListManager.syncWavesListVisibilityFromAppState();
         }
-        if (window.waves && typeof window.waves.reconcileVisibleWaveElements === 'function') {
+        if (enabledGroupIds.length > 0 && window.eventManager && typeof window.eventManager.recreateAllWaveElements === 'function') {
+            window.eventManager.recreateAllWaveElements();
+        } else if (window.waves && typeof window.waves.reconcileVisibleWaveElements === 'function') {
             window.waves.reconcileVisibleWaveElements();
         }
         if (window.waves && typeof window.waves.updatePosition === 'function') {

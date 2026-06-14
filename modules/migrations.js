@@ -3,11 +3,11 @@
  * Менеджер миграций: загрузка migrations/*.js и последовательный прогон.
  */
 class MigrationsManager {
-    /** Последняя версия схемы (= номер последнего migrations/NNN.js). Увеличить при добавлении 005.js */
-    static SCHEMA_VERSION = 4;
+    /** Последняя версия схемы (= номер последнего migrations/NNN.js). Увеличить при добавлении 006.js */
+    static SCHEMA_VERSION = 5;
 
     /** Известные файлы миграций (без HEAD-опроса) */
-    static KNOWN_MIGRATION_IDS = ['001', '002', '003', '004'];
+    static KNOWN_MIGRATION_IDS = ['001', '002', '003', '004', '005'];
 
     constructor(appState) {
         this.appState = appState;

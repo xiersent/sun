@@ -369,52 +369,73 @@ class SummaryManager {
 			resultsElement.innerHTML = '<div class="sun-summaryEmpty">Нет сигналов в выбранном состоянии</div>';
 			return;
 		}
-		
-		const resultsHTML = stateWaves.map((item, index) => {
-			const closenessClass = this.getClosenessClass(item.difference);
-			const stateValue = item.state.toFixed(2);
-			const dirLabel =
-				window.waves && typeof window.waves.formatWaveDirectionLabel === 'function'
-					? window.waves.formatWaveDirectionLabel(item.dir)
-					: '—';
-			const dirTitle =
-				window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
-					? window.waves.formatWaveDirectionTitle(item.dir)
+
+		const body = stateWaves
+			.map((item) => {
+				const closenessClass = this.getClosenessClass(item.difference);
+				const stateValue = item.state.toFixed(2);
+				const dirLabel =
+					window.waves && typeof window.waves.formatWaveDirectionLabel === 'function'
+						? window.waves.formatWaveDirectionLabel(item.dir)
+						: '—';
+				const dirTitle =
+					window.waves && typeof window.waves.formatWaveDirectionTitle === 'function'
+						? window.waves.formatWaveDirectionTitle(item.dir)
+						: '';
+				const pastWaveMarker = item.isPastWave
+					? ' <span class="sun-pastWaveMarker">(прошедшая)</span>'
 					: '';
-			
-			const pastWaveMarker = item.isPastWave ? '<span style="color: #666; font-style: italic;"> (прошедшая)</span>' : '';
-			
-			return `
-				<div class="sun-summaryItem ${closenessClass}">
-					<div class="sun-summaryItemInfo">
-						<div class="sun-summaryItemName">
-							<span class="sun-summaryItemIndex">${index + 1}.</span>
-							${item.wave.name} (${item.wave.period} дней)${pastWaveMarker}
-						</div>
-						<div class="sun-summaryItemDetails">
-							<span class="sun-summaryItemState">Состояние: ${stateValue} <span class="sun-waveDirectionLabel" title="${dirTitle}">${dirLabel}</span></span>
-							<span class="sun-summaryItemDifference">Разница: ${item.difference.toFixed(2)}</span>
-							<span class="sun-summaryItemCloseness">${item.closeness}</span>
-						</div>
-					</div>
-					<div class="sun-summaryItemColor" style="background-color: ${item.wave.color || '#666666'}"></div>
-					<div class="sun-summaryItemActions">
-						<button class="sun-uiBtn sun-showOnVizorBtn" data-wave-id="${item.wave.id}">
-							${window.dom ? window.dom.getWaveVizorToggleButtonLabel(item.wave.id) : 'Показать волну'}
-						</button>
-					</div>
-				</div>
-			`;
-		}).join('');
-		
-		resultsElement.innerHTML = resultsHTML;
+				const name = `${this._escapeHtml(item.wave.name || '')} <span class="sun-dateComparisonPeriod">(${item.wave.period} дн.)</span>${pastWaveMarker}`;
+				const vizorLabel =
+					window.dom && typeof window.dom.getWaveVizorToggleButtonLabel === 'function'
+						? window.dom.getWaveVizorToggleButtonLabel(item.wave.id)
+						: 'Показать волну';
+
+				return `<tr class="sun-dateComparisonTableRow" data-wave-id="${item.wave.id}">
+					<td class="sun-dateComparisonTableCell sun-dateComparisonName">
+						<span class="sun-dateComparisonColor" style="background-color:${item.wave.color || '#666'}"></span>
+						${name}
+					</td>
+					<td class="sun-dateComparisonTableCell sun-dateComparisonState">${stateValue}</td>
+					<td class="sun-dateComparisonTableCell" title="${this._escapeHtml(dirTitle)}">${dirLabel}</td>
+					<td class="sun-dateComparisonTableCell sun-dateComparisonState">${item.difference.toFixed(2)}</td>
+					<td class="sun-dateComparisonTableCell"><span class="sun-intersectionResultCloseness ${closenessClass}">${this._escapeHtml(item.closeness)}</span></td>
+					<td class="sun-dateComparisonTableCell sun-dateComparisonActions">
+						<button type="button" class="sun-uiBtn sun-dateComparisonActionsBtn sun-showOnVizorBtn" data-wave-id="${item.wave.id}">${this._escapeHtml(vizorLabel)}</button>
+					</td>
+				</tr>`;
+			})
+			.join('');
+
+		resultsElement.innerHTML = `
+			<table class="sun-dateComparisonTable sun-stateSearchTable">
+				<thead>
+					<tr class="sun-dateComparisonTableRow">
+						<th class="sun-dateComparisonTableHeadCell">Сигнал</th>
+						<th class="sun-dateComparisonTableHeadCell sun-dateComparisonState">Состояние</th>
+						<th class="sun-dateComparisonTableHeadCell">Напр.</th>
+						<th class="sun-dateComparisonTableHeadCell sun-dateComparisonState">Разница</th>
+						<th class="sun-dateComparisonTableHeadCell">Близость</th>
+						<th class="sun-dateComparisonTableHeadCell sun-dateComparisonActions">График</th>
+					</tr>
+				</thead>
+				<tbody>${body}</tbody>
+			</table>
+		`;
+
+		this._bindShowOnVizorButtons(resultsElement);
+	}
+
+	/** Кнопки «Показать/Скрыть волну» в таблице результатов. */
+	_bindShowOnVizorButtons(container) {
+		if (!container) return;
 
 		queueMicrotask(() => {
-			resultsElement.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
+			container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach((btn) => {
 				btn.replaceWith(btn.cloneNode(true));
 			});
 
-			resultsElement.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach(btn => {
+			container.querySelectorAll('.sun-showOnVizorBtn:not(.sun-dateCompareVizorBtn)').forEach((btn) => {
 				btn.addEventListener('click', (e) => {
 					e.preventDefault();
 					e.stopPropagation();
@@ -422,8 +443,7 @@ class SummaryManager {
 					const waveId = btn.dataset.waveId;
 					if (!waveId) return;
 
-					let checkbox = null;
-					checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
+					const checkbox = document.querySelector(`.sun-waveVisibilityCheck[data-id="${waveId}"]`);
 
 					if (checkbox) {
 						const isChecked = checkbox.checked;
@@ -439,20 +459,18 @@ class SummaryManager {
 							const $checkbox = $(checkbox);
 							window.eventManager.handleWaveVisibilityChange(waveId, !isChecked, $checkbox);
 						}
-					} else {
-						if (window.appState && window.appState.waveVisibility) {
-							const waveIdStr = String(waveId);
-							const currentState = window.appState.waveVisibility[waveIdStr];
-							window.appState.waveVisibility[waveIdStr] = currentState === false;
-							window.appState.save();
+					} else if (window.appState && window.appState.waveVisibility) {
+						const waveIdStr = String(waveId);
+						const currentState = window.appState.waveVisibility[waveIdStr];
+						window.appState.waveVisibility[waveIdStr] = currentState === false;
+						window.appState.save();
 
-							if (window.waves && window.waves.updatePosition) {
-								window.waves.updatePosition();
-							}
+						if (window.waves && window.waves.updatePosition) {
+							window.waves.updatePosition();
+						}
 
-							if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
-								window.unifiedListManager.updateWavesList();
-							}
+						if (window.unifiedListManager && window.unifiedListManager.updateWavesList) {
+							window.unifiedListManager.updateWavesList();
 						}
 					}
 					if (window.dom && window.dom.refreshShowOnVizorButtonLabels) {
@@ -463,15 +481,23 @@ class SummaryManager {
 		});
 	}
 
+	_escapeHtml(s) {
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
+
 
     
     /** Возвращает closeness class. */
     getClosenessClass(difference) {
-        if (difference < 0.001) return 'sun-summaryItemExact';
-        if (difference < 0.1) return 'sun-summaryItemVeryClose';
-        if (difference < 0.3) return 'sun-summaryItemClose';
-        if (difference < 0.5) return 'sun-summaryItemFairlyClose';
-        return 'sun-summaryItemNearby';
+        if (difference < 0.001) return 'sun-intersectionItemExact';
+        if (difference < 0.1) return 'sun-intersectionItemVeryClose';
+        if (difference < 0.3) return 'sun-intersectionItemClose';
+        if (difference < 0.5) return 'sun-intersectionItemFairlyClose';
+        return 'sun-intersectionItemNearby';
     }
     
     /** populateGroupSelect + updateSummary. */

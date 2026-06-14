@@ -49,6 +49,18 @@ class ImportExportManager {
             }
         });
     }
+
+    /** Нормализовать заметки сигналов после импорта. */
+    normalizeImportedWaves(data) {
+        if (!data || !Array.isArray(data.waves)) {
+            return;
+        }
+        data.waves.forEach((wave) => {
+            if (typeof wave.note !== 'string') {
+                wave.note = '';
+            }
+        });
+    }
     
     /** Скачать JSON со всеми данными, настройками UI и transform (файл *_everything.json). */
     exportAll() {
@@ -264,6 +276,8 @@ class ImportExportManager {
                                     }
                                 }
                             });
+
+                            this.normalizeImportedWaves(convertedData);
                             
                             window.appState.data = convertedData;
 
@@ -412,6 +426,7 @@ class ImportExportManager {
                             alert('Даты успешно импортированы!');
                             
                         } else if (isWavesOnly) {
+                            this.normalizeImportedWaves(convertedData);
                             window.appState.data.waves = convertedData.waves || [];
                             window.appState.data.groups = convertedData.groups || [];
                             

@@ -800,9 +800,255 @@ class AppCore {
         }
     }
 
+    /** Сворачиваемые формы «Добавить группу» / «Добавить персону» (взаимоисключающие). */
+    setupDatesPanelAddForms() {
+        const groupToggle = window.dom.byKey('btnToggleAddPersonGroup');
+        const groupFields = window.dom.byKey('addPersonGroupFormFields');
+        const groupInput = window.dom.byKey('newPersonGroupName');
+        const btnAddGroup = window.dom.byKey('btnAddPersonGroup');
+
+        const dateToggle = window.dom.byKey('btnToggleAddDate');
+        const dateFields = window.dom.byKey('dateAddFormFields');
+        const dateInput = window.dom.byKey('dateInput');
+        const nameInput = window.dom.byKey('dateNameInput');
+        const descEl = window.dom.byKey('dateDescriptionInput');
+        const genderEl = window.dom.byKey('dateGenderSelect');
+        const btnAddDate = window.dom.byKey('btnAddDate');
+
+        if (!groupToggle || !groupFields || !dateToggle || !dateFields) {
+            return;
+        }
+
+        const setOpenPanel = (panel) => {
+            const openGroup = panel === 'group';
+            const openDate = panel === 'date';
+
+            groupFields.classList.toggle('sun-addGroupFormFieldsCollapsed', !openGroup);
+            groupToggle.setAttribute('aria-expanded', openGroup ? 'true' : 'false');
+
+            dateFields.classList.toggle('sun-addGroupFormFieldsCollapsed', !openDate);
+            dateToggle.setAttribute('aria-expanded', openDate ? 'true' : 'false');
+
+            if (openGroup && groupInput) {
+                groupInput.focus();
+            } else if (openDate && dateInput) {
+                dateInput.focus();
+            }
+        };
+
+        groupToggle.addEventListener('click', () => {
+            const willOpen = groupFields.classList.contains('sun-addGroupFormFieldsCollapsed');
+            setOpenPanel(willOpen ? 'group' : null);
+        });
+
+        dateToggle.addEventListener('click', () => {
+            const willOpen = dateFields.classList.contains('sun-addGroupFormFieldsCollapsed');
+            setOpenPanel(willOpen ? 'date' : null);
+        });
+
+        const submitPersonGroup = () => {
+            const name = groupInput ? groupInput.value : '';
+            if (window.dates && window.dates.addPersonGroup) {
+                const g = window.dates.addPersonGroup(name || '');
+                if (g && groupInput) {
+                    groupInput.value = '';
+                    setOpenPanel(null);
+                }
+            }
+            if (window.dataManager && window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            }
+        };
+
+        if (btnAddGroup) {
+            btnAddGroup.addEventListener('click', submitPersonGroup);
+        }
+        if (groupInput) {
+            groupInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitPersonGroup();
+                }
+            });
+        }
+
+        const clearDateForm = () => {
+            if (dateInput) {
+                dateInput.value = '';
+            }
+            if (nameInput) {
+                nameInput.value = '';
+            }
+            if (descEl) {
+                descEl.value = '';
+            }
+            if (genderEl) {
+                genderEl.value = 'unset';
+            }
+        };
+
+        const submitDate = () => {
+            const dateValue = dateInput ? dateInput.value : '';
+            const name = nameInput ? (nameInput.value || 'Новая дата') : 'Новая дата';
+            const description = descEl ? String(descEl.value) : '';
+            const gender = genderEl ? genderEl.value : 'unset';
+            if (!dateValue) {
+                return;
+            }
+            if (window.dates && window.dates.addDate) {
+                window.dates.addDate(dateValue, name, description, gender);
+            }
+            if (window.dataManager && window.dataManager.updateDateList) {
+                window.dataManager.updateDateList();
+            }
+            clearDateForm();
+            setOpenPanel(null);
+        };
+
+        if (btnAddDate) {
+            btnAddDate.addEventListener('click', submitDate);
+        }
+
+        setOpenPanel(null);
+    }
+
+    /** Сворачиваемые формы «Добавить группу» / «Добавить сигнал» (взаимоисключающие). */
+    setupWavesPanelAddForms() {
+        const groupToggle = window.dom.byKey('btnToggleAddWaveGroup');
+        const groupFields = window.dom.byKey('addWaveGroupFormFields');
+        const groupInput = window.dom.byKey('newGroupName');
+        const btnAddGroup = window.dom.byKey('btnAddGroup');
+
+        const waveToggle = window.dom.byKey('btnToggleAddWave');
+        const waveFields = window.dom.byKey('addWaveFormFields');
+        const waveNameInput = window.dom.byKey('customWaveName');
+        const wavePeriodInput = window.dom.byKey('customWavePeriod');
+        const waveTypeInput = window.dom.byKey('customWaveType');
+        const waveColorInput = window.dom.byKey('customWaveColor');
+        const waveNoteInput = window.dom.byKey('customWaveNote');
+        const btnAddWave = window.dom.byKey('btnAddCustomWave');
+
+        if (!groupToggle || !groupFields || !waveToggle || !waveFields) {
+            return;
+        }
+
+        const setOpenPanel = (panel) => {
+            const openGroup = panel === 'group';
+            const openWave = panel === 'wave';
+
+            groupFields.classList.toggle('sun-addGroupFormFieldsCollapsed', !openGroup);
+            groupToggle.setAttribute('aria-expanded', openGroup ? 'true' : 'false');
+
+            waveFields.classList.toggle('sun-addGroupFormFieldsCollapsed', !openWave);
+            waveToggle.setAttribute('aria-expanded', openWave ? 'true' : 'false');
+
+            if (openGroup && groupInput) {
+                groupInput.focus();
+            } else if (openWave && waveNameInput) {
+                waveNameInput.focus();
+            }
+        };
+
+        groupToggle.addEventListener('click', () => {
+            const willOpen = groupFields.classList.contains('sun-addGroupFormFieldsCollapsed');
+            setOpenPanel(willOpen ? 'group' : null);
+        });
+
+        waveToggle.addEventListener('click', () => {
+            const willOpen = waveFields.classList.contains('sun-addGroupFormFieldsCollapsed');
+            setOpenPanel(willOpen ? 'wave' : null);
+        });
+
+        const submitWaveGroup = () => {
+            const groupName = groupInput ? groupInput.value.trim() : '';
+            if (!groupName || !window.dates) {
+                return;
+            }
+            const newGroup = window.dates.addGroup(groupName);
+            if (!newGroup) {
+                return;
+            }
+            if (window.displayViewTemplatesManager) {
+                window.displayViewTemplatesManager.onNewGroupAdded(newGroup);
+            }
+            if (window.dataManager) {
+                window.dataManager.updateWavesGroups();
+            }
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+            if (groupInput) {
+                groupInput.value = '';
+            }
+            setOpenPanel(null);
+        };
+
+        if (btnAddGroup) {
+            btnAddGroup.addEventListener('click', submitWaveGroup);
+        }
+        if (groupInput) {
+            groupInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitWaveGroup();
+                }
+            });
+        }
+
+        const clearWaveForm = () => {
+            if (waveNameInput) {
+                waveNameInput.value = '';
+            }
+            if (wavePeriodInput) {
+                wavePeriodInput.value = '';
+            }
+            if (waveColorInput) {
+                waveColorInput.value = '#666666';
+            }
+            if (waveNoteInput) {
+                waveNoteInput.value = '';
+            }
+        };
+
+        const submitWave = () => {
+            const name = waveNameInput ? waveNameInput.value.trim() : '';
+            const period = wavePeriodInput ? wavePeriodInput.value : '';
+            const type = waveTypeInput ? waveTypeInput.value : 'solid';
+            const color = waveColorInput ? waveColorInput.value : '#666666';
+            const note = waveNoteInput ? String(waveNoteInput.value) : '';
+            if (!name || !period || !window.waves) {
+                return;
+            }
+            const newWave = window.waves.addCustomWave(name, period, type, color, note);
+            if (!newWave) {
+                return;
+            }
+            if (window.unifiedListManager) {
+                window.unifiedListManager.updateWavesList();
+            }
+            const defaultGroup = window.appState.data.groups.find((g) => g.id === 'default-group');
+            if (defaultGroup && window.unifiedListManager && window.unifiedListManager.updateGroupStats) {
+                window.unifiedListManager.updateGroupStats('default-group');
+            }
+            if (window.summaryManager && window.summaryManager.updateSummary) {
+                window.summaryManager.updateSummary();
+            }
+            clearWaveForm();
+            setOpenPanel(null);
+        };
+
+        if (btnAddWave) {
+            btnAddWave.addEventListener('click', submitWave);
+        }
+
+        setOpenPanel(null);
+    }
+
     /** Глобальные слушатели: цвет, даты, импорт, стрелки. */
     setupEventListeners() {
         this.setupSecretSchemePanel();
+        this.setupDatesPanelAddForms();
+        this.setupWavesPanelAddForms();
 
         // Обработчик для кнопки "Программа"
         const colorPickerBtn = window.dom.byKey('colorPickerBtn');
@@ -874,74 +1120,7 @@ class AppCore {
                 }
             });
         }
-        
-        const btnAddCustomWave = window.dom.byKey('btnAddCustomWave');
-        if (btnAddCustomWave) {
-            btnAddCustomWave.addEventListener('click', () => {
-                const name = window.dom.byKey('customWaveName').value;
-                const period = window.dom.byKey('customWavePeriod').value;
-                const type = window.dom.byKey('customWaveType').value;
-                const color = window.dom.byKey('customWaveColor').value;
-                
-                if (name && period) {
-                    if (window.waves && window.waves.addCustomWave) {
-                        window.waves.addCustomWave(name, period, type, color);
-                    }
-                    
-                    if (window.dataManager && window.dataManager.updateWavesGroups) {
-                        window.dataManager.updateWavesGroups();
-                    }
-                    
-                    if (window.uiManager && window.uiManager.clearWaveForm) {
-                        window.uiManager.clearWaveForm();
-                    }
-                    
-                    if (window.summaryManager && window.summaryManager.refresh) {
-                        window.summaryManager.refresh();
-                    }
-                }
-            });
-        }
-        
-        const btnAddDate = window.dom.byKey('btnAddDate');
-        if (btnAddDate) {
-            btnAddDate.addEventListener('click', () => {
-                const dateValue = window.dom.byKey('dateInput').value;
-                const name = window.dom.byKey('dateNameInput').value || 'Новая дата';
-                const descEl = window.dom.byKey('dateDescriptionInput');
-                const description = descEl ? String(descEl.value) : '';
-                const genderEl = window.dom.byKey('dateGenderSelect');
-                const gender = genderEl ? genderEl.value : 'unset';
-                
-                if (dateValue) {
-                    if (window.dates && window.dates.addDate) {
-                        window.dates.addDate(dateValue, name, description, gender);
-                    }
-                    
-                    if (window.dataManager && window.dataManager.updateDateList) {
-                        window.dataManager.updateDateList();
-                    }
-                }
-            });
-        }
 
-        const btnAddPersonGroup = window.dom.byKey('btnAddPersonGroup');
-        if (btnAddPersonGroup) {
-            btnAddPersonGroup.addEventListener('click', () => {
-                const input = window.dom.byKey('newPersonGroupName');
-                const name = input ? input.value : '';
-                if (window.dates && window.dates.addPersonGroup) {
-                    const g = window.dates.addPersonGroup(name || '');
-                    if (g && input) {
-                        input.value = '';
-                    }
-                }
-                if (window.dataManager && window.dataManager.updateDateList) {
-                    window.dataManager.updateDateList();
-                }
-            });
-        }
-        
         const importAllFile = window.dom.byKey('importAllFile');
         
         if (importAllFile) {

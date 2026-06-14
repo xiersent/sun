@@ -90,10 +90,10 @@ $cross-window-half: clamp(6px, 2.5vw, 12px);
 /* Global */
 
 *{box-sizing: border-box;}
-button:focus-visible{outline: 2px solid #{$cp}; outline-offset: 2px;}
-input:focus-visible{outline: 2px solid #{$cp}; outline-offset: 2px;}
-textarea:focus-visible{outline: 2px solid #{$cp}; outline-offset: 2px;}
-select:focus-visible{outline: 2px solid #{$cp}; outline-offset: 2px;}
+button:focus-visible{outline: 1px solid #{$cp};  outline-offset: -1px;}
+input:focus-visible{outline: 1px solid #{$cp};  outline-offset: -1px;}
+textarea:focus-visible{outline: 1px solid #{$cp};  outline-offset: -1px;}
+select:focus-visible{outline: 1px solid #{$cp};  outline-offset: -1px;}
 button{padding: #{$spacing-xs} #{$spacing-sm}; background-color: #{$cp}; color: #fff; border: none; cursor: pointer; font-weight: 400; font-family: #{$font-family};}
 button:hover{filter: brightness(0.9);}
 [type="checkbox"]{width: 16px; height: 16px; cursor: pointer; flex-shrink: 0;}
@@ -661,7 +661,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){padding: 0;}
 	}
 	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection{
-		@media(min-width: 0px){padding: #{$spacing-md} #{$spacing-md} 0; border: none; outline: none; background: transparent;}
+		@media(min-width: 0px){padding: #{$spacing-md}; border: none; outline: none; background: transparent;}
 	}
 	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
 		@media(min-width: 0px){flex: 0 1 auto; padding: #{$spacing-sm} #{$spacing-md};}
@@ -774,6 +774,9 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){width: 100%;}
 	}
 	&listItemDate #{&}dateDescriptionEdit{
+		@media(min-width: 0px){width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: #{$font-family}; font-size: #{$font-size-sm};}
+	}
+	&listItemWave #{&}waveNoteEdit{
 		@media(min-width: 0px){width: 100%; min-height: 44px; max-height: 160px; resize: vertical; height: auto; padding: 6px 8px; box-sizing: border-box; line-height: 1.35; font-family: #{$font-family}; font-size: #{$font-size-sm};}
 	}
 	&listItemEditRow{
@@ -1976,7 +1979,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&addCustomWaveForm#{&}compact{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; font-size: #{$font-size-sm};}
 	}
-	&addCustomWaveForm#{&}compact #{&}addGroupForm{
+	&addCustomWaveForm#{&}compact #{&}addGroupFormFields{
 		@media(min-width: 0px){display: flex; gap: #{$spacing-xs}; width: 100%; align-items: center; margin-bottom: 0;}
 	}
 	&addCustomWaveForm#{&}compact #{&}addGroupInput{
@@ -2006,11 +2009,17 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&addCustomWaveForm#{&}compact #{&}waveInputsRow #{&}btnAddCustomWave{
 		@media(min-width: 0px){height: 25px; flex-shrink: 0; white-space: nowrap; margin-top: 0;}
 	}
+	&waveAddDescriptionRow{
+		@media(min-width: 0px){width: 100%;}
+	}
+	&waveAddDescriptionInput{
+		@media(min-width: 0px){width: 100%; min-height: 44px; max-height: 160px; resize: vertical; font-size: #{$font-size-sm}; padding: 6px 8px; box-sizing: border-box; line-height: 1.35;}
+	}
 	&displayViewTemplatesBar#{&}compact{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; font-size: #{$font-size-sm};}
 	}
 	&displayViewTemplatesSeparator{
-		@media(min-width: 0px){display: block; width: 100%; height: 1px; margin-top: #{$spacing-md}; margin-bottom: #{$spacing-md}; background-color: #{$clg}; border: none; flex-shrink: 0;}
+		@media(min-width: 0px){display: block; width: 100%; height: 1px; margin-top: 10px; margin-bottom: 10px; background-color: #{$clg}; border: none; flex-shrink: 0;}
 	}
 	&displayViewTemplatesLabel{
 		@media(min-width: 0px){font-weight: 400; color: #{$text-color};}
@@ -2073,10 +2082,13 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){background-color: #fffbe6;}
 	}
 	&intersectionForm{
-		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs};}
+		@media(min-width: 0px){display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: #{$spacing-xs};}
+	}
+	&intersectionForm > #{&}stateSearchConditions{
+		@media(min-width: 0px){flex: 1 1 100%; width: 100%; min-width: 0;}
 	}
 	&intersectionFormRow{
-		@media(min-width: 0px){display: flex; gap: #{$spacing-xs}; align-items: center;}
+		@media(min-width: 0px){display: flex; align-items: flex-end; flex-wrap: wrap; gap: #{$spacing-xs};}
 	}
 	&intersectionFormLabel{
 		@media(min-width: 0px){width: 100px; font-weight: 400; flex-shrink: 0; user-select: none; white-space: nowrap;}
@@ -2096,8 +2108,35 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&flex2{
 		@media(min-width: 0px){flex: 2; min-width: 0;}
 	}
+	&datesPanelAddActions{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; margin-bottom: #{$spacing-sm}; width: 100%;}
+	}
+	&wavesPanelAddActions{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; width: 100%;}
+	}
+	&datesPanelAddToggles{
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; gap: #{$spacing-xs}; align-items: center; justify-content: flex-end; width: 100%;}
+	}
+	&wavesPanelAddToggles{
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; gap: #{$spacing-xs}; align-items: center; justify-content: flex-end; width: 100%;}
+	}
 	&addGroupFormMb{
-		@media(min-width: 0px){margin-bottom: #{$spacing-xs};}
+		@media(min-width: 0px){margin-bottom: #{$spacing-xs}; flex-direction: column; align-items: stretch; gap: #{$spacing-xs};}
+	}
+	&addGroupToggle{
+		@media(min-width: 0px){flex-shrink: 0;}
+	}
+	&addGroupFormFields{
+		@media(min-width: 0px){display: flex; gap: #{$spacing-xs}; align-items: center; width: 100%;}
+	}
+	&dateAddFormFields{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; width: 100%;}
+	}
+	&waveAddFormFields{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs}; width: 100%;}
+	}
+	&addGroupFormFieldsCollapsed{
+		@media(min-width: 0px){display: none !important;}
 	}
 	&uHidden{
 		@media(min-width: 0px){display: none !important;}
@@ -2214,7 +2253,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){height: 25px; padding: #{$spacing-xs} #{$spacing-sm}; font-size: #{$font-size-sm}; white-space: nowrap;}
 	}
 	&summaryResultsContainer{
-		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; overflow-x: hidden; background: #fff;}
+		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; overflow-x: hidden; background: #fff; &, & * { transition: none; }}
 	}
 	&summaryResultsContainer #{&}summaryResults{
 		@media(min-width: 0px){overflow: visible; max-height: none;}
@@ -2229,7 +2268,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){padding: #{$spacing-lg}; text-align: center; color: #999; font-style: italic; font-size: #{$font-size-sm};}
 	}
 	&summaryItem{
-		@media(min-width: 0px){display: flex; align-items: center; justify-content: space-between; padding: #{$spacing-sm}; border-bottom: 1px solid #eee; background: #fff; gap: #{$spacing-sm}; cursor: pointer; transition: background-color 0.2s;}
+		@media(min-width: 0px){display: flex; align-items: center; justify-content: space-between; padding: #{$spacing-sm}; border-bottom: 1px solid #eee; background: #fff; gap: #{$spacing-sm}; cursor: pointer;}
 	}
 	&summaryItem:hover{
 		@media(min-width: 0px){background-color: #f5f5f5;}
@@ -2286,10 +2325,13 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){margin-bottom: #{$spacing-md};}
 	}
 	&intersectionForm{
-		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs};}
+		@media(min-width: 0px){display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: #{$spacing-xs};}
+	}
+	&intersectionForm > #{&}stateSearchConditions{
+		@media(min-width: 0px){flex: 1 1 100%; width: 100%; min-width: 0;}
 	}
 	&intersectionFormRow{
-		@media(min-width: 0px){display: flex; align-items: center; flex-wrap: wrap; gap: #{$spacing-xs};}
+		@media(min-width: 0px){display: flex; align-items: flex-end; flex-wrap: wrap; gap: #{$spacing-xs};}
 	}
 	&intersectionSelect{
 		@media(min-width: 0px){width: 100%; padding: #{$spacing-xs}; border: 1px solid #{$clg}; font-size: #{$font-size-sm}; height: 25px; background: #fff;}
@@ -2298,13 +2340,13 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){display: flex; align-items: center; gap: #{$spacing-xs}; font-size: #{$font-size-sm}; cursor: pointer; white-space: nowrap;}
 	}
 	&intersectionResultsContainer{
-		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; border: 1px solid #{$clg}; background: #fff;}
+		@media(min-width: 0px){max-height: 400px; min-height: 200px; overflow-y: auto; border: 1px solid #{$clg}; background: #fff; &, & * { transition: none; }}
 	}
 	&intersectionResults{
 		@media(min-width: 0px){display: flex; flex-direction: column;}
 	}
 	&intersectionResultItem{
-		@media(min-width: 0px){display: flex; align-items: center; justify-content: space-between; padding: #{$spacing-sm}; border-bottom: 1px solid #eee; background: #fff; gap: #{$spacing-sm}; cursor: pointer; transition: background-color 0.2s;}
+		@media(min-width: 0px){display: flex; align-items: center; justify-content: space-between; padding: #{$spacing-sm}; border-bottom: 1px solid #eee; background: #fff; gap: #{$spacing-sm}; cursor: pointer;}
 	}
 	&intersectionResultItem:hover{
 		@media(min-width: 0px){background-color: #f5f5f5;}
@@ -2379,10 +2421,16 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){padding: #{$spacing-lg}; text-align: center; color: #999; font-style: italic; font-size: #{$font-size-sm};}
 	}
 	&intersectionFormRowActions{
-		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: center; gap: #{$spacing-xs}; margin-left: auto;}
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: center; gap: #{$spacing-xs}; margin-left: auto; flex-shrink: 0;}
 	}
 	&intersectionForm > #{&}intersectionFormRowActions{
-		@media(min-width: 0px){justify-content: flex-end; margin-left: 0; margin-top: #{$spacing-xs};}
+		@media(min-width: 0px){justify-content: flex-end; margin-left: auto; margin-top: 0;}
+	}
+	&intersectionToolbarOneRow{
+		@media(min-width: 0px){flex: 1 1 auto; width: 100%; min-width: 0; margin-bottom: 0;}
+	}
+	&intersectionToolbarOneRow #{&}intersectionFormRowActions{
+		@media(min-width: 0px){margin-left: auto;}
 	}
 	&dateComparisonViewTabs{
 		@media(min-width: 0px){border: 1px solid #{$clg}; overflow: hidden; background: #fff; margin-top: #{$spacing-sm}; margin-bottom: #{$spacing-md};}
@@ -2436,7 +2484,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){width: 100%; max-width: 120px;}
 	}
 	&stateSearchActionsRow{
-		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: flex-end; gap: #{$spacing-xs}; margin-left: 0; margin-top: #{$spacing-xs}; justify-content: flex-start;}
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: flex-end; gap: #{$spacing-xs}; margin-left: 0; margin-top: 0; justify-content: flex-start; flex: 1 1 100%; width: 100%;}
 	}
 	&stateSearchLimitGroup{
 		@media(min-width: 0px){flex: 0 0 auto;}
@@ -2459,9 +2507,6 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&intersectionSelectGroup{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: #{$spacing-xs};}
 	}
-	&intersectionToolbarOneRow{
-		@media(min-width: 0px){margin-bottom: #{$spacing-sm};}
-	}
 	&intersectionToolbarOneRow #{&}intersectionSelectGroup{
 		@media(min-width: 0px){flex: 1 1 130px; min-width: 0; max-width: min(100%, 220px);}
 	}
@@ -2469,7 +2514,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){cursor: default;}
 	}
 	&dateComparisonTable{
-		@media(min-width: 0px){width: 100%; border-collapse: collapse; font-size: #{$font-size-sm}; border: 1px solid #{$clg};}
+		@media(min-width: 0px){width: 100%; border-collapse: collapse; font-size: #{$font-size-sm}; border: 1px solid #{$clg}; &, & * { transition: none; }}
 	}
 	&dateComparisonTable th{
 		@media(min-width: 0px){text-align: left; padding: #{$spacing-xs} #{$spacing-sm}; border: 1px solid #{$clg}; background: #f8f9fa; font-weight: 400; white-space: nowrap;}
@@ -2744,7 +2789,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){min-height: 100%; box-sizing: border-box;}
 	}
 	&intersectionFormRowActionsInForm{
-		@media(min-width: 0px){justify-content: flex-end; margin-left: 0; margin-top: #{$spacing-xs};}
+		@media(min-width: 0px){justify-content: flex-end; margin-left: auto; margin-top: 0;}
 	}
 	&intersectionTimeRailMirrorCountdownInStats{
 		@media(min-width: 0px){margin: 6px 0 0; padding: 0; font-size: #{$font-size-xs}; font-weight: 400; line-height: 1.35; color: #{$text-color}; font-variant-numeric: tabular-nums;}
@@ -2986,7 +3031,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		&addCustomWaveForm#{&}compact{
 			@media(min-width: 0px){flex-direction: column; gap: #{$spacing-xs};}
 		}
-		&addCustomWaveForm#{&}compact #{&}addGroupForm{
+		&addCustomWaveForm#{&}compact #{&}addGroupFormFields{
 			@media(min-width: 0px){flex-direction: column; gap: #{$spacing-xs};}
 		}
 		&addCustomWaveForm#{&}compact #{&}addGroupInput{
