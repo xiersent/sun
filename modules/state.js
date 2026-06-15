@@ -54,7 +54,8 @@ class AppState {
                 waveIntersectionsVisible: true,
                 extremumWaveColorHighlight: false,
                 displayViewTemplates: [],
-                activeDisplayViewTemplateId: '__display_standard__'
+                activeDisplayViewTemplateId: '__display_standard__',
+                panelActiveTab: null
             }
         };
         
@@ -148,6 +149,7 @@ class AppState {
         this.data.uiSettings.dateSelections = this.dateSelections;
         this.data.uiSettings.waveIntersectionsVisible = this.waveIntersectionsVisible;
         this.data.uiSettings.extremumWaveColorHighlight = this.extremumWaveColorHighlight;
+        this.data.uiSettings.panelActiveTab = this.panelActiveTab || null;
 
         delete this.data.uiSettings.graphBgWhite;
 
@@ -283,6 +285,29 @@ class AppState {
                 this.cornerSquaresVisible = data.uiSettings.cornerSquaresVisible !== undefined ? data.uiSettings.cornerSquaresVisible : true;
                 this.waveIntersectionsVisible = data.uiSettings.waveIntersectionsVisible !== undefined ? data.uiSettings.waveIntersectionsVisible : true;
                 this.extremumWaveColorHighlight = data.uiSettings.extremumWaveColorHighlight !== undefined ? data.uiSettings.extremumWaveColorHighlight : false;
+
+                const panelTabIds = new Set([
+                    'uiControls',
+                    'timeBar',
+                    'summary',
+                    'intersections',
+                    'dateCompare',
+                    'stateSearch'
+                ]);
+                let resolvedPanelTab =
+                    typeof data.uiSettings.panelActiveTab === 'string' && data.uiSettings.panelActiveTab
+                        ? data.uiSettings.panelActiveTab
+                        : null;
+                if (!resolvedPanelTab) {
+                    try {
+                        const legacyPanelTab = localStorage.getItem('activeTab');
+                        if (legacyPanelTab && legacyPanelTab !== 'null') {
+                            resolvedPanelTab = legacyPanelTab;
+                        }
+                    } catch (e) {}
+                }
+                this.panelActiveTab =
+                    resolvedPanelTab && panelTabIds.has(resolvedPanelTab) ? resolvedPanelTab : null;
                 
                 this.editingDateId = null;
                 this.editingWaveId = null;
@@ -474,6 +499,7 @@ class AppState {
         this.waveIntersectionsVisible = true;
         this.extremumWaveColorHighlight = false;
         this.activeDateId = null;
+        this.panelActiveTab = null;
         
         this.editingDateId = null;
         this.editingWaveId = null;

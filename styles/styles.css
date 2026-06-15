@@ -9,23 +9,23 @@
 }
 
 button:focus-visible {
-  outline: 2px solid #666;
-  outline-offset: 2px;
+  outline: 1px solid #666;
+  outline-offset: -1px;
 }
 
 input:focus-visible {
-  outline: 2px solid #666;
-  outline-offset: 2px;
+  outline: 1px solid #666;
+  outline-offset: -1px;
 }
 
 textarea:focus-visible {
-  outline: 2px solid #666;
-  outline-offset: 2px;
+  outline: 1px solid #666;
+  outline-offset: -1px;
 }
 
 select:focus-visible {
-  outline: 2px solid #666;
-  outline-offset: 2px;
+  outline: 1px solid #666;
+  outline-offset: -1px;
 }
 
 button {
@@ -105,9 +105,6 @@ textarea {
   }
 }
 /* Блок .sun- */
-.sun- {
-  /* --- migration blocks from HEAD --- */
-}
 @media (min-width: 0px) {
   .sun-root {
     overflow-y: scroll;
@@ -638,8 +635,38 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarStateStack > .sun-timeBarStateRow:hover > .sun-timeBarStateTrack {
+  .sun-timeBarStateStack > .sun-timeBarStateRow:hover > .sun-timeBarStateTrack, .sun-timeBarStateStack > .sun-timeBarStateRow:has(> .sun-timeBarStateTrack:hover) > .sun-timeBarStateTrack, .sun-timeBarStateStack > .sun-timeBarStateRow:has(.sun-timeBarSegmentSlot:hover) > .sun-timeBarStateTrack {
     background-color: rgba(0, 0, 0, 0.025);
+    overflow: visible;
+    z-index: 5;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateStack > .sun-timeBarStateRow:hover, .sun-timeBarStateStack > .sun-timeBarStateRow:has(> .sun-timeBarStateTrack:hover), .sun-timeBarStateStack > .sun-timeBarStateRow:has(.sun-timeBarSegmentSlot:hover) {
+    position: relative;
+    z-index: 20;
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateStack:has(> .sun-timeBarStateRow:hover), .sun-timeBarStateStack:has(.sun-timeBarSegmentSlot:hover) {
+    overflow: visible;
+    z-index: 2;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStacked:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarStacked:has(> .sun-timeBarStateRow:hover) {
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarWrap:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarWrap:has(.sun-timeBarStateRow:hover) {
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarContainerInWrap:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarWrap .sun-timeBarContainer:has(.sun-timeBarSegmentSlot:hover) {
+    overflow: visible;
   }
 }
 @media (min-width: 0px) {
@@ -715,7 +742,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-timeBarStateTrack:hover {
+  .sun-timeBarStateTrack:hover, .sun-timeBarStateTrack:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarStateTrack:has(.sun-timeBarSegmentLabel:hover) {
     z-index: 5;
     overflow: visible;
   }
@@ -1438,6 +1465,11 @@ textarea {
 @media (min-width: 0px) {
   .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] {
     padding: 0;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar]:has(.sun-timeBarStateRow:hover), .sun-tabContentInTabs[data-tab-panel=timeBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabContentInTabs[data-tab-panel=timeBar]:has(.sun-timeBarStateRow:hover) {
+    overflow: visible;
   }
 }
 @media (min-width: 0px) {
@@ -4944,8 +4976,8 @@ textarea {
     display: block;
     width: 100%;
     height: 1px;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     background-color: #ddd;
     border: none;
     flex-shrink: 0;
@@ -5178,7 +5210,6 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    margin-bottom: 10px;
     width: 100%;
   }
 }
@@ -5188,6 +5219,7 @@ textarea {
     flex-wrap: wrap;
     gap: 5px;
     align-items: center;
+    justify-content: flex-end;
     width: 100%;
   }
 }
@@ -5197,6 +5229,7 @@ textarea {
     flex-wrap: wrap;
     gap: 5px;
     align-items: center;
+    justify-content: flex-end;
     width: 100%;
   }
 }
@@ -5536,6 +5569,7 @@ textarea {
   .sun-summaryDuplicateButtons {
     display: flex;
     gap: 5px;
+    align-self: flex-end;
   }
 }
 @media (min-width: 0px) {
@@ -6182,6 +6216,16 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-dateComparisonSelects .sun-summaryDuplicateButtons {
+    flex: 0 0 auto;
+  }
+}
+@media (min-width: 0px) {
+  .sun-dateComparisonSelects .sun-intersectionLabelSpaced {
+    align-self: flex-end;
+  }
+}
+@media (min-width: 0px) {
   .sun-dateComparisonTable {
     width: 100%;
     border-collapse: collapse;
@@ -6777,6 +6821,9 @@ textarea {
     font-family: inherit;
     letter-spacing: normal;
   }
+}
+.sun- {
+  /* --- migration blocks from HEAD --- */
 }
 @media (min-width: 0px) {
   .sun-dateComparisonActionsBtn {

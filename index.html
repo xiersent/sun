@@ -161,12 +161,18 @@
                             </div>
                             
                             <div class="sun-summaryControls">
-                                <div class="sun-summarySelectRow">
-                                    <div class="sun-summarySelectGroup">
-                                        <select class="sun-summarySelect sun-summaryGroupSelect">
-                                            <option value="all">Все доступные группы с сигналами</option>
-                                        </select>
-                                        <select class="sun-summarySelect sun-summaryStateSelect"></select>
+                                <div class="sun-intersectionForm">
+                                    <div class="sun-intersectionFormRow sun-dateComparisonSelects">
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="summaryGroupSelect">Группа</label>
+                                            <select id="summaryGroupSelect" class="sun-summarySelect sun-summaryGroupSelect">
+                                                <option value="all">Все доступные группы с сигналами</option>
+                                            </select>
+                                        </div>
+                                        <div class="sun-intersectionSelectGroup">
+                                            <label class="sun-intersectionFormLabel" for="summaryStateSelect">Состояние</label>
+                                            <select id="summaryStateSelect" class="sun-summarySelect sun-summaryStateSelect"></select>
+                                        </div>
                                         <div class="sun-summaryDuplicateButtons">
                                             <button class="sun-uiBtn" data-action="today">Сегодня</button>
                                             <button class="sun-uiBtn" data-action="now">Сейчас</button>

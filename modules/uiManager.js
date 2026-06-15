@@ -583,6 +583,50 @@ class UIManager {
         return document.querySelector('.sun-tabsSection');
     }
 
+    /** Сохранить активную вкладку панели в appState (между сессиями). */
+    _persistPanelActiveTab() {
+        if (!window.appState) {
+            return;
+        }
+        window.appState.panelActiveTab = this.activeTab;
+        window.appState.saveDebounced();
+        try {
+            localStorage.removeItem('activeTab');
+        } catch (e) {}
+    }
+
+    /** Побочные эффекты после открытия вкладки (шкала времени, пересечения, сравнение). */
+    _runTabActivatedSideEffects(tabId) {
+        if (tabId === 'timeBar' && window.timeBarManager) {
+            queueMicrotask(() => {
+                if (typeof window.timeBarManager.createHourMarkers === 'function') {
+                    window.timeBarManager.createHourMarkers();
+                }
+                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
+                    window.timeBarManager.updateTimeIndicator();
+                }
+            });
+        }
+
+        if (tabId === 'intersections' && window.stateIntersectionManager) {
+            queueMicrotask(() => {
+                if (typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function') {
+                    window.stateIntersectionManager.mirrorCompareSelectsToIntersection();
+                }
+                window.stateIntersectionManager.updateIntersections();
+            });
+        }
+
+        if (tabId === 'dateCompare' && window.dateComparisonManager) {
+            queueMicrotask(() => {
+                window.dateComparisonManager.updateComparison();
+                if (window.waves && typeof window.waves.updatePosition === 'function') {
+                    window.waves.updatePosition();
+                }
+            });
+        }
+    }
+
     /**
      * Клик по вкладке: повторный клик снимает активность; при открытии — обновить пересечения/сравнение.
      * @param {HTMLElement} tabButton — кнопка с data-tab
@@ -611,35 +655,10 @@ class UIManager {
             this.activeTab = tabId;
         }
 
-        localStorage.setItem('activeTab', this.activeTab);
+        this._persistPanelActiveTab();
 
-        if (tabId === 'timeBar' && window.timeBarManager) {
-            queueMicrotask(() => {
-                if (typeof window.timeBarManager.createHourMarkers === 'function') {
-                    window.timeBarManager.createHourMarkers();
-                }
-                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
-                    window.timeBarManager.updateTimeIndicator();
-                }
-            });
-        }
-
-        if (tabId === 'intersections' && window.stateIntersectionManager) {
-            queueMicrotask(() => {
-                if (typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function') {
-                    window.stateIntersectionManager.mirrorCompareSelectsToIntersection();
-                }
-                window.stateIntersectionManager.updateIntersections();
-            });
-        }
-
-        if (tabId === 'dateCompare' && window.dateComparisonManager) {
-            queueMicrotask(() => {
-                window.dateComparisonManager.updateComparison();
-                if (window.waves && typeof window.waves.updatePosition === 'function') {
-                    window.waves.updatePosition();
-                }
-            });
+        if (tabId && this.activeTab === tabId) {
+            this._runTabActivatedSideEffects(tabId);
         }
     }
 
@@ -678,18 +697,17 @@ class UIManager {
         }
     }
 
-    /** Восстановить вкладку из localStorage.activeTab; по умолчанию — «Интерфейс». */
+    /** Восстановить вкладку из appState.panelActiveTab; по умолчанию — «Полоса времени». */
     restoreTabState() {
         const tabsRoot = this._getTabsRoot();
         if (!tabsRoot) {
             return;
         }
 
-        const savedTab = localStorage.getItem('activeTab');
-        let tabId = savedTab || 'uiControls';
+        let tabId = window.appState?.panelActiveTab || 'timeBar';
         let tabButton = tabsRoot.querySelector(`[data-tab="${tabId}"]`);
         if (!tabButton) {
-            tabId = 'uiControls';
+            tabId = 'timeBar';
             tabButton = tabsRoot.querySelector(`[data-tab="${tabId}"]`);
         }
         if (!tabButton) {
@@ -698,17 +716,7 @@ class UIManager {
 
         this.activateTab(tabButton);
         this.activeTab = tabId;
-
-        if (tabId === 'timeBar' && window.timeBarManager) {
-            queueMicrotask(() => {
-                if (typeof window.timeBarManager.createHourMarkers === 'function') {
-                    window.timeBarManager.createHourMarkers();
-                }
-                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
-                    window.timeBarManager.updateTimeIndicator();
-                }
-            });
-        }
+        this._runTabActivatedSideEffects(tabId);
     }
 
     /** Раскрыть/свернуть блок метаданных (спойлер). */
