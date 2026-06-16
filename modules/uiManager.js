@@ -365,11 +365,13 @@ class UIManager {
         window.dispatchEvent(new CustomEvent('zaraza:waveCornerSelectionChanged'));
     }
 
-    /** Вернуть угловым квадратам цвет по умолчанию (красный). */
+    /** Синхронизировать цвет угловых квадратов (волна или базовый цвет пользователя). */
     updateCornerSquareColors() {
-        document.querySelectorAll('.sun-cornerSquare').forEach((square) => {
-            square.style.backgroundColor = 'red';
-        });
+        if (window.waves && typeof window.waves.updateCornerSquareColors === 'function') {
+            window.waves.updateCornerSquareColors();
+        } else if (window.appCore && typeof window.appCore.restoreCornerColor === 'function') {
+            window.appCore.restoreCornerColor();
+        }
     }
 
     /** Отразить волны по горизонтали (scaleX *= −1). */
@@ -520,17 +522,12 @@ class UIManager {
             sessionStorage.clear();
         } catch (e) {}
 
-        if (window.appState && window.appState.data) {
-            window.appState.data.dates = [];
-            window.appState.data.waves = [];
-            window.appState.data.groups = [];
-            window.appState.data.personGroups = [];
-            window.appState.data.notes = [];
-            window.appState.activeDateId = null;
-            window.appState.currentDate = new Date();
-            window.appState.baseDate = new Date();
-            window.appState.currentDay = 0;
-
+        if (window.appState) {
+            window.appState.applyMemoryDefaultsFromReset({ skipSave: true });
+            if (window.appState.data.uiSettings) {
+                delete window.appState.data.uiSettings.migrationsSchemaVersion;
+                delete window.appState.data.uiSettings.firstLaunchDefaultsApplied;
+            }
             window.appState.save();
         }
 

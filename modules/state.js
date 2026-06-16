@@ -205,6 +205,7 @@ class AppState {
         __lp && __lp.mark('appState_localStorage_read', { hasSaved: !!saved, bytes: saved ? saved.length : 0 });
 
         if (saved) {
+            this._bootstrappingFromEmpty = false;
             try {
                 const data = JSON.parse(saved);
                 __lp && __lp.mark('appState_json_parse_done');
@@ -461,10 +462,106 @@ class AppState {
             }
         } else {
             __lp && __lp.mark('appState_no_saved_reset');
-            this.reset();
+            if (this._bootstrappingFromEmpty) {
+                __lp && __lp.mark('appState_bootstrap_abort');
+            } else {
+                this._bootstrappingFromEmpty = true;
+                this.applyMemoryDefaultsFromReset({ skipSave: true });
+                this.save();
+                return this._loadImpl();
+            }
+        }
+
+        if (Array.isArray(this.data.waves) && this.data.waves.length > 0) {
+            this.applyFirstLaunchDefaultsIfNeeded();
         }
 
         __lp && __lp.mark('appState_load_impl_done');
+    }
+
+    /** Есть ли сохранённые настройки полосы времени (localStorage). */
+    _hasSavedTimeBarPrefs() {
+        try {
+            return (
+                localStorage.getItem('timeBarStateRowHidden') != null ||
+                localStorage.getItem('timeBarGroupVisible') != null
+            );
+        } catch {
+            return false;
+        }
+    }
+
+    /** Пользователь уже включал хотя бы одну волну в сигналах. */
+    _hasUserWaveVisibilityPrefs() {
+        const vis = this.data?.uiSettings?.waveVisibility;
+        if (!vis || typeof vis !== 'object' || Object.keys(vis).length === 0) {
+            return false;
+        }
+        return Object.values(vis).some((v) => v === true);
+    }
+
+    /**
+     * Дефолты первого запуска: полосы −5/0/+5, только «120 колосков» на timeBar,
+     * в сигналах — все волны группы «Классическая».
+     * @returns {boolean} применены ли настройки
+     */
+    applyFirstLaunchDefaultsIfNeeded() {
+        if (this.data.uiSettings?.firstLaunchDefaultsApplied) {
+            return false;
+        }
+        if (this._hasSavedTimeBarPrefs() || this._hasUserWaveVisibilityPrefs()) {
+            return false;
+        }
+
+        const stateRowHidden = {};
+        for (let s = -5; s <= 5; s++) {
+            if (s !== -5 && s !== 0 && s !== 5) {
+                stateRowHidden[String(s)] = true;
+            }
+        }
+
+        const groupVisible = {};
+        const groups = Array.isArray(this.data.groups) ? this.data.groups : [];
+        groups.forEach((group) => {
+            if (String(group.id) !== '120-waves-group') {
+                groupVisible[String(group.id)] = false;
+            }
+        });
+
+        try {
+            localStorage.setItem('timeBarStateRowHidden', JSON.stringify(stateRowHidden));
+            localStorage.setItem('timeBarGroupVisible', JSON.stringify(groupVisible));
+        } catch {
+            return false;
+        }
+
+        const classicGroup = groups.find(
+            (g) => g.id === 'classic-group' || g.name === 'Классическая'
+        );
+        const classicWaveIds = new Set(
+            (classicGroup?.waves || [24, 28, 33, 38, 25]).map((id) => String(id))
+        );
+
+        if (classicGroup) {
+            classicGroup.enabled = true;
+            classicGroup.expanded = true;
+        }
+
+        if (!this.waveVisibility || typeof this.waveVisibility !== 'object') {
+            this.waveVisibility = {};
+        }
+        (this.data.waves || []).forEach((wave) => {
+            const waveIdStr = String(wave.id);
+            this.waveVisibility[waveIdStr] = classicWaveIds.has(waveIdStr);
+        });
+
+        if (!this.data.uiSettings) {
+            this.data.uiSettings = {};
+        }
+        this.data.uiSettings.waveVisibility = { ...this.getWaveVisibilityPlain() };
+        this.data.uiSettings.firstLaunchDefaultsApplied = true;
+        this.save();
+        return true;
     }
     
     /**

@@ -2850,26 +2850,31 @@ class WavesManager {
         }
     }
 
-    /** Красит угловые квадраты цветом волны с включённым waveCornerColor. */
+    /** Красит угловые квадраты цветом волны с включённым waveCornerColor, иначе — базовый цвет пользователя. */
     updateCornerSquareColors() {
-        let activeColor = 'red';
+        const baseColor =
+            window.appCore && typeof window.appCore.getBaseCornerColor === 'function'
+                ? window.appCore.getBaseCornerColor()
+                : '#ff0000';
+        let activeColor = baseColor;
         let hasActiveWave = false;
-        
-        window.appState.data.waves.forEach(wave => {
+
+        window.appState.data.waves.forEach((wave) => {
             const waveIdStr = String(wave.id);
             if (window.appState.waveCornerColor[waveIdStr]) {
                 activeColor = wave.color;
                 hasActiveWave = true;
             }
         });
-        
-        document.querySelectorAll('.sun-cornerSquare').forEach(square => {
-            if (hasActiveWave) {
-                square.style.backgroundColor = activeColor;
-            } else {
-                square.style.backgroundColor = 'red';
-            }
-        });
+
+        const color = hasActiveWave ? activeColor : baseColor;
+        if (window.appCore && typeof window.appCore.applyCornerSquareColor === 'function') {
+            window.appCore.applyCornerSquareColor(color);
+        } else {
+            document.querySelectorAll('.sun-cornerSquare').forEach((square) => {
+                square.style.backgroundColor = color;
+            });
+        }
     }
 
     /** Включает/выключает подсветку углов для одной волны (остальные сбрасываются). */

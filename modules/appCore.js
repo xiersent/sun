@@ -155,33 +155,51 @@ class AppCore {
         });
     }
     
-    // Сохраняет цвет квадратиков в localStorage
     /** Сохраняет цвет угловых квадратиков в localStorage. */
     saveCornerColor(color) {
         localStorage.setItem('corner_square_color', color);
         this.hasSelectedColor = true;
     }
-    
-    // Восстанавливает цвет квадратиков из localStorage
+
+    /** Базовый цвет углов: выбранный при первом запуске или красный по умолчанию. */
+    getBaseCornerColor() {
+        try {
+            const saved = localStorage.getItem('corner_square_color');
+            if (saved) {
+                return saved;
+            }
+        } catch {
+            /* ignore */
+        }
+        return this.defaultCornerColor;
+    }
+
+    /** Пользователь уже выбирал цвет на первом запуске (ключ в localStorage). */
+    hasUserSelectedCornerColor() {
+        try {
+            return localStorage.getItem('corner_square_color') != null;
+        } catch {
+            return false;
+        }
+    }
+
+    /** Применяет цвет ко всем угловым квадратикам. */
+    applyCornerSquareColor(color) {
+        document.querySelectorAll('.sun-cornerSquare').forEach((square) => {
+            square.style.backgroundColor = color;
+        });
+    }
+
     /** Восстанавливает сохранённый цвет угловых квадратиков. */
     restoreCornerColor() {
-        const savedColor = localStorage.getItem('corner_square_color');
-        if (savedColor && savedColor !== this.defaultCornerColor) {
-            document.querySelectorAll('.sun-cornerSquare').forEach(square => {
-                square.style.backgroundColor = savedColor;
-            });
-            this.hasSelectedColor = true;
-        } else {
-            this.hasSelectedColor = false;
-        }
+        this.applyCornerSquareColor(this.getBaseCornerColor());
+        this.hasSelectedColor = this.hasUserSelectedCornerColor();
     }
     
     // Сбрасывает цвет квадратиков в красный
     /** Сбрасывает цвет угловых квадратиков на красный по умолчанию. */
     resetCornerColor() {
-        document.querySelectorAll('.sun-cornerSquare').forEach(square => {
-            square.style.backgroundColor = this.defaultCornerColor;
-        });
+        this.applyCornerSquareColor(this.defaultCornerColor);
         localStorage.removeItem('corner_square_color');
         this.hasSelectedColor = false;
     }
@@ -1083,9 +1101,7 @@ class AppCore {
                 const selectedColor = e.target.value;
                 
                 // Окрашиваем все угловые квадратики в выбранный цвет
-                document.querySelectorAll('.sun-cornerSquare').forEach(square => {
-                    square.style.backgroundColor = selectedColor;
-                });
+                this.applyCornerSquareColor(selectedColor);
                 
                 // Сохраняем цвет
                 this.saveCornerColor(selectedColor);

@@ -44,7 +44,7 @@ class DataManager {
     }
     
     /** Полная перерисовка списка персон и синхронизация A/B. */
-    async updateDateList() {
+    async updateDateList(opts) {
         window.sunDateListLog && window.sunDateListLog('updateDateList:enter', {
             activeDateId: window.appState.activeDateId,
             dateSelections: { ...window.appState.dateSelections }
@@ -53,7 +53,7 @@ class DataManager {
             await window.unifiedListManager.initTemplates().catch(() => {});
         }
         if (window.unifiedListManager.updateDatesList) {
-            window.unifiedListManager.updateDatesList();
+            window.unifiedListManager.updateDatesList(opts);
         }
         window.sunDateListLog && window.sunDateListLog('updateDateList:after updateDatesList', {
             dateSelections: { ...window.appState.dateSelections },

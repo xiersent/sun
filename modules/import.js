@@ -61,6 +61,147 @@ class ImportExportManager {
             }
         });
     }
+
+    /** Персоны и группы персон после импорта. */
+    applyImportedPersonData(data) {
+        if (!data) {
+            return;
+        }
+        if (data.dates && data.dates.length) {
+            this.convertImportedDatesToTimestamp(data);
+        }
+
+        if (!data.personGroups || !data.personGroups.length) {
+            if (data.dates && data.dates.length) {
+                data.personGroups = [{
+                    id: 'default-person-group',
+                    name: 'По умолчанию',
+                    dates: data.dates.map((d) => d.id),
+                    expanded: true
+                }];
+            } else {
+                data.personGroups = [];
+            }
+        }
+
+        if (window.dates && window.dates.syncPersonGroupsLayout) {
+            window.dates.syncPersonGroupsLayout();
+        }
+    }
+
+    /** Восстановить uiSettings в памяти appState (в т.ч. activeDateId). */
+    applyImportedUiSettingsToMemory(convertedData) {
+        const ui = convertedData.uiSettings || {};
+        const dates = convertedData.dates || window.appState.data.dates || [];
+
+        if (ui.currentDate != null) {
+            window.appState.currentDate = window.timeUtils
+                ? window.timeUtils.toLocalDate(ui.currentDate)
+                : new Date(ui.currentDate);
+        }
+
+        if (ui.baseDate != null) {
+            if (window.timeUtils) {
+                const baseDateLocal = window.timeUtils.toLocalDate(ui.baseDate);
+                window.appState.baseDate = window.timeUtils.getStartOfDay(baseDateLocal);
+            } else {
+                window.appState.baseDate = new Date(ui.baseDate);
+            }
+        }
+
+        if (ui.currentDay !== undefined && ui.currentDay !== null) {
+            window.appState.currentDay = ui.currentDay;
+        }
+
+        if (ui.transform) {
+            window.appState.transform = ui.transform;
+        }
+
+        window.appState.uiHidden = ui.uiHidden || false;
+        window.appState.graphHidden = ui.graphHidden || false;
+        window.appState.showStars = ui.showStars !== undefined ? ui.showStars : true;
+        window.appState.grayMode = ui.grayMode || false;
+        window.appState.graphGrayMode = ui.graphGrayMode !== undefined ? ui.graphGrayMode : false;
+        window.appState.cornerSquaresVisible = ui.cornerSquaresVisible !== undefined ? ui.cornerSquaresVisible : true;
+        window.appState.waveIntersectionsVisible = ui.waveIntersectionsVisible !== undefined ? ui.waveIntersectionsVisible : true;
+        window.appState.extremumWaveColorHighlight = ui.extremumWaveColorHighlight !== undefined ? ui.extremumWaveColorHighlight : false;
+        window.appState.panelActiveTab =
+            typeof ui.panelActiveTab === 'string' && ui.panelActiveTab ? ui.panelActiveTab : null;
+
+        let activeId =
+            ui.activeDateId != null && String(ui.activeDateId) !== '' ? ui.activeDateId : null;
+        if (activeId != null && !dates.some((d) => String(d.id) === String(activeId))) {
+            activeId = null;
+        }
+        if (activeId == null && dates.length > 0) {
+            activeId = dates[0].id;
+        }
+        window.appState.activeDateId = activeId;
+
+        if (ui.dateSelections) {
+            window.appState.dateSelections = { ...ui.dateSelections };
+        } else {
+            window.appState.dateSelections = {
+                typeA: activeId,
+                typeB: null
+            };
+        }
+        if (!window.appState.data.uiSettings) {
+            window.appState.data.uiSettings = {};
+        }
+        window.appState.data.uiSettings.dateSelections = window.appState.dateSelections;
+        window.appState.data.uiSettings.activeDateId = activeId;
+    }
+
+    /** Перерисовка списков и активация импортированной персоны. */
+    async finalizeImportUi(options = {}) {
+        const { refreshWaves = true, refreshDisplayTemplates = false } = options;
+
+        if (window.unifiedListManager) {
+            window.unifiedListManager._datesListStructureSig = null;
+        }
+
+        if (window.extremumTimeManager && typeof window.extremumTimeManager.unwrapWaveVisibilityProxy === 'function') {
+            window.extremumTimeManager.unwrapWaveVisibilityProxy();
+        }
+
+        if (window.dataManager && window.dataManager.updateDateList) {
+            await window.dataManager.updateDateList({ forceFull: true });
+        }
+
+        if (window.dates && window.appState.activeDateId) {
+            window.dates.setActiveDate(window.appState.activeDateId, true);
+        }
+
+        if (refreshWaves && window.dataManager && window.dataManager.updateWavesGroups) {
+            await window.dataManager.updateWavesGroups();
+        }
+
+        if (refreshWaves && window.waves) {
+            if (window.waves.updatePosition) {
+                window.waves.updatePosition();
+            }
+            if (window.waves.updateCornerSquareColors) {
+                window.waves.updateCornerSquareColors();
+            }
+        }
+
+        if (window.grid && window.grid.updateCenterDate) {
+            window.grid.updateCenterDate();
+        }
+
+        if (refreshDisplayTemplates && window.displayViewTemplatesManager && window.displayViewTemplatesManager.init) {
+            window.displayViewTemplatesManager.init();
+        }
+
+        if (window.uiManager && window.uiManager.syncExtremumWaveColorHighlightButton) {
+            window.uiManager.syncExtremumWaveColorHighlightButton();
+        }
+
+        if (window.appClassSync) {
+            window.appClassSync.syncFromAppState();
+        }
+    }
     
     /** Скачать JSON со всеми данными, настройками UI и transform (файл *_everything.json). */
     exportAll() {
@@ -148,7 +289,7 @@ class ImportExportManager {
     importAll(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = async (event) => {
                 try {
                     const data = JSON.parse(event.target.result);
                     
@@ -280,22 +421,7 @@ class ImportExportManager {
                             this.normalizeImportedWaves(convertedData);
                             
                             window.appState.data = convertedData;
-
-                            if (!window.appState.data.personGroups || !window.appState.data.personGroups.length) {
-                                if (window.appState.data.dates && window.appState.data.dates.length) {
-                                    window.appState.data.personGroups = [{
-                                        id: 'default-person-group',
-                                        name: 'По умолчанию',
-                                        dates: window.appState.data.dates.map(d => d.id),
-                                        expanded: true
-                                    }];
-                                } else {
-                                    window.appState.data.personGroups = [];
-                                }
-                            }
-                            if (window.dates && window.dates.syncPersonGroupsLayout) {
-                                window.dates.syncPersonGroupsLayout();
-                            }
+                            this.applyImportedPersonData(window.appState.data);
                             
                             window.appState.waveVisibility = {};
                             window.appState.waveBold = {};
@@ -324,22 +450,7 @@ class ImportExportManager {
                                 }
                             });
                             
-                            window.appState.currentDate = new Date(convertedData.uiSettings.currentDate);
-                            window.appState.baseDate = new Date(convertedData.uiSettings.baseDate);
-                            window.appState.currentDay = convertedData.uiSettings.currentDay;
-                            window.appState.transform = convertedData.uiSettings.transform;
-                            window.appState.uiHidden = convertedData.uiSettings.uiHidden || false;
-                            window.appState.graphHidden = convertedData.uiSettings.graphHidden || false;
-                            window.appState.showStars = convertedData.uiSettings.showStars !== undefined ? convertedData.uiSettings.showStars : true;
-                            window.appState.grayMode = convertedData.uiSettings.grayMode || false;
-                            window.appState.graphGrayMode = convertedData.uiSettings.graphGrayMode !== undefined ? convertedData.uiSettings.graphGrayMode : false;
-                            window.appState.cornerSquaresVisible = convertedData.uiSettings.cornerSquaresVisible !== undefined ? convertedData.uiSettings.cornerSquaresVisible : true;
-                            window.appState.waveIntersectionsVisible = convertedData.uiSettings.waveIntersectionsVisible !== undefined ? convertedData.uiSettings.waveIntersectionsVisible : true;
-                            window.appState.extremumWaveColorHighlight = convertedData.uiSettings.extremumWaveColorHighlight !== undefined ? convertedData.uiSettings.extremumWaveColorHighlight : false;
-                            
-                            if (window.appClassSync) {
-                                window.appClassSync.syncFromAppState();
-                            }
+                            this.applyImportedUiSettingsToMemory(convertedData);
                             
                             const graphContainer = window.dom.byKey('graphContainer');
                             if (graphContainer) {
@@ -378,17 +489,10 @@ class ImportExportManager {
                                 window.waves.createWaveElement(wave);
                             });
 
-                            window.dataManager.updateDateList();
-                            window.dataManager.updateWavesGroups();
-                            if (window.displayViewTemplatesManager && window.displayViewTemplatesManager.init) {
-                                window.displayViewTemplatesManager.init();
-                            }
-                            window.grid.updateCenterDate();
-                            window.waves.updatePosition();
-                            window.waves.updateCornerSquareColors();
-                            if (window.uiManager && window.uiManager.syncExtremumWaveColorHighlightButton) {
-                                window.uiManager.syncExtremumWaveColorHighlightButton();
-                            }
+                            await this.finalizeImportUi({
+                                refreshWaves: true,
+                                refreshDisplayTemplates: true
+                            });
                             window.appState.save();
                             
                             alert('Все данные успешно импортированы!');
@@ -397,30 +501,14 @@ class ImportExportManager {
                             window.appState.data.dates = convertedData.dates || [];
                             if (convertedData.personGroups && convertedData.personGroups.length) {
                                 window.appState.data.personGroups = convertedData.personGroups;
-                            } else if (window.appState.data.dates.length > 0) {
-                                window.appState.data.personGroups = [{
-                                    id: 'default-person-group',
-                                    name: 'По умолчанию',
-                                    dates: window.appState.data.dates.map(d => d.id),
-                                    expanded: true
-                                }];
-                            } else {
-                                window.appState.data.personGroups = [];
                             }
-                            if (window.dates && window.dates.syncPersonGroupsLayout) {
-                                window.dates.syncPersonGroupsLayout();
-                            }
-                            
-                            if (window.appState.data.dates.length > 0 && !window.appState.data.dates.find(d => d.id === window.appState.activeDateId)) {
-                                window.appState.activeDateId = window.appState.data.dates[0].id;
-                                const activeDate = window.appState.data.dates.find(d => d.id === window.appState.activeDateId);
-                                if (activeDate) {
-                                    window.appState.baseDate = new Date(activeDate.date);
-                                }
-                            }
-                            
-                            window.dataManager.updateDateList();
-                            window.grid.updateCenterDate();
+                            this.applyImportedPersonData(window.appState.data);
+                            this.applyImportedUiSettingsToMemory({
+                                dates: window.appState.data.dates,
+                                uiSettings: convertedData.uiSettings || {}
+                            });
+
+                            await this.finalizeImportUi({ refreshWaves: false });
                             window.appState.save();
                             
                             alert('Даты успешно импортированы!');

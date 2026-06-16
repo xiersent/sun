@@ -24,7 +24,19 @@ class MigrationsManager {
 
     /** Данные уже на актуальной схеме — не грузим migrations/*.js. */
     shouldSkipMigrations() {
-        return this.getStoredSchemaVersion() >= MigrationsManager.SCHEMA_VERSION;
+        const stored = this.getStoredSchemaVersion();
+        if (stored < MigrationsManager.SCHEMA_VERSION) {
+            return false;
+        }
+        const data = this.appState?.data;
+        const hasCoreData =
+            Array.isArray(data?.waves) &&
+            data.waves.length > 0 &&
+            Array.isArray(data?.groups) &&
+            data.groups.length > 0 &&
+            Array.isArray(data?.dates) &&
+            data.dates.length > 0;
+        return hasCoreData;
     }
 
     /** Записать версию схемы; save() — в конце load() после hydrate. */
