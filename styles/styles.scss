@@ -1320,6 +1320,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&warningText{
 		@media(min-width: 0px){line-height: 1.5; margin-bottom: #{$spacing-lg};}
 	}
+	&desktopDownloadLink{
+		@media(min-width: 0px){color: inherit; font-weight: 400; text-decoration: underline; white-space: nowrap;}
+	}
+	&desktopDownloadLink:hover{
+		@media(min-width: 0px){color: #333;}
+	}
 	&warningInfo{
 		@media(min-width: 0px){display: flex; flex-direction: column; gap: 8px; max-width: 300px; margin: 0 auto;}
 	}

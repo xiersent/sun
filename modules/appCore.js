@@ -274,6 +274,12 @@ class AppCore {
         
         warningBox.classList.remove('sun-hidden');
         
+        const desktopNotice = warningBox.querySelector('.sun-desktopNotice');
+        if (desktopNotice) {
+            const isDesktopApp = !!(window.__TAURI_INTERNALS__ || window.__TAURI__);
+            desktopNotice.classList.toggle('sun-hidden', isDesktopApp);
+        }
+        
         // Заполняем информацию
         this.fillWarningInfo(warningBox);
     }
