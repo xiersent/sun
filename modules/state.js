@@ -640,7 +640,10 @@ class AppState {
             this.data.dates.forEach(date => {
                 if (date.date && !this.isTimestamp(date.date)) {
                     try {
-                        const dateObj = new Date(date.date);
+                        const dateObj =
+                            window.timeUtils && typeof window.timeUtils.parseStringToLocal === 'function'
+                                ? window.timeUtils.parseStringToLocal(String(date.date))
+                                : new Date(date.date);
                         if (!isNaN(dateObj.getTime())) {
                             date.date = dateObj.getTime();
                         }
@@ -686,7 +689,10 @@ class AppState {
     
     /** Проверка числового timestamp. */
     isTimestamp(value) {
-        return typeof value === 'number' && !isNaN(value) && value > 0;
+        if (window.timeUtils && typeof window.timeUtils.isTimestamp === 'function') {
+            return window.timeUtils.isTimestamp(value);
+        }
+        return typeof value === 'number' && Number.isFinite(value);
     }
     
     /** Есть выбранная персона (дата из списка), привязанная к activeDateId */

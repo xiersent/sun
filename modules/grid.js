@@ -172,6 +172,13 @@ class GridManager {
         } else {
             el.style.left = `calc(50% + ${pos.pixelPosition}px)`;
             el.style.transform = 'translateX(-50%)';
+            if (el.classList.contains('sun-dateLabels')) {
+                el.style.bottom = '30px';
+                el.style.top = '';
+            } else if (el.classList.contains('sun-weekdayLabel')) {
+                el.style.bottom = '10px';
+                el.style.top = '';
+            }
         }
     }
 

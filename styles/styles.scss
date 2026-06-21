@@ -1327,16 +1327,19 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){color: #333;}
 	}
 	&warningInfo{
-		@media(min-width: 0px){display: flex; flex-direction: column; gap: 8px; max-width: 300px; margin: 0 auto;}
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: min(100%, 420px); margin: 0 auto; box-sizing: border-box;}
 	}
 	&warningInfoItem{
-		@media(min-width: 0px){display: flex; align-items: center; gap: 5px; justify-content: space-between;}
+		@media(min-width: 0px){display: flex; align-items: baseline; gap: 0; justify-content: space-between; width: 100%; min-width: 0;}
 	}
 	&warningInfoItem strong{
-		@media(min-width: 0px){font-weight: 400; color: #333;}
+		@media(min-width: 0px){font-weight: 400; color: #333; flex-shrink: 0; white-space: nowrap;}
 	}
 	&warningInfoItem span{
 		@media(min-width: 0px){color: #666; font-weight: 400;}
+	}
+	&versionInfoValue{
+		@media(min-width: 0px){flex-shrink: 0; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums;}
 	}
 	&mobileWarning{
 		@media(min-width: 0px){color: #ff0000; font-weight: 400; margin-top: #{$spacing-sm}; padding: #{$spacing-sm}; background: #fff3f3; border: 1px solid #ff0000; font-size: #{$font-size-sm};}
@@ -2188,7 +2191,7 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){width: 216px;}
 	}
 	&warningInfoStretch{
-		@media(min-width: 0px){flex: 1; border-bottom: 1px dotted; align-self: stretch;}
+		@media(min-width: 0px){flex: 1 1 auto; min-width: 12px; margin: 0 6px; height: 0; align-self: center; border-bottom: 1px dotted #aaa;}
 	}
 	&hiddenColorPickerPos{
 		@media(min-width: 0px){position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;}

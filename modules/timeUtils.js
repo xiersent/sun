@@ -49,10 +49,13 @@ class TimeUtils {
     
     /** Парсит строку YYYY-MM-DD [HH:mm:ss] в локальный Date. */
     parseStringToLocal(dateTimeString) {
-        if (!dateTimeString) return new Date();
+        if (dateTimeString == null || dateTimeString === '') return new Date();
+        if (typeof dateTimeString === 'number' && Number.isFinite(dateTimeString)) {
+            return new Date(dateTimeString);
+        }
         
         try {
-            let normalized = dateTimeString.trim();
+            let normalized = String(dateTimeString).trim();
             
             if (normalized.includes(' ') && !normalized.includes('T')) {
                 const [datePart, timePart] = normalized.split(' ');
@@ -267,12 +270,11 @@ class TimeUtils {
         return (timestamp2 - timestamp1) / this.DAY_MS;
     }
     
-    /** Проверка корректного числового timestamp. */
+    /** Проверка корректного числового timestamp (мс с эпохи, в т.ч. до 1970). */
     isTimestamp(value) {
-        return typeof value === 'number' && 
-               !isNaN(value) && 
-               value > 0 && 
-               value < Number.MAX_SAFE_INTEGER;
+        return typeof value === 'number' &&
+               Number.isFinite(value) &&
+               Math.abs(value) < Number.MAX_SAFE_INTEGER;
     }
     
     /** Строка → миллисекунды. */

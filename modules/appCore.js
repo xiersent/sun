@@ -344,6 +344,36 @@ class AppCore {
         return versions.find((entry) => entry && String(entry.id) === 'version') || null;
     }
 
+    /**
+     * Дата из content versions.json → sun[DD.MM.YY].exe для папки /sun/ на сервере.
+     * @param {string} content
+     * @returns {string|null}
+     */
+    _buildDesktopExeHrefFromVersionContent(content) {
+        const m = String(content || '').trim().match(/^(\d{2})\.(\d{2})\.(\d{2}|\d{4})/);
+        if (!m) {
+            return null;
+        }
+        const yearShort = m[3].length === 4 ? m[3].slice(-2) : m[3];
+        return `/sun/sun[${m[1]}.${m[2]}.${yearShort}].exe`;
+    }
+
+    /** Ссылка «Скачать» в шапке предупреждения — из той же даты, что и «Обновления от:». */
+    _syncDesktopDownloadLink(versions) {
+        const link = document.querySelector('.sun-desktopDownloadLink');
+        if (!link) {
+            return;
+        }
+        const entry = this._getVersionFromEntry(versions);
+        if (!entry) {
+            return;
+        }
+        const href = this._buildDesktopExeHrefFromVersionContent(entry.content);
+        if (href) {
+            link.href = href;
+        }
+    }
+
     _createWarningInfoItem(title, content) {
         const item = document.createElement('div');
         item.className = 'sun-warningInfoItem';
@@ -386,6 +416,7 @@ class AppCore {
         const item = this._createWarningInfoItem(entry.title, entry.content);
         item.dataset.versionId = entry.id;
         container.appendChild(item);
+        this._syncDesktopDownloadLink(versions);
     }
 
     /** Заполняет блок версий в предупреждении. */

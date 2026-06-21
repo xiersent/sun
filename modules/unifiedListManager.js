@@ -1314,7 +1314,10 @@ class UnifiedListManager {
         }
         
         try {
-            const newDate = new Date(newDateValue);
+            const newDate =
+                window.timeUtils && typeof window.timeUtils.parseFromDateAndTimeInputs === 'function'
+                    ? window.timeUtils.parseFromDateAndTimeInputs(newDateValue, '')
+                    : new Date(newDateValue);
             if (isNaN(newDate.getTime())) {
                 throw new Error('Некорректная дата');
             }
@@ -2000,6 +2003,10 @@ class UnifiedListManager {
         desired.forEach((did) => {
             const row = byId.get(did);
             row.setAttribute('data-person-group-id', String(personGroupId));
+            const dateObj = window.appState.data.dates.find((d) => String(d.id) === String(did));
+            if (dateObj) {
+                this._syncDateRowDisplayFromAppState(row, dateObj);
+            }
             frag.appendChild(row);
         });
         container.appendChild(frag);

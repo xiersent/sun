@@ -26,7 +26,10 @@ class ImportExportManager {
      * @returns {boolean}
      */
     isTimestamp(value) {
-        return typeof value === 'number' && !isNaN(value) && value > 0;
+        if (window.timeUtils && typeof window.timeUtils.isTimestamp === 'function') {
+            return window.timeUtils.isTimestamp(value);
+        }
+        return typeof value === 'number' && Number.isFinite(value);
     }
 
     /**
@@ -35,9 +38,11 @@ class ImportExportManager {
      */
     convertImportedDatesToTimestamp(data) {
         data.dates.forEach(date => {
-            if (date.date && !this.isTimestamp(date.date)) {
-                const dateObj = window.timeUtils.parseStringToLocal(date.date);
-                date.date = dateObj.getTime();
+            if (date.date != null && date.date !== '' && !this.isTimestamp(date.date)) {
+                const dateObj = window.timeUtils.parseStringToLocal(String(date.date));
+                if (!isNaN(dateObj.getTime())) {
+                    date.date = dateObj.getTime();
+                }
             }
             if (typeof date.description !== 'string') {
                 date.description = '';
