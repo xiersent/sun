@@ -345,7 +345,7 @@ class AppCore {
     }
 
     /**
-     * Дата из content versions.json → sun[DD.MM.YY].exe для папки /sun/ на сервере.
+     * Дата из content versions.json → sun[DD.MM.YY].exe в корне сайта (рядом с index.html).
      * @param {string} content
      * @returns {string|null}
      */
@@ -355,7 +355,7 @@ class AppCore {
             return null;
         }
         const yearShort = m[3].length === 4 ? m[3].slice(-2) : m[3];
-        return `/sun/sun[${m[1]}.${m[2]}.${yearShort}].exe`;
+        return `sun[${m[1]}.${m[2]}.${yearShort}].exe`;
     }
 
     /** Ссылка «Скачать» в шапке предупреждения — из той же даты, что и «Обновления от:». */
