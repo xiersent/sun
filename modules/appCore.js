@@ -350,7 +350,7 @@ class AppCore {
      * @returns {string|null}
      */
     _buildDesktopExeHrefFromVersionContent(content) {
-        const m = String(content || '').trim().match(/^(\d{2})\.(\d{2})\.(\d{2}|\d{4})/);
+        const m = String(content || '').trim().match(/^(\d{2})\.(\d{2})\.(\d{4}|\d{2})/);
         if (!m) {
             return null;
         }
