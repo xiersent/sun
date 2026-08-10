@@ -79,6 +79,7 @@ $z-grid: 5;
 $z-overlay: 9999;
 $sun-wave-label-edge-gap: calc(#{$spacing-xs} + 1px);
 $time-bar-side-w: 72px;
+$time-bar-intersection-side-w: 168px;
 $time-bar-now-row-h: 26px;
 $time-bar-now-line-anchor: calc(#{$time-bar-now-row-h} / 2);
 $cursor-tooltip-bg: #1e1e1e;
@@ -282,6 +283,9 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarWrap{
 		@media(min-width: 0px){ margin: #{$spacing-md} auto; align-self: center;}
 	}
+	&timeBarIntersectionWrap{
+		@media(min-width: 0px){ margin: #{$spacing-md} auto; align-self: center; width: 100%;}
+	}
 	&timeBarControlsSection #{&}tabContainer{
 		@media(min-width: 0px){align-items: flex-start;}
 	}
@@ -299,6 +303,39 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	}
 	&timeBarWrap > #{&}panelSection#{&}timeBarControlsSection > #{&}timeBarControls{
 		@media(min-width: 0px){outline: none;}
+	}
+	&timeBarIntersectionBlock > #{&}panelSection#{&}timeBarControlsSection{
+		@media(min-width: 0px){margin-bottom: 0; display: flex; flex-direction: column; gap: #{$spacing-sm};}
+	}
+	&timeBarIntersectionBlock > #{&}panelSection#{&}timeBarControlsSection > #{&}timeBarControls{
+		@media(min-width: 0px){outline: none;}
+	}
+	&timeBarMultiIntersectionWrap{
+		@media(min-width: 0px){ margin: #{$spacing-md} auto; align-self: center; width: 100%;}
+	}
+	&timeBarMultiIntersectionRows{
+		@media(min-width: 0px){display: flex; flex-direction: column; flex: 0 0 auto; width: 100%;}
+	}
+	&timeBarMultiIntersectionSecondaryList{
+		@media(min-width: 0px){display: flex; flex-direction: column; gap: 8px; width: 100%;}
+	}
+	&timeBarMultiIntersectionSecondaryRow{
+		@media(min-width: 0px){display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; width: 100%; justify-content: center;}
+	}
+	&timeBarMultiIntersectionSecondaryRow #{&}intersectionSelectGroup{
+		@media(min-width: 0px){flex: 1 1 220px; min-width: 160px; max-width: 360px;}
+	}
+	&timeBarMultiIntersectionStripChecks{
+		@media(min-width: 0px){flex: 0 0 auto; margin: 0; gap: 6px 12px;}
+	}
+	&timeBarMultiIntersectionAddRow{
+		@media(min-width: 0px){justify-content: center;}
+	}
+	&timeBarMultiIntersectionPrimaryRow{
+		@media(min-width: 0px){justify-content: center;}
+	}
+	&timeBarMultiIntersectionPrimaryRow #{&}intersectionSelectGroup{
+		@media(min-width: 0px){flex: 1 1 220px; min-width: 160px; max-width: 360px;}
 	}
 	&timeBarControls{
 		@media(min-width: 0px){background: #fafafa; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; font-size: 11px; user-select: none;}
@@ -360,8 +397,92 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarStateStack{
 		@media(min-width: 0px){display: flex; flex-direction: column; flex: 0 0 auto; position: relative; z-index: 1;}
 	}
+	&timeBarIntersection{
+		@media(min-width: 0px){
+			border-top: none;
+			--time-bar-side-w: #{$time-bar-intersection-side-w};
+		}
+	}
+	&timeBarIntersectionBlock{
+		@media(min-width: 0px){margin-top: 0; display: flex; flex-direction: column; gap: 0; width: 100%;}
+	}
+	&timeBarIntersectionBlock #{&}timeBarIntersection{
+		@media(min-width: 0px){outline: 1px solid #{$clg}; background: #fff;}
+	}
+	&timeBarIntersection #{&}timeBarIntersectionTrack{
+		@media(min-width: 0px){min-height: 28px;}
+	}
+	&timeBarIntersection:has(#{&}timeBarSegmentSlot:hover),
+	&timeBarIntersection:has(> #{&}timeBarIntersectionRow:hover){
+		@media(min-width: 0px){overflow: visible; position: relative; z-index: 2;}
+	}
+	&timeBarIntersectionRow:hover,
+	&timeBarIntersectionRow:has(> #{&}timeBarIntersectionTrack:hover),
+	&timeBarIntersectionRow:has(#{&}timeBarSegmentSlot:hover){
+		@media(min-width: 0px){position: relative; z-index: 20; overflow: visible;}
+	}
+	&timeBarIntersectionRow:hover > #{&}timeBarIntersectionTrack,
+	&timeBarIntersectionRow:has(> #{&}timeBarIntersectionTrack:hover) > #{&}timeBarIntersectionTrack,
+	&timeBarIntersectionRow:has(#{&}timeBarSegmentSlot:hover) > #{&}timeBarIntersectionTrack{
+		@media(min-width: 0px){background-color: rgba(0, 0, 0, 0.025); overflow: visible; z-index: 5;}
+	}
+	&timeBarIntersectionPair{
+		@media(min-width: 0px){cursor: pointer;}
+	}
+	&timeBarIntersectionPairReadonly{
+		@media(min-width: 0px){cursor: default;}
+	}
+	&timeBarIntersectionPairReadonly #{&}extremumWaveName{
+		@media(min-width: 0px){cursor: default; pointer-events: none;}
+	}
+	&timeBarMultiIntersection #{&}timeBarIntersectionPair,
+	&timeBarMultiIntersection #{&}timeBarIntersectionPairReadonly{
+		@media(min-width: 0px){cursor: default;}
+	}
+	&timeBarMultiIntersection #{&}timeBarSegment #{&}extremumWaveName,
+	&timeBarMultiIntersection #{&}extremumWaveNameInSegment{
+		@media(min-width: 0px){cursor: default; pointer-events: none;}
+	}
+	&timeBarIntersectionPairSep{
+		@media(min-width: 0px){
+			display: inline-block;
+			height: 14px;
+			width: auto;
+			vertical-align: -2px;
+			object-fit: contain;
+			image-rendering: pixelated;
+			image-rendering: crisp-edges;
+			pointer-events: none;
+			user-select: none;
+		}
+	}
+	&timeBarIntersection #{&}timeBarHoursRow{
+		@media(min-width: 0px){border-top: none; border-bottom: 1px solid #{$clg};}
+	}
+	&timeBarIntersectionHidden{
+		@media(min-width: 0px){display: none;}
+	}
 	&timeBarStateRow{
 		@media(min-width: 0px){display: flex; flex-direction: row; align-items: stretch; min-height: 20px; border-bottom: 1px solid #eee;}
+	}
+	&timeBarStateRow#{&}timeBarIntersectionRow{
+		@media(min-width: 0px){border-bottom: 1px solid #eee;}
+	}
+	&timeBarIntersection > #{&}timeBarIntersectionRow:not(#{&}timeBarIntersectionRowHidden):not( :has(~ #{&}timeBarIntersectionRow:not(#{&}timeBarIntersectionRowHidden)) ){
+		@media(min-width: 0px){border-bottom: none;}
+	}
+	/* Множественная полоса: ряды вложены в контейнер; учитывать скрытые галочками. */
+	&timeBarMultiIntersectionRows > #{&}timeBarMultiIntersectionRow:not(#{&}timeBarIntersectionRowHidden):not( :has(~ #{&}timeBarMultiIntersectionRow:not(#{&}timeBarIntersectionRowHidden)) ){
+		@media(min-width: 0px){border-bottom: none;}
+	}
+	&timeBarMultiIntersectionRows:not( :has(> #{&}timeBarMultiIntersectionRow:not(#{&}timeBarIntersectionRowHidden)) ) ~ #{&}timeBarNowRow{
+		@media(min-width: 0px){border-top: none;}
+	}
+	&timeBarStateRow#{&}timeBarIntersectionRowHidden{
+		@media(min-width: 0px){display: none;}
+	}
+	&timeBarIntersection #{&}timeBarNowRow{
+		@media(min-width: 0px){border-top: 1px solid #{$clg};}
 	}
 	&timeBarStateStack > #{&}timeBarStateRow:hover > #{&}timeBarStateTrack,
 	&timeBarStateStack > #{&}timeBarStateRow:has(> #{&}timeBarStateTrack:hover) > #{&}timeBarStateTrack,
@@ -385,6 +506,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarWrap:has(#{&}timeBarStateRow:hover){
 		@media(min-width: 0px){overflow: visible;}
 	}
+	&timeBarIntersectionWrap:has(#{&}timeBarSegmentSlot:hover),
+	&timeBarIntersectionWrap:has(#{&}timeBarStateRow:hover),
+	&timeBarIntersectionBlock:has(#{&}timeBarSegmentSlot:hover),
+	&timeBarIntersectionBlock:has(#{&}timeBarStateRow:hover){
+		@media(min-width: 0px){overflow: visible;}
+	}
 	&timeBarContainerInWrap:has(#{&}timeBarSegmentSlot:hover),
 	&timeBarWrap #{&}timeBarContainer:has(#{&}timeBarSegmentSlot:hover){
 		@media(min-width: 0px){overflow: visible;}
@@ -402,7 +529,14 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){border-top: 1px solid #{$clg}; border-bottom: none;}
 	}
 	&timeBarStateSide{
-		@media(min-width: 0px){flex: 0 0 #{$time-bar-side-w}; display: flex; align-items: center; gap: 4px; padding: 0 6px; border-right: 1px solid #{$clg}; background: #fafafa; font-size: 11px; color: #{$text-secondary};}
+		@media(min-width: 0px){flex: 0 0 #{$time-bar-side-w}; width: #{$time-bar-side-w}; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 0 6px; border-right: 1px solid #{$clg}; background: #fafafa; font-size: 11px; color: #{$text-secondary};}
+	}
+	&timeBarIntersection #{&}timeBarStateSide{
+		@media(min-width: 0px){
+			flex: 0 0 var(--time-bar-side-w, #{$time-bar-intersection-side-w});
+			width: var(--time-bar-side-w, #{$time-bar-intersection-side-w});
+			min-width: var(--time-bar-side-w, #{$time-bar-intersection-side-w});
+		}
 	}
 	&timeBarStateToggle{
 		@media(min-width: 0px){flex: 0 0 auto; width: 22px; height: 20px; padding: 0; border: 1px solid #{$clg}; background: #fff; cursor: pointer; font-size: 11px; line-height: 1; color: #{$text-color};}
@@ -412,6 +546,15 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	}
 	&timeBarStateLabel{
 		@media(min-width: 0px){font-variant-numeric: tabular-nums; font-weight: 400; min-width: 22px;}
+	}
+	&timeBarIntersection #{&}timeBarStateLabel{
+		@media(min-width: 0px){
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			min-width: 0;
+			flex: 1 1 auto;
+		}
 	}
 	&timeBarStateTrack{
 		@media(min-width: 0px){flex: 1 1 auto; position: relative; z-index: 1; min-width: 0; min-height: 28px; background: #fff; overflow: hidden;}
@@ -682,19 +825,39 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&tabsSection #{&}timeBarWrap{
 		@media(min-width: 0px){margin: 0; align-self: stretch; width: 100%;}
 	}
-	&tabsSection #{&}tabContent[data-tab-panel="timeBar"]{
+	&tabsSection #{&}timeBarIntersectionWrap{
+		@media(min-width: 0px){margin: 0; align-self: stretch; width: 100%;}
+	}
+	&tabsSection #{&}timeBarMultiIntersectionWrap{
+		@media(min-width: 0px){margin: 0; align-self: stretch; width: 100%;}
+	}
+	&tabsSection #{&}tabContent[data-tab-panel="timeBar"],
+	&tabsSection #{&}tabContent[data-tab-panel="intersectionBar"],
+	&tabsSection #{&}tabContent[data-tab-panel="multiIntersectionBar"]{
 		@media(min-width: 0px){padding: 0;}
 	}
 	&tabsSection #{&}tabContent[data-tab-panel="timeBar"]:has(#{&}timeBarSegmentSlot:hover),
 	&tabsSection #{&}tabContent[data-tab-panel="timeBar"]:has(#{&}timeBarStateRow:hover),
 	&tabContentInTabs[data-tab-panel="timeBar"]:has(#{&}timeBarSegmentSlot:hover),
-	&tabContentInTabs[data-tab-panel="timeBar"]:has(#{&}timeBarStateRow:hover){
+	&tabContentInTabs[data-tab-panel="timeBar"]:has(#{&}timeBarStateRow:hover),
+	&tabsSection #{&}tabContent[data-tab-panel="intersectionBar"]:has(#{&}timeBarSegmentSlot:hover),
+	&tabsSection #{&}tabContent[data-tab-panel="intersectionBar"]:has(#{&}timeBarStateRow:hover),
+	&tabContentInTabs[data-tab-panel="intersectionBar"]:has(#{&}timeBarSegmentSlot:hover),
+	&tabContentInTabs[data-tab-panel="intersectionBar"]:has(#{&}timeBarStateRow:hover),
+	&tabsSection #{&}tabContent[data-tab-panel="multiIntersectionBar"]:has(#{&}timeBarSegmentSlot:hover),
+	&tabsSection #{&}tabContent[data-tab-panel="multiIntersectionBar"]:has(#{&}timeBarStateRow:hover),
+	&tabContentInTabs[data-tab-panel="multiIntersectionBar"]:has(#{&}timeBarSegmentSlot:hover),
+	&tabContentInTabs[data-tab-panel="multiIntersectionBar"]:has(#{&}timeBarStateRow:hover){
 		@media(min-width: 0px){overflow: visible;}
 	}
-	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection{
+	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection,
+	&tabsSection #{&}tabContent[data-tab-panel="intersectionBar"] #{&}timeBarControlsSection,
+	&tabsSection #{&}tabContent[data-tab-panel="multiIntersectionBar"] #{&}timeBarControlsSection{
 		@media(min-width: 0px){padding: #{$spacing-md}; border: none; outline: none; background: transparent;}
 	}
-	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
+	&tabsSection #{&}tabContent[data-tab-panel="timeBar"] #{&}timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton,
+	&tabsSection #{&}tabContent[data-tab-panel="intersectionBar"] #{&}timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton,
+	&tabsSection #{&}tabContent[data-tab-panel="multiIntersectionBar"] #{&}timeBarControlsSection #{&}tabButtons#{&}tabButtonsFramed #{&}tabButton{
 		@media(min-width: 0px){flex: 0 1 auto; padding: #{$spacing-sm} #{$spacing-md};}
 	}
 	&tabContent #{&}buttonsPanel{
@@ -1125,6 +1288,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarGroupCheck{
 		@include sun-custom-checkbox-base;
 	}
+	&timeBarIntersectionStripCheck,
+	&timeBarIntersectionGroupCheck,
+	&timeBarMultiIntersectionStripCheck,
+	&timeBarMultiIntersectionGroupCheck{
+		@include sun-custom-checkbox-base;
+	}
 	&dateCheckbox[data-type="a"]:checked{
 		@media(min-width: 0px){background-color: #2196f3;}
 	}
@@ -1149,6 +1318,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarGroupCheck:checked{
 		@media(min-width: 0px){background-color: #2196f3;}
 	}
+	&timeBarIntersectionStripCheck:checked,
+	&timeBarIntersectionGroupCheck:checked,
+	&timeBarMultiIntersectionStripCheck:checked,
+	&timeBarMultiIntersectionGroupCheck:checked{
+		@media(min-width: 0px){background-color: #2196f3;}
+	}
 	&dateCheckbox:checked::after{
 		@include sun-checkbox-checked-mark;
 	}
@@ -1170,6 +1345,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 	&timeBarGroupCheck:checked::after{
 		@include sun-checkbox-checked-mark;
 	}
+	&timeBarIntersectionStripCheck:checked::after,
+	&timeBarIntersectionGroupCheck:checked::after,
+	&timeBarMultiIntersectionStripCheck:checked::after,
+	&timeBarMultiIntersectionGroupCheck:checked::after{
+		@include sun-checkbox-checked-mark;
+	}
 	&dateCheckbox:checked{
 		@media(min-width: 0px){border-color: transparent;}
 	}
@@ -1189,6 +1370,12 @@ textarea{padding: #{$spacing-sm}; border: 1px solid #{$clg}; font-family: #{$fon
 		@media(min-width: 0px){border-color: transparent;}
 	}
 	&timeBarGroupCheck:checked{
+		@media(min-width: 0px){border-color: transparent;}
+	}
+	&timeBarIntersectionStripCheck:checked,
+	&timeBarIntersectionGroupCheck:checked,
+	&timeBarMultiIntersectionStripCheck:checked,
+	&timeBarMultiIntersectionGroupCheck:checked{
 		@media(min-width: 0px){border-color: transparent;}
 	}
 	&listItemDate #{&}dateSelectionChecks{

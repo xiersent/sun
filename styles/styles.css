@@ -440,6 +440,13 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-timeBarIntersectionWrap {
+    margin: 15px auto;
+    align-self: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
   .sun-timeBarControlsSection .sun-tabContainer {
     align-items: flex-start;
   }
@@ -471,6 +478,83 @@ textarea {
 @media (min-width: 0px) {
   .sun-timeBarWrap > .sun-panelSection.sun-timeBarControlsSection > .sun-timeBarControls {
     outline: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionBlock > .sun-panelSection.sun-timeBarControlsSection {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionBlock > .sun-panelSection.sun-timeBarControlsSection > .sun-timeBarControls {
+    outline: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionWrap {
+    margin: 15px auto;
+    align-self: center;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionRows {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionSecondaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionSecondaryRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionSecondaryRow .sun-intersectionSelectGroup {
+    flex: 1 1 220px;
+    min-width: 160px;
+    max-width: 360px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionStripChecks {
+    flex: 0 0 auto;
+    margin: 0;
+    gap: 6px 12px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionAddRow {
+    justify-content: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionPrimaryRow {
+    justify-content: center;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionPrimaryRow .sun-intersectionSelectGroup {
+    flex: 1 1 220px;
+    min-width: 160px;
+    max-width: 360px;
   }
 }
 @media (min-width: 0px) {
@@ -626,12 +710,143 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-timeBarIntersection {
+    border-top: none;
+    --time-bar-side-w: 168px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionBlock {
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionBlock .sun-timeBarIntersection {
+    outline: 1px solid #ddd;
+    background: #fff;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection .sun-timeBarIntersectionTrack {
+    min-height: 28px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarIntersection:has(> .sun-timeBarIntersectionRow:hover) {
+    overflow: visible;
+    position: relative;
+    z-index: 2;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionRow:hover, .sun-timeBarIntersectionRow:has(> .sun-timeBarIntersectionTrack:hover), .sun-timeBarIntersectionRow:has(.sun-timeBarSegmentSlot:hover) {
+    position: relative;
+    z-index: 20;
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionRow:hover > .sun-timeBarIntersectionTrack, .sun-timeBarIntersectionRow:has(> .sun-timeBarIntersectionTrack:hover) > .sun-timeBarIntersectionTrack, .sun-timeBarIntersectionRow:has(.sun-timeBarSegmentSlot:hover) > .sun-timeBarIntersectionTrack {
+    background-color: rgba(0, 0, 0, 0.025);
+    overflow: visible;
+    z-index: 5;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionPair {
+    cursor: pointer;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionPairReadonly {
+    cursor: default;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionPairReadonly .sun-extremumWaveName {
+    cursor: default;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersection .sun-timeBarIntersectionPair, .sun-timeBarMultiIntersection .sun-timeBarIntersectionPairReadonly {
+    cursor: default;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersection .sun-timeBarSegment .sun-extremumWaveName, .sun-timeBarMultiIntersection .sun-extremumWaveNameInSegment {
+    cursor: default;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionPairSep {
+    display: inline-block;
+    height: 14px;
+    width: auto;
+    vertical-align: -2px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection .sun-timeBarHoursRow {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionHidden {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
   .sun-timeBarStateRow {
     display: flex;
     flex-direction: row;
     align-items: stretch;
     min-height: 20px;
     border-bottom: 1px solid #eee;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateRow.sun-timeBarIntersectionRow {
+    border-bottom: 1px solid #eee;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection > .sun-timeBarIntersectionRow:not(.sun-timeBarIntersectionRowHidden):not(:has(~ .sun-timeBarIntersectionRow:not(.sun-timeBarIntersectionRowHidden))) {
+    border-bottom: none;
+  }
+}
+.sun- {
+  /* Множественная полоса: ряды вложены в контейнер; учитывать скрытые галочками. */
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionRows > .sun-timeBarMultiIntersectionRow:not(.sun-timeBarIntersectionRowHidden):not(:has(~ .sun-timeBarMultiIntersectionRow:not(.sun-timeBarIntersectionRowHidden))) {
+    border-bottom: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarMultiIntersectionRows:not(:has(> .sun-timeBarMultiIntersectionRow:not(.sun-timeBarIntersectionRowHidden))) ~ .sun-timeBarNowRow {
+    border-top: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarStateRow.sun-timeBarIntersectionRowHidden {
+    display: none;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection .sun-timeBarNowRow {
+    border-top: 1px solid #ddd;
   }
 }
 @media (min-width: 0px) {
@@ -665,6 +880,11 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-timeBarIntersectionWrap:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarIntersectionWrap:has(.sun-timeBarStateRow:hover), .sun-timeBarIntersectionBlock:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarIntersectionBlock:has(.sun-timeBarStateRow:hover) {
+    overflow: visible;
+  }
+}
+@media (min-width: 0px) {
   .sun-timeBarContainerInWrap:has(.sun-timeBarSegmentSlot:hover), .sun-timeBarWrap .sun-timeBarContainer:has(.sun-timeBarSegmentSlot:hover) {
     overflow: visible;
   }
@@ -694,6 +914,8 @@ textarea {
 @media (min-width: 0px) {
   .sun-timeBarStateSide {
     flex: 0 0 72px;
+    width: 72px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -702,6 +924,13 @@ textarea {
     background: #fafafa;
     font-size: 11px;
     color: #666;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection .sun-timeBarStateSide {
+    flex: 0 0 var(--time-bar-side-w, 168px);
+    width: var(--time-bar-side-w, 168px);
+    min-width: var(--time-bar-side-w, 168px);
   }
 }
 @media (min-width: 0px) {
@@ -728,6 +957,15 @@ textarea {
     font-variant-numeric: tabular-nums;
     font-weight: 400;
     min-width: 22px;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersection .sun-timeBarStateLabel {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1 1 auto;
   }
 }
 @media (min-width: 0px) {
@@ -1463,17 +1701,31 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] {
+  .sun-tabsSection .sun-timeBarIntersectionWrap {
+    margin: 0;
+    align-self: stretch;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabsSection .sun-timeBarMultiIntersectionWrap {
+    margin: 0;
+    align-self: stretch;
+    width: 100%;
+  }
+}
+@media (min-width: 0px) {
+  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar], .sun-tabsSection .sun-tabContent[data-tab-panel=intersectionBar], .sun-tabsSection .sun-tabContent[data-tab-panel=multiIntersectionBar] {
     padding: 0;
   }
 }
 @media (min-width: 0px) {
-  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar]:has(.sun-timeBarStateRow:hover), .sun-tabContentInTabs[data-tab-panel=timeBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabContentInTabs[data-tab-panel=timeBar]:has(.sun-timeBarStateRow:hover) {
+  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar]:has(.sun-timeBarStateRow:hover), .sun-tabContentInTabs[data-tab-panel=timeBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabContentInTabs[data-tab-panel=timeBar]:has(.sun-timeBarStateRow:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=intersectionBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=intersectionBar]:has(.sun-timeBarStateRow:hover), .sun-tabContentInTabs[data-tab-panel=intersectionBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabContentInTabs[data-tab-panel=intersectionBar]:has(.sun-timeBarStateRow:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=multiIntersectionBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabsSection .sun-tabContent[data-tab-panel=multiIntersectionBar]:has(.sun-timeBarStateRow:hover), .sun-tabContentInTabs[data-tab-panel=multiIntersectionBar]:has(.sun-timeBarSegmentSlot:hover), .sun-tabContentInTabs[data-tab-panel=multiIntersectionBar]:has(.sun-timeBarStateRow:hover) {
     overflow: visible;
   }
 }
 @media (min-width: 0px) {
-  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] .sun-timeBarControlsSection {
+  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] .sun-timeBarControlsSection, .sun-tabsSection .sun-tabContent[data-tab-panel=intersectionBar] .sun-timeBarControlsSection, .sun-tabsSection .sun-tabContent[data-tab-panel=multiIntersectionBar] .sun-timeBarControlsSection {
     padding: 15px;
     border: none;
     outline: none;
@@ -1481,7 +1733,7 @@ textarea {
   }
 }
 @media (min-width: 0px) {
-  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
+  .sun-tabsSection .sun-tabContent[data-tab-panel=timeBar] .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton, .sun-tabsSection .sun-tabContent[data-tab-panel=intersectionBar] .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton, .sun-tabsSection .sun-tabContent[data-tab-panel=multiIntersectionBar] .sun-timeBarControlsSection .sun-tabButtons.sun-tabButtonsFramed .sun-tabButton {
     flex: 0 1 auto;
     padding: 10px 15px;
   }
@@ -2585,6 +2837,20 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-timeBarIntersectionStripCheck, .sun-timeBarIntersectionGroupCheck, .sun-timeBarMultiIntersectionStripCheck, .sun-timeBarMultiIntersectionGroupCheck {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    position: relative;
+    background-color: white;
+  }
+}
+@media (min-width: 0px) {
   .sun-dateCheckbox[data-type=a]:checked {
     background-color: #2196f3;
   }
@@ -2621,6 +2887,11 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-timeBarGroupCheck:checked {
+    background-color: #2196f3;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionStripCheck:checked, .sun-timeBarIntersectionGroupCheck:checked, .sun-timeBarMultiIntersectionStripCheck:checked, .sun-timeBarMultiIntersectionGroupCheck:checked {
     background-color: #2196f3;
   }
 }
@@ -2730,6 +3001,21 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-timeBarIntersectionStripCheck:checked::after, .sun-timeBarIntersectionGroupCheck:checked::after, .sun-timeBarMultiIntersectionStripCheck:checked::after, .sun-timeBarMultiIntersectionGroupCheck:checked::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1;
+    pointer-events: none;
+  }
+}
+@media (min-width: 0px) {
   .sun-dateCheckbox:checked {
     border-color: transparent;
   }
@@ -2761,6 +3047,11 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-timeBarGroupCheck:checked {
+    border-color: transparent;
+  }
+}
+@media (min-width: 0px) {
+  .sun-timeBarIntersectionStripCheck:checked, .sun-timeBarIntersectionGroupCheck:checked, .sun-timeBarMultiIntersectionStripCheck:checked, .sun-timeBarMultiIntersectionGroupCheck:checked {
     border-color: transparent;
   }
 }
@@ -3103,32 +3394,59 @@ textarea {
   }
 }
 @media (min-width: 0px) {
+  .sun-desktopDownloadLink {
+    color: inherit;
+    font-weight: 400;
+    text-decoration: underline;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 0px) {
+  .sun-desktopDownloadLink:hover {
+    color: #333;
+  }
+}
+@media (min-width: 0px) {
   .sun-warningInfo {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-width: 300px;
+    width: 100%;
+    max-width: min(100%, 420px);
     margin: 0 auto;
+    box-sizing: border-box;
   }
 }
 @media (min-width: 0px) {
   .sun-warningInfoItem {
     display: flex;
-    align-items: center;
-    gap: 5px;
+    align-items: baseline;
+    gap: 0;
     justify-content: space-between;
+    width: 100%;
+    min-width: 0;
   }
 }
 @media (min-width: 0px) {
   .sun-warningInfoItem strong {
     font-weight: 400;
     color: #333;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 }
 @media (min-width: 0px) {
   .sun-warningInfoItem span {
     color: #666;
     font-weight: 400;
+  }
+}
+@media (min-width: 0px) {
+  .sun-versionInfoValue {
+    flex-shrink: 0;
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 }
 @media (min-width: 0px) {
@@ -5302,9 +5620,12 @@ textarea {
 }
 @media (min-width: 0px) {
   .sun-warningInfoStretch {
-    flex: 1;
-    border-bottom: 1px dotted;
-    align-self: stretch;
+    flex: 1 1 auto;
+    min-width: 12px;
+    margin: 0 6px;
+    height: 0;
+    align-self: center;
+    border-bottom: 1px dotted #aaa;
   }
 }
 @media (min-width: 0px) {
@@ -7763,5 +8084,3 @@ textarea {
 .sun-root h6 {
   font-weight: 400;
 }
-
-/*# sourceMappingURL=styles.css.map */

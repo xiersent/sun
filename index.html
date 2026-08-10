@@ -26,7 +26,7 @@
         <div class="sun-warningBox sun-hidden">
             <div class="sun-warningTitle">ПРЕДУПРЕЖДЕНИЕ</div>
             <div class="sun-warningText">Использование данного инструмента может привести к непредвиденным последствиям. Автор предупреждает о возможных рисках и не несет ответственности за любые полученные результаты.</div>
-            <div class="sun-warningText sun-desktopNotice">В связи со слухами о блокировке GitHub решил подстраховаться и выпустить десктопную версию приложения. Это та же самая страничка, но в обёртке программы, не требующая доступа к сети интернет. Если вы активно пользуетесь веб-версией со своими данными, то их можно импортировать в десктопную версию. <a class="sun-desktopDownloadLink" href="sun[21.06.26].exe">[Скачать]</a></div>
+            <div class="sun-warningText sun-desktopNotice">В связи со слухами о блокировке GitHub решил подстраховаться и выпустить десктопную версию приложения. Это та же самая страничка, но в обёртке программы, не требующая доступа к сети интернет. Если вы активно пользуетесь веб-версией со своими данными, то их можно импортировать в десктопную версию. <a class="sun-desktopDownloadLink" href="sun[10.08.26].exe">[Скачать]</a></div>
 
             <div class="sun-warningInfo sun-dynamicVersionContainer"></div>
 
@@ -81,6 +81,8 @@
                     <div class="sun-tabButtons sun-tabButtonsFramed" role="tablist" aria-label="Разделы панели">
                         <button type="button" class="sun-tabButton" data-tab="uiControls" role="tab">Интерфейс</button>
                         <button type="button" class="sun-tabButton" data-tab="timeBar" role="tab">Полоса времени</button>
+                        <button type="button" class="sun-tabButton" data-tab="intersectionBar" role="tab">Полоса пересечений <span class="sun-tabNewMark">[NEW]</span></button>
+                        <button type="button" class="sun-tabButton" data-tab="multiIntersectionBar" role="tab">Мн. полоса пересечений <span class="sun-tabNewMark">[NEW]</span></button>
                         <button type="button" class="sun-tabButton" data-tab="summary" role="tab">Состояния</button>
                         <button type="button" class="sun-tabButton" data-tab="intersections" role="tab">Пересечения</button>
                         <button type="button" class="sun-tabButton" data-tab="dateCompare" role="tab">Сравнение дат</button>
@@ -140,7 +142,7 @@
                                         <div class="sun-timeLabels sun-timeLabelsInHoursTrack"></div>
                                     </div>
                                 </div>
-                                <div class="sun-timeBarStateStack"></div>
+                                <div class="sun-timeBarStateStack" id="timeBarStateStack"></div>
                                 <div class="sun-timeBarNowVline" aria-hidden="true"></div>
                                 <div class="sun-timeBarNowRow">
                                     <div class="sun-timeBarStateSide sun-timeBarStateSideNow" aria-hidden="true"></div>
@@ -151,6 +153,85 @@
                                     </div>
                                 </div>
                             </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="intersectionBar">
+                        <div class="sun-timeBarIntersectionWrap sun-tabPanelInner" id="timeBarIntersectionWrap">
+                            <div class="sun-timeBarIntersectionBlock">
+                                <div class="sun-panelSection sun-timeBarControlsSection sun-timeBarControlsSectionLayout sun-timeBarIntersectionControlsSection">
+                                    <div class="sun-tabContainer sun-tabContainerTimeBarControls sun-tabContainerWithFramedButtons">
+                                        <div class="sun-tabButtons sun-tabButtonsFramed sun-tabButtonsTimeBarControls" role="tablist" aria-label="Настройки полос пересечений">
+                                            <button type="button" class="sun-tabButton sun-timeBarIntersectionControlsToggle" id="timeBarIntersectionControlsToggle" aria-expanded="false" aria-controls="timeBarIntersectionControls" title="Редактировать" aria-label="Редактировать">Редактировать</button>
+                                        </div>
+                                    </div>
+                                    <div class="sun-timeBarControls sun-timeBarControlsCollapsed sun-timeBarControlsInSection" id="timeBarIntersectionControls" aria-label="Настройки полос пересечений A×B / B×A"></div>
+                                </div>
+                                <div class="sun-timeBar sun-timeBarStacked sun-timeBarIntersection" aria-label="Пересечения сигналов A и B">
+                                    <div class="sun-timeBarStateRow sun-timeBarHoursRow">
+                                        <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
+                                        <div class="sun-timeBarHoursTrack">
+                                            <div class="sun-timeScale sun-timeScaleInHoursTrack" id="timeBarIntersectionScale"></div>
+                                            <div class="sun-timeLabels sun-timeLabelsInHoursTrack" id="timeBarIntersectionLabels"></div>
+                                        </div>
+                                    </div>
+                                    <div class="sun-timeBarStateRow sun-timeBarIntersectionRow sun-timeBarIntersectionRowBA" data-orientation="ba">
+                                        <div class="sun-timeBarStateSide">
+                                            <span class="sun-timeBarStateLabel">B×A</span>
+                                        </div>
+                                        <div class="sun-timeBarStateTrack sun-timeBarIntersectionTrack" id="timeBarIntersectionTrackBA"></div>
+                                    </div>
+                                    <div class="sun-timeBarStateRow sun-timeBarIntersectionRow" data-orientation="ab">
+                                        <div class="sun-timeBarStateSide">
+                                            <span class="sun-timeBarStateLabel">A×B</span>
+                                        </div>
+                                        <div class="sun-timeBarStateTrack sun-timeBarIntersectionTrack" id="timeBarIntersectionTrack"></div>
+                                    </div>
+                                    <div class="sun-timeBarNowVline" id="timeBarIntersectionNowVline" aria-hidden="true"></div>
+                                    <div class="sun-timeBarNowRow">
+                                        <div class="sun-timeBarStateSide sun-timeBarStateSideNow" aria-hidden="true"></div>
+                                        <div class="sun-timeBarNowTrack">
+                                            <div class="sun-timeIndicator sun-timeBarNowMarker" id="timeBarIntersectionNowMarker" title="">
+                                                <div class="sun-timeIndicatorLabel sun-timeBarNowLabel"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sun-tabContent sun-tabContentInTabs" data-tab-panel="multiIntersectionBar">
+                        <div class="sun-timeBarMultiIntersectionWrap sun-tabPanelInner" id="timeBarMultiIntersectionWrap">
+                            <div class="sun-timeBarMultiIntersectionBlock sun-timeBarIntersectionBlock">
+                                <div class="sun-panelSection sun-timeBarControlsSection sun-timeBarControlsSectionLayout sun-timeBarMultiIntersectionControlsSection">
+                                    <div class="sun-tabContainer sun-tabContainerTimeBarControls sun-tabContainerWithFramedButtons">
+                                        <div class="sun-tabButtons sun-tabButtonsFramed sun-tabButtonsTimeBarControls" role="tablist" aria-label="Настройки множественной полосы пересечений">
+                                            <button type="button" class="sun-tabButton sun-timeBarMultiIntersectionControlsToggle" id="timeBarMultiIntersectionControlsToggle" aria-expanded="false" aria-controls="timeBarMultiIntersectionControls" title="Редактировать" aria-label="Редактировать">Редактировать</button>
+                                        </div>
+                                    </div>
+                                    <div class="sun-timeBarControls sun-timeBarControlsCollapsed sun-timeBarControlsInSection" id="timeBarMultiIntersectionControls" aria-label="Настройки множественной полосы пересечений"></div>
+                                </div>
+                                <div class="sun-timeBar sun-timeBarStacked sun-timeBarIntersection sun-timeBarMultiIntersection" aria-label="Пересечения основной персоны с несколькими">
+                                    <div class="sun-timeBarStateRow sun-timeBarHoursRow">
+                                        <div class="sun-timeBarStateSide sun-timeBarStateSideHours" aria-hidden="true"></div>
+                                        <div class="sun-timeBarHoursTrack">
+                                            <div class="sun-timeScale sun-timeScaleInHoursTrack" id="timeBarMultiIntersectionScale"></div>
+                                            <div class="sun-timeLabels sun-timeLabelsInHoursTrack" id="timeBarMultiIntersectionLabels"></div>
+                                        </div>
+                                    </div>
+                                    <div class="sun-timeBarMultiIntersectionRows" id="timeBarMultiIntersectionRows"></div>
+                                    <div class="sun-timeBarNowVline" id="timeBarMultiIntersectionNowVline" aria-hidden="true"></div>
+                                    <div class="sun-timeBarNowRow">
+                                        <div class="sun-timeBarStateSide sun-timeBarStateSideNow" aria-hidden="true"></div>
+                                        <div class="sun-timeBarNowTrack">
+                                            <div class="sun-timeIndicator sun-timeBarNowMarker" id="timeBarMultiIntersectionNowMarker" title="">
+                                                <div class="sun-timeIndicatorLabel sun-timeBarNowLabel"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -485,6 +566,7 @@
     <script src="modules/summaryManager.js"></script>
     <script src="modules/templates.js"></script>
     <script src="modules/timeBarManager.js"></script>
+    <script src="modules/timeBarMultiIntersection.js"></script>
     <script src="modules/wavesTransformLayer.js"></script>
     <script src="modules/uiManager.js"></script>
     <script src="modules/unifiedListManager.js"></script>

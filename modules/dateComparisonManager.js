@@ -328,6 +328,9 @@ class DateComparisonManager {
         if (window.waves && typeof window.waves.updatePosition === 'function') {
             window.waves.updatePosition();
         }
+        if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+            window.extremumTimeManager.updateExtremums();
+        }
     }
 
     /** Внутренний метод applySelectsToDateSelections. */

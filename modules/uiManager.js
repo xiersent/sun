@@ -605,6 +605,40 @@ class UIManager {
             });
         }
 
+        if (tabId === 'intersectionBar' && window.timeBarManager) {
+            queueMicrotask(() => {
+                if (typeof window.timeBarManager.buildIntersectionControlsPanel === 'function') {
+                    window.timeBarManager.buildIntersectionControlsPanel();
+                }
+                if (typeof window.timeBarManager.createHourMarkers === 'function') {
+                    window.timeBarManager.createHourMarkers();
+                }
+                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
+                    window.timeBarManager.updateTimeIndicator();
+                }
+                if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+                    window.extremumTimeManager.updateExtremums();
+                }
+            });
+        }
+
+        if (tabId === 'multiIntersectionBar' && window.timeBarManager) {
+            queueMicrotask(() => {
+                if (typeof window.timeBarManager.buildMultiIntersectionControlsPanel === 'function') {
+                    window.timeBarManager.buildMultiIntersectionControlsPanel();
+                }
+                if (typeof window.timeBarManager.createHourMarkers === 'function') {
+                    window.timeBarManager.createHourMarkers();
+                }
+                if (typeof window.timeBarManager.updateTimeIndicator === 'function') {
+                    window.timeBarManager.updateTimeIndicator();
+                }
+                if (window.extremumTimeManager && window.extremumTimeManager.updateExtremums) {
+                    window.extremumTimeManager.updateExtremums();
+                }
+            });
+        }
+
         if (tabId === 'intersections' && window.stateIntersectionManager) {
             queueMicrotask(() => {
                 if (typeof window.stateIntersectionManager.mirrorCompareSelectsToIntersection === 'function') {

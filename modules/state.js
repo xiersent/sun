@@ -290,6 +290,8 @@ class AppState {
                 const panelTabIds = new Set([
                     'uiControls',
                     'timeBar',
+                    'intersectionBar',
+                    'multiIntersectionBar',
                     'summary',
                     'intersections',
                     'dateCompare',
